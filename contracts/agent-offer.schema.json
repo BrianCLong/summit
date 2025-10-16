@@ -3,12 +3,19 @@
   "title": "AgentOffer",
   "type": "object",
   "properties": {
-    "taskId": {"type":"string"},
-    "arm": {"type":"string"},
-    "predEval": {"type":"number"},
-    "predCostUSD": {"type":"number"},
-    "predMinutes": {"type":"number"},
-    "risk": {"type":"number"}
+    "taskId": { "type": "string" },
+    "arm": { "type": "string" },
+    "predEval": { "type": "number" },
+    "predCostUSD": { "type": "number" },
+    "predMinutes": { "type": "number" },
+    "risk": { "type": "number" }
   },
-  "required": ["taskId","arm","predEval","predCostUSD","predMinutes","risk"]
+  "required": [
+    "taskId",
+    "arm",
+    "predEval",
+    "predCostUSD",
+    "predMinutes",
+    "risk"
+  ]
 }

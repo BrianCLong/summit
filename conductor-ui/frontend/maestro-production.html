@@ -1,1705 +1,2457 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Maestro Conductor - IntelGraph Platform</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone@7.22.0/babel.min.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #1a202c; 
-            min-height: 100vh;
-            overflow-x: hidden;
-        }
-        
-        /* Layout */
-        .app { display: flex; flex-direction: column; min-height: 100vh; }
-        .header { 
-            background: rgba(255, 255, 255, 0.95); 
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(0,0,0,0.1); 
-            padding: 0 32px; 
-            height: 80px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: space-between; 
-            position: sticky; 
-            top: 0; 
-            z-index: 100;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-        .main-content { display: flex; flex: 1; }
-        .sidebar { 
-            width: 320px; 
-            background: rgba(255, 255, 255, 0.95); 
-            backdrop-filter: blur(10px);
-            border-right: 1px solid rgba(0,0,0,0.1); 
-            overflow-y: auto;
-            box-shadow: 4px 0 6px rgba(0,0,0,0.05);
-        }
-        .content { 
-            flex: 1; 
-            overflow-y: auto; 
-            padding: 32px;
-            background: rgba(0,0,0,0.02);
-        }
-        
-        /* Header Styles */
-        .header-left { display: flex; align-items: center; gap: 20px; }
-        .logo { 
-            width: 50px; 
-            height: 50px; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            border-radius: 12px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            color: white; 
-            font-weight: 700; 
-            font-size: 24px;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-        .header-title { 
-            font-weight: 700; 
-            font-size: 24px; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .header-subtitle { font-size: 14px; color: #6b7280; font-weight: 500; }
-        .header-right { display: flex; align-items: center; gap: 20px; }
-        .cmd-palette { 
-            background: rgba(0,0,0,0.05); 
-            border: 1px solid rgba(0,0,0,0.1); 
-            border-radius: 12px; 
-            padding: 12px 20px; 
-            font-size: 14px; 
-            color: #6b7280; 
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-        .cmd-palette:hover { 
-            background: rgba(102, 126, 234, 0.1); 
-            color: #667eea;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
-        }
-        .user-profile { 
-            width: 45px; 
-            height: 45px; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            color: white; 
-            font-weight: 700; 
-            cursor: pointer;
-            transition: transform 0.3s ease;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-        .user-profile:hover { transform: scale(1.1); }
-        
-        /* Sidebar Navigation */
-        .nav-section { padding: 24px; }
-        .nav-title { 
-            font-size: 13px; 
-            font-weight: 700; 
-            color: #6b7280; 
-            text-transform: uppercase; 
-            letter-spacing: 1px; 
-            margin-bottom: 16px; 
-        }
-        .nav-item { 
-            display: flex; 
-            align-items: center; 
-            gap: 16px; 
-            padding: 16px 20px; 
-            border-radius: 16px; 
-            cursor: pointer; 
-            color: #4b5563; 
-            text-decoration: none; 
-            transition: all 0.3s ease; 
-            margin-bottom: 4px;
-            font-weight: 500;
-            position: relative;
-        }
-        .nav-item:hover { 
-            background: rgba(102, 126, 234, 0.1); 
-            color: #667eea;
-            transform: translateX(8px);
-        }
-        .nav-item.active { 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            color: white;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-        .nav-item.active:hover { transform: translateX(0); }
-        .nav-item i { width: 20px; font-size: 16px; }
-        
-        /* Cards and Panels */
-        .dashboard-grid { 
-            display: grid; 
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); 
-            gap: 32px; 
-            margin-bottom: 40px; 
-        }
-        .dashboard-grid-wide { grid-column: 1 / -1; }
-        .card { 
-            background: rgba(255, 255, 255, 0.95); 
-            backdrop-filter: blur(10px);
-            border-radius: 24px; 
-            padding: 32px; 
-            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        .card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        .card:hover { 
-            transform: translateY(-8px); 
-            box-shadow: 0 16px 48px rgba(0,0,0,0.15);
-        }
-        .card-header { 
-            display: flex; 
-            align-items: flex-start; 
-            justify-content: space-between; 
-            margin-bottom: 24px; 
-        }
-        .card-title { 
-            font-weight: 700; 
-            font-size: 20px; 
-            color: #1a202c;
-            margin-bottom: 8px;
-        }
-        .card-subtitle { 
-            font-size: 14px; 
-            color: #6b7280; 
-            font-weight: 500;
-        }
-        
-        /* Metrics */
-        .metrics-row { display: flex; gap: 24px; margin-bottom: 20px; flex-wrap: wrap; }
-        .metric { flex: 1; min-width: 120px; }
-        .metric-label { 
-            font-size: 13px; 
-            color: #6b7280; 
-            margin-bottom: 8px; 
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .metric-value { 
-            font-size: 32px; 
-            font-weight: 800; 
-            color: #1a202c;
-            line-height: 1;
-        }
-        .metric-unit { 
-            font-size: 16px; 
-            color: #6b7280; 
-            margin-left: 4px; 
-            font-weight: 500;
-        }
-        .metric-change { 
-            font-size: 12px; 
-            margin-top: 8px; 
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .metric-change.positive { color: #10b981; }
-        .metric-change.negative { color: #ef4444; }
-        
-        /* Status indicators */
-        .status { 
-            display: inline-flex; 
-            align-items: center; 
-            gap: 8px; 
-            padding: 8px 16px; 
-            border-radius: 20px; 
-            font-size: 13px; 
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .status.healthy { background: rgba(16, 185, 129, 0.1); color: #047857; }
-        .status.warning { background: rgba(245, 158, 11, 0.1); color: #92400e; }
-        .status.error { background: rgba(239, 68, 68, 0.1); color: #991b1b; }
-        .status.running { background: rgba(59, 130, 246, 0.1); color: #1d4ed8; }
-        .status.pending { background: rgba(156, 163, 175, 0.1); color: #4b5563; }
-        .status-dot { width: 8px; height: 8px; border-radius: 50%; }
-        
-        /* Controls */
-        .control-group { margin-bottom: 24px; }
-        .control-label { 
-            display: block; 
-            font-size: 14px; 
-            font-weight: 600; 
-            color: #374151; 
-            margin-bottom: 12px; 
-        }
-        .slider { 
-            width: 100%; 
-            height: 8px; 
-            background: #e5e7eb; 
-            border-radius: 4px; 
-            outline: none;
-            transition: all 0.3s ease;
-        }
-        .slider::-webkit-slider-thumb { 
-            appearance: none; 
-            width: 24px; 
-            height: 24px; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            border-radius: 50%; 
-            cursor: pointer;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-            transition: transform 0.3s ease;
-        }
-        .slider::-webkit-slider-thumb:hover { transform: scale(1.2); }
-        .button { 
-            padding: 16px 32px; 
-            border-radius: 16px; 
-            border: none; 
-            font-weight: 600; 
-            cursor: pointer; 
-            transition: all 0.3s ease;
-            font-size: 14px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .button.primary { 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            color: white;
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-        .button.primary:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
-        }
-        .button.secondary { 
-            background: rgba(0,0,0,0.05); 
-            color: #4b5563; 
-            border: 1px solid rgba(0,0,0,0.1);
-        }
-        .button.secondary:hover { 
-            background: rgba(102, 126, 234, 0.1); 
-            color: #667eea;
-            border-color: #667eea;
-        }
-        .button.danger { 
-            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%); 
-            color: white;
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-        }
-        
-        /* Tables */
-        .table-container { 
-            overflow: hidden; 
-            border-radius: 16px; 
-            background: white;
-            box-shadow: 0 4px 24px rgba(0,0,0,0.08);
-        }
-        .table { width: 100%; border-collapse: collapse; }
-        .table th { 
-            text-align: left; 
-            font-weight: 700; 
-            color: #4b5563; 
-            font-size: 12px; 
-            text-transform: uppercase; 
-            letter-spacing: 1px; 
-            padding: 20px 24px; 
-            background: #f8fafc;
-            border-bottom: 1px solid #e5e7eb;
-        }
-        .table td { 
-            padding: 20px 24px; 
-            border-bottom: 1px solid #f1f5f9;
-            font-weight: 500;
-        }
-        .table tbody tr { transition: background-color 0.2s ease; }
-        .table tbody tr:hover { background: rgba(102, 126, 234, 0.05); }
-        
-        /* Charts (Custom SVG) */
-        .chart-container { 
-            height: 300px; 
-            position: relative; 
-            background: #f8fafc; 
-            border-radius: 12px; 
-            padding: 24px;
-            overflow: hidden;
-        }
-        .chart-svg { width: 100%; height: 100%; }
-        
-        /* Progress Bars */
-        .progress-bar {
-            width: 100%;
-            height: 12px;
-            background: #e5e7eb;
-            border-radius: 6px;
-            overflow: hidden;
-            margin: 12px 0;
-        }
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 6px;
-            transition: width 0.8s ease;
-            position: relative;
-        }
-        .progress-fill::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            animation: shimmer 2s infinite;
-        }
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
-        
-        /* Alerts */
-        .alert { 
-            padding: 16px 20px; 
-            border-radius: 12px; 
-            margin-bottom: 20px; 
-            font-weight: 500;
-            border-left: 4px solid;
-        }
-        .alert.info { 
-            background: rgba(59, 130, 246, 0.1); 
-            color: #1e40af; 
-            border-left-color: #3b82f6;
-        }
-        .alert.warning { 
-            background: rgba(245, 158, 11, 0.1); 
-            color: #92400e; 
-            border-left-color: #f59e0b;
-        }
-        .alert.success { 
-            background: rgba(16, 185, 129, 0.1); 
-            color: #047857; 
-            border-left-color: #10b981;
-        }
-        
-        /* Modal */
-        .modal-overlay { 
-            position: fixed; 
-            top: 0; 
-            left: 0; 
-            right: 0; 
-            bottom: 0; 
-            background: rgba(0,0,0,0.6); 
-            backdrop-filter: blur(8px);
-            z-index: 1000; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-            animation: fadeIn 0.3s ease;
-        }
-        .modal { 
-            background: white; 
-            border-radius: 24px; 
-            padding: 32px; 
-            max-width: 600px; 
-            width: 90%; 
-            max-height: 80vh; 
-            overflow-y: auto;
-            box-shadow: 0 24px 64px rgba(0,0,0,0.2);
-            animation: slideIn 0.3s ease;
-        }
-        .modal-header { 
-            display: flex; 
-            justify-content: space-between; 
-            align-items: center; 
-            margin-bottom: 24px; 
-            border-bottom: 1px solid #e5e7eb;
-            padding-bottom: 16px;
-        }
-        .modal-title { 
-            font-weight: 700; 
-            font-size: 20px; 
-            color: #1a202c;
-        }
-        .close-button { 
-            background: none; 
-            border: none; 
-            font-size: 28px; 
-            cursor: pointer; 
-            color: #6b7280;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-        .close-button:hover { 
-            background: rgba(239, 68, 68, 0.1); 
-            color: #ef4444;
-        }
-        
-        /* Forms */
-        .form-group { margin-bottom: 20px; }
-        .input, .select, .textarea { 
-            width: 100%; 
-            padding: 16px 20px; 
-            border: 2px solid #e5e7eb; 
-            border-radius: 12px; 
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            background: white;
-        }
-        .input:focus, .select:focus, .textarea:focus { 
-            outline: none; 
-            border-color: #667eea; 
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-        }
-        .textarea { resize: vertical; min-height: 100px; }
-        
-        /* Animations */
-        .fade-in { animation: fadeIn 0.6s ease; }
-        @keyframes fadeIn { 
-            from { opacity: 0; transform: translateY(20px); } 
-            to { opacity: 1; transform: translateY(0); } 
-        }
-        @keyframes slideIn {
-            from { opacity: 0; transform: scale(0.9) translateY(-20px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        
-        /* Loading */
-        .loading { 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            padding: 60px; 
-        }
-        .spinner { 
-            width: 48px; 
-            height: 48px; 
-            border: 4px solid rgba(102, 126, 234, 0.2); 
-            border-top: 4px solid #667eea; 
-            border-radius: 50%; 
-            animation: spin 1s linear infinite; 
-        }
-        @keyframes spin { 
-            0% { transform: rotate(0deg); } 
-            100% { transform: rotate(360deg); } 
-        }
-        
-        /* Activity Feed */
-        .activity-item {
-            display: flex;
-            gap: 16px;
-            padding: 16px 0;
-            border-bottom: 1px solid #f1f5f9;
-        }
-        .activity-icon {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            margin-top: 6px;
-            flex-shrink: 0;
-        }
-        .activity-content {
-            flex: 1;
-        }
-        .activity-title {
-            font-weight: 600;
-            font-size: 14px;
-            color: #1a202c;
-            margin-bottom: 4px;
-        }
-        .activity-meta {
-            font-size: 12px;
-            color: #6b7280;
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .main-content { flex-direction: column; }
-            .sidebar { width: 100%; max-height: 300px; }
-            .dashboard-grid { grid-template-columns: 1fr; gap: 24px; }
-            .metrics-row { flex-direction: column; gap: 16px; }
-            .header { padding: 0 20px; height: 70px; }
-            .content { padding: 20px; }
-            .card { padding: 24px; }
-        }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+          'Helvetica Neue', Arial, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: #1a202c;
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
+
+      /* Layout */
+      .app {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+      .header {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        padding: 0 32px;
+        height: 80px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+      }
+      .main-content {
+        display: flex;
+        flex: 1;
+      }
+      .sidebar {
+        width: 320px;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-right: 1px solid rgba(0, 0, 0, 0.1);
+        overflow-y: auto;
+        box-shadow: 4px 0 6px rgba(0, 0, 0, 0.05);
+      }
+      .content {
+        flex: 1;
+        overflow-y: auto;
+        padding: 32px;
+        background: rgba(0, 0, 0, 0.02);
+      }
+
+      /* Header Styles */
+      .header-left {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+      .logo {
+        width: 50px;
+        height: 50px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        font-size: 24px;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+      }
+      .header-title {
+        font-weight: 700;
+        font-size: 24px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .header-subtitle {
+        font-size: 14px;
+        color: #6b7280;
+        font-weight: 500;
+      }
+      .header-right {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+      }
+      .cmd-palette {
+        background: rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        padding: 12px 20px;
+        font-size: 14px;
+        color: #6b7280;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 500;
+      }
+      .cmd-palette:hover {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+      }
+      .user-profile {
+        width: 45px;
+        height: 45px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: 700;
+        cursor: pointer;
+        transition: transform 0.3s ease;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      }
+      .user-profile:hover {
+        transform: scale(1.1);
+      }
+
+      /* Sidebar Navigation */
+      .nav-section {
+        padding: 24px;
+      }
+      .nav-title {
+        font-size: 13px;
+        font-weight: 700;
+        color: #6b7280;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 16px;
+      }
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 16px 20px;
+        border-radius: 16px;
+        cursor: pointer;
+        color: #4b5563;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        margin-bottom: 4px;
+        font-weight: 500;
+        position: relative;
+      }
+      .nav-item:hover {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        transform: translateX(8px);
+      }
+      .nav-item.active {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      }
+      .nav-item.active:hover {
+        transform: translateX(0);
+      }
+      .nav-item i {
+        width: 20px;
+        font-size: 16px;
+      }
+
+      /* Cards and Panels */
+      .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+        gap: 32px;
+        margin-bottom: 40px;
+      }
+      .dashboard-grid-wide {
+        grid-column: 1 / -1;
+      }
+      .card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 24px;
+        padding: 32px;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition:
+          transform 0.3s ease,
+          box-shadow 0.3s ease;
+        position: relative;
+        overflow: hidden;
+      }
+      .card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      }
+      .card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 16px 48px rgba(0, 0, 0, 0.15);
+      }
+      .card-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        margin-bottom: 24px;
+      }
+      .card-title {
+        font-weight: 700;
+        font-size: 20px;
+        color: #1a202c;
+        margin-bottom: 8px;
+      }
+      .card-subtitle {
+        font-size: 14px;
+        color: #6b7280;
+        font-weight: 500;
+      }
+
+      /* Metrics */
+      .metrics-row {
+        display: flex;
+        gap: 24px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+      .metric {
+        flex: 1;
+        min-width: 120px;
+      }
+      .metric-label {
+        font-size: 13px;
+        color: #6b7280;
+        margin-bottom: 8px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .metric-value {
+        font-size: 32px;
+        font-weight: 800;
+        color: #1a202c;
+        line-height: 1;
+      }
+      .metric-unit {
+        font-size: 16px;
+        color: #6b7280;
+        margin-left: 4px;
+        font-weight: 500;
+      }
+      .metric-change {
+        font-size: 12px;
+        margin-top: 8px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      .metric-change.positive {
+        color: #10b981;
+      }
+      .metric-change.negative {
+        color: #ef4444;
+      }
+
+      /* Status indicators */
+      .status {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .status.healthy {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+      }
+      .status.warning {
+        background: rgba(245, 158, 11, 0.1);
+        color: #92400e;
+      }
+      .status.error {
+        background: rgba(239, 68, 68, 0.1);
+        color: #991b1b;
+      }
+      .status.running {
+        background: rgba(59, 130, 246, 0.1);
+        color: #1d4ed8;
+      }
+      .status.pending {
+        background: rgba(156, 163, 175, 0.1);
+        color: #4b5563;
+      }
+      .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+      }
+
+      /* Controls */
+      .control-group {
+        margin-bottom: 24px;
+      }
+      .control-label {
+        display: block;
+        font-size: 14px;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 12px;
+      }
+      .slider {
+        width: 100%;
+        height: 8px;
+        background: #e5e7eb;
+        border-radius: 4px;
+        outline: none;
+        transition: all 0.3s ease;
+      }
+      .slider::-webkit-slider-thumb {
+        appearance: none;
+        width: 24px;
+        height: 24px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        transition: transform 0.3s ease;
+      }
+      .slider::-webkit-slider-thumb:hover {
+        transform: scale(1.2);
+      }
+      .button {
+        padding: 16px 32px;
+        border-radius: 16px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+      .button.primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+      }
+      .button.primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+      }
+      .button.secondary {
+        background: rgba(0, 0, 0, 0.05);
+        color: #4b5563;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+      }
+      .button.secondary:hover {
+        background: rgba(102, 126, 234, 0.1);
+        color: #667eea;
+        border-color: #667eea;
+      }
+      .button.danger {
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        color: white;
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+      }
+
+      /* Tables */
+      .table-container {
+        overflow: hidden;
+        border-radius: 16px;
+        background: white;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+      }
+      .table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      .table th {
+        text-align: left;
+        font-weight: 700;
+        color: #4b5563;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        padding: 20px 24px;
+        background: #f8fafc;
+        border-bottom: 1px solid #e5e7eb;
+      }
+      .table td {
+        padding: 20px 24px;
+        border-bottom: 1px solid #f1f5f9;
+        font-weight: 500;
+      }
+      .table tbody tr {
+        transition: background-color 0.2s ease;
+      }
+      .table tbody tr:hover {
+        background: rgba(102, 126, 234, 0.05);
+      }
+
+      /* Charts (Custom SVG) */
+      .chart-container {
+        height: 300px;
+        position: relative;
+        background: #f8fafc;
+        border-radius: 12px;
+        padding: 24px;
+        overflow: hidden;
+      }
+      .chart-svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      /* Progress Bars */
+      .progress-bar {
+        width: 100%;
+        height: 12px;
+        background: #e5e7eb;
+        border-radius: 6px;
+        overflow: hidden;
+        margin: 12px 0;
+      }
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 6px;
+        transition: width 0.8s ease;
+        position: relative;
+      }
+      .progress-fill::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.3),
+          transparent
+        );
+        animation: shimmer 2s infinite;
+      }
+      @keyframes shimmer {
+        0% {
+          transform: translateX(-100%);
+        }
+        100% {
+          transform: translateX(100%);
+        }
+      }
+
+      /* Alerts */
+      .alert {
+        padding: 16px 20px;
+        border-radius: 12px;
+        margin-bottom: 20px;
+        font-weight: 500;
+        border-left: 4px solid;
+      }
+      .alert.info {
+        background: rgba(59, 130, 246, 0.1);
+        color: #1e40af;
+        border-left-color: #3b82f6;
+      }
+      .alert.warning {
+        background: rgba(245, 158, 11, 0.1);
+        color: #92400e;
+        border-left-color: #f59e0b;
+      }
+      .alert.success {
+        background: rgba(16, 185, 129, 0.1);
+        color: #047857;
+        border-left-color: #10b981;
+      }
+
+      /* Modal */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        backdrop-filter: blur(8px);
+        z-index: 1000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.3s ease;
+      }
+      .modal {
+        background: white;
+        border-radius: 24px;
+        padding: 32px;
+        max-width: 600px;
+        width: 90%;
+        max-height: 80vh;
+        overflow-y: auto;
+        box-shadow: 0 24px 64px rgba(0, 0, 0, 0.2);
+        animation: slideIn 0.3s ease;
+      }
+      .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+        border-bottom: 1px solid #e5e7eb;
+        padding-bottom: 16px;
+      }
+      .modal-title {
+        font-weight: 700;
+        font-size: 20px;
+        color: #1a202c;
+      }
+      .close-button {
+        background: none;
+        border: none;
+        font-size: 28px;
+        cursor: pointer;
+        color: #6b7280;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+      }
+      .close-button:hover {
+        background: rgba(239, 68, 68, 0.1);
+        color: #ef4444;
+      }
+
+      /* Forms */
+      .form-group {
+        margin-bottom: 20px;
+      }
+      .input,
+      .select,
+      .textarea {
+        width: 100%;
+        padding: 16px 20px;
+        border: 2px solid #e5e7eb;
+        border-radius: 12px;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        background: white;
+      }
+      .input:focus,
+      .select:focus,
+      .textarea:focus {
+        outline: none;
+        border-color: #667eea;
+        box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+      }
+      .textarea {
+        resize: vertical;
+        min-height: 100px;
+      }
+
+      /* Animations */
+      .fade-in {
+        animation: fadeIn 0.6s ease;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      @keyframes slideIn {
+        from {
+          opacity: 0;
+          transform: scale(0.9) translateY(-20px);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1) translateY(0);
+        }
+      }
+
+      /* Loading */
+      .loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 60px;
+      }
+      .spinner {
+        width: 48px;
+        height: 48px;
+        border: 4px solid rgba(102, 126, 234, 0.2);
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Activity Feed */
+      .activity-item {
+        display: flex;
+        gap: 16px;
+        padding: 16px 0;
+        border-bottom: 1px solid #f1f5f9;
+      }
+      .activity-icon {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-top: 6px;
+        flex-shrink: 0;
+      }
+      .activity-content {
+        flex: 1;
+      }
+      .activity-title {
+        font-weight: 600;
+        font-size: 14px;
+        color: #1a202c;
+        margin-bottom: 4px;
+      }
+      .activity-meta {
+        font-size: 12px;
+        color: #6b7280;
+      }
+
+      /* Responsive */
+      @media (max-width: 768px) {
+        .main-content {
+          flex-direction: column;
+        }
+        .sidebar {
+          width: 100%;
+          max-height: 300px;
+        }
+        .dashboard-grid {
+          grid-template-columns: 1fr;
+          gap: 24px;
+        }
+        .metrics-row {
+          flex-direction: column;
+          gap: 16px;
+        }
+        .header {
+          padding: 0 20px;
+          height: 70px;
+        }
+        .content {
+          padding: 20px;
+        }
+        .card {
+          padding: 24px;
+        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div id="root"></div>
-    
+
     <script type="text/babel">
-        const { useState, useEffect, useCallback } = React;
-        
-        // Mock API with realistic data
-        const mockApi = {
-            async getSummary() {
-                await new Promise(resolve => setTimeout(resolve, 300));
-                return {
-                    autonomy: { level: 2, canary: 0.1 },
-                    health: { success: 0.992, p95: 145, burn: 1.2, uptime: 99.8 },
-                    budgets: { remaining: 2450, cap: 5000, utilization: 51.0 },
-                    runs: [
-                        { id: 'run-2849', status: 'running', pipeline: 'data-ingestion', progress: 75 },
-                        { id: 'run-2848', status: 'completed', pipeline: 'ml-training', progress: 100 },
-                        { id: 'run-2847', status: 'failed', pipeline: 'model-serving', progress: 45 },
-                        { id: 'run-2846', status: 'completed', pipeline: 'analytics', progress: 100 },
-                        { id: 'run-2845', status: 'pending', pipeline: 'data-ingestion', progress: 0 }
-                    ],
-                    changes: [
-                        { at: '17:45', title: 'Auto-scaled workers from 3 to 5', by: 'system', type: 'automation' },
-                        { at: '16:23', title: 'Pipeline config updated', by: 'jane.doe', type: 'manual' },
-                        { at: '15:18', title: 'New user added', by: 'admin', type: 'access' },
-                        { at: '14:45', title: 'SLO threshold adjusted', by: 'john.smith', type: 'config' },
-                        { at: '13:12', title: 'Security patch applied', by: 'system', type: 'maintenance' }
-                    ]
-                };
+      const { useState, useEffect, useCallback } = React;
+
+      // Mock API with realistic data
+      const mockApi = {
+        async getSummary() {
+          await new Promise((resolve) => setTimeout(resolve, 300));
+          return {
+            autonomy: { level: 2, canary: 0.1 },
+            health: { success: 0.992, p95: 145, burn: 1.2, uptime: 99.8 },
+            budgets: { remaining: 2450, cap: 5000, utilization: 51.0 },
+            runs: [
+              {
+                id: 'run-2849',
+                status: 'running',
+                pipeline: 'data-ingestion',
+                progress: 75,
+              },
+              {
+                id: 'run-2848',
+                status: 'completed',
+                pipeline: 'ml-training',
+                progress: 100,
+              },
+              {
+                id: 'run-2847',
+                status: 'failed',
+                pipeline: 'model-serving',
+                progress: 45,
+              },
+              {
+                id: 'run-2846',
+                status: 'completed',
+                pipeline: 'analytics',
+                progress: 100,
+              },
+              {
+                id: 'run-2845',
+                status: 'pending',
+                pipeline: 'data-ingestion',
+                progress: 0,
+              },
+            ],
+            changes: [
+              {
+                at: '17:45',
+                title: 'Auto-scaled workers from 3 to 5',
+                by: 'system',
+                type: 'automation',
+              },
+              {
+                at: '16:23',
+                title: 'Pipeline config updated',
+                by: 'jane.doe',
+                type: 'manual',
+              },
+              {
+                at: '15:18',
+                title: 'New user added',
+                by: 'admin',
+                type: 'access',
+              },
+              {
+                at: '14:45',
+                title: 'SLO threshold adjusted',
+                by: 'john.smith',
+                type: 'config',
+              },
+              {
+                at: '13:12',
+                title: 'Security patch applied',
+                by: 'system',
+                type: 'maintenance',
+              },
+            ],
+          };
+        },
+
+        async getRuns() {
+          await new Promise((resolve) => setTimeout(resolve, 200));
+          return Array.from({ length: 15 }, (_, i) => ({
+            id: `run-${2849 + i}`,
+            pipeline: [
+              'data-ingestion',
+              'ml-training',
+              'model-serving',
+              'analytics',
+            ][Math.floor(Math.random() * 4)],
+            status: ['running', 'completed', 'failed', 'pending'][
+              Math.floor(Math.random() * 4)
+            ],
+            durationMs: 1000 + Math.floor(Math.random() * 120000),
+            cost: (Math.random() * 25).toFixed(2),
+            user: ['john.doe', 'jane.smith', 'bob.wilson', 'alice.brown'][
+              Math.floor(Math.random() * 4)
+            ],
+            startTime: new Date(Date.now() - Math.random() * 86400000),
+            progress: Math.floor(Math.random() * 101),
+          }));
+        },
+
+        async getPipelines() {
+          await new Promise((resolve) => setTimeout(resolve, 250));
+          return [
+            {
+              id: 'pipeline-1',
+              name: 'Data Ingestion Pipeline',
+              version: 'v2.1',
+              owner: 'data-team',
+              status: 'active',
+              description: 'Processes raw data from multiple sources',
             },
-            
-            async getRuns() {
-                await new Promise(resolve => setTimeout(resolve, 200));
-                return Array.from({ length: 15 }, (_, i) => ({
-                    id: `run-${2849 + i}`,
-                    pipeline: ['data-ingestion', 'ml-training', 'model-serving', 'analytics'][Math.floor(Math.random() * 4)],
-                    status: ['running', 'completed', 'failed', 'pending'][Math.floor(Math.random() * 4)],
-                    durationMs: 1000 + Math.floor(Math.random() * 120000),
-                    cost: (Math.random() * 25).toFixed(2),
-                    user: ['john.doe', 'jane.smith', 'bob.wilson', 'alice.brown'][Math.floor(Math.random() * 4)],
-                    startTime: new Date(Date.now() - Math.random() * 86400000),
-                    progress: Math.floor(Math.random() * 101)
-                }));
+            {
+              id: 'pipeline-2',
+              name: 'ML Training Pipeline',
+              version: 'v1.8',
+              owner: 'ml-team',
+              status: 'active',
+              description: 'Trains machine learning models',
             },
-            
-            async getPipelines() {
-                await new Promise(resolve => setTimeout(resolve, 250));
-                return [
-                    { id: 'pipeline-1', name: 'Data Ingestion Pipeline', version: 'v2.1', owner: 'data-team', status: 'active', description: 'Processes raw data from multiple sources' },
-                    { id: 'pipeline-2', name: 'ML Training Pipeline', version: 'v1.8', owner: 'ml-team', status: 'active', description: 'Trains machine learning models' },
-                    { id: 'pipeline-3', name: 'Model Serving Pipeline', version: 'v3.2', owner: 'platform-team', status: 'active', description: 'Deploys models to production' },
-                    { id: 'pipeline-4', name: 'Analytics Pipeline', version: 'v1.5', owner: 'analytics-team', status: 'active', description: 'Generates business intelligence reports' },
-                    { id: 'pipeline-5', name: 'Data Validation Pipeline', version: 'v1.2', owner: 'data-team', status: 'inactive', description: 'Validates data quality' },
-                    { id: 'pipeline-6', name: 'Real-time Processing', version: 'v2.3', owner: 'streaming-team', status: 'active', description: 'Processes real-time streams' }
-                ];
+            {
+              id: 'pipeline-3',
+              name: 'Model Serving Pipeline',
+              version: 'v3.2',
+              owner: 'platform-team',
+              status: 'active',
+              description: 'Deploys models to production',
             },
-            
-            async getMetrics() {
-                await new Promise(resolve => setTimeout(resolve, 150));
-                return {
-                    currentMetrics: {
-                        requestsPerMin: 1247,
-                        avgLatency: 145,
-                        errorRate: 0.8,
-                        cpuUsage: 42.3,
-                        memoryUsage: 67.8,
-                        diskUsage: 34.2,
-                        throughput: 1847,
-                        queueDepth: 23
-                    },
-                    timeSeriesData: Array.from({ length: 24 }, (_, i) => ({
-                        time: `${23 - i}h`,
-                        requests: 1000 + Math.floor(Math.random() * 800),
-                        latency: 100 + Math.floor(Math.random() * 150),
-                        cpu: 20 + Math.random() * 60,
-                        memory: 30 + Math.random() * 50,
-                        errors: Math.floor(Math.random() * 30)
-                    }))
-                };
+            {
+              id: 'pipeline-4',
+              name: 'Analytics Pipeline',
+              version: 'v1.5',
+              owner: 'analytics-team',
+              status: 'active',
+              description: 'Generates business intelligence reports',
             },
-            
-            async getAutonomy() {
-                await new Promise(resolve => setTimeout(resolve, 200));
-                return {
-                    level: 2,
-                    canary: 0.1,
-                    policies: [
-                        { title: 'Resource Limits', state: 'active', description: 'Enforces CPU and memory constraints' },
-                        { title: 'Cost Controls', state: 'active', description: 'Prevents spending over budget' },
-                        { title: 'Security Gates', state: 'active', description: 'Validates security compliance' },
-                        { title: 'Performance SLOs', state: 'monitoring', description: 'Monitors service levels' },
-                        { title: 'Data Quality Gates', state: 'active', description: 'Ensures data quality' }
-                    ],
-                    recentDecisions: [
-                        { timestamp: '17:45', action: 'Auto-scaled workers from 3 to 5', reason: 'High queue depth detected', impact: 'Reduced latency by 40%' },
-                        { timestamp: '16:23', action: 'Rolled back model deployment', reason: 'Error rate exceeded threshold', impact: 'Prevented service degradation' },
-                        { timestamp: '15:18', action: 'Applied resource limits', reason: 'CPU usage exceeded 85%', impact: 'Maintained stability' },
-                        { timestamp: '14:45', action: 'Triggered quality alert', reason: 'Data completeness dropped', impact: 'Prevented downstream issues' }
-                    ]
-                };
-            }
-        };
-        
-        // Simple SVG Chart Component
-        const SimpleChart = ({ data, width = 400, height = 200, color = "#667eea" }) => {
-            const maxValue = Math.max(...data.map(d => d.value));
-            const points = data.map((d, i) => {
-                const x = (i / (data.length - 1)) * width;
-                const y = height - (d.value / maxValue) * height;
-                return `${x},${y}`;
-            }).join(' ');
-            
+            {
+              id: 'pipeline-5',
+              name: 'Data Validation Pipeline',
+              version: 'v1.2',
+              owner: 'data-team',
+              status: 'inactive',
+              description: 'Validates data quality',
+            },
+            {
+              id: 'pipeline-6',
+              name: 'Real-time Processing',
+              version: 'v2.3',
+              owner: 'streaming-team',
+              status: 'active',
+              description: 'Processes real-time streams',
+            },
+          ];
+        },
+
+        async getMetrics() {
+          await new Promise((resolve) => setTimeout(resolve, 150));
+          return {
+            currentMetrics: {
+              requestsPerMin: 1247,
+              avgLatency: 145,
+              errorRate: 0.8,
+              cpuUsage: 42.3,
+              memoryUsage: 67.8,
+              diskUsage: 34.2,
+              throughput: 1847,
+              queueDepth: 23,
+            },
+            timeSeriesData: Array.from({ length: 24 }, (_, i) => ({
+              time: `${23 - i}h`,
+              requests: 1000 + Math.floor(Math.random() * 800),
+              latency: 100 + Math.floor(Math.random() * 150),
+              cpu: 20 + Math.random() * 60,
+              memory: 30 + Math.random() * 50,
+              errors: Math.floor(Math.random() * 30),
+            })),
+          };
+        },
+
+        async getAutonomy() {
+          await new Promise((resolve) => setTimeout(resolve, 200));
+          return {
+            level: 2,
+            canary: 0.1,
+            policies: [
+              {
+                title: 'Resource Limits',
+                state: 'active',
+                description: 'Enforces CPU and memory constraints',
+              },
+              {
+                title: 'Cost Controls',
+                state: 'active',
+                description: 'Prevents spending over budget',
+              },
+              {
+                title: 'Security Gates',
+                state: 'active',
+                description: 'Validates security compliance',
+              },
+              {
+                title: 'Performance SLOs',
+                state: 'monitoring',
+                description: 'Monitors service levels',
+              },
+              {
+                title: 'Data Quality Gates',
+                state: 'active',
+                description: 'Ensures data quality',
+              },
+            ],
+            recentDecisions: [
+              {
+                timestamp: '17:45',
+                action: 'Auto-scaled workers from 3 to 5',
+                reason: 'High queue depth detected',
+                impact: 'Reduced latency by 40%',
+              },
+              {
+                timestamp: '16:23',
+                action: 'Rolled back model deployment',
+                reason: 'Error rate exceeded threshold',
+                impact: 'Prevented service degradation',
+              },
+              {
+                timestamp: '15:18',
+                action: 'Applied resource limits',
+                reason: 'CPU usage exceeded 85%',
+                impact: 'Maintained stability',
+              },
+              {
+                timestamp: '14:45',
+                action: 'Triggered quality alert',
+                reason: 'Data completeness dropped',
+                impact: 'Prevented downstream issues',
+              },
+            ],
+          };
+        },
+      };
+
+      // Simple SVG Chart Component
+      const SimpleChart = ({
+        data,
+        width = 400,
+        height = 200,
+        color = '#667eea',
+      }) => {
+        const maxValue = Math.max(...data.map((d) => d.value));
+        const points = data
+          .map((d, i) => {
+            const x = (i / (data.length - 1)) * width;
+            const y = height - (d.value / maxValue) * height;
+            return `${x},${y}`;
+          })
+          .join(' ');
+
+        return (
+          <svg
+            width={width}
+            height={height}
+            style={{ width: '100%', height: '100%' }}
+          >
+            <defs>
+              <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                <stop offset="0%" stopColor={color} stopOpacity="0.3" />
+                <stop offset="100%" stopColor={color} stopOpacity="0" />
+              </linearGradient>
+            </defs>
+            <polyline
+              fill="none"
+              stroke={color}
+              strokeWidth="3"
+              points={points}
+            />
+            <polygon
+              fill="url(#gradient)"
+              points={`0,${height} ${points} ${width},${height}`}
+            />
+          </svg>
+        );
+      };
+
+      function MaestroApp() {
+        const [currentPage, setCurrentPage] = useState('home');
+        const [loading, setLoading] = useState({});
+        const [data, setData] = useState({});
+        const [showModal, setShowModal] = useState(null);
+        const [autonomyLevel, setAutonomyLevel] = useState(2);
+        const [costBudget, setCostBudget] = useState(5000);
+
+        const loadData = useCallback(async (key, apiCall) => {
+          setLoading((prev) => ({ ...prev, [key]: true }));
+          try {
+            const result = await apiCall();
+            setData((prev) => ({ ...prev, [key]: result }));
+          } catch (error) {
+            console.error(`Error loading ${key}:`, error);
+          } finally {
+            setLoading((prev) => ({ ...prev, [key]: false }));
+          }
+        }, []);
+
+        useEffect(() => {
+          if (currentPage === 'home') {
+            loadData('summary', mockApi.getSummary);
+            loadData('metrics', mockApi.getMetrics);
+          } else if (currentPage === 'runs') {
+            loadData('runs', mockApi.getRuns);
+          } else if (currentPage === 'pipelines') {
+            loadData('pipelines', mockApi.getPipelines);
+          } else if (currentPage === 'autonomy') {
+            loadData('autonomy', mockApi.getAutonomy);
+          } else if (currentPage === 'observability') {
+            loadData('metrics', mockApi.getMetrics);
+          }
+        }, [currentPage, loadData]);
+
+        const Header = () => (
+          <div className="header">
+            <div className="header-left">
+              <div className="logo">M</div>
+              <div>
+                <div className="header-title">Maestro Conductor</div>
+                <div className="header-subtitle">
+                  IntelGraph AI Platform • Development Environment
+                </div>
+              </div>
+            </div>
+            <div className="header-right">
+              <div
+                className="cmd-palette"
+                onClick={() => setShowModal('commandPalette')}
+              >
+                <i className="fas fa-search"></i> ⌘K Command Palette
+              </div>
+              <div
+                className="user-profile"
+                onClick={() => setShowModal('userProfile')}
+              >
+                JD
+              </div>
+            </div>
+          </div>
+        );
+
+        const Sidebar = () => (
+          <div className="sidebar">
+            <div className="nav-section">
+              <div className="nav-title">Core Operations</div>
+              <a
+                href="#"
+                className={`nav-item ${currentPage === 'home' ? 'active' : ''}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrentPage('home');
+                }}
+              >
+                <i className="fas fa-home"></i>
+                <span>Dashboard</span>
+              </a>
+              <a
+                href="#"
+                className={`nav-item ${currentPage === 'runs' ? 'active' : ''}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrentPage('runs');
+                }}
+              >
+                <i className="fas fa-play-circle"></i>
+                <span>Pipeline Runs</span>
+              </a>
+              <a
+                href="#"
+                className={`nav-item ${currentPage === 'pipelines' ? 'active' : ''}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrentPage('pipelines');
+                }}
+              >
+                <i className="fas fa-project-diagram"></i>
+                <span>Pipelines</span>
+              </a>
+              <a
+                href="#"
+                className={`nav-item ${currentPage === 'observability' ? 'active' : ''}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrentPage('observability');
+                }}
+              >
+                <i className="fas fa-chart-line"></i>
+                <span>Observability</span>
+              </a>
+            </div>
+
+            <div className="nav-section">
+              <div className="nav-title">Autonomous Systems</div>
+              <a
+                href="#"
+                className={`nav-item ${currentPage === 'autonomy' ? 'active' : ''}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrentPage('autonomy');
+                }}
+              >
+                <i className="fas fa-robot"></i>
+                <span>Autonomy Control</span>
+              </a>
+              <a
+                href="#"
+                className={`nav-item ${currentPage === 'policies' ? 'active' : ''}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrentPage('policies');
+                }}
+              >
+                <i className="fas fa-shield-alt"></i>
+                <span>Policies & Gates</span>
+              </a>
+              <a
+                href="#"
+                className={`nav-item ${currentPage === 'cost' ? 'active' : ''}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrentPage('cost');
+                }}
+              >
+                <i className="fas fa-dollar-sign"></i>
+                <span>Cost Management</span>
+              </a>
+            </div>
+
+            <div className="nav-section">
+              <div className="nav-title">Platform Services</div>
+              <a
+                href="#"
+                className={`nav-item ${currentPage === 'recipes' ? 'active' : ''}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrentPage('recipes');
+                }}
+              >
+                <i className="fas fa-book"></i>
+                <span>Recipe Library</span>
+              </a>
+              <a
+                href="#"
+                className={`nav-item ${currentPage === 'secrets' ? 'active' : ''}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrentPage('secrets');
+                }}
+              >
+                <i className="fas fa-key"></i>
+                <span>Secrets & Config</span>
+              </a>
+              <a
+                href="#"
+                className={`nav-item ${currentPage === 'admin' ? 'active' : ''}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrentPage('admin');
+                }}
+              >
+                <i className="fas fa-cogs"></i>
+                <span>Administration</span>
+              </a>
+            </div>
+          </div>
+        );
+
+        const HomePage = () => {
+          const summary = data.summary;
+          const metrics = data.metrics;
+
+          if (loading.summary || loading.metrics) {
             return (
-                <svg width={width} height={height} style={{ width: '100%', height: '100%' }}>
-                    <defs>
-                        <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                            <stop offset="0%" stopColor={color} stopOpacity="0.3"/>
-                            <stop offset="100%" stopColor={color} stopOpacity="0"/>
-                        </linearGradient>
-                    </defs>
-                    <polyline
-                        fill="none"
-                        stroke={color}
-                        strokeWidth="3"
-                        points={points}
-                    />
-                    <polygon
-                        fill="url(#gradient)"
-                        points={`0,${height} ${points} ${width},${height}`}
-                    />
-                </svg>
+              <div className="loading">
+                <div className="spinner"></div>
+              </div>
             );
+          }
+
+          return (
+            <div className="dashboard-grid fade-in">
+              {/* System Health Overview */}
+              <div className="card">
+                <div className="card-header">
+                  <div>
+                    <div className="card-title">System Health</div>
+                    <div className="card-subtitle">
+                      Real-time operational status
+                    </div>
+                  </div>
+                </div>
+                <div className="metrics-row">
+                  <div className="metric">
+                    <div className="metric-label">Success Rate</div>
+                    <div className="metric-value">
+                      {summary
+                        ? (summary.health.success * 100).toFixed(1)
+                        : '99.2'}
+                      <span className="metric-unit">%</span>
+                    </div>
+                    <div className="metric-change positive">
+                      <i className="fas fa-arrow-up"></i> +0.3% from last hour
+                    </div>
+                  </div>
+                </div>
+                <div className="metrics-row">
+                  <div className="metric">
+                    <div className="metric-label">P95 Latency</div>
+                    <div className="metric-value">
+                      {summary?.health.p95 || '145'}
+                      <span className="metric-unit">ms</span>
+                    </div>
+                    <div className="metric-change positive">
+                      <i className="fas fa-arrow-down"></i> -12ms improvement
+                    </div>
+                  </div>
+                  <div className="metric">
+                    <div className="metric-label">Uptime</div>
+                    <div className="metric-value">
+                      {summary?.health.uptime || '99.8'}
+                      <span className="metric-unit">%</span>
+                    </div>
+                    <div className="metric-change positive">
+                      <i className="fas fa-check-circle"></i> Excellent
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Autonomy Level */}
+              <div className="card">
+                <div className="card-header">
+                  <div>
+                    <div className="card-title">Autonomous Operations</div>
+                    <div className="card-subtitle">
+                      Current autonomy configuration
+                    </div>
+                  </div>
+                </div>
+                <div className="metrics-row">
+                  <div className="metric">
+                    <div className="metric-label">Autonomy Level</div>
+                    <div className="metric-value" style={{ color: '#667eea' }}>
+                      L{summary?.autonomy.level || '2'}
+                    </div>
+                    <div className="metric-change">
+                      Conditional autonomy active
+                    </div>
+                  </div>
+                </div>
+                <div className="metrics-row">
+                  <div className="metric">
+                    <div className="metric-label">Canary Deployment</div>
+                    <div className="metric-value">
+                      {summary
+                        ? (summary.autonomy.canary * 100).toFixed(0)
+                        : '10'}
+                      <span className="metric-unit">%</span>
+                    </div>
+                  </div>
+                  <div className="metric">
+                    <div className="metric-label">Active Policies</div>
+                    <div className="metric-value">5</div>
+                  </div>
+                </div>
+                <button
+                  className="button primary"
+                  onClick={() => setCurrentPage('autonomy')}
+                >
+                  <i className="fas fa-robot"></i>
+                  Configure Autonomy
+                </button>
+              </div>
+
+              {/* Budget Status */}
+              <div className="card">
+                <div className="card-header">
+                  <div>
+                    <div className="card-title">Budget & Costs</div>
+                    <div className="card-subtitle">
+                      Monthly spending overview
+                    </div>
+                  </div>
+                </div>
+                <div className="metrics-row">
+                  <div className="metric">
+                    <div className="metric-label">Remaining Budget</div>
+                    <div className="metric-value">
+                      ${summary?.budgets.remaining || '2,450'}
+                    </div>
+                  </div>
+                  <div className="metric">
+                    <div className="metric-label">Monthly Cap</div>
+                    <div className="metric-value">
+                      ${summary?.budgets.cap || '5,000'}
+                    </div>
+                  </div>
+                </div>
+                <div className="progress-bar">
+                  <div
+                    className="progress-fill"
+                    style={{
+                      width: `${summary ? ((summary.budgets.cap - summary.budgets.remaining) / summary.budgets.cap) * 100 : 51}%`,
+                    }}
+                  ></div>
+                </div>
+                <div className="metric-change">
+                  {summary ? summary.budgets.utilization : '51.0'}% utilized
+                  this month
+                </div>
+              </div>
+
+              {/* Live Pipeline Runs */}
+              <div className="card">
+                <div className="card-header">
+                  <div>
+                    <div className="card-title">Active Pipeline Runs</div>
+                    <div className="card-subtitle">
+                      Current execution status
+                    </div>
+                  </div>
+                </div>
+                <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                  {(summary?.runs || []).map((run) => (
+                    <div key={run.id} className="activity-item">
+                      <div
+                        className="activity-icon"
+                        style={{
+                          backgroundColor:
+                            run.status === 'completed'
+                              ? '#10b981'
+                              : run.status === 'running'
+                                ? '#3b82f6'
+                                : run.status === 'failed'
+                                  ? '#ef4444'
+                                  : '#6b7280',
+                        }}
+                      ></div>
+                      <div className="activity-content">
+                        <div className="activity-title">{run.id}</div>
+                        <div className="activity-meta">
+                          {run.pipeline} •
+                          <span
+                            className={`status ${run.status}`}
+                            style={{ marginLeft: '8px', padding: '2px 8px' }}
+                          >
+                            {run.status}
+                          </span>
+                          {run.progress > 0 && (
+                            <span style={{ marginLeft: '8px' }}>
+                              • {run.progress}% complete
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  className="button secondary"
+                  onClick={() => setCurrentPage('runs')}
+                >
+                  <i className="fas fa-external-link-alt"></i>
+                  View All Runs
+                </button>
+              </div>
+
+              {/* Real-time Metrics Chart */}
+              <div className="card dashboard-grid-wide">
+                <div className="card-header">
+                  <div>
+                    <div className="card-title">Performance Metrics</div>
+                    <div className="card-subtitle">
+                      System performance over the last 24 hours
+                    </div>
+                  </div>
+                </div>
+                <div className="chart-container">
+                  {metrics?.timeSeriesData && (
+                    <SimpleChart
+                      data={metrics.timeSeriesData.map((d) => ({
+                        value: d.requests,
+                      }))}
+                      color="#667eea"
+                    />
+                  )}
+                </div>
+              </div>
+
+              {/* Current System Resources */}
+              <div className="card">
+                <div className="card-header">
+                  <div>
+                    <div className="card-title">System Resources</div>
+                    <div className="card-subtitle">
+                      Current utilization levels
+                    </div>
+                  </div>
+                </div>
+
+                <div className="control-group">
+                  <div className="metric-label">CPU Usage</div>
+                  <div className="progress-bar">
+                    <div
+                      className="progress-fill"
+                      style={{
+                        width: `${metrics?.currentMetrics.cpuUsage || 42}%`,
+                        background:
+                          (metrics?.currentMetrics.cpuUsage || 42) > 80
+                            ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
+                            : (metrics?.currentMetrics.cpuUsage || 42) > 60
+                              ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
+                              : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                      }}
+                    ></div>
+                  </div>
+                  <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                    {metrics?.currentMetrics.cpuUsage || 42.3}% utilized
+                  </div>
+                </div>
+
+                <div className="control-group">
+                  <div className="metric-label">Memory Usage</div>
+                  <div className="progress-bar">
+                    <div
+                      className="progress-fill"
+                      style={{
+                        width: `${metrics?.currentMetrics.memoryUsage || 68}%`,
+                        background:
+                          (metrics?.currentMetrics.memoryUsage || 68) > 80
+                            ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)'
+                            : (metrics?.currentMetrics.memoryUsage || 68) > 60
+                              ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)'
+                              : 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                      }}
+                    ></div>
+                  </div>
+                  <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                    {metrics?.currentMetrics.memoryUsage || 67.8}% utilized
+                  </div>
+                </div>
+
+                <div className="control-group">
+                  <div className="metric-label">Disk Usage</div>
+                  <div className="progress-bar">
+                    <div
+                      className="progress-fill"
+                      style={{
+                        width: `${metrics?.currentMetrics.diskUsage || 34}%`,
+                        background:
+                          'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                      }}
+                    ></div>
+                  </div>
+                  <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                    {metrics?.currentMetrics.diskUsage || 34.2}% utilized
+                  </div>
+                </div>
+              </div>
+
+              {/* Recent System Changes */}
+              <div className="card">
+                <div className="card-header">
+                  <div>
+                    <div className="card-title">Recent Activity</div>
+                    <div className="card-subtitle">
+                      System changes and updates
+                    </div>
+                  </div>
+                </div>
+                <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                  {(summary?.changes || []).map((change, index) => (
+                    <div key={index} className="activity-item">
+                      <div
+                        className="activity-icon"
+                        style={{
+                          backgroundColor:
+                            change.type === 'automation'
+                              ? '#3b82f6'
+                              : change.type === 'manual'
+                                ? '#10b981'
+                                : change.type === 'maintenance'
+                                  ? '#f59e0b'
+                                  : '#6b7280',
+                        }}
+                      ></div>
+                      <div className="activity-content">
+                        <div className="activity-title">{change.title}</div>
+                        <div className="activity-meta">
+                          {change.at} • by {change.by} • {change.type}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          );
         };
-        
-        function MaestroApp() {
-            const [currentPage, setCurrentPage] = useState('home');
-            const [loading, setLoading] = useState({});
-            const [data, setData] = useState({});
-            const [showModal, setShowModal] = useState(null);
-            const [autonomyLevel, setAutonomyLevel] = useState(2);
-            const [costBudget, setCostBudget] = useState(5000);
-            
-            const loadData = useCallback(async (key, apiCall) => {
-                setLoading(prev => ({ ...prev, [key]: true }));
-                try {
-                    const result = await apiCall();
-                    setData(prev => ({ ...prev, [key]: result }));
-                } catch (error) {
-                    console.error(`Error loading ${key}:`, error);
-                } finally {
-                    setLoading(prev => ({ ...prev, [key]: false }));
-                }
-            }, []);
-            
-            useEffect(() => {
-                if (currentPage === 'home') {
-                    loadData('summary', mockApi.getSummary);
-                    loadData('metrics', mockApi.getMetrics);
-                } else if (currentPage === 'runs') {
-                    loadData('runs', mockApi.getRuns);
-                } else if (currentPage === 'pipelines') {
-                    loadData('pipelines', mockApi.getPipelines);
-                } else if (currentPage === 'autonomy') {
-                    loadData('autonomy', mockApi.getAutonomy);
-                } else if (currentPage === 'observability') {
-                    loadData('metrics', mockApi.getMetrics);
-                }
-            }, [currentPage, loadData]);
-            
-            const Header = () => (
-                <div className="header">
-                    <div className="header-left">
-                        <div className="logo">M</div>
-                        <div>
-                            <div className="header-title">Maestro Conductor</div>
-                            <div className="header-subtitle">IntelGraph AI Platform • Development Environment</div>
-                        </div>
-                    </div>
-                    <div className="header-right">
-                        <div className="cmd-palette" onClick={() => setShowModal('commandPalette')}>
-                            <i className="fas fa-search"></i> ⌘K Command Palette
-                        </div>
-                        <div className="user-profile" onClick={() => setShowModal('userProfile')}>
-                            JD
-                        </div>
-                    </div>
-                </div>
-            );
-            
-            const Sidebar = () => (
-                <div className="sidebar">
-                    <div className="nav-section">
-                        <div className="nav-title">Core Operations</div>
-                        <a href="#" className={`nav-item ${currentPage === 'home' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentPage('home'); }}>
-                            <i className="fas fa-home"></i>
-                            <span>Dashboard</span>
-                        </a>
-                        <a href="#" className={`nav-item ${currentPage === 'runs' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentPage('runs'); }}>
-                            <i className="fas fa-play-circle"></i>
-                            <span>Pipeline Runs</span>
-                        </a>
-                        <a href="#" className={`nav-item ${currentPage === 'pipelines' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentPage('pipelines'); }}>
-                            <i className="fas fa-project-diagram"></i>
-                            <span>Pipelines</span>
-                        </a>
-                        <a href="#" className={`nav-item ${currentPage === 'observability' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentPage('observability'); }}>
-                            <i className="fas fa-chart-line"></i>
-                            <span>Observability</span>
-                        </a>
-                    </div>
-                    
-                    <div className="nav-section">
-                        <div className="nav-title">Autonomous Systems</div>
-                        <a href="#" className={`nav-item ${currentPage === 'autonomy' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentPage('autonomy'); }}>
-                            <i className="fas fa-robot"></i>
-                            <span>Autonomy Control</span>
-                        </a>
-                        <a href="#" className={`nav-item ${currentPage === 'policies' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentPage('policies'); }}>
-                            <i className="fas fa-shield-alt"></i>
-                            <span>Policies & Gates</span>
-                        </a>
-                        <a href="#" className={`nav-item ${currentPage === 'cost' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentPage('cost'); }}>
-                            <i className="fas fa-dollar-sign"></i>
-                            <span>Cost Management</span>
-                        </a>
-                    </div>
-                    
-                    <div className="nav-section">
-                        <div className="nav-title">Platform Services</div>
-                        <a href="#" className={`nav-item ${currentPage === 'recipes' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentPage('recipes'); }}>
-                            <i className="fas fa-book"></i>
-                            <span>Recipe Library</span>
-                        </a>
-                        <a href="#" className={`nav-item ${currentPage === 'secrets' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentPage('secrets'); }}>
-                            <i className="fas fa-key"></i>
-                            <span>Secrets & Config</span>
-                        </a>
-                        <a href="#" className={`nav-item ${currentPage === 'admin' ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); setCurrentPage('admin'); }}>
-                            <i className="fas fa-cogs"></i>
-                            <span>Administration</span>
-                        </a>
-                    </div>
-                </div>
-            );
-            
-            const HomePage = () => {
-                const summary = data.summary;
-                const metrics = data.metrics;
-                
-                if (loading.summary || loading.metrics) {
-                    return <div className="loading"><div className="spinner"></div></div>;
-                }
-                
-                return (
-                    <div className="dashboard-grid fade-in">
-                        {/* System Health Overview */}
-                        <div className="card">
-                            <div className="card-header">
-                                <div>
-                                    <div className="card-title">System Health</div>
-                                    <div className="card-subtitle">Real-time operational status</div>
-                                </div>
-                            </div>
-                            <div className="metrics-row">
-                                <div className="metric">
-                                    <div className="metric-label">Success Rate</div>
-                                    <div className="metric-value">{summary ? (summary.health.success * 100).toFixed(1) : '99.2'}<span className="metric-unit">%</span></div>
-                                    <div className="metric-change positive">
-                                        <i className="fas fa-arrow-up"></i> +0.3% from last hour
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="metrics-row">
-                                <div className="metric">
-                                    <div className="metric-label">P95 Latency</div>
-                                    <div className="metric-value">{summary?.health.p95 || '145'}<span className="metric-unit">ms</span></div>
-                                    <div className="metric-change positive">
-                                        <i className="fas fa-arrow-down"></i> -12ms improvement
-                                    </div>
-                                </div>
-                                <div className="metric">
-                                    <div className="metric-label">Uptime</div>
-                                    <div className="metric-value">{summary?.health.uptime || '99.8'}<span className="metric-unit">%</span></div>
-                                    <div className="metric-change positive">
-                                        <i className="fas fa-check-circle"></i> Excellent
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        {/* Autonomy Level */}
-                        <div className="card">
-                            <div className="card-header">
-                                <div>
-                                    <div className="card-title">Autonomous Operations</div>
-                                    <div className="card-subtitle">Current autonomy configuration</div>
-                                </div>
-                            </div>
-                            <div className="metrics-row">
-                                <div className="metric">
-                                    <div className="metric-label">Autonomy Level</div>
-                                    <div className="metric-value" style={{color: '#667eea'}}>L{summary?.autonomy.level || '2'}</div>
-                                    <div className="metric-change">Conditional autonomy active</div>
-                                </div>
-                            </div>
-                            <div className="metrics-row">
-                                <div className="metric">
-                                    <div className="metric-label">Canary Deployment</div>
-                                    <div className="metric-value">{summary ? (summary.autonomy.canary * 100).toFixed(0) : '10'}<span className="metric-unit">%</span></div>
-                                </div>
-                                <div className="metric">
-                                    <div className="metric-label">Active Policies</div>
-                                    <div className="metric-value">5</div>
-                                </div>
-                            </div>
-                            <button className="button primary" onClick={() => setCurrentPage('autonomy')}>
-                                <i className="fas fa-robot"></i>
-                                Configure Autonomy
-                            </button>
-                        </div>
-                        
-                        {/* Budget Status */}
-                        <div className="card">
-                            <div className="card-header">
-                                <div>
-                                    <div className="card-title">Budget & Costs</div>
-                                    <div className="card-subtitle">Monthly spending overview</div>
-                                </div>
-                            </div>
-                            <div className="metrics-row">
-                                <div className="metric">
-                                    <div className="metric-label">Remaining Budget</div>
-                                    <div className="metric-value">${summary?.budgets.remaining || '2,450'}</div>
-                                </div>
-                                <div className="metric">
-                                    <div className="metric-label">Monthly Cap</div>
-                                    <div className="metric-value">${summary?.budgets.cap || '5,000'}</div>
-                                </div>
-                            </div>
-                            <div className="progress-bar">
-                                <div 
-                                    className="progress-fill" 
-                                    style={{width: `${summary ? (summary.budgets.cap - summary.budgets.remaining) / summary.budgets.cap * 100 : 51}%`}}
-                                ></div>
-                            </div>
-                            <div className="metric-change">
-                                {summary ? summary.budgets.utilization : '51.0'}% utilized this month
-                            </div>
-                        </div>
-                        
-                        {/* Live Pipeline Runs */}
-                        <div className="card">
-                            <div className="card-header">
-                                <div>
-                                    <div className="card-title">Active Pipeline Runs</div>
-                                    <div className="card-subtitle">Current execution status</div>
-                                </div>
-                            </div>
-                            <div style={{maxHeight: '300px', overflowY: 'auto'}}>
-                                {(summary?.runs || []).map(run => (
-                                    <div key={run.id} className="activity-item">
-                                        <div 
-                                            className="activity-icon" 
-                                            style={{
-                                                backgroundColor: 
-                                                    run.status === 'completed' ? '#10b981' :
-                                                    run.status === 'running' ? '#3b82f6' :
-                                                    run.status === 'failed' ? '#ef4444' : '#6b7280'
-                                            }}
-                                        ></div>
-                                        <div className="activity-content">
-                                            <div className="activity-title">{run.id}</div>
-                                            <div className="activity-meta">
-                                                {run.pipeline} • 
-                                                <span className={`status ${run.status}`} style={{marginLeft: '8px', padding: '2px 8px'}}>
-                                                    {run.status}
-                                                </span>
-                                                {run.progress > 0 && (
-                                                    <span style={{marginLeft: '8px'}}>• {run.progress}% complete</span>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                            <button className="button secondary" onClick={() => setCurrentPage('runs')}>
-                                <i className="fas fa-external-link-alt"></i>
-                                View All Runs
-                            </button>
-                        </div>
-                        
-                        {/* Real-time Metrics Chart */}
-                        <div className="card dashboard-grid-wide">
-                            <div className="card-header">
-                                <div>
-                                    <div className="card-title">Performance Metrics</div>
-                                    <div className="card-subtitle">System performance over the last 24 hours</div>
-                                </div>
-                            </div>
-                            <div className="chart-container">
-                                {metrics?.timeSeriesData && (
-                                    <SimpleChart 
-                                        data={metrics.timeSeriesData.map(d => ({ value: d.requests }))}
-                                        color="#667eea"
-                                    />
-                                )}
-                            </div>
-                        </div>
-                        
-                        {/* Current System Resources */}
-                        <div className="card">
-                            <div className="card-header">
-                                <div>
-                                    <div className="card-title">System Resources</div>
-                                    <div className="card-subtitle">Current utilization levels</div>
-                                </div>
-                            </div>
-                            
-                            <div className="control-group">
-                                <div className="metric-label">CPU Usage</div>
-                                <div className="progress-bar">
-                                    <div 
-                                        className="progress-fill" 
-                                        style={{
-                                            width: `${metrics?.currentMetrics.cpuUsage || 42}%`,
-                                            background: (metrics?.currentMetrics.cpuUsage || 42) > 80 ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' : 
-                                                       (metrics?.currentMetrics.cpuUsage || 42) > 60 ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' :
-                                                       'linear-gradient(135deg, #10b981 0%, #059669 100%)'
-                                        }}
-                                    ></div>
-                                </div>
-                                <div style={{fontSize: '14px', color: '#6b7280'}}>{metrics?.currentMetrics.cpuUsage || 42.3}% utilized</div>
-                            </div>
-                            
-                            <div className="control-group">
-                                <div className="metric-label">Memory Usage</div>
-                                <div className="progress-bar">
-                                    <div 
-                                        className="progress-fill" 
-                                        style={{
-                                            width: `${metrics?.currentMetrics.memoryUsage || 68}%`,
-                                            background: (metrics?.currentMetrics.memoryUsage || 68) > 80 ? 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' : 
-                                                       (metrics?.currentMetrics.memoryUsage || 68) > 60 ? 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' :
-                                                       'linear-gradient(135deg, #10b981 0%, #059669 100%)'
-                                        }}
-                                    ></div>
-                                </div>
-                                <div style={{fontSize: '14px', color: '#6b7280'}}>{metrics?.currentMetrics.memoryUsage || 67.8}% utilized</div>
-                            </div>
-                            
-                            <div className="control-group">
-                                <div className="metric-label">Disk Usage</div>
-                                <div className="progress-bar">
-                                    <div 
-                                        className="progress-fill" 
-                                        style={{
-                                            width: `${metrics?.currentMetrics.diskUsage || 34}%`,
-                                            background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
-                                        }}
-                                    ></div>
-                                </div>
-                                <div style={{fontSize: '14px', color: '#6b7280'}}>{metrics?.currentMetrics.diskUsage || 34.2}% utilized</div>
-                            </div>
-                        </div>
-                        
-                        {/* Recent System Changes */}
-                        <div className="card">
-                            <div className="card-header">
-                                <div>
-                                    <div className="card-title">Recent Activity</div>
-                                    <div className="card-subtitle">System changes and updates</div>
-                                </div>
-                            </div>
-                            <div style={{maxHeight: '300px', overflowY: 'auto'}}>
-                                {(summary?.changes || []).map((change, index) => (
-                                    <div key={index} className="activity-item">
-                                        <div 
-                                            className="activity-icon" 
-                                            style={{
-                                                backgroundColor: 
-                                                    change.type === 'automation' ? '#3b82f6' :
-                                                    change.type === 'manual' ? '#10b981' :
-                                                    change.type === 'maintenance' ? '#f59e0b' : '#6b7280'
-                                            }}
-                                        ></div>
-                                        <div className="activity-content">
-                                            <div className="activity-title">{change.title}</div>
-                                            <div className="activity-meta">
-                                                {change.at} • by {change.by} • {change.type}
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-                );
-            };
-            
-            const RunsPage = () => {
-                const runs = data.runs;
-                
-                if (loading.runs) {
-                    return <div className="loading"><div className="spinner"></div></div>;
-                }
-                
-                return (
-                    <div className="fade-in">
-                        <div className="card">
-                            <div className="card-header">
-                                <div>
-                                    <div className="card-title">Pipeline Runs Management</div>
-                                    <div className="card-subtitle">Execution history and current status</div>
-                                </div>
-                                <button className="button primary" onClick={() => setShowModal('newRun')}>
-                                    <i className="fas fa-plus"></i> New Run
-                                </button>
-                            </div>
-                            
-                            <div className="metrics-row" style={{marginBottom: '32px'}}>
-                                <div className="metric">
-                                    <div className="metric-label">Total Runs</div>
-                                    <div className="metric-value">{runs?.length || 0}</div>
-                                </div>
-                                <div className="metric">
-                                    <div className="metric-label">Success Rate</div>
-                                    <div className="metric-value">
-                                        {runs ? ((runs.filter(r => r.status === 'completed').length / runs.length) * 100).toFixed(1) : '89.2'}
-                                        <span className="metric-unit">%</span>
-                                    </div>
-                                </div>
-                                <div className="metric">
-                                    <div className="metric-label">Avg Duration</div>
-                                    <div className="metric-value">
-                                        {runs ? Math.round(runs.reduce((acc, r) => acc + r.durationMs, 0) / runs.length / 1000) : 127}
-                                        <span className="metric-unit">s</span>
-                                    </div>
-                                </div>
-                                <div className="metric">
-                                    <div className="metric-label">Total Cost</div>
-                                    <div className="metric-value">
-                                        ${runs ? runs.reduce((acc, r) => acc + parseFloat(r.cost), 0).toFixed(2) : '156.78'}
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <div className="table-container">
-                                <table className="table">
-                                    <thead>
-                                        <tr>
-                                            <th>Run ID</th>
-                                            <th>Pipeline</th>
-                                            <th>Status</th>
-                                            <th>Progress</th>
-                                            <th>Duration</th>
-                                            <th>Cost</th>
-                                            <th>Started By</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {runs?.map(run => (
-                                            <tr key={run.id}>
-                                                <td>
-                                                    <span style={{fontFamily: 'monospace', fontSize: '13px', color: '#667eea', fontWeight: '600'}}>
-                                                        {run.id}
-                                                    </span>
-                                                </td>
-                                                <td style={{fontWeight: '500'}}>{run.pipeline}</td>
-                                                <td>
-                                                    <div className={`status ${run.status}`}>
-                                                        {run.status}
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <div className="progress-bar" style={{height: '6px', margin: '0'}}>
-                                                        <div 
-                                                            className="progress-fill" 
-                                                            style={{width: `${run.progress}%`}}
-                                                        ></div>
-                                                    </div>
-                                                    <div style={{fontSize: '12px', color: '#6b7280', marginTop: '4px'}}>{run.progress}%</div>
-                                                </td>
-                                                <td>{Math.round(run.durationMs / 1000)}s</td>
-                                                <td>${run.cost}</td>
-                                                <td style={{color: '#6b7280'}}>{run.user}</td>
-                                                <td>
-                                                    <button className="button secondary" style={{fontSize: '12px', padding: '8px 16px'}}>
-                                                        <i className="fas fa-eye"></i>
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                );
-            };
-            
-            const PipelinesPage = () => {
-                const pipelines = data.pipelines;
-                
-                if (loading.pipelines) {
-                    return <div className="loading"><div className="spinner"></div></div>;
-                }
-                
-                return (
-                    <div className="fade-in">
-                        <div className="card" style={{marginBottom: '32px'}}>
-                            <div className="card-header">
-                                <div>
-                                    <div className="card-title">Pipeline Management</div>
-                                    <div className="card-subtitle">Configure and deploy data processing pipelines</div>
-                                </div>
-                                <button className="button primary" onClick={() => setShowModal('newPipeline')}>
-                                    <i className="fas fa-plus"></i> New Pipeline
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div className="dashboard-grid">
-                            {pipelines?.map(pipeline => (
-                                <div key={pipeline.id} className="card">
-                                    <div className="card-header">
-                                        <div>
-                                            <div className="card-title" style={{fontSize: '18px'}}>{pipeline.name}</div>
-                                            <div className="card-subtitle">{pipeline.description}</div>
-                                        </div>
-                                        <div className={`status ${pipeline.status}`}>
-                                            {pipeline.status}
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="metrics-row">
-                                        <div className="metric">
-                                            <div className="metric-label">Version</div>
-                                            <div className="metric-value" style={{fontSize: '18px'}}>{pipeline.version}</div>
-                                        </div>
-                                        <div className="metric">
-                                            <div className="metric-label">Owner Team</div>
-                                            <div className="metric-value" style={{fontSize: '18px'}}>{pipeline.owner}</div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div style={{display: 'flex', gap: '12px', marginTop: '24px'}}>
-                                        <button className="button secondary" style={{flex: 1}}>
-                                            <i className="fas fa-cog"></i>
-                                            Configure
-                                        </button>
-                                        <button className="button primary" style={{flex: 1}}>
-                                            <i className="fas fa-play"></i>
-                                            Run Now
-                                        </button>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    </div>
-                );
-            };
-            
-            const AutonomyPage = () => {
-                const autonomy = data.autonomy;
-                
-                if (loading.autonomy) {
-                    return <div className="loading"><div className="spinner"></div></div>;
-                }
-                
-                const levelDescriptions = {
-                    0: "Manual operation - All decisions require human approval",
-                    1: "Assisted operation - System provides recommendations",
-                    2: "Conditional autonomy - Automatic actions within defined parameters",
-                    3: "High autonomy - Independent operation with human oversight",
-                    4: "Full autonomy - Complete operational independence",
-                    5: "Complete autonomy - Self-improving and self-governing"
-                };
-                
-                return (
-                    <div className="fade-in">
-                        <div className="dashboard-grid">
-                            <div className="card">
-                                <div className="card-header">
-                                    <div>
-                                        <div className="card-title">Autonomy Level Control</div>
-                                        <div className="card-subtitle">Configure autonomous operation capabilities</div>
-                                    </div>
-                                </div>
-                                
-                                <div className="control-group">
-                                    <label className="control-label">
-                                        Current Autonomy Level: L{autonomyLevel}
-                                    </label>
-                                    <input 
-                                        type="range" 
-                                        min="0" 
-                                        max="5" 
-                                        value={autonomyLevel} 
-                                        className="slider"
-                                        onChange={(e) => setAutonomyLevel(parseInt(e.target.value))}
-                                    />
-                                    <div style={{display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#6b7280', marginTop: '12px'}}>
-                                        <span>L0</span>
-                                        <span>L1</span>
-                                        <span>L2</span>
-                                        <span>L3</span>
-                                        <span>L4</span>
-                                        <span>L5</span>
-                                    </div>
-                                </div>
-                                
-                                <div className="alert info" style={{margin: '20px 0'}}>
-                                    <strong>Level {autonomyLevel} Capabilities:</strong><br/>
-                                    {levelDescriptions[autonomyLevel]}
-                                </div>
-                                
-                                <button className="button primary" onClick={() => setShowModal('confirmAutonomy')}>
-                                    <i className="fas fa-robot"></i>
-                                    Update Autonomy Level
-                                </button>
-                            </div>
-                            
-                            <div className="card">
-                                <div className="card-header">
-                                    <div>
-                                        <div className="card-title">Active Policies</div>
-                                        <div className="card-subtitle">Guardrails and safety constraints</div>
-                                    </div>
-                                </div>
-                                
-                                {autonomy?.policies?.map((policy, index) => (
-                                    <div key={index} className="activity-item">
-                                        <div 
-                                            className="activity-icon" 
-                                            style={{
-                                                backgroundColor: policy.state === 'active' ? '#10b981' : '#f59e0b'
-                                            }}
-                                        ></div>
-                                        <div className="activity-content">
-                                            <div className="activity-title">{policy.title}</div>
-                                            <div className="activity-meta">
-                                                {policy.description} • 
-                                                <span className={`status ${policy.state === 'active' ? 'healthy' : 'warning'}`} style={{marginLeft: '8px', padding: '2px 8px'}}>
-                                                    {policy.state}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                                
-                                <button className="button secondary" style={{marginTop: '20px'}}>
-                                    <i className="fas fa-plus"></i>
-                                    Add New Policy
-                                </button>
-                            </div>
-                            
-                            <div className="card dashboard-grid-wide">
-                                <div className="card-header">
-                                    <div>
-                                        <div className="card-title">Recent Autonomous Decisions</div>
-                                        <div className="card-subtitle">Actions taken automatically by the system</div>
-                                    </div>
-                                </div>
-                                
-                                <div style={{maxHeight: '400px', overflowY: 'auto'}}>
-                                    {autonomy?.recentDecisions?.map((decision, index) => (
-                                        <div key={index} className="activity-item">
-                                            <div 
-                                                className="activity-icon" 
-                                                style={{backgroundColor: '#3b82f6'}}
-                                            ></div>
-                                            <div className="activity-content">
-                                                <div className="activity-title">{decision.action}</div>
-                                                <div className="activity-meta">
-                                                    <strong>Reason:</strong> {decision.reason}<br/>
-                                                    <strong>Impact:</strong> {decision.impact}<br/>
-                                                    <strong>Time:</strong> {decision.timestamp}
-                                                </div>
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                );
-            };
-            
-            const ObservabilityPage = () => {
-                const metrics = data.metrics;
-                
-                if (loading.metrics) {
-                    return <div className="loading"><div className="spinner"></div></div>;
-                }
-                
-                return (
-                    <div className="fade-in">
-                        <div className="dashboard-grid">
-                            <div className="card dashboard-grid-wide">
-                                <div className="card-header">
-                                    <div>
-                                        <div className="card-title">System Performance Dashboard</div>
-                                        <div className="card-subtitle">Real-time monitoring and analytics</div>
-                                    </div>
-                                </div>
-                                
-                                <div className="metrics-row" style={{marginBottom: '32px'}}>
-                                    <div className="metric">
-                                        <div className="metric-label">Requests/min</div>
-                                        <div className="metric-value">{metrics?.currentMetrics.requestsPerMin?.toLocaleString() || '1,247'}</div>
-                                        <div className="metric-change positive">
-                                            <i className="fas fa-arrow-up"></i> +15% from last hour
-                                        </div>
-                                    </div>
-                                    <div className="metric">
-                                        <div className="metric-label">Avg Latency</div>
-                                        <div className="metric-value">{metrics?.currentMetrics.avgLatency || 145}<span className="metric-unit">ms</span></div>
-                                        <div className="metric-change positive">
-                                            <i className="fas fa-arrow-down"></i> -8% from last hour
-                                        </div>
-                                    </div>
-                                    <div className="metric">
-                                        <div className="metric-label">Error Rate</div>
-                                        <div className="metric-value">{metrics?.currentMetrics.errorRate || 0.8}<span className="metric-unit">%</span></div>
-                                        <div className="metric-change positive">
-                                            <i className="fas fa-arrow-down"></i> -0.2% improvement
-                                        </div>
-                                    </div>
-                                    <div className="metric">
-                                        <div className="metric-label">Queue Depth</div>
-                                        <div className="metric-value">{metrics?.currentMetrics.queueDepth || 23}</div>
-                                        <div className="metric-change">Normal levels</div>
-                                    </div>
-                                </div>
-                                
-                                <div className="chart-container">
-                                    {metrics?.timeSeriesData && (
-                                        <SimpleChart 
-                                            data={metrics.timeSeriesData.map(d => ({ value: d.latency }))}
-                                            color="#764ba2"
-                                        />
-                                    )}
-                                </div>
-                            </div>
-                            
-                            <div className="card">
-                                <div className="card-header">
-                                    <div>
-                                        <div className="card-title">SLO Status</div>
-                                        <div className="card-subtitle">Service Level Objectives</div>
-                                    </div>
-                                </div>
-                                
-                                <div className="control-group">
-                                    <div className="metric-label">Availability SLO</div>
-                                    <div className="progress-bar">
-                                        <div className="progress-fill" style={{width: '99.9%'}}></div>
-                                    </div>
-                                    <div style={{fontSize: '14px', color: '#6b7280'}}>99.9% (Target: 99.5%)</div>
-                                </div>
-                                
-                                <div className="control-group">
-                                    <div className="metric-label">Latency SLO</div>
-                                    <div className="progress-bar">
-                                        <div className="progress-fill" style={{width: '87%'}}></div>
-                                    </div>
-                                    <div style={{fontSize: '14px', color: '#6b7280'}}>145ms (Target: &lt; 200ms)</div>
-                                </div>
-                                
-                                <div className="control-group">
-                                    <div className="metric-label">Error Rate SLO</div>
-                                    <div className="progress-fill" style={{width: '92%', background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)'}}></div>
-                                    <div style={{fontSize: '14px', color: '#6b7280'}}>0.8% (Target: &lt; 1%)</div>
-                                </div>
-                                
-                                <div className="alert success" style={{marginTop: '20px'}}>
-                                    <i className="fas fa-check-circle"></i>
-                                    All SLOs are meeting their targets
-                                </div>
-                            </div>
-                            
-                            <div className="card">
-                                <div className="card-header">
-                                    <div>
-                                        <div className="card-title">Alert Center</div>
-                                        <div className="card-subtitle">Active alerts and notifications</div>
-                                    </div>
-                                </div>
-                                
-                                <div className="alert warning">
-                                    <strong>Warning:</strong> Auth service response time elevated (350ms average)
-                                    <div style={{fontSize: '12px', marginTop: '4px'}}>Started: 2 hours ago</div>
-                                </div>
-                                
-                                <div className="alert info">
-                                    <strong>Info:</strong> Scheduled maintenance window in 2 hours
-                                    <div style={{fontSize: '12px', marginTop: '4px'}}>Duration: 30 minutes</div>
-                                </div>
-                                
-                                <div style={{color: '#6b7280', fontSize: '14px', textAlign: 'center', marginTop: '20px'}}>
-                                    <i className="fas fa-check-circle"></i> No critical alerts
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                );
-            };
-            
-            const GenericPage = ({ title, subtitle, description, icon }) => (
-                <div className="fade-in">
-                    <div className="card">
-                        <div className="card-header">
-                            <div>
-                                <div className="card-title">
-                                    <i className={`fas ${icon}`} style={{marginRight: '12px', color: '#667eea'}}></i>
-                                    {title}
-                                </div>
-                                <div className="card-subtitle">{subtitle}</div>
-                            </div>
-                        </div>
-                        <div className="alert info" style={{margin: '20px 0'}}>
-                            {description}
-                        </div>
-                        <button className="button primary">
-                            <i className="fas fa-cog"></i>
-                            Configure {title}
-                        </button>
-                    </div>
-                </div>
-            );
-            
-            const Modal = ({ title, children, onClose }) => (
-                <div className="modal-overlay" onClick={onClose}>
-                    <div className="modal" onClick={(e) => e.stopPropagation()}>
-                        <div className="modal-header">
-                            <div className="modal-title">{title}</div>
-                            <button className="close-button" onClick={onClose}>&times;</button>
-                        </div>
-                        {children}
-                    </div>
-                </div>
-            );
-            
-            const renderPage = () => {
-                switch(currentPage) {
-                    case 'home': return <HomePage />;
-                    case 'runs': return <RunsPage />;
-                    case 'pipelines': return <PipelinesPage />;
-                    case 'observability': return <ObservabilityPage />;
-                    case 'autonomy': return <AutonomyPage />;
-                    case 'cost': return <GenericPage title="Cost Management" subtitle="Budget controls and optimization" description="Configure spending limits, track costs across services, and optimize resource utilization for maximum efficiency." icon="fa-dollar-sign" />;
-                    case 'recipes': return <GenericPage title="Recipe Library" subtitle="Pre-built pipeline templates" description="Browse and deploy verified pipeline configurations, data processing recipes, and automation templates from the community." icon="fa-book" />;
-                    case 'secrets': return <GenericPage title="Secrets & Configuration" subtitle="Secure credential management" description="Manage API keys, database credentials, certificates, and secure connections to external systems with enterprise-grade security." icon="fa-key" />;
-                    case 'policies': return <GenericPage title="Policies & Gates" subtitle="Governance and compliance" description="Define and enforce organizational policies, compliance rules, and approval workflows for automated governance." icon="fa-shield-alt" />;
-                    case 'admin': return <GenericPage title="Administration" subtitle="System configuration" description="Configure system settings, manage users and permissions, monitor platform health, and oversee infrastructure operations." icon="fa-cogs" />;
-                    default: return <HomePage />;
-                }
-            };
-            
+
+        const RunsPage = () => {
+          const runs = data.runs;
+
+          if (loading.runs) {
             return (
-                <div className="app">
-                    <Header />
-                    <div className="main-content">
-                        <Sidebar />
-                        <div className="content">
-                            {renderPage()}
-                        </div>
-                    </div>
-                    
-                    {showModal === 'commandPalette' && (
-                        <Modal title="Command Palette" onClose={() => setShowModal(null)}>
-                            <div className="form-group">
-                                <input type="text" className="input" placeholder="Search commands, pages, and actions..." autoFocus />
-                            </div>
-                            <div style={{fontSize: '12px', color: '#6b7280', lineHeight: '1.6'}}>
-                                <strong>Available Commands:</strong><br/>
-                                • ⌘ + K: Open command palette<br/>
-                                • G + H: Go to dashboard<br/>
-                                • G + R: Go to pipeline runs<br/>
-                                • G + P: Go to pipelines<br/>
-                                • G + O: Go to observability<br/>
-                                • G + A: Go to autonomy controls
-                            </div>
-                        </Modal>
-                    )}
-                    
-                    {showModal === 'userProfile' && (
-                        <Modal title="User Profile" onClose={() => setShowModal(null)}>
-                            <div className="form-group">
-                                <label className="control-label">Full Name</label>
-                                <input type="text" className="input" value="John Doe" readOnly />
-                            </div>
-                            <div className="form-group">
-                                <label className="control-label">Email Address</label>
-                                <input type="email" className="input" value="john.doe@company.com" readOnly />
-                            </div>
-                            <div className="form-group">
-                                <label className="control-label">Role</label>
-                                <input type="text" className="input" value="Platform Engineer" readOnly />
-                            </div>
-                            <div className="form-group">
-                                <label className="control-label">Team</label>
-                                <input type="text" className="input" value="IntelGraph Platform Team" readOnly />
-                            </div>
-                            <div style={{display: 'flex', gap: '12px'}}>
-                                <button className="button secondary">
-                                    <i className="fas fa-edit"></i>
-                                    Edit Profile
-                                </button>
-                                <button className="button danger">
-                                    <i className="fas fa-sign-out-alt"></i>
-                                    Sign Out
-                                </button>
-                            </div>
-                        </Modal>
-                    )}
-                    
-                    {showModal === 'newRun' && (
-                        <Modal title="Start New Pipeline Run" onClose={() => setShowModal(null)}>
-                            <div className="form-group">
-                                <label className="control-label">Select Pipeline</label>
-                                <select className="select">
-                                    <option>Choose a pipeline to run...</option>
-                                    <option>Data Ingestion Pipeline (v2.1)</option>
-                                    <option>ML Training Pipeline (v1.8)</option>
-                                    <option>Model Serving Pipeline (v3.2)</option>
-                                    <option>Analytics Pipeline (v1.5)</option>
-                                    <option>Real-time Processing (v2.3)</option>
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label className="control-label">Configuration Profile</label>
-                                <select className="select">
-                                    <option>Default configuration</option>
-                                    <option>High performance (increased resources)</option>
-                                    <option>Cost optimized (reduced resources)</option>
-                                    <option>Custom configuration</option>
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label className="control-label">Execution Priority</label>
-                                <select className="select">
-                                    <option>Normal priority</option>
-                                    <option>High priority (faster execution)</option>
-                                    <option>Low priority (cost efficient)</option>
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label className="control-label">Description (Optional)</label>
-                                <textarea className="textarea" placeholder="Add a description for this run..."></textarea>
-                            </div>
-                            <div style={{display: 'flex', gap: '12px', marginTop: '24px'}}>
-                                <button className="button secondary" onClick={() => setShowModal(null)}>
-                                    Cancel
-                                </button>
-                                <button className="button primary">
-                                    <i className="fas fa-play"></i>
-                                    Start Pipeline Run
-                                </button>
-                            </div>
-                        </Modal>
-                    )}
-                    
-                    {showModal === 'newPipeline' && (
-                        <Modal title="Create New Pipeline" onClose={() => setShowModal(null)}>
-                            <div className="form-group">
-                                <label className="control-label">Pipeline Name</label>
-                                <input type="text" className="input" placeholder="Enter a descriptive pipeline name..." />
-                            </div>
-                            <div className="form-group">
-                                <label className="control-label">Pipeline Template</label>
-                                <select className="select">
-                                    <option>Select a starting template...</option>
-                                    <option>Data Processing Pipeline</option>
-                                    <option>Machine Learning Pipeline</option>
-                                    <option>ETL Pipeline</option>
-                                    <option>Real-time Analytics Pipeline</option>
-                                    <option>Custom Pipeline (start from scratch)</option>
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label className="control-label">Owner Team</label>
-                                <select className="select">
-                                    <option>Select the owning team...</option>
-                                    <option>Data Team</option>
-                                    <option>ML Team</option>
-                                    <option>Platform Team</option>
-                                    <option>Analytics Team</option>
-                                    <option>Streaming Team</option>
-                                </select>
-                            </div>
-                            <div className="form-group">
-                                <label className="control-label">Description</label>
-                                <textarea className="textarea" placeholder="Describe what this pipeline does and its intended use..."></textarea>
-                            </div>
-                            <div style={{display: 'flex', gap: '12px', marginTop: '24px'}}>
-                                <button className="button secondary" onClick={() => setShowModal(null)}>
-                                    Cancel
-                                </button>
-                                <button className="button primary">
-                                    <i className="fas fa-plus"></i>
-                                    Create Pipeline
-                                </button>
-                            </div>
-                        </Modal>
-                    )}
-                    
-                    {showModal === 'confirmAutonomy' && (
-                        <Modal title="Confirm Autonomy Level Change" onClose={() => setShowModal(null)}>
-                            <div className="alert warning" style={{margin: '0 0 20px 0'}}>
-                                <strong>Warning:</strong> Changing autonomy level to L{autonomyLevel} will modify how the system makes automated decisions and could affect operational behavior.
-                            </div>
-                            <div style={{marginBottom: '24px', lineHeight: '1.6'}}>
-                                <strong>Current Level:</strong> L{data.autonomy?.level || 2} - Conditional autonomy<br/>
-                                <strong>New Level:</strong> L{autonomyLevel} - {levelDescriptions[autonomyLevel]}<br/><br/>
-                                Are you sure you want to proceed with this change?
-                            </div>
-                            <div style={{display: 'flex', gap: '12px'}}>
-                                <button className="button secondary" onClick={() => setShowModal(null)}>
-                                    Cancel Change
-                                </button>
-                                <button className="button primary" onClick={() => {
-                                    // Simulate API call
-                                    setTimeout(() => {
-                                        setData(prev => ({
-                                            ...prev,
-                                            autonomy: { ...prev.autonomy, level: autonomyLevel }
-                                        }));
-                                        setShowModal(null);
-                                    }, 500);
-                                }}>
-                                    <i className="fas fa-check"></i>
-                                    Confirm Update
-                                </button>
-                            </div>
-                        </Modal>
-                    )}
-                </div>
+              <div className="loading">
+                <div className="spinner"></div>
+              </div>
             );
-        }
-        
-        // Render the app
-        ReactDOM.render(<MaestroApp />, document.getElementById('root'));
+          }
+
+          return (
+            <div className="fade-in">
+              <div className="card">
+                <div className="card-header">
+                  <div>
+                    <div className="card-title">Pipeline Runs Management</div>
+                    <div className="card-subtitle">
+                      Execution history and current status
+                    </div>
+                  </div>
+                  <button
+                    className="button primary"
+                    onClick={() => setShowModal('newRun')}
+                  >
+                    <i className="fas fa-plus"></i> New Run
+                  </button>
+                </div>
+
+                <div className="metrics-row" style={{ marginBottom: '32px' }}>
+                  <div className="metric">
+                    <div className="metric-label">Total Runs</div>
+                    <div className="metric-value">{runs?.length || 0}</div>
+                  </div>
+                  <div className="metric">
+                    <div className="metric-label">Success Rate</div>
+                    <div className="metric-value">
+                      {runs
+                        ? (
+                            (runs.filter((r) => r.status === 'completed')
+                              .length /
+                              runs.length) *
+                            100
+                          ).toFixed(1)
+                        : '89.2'}
+                      <span className="metric-unit">%</span>
+                    </div>
+                  </div>
+                  <div className="metric">
+                    <div className="metric-label">Avg Duration</div>
+                    <div className="metric-value">
+                      {runs
+                        ? Math.round(
+                            runs.reduce((acc, r) => acc + r.durationMs, 0) /
+                              runs.length /
+                              1000,
+                          )
+                        : 127}
+                      <span className="metric-unit">s</span>
+                    </div>
+                  </div>
+                  <div className="metric">
+                    <div className="metric-label">Total Cost</div>
+                    <div className="metric-value">
+                      $
+                      {runs
+                        ? runs
+                            .reduce((acc, r) => acc + parseFloat(r.cost), 0)
+                            .toFixed(2)
+                        : '156.78'}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="table-container">
+                  <table className="table">
+                    <thead>
+                      <tr>
+                        <th>Run ID</th>
+                        <th>Pipeline</th>
+                        <th>Status</th>
+                        <th>Progress</th>
+                        <th>Duration</th>
+                        <th>Cost</th>
+                        <th>Started By</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {runs?.map((run) => (
+                        <tr key={run.id}>
+                          <td>
+                            <span
+                              style={{
+                                fontFamily: 'monospace',
+                                fontSize: '13px',
+                                color: '#667eea',
+                                fontWeight: '600',
+                              }}
+                            >
+                              {run.id}
+                            </span>
+                          </td>
+                          <td style={{ fontWeight: '500' }}>{run.pipeline}</td>
+                          <td>
+                            <div className={`status ${run.status}`}>
+                              {run.status}
+                            </div>
+                          </td>
+                          <td>
+                            <div
+                              className="progress-bar"
+                              style={{ height: '6px', margin: '0' }}
+                            >
+                              <div
+                                className="progress-fill"
+                                style={{ width: `${run.progress}%` }}
+                              ></div>
+                            </div>
+                            <div
+                              style={{
+                                fontSize: '12px',
+                                color: '#6b7280',
+                                marginTop: '4px',
+                              }}
+                            >
+                              {run.progress}%
+                            </div>
+                          </td>
+                          <td>{Math.round(run.durationMs / 1000)}s</td>
+                          <td>${run.cost}</td>
+                          <td style={{ color: '#6b7280' }}>{run.user}</td>
+                          <td>
+                            <button
+                              className="button secondary"
+                              style={{ fontSize: '12px', padding: '8px 16px' }}
+                            >
+                              <i className="fas fa-eye"></i>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        const PipelinesPage = () => {
+          const pipelines = data.pipelines;
+
+          if (loading.pipelines) {
+            return (
+              <div className="loading">
+                <div className="spinner"></div>
+              </div>
+            );
+          }
+
+          return (
+            <div className="fade-in">
+              <div className="card" style={{ marginBottom: '32px' }}>
+                <div className="card-header">
+                  <div>
+                    <div className="card-title">Pipeline Management</div>
+                    <div className="card-subtitle">
+                      Configure and deploy data processing pipelines
+                    </div>
+                  </div>
+                  <button
+                    className="button primary"
+                    onClick={() => setShowModal('newPipeline')}
+                  >
+                    <i className="fas fa-plus"></i> New Pipeline
+                  </button>
+                </div>
+              </div>
+
+              <div className="dashboard-grid">
+                {pipelines?.map((pipeline) => (
+                  <div key={pipeline.id} className="card">
+                    <div className="card-header">
+                      <div>
+                        <div
+                          className="card-title"
+                          style={{ fontSize: '18px' }}
+                        >
+                          {pipeline.name}
+                        </div>
+                        <div className="card-subtitle">
+                          {pipeline.description}
+                        </div>
+                      </div>
+                      <div className={`status ${pipeline.status}`}>
+                        {pipeline.status}
+                      </div>
+                    </div>
+
+                    <div className="metrics-row">
+                      <div className="metric">
+                        <div className="metric-label">Version</div>
+                        <div
+                          className="metric-value"
+                          style={{ fontSize: '18px' }}
+                        >
+                          {pipeline.version}
+                        </div>
+                      </div>
+                      <div className="metric">
+                        <div className="metric-label">Owner Team</div>
+                        <div
+                          className="metric-value"
+                          style={{ fontSize: '18px' }}
+                        >
+                          {pipeline.owner}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        display: 'flex',
+                        gap: '12px',
+                        marginTop: '24px',
+                      }}
+                    >
+                      <button className="button secondary" style={{ flex: 1 }}>
+                        <i className="fas fa-cog"></i>
+                        Configure
+                      </button>
+                      <button className="button primary" style={{ flex: 1 }}>
+                        <i className="fas fa-play"></i>
+                        Run Now
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        };
+
+        const AutonomyPage = () => {
+          const autonomy = data.autonomy;
+
+          if (loading.autonomy) {
+            return (
+              <div className="loading">
+                <div className="spinner"></div>
+              </div>
+            );
+          }
+
+          const levelDescriptions = {
+            0: 'Manual operation - All decisions require human approval',
+            1: 'Assisted operation - System provides recommendations',
+            2: 'Conditional autonomy - Automatic actions within defined parameters',
+            3: 'High autonomy - Independent operation with human oversight',
+            4: 'Full autonomy - Complete operational independence',
+            5: 'Complete autonomy - Self-improving and self-governing',
+          };
+
+          return (
+            <div className="fade-in">
+              <div className="dashboard-grid">
+                <div className="card">
+                  <div className="card-header">
+                    <div>
+                      <div className="card-title">Autonomy Level Control</div>
+                      <div className="card-subtitle">
+                        Configure autonomous operation capabilities
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="control-group">
+                    <label className="control-label">
+                      Current Autonomy Level: L{autonomyLevel}
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="5"
+                      value={autonomyLevel}
+                      className="slider"
+                      onChange={(e) =>
+                        setAutonomyLevel(parseInt(e.target.value))
+                      }
+                    />
+                    <div
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        fontSize: '12px',
+                        color: '#6b7280',
+                        marginTop: '12px',
+                      }}
+                    >
+                      <span>L0</span>
+                      <span>L1</span>
+                      <span>L2</span>
+                      <span>L3</span>
+                      <span>L4</span>
+                      <span>L5</span>
+                    </div>
+                  </div>
+
+                  <div className="alert info" style={{ margin: '20px 0' }}>
+                    <strong>Level {autonomyLevel} Capabilities:</strong>
+                    <br />
+                    {levelDescriptions[autonomyLevel]}
+                  </div>
+
+                  <button
+                    className="button primary"
+                    onClick={() => setShowModal('confirmAutonomy')}
+                  >
+                    <i className="fas fa-robot"></i>
+                    Update Autonomy Level
+                  </button>
+                </div>
+
+                <div className="card">
+                  <div className="card-header">
+                    <div>
+                      <div className="card-title">Active Policies</div>
+                      <div className="card-subtitle">
+                        Guardrails and safety constraints
+                      </div>
+                    </div>
+                  </div>
+
+                  {autonomy?.policies?.map((policy, index) => (
+                    <div key={index} className="activity-item">
+                      <div
+                        className="activity-icon"
+                        style={{
+                          backgroundColor:
+                            policy.state === 'active' ? '#10b981' : '#f59e0b',
+                        }}
+                      ></div>
+                      <div className="activity-content">
+                        <div className="activity-title">{policy.title}</div>
+                        <div className="activity-meta">
+                          {policy.description} •
+                          <span
+                            className={`status ${policy.state === 'active' ? 'healthy' : 'warning'}`}
+                            style={{ marginLeft: '8px', padding: '2px 8px' }}
+                          >
+                            {policy.state}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+
+                  <button
+                    className="button secondary"
+                    style={{ marginTop: '20px' }}
+                  >
+                    <i className="fas fa-plus"></i>
+                    Add New Policy
+                  </button>
+                </div>
+
+                <div className="card dashboard-grid-wide">
+                  <div className="card-header">
+                    <div>
+                      <div className="card-title">
+                        Recent Autonomous Decisions
+                      </div>
+                      <div className="card-subtitle">
+                        Actions taken automatically by the system
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                    {autonomy?.recentDecisions?.map((decision, index) => (
+                      <div key={index} className="activity-item">
+                        <div
+                          className="activity-icon"
+                          style={{ backgroundColor: '#3b82f6' }}
+                        ></div>
+                        <div className="activity-content">
+                          <div className="activity-title">
+                            {decision.action}
+                          </div>
+                          <div className="activity-meta">
+                            <strong>Reason:</strong> {decision.reason}
+                            <br />
+                            <strong>Impact:</strong> {decision.impact}
+                            <br />
+                            <strong>Time:</strong> {decision.timestamp}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        const ObservabilityPage = () => {
+          const metrics = data.metrics;
+
+          if (loading.metrics) {
+            return (
+              <div className="loading">
+                <div className="spinner"></div>
+              </div>
+            );
+          }
+
+          return (
+            <div className="fade-in">
+              <div className="dashboard-grid">
+                <div className="card dashboard-grid-wide">
+                  <div className="card-header">
+                    <div>
+                      <div className="card-title">
+                        System Performance Dashboard
+                      </div>
+                      <div className="card-subtitle">
+                        Real-time monitoring and analytics
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="metrics-row" style={{ marginBottom: '32px' }}>
+                    <div className="metric">
+                      <div className="metric-label">Requests/min</div>
+                      <div className="metric-value">
+                        {metrics?.currentMetrics.requestsPerMin?.toLocaleString() ||
+                          '1,247'}
+                      </div>
+                      <div className="metric-change positive">
+                        <i className="fas fa-arrow-up"></i> +15% from last hour
+                      </div>
+                    </div>
+                    <div className="metric">
+                      <div className="metric-label">Avg Latency</div>
+                      <div className="metric-value">
+                        {metrics?.currentMetrics.avgLatency || 145}
+                        <span className="metric-unit">ms</span>
+                      </div>
+                      <div className="metric-change positive">
+                        <i className="fas fa-arrow-down"></i> -8% from last hour
+                      </div>
+                    </div>
+                    <div className="metric">
+                      <div className="metric-label">Error Rate</div>
+                      <div className="metric-value">
+                        {metrics?.currentMetrics.errorRate || 0.8}
+                        <span className="metric-unit">%</span>
+                      </div>
+                      <div className="metric-change positive">
+                        <i className="fas fa-arrow-down"></i> -0.2% improvement
+                      </div>
+                    </div>
+                    <div className="metric">
+                      <div className="metric-label">Queue Depth</div>
+                      <div className="metric-value">
+                        {metrics?.currentMetrics.queueDepth || 23}
+                      </div>
+                      <div className="metric-change">Normal levels</div>
+                    </div>
+                  </div>
+
+                  <div className="chart-container">
+                    {metrics?.timeSeriesData && (
+                      <SimpleChart
+                        data={metrics.timeSeriesData.map((d) => ({
+                          value: d.latency,
+                        }))}
+                        color="#764ba2"
+                      />
+                    )}
+                  </div>
+                </div>
+
+                <div className="card">
+                  <div className="card-header">
+                    <div>
+                      <div className="card-title">SLO Status</div>
+                      <div className="card-subtitle">
+                        Service Level Objectives
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="control-group">
+                    <div className="metric-label">Availability SLO</div>
+                    <div className="progress-bar">
+                      <div
+                        className="progress-fill"
+                        style={{ width: '99.9%' }}
+                      ></div>
+                    </div>
+                    <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                      99.9% (Target: 99.5%)
+                    </div>
+                  </div>
+
+                  <div className="control-group">
+                    <div className="metric-label">Latency SLO</div>
+                    <div className="progress-bar">
+                      <div
+                        className="progress-fill"
+                        style={{ width: '87%' }}
+                      ></div>
+                    </div>
+                    <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                      145ms (Target: &lt; 200ms)
+                    </div>
+                  </div>
+
+                  <div className="control-group">
+                    <div className="metric-label">Error Rate SLO</div>
+                    <div
+                      className="progress-fill"
+                      style={{
+                        width: '92%',
+                        background:
+                          'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                      }}
+                    ></div>
+                    <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                      0.8% (Target: &lt; 1%)
+                    </div>
+                  </div>
+
+                  <div className="alert success" style={{ marginTop: '20px' }}>
+                    <i className="fas fa-check-circle"></i>
+                    All SLOs are meeting their targets
+                  </div>
+                </div>
+
+                <div className="card">
+                  <div className="card-header">
+                    <div>
+                      <div className="card-title">Alert Center</div>
+                      <div className="card-subtitle">
+                        Active alerts and notifications
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="alert warning">
+                    <strong>Warning:</strong> Auth service response time
+                    elevated (350ms average)
+                    <div style={{ fontSize: '12px', marginTop: '4px' }}>
+                      Started: 2 hours ago
+                    </div>
+                  </div>
+
+                  <div className="alert info">
+                    <strong>Info:</strong> Scheduled maintenance window in 2
+                    hours
+                    <div style={{ fontSize: '12px', marginTop: '4px' }}>
+                      Duration: 30 minutes
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      color: '#6b7280',
+                      fontSize: '14px',
+                      textAlign: 'center',
+                      marginTop: '20px',
+                    }}
+                  >
+                    <i className="fas fa-check-circle"></i> No critical alerts
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        const GenericPage = ({ title, subtitle, description, icon }) => (
+          <div className="fade-in">
+            <div className="card">
+              <div className="card-header">
+                <div>
+                  <div className="card-title">
+                    <i
+                      className={`fas ${icon}`}
+                      style={{ marginRight: '12px', color: '#667eea' }}
+                    ></i>
+                    {title}
+                  </div>
+                  <div className="card-subtitle">{subtitle}</div>
+                </div>
+              </div>
+              <div className="alert info" style={{ margin: '20px 0' }}>
+                {description}
+              </div>
+              <button className="button primary">
+                <i className="fas fa-cog"></i>
+                Configure {title}
+              </button>
+            </div>
+          </div>
+        );
+
+        const Modal = ({ title, children, onClose }) => (
+          <div className="modal-overlay" onClick={onClose}>
+            <div className="modal" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <div className="modal-title">{title}</div>
+                <button className="close-button" onClick={onClose}>
+                  &times;
+                </button>
+              </div>
+              {children}
+            </div>
+          </div>
+        );
+
+        const renderPage = () => {
+          switch (currentPage) {
+            case 'home':
+              return <HomePage />;
+            case 'runs':
+              return <RunsPage />;
+            case 'pipelines':
+              return <PipelinesPage />;
+            case 'observability':
+              return <ObservabilityPage />;
+            case 'autonomy':
+              return <AutonomyPage />;
+            case 'cost':
+              return (
+                <GenericPage
+                  title="Cost Management"
+                  subtitle="Budget controls and optimization"
+                  description="Configure spending limits, track costs across services, and optimize resource utilization for maximum efficiency."
+                  icon="fa-dollar-sign"
+                />
+              );
+            case 'recipes':
+              return (
+                <GenericPage
+                  title="Recipe Library"
+                  subtitle="Pre-built pipeline templates"
+                  description="Browse and deploy verified pipeline configurations, data processing recipes, and automation templates from the community."
+                  icon="fa-book"
+                />
+              );
+            case 'secrets':
+              return (
+                <GenericPage
+                  title="Secrets & Configuration"
+                  subtitle="Secure credential management"
+                  description="Manage API keys, database credentials, certificates, and secure connections to external systems with enterprise-grade security."
+                  icon="fa-key"
+                />
+              );
+            case 'policies':
+              return (
+                <GenericPage
+                  title="Policies & Gates"
+                  subtitle="Governance and compliance"
+                  description="Define and enforce organizational policies, compliance rules, and approval workflows for automated governance."
+                  icon="fa-shield-alt"
+                />
+              );
+            case 'admin':
+              return (
+                <GenericPage
+                  title="Administration"
+                  subtitle="System configuration"
+                  description="Configure system settings, manage users and permissions, monitor platform health, and oversee infrastructure operations."
+                  icon="fa-cogs"
+                />
+              );
+            default:
+              return <HomePage />;
+          }
+        };
+
+        return (
+          <div className="app">
+            <Header />
+            <div className="main-content">
+              <Sidebar />
+              <div className="content">{renderPage()}</div>
+            </div>
+
+            {showModal === 'commandPalette' && (
+              <Modal title="Command Palette" onClose={() => setShowModal(null)}>
+                <div className="form-group">
+                  <input
+                    type="text"
+                    className="input"
+                    placeholder="Search commands, pages, and actions..."
+                    autoFocus
+                  />
+                </div>
+                <div
+                  style={{
+                    fontSize: '12px',
+                    color: '#6b7280',
+                    lineHeight: '1.6',
+                  }}
+                >
+                  <strong>Available Commands:</strong>
+                  <br />
+                  • ⌘ + K: Open command palette
+                  <br />
+                  • G + H: Go to dashboard
+                  <br />
+                  • G + R: Go to pipeline runs
+                  <br />
+                  • G + P: Go to pipelines
+                  <br />
+                  • G + O: Go to observability
+                  <br />• G + A: Go to autonomy controls
+                </div>
+              </Modal>
+            )}
+
+            {showModal === 'userProfile' && (
+              <Modal title="User Profile" onClose={() => setShowModal(null)}>
+                <div className="form-group">
+                  <label className="control-label">Full Name</label>
+                  <input
+                    type="text"
+                    className="input"
+                    value="John Doe"
+                    readOnly
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="control-label">Email Address</label>
+                  <input
+                    type="email"
+                    className="input"
+                    value="john.doe@company.com"
+                    readOnly
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="control-label">Role</label>
+                  <input
+                    type="text"
+                    className="input"
+                    value="Platform Engineer"
+                    readOnly
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="control-label">Team</label>
+                  <input
+                    type="text"
+                    className="input"
+                    value="IntelGraph Platform Team"
+                    readOnly
+                  />
+                </div>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button className="button secondary">
+                    <i className="fas fa-edit"></i>
+                    Edit Profile
+                  </button>
+                  <button className="button danger">
+                    <i className="fas fa-sign-out-alt"></i>
+                    Sign Out
+                  </button>
+                </div>
+              </Modal>
+            )}
+
+            {showModal === 'newRun' && (
+              <Modal
+                title="Start New Pipeline Run"
+                onClose={() => setShowModal(null)}
+              >
+                <div className="form-group">
+                  <label className="control-label">Select Pipeline</label>
+                  <select className="select">
+                    <option>Choose a pipeline to run...</option>
+                    <option>Data Ingestion Pipeline (v2.1)</option>
+                    <option>ML Training Pipeline (v1.8)</option>
+                    <option>Model Serving Pipeline (v3.2)</option>
+                    <option>Analytics Pipeline (v1.5)</option>
+                    <option>Real-time Processing (v2.3)</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="control-label">Configuration Profile</label>
+                  <select className="select">
+                    <option>Default configuration</option>
+                    <option>High performance (increased resources)</option>
+                    <option>Cost optimized (reduced resources)</option>
+                    <option>Custom configuration</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="control-label">Execution Priority</label>
+                  <select className="select">
+                    <option>Normal priority</option>
+                    <option>High priority (faster execution)</option>
+                    <option>Low priority (cost efficient)</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="control-label">
+                    Description (Optional)
+                  </label>
+                  <textarea
+                    className="textarea"
+                    placeholder="Add a description for this run..."
+                  ></textarea>
+                </div>
+                <div
+                  style={{ display: 'flex', gap: '12px', marginTop: '24px' }}
+                >
+                  <button
+                    className="button secondary"
+                    onClick={() => setShowModal(null)}
+                  >
+                    Cancel
+                  </button>
+                  <button className="button primary">
+                    <i className="fas fa-play"></i>
+                    Start Pipeline Run
+                  </button>
+                </div>
+              </Modal>
+            )}
+
+            {showModal === 'newPipeline' && (
+              <Modal
+                title="Create New Pipeline"
+                onClose={() => setShowModal(null)}
+              >
+                <div className="form-group">
+                  <label className="control-label">Pipeline Name</label>
+                  <input
+                    type="text"
+                    className="input"
+                    placeholder="Enter a descriptive pipeline name..."
+                  />
+                </div>
+                <div className="form-group">
+                  <label className="control-label">Pipeline Template</label>
+                  <select className="select">
+                    <option>Select a starting template...</option>
+                    <option>Data Processing Pipeline</option>
+                    <option>Machine Learning Pipeline</option>
+                    <option>ETL Pipeline</option>
+                    <option>Real-time Analytics Pipeline</option>
+                    <option>Custom Pipeline (start from scratch)</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="control-label">Owner Team</label>
+                  <select className="select">
+                    <option>Select the owning team...</option>
+                    <option>Data Team</option>
+                    <option>ML Team</option>
+                    <option>Platform Team</option>
+                    <option>Analytics Team</option>
+                    <option>Streaming Team</option>
+                  </select>
+                </div>
+                <div className="form-group">
+                  <label className="control-label">Description</label>
+                  <textarea
+                    className="textarea"
+                    placeholder="Describe what this pipeline does and its intended use..."
+                  ></textarea>
+                </div>
+                <div
+                  style={{ display: 'flex', gap: '12px', marginTop: '24px' }}
+                >
+                  <button
+                    className="button secondary"
+                    onClick={() => setShowModal(null)}
+                  >
+                    Cancel
+                  </button>
+                  <button className="button primary">
+                    <i className="fas fa-plus"></i>
+                    Create Pipeline
+                  </button>
+                </div>
+              </Modal>
+            )}
+
+            {showModal === 'confirmAutonomy' && (
+              <Modal
+                title="Confirm Autonomy Level Change"
+                onClose={() => setShowModal(null)}
+              >
+                <div className="alert warning" style={{ margin: '0 0 20px 0' }}>
+                  <strong>Warning:</strong> Changing autonomy level to L
+                  {autonomyLevel} will modify how the system makes automated
+                  decisions and could affect operational behavior.
+                </div>
+                <div style={{ marginBottom: '24px', lineHeight: '1.6' }}>
+                  <strong>Current Level:</strong> L{data.autonomy?.level || 2} -
+                  Conditional autonomy
+                  <br />
+                  <strong>New Level:</strong> L{autonomyLevel} -{' '}
+                  {levelDescriptions[autonomyLevel]}
+                  <br />
+                  <br />
+                  Are you sure you want to proceed with this change?
+                </div>
+                <div style={{ display: 'flex', gap: '12px' }}>
+                  <button
+                    className="button secondary"
+                    onClick={() => setShowModal(null)}
+                  >
+                    Cancel Change
+                  </button>
+                  <button
+                    className="button primary"
+                    onClick={() => {
+                      // Simulate API call
+                      setTimeout(() => {
+                        setData((prev) => ({
+                          ...prev,
+                          autonomy: { ...prev.autonomy, level: autonomyLevel },
+                        }));
+                        setShowModal(null);
+                      }, 500);
+                    }}
+                  >
+                    <i className="fas fa-check"></i>
+                    Confirm Update
+                  </button>
+                </div>
+              </Modal>
+            )}
+          </div>
+        );
+      }
+
+      // Render the app
+      ReactDOM.render(<MaestroApp />, document.getElementById('root'));
     </script>
-</body>
+  </body>
 </html>

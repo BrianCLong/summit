@@ -95,7 +95,9 @@ test.describe('Maestro UI Accessibility @a11y', () => {
       const buttonText = await trigger.textContent();
       if (
         buttonText &&
-        (buttonText.includes('Add') || buttonText.includes('Edit') || buttonText.includes('Create'))
+        (buttonText.includes('Add') ||
+          buttonText.includes('Edit') ||
+          buttonText.includes('Create'))
       ) {
         await trigger.click();
         await page.waitForTimeout(500);
@@ -147,7 +149,9 @@ test.describe('Maestro UI Accessibility @a11y', () => {
       await skipLink.click();
 
       // Should focus main content
-      const mainContent = await page.locator('#main, [role="main"], main').first();
+      const mainContent = await page
+        .locator('#main, [role="main"], main')
+        .first();
       await expect(mainContent).toBeFocused();
     }
   });

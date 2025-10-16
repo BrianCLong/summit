@@ -102,7 +102,9 @@ def test_intelcraft_element_round_trip() -> None:
 def test_integrate_merges_existing_node_and_edge_attributes() -> None:
     graph = Graph()
     graph.add_node("actor:alpha", attributes={"category": "actor", "aliases": ["A"]})
-    graph.add_edge("actor:alpha", "campaign:gamma", attributes={"relation_type": "leads", "confidence": 0.4})
+    graph.add_edge(
+        "actor:alpha", "campaign:gamma", attributes={"relation_type": "leads", "confidence": 0.4}
+    )
 
     integrate_intelcraft_elements(
         graph,

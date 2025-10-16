@@ -1,8 +1,7 @@
-import os
-import sys
-import types
 import importlib.util
 import pathlib
+import sys
+import types
 from unittest.mock import patch
 
 base_dir = pathlib.Path(__file__).resolve().parents[1]
@@ -23,9 +22,7 @@ class _DummyCelery:
         return decorator
 
 
-sys.modules.setdefault(
-    "celery", types.SimpleNamespace(Celery=lambda *a, **k: _DummyCelery())
-)
+sys.modules.setdefault("celery", types.SimpleNamespace(Celery=lambda *a, **k: _DummyCelery()))
 
 # Provide minimal monitoring module to satisfy imports
 monitoring_module = types.SimpleNamespace(

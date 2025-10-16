@@ -2,7 +2,15 @@ import React, { useEffect, useMemo, useState } from 'react';
 import CiSummary, { CiAnnotation } from '../components/CiSummary';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { IconButton, MenuItem, Select, TextField } from '@mui/material';
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, Legend } from 'recharts';
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  Legend,
+} from 'recharts';
 import { api } from '../api';
 
 function setQuery(params: Record<string, string | number | undefined>) {
@@ -11,7 +19,11 @@ function setQuery(params: Record<string, string | number | undefined>) {
     if (v === undefined || v === '') url.searchParams.delete(k);
     else url.searchParams.set(k, String(v));
   });
-  history.replaceState(null, '', `${url.pathname}${url.search}${location.hash}`);
+  history.replaceState(
+    null,
+    '',
+    `${url.pathname}${url.search}${location.hash}`,
+  );
 }
 
 export default function CICD() {
@@ -43,16 +55,26 @@ export default function CICD() {
     // fetch trends
     (async () => {
       try {
-        const r = await (api() as any).getCITrends({ sinceMs: since, stepMs: 60 * 60 * 1000 });
+        const r = await (api() as any).getCITrends({
+          sinceMs: since,
+          stepMs: 60 * 60 * 1000,
+        });
         setTrends(
-          (r.buckets || []).map((b: any) => ({ time: new Date(b.ts).toLocaleTimeString(), ...b })),
+          (r.buckets || []).map((b: any) => ({
+            time: new Date(b.ts).toLocaleTimeString(),
+            ...b,
+          })),
         );
       } catch {}
     })();
   }, [level, repo, since]);
 
   const link = (a: CiAnnotation) =>
-    a.url ? a.url : a.repo && a.sha ? `https://github.com/${a.repo}/commit/${a.sha}` : undefined;
+    a.url
+      ? a.url
+      : a.repo && a.sha
+        ? `https://github.com/${a.repo}/commit/${a.sha}`
+        : undefined;
 
   const pathCol = (a: CiAnnotation) =>
     a.path ? `${a.path}${a.startLine ? `:${a.startLine}` : ''}` : '-';
@@ -134,7 +156,10 @@ export default function CICD() {
                 <td>{a.level}</td>
                 <td>{a.repo || '-'}</td>
                 <td>
-                  <a href={`/maestro/runs/${a.runId}`} className="text-blue-600 underline">
+                  <a
+                    href={`/maestro/runs/${a.runId}`}
+                    className="text-blue-600 underline"
+                  >
                     {a.runId.slice(0, 8)}
                   </a>
                 </td>

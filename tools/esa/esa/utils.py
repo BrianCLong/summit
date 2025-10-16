@@ -2,9 +2,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Sequence
+from typing import Any
 
 
 @dataclass
@@ -12,7 +13,7 @@ class Record:
     """Data record loaded from a dataset."""
 
     index: int
-    values: Dict[str, Any]
+    values: dict[str, Any]
 
     def metric(self, column: str) -> float:
         value = self.values.get(column)
@@ -30,7 +31,7 @@ class Record:
 class SamplingProof:
     seed: int
     rng_state_hash: str
-    inclusion_probabilities: Dict[int, float]
+    inclusion_probabilities: dict[int, float]
 
 
 def hash_rng_state(state: Sequence[Any]) -> str:
@@ -40,7 +41,7 @@ def hash_rng_state(state: Sequence[Any]) -> str:
     return hashlib.sha256(state_bytes).hexdigest()
 
 
-def load_json_or_yaml(path: Path) -> Dict[str, Any]:
+def load_json_or_yaml(path: Path) -> dict[str, Any]:
     """Load configuration from JSON or YAML without requiring PyYAML."""
 
     text = path.read_text()
@@ -50,20 +51,18 @@ def load_json_or_yaml(path: Path) -> Dict[str, Any]:
         try:
             import yaml  # type: ignore
         except ModuleNotFoundError as exc:
-            raise ValueError(
-                "Configuration is not valid JSON and PyYAML is not installed"
-            ) from exc
+            raise ValueError("Configuration is not valid JSON and PyYAML is not installed") from exc
         return yaml.safe_load(text)
 
 
-def load_dataset(path: Path) -> List[Record]:
+def load_dataset(path: Path) -> list[Record]:
     """Load a CSV dataset into a list of :class:`Record` objects."""
 
     import csv
 
     with path.open(newline="") as handle:
         reader = csv.DictReader(handle)
-        records: List[Record] = []
+        records: list[Record] = []
         for idx, row in enumerate(reader):
             records.append(Record(index=idx, values=row))
     if not records:
@@ -71,10 +70,10 @@ def load_dataset(path: Path) -> List[Record]:
     return records
 
 
-def group_by(records: Iterable[Record], keys: Sequence[str]) -> Dict[str, List[Record]]:
+def group_by(records: Iterable[Record], keys: Sequence[str]) -> dict[str, list[Record]]:
     """Group records by concatenated key values."""
 
-    groups: Dict[str, List[Record]] = {}
+    groups: dict[str, list[Record]] = {}
     for record in records:
         if not keys:
             groups.setdefault("__all__", []).append(record)

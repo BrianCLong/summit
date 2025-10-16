@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect } from 'react';
 import {
   Box,
   Card,
@@ -19,7 +19,7 @@ import {
   Paper,
   IconButton,
   Tooltip,
-} from "@mui/material";
+} from '@mui/material';
 import {
   Send as SendIcon,
   Psychology as PsychologyIcon,
@@ -30,136 +30,136 @@ import {
   Timeline as TimelineIcon,
   Clear as ClearIcon,
   AutoAwesome as AutoAwesomeIcon,
-} from "@mui/icons-material";
-import AdvancedPatternDetection from "./AdvancedPatternDetection";
-import { useMutation } from "@apollo/client";
-import { GENERATE_ENTITIES_FROM_TEXT } from "../../graphql/copilot.gql";
+} from '@mui/icons-material';
+import AdvancedPatternDetection from './AdvancedPatternDetection';
+import { useMutation } from '@apollo/client';
+import { GENERATE_ENTITIES_FROM_TEXT } from '../../graphql/copilot.gql';
 
 // Simulated AI responses for demo
 const intelligentResponses = {
-  "analyze network": [
-    "🔍 **Network Analysis Complete**",
-    "",
-    "**Key Findings:**",
-    "• Detected 3 potential risk clusters in the relationship graph",
-    "• John Smith appears to be a central hub with 85% connectivity",
-    "• Unusual activity spike detected in the last 30 days",
-    "",
-    "**Risk Assessment:**",
-    "• High: TechCorp Inc (financial irregularities)",
-    "• Medium: Document #47 (incomplete verification)",
-    "• Low: Standard employee connections",
-    "",
-    "**Recommendations:**",
+  'analyze network': [
+    '🔍 **Network Analysis Complete**',
+    '',
+    '**Key Findings:**',
+    '• Detected 3 potential risk clusters in the relationship graph',
+    '• John Smith appears to be a central hub with 85% connectivity',
+    '• Unusual activity spike detected in the last 30 days',
+    '',
+    '**Risk Assessment:**',
+    '• High: TechCorp Inc (financial irregularities)',
+    '• Medium: Document #47 (incomplete verification)',
+    '• Low: Standard employee connections',
+    '',
+    '**Recommendations:**',
     "1. Investigate TechCorp's recent financial transactions",
-    "2. Verify authenticity of Document #47",
+    '2. Verify authenticity of Document #47',
     "3. Monitor John Smith's activity patterns",
   ],
-  "threat assessment": [
-    "🛡️ **Threat Assessment Report**",
-    "",
-    "**Current Threat Level: MODERATE**",
-    "",
-    "**Active Threats Identified:**",
-    "• Suspicious financial patterns (Score: 75/100)",
-    "• Irregular communication networks (Score: 60/100)",
-    "• Geographic anomalies (Score: 45/100)",
-    "",
-    "**Threat Vectors:**",
-    "1. **Financial:** Unusual large transactions",
-    "2. **Communication:** Encrypted channels usage increase",
-    "3. **Behavioral:** Meeting pattern changes",
-    "",
-    "**Mitigation Strategies:**",
-    "• Enhanced monitoring of flagged entities",
-    "• Cross-reference with external threat databases",
-    "• Deploy additional surveillance protocols",
+  'threat assessment': [
+    '🛡️ **Threat Assessment Report**',
+    '',
+    '**Current Threat Level: MODERATE**',
+    '',
+    '**Active Threats Identified:**',
+    '• Suspicious financial patterns (Score: 75/100)',
+    '• Irregular communication networks (Score: 60/100)',
+    '• Geographic anomalies (Score: 45/100)',
+    '',
+    '**Threat Vectors:**',
+    '1. **Financial:** Unusual large transactions',
+    '2. **Communication:** Encrypted channels usage increase',
+    '3. **Behavioral:** Meeting pattern changes',
+    '',
+    '**Mitigation Strategies:**',
+    '• Enhanced monitoring of flagged entities',
+    '• Cross-reference with external threat databases',
+    '• Deploy additional surveillance protocols',
   ],
-  "predict patterns": [
-    "🔮 **Predictive Analysis Results**",
-    "",
-    "**Pattern Recognition:**",
-    "• Weekly meeting cycles detected (92% confidence)",
-    "• Communication burst patterns every 14 days",
-    "• Geographic clustering around SF Bay Area",
-    "",
-    "**Future Predictions (Next 30 days):**",
-    "• 78% probability of increased activity mid-month",
-    "• Likely new connections: 2-3 additional entities",
-    "• Expected communication volume: +35%",
-    "",
-    "**Anomaly Alerts:**",
-    "• Watch for unusual weekend activity",
-    "• Monitor for new international connections",
-    "• Flag transactions >$50K threshold",
+  'predict patterns': [
+    '🔮 **Predictive Analysis Results**',
+    '',
+    '**Pattern Recognition:**',
+    '• Weekly meeting cycles detected (92% confidence)',
+    '• Communication burst patterns every 14 days',
+    '• Geographic clustering around SF Bay Area',
+    '',
+    '**Future Predictions (Next 30 days):**',
+    '• 78% probability of increased activity mid-month',
+    '• Likely new connections: 2-3 additional entities',
+    '• Expected communication volume: +35%',
+    '',
+    '**Anomaly Alerts:**',
+    '• Watch for unusual weekend activity',
+    '• Monitor for new international connections',
+    '• Flag transactions >$50K threshold',
   ],
-  "investigation summary": [
-    "📊 **Investigation Summary**",
-    "",
-    "**Case Overview:**",
-    "• Total Entities: 47",
-    "• Active Connections: 156",
-    "• Investigation Duration: 23 days",
-    "",
-    "**Key Evidence:**",
-    "• 12 financial documents analyzed",
-    "• 8 witness interviews completed",
-    "• 34 communication records reviewed",
-    "",
-    "**Current Status:**",
-    "• Evidence Quality: Strong (85%)",
-    "• Case Completion: 67%",
-    "• Confidence Level: High",
-    "",
-    "**Next Steps:**",
-    "1. Verify remaining financial transactions",
-    "2. Interview 3 additional witnesses",
-    "3. Cross-reference with database XYZ",
+  'investigation summary': [
+    '📊 **Investigation Summary**',
+    '',
+    '**Case Overview:**',
+    '• Total Entities: 47',
+    '• Active Connections: 156',
+    '• Investigation Duration: 23 days',
+    '',
+    '**Key Evidence:**',
+    '• 12 financial documents analyzed',
+    '• 8 witness interviews completed',
+    '• 34 communication records reviewed',
+    '',
+    '**Current Status:**',
+    '• Evidence Quality: Strong (85%)',
+    '• Case Completion: 67%',
+    '• Confidence Level: High',
+    '',
+    '**Next Steps:**',
+    '1. Verify remaining financial transactions',
+    '2. Interview 3 additional witnesses',
+    '3. Cross-reference with database XYZ',
   ],
 };
 
 const quickActions = [
   {
-    label: "Analyze Network",
+    label: 'Analyze Network',
     icon: <TimelineIcon />,
-    query: "analyze network",
+    query: 'analyze network',
   },
   {
-    label: "Threat Assessment",
+    label: 'Threat Assessment',
     icon: <SecurityIcon />,
-    query: "threat assessment",
+    query: 'threat assessment',
   },
   {
-    label: "Predict Patterns",
+    label: 'Predict Patterns',
     icon: <TrendingIcon />,
-    query: "predict patterns",
+    query: 'predict patterns',
   },
   {
-    label: "Investigation Summary",
+    label: 'Investigation Summary',
     icon: <InsightIcon />,
-    query: "investigation summary",
+    query: 'investigation summary',
   },
 ];
 
 const aiInsights = [
-  "💡 John Smith has 40% more connections than average",
-  "⚠️ Unusual activity detected in financial cluster",
-  "🎯 3 new potential persons of interest identified",
-  "📈 Communication patterns show 25% increase",
-  "🔍 Cross-reference opportunity with Case #34B",
+  '💡 John Smith has 40% more connections than average',
+  '⚠️ Unusual activity detected in financial cluster',
+  '🎯 3 new potential persons of interest identified',
+  '📈 Communication patterns show 25% increase',
+  '🔍 Cross-reference opportunity with Case #34B',
 ];
 
 function ChatMessage({ message, isUser, isLoading }) {
   return (
     <ListItem
       sx={{
-        flexDirection: isUser ? "row-reverse" : "row",
-        alignItems: "flex-start",
+        flexDirection: isUser ? 'row-reverse' : 'row',
+        alignItems: 'flex-start',
         gap: 1,
       }}
     >
       <ListItemAvatar>
-        <Avatar sx={{ bgcolor: isUser ? "primary.main" : "secondary.main" }}>
+        <Avatar sx={{ bgcolor: isUser ? 'primary.main' : 'secondary.main' }}>
           {isUser ? <PersonIcon /> : <PsychologyIcon />}
         </Avatar>
       </ListItemAvatar>
@@ -168,9 +168,9 @@ function ChatMessage({ message, isUser, isLoading }) {
           <Paper
             sx={{
               p: 2,
-              bgcolor: isUser ? "primary.light" : "grey.100",
-              color: isUser ? "primary.contrastText" : "text.primary",
-              maxWidth: "80%",
+              bgcolor: isUser ? 'primary.light' : 'grey.100',
+              color: isUser ? 'primary.contrastText' : 'text.primary',
+              maxWidth: '80%',
               borderRadius: 2,
             }}
           >
@@ -183,14 +183,14 @@ function ChatMessage({ message, isUser, isLoading }) {
               <Typography
                 variant="body1"
                 sx={{
-                  whiteSpace: "pre-line",
-                  "& strong": { fontWeight: "bold" },
-                  "& em": { fontStyle: "italic" },
+                  whiteSpace: 'pre-line',
+                  '& strong': { fontWeight: 'bold' },
+                  '& em': { fontStyle: 'italic' },
                 }}
                 dangerouslySetInnerHTML={{
                   __html: message.replace(
                     /\*\*(.*?)\*\*/g,
-                    "<strong>$1</strong>",
+                    '<strong>$1</strong>',
                   ),
                 }}
               />
@@ -211,9 +211,9 @@ export default function IntelligentCopilot() {
       timestamp: new Date(),
     },
   ]);
-  const [inputValue, setInputValue] = useState("");
+  const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [notes, setNotes] = useState("");
+  const [notes, setNotes] = useState('');
   const [generated, setGenerated] = useState({
     entities: [],
     relationships: [],
@@ -224,7 +224,7 @@ export default function IntelligentCopilot() {
   const messagesEndRef = useRef(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   useEffect(() => {
@@ -242,7 +242,7 @@ export default function IntelligentCopilot() {
     };
 
     setMessages((prev) => [...prev, userMessage]);
-    setInputValue("");
+    setInputValue('');
     setIsLoading(true);
 
     // Simulate AI processing delay
@@ -250,14 +250,14 @@ export default function IntelligentCopilot() {
       () => {
         const query = text.toLowerCase();
         let aiResponse =
-          "I understand you want to know about: " +
+          'I understand you want to know about: ' +
           text +
           "\n\nI'm still learning about this topic. Try asking about network analysis, threat assessment, pattern prediction, or investigation summaries for more detailed insights.";
 
         // Find matching response
         for (const [key, response] of Object.entries(intelligentResponses)) {
           if (query.includes(key)) {
-            aiResponse = response.join("\n");
+            aiResponse = response.join('\n');
             break;
           }
         }
@@ -283,7 +283,7 @@ export default function IntelligentCopilot() {
   const handleGenerate = async () => {
     if (!notes.trim()) return;
     const { data } = await generateEntities({
-      variables: { investigationId: "demo", text: notes },
+      variables: { investigationId: 'demo', text: notes },
     });
     setGenerated(data.generateEntitiesFromText);
   };
@@ -300,15 +300,15 @@ export default function IntelligentCopilot() {
   };
 
   return (
-    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
       <Card sx={{ mb: 2 }}>
         <CardContent>
           <Box
             sx={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
             }}
           >
             <Box>
@@ -334,7 +334,7 @@ export default function IntelligentCopilot() {
           <Typography variant="h6" gutterBottom>
             Magic From Text
           </Typography>
-          <Box sx={{ display: "flex", gap: 1 }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
             <TextField
               fullWidth
               placeholder="Paste notes or summary..."
@@ -363,10 +363,10 @@ export default function IntelligentCopilot() {
       <Grid container spacing={2} sx={{ flexGrow: 1 }}>
         {/* AI Insights Panel */}
         <Grid item xs={12} lg={3}>
-          <Card sx={{ height: "100%" }}>
+          <Card sx={{ height: '100%' }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
-                <AutoAwesomeIcon sx={{ mr: 1, verticalAlign: "middle" }} />
+                <AutoAwesomeIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
                 Live Insights
               </Typography>
               <List dense>
@@ -376,7 +376,7 @@ export default function IntelligentCopilot() {
                       primary={
                         <Typography
                           variant="body2"
-                          sx={{ fontSize: "0.85rem" }}
+                          sx={{ fontSize: '0.85rem' }}
                         >
                           {insight}
                         </Typography>
@@ -400,7 +400,7 @@ export default function IntelligentCopilot() {
                       size="small"
                       startIcon={action.icon}
                       onClick={() => handleQuickAction(action.query)}
-                      sx={{ justifyContent: "flex-start", fontSize: "0.75rem" }}
+                      sx={{ justifyContent: 'flex-start', fontSize: '0.75rem' }}
                     >
                       {action.label}
                     </Button>
@@ -414,13 +414,13 @@ export default function IntelligentCopilot() {
         {/* Chat Interface */}
         <Grid item xs={12} lg={6}>
           <Card
-            sx={{ height: "100%", display: "flex", flexDirection: "column" }}
+            sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}
           >
             <CardContent
               sx={{
                 flexGrow: 1,
-                display: "flex",
-                flexDirection: "column",
+                display: 'flex',
+                flexDirection: 'column',
                 p: 0,
               }}
             >
@@ -428,8 +428,8 @@ export default function IntelligentCopilot() {
               <Box
                 sx={{
                   flexGrow: 1,
-                  overflow: "auto",
-                  maxHeight: "60vh",
+                  overflow: 'auto',
+                  maxHeight: '60vh',
                   p: 1,
                 }}
               >
@@ -449,18 +449,18 @@ export default function IntelligentCopilot() {
               </Box>
 
               {/* Input Area */}
-              <Box sx={{ p: 2, borderTop: 1, borderColor: "divider" }}>
-                <Alert severity="info" sx={{ mb: 2, fontSize: "0.85rem" }}>
+              <Box sx={{ p: 2, borderTop: 1, borderColor: 'divider' }}>
+                <Alert severity="info" sx={{ mb: 2, fontSize: '0.85rem' }}>
                   💡 Try asking: "analyze network", "threat assessment",
                   "predict patterns", or "investigation summary"
                 </Alert>
-                <Box sx={{ display: "flex", gap: 1 }}>
+                <Box sx={{ display: 'flex', gap: 1 }}>
                   <TextField
                     fullWidth
                     placeholder="Ask me about patterns, threats, connections, or investigations..."
                     value={inputValue}
                     onChange={(e) => setInputValue(e.target.value)}
-                    onKeyPress={(e) => e.key === "Enter" && handleSendMessage()}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                     disabled={isLoading}
                     multiline
                     maxRows={3}
@@ -469,7 +469,7 @@ export default function IntelligentCopilot() {
                     variant="contained"
                     onClick={() => handleSendMessage()}
                     disabled={!inputValue.trim() || isLoading}
-                    sx={{ minWidth: "auto", px: 2 }}
+                    sx={{ minWidth: 'auto', px: 2 }}
                   >
                     <SendIcon />
                   </Button>

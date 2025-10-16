@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -10,7 +10,7 @@ import {
   FormControlLabel,
   Radio,
   Typography,
-} from "@mui/material";
+} from '@mui/material';
 
 export default function ConflictResolutionModal({
   open,
@@ -27,7 +27,7 @@ export default function ConflictResolutionModal({
   const handleSubmit = () => {
     const resolved = {};
     fields.forEach((f) => {
-      resolved[f] = selection[f] === "server" ? server[f] : local[f];
+      resolved[f] = selection[f] === 'server' ? server[f] : local[f];
     });
     onResolve(resolved);
   };
@@ -53,13 +53,13 @@ export default function ConflictResolutionModal({
           >
             <Grid item xs={5}>
               <Typography variant="body2">
-                {String(local[field] ?? "")}
+                {String(local[field] ?? '')}
               </Typography>
             </Grid>
             <Grid item xs={2}>
               <RadioGroup
                 row
-                value={selection[field] || "local"}
+                value={selection[field] || 'local'}
                 onChange={(e) => handleChange(field, e.target.value)}
               >
                 <FormControlLabel
@@ -76,7 +76,7 @@ export default function ConflictResolutionModal({
             </Grid>
             <Grid item xs={5}>
               <Typography variant="body2">
-                {String(server[field] ?? "")}
+                {String(server[field] ?? '')}
               </Typography>
             </Grid>
           </Grid>

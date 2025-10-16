@@ -9,8 +9,8 @@ services:
       NEO4J_dbms_memory_heap_initial__size: 256m
       NEO4J_dbms_memory_heap_max__size: 512m
     ports:
-      - "7475:7474"  # HTTP (avoid conflict with existing)
-      - "7688:7687"  # Bolt
+      - '7475:7474' # HTTP (avoid conflict with existing)
+      - '7688:7687' # Bolt
     volumes:
       - neo4j_data:/data
       - neo4j_logs:/logs
@@ -21,7 +21,7 @@ services:
   prometheus:
     image: prom/prometheus:latest
     ports:
-      - "9091:9090"  # Avoid conflict with existing
+      - '9091:9090' # Avoid conflict with existing
     volumes:
       - prometheus_data:/prometheus
     command:
@@ -40,7 +40,7 @@ services:
     environment:
       GF_SECURITY_ADMIN_PASSWORD: admin
     ports:
-      - "3001:3000"
+      - '3001:3000'
     volumes:
       - grafana_data:/var/lib/grafana
     networks:
@@ -52,10 +52,10 @@ services:
     environment:
       COLLECTOR_OTLP_ENABLED: true
     ports:
-      - "16686:16686"  # UI
-      - "14268:14268"  # HTTP
-      - "4317:4317"    # OTLP gRPC
-      - "4318:4318"    # OTLP HTTP
+      - '16686:16686' # UI
+      - '14268:14268' # HTTP
+      - '4317:4317' # OTLP gRPC
+      - '4318:4318' # OTLP HTTP
     networks:
       - maestro-network
 

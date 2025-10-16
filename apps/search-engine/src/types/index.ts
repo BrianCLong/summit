@@ -142,7 +142,15 @@ export interface SearchIndex {
 }
 
 export interface QueryBuilder {
-  type: 'bool' | 'match' | 'term' | 'range' | 'wildcard' | 'fuzzy' | 'nested' | 'geo_distance';
+  type:
+    | 'bool'
+    | 'match'
+    | 'term'
+    | 'range'
+    | 'wildcard'
+    | 'fuzzy'
+    | 'nested'
+    | 'geo_distance';
   field?: string;
   value?: any;
   operator?: 'and' | 'or';

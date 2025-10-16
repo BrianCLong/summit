@@ -8,15 +8,15 @@ metadata:
     app.kubernetes.io/component: backup
     app.kubernetes.io/part-of: intelgraph
 spec:
-  schedule: "0 3 * * *"  # Daily at 3 AM UTC
-  timeZone: "UTC"
+  schedule: '0 3 * * *' # Daily at 3 AM UTC
+  timeZone: 'UTC'
   successfulJobsHistoryLimit: 7
   failedJobsHistoryLimit: 3
   concurrencyPolicy: Forbid
   startingDeadlineSeconds: 300
   jobTemplate:
     spec:
-      activeDeadlineSeconds: 3600  # 1 hour timeout
+      activeDeadlineSeconds: 3600 # 1 hour timeout
       backoffLimit: 2
       template:
         metadata:
@@ -32,355 +32,355 @@ spec:
             fsGroup: 65532
           serviceAccountName: k8s-config-backup
           containers:
-          - name: k8s-config-backup
-            image: bitnami/kubectl:latest
-            imagePullPolicy: IfNotPresent
-            command:
-            - /bin/bash
-            - -c
-            - |
-              set -euo pipefail
-              
-              # Configuration
-              BACKUP_NAME="k8s-config-backup-$(date +%Y%m%d-%H%M%S)"
-              BACKUP_DIR="/backups/${BACKUP_NAME}"
-              RETENTION_DAYS=30
-              
-              echo "Starting Kubernetes configuration backup: ${BACKUP_NAME}"
-              
-              # Create backup directory structure
-              mkdir -p "${BACKUP_DIR}/secrets"
-              mkdir -p "${BACKUP_DIR}/configmaps" 
-              mkdir -p "${BACKUP_DIR}/deployments"
-              mkdir -p "${BACKUP_DIR}/services"
-              mkdir -p "${BACKUP_DIR}/ingress"
-              mkdir -p "${BACKUP_DIR}/pvc"
-              mkdir -p "${BACKUP_DIR}/networkpolicies"
-              mkdir -p "${BACKUP_DIR}/rbac"
-              mkdir -p "${BACKUP_DIR}/custom-resources"
-              
-              # Define namespaces to backup
-              NAMESPACES=(
-                "default"
-                "database" 
-                "monitoring"
-                "security"
-                "cache"
-                "backup-system"
-                "ingress-nginx"
-                "cert-manager"
-              )
-              
-              # Function to backup resource with metadata
-              backup_resource() {
-                local resource_type="$1"
-                local namespace="$2"
-                local output_dir="$3"
-                
-                echo "Backing up ${resource_type} in namespace ${namespace}..."
-                
-                # Get all resources of this type in the namespace
-                kubectl get ${resource_type} -n ${namespace} -o json > "${output_dir}/${namespace}-${resource_type}.json" 2>/dev/null || {
-                  echo "No ${resource_type} found in namespace ${namespace}"
-                  echo '{"apiVersion":"v1","kind":"List","items":[]}' > "${output_dir}/${namespace}-${resource_type}.json"
-                }
-                
-                # Also create YAML backup for readability
-                kubectl get ${resource_type} -n ${namespace} -o yaml > "${output_dir}/${namespace}-${resource_type}.yaml" 2>/dev/null || {
-                  echo "apiVersion: v1\nkind: List\nitems: []" > "${output_dir}/${namespace}-${resource_type}.yaml"
-                }
-              }
-              
-              # Backup secrets (with special handling for sensitive data)
-              echo "Backing up secrets..."
-              for ns in "${NAMESPACES[@]}"; do
-                # Get list of secrets
-                kubectl get secrets -n ${ns} -o json | \
-                jq '
-                  .items[] | 
-                  select(.type != "kubernetes.io/service-account-token") |
-                  {
-                    apiVersion: .apiVersion,
-                    kind: .kind,
-                    metadata: {
-                      name: .metadata.name,
-                      namespace: .metadata.namespace,
-                      labels: .metadata.labels,
-                      annotations: .metadata.annotations
-                    },
-                    type: .type,
-                    data: (.data | to_entries | map({key: .key, value: "[REDACTED]"}) | from_entries)
+            - name: k8s-config-backup
+              image: bitnami/kubectl:latest
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -euo pipefail
+
+                  # Configuration
+                  BACKUP_NAME="k8s-config-backup-$(date +%Y%m%d-%H%M%S)"
+                  BACKUP_DIR="/backups/${BACKUP_NAME}"
+                  RETENTION_DAYS=30
+
+                  echo "Starting Kubernetes configuration backup: ${BACKUP_NAME}"
+
+                  # Create backup directory structure
+                  mkdir -p "${BACKUP_DIR}/secrets"
+                  mkdir -p "${BACKUP_DIR}/configmaps" 
+                  mkdir -p "${BACKUP_DIR}/deployments"
+                  mkdir -p "${BACKUP_DIR}/services"
+                  mkdir -p "${BACKUP_DIR}/ingress"
+                  mkdir -p "${BACKUP_DIR}/pvc"
+                  mkdir -p "${BACKUP_DIR}/networkpolicies"
+                  mkdir -p "${BACKUP_DIR}/rbac"
+                  mkdir -p "${BACKUP_DIR}/custom-resources"
+
+                  # Define namespaces to backup
+                  NAMESPACES=(
+                    "default"
+                    "database" 
+                    "monitoring"
+                    "security"
+                    "cache"
+                    "backup-system"
+                    "ingress-nginx"
+                    "cert-manager"
+                  )
+
+                  # Function to backup resource with metadata
+                  backup_resource() {
+                    local resource_type="$1"
+                    local namespace="$2"
+                    local output_dir="$3"
+                    
+                    echo "Backing up ${resource_type} in namespace ${namespace}..."
+                    
+                    # Get all resources of this type in the namespace
+                    kubectl get ${resource_type} -n ${namespace} -o json > "${output_dir}/${namespace}-${resource_type}.json" 2>/dev/null || {
+                      echo "No ${resource_type} found in namespace ${namespace}"
+                      echo '{"apiVersion":"v1","kind":"List","items":[]}' > "${output_dir}/${namespace}-${resource_type}.json"
+                    }
+                    
+                    # Also create YAML backup for readability
+                    kubectl get ${resource_type} -n ${namespace} -o yaml > "${output_dir}/${namespace}-${resource_type}.yaml" 2>/dev/null || {
+                      echo "apiVersion: v1\nkind: List\nitems: []" > "${output_dir}/${namespace}-${resource_type}.yaml"
+                    }
                   }
-                ' > "${BACKUP_DIR}/secrets/${ns}-secrets-metadata.json" 2>/dev/null || {
-                  echo '[]' > "${BACKUP_DIR}/secrets/${ns}-secrets-metadata.json"
-                }
-                
-                # Create a list of secrets for restore reference
-                kubectl get secrets -n ${ns} -o name > "${BACKUP_DIR}/secrets/${ns}-secrets-list.txt" 2>/dev/null || {
-                  touch "${BACKUP_DIR}/secrets/${ns}-secrets-list.txt"
-                }
-              done
-              
-              # Backup ConfigMaps
-              echo "Backing up configmaps..."
-              for ns in "${NAMESPACES[@]}"; do
-                backup_resource "configmaps" "${ns}" "${BACKUP_DIR}/configmaps"
-              done
-              
-              # Backup Deployments
-              echo "Backing up deployments..."
-              for ns in "${NAMESPACES[@]}"; do
-                backup_resource "deployments" "${ns}" "${BACKUP_DIR}/deployments"
-              done
-              
-              # Backup Services
-              echo "Backing up services..."
-              for ns in "${NAMESPACES[@]}"; do
-                backup_resource "services" "${ns}" "${BACKUP_DIR}/services"
-              done
-              
-              # Backup Ingress
-              echo "Backing up ingress resources..."
-              for ns in "${NAMESPACES[@]}"; do
-                backup_resource "ingress" "${ns}" "${BACKUP_DIR}/ingress"
-              done
-              
-              # Backup PersistentVolumeClaims
-              echo "Backing up persistent volume claims..."
-              for ns in "${NAMESPACES[@]}"; do
-                backup_resource "pvc" "${ns}" "${BACKUP_DIR}/pvc"
-              done
-              
-              # Backup NetworkPolicies
-              echo "Backing up network policies..."
-              for ns in "${NAMESPACES[@]}"; do
-                backup_resource "networkpolicies" "${ns}" "${BACKUP_DIR}/networkpolicies"
-              done
-              
-              # Backup RBAC resources
-              echo "Backing up RBAC resources..."
-              kubectl get clusterroles -o yaml > "${BACKUP_DIR}/rbac/clusterroles.yaml"
-              kubectl get clusterrolebindings -o yaml > "${BACKUP_DIR}/rbac/clusterrolebindings.yaml"
-              
-              for ns in "${NAMESPACES[@]}"; do
-                backup_resource "roles" "${ns}" "${BACKUP_DIR}/rbac"
-                backup_resource "rolebindings" "${ns}" "${BACKUP_DIR}/rbac"
-                backup_resource "serviceaccounts" "${ns}" "${BACKUP_DIR}/rbac"
-              done
-              
-              # Backup Custom Resources
-              echo "Backing up custom resources..."
-              
-              # Get CRDs
-              kubectl get crd -o yaml > "${BACKUP_DIR}/custom-resources/crds.yaml"
-              
-              # Backup Prometheus resources (if exists)
-              kubectl get prometheusrules -A -o yaml > "${BACKUP_DIR}/custom-resources/prometheusrules.yaml" 2>/dev/null || echo "No PrometheusRules found"
-              kubectl get servicemonitors -A -o yaml > "${BACKUP_DIR}/custom-resources/servicemonitors.yaml" 2>/dev/null || echo "No ServiceMonitors found"
-              
-              # Backup cert-manager resources (if exists)
-              kubectl get certificates -A -o yaml > "${BACKUP_DIR}/custom-resources/certificates.yaml" 2>/dev/null || echo "No Certificates found"
-              kubectl get clusterissuers -A -o yaml > "${BACKUP_DIR}/custom-resources/clusterissuers.yaml" 2>/dev/null || echo "No ClusterIssuers found"
-              
-              # Backup network policies
-              kubectl get networkpolicies -A -o yaml > "${BACKUP_DIR}/custom-resources/networkpolicies.yaml" 2>/dev/null || echo "No NetworkPolicies found"
-              
-              # Create cluster information
-              echo "Collecting cluster information..."
-              kubectl cluster-info > "${BACKUP_DIR}/cluster-info.txt"
-              kubectl get nodes -o yaml > "${BACKUP_DIR}/nodes.yaml"
-              kubectl get namespaces -o yaml > "${BACKUP_DIR}/namespaces.yaml"
-              kubectl get pv -o yaml > "${BACKUP_DIR}/persistent-volumes.yaml"
-              kubectl get storageclasses -o yaml > "${BACKUP_DIR}/storage-classes.yaml"
-              
-              # Create backup manifest
-              BACKUP_SIZE=$(du -sb "${BACKUP_DIR}" | cut -f1)
-              RESOURCE_COUNTS=$(find "${BACKUP_DIR}" -name "*.json" -o -name "*.yaml" | wc -l)
-              
-              cat > "${BACKUP_DIR}/backup-manifest.json" << EOF
-              {
-                "backup_name": "${BACKUP_NAME}",
-                "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-                "backup_type": "kubernetes_configuration",
-                "cluster_name": "${CLUSTER_NAME:-unknown}",
-                "kubernetes_version": "$(kubectl version --client=false -o json | jq -r '.serverVersion.gitVersion' 2>/dev/null || echo 'unknown')",
-                "namespaces_backed_up": $(printf '%s\n' "${NAMESPACES[@]}" | jq -R . | jq -s .),
-                "backup_size_bytes": ${BACKUP_SIZE},
-                "resource_files_count": ${RESOURCE_COUNTS},
-                "retention_policy": "${RETENTION_DAYS} days",
-                "backup_method": "kubectl_export",
-                "includes_secrets_metadata": true,
-                "secrets_data_redacted": true
-              }
-              EOF
-              
-              # Create restoration script
-              cat > "${BACKUP_DIR}/restore-script.sh" << 'EOF'
-              #!/bin/bash
-              # Kubernetes Configuration Restore Script
-              # Usage: ./restore-script.sh [namespace]
-              
-              set -euo pipefail
-              
-              RESTORE_NAMESPACE=${1:-""}
-              BACKUP_DIR=$(dirname "$0")
-              
-              echo "Starting Kubernetes configuration restore..."
-              
-              if [[ -n "$RESTORE_NAMESPACE" ]]; then
-                echo "Restoring configuration for namespace: $RESTORE_NAMESPACE"
-                
-                # Create namespace if it doesn't exist
-                kubectl create namespace "$RESTORE_NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
-                
-                # Restore configmaps
-                if [[ -f "${BACKUP_DIR}/configmaps/${RESTORE_NAMESPACE}-configmaps.yaml" ]]; then
-                  kubectl apply -f "${BACKUP_DIR}/configmaps/${RESTORE_NAMESPACE}-configmaps.yaml"
-                fi
-                
-                # Restore services
-                if [[ -f "${BACKUP_DIR}/services/${RESTORE_NAMESPACE}-services.yaml" ]]; then
-                  kubectl apply -f "${BACKUP_DIR}/services/${RESTORE_NAMESPACE}-services.yaml"
-                fi
-                
-                # Restore deployments
-                if [[ -f "${BACKUP_DIR}/deployments/${RESTORE_NAMESPACE}-deployments.yaml" ]]; then
-                  kubectl apply -f "${BACKUP_DIR}/deployments/${RESTORE_NAMESPACE}-deployments.yaml"
-                fi
-                
-                echo "Note: Secrets must be restored manually due to security considerations"
-                echo "Refer to: ${BACKUP_DIR}/secrets/${RESTORE_NAMESPACE}-secrets-list.txt"
-              else
-                echo "Please specify a namespace to restore: ./restore-script.sh <namespace>"
-                echo "Available namespaces in backup:"
-                ls "${BACKUP_DIR}/configmaps" | grep -o '^[^-]*' | sort -u
-              fi
-              EOF
-              
-              chmod +x "${BACKUP_DIR}/restore-script.sh"
-              
-              # Create inventory report
-              echo "Creating inventory report..."
-              cat > "${BACKUP_DIR}/inventory-report.txt" << EOF
-              Kubernetes Configuration Backup Inventory
-              ========================================
-              
-              Backup Name: ${BACKUP_NAME}
-              Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)
-              Cluster: ${CLUSTER_NAME:-unknown}
-              
-              Namespaces Backed Up:
-              $(printf '  - %s\n' "${NAMESPACES[@]}")
-              
-              Resource Counts:
-              EOF
-              
-              for ns in "${NAMESPACES[@]}"; do
-                echo "  Namespace: ${ns}" >> "${BACKUP_DIR}/inventory-report.txt"
-                echo "    Secrets: $(kubectl get secrets -n ${ns} --no-headers 2>/dev/null | wc -l)" >> "${BACKUP_DIR}/inventory-report.txt"
-                echo "    ConfigMaps: $(kubectl get configmaps -n ${ns} --no-headers 2>/dev/null | wc -l)" >> "${BACKUP_DIR}/inventory-report.txt"
-                echo "    Deployments: $(kubectl get deployments -n ${ns} --no-headers 2>/dev/null | wc -l)" >> "${BACKUP_DIR}/inventory-report.txt"
-                echo "    Services: $(kubectl get services -n ${ns} --no-headers 2>/dev/null | wc -l)" >> "${BACKUP_DIR}/inventory-report.txt"
-              done
-              
-              # Compress backup
-              echo "Compressing backup..."
-              tar -czf "${BACKUP_DIR}.tar.gz" -C "/backups" "${BACKUP_NAME}"
-              rm -rf "${BACKUP_DIR}"
-              
-              # Upload to S3 with encryption
-              echo "Uploading to S3..."
-              aws s3 cp "${BACKUP_DIR}.tar.gz" \
-                "s3://${BACKUP_BUCKET}/kubernetes/$(date +%Y/%m/%d)/${BACKUP_NAME}.tar.gz" \
-                --server-side-encryption AES256 \
-                --storage-class STANDARD_IA \
-                --metadata backup-type=kubernetes,cluster=${CLUSTER_NAME:-unknown},timestamp=$(date +%s)
-              
-              # Cross-region replication
-              echo "Replicating to DR region..."
-              aws s3 cp "s3://${BACKUP_BUCKET}/kubernetes/$(date +%Y/%m/%d)/${BACKUP_NAME}.tar.gz" \
-                "s3://${DR_BACKUP_BUCKET}/kubernetes/$(date +%Y/%m/%d)/${BACKUP_NAME}.tar.gz" \
-                --source-region ${AWS_REGION} \
-                --region ${DR_AWS_REGION}
-              
-              # Cleanup local backup
-              rm -f "${BACKUP_DIR}.tar.gz"
-              
-              # Cleanup old backups
-              echo "Cleaning up old backups..."
-              aws s3 ls "s3://${BACKUP_BUCKET}/kubernetes/" --recursive | \
-                awk '{if($1 < "'$(date -d "${RETENTION_DAYS} days ago" +%Y-%m-%d)'") print $4}' | \
-                xargs -r -I {} aws s3 rm "s3://${BACKUP_BUCKET}/{}"
-              
-              # Send success notification
-              curl -X POST "${SLACK_WEBHOOK_URL}" \
-                -H 'Content-Type: application/json' \
-                -d "{\"text\":\"✅ Kubernetes configuration backup completed: ${BACKUP_NAME}\\nCluster: ${CLUSTER_NAME:-unknown}\\nSize: $(numfmt --to=iec ${BACKUP_SIZE})\"}" || true
-              
-              echo "Kubernetes configuration backup completed successfully: ${BACKUP_NAME}"
-              
-            env:
-            - name: BACKUP_BUCKET
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: backup-bucket
-            - name: DR_BACKUP_BUCKET
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: dr-backup-bucket
-            - name: AWS_REGION
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: aws-region
-            - name: DR_AWS_REGION
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: dr-aws-region
-            - name: CLUSTER_NAME
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: cluster-name
-            - name: SLACK_WEBHOOK_URL
-              valueFrom:
-                secretKeyRef:
-                  name: backup-secrets
-                  key: slack-webhook-url
-            - name: AWS_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: backup-secrets
-                  key: aws-access-key-id
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: backup-secrets
-                  key: aws-secret-access-key
-            resources:
-              requests:
-                memory: "512Mi"
-                cpu: "250m"
-              limits:
-                memory: "2Gi"
-                cpu: "1000m"
-            volumeMounts:
-            - name: backup-storage
-              mountPath: /backups
+
+                  # Backup secrets (with special handling for sensitive data)
+                  echo "Backing up secrets..."
+                  for ns in "${NAMESPACES[@]}"; do
+                    # Get list of secrets
+                    kubectl get secrets -n ${ns} -o json | \
+                    jq '
+                      .items[] | 
+                      select(.type != "kubernetes.io/service-account-token") |
+                      {
+                        apiVersion: .apiVersion,
+                        kind: .kind,
+                        metadata: {
+                          name: .metadata.name,
+                          namespace: .metadata.namespace,
+                          labels: .metadata.labels,
+                          annotations: .metadata.annotations
+                        },
+                        type: .type,
+                        data: (.data | to_entries | map({key: .key, value: "[REDACTED]"}) | from_entries)
+                      }
+                    ' > "${BACKUP_DIR}/secrets/${ns}-secrets-metadata.json" 2>/dev/null || {
+                      echo '[]' > "${BACKUP_DIR}/secrets/${ns}-secrets-metadata.json"
+                    }
+                    
+                    # Create a list of secrets for restore reference
+                    kubectl get secrets -n ${ns} -o name > "${BACKUP_DIR}/secrets/${ns}-secrets-list.txt" 2>/dev/null || {
+                      touch "${BACKUP_DIR}/secrets/${ns}-secrets-list.txt"
+                    }
+                  done
+
+                  # Backup ConfigMaps
+                  echo "Backing up configmaps..."
+                  for ns in "${NAMESPACES[@]}"; do
+                    backup_resource "configmaps" "${ns}" "${BACKUP_DIR}/configmaps"
+                  done
+
+                  # Backup Deployments
+                  echo "Backing up deployments..."
+                  for ns in "${NAMESPACES[@]}"; do
+                    backup_resource "deployments" "${ns}" "${BACKUP_DIR}/deployments"
+                  done
+
+                  # Backup Services
+                  echo "Backing up services..."
+                  for ns in "${NAMESPACES[@]}"; do
+                    backup_resource "services" "${ns}" "${BACKUP_DIR}/services"
+                  done
+
+                  # Backup Ingress
+                  echo "Backing up ingress resources..."
+                  for ns in "${NAMESPACES[@]}"; do
+                    backup_resource "ingress" "${ns}" "${BACKUP_DIR}/ingress"
+                  done
+
+                  # Backup PersistentVolumeClaims
+                  echo "Backing up persistent volume claims..."
+                  for ns in "${NAMESPACES[@]}"; do
+                    backup_resource "pvc" "${ns}" "${BACKUP_DIR}/pvc"
+                  done
+
+                  # Backup NetworkPolicies
+                  echo "Backing up network policies..."
+                  for ns in "${NAMESPACES[@]}"; do
+                    backup_resource "networkpolicies" "${ns}" "${BACKUP_DIR}/networkpolicies"
+                  done
+
+                  # Backup RBAC resources
+                  echo "Backing up RBAC resources..."
+                  kubectl get clusterroles -o yaml > "${BACKUP_DIR}/rbac/clusterroles.yaml"
+                  kubectl get clusterrolebindings -o yaml > "${BACKUP_DIR}/rbac/clusterrolebindings.yaml"
+
+                  for ns in "${NAMESPACES[@]}"; do
+                    backup_resource "roles" "${ns}" "${BACKUP_DIR}/rbac"
+                    backup_resource "rolebindings" "${ns}" "${BACKUP_DIR}/rbac"
+                    backup_resource "serviceaccounts" "${ns}" "${BACKUP_DIR}/rbac"
+                  done
+
+                  # Backup Custom Resources
+                  echo "Backing up custom resources..."
+
+                  # Get CRDs
+                  kubectl get crd -o yaml > "${BACKUP_DIR}/custom-resources/crds.yaml"
+
+                  # Backup Prometheus resources (if exists)
+                  kubectl get prometheusrules -A -o yaml > "${BACKUP_DIR}/custom-resources/prometheusrules.yaml" 2>/dev/null || echo "No PrometheusRules found"
+                  kubectl get servicemonitors -A -o yaml > "${BACKUP_DIR}/custom-resources/servicemonitors.yaml" 2>/dev/null || echo "No ServiceMonitors found"
+
+                  # Backup cert-manager resources (if exists)
+                  kubectl get certificates -A -o yaml > "${BACKUP_DIR}/custom-resources/certificates.yaml" 2>/dev/null || echo "No Certificates found"
+                  kubectl get clusterissuers -A -o yaml > "${BACKUP_DIR}/custom-resources/clusterissuers.yaml" 2>/dev/null || echo "No ClusterIssuers found"
+
+                  # Backup network policies
+                  kubectl get networkpolicies -A -o yaml > "${BACKUP_DIR}/custom-resources/networkpolicies.yaml" 2>/dev/null || echo "No NetworkPolicies found"
+
+                  # Create cluster information
+                  echo "Collecting cluster information..."
+                  kubectl cluster-info > "${BACKUP_DIR}/cluster-info.txt"
+                  kubectl get nodes -o yaml > "${BACKUP_DIR}/nodes.yaml"
+                  kubectl get namespaces -o yaml > "${BACKUP_DIR}/namespaces.yaml"
+                  kubectl get pv -o yaml > "${BACKUP_DIR}/persistent-volumes.yaml"
+                  kubectl get storageclasses -o yaml > "${BACKUP_DIR}/storage-classes.yaml"
+
+                  # Create backup manifest
+                  BACKUP_SIZE=$(du -sb "${BACKUP_DIR}" | cut -f1)
+                  RESOURCE_COUNTS=$(find "${BACKUP_DIR}" -name "*.json" -o -name "*.yaml" | wc -l)
+
+                  cat > "${BACKUP_DIR}/backup-manifest.json" << EOF
+                  {
+                    "backup_name": "${BACKUP_NAME}",
+                    "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+                    "backup_type": "kubernetes_configuration",
+                    "cluster_name": "${CLUSTER_NAME:-unknown}",
+                    "kubernetes_version": "$(kubectl version --client=false -o json | jq -r '.serverVersion.gitVersion' 2>/dev/null || echo 'unknown')",
+                    "namespaces_backed_up": $(printf '%s\n' "${NAMESPACES[@]}" | jq -R . | jq -s .),
+                    "backup_size_bytes": ${BACKUP_SIZE},
+                    "resource_files_count": ${RESOURCE_COUNTS},
+                    "retention_policy": "${RETENTION_DAYS} days",
+                    "backup_method": "kubectl_export",
+                    "includes_secrets_metadata": true,
+                    "secrets_data_redacted": true
+                  }
+                  EOF
+
+                  # Create restoration script
+                  cat > "${BACKUP_DIR}/restore-script.sh" << 'EOF'
+                  #!/bin/bash
+                  # Kubernetes Configuration Restore Script
+                  # Usage: ./restore-script.sh [namespace]
+
+                  set -euo pipefail
+
+                  RESTORE_NAMESPACE=${1:-""}
+                  BACKUP_DIR=$(dirname "$0")
+
+                  echo "Starting Kubernetes configuration restore..."
+
+                  if [[ -n "$RESTORE_NAMESPACE" ]]; then
+                    echo "Restoring configuration for namespace: $RESTORE_NAMESPACE"
+                    
+                    # Create namespace if it doesn't exist
+                    kubectl create namespace "$RESTORE_NAMESPACE" --dry-run=client -o yaml | kubectl apply -f -
+                    
+                    # Restore configmaps
+                    if [[ -f "${BACKUP_DIR}/configmaps/${RESTORE_NAMESPACE}-configmaps.yaml" ]]; then
+                      kubectl apply -f "${BACKUP_DIR}/configmaps/${RESTORE_NAMESPACE}-configmaps.yaml"
+                    fi
+                    
+                    # Restore services
+                    if [[ -f "${BACKUP_DIR}/services/${RESTORE_NAMESPACE}-services.yaml" ]]; then
+                      kubectl apply -f "${BACKUP_DIR}/services/${RESTORE_NAMESPACE}-services.yaml"
+                    fi
+                    
+                    # Restore deployments
+                    if [[ -f "${BACKUP_DIR}/deployments/${RESTORE_NAMESPACE}-deployments.yaml" ]]; then
+                      kubectl apply -f "${BACKUP_DIR}/deployments/${RESTORE_NAMESPACE}-deployments.yaml"
+                    fi
+                    
+                    echo "Note: Secrets must be restored manually due to security considerations"
+                    echo "Refer to: ${BACKUP_DIR}/secrets/${RESTORE_NAMESPACE}-secrets-list.txt"
+                  else
+                    echo "Please specify a namespace to restore: ./restore-script.sh <namespace>"
+                    echo "Available namespaces in backup:"
+                    ls "${BACKUP_DIR}/configmaps" | grep -o '^[^-]*' | sort -u
+                  fi
+                  EOF
+
+                  chmod +x "${BACKUP_DIR}/restore-script.sh"
+
+                  # Create inventory report
+                  echo "Creating inventory report..."
+                  cat > "${BACKUP_DIR}/inventory-report.txt" << EOF
+                  Kubernetes Configuration Backup Inventory
+                  ========================================
+
+                  Backup Name: ${BACKUP_NAME}
+                  Timestamp: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+                  Cluster: ${CLUSTER_NAME:-unknown}
+
+                  Namespaces Backed Up:
+                  $(printf '  - %s\n' "${NAMESPACES[@]}")
+
+                  Resource Counts:
+                  EOF
+
+                  for ns in "${NAMESPACES[@]}"; do
+                    echo "  Namespace: ${ns}" >> "${BACKUP_DIR}/inventory-report.txt"
+                    echo "    Secrets: $(kubectl get secrets -n ${ns} --no-headers 2>/dev/null | wc -l)" >> "${BACKUP_DIR}/inventory-report.txt"
+                    echo "    ConfigMaps: $(kubectl get configmaps -n ${ns} --no-headers 2>/dev/null | wc -l)" >> "${BACKUP_DIR}/inventory-report.txt"
+                    echo "    Deployments: $(kubectl get deployments -n ${ns} --no-headers 2>/dev/null | wc -l)" >> "${BACKUP_DIR}/inventory-report.txt"
+                    echo "    Services: $(kubectl get services -n ${ns} --no-headers 2>/dev/null | wc -l)" >> "${BACKUP_DIR}/inventory-report.txt"
+                  done
+
+                  # Compress backup
+                  echo "Compressing backup..."
+                  tar -czf "${BACKUP_DIR}.tar.gz" -C "/backups" "${BACKUP_NAME}"
+                  rm -rf "${BACKUP_DIR}"
+
+                  # Upload to S3 with encryption
+                  echo "Uploading to S3..."
+                  aws s3 cp "${BACKUP_DIR}.tar.gz" \
+                    "s3://${BACKUP_BUCKET}/kubernetes/$(date +%Y/%m/%d)/${BACKUP_NAME}.tar.gz" \
+                    --server-side-encryption AES256 \
+                    --storage-class STANDARD_IA \
+                    --metadata backup-type=kubernetes,cluster=${CLUSTER_NAME:-unknown},timestamp=$(date +%s)
+
+                  # Cross-region replication
+                  echo "Replicating to DR region..."
+                  aws s3 cp "s3://${BACKUP_BUCKET}/kubernetes/$(date +%Y/%m/%d)/${BACKUP_NAME}.tar.gz" \
+                    "s3://${DR_BACKUP_BUCKET}/kubernetes/$(date +%Y/%m/%d)/${BACKUP_NAME}.tar.gz" \
+                    --source-region ${AWS_REGION} \
+                    --region ${DR_AWS_REGION}
+
+                  # Cleanup local backup
+                  rm -f "${BACKUP_DIR}.tar.gz"
+
+                  # Cleanup old backups
+                  echo "Cleaning up old backups..."
+                  aws s3 ls "s3://${BACKUP_BUCKET}/kubernetes/" --recursive | \
+                    awk '{if($1 < "'$(date -d "${RETENTION_DAYS} days ago" +%Y-%m-%d)'") print $4}' | \
+                    xargs -r -I {} aws s3 rm "s3://${BACKUP_BUCKET}/{}"
+
+                  # Send success notification
+                  curl -X POST "${SLACK_WEBHOOK_URL}" \
+                    -H 'Content-Type: application/json' \
+                    -d "{\"text\":\"✅ Kubernetes configuration backup completed: ${BACKUP_NAME}\\nCluster: ${CLUSTER_NAME:-unknown}\\nSize: $(numfmt --to=iec ${BACKUP_SIZE})\"}" || true
+
+                  echo "Kubernetes configuration backup completed successfully: ${BACKUP_NAME}"
+
+              env:
+                - name: BACKUP_BUCKET
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: backup-bucket
+                - name: DR_BACKUP_BUCKET
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: dr-backup-bucket
+                - name: AWS_REGION
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: aws-region
+                - name: DR_AWS_REGION
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: dr-aws-region
+                - name: CLUSTER_NAME
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: cluster-name
+                - name: SLACK_WEBHOOK_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-secrets
+                      key: slack-webhook-url
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-secrets
+                      key: aws-access-key-id
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-secrets
+                      key: aws-secret-access-key
+              resources:
+                requests:
+                  memory: '512Mi'
+                  cpu: '250m'
+                limits:
+                  memory: '2Gi'
+                  cpu: '1000m'
+              volumeMounts:
+                - name: backup-storage
+                  mountPath: /backups
           volumes:
-          - name: backup-storage
-            emptyDir:
-              sizeLimit: 10Gi
+            - name: backup-storage
+              emptyDir:
+                sizeLimit: 10Gi
           tolerations:
-          - key: "backup-workload"
-            operator: "Equal"
-            value: "true"
-            effect: "NoSchedule"
+            - key: 'backup-workload'
+              operator: 'Equal'
+              value: 'true'
+              effect: 'NoSchedule'
           nodeSelector:
-            node-type: "backup-optimized"
+            node-type: 'backup-optimized'
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -391,43 +391,43 @@ metadata:
     app.kubernetes.io/name: k8s-config-backup
     app.kubernetes.io/component: backup
   annotations:
-    eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/k8s-backup-role"
+    eks.amazonaws.com/role-arn: 'arn:aws:iam::123456789012:role/k8s-backup-role'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: k8s-config-backup
 rules:
-- apiGroups: [""]
-  resources: ["*"]
-  verbs: ["get", "list"]
-- apiGroups: ["apps"]
-  resources: ["*"]
-  verbs: ["get", "list"]
-- apiGroups: ["networking.k8s.io"]
-  resources: ["*"]
-  verbs: ["get", "list"]
-- apiGroups: ["rbac.authorization.k8s.io"]
-  resources: ["*"]
-  verbs: ["get", "list"]
-- apiGroups: ["apiextensions.k8s.io"]
-  resources: ["customresourcedefinitions"]
-  verbs: ["get", "list"]
-- apiGroups: ["monitoring.coreos.com"]
-  resources: ["*"]
-  verbs: ["get", "list"]
-- apiGroups: ["cert-manager.io"]
-  resources: ["*"]
-  verbs: ["get", "list"]
+  - apiGroups: ['']
+    resources: ['*']
+    verbs: ['get', 'list']
+  - apiGroups: ['apps']
+    resources: ['*']
+    verbs: ['get', 'list']
+  - apiGroups: ['networking.k8s.io']
+    resources: ['*']
+    verbs: ['get', 'list']
+  - apiGroups: ['rbac.authorization.k8s.io']
+    resources: ['*']
+    verbs: ['get', 'list']
+  - apiGroups: ['apiextensions.k8s.io']
+    resources: ['customresourcedefinitions']
+    verbs: ['get', 'list']
+  - apiGroups: ['monitoring.coreos.com']
+    resources: ['*']
+    verbs: ['get', 'list']
+  - apiGroups: ['cert-manager.io']
+    resources: ['*']
+    verbs: ['get', 'list']
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
 metadata:
   name: k8s-config-backup
 subjects:
-- kind: ServiceAccount
-  name: k8s-config-backup
-  namespace: backup-system
+  - kind: ServiceAccount
+    name: k8s-config-backup
+    namespace: backup-system
 roleRef:
   kind: ClusterRole
   name: k8s-config-backup

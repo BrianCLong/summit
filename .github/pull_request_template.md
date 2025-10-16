@@ -1,10 +1,12 @@
 ## 🧠 Copilot Review Tasks
+
 - [ ] `/explain-changes`
 - [ ] `/generate-tests`
 - [ ] `/risk-callouts`
 - [ ] `/summarize-diff`
 
 ## ✅ Checklist
+
 - [ ] Code compiles & passes CI
 - [ ] Tests added/updated
 - [ ] Documentation updated
@@ -14,6 +16,7 @@
 ## Screenshots/Notes
 
 ### Pre-flight (guardrails)
+
 - [ ] I ran `make doctor` locally (lint → typecheck → codegen drift → cycles)
 - [ ] If UI/API touched: labeled `ui:smoke` or ran `make k6` locally
 - [ ] If Helm/Terraform changed: added `ops:strict` label

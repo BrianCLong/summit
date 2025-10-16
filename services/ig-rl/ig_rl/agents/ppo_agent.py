@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass
-from typing import Dict, Optional, Sequence, Tuple
 
 import torch
 from torch import nn
@@ -31,7 +31,7 @@ class ActorCritic(nn.Module):
         self.actor = nn.Linear(256, act_dim)
         self.critic = nn.Linear(256, 1)
 
-    def forward(self, obs: torch.Tensor) -> Tuple[torch.Tensor, torch.Tensor]:
+    def forward(self, obs: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
         latent = self.shared(obs)
         return self.actor(latent), self.critic(latent)
 
@@ -39,24 +39,30 @@ class ActorCritic(nn.Module):
 class PPOAgent:
     """Simplified PPO trainer that respects action masks."""
 
-    def __init__(self, obs_dim: int, act_dim: int, config: Optional[PPOConfig] = None) -> None:
+    def __init__(self, obs_dim: int, act_dim: int, config: PPOConfig | None = None) -> None:
         self.config = config or PPOConfig()
         self.policy = ActorCritic(obs_dim, act_dim)
         self.optimizer = torch.optim.Adam(self.policy.parameters(), lr=self.config.learning_rate)
 
-    def policy_distribution(self, logits: torch.Tensor, mask: Optional[Sequence[bool]] = None) -> Categorical:
+    def policy_distribution(
+        self, logits: torch.Tensor, mask: Sequence[bool] | None = None
+    ) -> Categorical:
         if mask is not None:
             mask_tensor = torch.tensor(mask, dtype=torch.bool, device=logits.device)
             logits = logits.masked_fill(~mask_tensor, float("-inf"))
         return Categorical(logits=logits)
 
-    def act(self, obs: torch.Tensor, mask: Optional[Sequence[bool]] = None) -> Tuple[int, torch.Tensor, torch.Tensor]:
+    def act(
+        self, obs: torch.Tensor, mask: Sequence[bool] | None = None
+    ) -> tuple[int, torch.Tensor, torch.Tensor]:
         logits, value = self.policy(obs)
         dist = self.policy_distribution(logits.squeeze(0), mask)
         action = dist.sample()
         return int(action.item()), dist.log_prob(action), value.squeeze(-1)
 
-    def update(self, batch: Dict[str, torch.Tensor], mask: Optional[torch.Tensor] = None) -> Dict[str, float]:
+    def update(
+        self, batch: dict[str, torch.Tensor], mask: torch.Tensor | None = None
+    ) -> dict[str, float]:
         obs = batch["obs"]
         actions = batch["actions"]
         advantages = batch["advantages"]
@@ -74,7 +80,9 @@ class PPOAgent:
 
         critic_loss = torch.nn.functional.mse_loss(values.squeeze(-1), returns)
 
-        loss = actor_loss + self.config.value_coef * critic_loss - self.config.entropy_coef * entropy
+        loss = (
+            actor_loss + self.config.value_coef * critic_loss - self.config.entropy_coef * entropy
+        )
 
         self.optimizer.zero_grad()
         loss.backward()

@@ -2,7 +2,7 @@
 # Minimal resource allocation and relaxed policies
 
 global:
-  imagePullPolicy: Never  # Use local images
+  imagePullPolicy: Never # Use local images
 
 # Policy relaxed for development
 policy:
@@ -14,11 +14,11 @@ policy:
 apiGateway:
   resources:
     requests:
-      memory: "128Mi"
-      cpu: "100m"
+      memory: '128Mi'
+      cpu: '100m'
     limits:
-      memory: "256Mi"
-      cpu: "250m"
+      memory: '256Mi'
+      cpu: '250m'
   autoscaling:
     enabled: false
   replicas: 1
@@ -26,20 +26,20 @@ apiGateway:
 graphXai:
   resources:
     requests:
-      memory: "256Mi"
-      cpu: "250m"
+      memory: '256Mi'
+      cpu: '250m'
     limits:
-      memory: "512Mi"
-      cpu: "500m"
+      memory: '512Mi'
+      cpu: '500m'
 
 provLedger:
   resources:
     requests:
-      memory: "128Mi"
-      cpu: "100m"
+      memory: '128Mi'
+      cpu: '100m'
     limits:
-      memory: "256Mi"
-      cpu: "250m"
+      memory: '256Mi'
+      cpu: '250m'
 
 web:
   service:
@@ -68,11 +68,11 @@ neo4j:
     enabled: false
   resources:
     requests:
-      memory: "512Mi"
-      cpu: "250m"
+      memory: '512Mi'
+      cpu: '250m'
     limits:
-      memory: "1Gi"
-      cpu: "500m"
+      memory: '1Gi'
+      cpu: '500m'
 
 postgresql:
   primary:
@@ -80,11 +80,11 @@ postgresql:
       enabled: false
     resources:
       requests:
-        memory: "128Mi"
-        cpu: "100m"
+        memory: '128Mi'
+        cpu: '100m'
       limits:
-        memory: "256Mi"
-        cpu: "250m"
+        memory: '256Mi'
+        cpu: '250m'
 
 redis:
   master:
@@ -92,11 +92,11 @@ redis:
       enabled: false
     resources:
       requests:
-        memory: "128Mi"
-        cpu: "100m"
+        memory: '128Mi'
+        cpu: '100m'
       limits:
-        memory: "256Mi"
-        cpu: "250m"
+        memory: '256Mi'
+        cpu: '250m'
 
 # Observability disabled in dev
 observability:

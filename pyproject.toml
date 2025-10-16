@@ -1,11 +1,24 @@
 [tool.black]
 line-length = 100
+exclude = """
+(/\.|^)venv|
+(/\.|^)\.venv|
+node_modules|
+v4/archive|
+tools/federation_mesh\.py
+"""
 
 [tool.ruff]
 line-length = 100
 select = ["E","F","I","UP","B","C90"]
 ignore = ["E501"]
 fix = true
+exclude = [
+  ".venv",
+  "venv",
+  "node_modules",
+  "v4/archive",
+]
 
 [tool.mypy]
 python_version = "3.12"

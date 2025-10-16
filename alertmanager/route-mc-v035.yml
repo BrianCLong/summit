@@ -19,7 +19,7 @@ receivers:
   - name: slack-mc
     slack_configs:
       - api_url: ${SLACK_WEBHOOK_URL}
-        channel: "#mc-ops"
+        channel: '#mc-ops'
         send_resolved: true
         title: ':rotating_light: {{ .CommonLabels.alertname }} ({{ .Status | toUpper }})'
         text: >-
@@ -32,7 +32,7 @@ receivers:
   - name: slack-mc-threaded
     slack_configs:
       - api_url: ${SLACK_WEBHOOK_URL}
-        channel: "#mc-ops"
+        channel: '#mc-ops'
         send_resolved: true
         # Thread under deployment message using thread_ts from environment
         thread_ts: '{{ if $externalURL }}{{ $externalURL }}{{ end }}'

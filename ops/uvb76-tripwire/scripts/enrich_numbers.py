@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import argparse
 import json
+from collections.abc import Iterable
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional
 
 if __package__ in (None, ""):
     import sys
@@ -17,7 +17,7 @@ else:  # pragma: no branch
     from detector import utils
 
 
-def load_source(cache_dir: Path, name: str) -> List[Dict]:
+def load_source(cache_dir: Path, name: str) -> list[dict]:
     path = cache_dir / f"{name}.json"
     if not path.exists():
         print(f"[enrich] cache file missing: {path}")
@@ -34,7 +34,7 @@ def parse_time(value: str) -> datetime:
     return datetime.fromisoformat(value.replace("Z", "+00:00"))
 
 
-def matches(event: Dict, record: Dict, tolerance_khz: float, window_min: int) -> bool:
+def matches(event: dict, record: dict, tolerance_khz: float, window_min: int) -> bool:
     freq_hint = event.get("freq_khz_hint")
     if freq_hint is None:
         return False
@@ -47,10 +47,12 @@ def matches(event: Dict, record: Dict, tolerance_khz: float, window_min: int) ->
     return start - window <= event_time <= end + window
 
 
-def enrich(events: Iterable[Dict], catalog: List[Dict], tolerance_khz: float, window_min: int) -> List[Dict]:
+def enrich(
+    events: Iterable[dict], catalog: list[dict], tolerance_khz: float, window_min: int
+) -> list[dict]:
     enriched = []
     for event in events:
-        candidate: Optional[Dict] = None
+        candidate: dict | None = None
         for record in catalog:
             if matches(event, record, tolerance_khz, window_min):
                 candidate = record
@@ -77,7 +79,7 @@ def main() -> None:
     cache_dir = Path(enrich_cfg.get("cache_dir", "./cache"))
     cache_dir.mkdir(parents=True, exist_ok=True)
 
-    catalog: List[Dict] = []
+    catalog: list[dict] = []
     for source in enrich_cfg.get("sources", []):
         catalog.extend(load_source(cache_dir, source))
 

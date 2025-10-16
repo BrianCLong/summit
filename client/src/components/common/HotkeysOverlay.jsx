@@ -1,5 +1,13 @@
 import React from 'react';
-import { Modal, Box, Typography, IconButton, List, ListItem, ListItemText } from '@mui/material';
+import {
+  Modal,
+  Box,
+  Typography,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
+} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
 
 const style = {
@@ -49,13 +57,21 @@ function HotkeysOverlay({ open, handleClose }) {
         >
           <CloseIcon />
         </IconButton>
-        <Typography id="hotkeys-modal-title" variant="h6" component="h2" gutterBottom>
+        <Typography
+          id="hotkeys-modal-title"
+          variant="h6"
+          component="h2"
+          gutterBottom
+        >
           Keyboard Shortcuts
         </Typography>
         <List>
           {hotkeys.map((hotkey, index) => (
             <ListItem key={index}>
-              <ListItemText primary={hotkey.combo} secondary={hotkey.description} />
+              <ListItemText
+                primary={hotkey.combo}
+                secondary={hotkey.description}
+              />
             </ListItem>
           ))}
         </List>

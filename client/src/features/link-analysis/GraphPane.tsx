@@ -19,7 +19,11 @@ export const GraphPane: React.FC = () => {
   ];
   return (
     <div data-testid="graph-pane" style={{ height: '100%' }}>
-      <ReactFlow nodes={nodes} edges={[]} onNodeClick={(_, node) => togglePinned(node.id)}>
+      <ReactFlow
+        nodes={nodes}
+        edges={[]}
+        onNodeClick={(_, node) => togglePinned(node.id)}
+      >
         <Background />
       </ReactFlow>
     </div>

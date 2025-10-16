@@ -1,6 +1,12 @@
 import React from 'react';
 
-export default function DiffView({ before, after }: { before: string; after: string }) {
+export default function DiffView({
+  before,
+  after,
+}: {
+  before: string;
+  after: string;
+}) {
   const a = (before || '').split('\n');
   const b = (after || '').split('\n');
   const rows: { t: 'same' | 'add' | 'del'; s: string }[] = [];
@@ -41,7 +47,9 @@ export default function DiffView({ before, after }: { before: string; after: str
           key={idx}
           className={`whitespace-pre-wrap px-2 py-0.5 ${r.t === 'same' ? 'bg-white' : r.t === 'add' ? 'bg-emerald-50' : 'bg-red-50'}`}
         >
-          <span className={`inline-block w-4 ${r.t === 'same' ? 'text-gray-400' : ''}`}>
+          <span
+            className={`inline-block w-4 ${r.t === 'same' ? 'text-gray-400' : ''}`}
+          >
             {r.t === 'add' ? '+' : r.t === 'del' ? '−' : ' '}
           </span>
           <span>{r.s}</span>

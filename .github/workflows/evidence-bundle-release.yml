@@ -22,391 +22,391 @@ jobs:
     permissions:
       contents: write
       packages: read
-      id-token: write  # For cosign signing
-      attestations: write  # For SLSA provenance
+      id-token: write # For cosign signing
+      attestations: write # For SLSA provenance
     outputs:
       evidence-hash: ${{ steps.bundle.outputs.evidence-hash }}
       bundle-path: ${{ steps.bundle.outputs.bundle-path }}
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        fetch-depth: 0  # Full history for provenance
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # Full history for provenance
 
-    - name: Set up environment variables
-      id: vars
-      run: |
-        if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-          RELEASE_TAG="${{ github.event.inputs.release_tag }}"
-        else
-          RELEASE_TAG="${{ github.ref_name }}"
-        fi
-
-        echo "RELEASE_TAG=${RELEASE_TAG}" >> $GITHUB_ENV
-        echo "BUILD_TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_ENV
-        echo "GIT_COMMIT=$(git rev-parse HEAD)" >> $GITHUB_ENV
-        echo "GIT_SHORT_COMMIT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
-
-        echo "release-tag=${RELEASE_TAG}" >> $GITHUB_OUTPUT
-
-    - name: Install dependencies
-      run: |
-        # Install cosign for signature verification
-        curl -O -L "https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64"
-        sudo mv cosign-linux-amd64 /usr/local/bin/cosign
-        sudo chmod +x /usr/local/bin/cosign
-
-        # Install syft for SBOM generation
-        curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
-
-        # Install grype for vulnerability scanning
-        curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
-
-    - name: Log in to Container Registry
-      uses: docker/login-action@v3
-      with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: Create evidence bundle directory structure
-      run: |
-        mkdir -p evidence-bundle-${RELEASE_TAG}/
-        mkdir -p evidence-bundle-${RELEASE_TAG}/{sbom,security,signing,performance,policies,runbooks,charts}
-        mkdir -p evidence-bundle-${RELEASE_TAG}/reports/{slo,chaos,load-test}
-
-        echo "📁 Evidence bundle directory structure created"
-
-    - name: Generate and verify Helm chart
-      run: |
-        # Package Helm chart
-        helm package charts/intelgraph-maestro -d evidence-bundle-${RELEASE_TAG}/charts/
-
-        # Generate checksum
-        cd evidence-bundle-${RELEASE_TAG}/charts/
-        CHART_FILE=$(ls *.tgz)
-        sha256sum ${CHART_FILE} > ${CHART_FILE}.sha256
-
-        echo "✅ Helm chart packaged and checksummed"
-
-    - name: Generate SBOMs for all container images
-      run: |
-        IMAGES=(
-          "${IMAGE_PREFIX}/api:${RELEASE_TAG}"
-          "${IMAGE_PREFIX}/client:${RELEASE_TAG}"
-          "${IMAGE_PREFIX}/gateway:${RELEASE_TAG}"
-        )
-
-        for image in "${IMAGES[@]}"; do
-          component=$(echo $image | cut -d'/' -f3 | cut -d':' -f1)
-          echo "🔍 Generating SBOM for ${component}..."
-
-          # Generate SPDX SBOM
-          syft ${image} -o spdx-json=evidence-bundle-${RELEASE_TAG}/sbom/${component}-spdx.json
-
-          # Generate vulnerability report
-          grype ${image} -o json > evidence-bundle-${RELEASE_TAG}/security/${component}-trivy-report.json || true
-
-          echo "✅ SBOM and vulnerability scan completed for ${component}"
-        done
-
-    - name: Verify container image signatures
-      run: |
-        IMAGES=(
-          "${IMAGE_PREFIX}/api:${RELEASE_TAG}"
-          "${IMAGE_PREFIX}/client:${RELEASE_TAG}"
-          "${IMAGE_PREFIX}/gateway:${RELEASE_TAG}"
-        )
-
-        for image in "${IMAGES[@]}"; do
-          component=$(echo $image | cut -d'/' -f3 | cut -d':' -f1)
-          echo "🔐 Verifying signature for ${component}..."
-
-          # Verify with cosign (may fail if not signed yet)
-          cosign verify ${image} \
-            --certificate-oidc-issuer=https://token.actions.githubusercontent.com \
-            --certificate-identity-regexp="^https://github.com/intelgraph/" \
-            > evidence-bundle-${RELEASE_TAG}/signing/${component}-cosign-verify.log 2>&1 || \
-            echo "⚠️ Signature verification failed for ${image} (may not be signed yet)"
-
-          # Get Rekor UUID if available
-          cosign verify ${image} --output=json 2>/dev/null | \
-            jq -r '.[0].optional.Bundle.Payload.logID // "not-found"' \
-            > evidence-bundle-${RELEASE_TAG}/signing/${component}-rekor-uuid.txt || \
-            echo "not-found" > evidence-bundle-${RELEASE_TAG}/signing/${component}-rekor-uuid.txt
-        done
-
-    - name: Package OPA policies
-      run: |
-        echo "📋 Packaging OPA policy bundle..."
-
-        # Create policy bundle
-        cd policies/opa
-        tar -czf ../../evidence-bundle-${RELEASE_TAG}/policies/opa-bundle.tar.gz .
-        cd ../../
-
-        # Generate checksum
-        sha256sum evidence-bundle-${RELEASE_TAG}/policies/opa-bundle.tar.gz > \
-          evidence-bundle-${RELEASE_TAG}/policies/opa-bundle.tar.gz.sha256
-
-        echo "✅ OPA policy bundle created and checksummed"
-
-    - name: Generate GraphQL schema artifacts
-      run: |
-        echo "🔍 Collecting GraphQL schema and persisted operations..."
-
-        # Copy GraphQL schema
-        mkdir -p evidence-bundle-${RELEASE_TAG}/graphql
-        find . -name "*.graphql" -o -name "schema.gql" | head -1 | \
-          xargs -I {} cp {} evidence-bundle-${RELEASE_TAG}/graphql/schema.graphql 2>/dev/null || \
-          echo "query { __schema { types { name } } }" > evidence-bundle-${RELEASE_TAG}/graphql/schema.graphql
-
-        # Generate persisted operations if script exists
-        if [ -f "client/scripts/generate-persisted-operations.js" ]; then
-          cd client && node scripts/generate-persisted-operations.js
-          cp persisted-operations.json ../evidence-bundle-${RELEASE_TAG}/graphql/
-          cd ..
-        else
-          echo '{"operations": {}}' > evidence-bundle-${RELEASE_TAG}/graphql/persisted-operations.json
-        fi
-
-        # Generate checksums
-        cd evidence-bundle-${RELEASE_TAG}/graphql
-        sha256sum *.json *.graphql > checksums.sha256
-        cd ../../
-
-        echo "✅ GraphQL artifacts collected"
-
-    - name: Collect database migrations
-      run: |
-        echo "🗄️ Collecting database migration files..."
-
-        mkdir -p evidence-bundle-${RELEASE_TAG}/db/migrations
-
-        # Copy PostgreSQL migrations if they exist
-        if [ -d "db/migrations" ]; then
-          cp -r db/migrations/* evidence-bundle-${RELEASE_TAG}/db/migrations/
-        fi
-
-        # Copy Neo4j migrations if they exist
-        if [ -d "graph/migrations" ]; then
-          mkdir -p evidence-bundle-${RELEASE_TAG}/graph/migrations
-          cp -r graph/migrations/* evidence-bundle-${RELEASE_TAG}/graph/migrations/
-        fi
-
-        echo "✅ Database migrations collected"
-
-    - name: Collect runbooks and documentation
-      run: |
-        echo "📚 Collecting runbooks and operational documentation..."
-
-        # Copy runbooks if they exist
-        if [ -d "runbooks" ]; then
-          cp -r runbooks/* evidence-bundle-${RELEASE_TAG}/runbooks/
-        fi
-
-        # Copy key documentation files
-        docs_files=(
-          "GO_LIVE_CUTOVER.md"
-          "GO_LIVE_APPROVAL.md"
-          "ALERT_POLICIES.yaml"
-          "EVIDENCE_BUNDLE.manifest.json"
-        )
-
-        for doc in "${docs_files[@]}"; do
-          if [ -f "$doc" ]; then
-            cp "$doc" evidence-bundle-${RELEASE_TAG}/
+      - name: Set up environment variables
+        id: vars
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            RELEASE_TAG="${{ github.event.inputs.release_tag }}"
+          else
+            RELEASE_TAG="${{ github.ref_name }}"
           fi
-        done
 
-        echo "✅ Documentation collected"
+          echo "RELEASE_TAG=${RELEASE_TAG}" >> $GITHUB_ENV
+          echo "BUILD_TIMESTAMP=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> $GITHUB_ENV
+          echo "GIT_COMMIT=$(git rev-parse HEAD)" >> $GITHUB_ENV
+          echo "GIT_SHORT_COMMIT=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
-    - name: Generate performance test reports
-      run: |
-        echo "📊 Generating mock performance test reports..."
+          echo "release-tag=${RELEASE_TAG}" >> $GITHUB_OUTPUT
 
-        # Create mock k6 performance report
-        cat > evidence-bundle-${RELEASE_TAG}/reports/k6-baseline-test.json << 'EOF'
-        {
-          "metrics": {
-            "http_req_duration": {"avg": 245.5, "p95": 320.0, "p99": 456.2},
-            "http_req_failed": {"rate": 0.008},
-            "http_reqs": {"count": 12450, "rate": 207.5},
-            "vus": {"value": 100}
-          },
-          "test_timestamp": "2025-09-21T16:30:00Z",
-          "test_duration": "10m",
-          "slo_compliance": true
-        }
-        EOF
+      - name: Install dependencies
+        run: |
+          # Install cosign for signature verification
+          curl -O -L "https://github.com/sigstore/cosign/releases/latest/download/cosign-linux-amd64"
+          sudo mv cosign-linux-amd64 /usr/local/bin/cosign
+          sudo chmod +x /usr/local/bin/cosign
 
-        # Create mock SLO compliance report
-        cat > evidence-bundle-${RELEASE_TAG}/reports/slo-compliance-report.json << 'EOF'
-        {
-          "measurement_window": "24h",
-          "slos": {
-            "api_availability": {"target": 99.9, "actual": 99.97, "status": "met"},
-            "api_p95_latency_ms": {"target": 350, "actual": 285, "status": "met"},
-            "graph_query_p95_ms": {"target": 1200, "actual": 890, "status": "met"},
-            "error_rate_percent": {"target": 0.1, "actual": 0.008, "status": "met"}
-          },
-          "generated_at": "2025-09-21T16:30:00Z"
-        }
-        EOF
+          # Install syft for SBOM generation
+          curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin
 
-        echo "✅ Performance reports generated"
+          # Install grype for vulnerability scanning
+          curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin
 
-    - name: Populate evidence bundle manifest
-      id: manifest
-      run: |
-        echo "📋 Populating evidence bundle manifest..."
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-        # Calculate dynamic values
-        API_DIGEST=$(docker inspect ${IMAGE_PREFIX}/api:${RELEASE_TAG} --format='{{index .RepoDigests 0}}' 2>/dev/null | cut -d@ -f2 || echo "sha256:not-available")
-        CLIENT_DIGEST=$(docker inspect ${IMAGE_PREFIX}/client:${RELEASE_TAG} --format='{{index .RepoDigests 0}}' 2>/dev/null | cut -d@ -f2 || echo "sha256:not-available")
-        GATEWAY_DIGEST=$(docker inspect ${IMAGE_PREFIX}/gateway:${RELEASE_TAG} --format='{{index .RepoDigests 0}}' 2>/dev/null | cut -d@ -f2 || echo "sha256:not-available")
+      - name: Create evidence bundle directory structure
+        run: |
+          mkdir -p evidence-bundle-${RELEASE_TAG}/
+          mkdir -p evidence-bundle-${RELEASE_TAG}/{sbom,security,signing,performance,policies,runbooks,charts}
+          mkdir -p evidence-bundle-${RELEASE_TAG}/reports/{slo,chaos,load-test}
 
-        OPA_BUNDLE_HASH=$(sha256sum evidence-bundle-${RELEASE_TAG}/policies/opa-bundle.tar.gz | cut -d' ' -f1)
-        SCHEMA_HASH=$(sha256sum evidence-bundle-${RELEASE_TAG}/graphql/schema.graphql | cut -d' ' -f1)
-        PERSISTED_OPS_HASH=$(sha256sum evidence-bundle-${RELEASE_TAG}/graphql/persisted-operations.json | cut -d' ' -f1)
+          echo "📁 Evidence bundle directory structure created"
 
-        # Create populated manifest
-        sed -e "s/{{ .Release.GitCommit }}/${GIT_COMMIT}/g" \
-            -e "s/{{ .Release.BuildTime }}/${BUILD_TIMESTAMP}/g" \
-            -e "s/{{ .Release.Pipeline }}/${GITHUB_RUN_ID}/g" \
-            -e "s/{{ .Release.Approver }}/${GITHUB_ACTOR}/g" \
-            -e "s/{{ .Images.API.Digest }}/${API_DIGEST}/g" \
-            -e "s/{{ .Images.Client.Digest }}/${CLIENT_DIGEST}/g" \
-            -e "s/{{ .Images.Gateway.Digest }}/${GATEWAY_DIGEST}/g" \
-            -e "s/{{ sha256sum policies\/opa\/bundle.tar.gz }}/${OPA_BUNDLE_HASH}/g" \
-            -e "s/{{ sha256sum graphql\/schema.graphql }}/${SCHEMA_HASH}/g" \
-            -e "s/{{ sha256sum graphql\/persisted-operations.json }}/${PERSISTED_OPS_HASH}/g" \
-            EVIDENCE_BUNDLE.manifest.json > evidence-bundle-${RELEASE_TAG}/EVIDENCE_BUNDLE.manifest.json
+      - name: Generate and verify Helm chart
+        run: |
+          # Package Helm chart
+          helm package charts/intelgraph-maestro -d evidence-bundle-${RELEASE_TAG}/charts/
 
-        echo "✅ Evidence bundle manifest populated"
+          # Generate checksum
+          cd evidence-bundle-${RELEASE_TAG}/charts/
+          CHART_FILE=$(ls *.tgz)
+          sha256sum ${CHART_FILE} > ${CHART_FILE}.sha256
 
-    - name: Create and sign evidence bundle
-      id: bundle
-      run: |
-        echo "📦 Creating evidence bundle archive..."
+          echo "✅ Helm chart packaged and checksummed"
 
-        # Create compressed archive
-        tar -czf evidence-bundle-${RELEASE_TAG}.tar.gz evidence-bundle-${RELEASE_TAG}/
+      - name: Generate SBOMs for all container images
+        run: |
+          IMAGES=(
+            "${IMAGE_PREFIX}/api:${RELEASE_TAG}"
+            "${IMAGE_PREFIX}/client:${RELEASE_TAG}"
+            "${IMAGE_PREFIX}/gateway:${RELEASE_TAG}"
+          )
 
-        # Generate final checksum
-        BUNDLE_HASH=$(sha256sum evidence-bundle-${RELEASE_TAG}.tar.gz | cut -d' ' -f1)
-        echo "${BUNDLE_HASH}  evidence-bundle-${RELEASE_TAG}.tar.gz" > evidence-bundle-${RELEASE_TAG}.tar.gz.sha256
+          for image in "${IMAGES[@]}"; do
+            component=$(echo $image | cut -d'/' -f3 | cut -d':' -f1)
+            echo "🔍 Generating SBOM for ${component}..."
 
-        # Sign the bundle with cosign (keyless signing)
-        cosign sign-blob evidence-bundle-${RELEASE_TAG}.tar.gz \
-          --output-signature evidence-bundle-${RELEASE_TAG}.tar.gz.sig \
-          --output-certificate evidence-bundle-${RELEASE_TAG}.tar.gz.crt
+            # Generate SPDX SBOM
+            syft ${image} -o spdx-json=evidence-bundle-${RELEASE_TAG}/sbom/${component}-spdx.json
 
-        echo "📦 Evidence bundle size: $(du -h evidence-bundle-${RELEASE_TAG}.tar.gz | cut -f1)"
-        echo "🔐 Evidence bundle SHA256: ${BUNDLE_HASH}"
+            # Generate vulnerability report
+            grype ${image} -o json > evidence-bundle-${RELEASE_TAG}/security/${component}-trivy-report.json || true
 
-        # Set outputs
-        echo "evidence-hash=${BUNDLE_HASH}" >> $GITHUB_OUTPUT
-        echo "bundle-path=evidence-bundle-${RELEASE_TAG}.tar.gz" >> $GITHUB_OUTPUT
+            echo "✅ SBOM and vulnerability scan completed for ${component}"
+          done
 
-        echo "✅ Evidence bundle created and signed"
+      - name: Verify container image signatures
+        run: |
+          IMAGES=(
+            "${IMAGE_PREFIX}/api:${RELEASE_TAG}"
+            "${IMAGE_PREFIX}/client:${RELEASE_TAG}"
+            "${IMAGE_PREFIX}/gateway:${RELEASE_TAG}"
+          )
 
-    - name: Generate SLSA provenance
-      uses: actions/attest-build-provenance@v1
-      with:
-        subject-path: evidence-bundle-${{ env.RELEASE_TAG }}.tar.gz
+          for image in "${IMAGES[@]}"; do
+            component=$(echo $image | cut -d'/' -f3 | cut -d':' -f1)
+            echo "🔐 Verifying signature for ${component}..."
 
-    - name: Upload evidence bundle to release
-      if: startsWith(github.ref, 'refs/tags/')
-      run: |
-        echo "📤 Uploading evidence bundle to GitHub release..."
+            # Verify with cosign (may fail if not signed yet)
+            cosign verify ${image} \
+              --certificate-oidc-issuer=https://token.actions.githubusercontent.com \
+              --certificate-identity-regexp="^https://github.com/intelgraph/" \
+              > evidence-bundle-${RELEASE_TAG}/signing/${component}-cosign-verify.log 2>&1 || \
+              echo "⚠️ Signature verification failed for ${image} (may not be signed yet)"
 
-        # Check if release exists, create if not
-        if ! gh release view ${RELEASE_TAG} >/dev/null 2>&1; then
-          echo "Creating release ${RELEASE_TAG}..."
-          gh release create ${RELEASE_TAG} \
-            --title "IntelGraph Maestro ${RELEASE_TAG}" \
-            --notes "Enterprise-grade production release with complete compliance evidence bundle." \
-            --verify-tag
-        fi
+            # Get Rekor UUID if available
+            cosign verify ${image} --output=json 2>/dev/null | \
+              jq -r '.[0].optional.Bundle.Payload.logID // "not-found"' \
+              > evidence-bundle-${RELEASE_TAG}/signing/${component}-rekor-uuid.txt || \
+              echo "not-found" > evidence-bundle-${RELEASE_TAG}/signing/${component}-rekor-uuid.txt
+          done
 
-        # Upload evidence bundle and related files
-        gh release upload ${RELEASE_TAG} \
-          evidence-bundle-${RELEASE_TAG}.tar.gz \
-          evidence-bundle-${RELEASE_TAG}.tar.gz.sha256 \
-          evidence-bundle-${RELEASE_TAG}.tar.gz.sig \
-          evidence-bundle-${RELEASE_TAG}.tar.gz.crt \
-          --clobber
+      - name: Package OPA policies
+        run: |
+          echo "📋 Packaging OPA policy bundle..."
 
-        echo "✅ Evidence bundle uploaded to release"
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Create policy bundle
+          cd policies/opa
+          tar -czf ../../evidence-bundle-${RELEASE_TAG}/policies/opa-bundle.tar.gz .
+          cd ../../
 
-    - name: Post evidence bundle summary
-      run: |
-        echo "## 📦 Evidence Bundle Generated Successfully" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "**Release:** \`${RELEASE_TAG}\`" >> $GITHUB_STEP_SUMMARY
-        echo "**Bundle Hash:** \`${{ steps.bundle.outputs.evidence-hash }}\`" >> $GITHUB_STEP_SUMMARY
-        echo "**Bundle Size:** \`$(du -h ${{ steps.bundle.outputs.bundle-path }} | cut -f1)\`" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### 📋 Included Artifacts" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ Helm charts with production values" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ Container image SBOMs (SPDX format)" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ Vulnerability scan reports" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ Cosign signature verification" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ OPA policy bundle with checksums" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ GraphQL schema + persisted operations" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ Database migration scripts" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ Performance and SLO reports" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ Operational runbooks" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ Compliance documentation" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "### 🔐 Security Attestations" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ SLSA Level 3 build provenance" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ Cosign keyless signing" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ Rekor transparency log" >> $GITHUB_STEP_SUMMARY
-        echo "- ✅ Container image signatures verified" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "**🎉 Evidence bundle ready for production deployment and compliance audit!**"
+          # Generate checksum
+          sha256sum evidence-bundle-${RELEASE_TAG}/policies/opa-bundle.tar.gz > \
+            evidence-bundle-${RELEASE_TAG}/policies/opa-bundle.tar.gz.sha256
+
+          echo "✅ OPA policy bundle created and checksummed"
+
+      - name: Generate GraphQL schema artifacts
+        run: |
+          echo "🔍 Collecting GraphQL schema and persisted operations..."
+
+          # Copy GraphQL schema
+          mkdir -p evidence-bundle-${RELEASE_TAG}/graphql
+          find . -name "*.graphql" -o -name "schema.gql" | head -1 | \
+            xargs -I {} cp {} evidence-bundle-${RELEASE_TAG}/graphql/schema.graphql 2>/dev/null || \
+            echo "query { __schema { types { name } } }" > evidence-bundle-${RELEASE_TAG}/graphql/schema.graphql
+
+          # Generate persisted operations if script exists
+          if [ -f "client/scripts/generate-persisted-operations.js" ]; then
+            cd client && node scripts/generate-persisted-operations.js
+            cp persisted-operations.json ../evidence-bundle-${RELEASE_TAG}/graphql/
+            cd ..
+          else
+            echo '{"operations": {}}' > evidence-bundle-${RELEASE_TAG}/graphql/persisted-operations.json
+          fi
+
+          # Generate checksums
+          cd evidence-bundle-${RELEASE_TAG}/graphql
+          sha256sum *.json *.graphql > checksums.sha256
+          cd ../../
+
+          echo "✅ GraphQL artifacts collected"
+
+      - name: Collect database migrations
+        run: |
+          echo "🗄️ Collecting database migration files..."
+
+          mkdir -p evidence-bundle-${RELEASE_TAG}/db/migrations
+
+          # Copy PostgreSQL migrations if they exist
+          if [ -d "db/migrations" ]; then
+            cp -r db/migrations/* evidence-bundle-${RELEASE_TAG}/db/migrations/
+          fi
+
+          # Copy Neo4j migrations if they exist
+          if [ -d "graph/migrations" ]; then
+            mkdir -p evidence-bundle-${RELEASE_TAG}/graph/migrations
+            cp -r graph/migrations/* evidence-bundle-${RELEASE_TAG}/graph/migrations/
+          fi
+
+          echo "✅ Database migrations collected"
+
+      - name: Collect runbooks and documentation
+        run: |
+          echo "📚 Collecting runbooks and operational documentation..."
+
+          # Copy runbooks if they exist
+          if [ -d "runbooks" ]; then
+            cp -r runbooks/* evidence-bundle-${RELEASE_TAG}/runbooks/
+          fi
+
+          # Copy key documentation files
+          docs_files=(
+            "GO_LIVE_CUTOVER.md"
+            "GO_LIVE_APPROVAL.md"
+            "ALERT_POLICIES.yaml"
+            "EVIDENCE_BUNDLE.manifest.json"
+          )
+
+          for doc in "${docs_files[@]}"; do
+            if [ -f "$doc" ]; then
+              cp "$doc" evidence-bundle-${RELEASE_TAG}/
+            fi
+          done
+
+          echo "✅ Documentation collected"
+
+      - name: Generate performance test reports
+        run: |
+          echo "📊 Generating mock performance test reports..."
+
+          # Create mock k6 performance report
+          cat > evidence-bundle-${RELEASE_TAG}/reports/k6-baseline-test.json << 'EOF'
+          {
+            "metrics": {
+              "http_req_duration": {"avg": 245.5, "p95": 320.0, "p99": 456.2},
+              "http_req_failed": {"rate": 0.008},
+              "http_reqs": {"count": 12450, "rate": 207.5},
+              "vus": {"value": 100}
+            },
+            "test_timestamp": "2025-09-21T16:30:00Z",
+            "test_duration": "10m",
+            "slo_compliance": true
+          }
+          EOF
+
+          # Create mock SLO compliance report
+          cat > evidence-bundle-${RELEASE_TAG}/reports/slo-compliance-report.json << 'EOF'
+          {
+            "measurement_window": "24h",
+            "slos": {
+              "api_availability": {"target": 99.9, "actual": 99.97, "status": "met"},
+              "api_p95_latency_ms": {"target": 350, "actual": 285, "status": "met"},
+              "graph_query_p95_ms": {"target": 1200, "actual": 890, "status": "met"},
+              "error_rate_percent": {"target": 0.1, "actual": 0.008, "status": "met"}
+            },
+            "generated_at": "2025-09-21T16:30:00Z"
+          }
+          EOF
+
+          echo "✅ Performance reports generated"
+
+      - name: Populate evidence bundle manifest
+        id: manifest
+        run: |
+          echo "📋 Populating evidence bundle manifest..."
+
+          # Calculate dynamic values
+          API_DIGEST=$(docker inspect ${IMAGE_PREFIX}/api:${RELEASE_TAG} --format='{{index .RepoDigests 0}}' 2>/dev/null | cut -d@ -f2 || echo "sha256:not-available")
+          CLIENT_DIGEST=$(docker inspect ${IMAGE_PREFIX}/client:${RELEASE_TAG} --format='{{index .RepoDigests 0}}' 2>/dev/null | cut -d@ -f2 || echo "sha256:not-available")
+          GATEWAY_DIGEST=$(docker inspect ${IMAGE_PREFIX}/gateway:${RELEASE_TAG} --format='{{index .RepoDigests 0}}' 2>/dev/null | cut -d@ -f2 || echo "sha256:not-available")
+
+          OPA_BUNDLE_HASH=$(sha256sum evidence-bundle-${RELEASE_TAG}/policies/opa-bundle.tar.gz | cut -d' ' -f1)
+          SCHEMA_HASH=$(sha256sum evidence-bundle-${RELEASE_TAG}/graphql/schema.graphql | cut -d' ' -f1)
+          PERSISTED_OPS_HASH=$(sha256sum evidence-bundle-${RELEASE_TAG}/graphql/persisted-operations.json | cut -d' ' -f1)
+
+          # Create populated manifest
+          sed -e "s/{{ .Release.GitCommit }}/${GIT_COMMIT}/g" \
+              -e "s/{{ .Release.BuildTime }}/${BUILD_TIMESTAMP}/g" \
+              -e "s/{{ .Release.Pipeline }}/${GITHUB_RUN_ID}/g" \
+              -e "s/{{ .Release.Approver }}/${GITHUB_ACTOR}/g" \
+              -e "s/{{ .Images.API.Digest }}/${API_DIGEST}/g" \
+              -e "s/{{ .Images.Client.Digest }}/${CLIENT_DIGEST}/g" \
+              -e "s/{{ .Images.Gateway.Digest }}/${GATEWAY_DIGEST}/g" \
+              -e "s/{{ sha256sum policies\/opa\/bundle.tar.gz }}/${OPA_BUNDLE_HASH}/g" \
+              -e "s/{{ sha256sum graphql\/schema.graphql }}/${SCHEMA_HASH}/g" \
+              -e "s/{{ sha256sum graphql\/persisted-operations.json }}/${PERSISTED_OPS_HASH}/g" \
+              EVIDENCE_BUNDLE.manifest.json > evidence-bundle-${RELEASE_TAG}/EVIDENCE_BUNDLE.manifest.json
+
+          echo "✅ Evidence bundle manifest populated"
+
+      - name: Create and sign evidence bundle
+        id: bundle
+        run: |
+          echo "📦 Creating evidence bundle archive..."
+
+          # Create compressed archive
+          tar -czf evidence-bundle-${RELEASE_TAG}.tar.gz evidence-bundle-${RELEASE_TAG}/
+
+          # Generate final checksum
+          BUNDLE_HASH=$(sha256sum evidence-bundle-${RELEASE_TAG}.tar.gz | cut -d' ' -f1)
+          echo "${BUNDLE_HASH}  evidence-bundle-${RELEASE_TAG}.tar.gz" > evidence-bundle-${RELEASE_TAG}.tar.gz.sha256
+
+          # Sign the bundle with cosign (keyless signing)
+          cosign sign-blob evidence-bundle-${RELEASE_TAG}.tar.gz \
+            --output-signature evidence-bundle-${RELEASE_TAG}.tar.gz.sig \
+            --output-certificate evidence-bundle-${RELEASE_TAG}.tar.gz.crt
+
+          echo "📦 Evidence bundle size: $(du -h evidence-bundle-${RELEASE_TAG}.tar.gz | cut -f1)"
+          echo "🔐 Evidence bundle SHA256: ${BUNDLE_HASH}"
+
+          # Set outputs
+          echo "evidence-hash=${BUNDLE_HASH}" >> $GITHUB_OUTPUT
+          echo "bundle-path=evidence-bundle-${RELEASE_TAG}.tar.gz" >> $GITHUB_OUTPUT
+
+          echo "✅ Evidence bundle created and signed"
+
+      - name: Generate SLSA provenance
+        uses: actions/attest-build-provenance@v1
+        with:
+          subject-path: evidence-bundle-${{ env.RELEASE_TAG }}.tar.gz
+
+      - name: Upload evidence bundle to release
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          echo "📤 Uploading evidence bundle to GitHub release..."
+
+          # Check if release exists, create if not
+          if ! gh release view ${RELEASE_TAG} >/dev/null 2>&1; then
+            echo "Creating release ${RELEASE_TAG}..."
+            gh release create ${RELEASE_TAG} \
+              --title "IntelGraph Maestro ${RELEASE_TAG}" \
+              --notes "Enterprise-grade production release with complete compliance evidence bundle." \
+              --verify-tag
+          fi
+
+          # Upload evidence bundle and related files
+          gh release upload ${RELEASE_TAG} \
+            evidence-bundle-${RELEASE_TAG}.tar.gz \
+            evidence-bundle-${RELEASE_TAG}.tar.gz.sha256 \
+            evidence-bundle-${RELEASE_TAG}.tar.gz.sig \
+            evidence-bundle-${RELEASE_TAG}.tar.gz.crt \
+            --clobber
+
+          echo "✅ Evidence bundle uploaded to release"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Post evidence bundle summary
+        run: |
+          echo "## 📦 Evidence Bundle Generated Successfully" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Release:** \`${RELEASE_TAG}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Bundle Hash:** \`${{ steps.bundle.outputs.evidence-hash }}\`" >> $GITHUB_STEP_SUMMARY
+          echo "**Bundle Size:** \`$(du -h ${{ steps.bundle.outputs.bundle-path }} | cut -f1)\`" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 📋 Included Artifacts" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Helm charts with production values" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Container image SBOMs (SPDX format)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Vulnerability scan reports" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Cosign signature verification" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ OPA policy bundle with checksums" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ GraphQL schema + persisted operations" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Database migration scripts" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Performance and SLO reports" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Operational runbooks" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Compliance documentation" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🔐 Security Attestations" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ SLSA Level 3 build provenance" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Cosign keyless signing" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Rekor transparency log" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Container image signatures verified" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🎉 Evidence bundle ready for production deployment and compliance audit!**"
 
   validate-evidence-bundle:
     name: Validate Evidence Bundle
     runs-on: ubuntu-latest
     needs: generate-evidence-bundle
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Download evidence bundle
-      run: |
-        # This would download from the release in a real scenario
-        echo "📥 Evidence bundle validation would happen here"
-        echo "Bundle hash: ${{ needs.generate-evidence-bundle.outputs.evidence-hash }}"
+      - name: Download evidence bundle
+        run: |
+          # This would download from the release in a real scenario
+          echo "📥 Evidence bundle validation would happen here"
+          echo "Bundle hash: ${{ needs.generate-evidence-bundle.outputs.evidence-hash }}"
 
-        # Validate bundle structure
-        echo "✅ Bundle structure validation passed"
+          # Validate bundle structure
+          echo "✅ Bundle structure validation passed"
 
-        # Validate checksums
-        echo "✅ Checksum validation passed"
+          # Validate checksums
+          echo "✅ Checksum validation passed"
 
-        # Validate signatures
-        echo "✅ Signature validation passed"
+          # Validate signatures
+          echo "✅ Signature validation passed"
 
-    - name: Compliance check summary
-      run: |
-        echo "## 🛡️ Evidence Bundle Compliance Validation" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "| Check | Status | Details |" >> $GITHUB_STEP_SUMMARY
-        echo "|-------|--------|---------|" >> $GITHUB_STEP_SUMMARY
-        echo "| Bundle Structure | ✅ PASS | All required directories present |" >> $GITHUB_STEP_SUMMARY
-        echo "| Artifact Checksums | ✅ PASS | SHA256 hashes verified |" >> $GITHUB_STEP_SUMMARY
-        echo "| Digital Signatures | ✅ PASS | Cosign signatures valid |" >> $GITHUB_STEP_SUMMARY
-        echo "| SBOM Completeness | ✅ PASS | All container SBOMs included |" >> $GITHUB_STEP_SUMMARY
-        echo "| Security Scans | ✅ PASS | Vulnerability reports included |" >> $GITHUB_STEP_SUMMARY
-        echo "| Policy Bundle | ✅ PASS | OPA policies verified |" >> $GITHUB_STEP_SUMMARY
-        echo "| Performance Data | ✅ PASS | SLO compliance reports included |" >> $GITHUB_STEP_SUMMARY
-        echo "| Documentation | ✅ PASS | Runbooks and procedures complete |" >> $GITHUB_STEP_SUMMARY
-        echo "" >> $GITHUB_STEP_SUMMARY
-        echo "**🎯 Evidence bundle meets all enterprise compliance requirements!**"
+      - name: Compliance check summary
+        run: |
+          echo "## 🛡️ Evidence Bundle Compliance Validation" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status | Details |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|---------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Bundle Structure | ✅ PASS | All required directories present |" >> $GITHUB_STEP_SUMMARY
+          echo "| Artifact Checksums | ✅ PASS | SHA256 hashes verified |" >> $GITHUB_STEP_SUMMARY
+          echo "| Digital Signatures | ✅ PASS | Cosign signatures valid |" >> $GITHUB_STEP_SUMMARY
+          echo "| SBOM Completeness | ✅ PASS | All container SBOMs included |" >> $GITHUB_STEP_SUMMARY
+          echo "| Security Scans | ✅ PASS | Vulnerability reports included |" >> $GITHUB_STEP_SUMMARY
+          echo "| Policy Bundle | ✅ PASS | OPA policies verified |" >> $GITHUB_STEP_SUMMARY
+          echo "| Performance Data | ✅ PASS | SLO compliance reports included |" >> $GITHUB_STEP_SUMMARY
+          echo "| Documentation | ✅ PASS | Runbooks and procedures complete |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**🎯 Evidence bundle meets all enterprise compliance requirements!**"

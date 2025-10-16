@@ -2,7 +2,13 @@ import React from 'react';
 import { useFocusTrap } from '../utils/useFocusTrap';
 import { Link } from 'react-router-dom';
 
-export default function CommandPalette({ open, onClose }: { open: boolean; onClose: () => void }) {
+export default function CommandPalette({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
   const ref = React.useRef<HTMLDivElement>(null);
   useFocusTrap(ref, open, onClose);
   const [q, setQ] = React.useState('');
@@ -18,7 +24,9 @@ export default function CommandPalette({ open, onClose }: { open: boolean; onClo
     { label: 'Go: Tickets', href: '/maestro/tickets' },
     { label: 'Go: Admin Studio', href: '/maestro/admin' },
   ];
-  const filtered = items.filter((i) => i.label.toLowerCase().includes(q.toLowerCase()));
+  const filtered = items.filter((i) =>
+    i.label.toLowerCase().includes(q.toLowerCase()),
+  );
   if (!open) return null;
   return (
     <div
@@ -56,7 +64,9 @@ export default function CommandPalette({ open, onClose }: { open: boolean; onClo
             </li>
           ))}
           {filtered.length === 0 && (
-            <li className="px-3 py-6 text-center text-sm text-slate-500">No matches</li>
+            <li className="px-3 py-6 text-center text-sm text-slate-500">
+              No matches
+            </li>
           )}
         </ul>
         <div className="border-t px-3 py-1 text-[11px] text-slate-500">

@@ -6,13 +6,21 @@ import PlaybookDialog from '../components/PlaybookDialog';
 export default function AlertCenter() {
   const { getAlertCenterEvents, getIncidents } = api();
   const [since, setSince] = useState(6 * 3600 * 1000);
-  const [filterType, setFilterType] = useState<'all' | 'ci' | 'slo' | 'forecast'>('all');
-  const [filterSev, setFilterSev] = useState<'all' | 'info' | 'warn' | 'page'>('all');
+  const [filterType, setFilterType] = useState<
+    'all' | 'ci' | 'slo' | 'forecast'
+  >('all');
+  const [filterSev, setFilterSev] = useState<'all' | 'info' | 'warn' | 'page'>(
+    'all',
+  );
   const [rows, setRows] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [mode, setMode] = useState<'events' | 'incidents'>('events');
   const [inc, setInc] = useState<any[]>([]);
-  const [pb, setPb] = useState<{ open: boolean; sig: string; provider: string } | null>(null);
+  const [pb, setPb] = useState<{
+    open: boolean;
+    sig: string;
+    provider: string;
+  } | null>(null);
 
   const refresh = () => {
     setLoading(true);
@@ -56,7 +64,11 @@ export default function AlertCenter() {
           >
             Incidents
           </button>
-          <button className="rounded border px-2 py-1 text-sm" onClick={refresh} disabled={loading}>
+          <button
+            className="rounded border px-2 py-1 text-sm"
+            onClick={refresh}
+            disabled={loading}
+          >
             Refresh
           </button>
         </div>
@@ -128,7 +140,9 @@ export default function AlertCenter() {
                     </span>
                   </td>
                   <td>
-                    <span className="rounded border px-2 py-0.5 text-xs">{e.type}</span>
+                    <span className="rounded border px-2 py-0.5 text-xs">
+                      {e.type}
+                    </span>
                   </td>
                   <td>
                     {e.title}
@@ -136,8 +150,16 @@ export default function AlertCenter() {
                       className="ml-2 text-blue-600 underline"
                       onClick={() => {
                         const provider =
-                          e.type === 'forecast' ? 'llm' : e.type === 'ci' ? 'ci' : 'other';
-                        setPb({ open: true, sig: canonSig(e.title || ''), provider });
+                          e.type === 'forecast'
+                            ? 'llm'
+                            : e.type === 'ci'
+                              ? 'ci'
+                              : 'other';
+                        setPb({
+                          open: true,
+                          sig: canonSig(e.title || ''),
+                          provider,
+                        });
                       }}
                     >
                       Playbook
@@ -199,7 +221,9 @@ export default function AlertCenter() {
                   <td>{g.count}</td>
                   <td>
                     <details>
-                      <summary className="cursor-pointer text-blue-600 underline">view</summary>
+                      <summary className="cursor-pointer text-blue-600 underline">
+                        view
+                      </summary>
                       <ul className="ml-6 list-disc">
                         {g.events.map((e: any) => (
                           <li key={e.id}>
@@ -233,7 +257,12 @@ export default function AlertCenter() {
         </div>
       )}
       {pb?.open && (
-        <PlaybookDialog open onClose={() => setPb(null)} sig={pb.sig} providerGuess={pb.provider} />
+        <PlaybookDialog
+          open
+          onClose={() => setPb(null)}
+          sig={pb.sig}
+          providerGuess={pb.provider}
+        />
       )}
     </section>
   );

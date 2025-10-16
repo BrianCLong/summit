@@ -18,8 +18,11 @@ export async function loadLanguage(lang) {
 
 export function t(key, vars = {}) {
   const tpl = dict[key] || key;
-  return tpl.replace(/\{(\w+)\}/g, (_, k) => (k in vars ? String(vars[k]) : `{${k}}`));
+  return tpl.replace(/\{(\w+)\}/g, (_, k) =>
+    k in vars ? String(vars[k]) : `{${k}}`,
+  );
 }
 
-export function getLanguage() { return current; }
-
+export function getLanguage() {
+  return current;
+}

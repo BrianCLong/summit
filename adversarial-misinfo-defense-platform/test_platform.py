@@ -1,5 +1,5 @@
 """
-Test suite for Adversarial Misinformation Defense Platform
+Test Suite for Adversarial Misinformation Defense Platform
 
 This module contains tests to verify that all platform components are working correctly.
 """

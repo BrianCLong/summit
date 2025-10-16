@@ -154,7 +154,8 @@ export default function GraphCanvas() {
         const bb = n.renderedBoundingBox();
         const cx = (bb.x1 + bb.x2) / 2;
         const cyy = (bb.y1 + bb.y2) / 2;
-        if (cx >= rect.x1 && cx <= rect.x2 && cyy >= rect.y1 && cyy <= rect.y2) n.select();
+        if (cx >= rect.x1 && cx <= rect.x2 && cyy >= rect.y1 && cyy <= rect.y2)
+          n.select();
       });
     });
 
@@ -172,7 +173,10 @@ export default function GraphCanvas() {
     if (!cy || !menuTarget?.id) return;
     const id = menuTarget.id;
     const newId = `${id}-${Math.floor(Math.random() * 1000)}`;
-    cy.add([{ data: { id: newId, label: `N:${newId}` } }, { data: { source: id, target: newId } }]);
+    cy.add([
+      { data: { id: newId, label: `N:${newId}` } },
+      { data: { source: id, target: newId } },
+    ]);
     cy.layout({ name: 'cose', animate: false }).run();
     setMenuAnchor(null);
   };
@@ -216,15 +220,32 @@ export default function GraphCanvas() {
           justifyContent: 'center',
         }}
       >
-        <Typography color="error">Error loading graph data: {error.message}</Typography>
+        <Typography color="error">
+          Error loading graph data: {error.message}
+        </Typography>
       </Box>
     );
   }
 
   return (
-    <Box sx={{ border: '1px solid #e0e0e0', borderRadius: 2, height: 600, position: 'relative' }}>
-      <div id="graph-root" ref={containerRef} style={{ width: '100%', height: '100%' }} />
-      <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={() => setMenuAnchor(null)}>
+    <Box
+      sx={{
+        border: '1px solid #e0e0e0',
+        borderRadius: 2,
+        height: 600,
+        position: 'relative',
+      }}
+    >
+      <div
+        id="graph-root"
+        ref={containerRef}
+        style={{ width: '100%', height: '100%' }}
+      />
+      <Menu
+        anchorEl={menuAnchor}
+        open={Boolean(menuAnchor)}
+        onClose={() => setMenuAnchor(null)}
+      >
         <MenuItem onClick={handleExpandNeighbors}>Expand Neighbors</MenuItem>
         <MenuItem onClick={handlePinToggle}>Pin/Unpin</MenuItem>
         <MenuItem
@@ -244,14 +265,28 @@ export default function GraphCanvas() {
           Add to Investigation
         </MenuItem>
       </Menu>
-      <Box sx={{ position: 'absolute', left: 8, bottom: 8, display: 'flex', gap: 1 }}>
-        <Button size="small" variant="outlined" onClick={() => cyRef.current?.fit()}>
+      <Box
+        sx={{
+          position: 'absolute',
+          left: 8,
+          bottom: 8,
+          display: 'flex',
+          gap: 1,
+        }}
+      >
+        <Button
+          size="small"
+          variant="outlined"
+          onClick={() => cyRef.current?.fit()}
+        >
           Fit
         </Button>
         <Button
           size="small"
           variant="outlined"
-          onClick={() => cyRef.current?.layout({ name: 'cose', animate: false }).run()}
+          onClick={() =>
+            cyRef.current?.layout({ name: 'cose', animate: false }).run()
+          }
         >
           Layout
         </Button>

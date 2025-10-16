@@ -1,11 +1,12 @@
 """Static linting utilities for Gatekeeper RBAC policies and role maps."""
+
 from __future__ import annotations
 
 import glob
 import re
+from collections.abc import Sequence
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Optional, Sequence, Tuple
 
 try:  # pragma: no cover - optional dependency guard
     import yaml
@@ -23,12 +24,14 @@ class LintIssue:
     message: str
     severity: str = "error"
 
-    def sort_key(self) -> Tuple[str, int, str]:
+    def sort_key(self) -> tuple[str, int, str]:
         return (self.file, self.line, self.rule)
 
 
 BROAD_WILDCARD_PATTERN = re.compile(r'"([^"\\]*\\.)*[^"\\]*\*[^"\\]*"')
-RULE_DEFINITION_PATTERN = re.compile(r"^(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s*(?:\[[^\]]+\])?\s*{", re.MULTILINE)
+RULE_DEFINITION_PATTERN = re.compile(
+    r"^(?P<name>[A-Za-z_][A-Za-z0-9_]*)\s*(?:\[[^\]]+\])?\s*{", re.MULTILINE
+)
 COMMENT_PATTERN = re.compile(r"^\s*#")
 
 
@@ -43,15 +46,15 @@ class PolicyLintResult:
 class RoleLintResult:
     """Container for role map linting output and optional normalization."""
 
-    def __init__(self, issues: Sequence[LintIssue], normalized: Optional[str] = None):
+    def __init__(self, issues: Sequence[LintIssue], normalized: str | None = None):
         self.issues = list(issues)
         self.normalized = normalized
 
 
-def expand_policy_globs(patterns: Sequence[str]) -> List[Path]:
+def expand_policy_globs(patterns: Sequence[str]) -> list[Path]:
     """Expand the provided glob patterns into an ordered list of policy paths."""
 
-    paths: List[Path] = []
+    paths: list[Path] = []
     for pattern in patterns:
         for match in sorted(glob.glob(pattern, recursive=True)):
             path = Path(match)
@@ -63,8 +66,8 @@ def expand_policy_globs(patterns: Sequence[str]) -> List[Path]:
 def lint_policies(paths: Sequence[Path]) -> PolicyLintResult:
     """Lint the provided Rego policy files for common safety violations."""
 
-    issues: List[LintIssue] = []
-    checked: List[Path] = []
+    issues: list[LintIssue] = []
+    checked: list[Path] = []
 
     for path in paths:
         try:
@@ -92,7 +95,7 @@ def lint_policies(paths: Sequence[Path]) -> PolicyLintResult:
             )
 
         # Unreachable rule detection: rules never referenced outside their definition
-        rule_references: Dict[str, int] = {}
+        rule_references: dict[str, int] = {}
         for match in RULE_DEFINITION_PATTERN.finditer(text):
             name = match.group("name")
             line = text.count("\n", 0, match.start()) + 1
@@ -159,8 +162,8 @@ def lint_roles(path: Path, *, normalize: bool = False) -> RoleLintResult:
             ]
         )
 
-    issues: List[LintIssue] = []
-    normalized_text: Optional[str] = None
+    issues: list[LintIssue] = []
+    normalized_text: str | None = None
 
     role_entries = _extract_role_entries(data)
 
@@ -190,7 +193,7 @@ def lint_roles(path: Path, *, normalize: bool = False) -> RoleLintResult:
     return RoleLintResult(issues=issues, normalized=normalized_text)
 
 
-def _extract_role_entries(data: object) -> List[Dict[str, object]]:
+def _extract_role_entries(data: object) -> list[dict[str, object]]:
     """Locate role entries within the loaded YAML structure."""
 
     if isinstance(data, dict):
@@ -203,8 +206,8 @@ def _extract_role_entries(data: object) -> List[Dict[str, object]]:
     return []
 
 
-def _lint_role(role: Dict[str, object], path: Path) -> List[LintIssue]:
-    issues: List[LintIssue] = []
+def _lint_role(role: dict[str, object], path: Path) -> list[LintIssue]:
+    issues: list[LintIssue] = []
     role_name = str(role.get("name", role.get("id", "<unnamed>")))
     permissions = role.get("permissions")
 
@@ -219,7 +222,7 @@ def _lint_role(role: Dict[str, object], path: Path) -> List[LintIssue]:
         )
         return issues
 
-    seen: Dict[Tuple[str, Tuple[str, ...]], int] = {}
+    seen: dict[tuple[str, tuple[str, ...]], int] = {}
     for idx, perm in enumerate(permissions):
         if not isinstance(perm, dict):
             issues.append(
@@ -290,7 +293,7 @@ def _lint_role(role: Dict[str, object], path: Path) -> List[LintIssue]:
     return issues
 
 
-def _normalize_roles(data: object) -> Tuple[object, bool]:
+def _normalize_roles(data: object) -> tuple[object, bool]:
     """Return a normalized copy of the roles structure for deterministic output."""
 
     changed = False
@@ -309,9 +312,11 @@ def _normalize_roles(data: object) -> Tuple[object, bool]:
                         normalized_roles.append(role)
                 sorted_roles = sorted(
                     normalized_roles,
-                    key=lambda item: str(item.get("name", item.get("id", "")))
-                    if isinstance(item, dict)
-                    else str(item),
+                    key=lambda item: (
+                        str(item.get("name", item.get("id", "")))
+                        if isinstance(item, dict)
+                        else str(item)
+                    ),
                 )
                 if roles != sorted_roles:
                     changed = True
@@ -328,9 +333,9 @@ def _normalize_roles(data: object) -> Tuple[object, bool]:
                 normalized_roles.append(role)
         sorted_roles = sorted(
             normalized_roles,
-            key=lambda item: str(item.get("name", item.get("id", "")))
-            if isinstance(item, dict)
-            else str(item),
+            key=lambda item: (
+                str(item.get("name", item.get("id", ""))) if isinstance(item, dict) else str(item)
+            ),
         )
         if data != sorted_roles:
             changed = True
@@ -339,7 +344,7 @@ def _normalize_roles(data: object) -> Tuple[object, bool]:
     return data, changed
 
 
-def _normalize_role(role: Dict[str, object]) -> Tuple[Dict[str, object], bool]:
+def _normalize_role(role: dict[str, object]) -> tuple[dict[str, object], bool]:
     changed = False
     permissions = role.get("permissions")
     if isinstance(permissions, list):

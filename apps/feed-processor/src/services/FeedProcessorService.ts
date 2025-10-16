@@ -14,7 +14,16 @@ const pipelineAsync = promisify(pipeline);
 export interface FeedSource {
   id: string;
   name: string;
-  type: 'rss' | 'json' | 'xml' | 'csv' | 'stix' | 'taxii' | 'api' | 'webhook' | 'file';
+  type:
+    | 'rss'
+    | 'json'
+    | 'xml'
+    | 'csv'
+    | 'stix'
+    | 'taxii'
+    | 'api'
+    | 'webhook'
+    | 'file';
   url?: string;
   configuration: {
     pollInterval: number; // milliseconds
@@ -136,7 +145,10 @@ export class FeedProcessorService extends EventEmitter {
   }
 
   async createFeedSource(
-    source: Omit<FeedSource, 'id' | 'createdAt' | 'updatedAt' | 'errorCount' | 'totalProcessed'>,
+    source: Omit<
+      FeedSource,
+      'id' | 'createdAt' | 'updatedAt' | 'errorCount' | 'totalProcessed'
+    >,
     userId: string,
   ): Promise<FeedSource> {
     const client = await this.pgPool.connect();
@@ -202,7 +214,9 @@ export class FeedProcessorService extends EventEmitter {
       this.stopPolling(source.id);
     }
 
-    logger.info(`Starting polling for feed source: ${source.name} (${source.id})`);
+    logger.info(
+      `Starting polling for feed source: ${source.name} (${source.id})`,
+    );
 
     // Initial poll
     this.pollFeedSource(source);
@@ -367,10 +381,13 @@ export class FeedProcessorService extends EventEmitter {
           feedItems = data.rss?.channel?.[0]?.item || [];
           break;
         case 'json':
-          feedItems = Array.isArray(data) ? data : data.items || data.results || [data];
+          feedItems = Array.isArray(data)
+            ? data
+            : data.items || data.results || [data];
           break;
         case 'xml':
-          const rootElement = source.configuration.format.rootElement || 'items';
+          const rootElement =
+            source.configuration.format.rootElement || 'items';
           feedItems = data[rootElement] || [];
           break;
         case 'stix':
@@ -386,10 +403,17 @@ export class FeedProcessorService extends EventEmitter {
             id: uuidv4(),
             sourceId: source.id,
             originalId: this.extractField(item, mapping.id || 'id'),
-            title: this.extractField(item, mapping.title || 'title') || `Item ${index}`,
-            description: this.extractField(item, mapping.description || 'description'),
+            title:
+              this.extractField(item, mapping.title || 'title') ||
+              `Item ${index}`,
+            description: this.extractField(
+              item,
+              mapping.description || 'description',
+            ),
             content: this.extractField(item, mapping.content || 'content'),
-            publishedAt: this.parseDate(this.extractField(item, mapping.publishedAt || 'pubDate')),
+            publishedAt: this.parseDate(
+              this.extractField(item, mapping.publishedAt || 'pubDate'),
+            ),
             url: this.extractField(item, mapping.url || 'link'),
             author: this.extractField(item, mapping.author || 'author'),
             category: this.extractField(item, mapping.category || 'category'),
@@ -453,23 +477,36 @@ export class FeedProcessorService extends EventEmitter {
     }
   }
 
-  private applyFilters(items: ProcessedFeedItem[], source: FeedSource): ProcessedFeedItem[] {
+  private applyFilters(
+    items: ProcessedFeedItem[],
+    source: FeedSource,
+  ): ProcessedFeedItem[] {
     const filters = source.configuration.filters;
     if (!filters) return items;
 
     return items.filter((item) => {
       // Include patterns
       if (filters.includePatterns?.length > 0) {
-        const content = `${item.title} ${item.description} ${item.content}`.toLowerCase();
-        if (!filters.includePatterns.some((pattern) => content.includes(pattern.toLowerCase()))) {
+        const content =
+          `${item.title} ${item.description} ${item.content}`.toLowerCase();
+        if (
+          !filters.includePatterns.some((pattern) =>
+            content.includes(pattern.toLowerCase()),
+          )
+        ) {
           return false;
         }
       }
 
       // Exclude patterns
       if (filters.excludePatterns?.length > 0) {
-        const content = `${item.title} ${item.description} ${item.content}`.toLowerCase();
-        if (filters.excludePatterns.some((pattern) => content.includes(pattern.toLowerCase()))) {
+        const content =
+          `${item.title} ${item.description} ${item.content}`.toLowerCase();
+        if (
+          filters.excludePatterns.some((pattern) =>
+            content.includes(pattern.toLowerCase()),
+          )
+        ) {
           return false;
         }
       }
@@ -486,7 +523,11 @@ export class FeedProcessorService extends EventEmitter {
     });
   }
 
-  private evaluateFilter(value: any, operator: string, filterValue: any): boolean {
+  private evaluateFilter(
+    value: any,
+    operator: string,
+    filterValue: any,
+  ): boolean {
     switch (operator) {
       case 'eq':
         return value === filterValue;
@@ -501,11 +542,17 @@ export class FeedProcessorService extends EventEmitter {
       case 'lte':
         return value <= filterValue;
       case 'contains':
-        return String(value).toLowerCase().includes(String(filterValue).toLowerCase());
+        return String(value)
+          .toLowerCase()
+          .includes(String(filterValue).toLowerCase());
       case 'startsWith':
-        return String(value).toLowerCase().startsWith(String(filterValue).toLowerCase());
+        return String(value)
+          .toLowerCase()
+          .startsWith(String(filterValue).toLowerCase());
       case 'endsWith':
-        return String(value).toLowerCase().endsWith(String(filterValue).toLowerCase());
+        return String(value)
+          .toLowerCase()
+          .endsWith(String(filterValue).toLowerCase());
       case 'in':
         return Array.isArray(filterValue) && filterValue.includes(value);
       case 'regex':
@@ -515,7 +562,10 @@ export class FeedProcessorService extends EventEmitter {
     }
   }
 
-  private queueItemsForProcessing(items: ProcessedFeedItem[], source: FeedSource): void {
+  private queueItemsForProcessing(
+    items: ProcessedFeedItem[],
+    source: FeedSource,
+  ): void {
     if (!this.processingQueues.has(source.id)) {
       this.processingQueues.set(source.id, []);
     }
@@ -523,7 +573,9 @@ export class FeedProcessorService extends EventEmitter {
     const queue = this.processingQueues.get(source.id)!;
     queue.push(...items);
 
-    logger.debug(`Queued ${items.length} items for processing from ${source.name}`);
+    logger.debug(
+      `Queued ${items.length} items for processing from ${source.name}`,
+    );
     this.emit('items.queued', { sourceId: source.id, count: items.length });
   }
 
@@ -586,7 +638,8 @@ export class FeedProcessorService extends EventEmitter {
 
       // Threat intelligence
       if (enrichment?.threatIntelligence) {
-        item.processedData.threatIndicators = await this.extractThreatIndicators(item);
+        item.processedData.threatIndicators =
+          await this.extractThreatIndicators(item);
       }
 
       // Calculate relevance score
@@ -621,9 +674,12 @@ export class FeedProcessorService extends EventEmitter {
     }
   }
 
-  private async extractEntities(item: ProcessedFeedItem): Promise<ExtractedEntity[]> {
+  private async extractEntities(
+    item: ProcessedFeedItem,
+  ): Promise<ExtractedEntity[]> {
     // Placeholder for entity extraction using NLP
-    const content = `${item.title} ${item.description} ${item.content}`.toLowerCase();
+    const content =
+      `${item.title} ${item.description} ${item.content}`.toLowerCase();
     const entities: ExtractedEntity[] = [];
 
     // Simple pattern-based entity extraction (in production, use NLP libraries)
@@ -650,21 +706,36 @@ export class FeedProcessorService extends EventEmitter {
     return entities;
   }
 
-  private async extractGeolocation(item: ProcessedFeedItem): Promise<GeolocationData> {
+  private async extractGeolocation(
+    item: ProcessedFeedItem,
+  ): Promise<GeolocationData> {
     // Placeholder for geolocation extraction
     return { locations: [] };
   }
 
-  private async analyzeSentiment(item: ProcessedFeedItem): Promise<SentimentData> {
+  private async analyzeSentiment(
+    item: ProcessedFeedItem,
+  ): Promise<SentimentData> {
     // Placeholder for sentiment analysis
     const content = `${item.title} ${item.description}`.toLowerCase();
 
     // Simple keyword-based sentiment (in production, use ML models)
     const positiveWords = ['good', 'great', 'excellent', 'positive', 'success'];
-    const negativeWords = ['bad', 'terrible', 'negative', 'failure', 'attack', 'breach'];
+    const negativeWords = [
+      'bad',
+      'terrible',
+      'negative',
+      'failure',
+      'attack',
+      'breach',
+    ];
 
-    const positiveCount = positiveWords.filter((word) => content.includes(word)).length;
-    const negativeCount = negativeWords.filter((word) => content.includes(word)).length;
+    const positiveCount = positiveWords.filter((word) =>
+      content.includes(word),
+    ).length;
+    const negativeCount = negativeWords.filter((word) =>
+      content.includes(word),
+    ).length;
 
     let score = 0;
     let label: 'positive' | 'negative' | 'neutral' = 'neutral';
@@ -685,7 +756,9 @@ export class FeedProcessorService extends EventEmitter {
     };
   }
 
-  private async extractThreatIndicators(item: ProcessedFeedItem): Promise<ThreatIndicator[]> {
+  private async extractThreatIndicators(
+    item: ProcessedFeedItem,
+  ): Promise<ThreatIndicator[]> {
     const indicators: ThreatIndicator[] = [];
     const content = `${item.title} ${item.description} ${item.content}`;
 
@@ -741,7 +814,8 @@ export class FeedProcessorService extends EventEmitter {
     }
 
     // Recency boost (newer items are more relevant)
-    const ageInDays = (Date.now() - item.publishedAt.getTime()) / (24 * 60 * 60 * 1000);
+    const ageInDays =
+      (Date.now() - item.publishedAt.getTime()) / (24 * 60 * 60 * 1000);
     if (ageInDays < 1) {
       score += 0.2;
     } else if (ageInDays < 7) {
@@ -785,7 +859,10 @@ export class FeedProcessorService extends EventEmitter {
       ]);
 
       // Create entities in graph if extracted
-      if (item.processedData.entities && item.processedData.entities.length > 0) {
+      if (
+        item.processedData.entities &&
+        item.processedData.entities.length > 0
+      ) {
         await this.createGraphEntities(item);
       }
 
@@ -860,7 +937,10 @@ export class FeedProcessorService extends EventEmitter {
     }
   }
 
-  private async updateSourceStatus(sourceId: string, updates: Partial<FeedSource>): Promise<void> {
+  private async updateSourceStatus(
+    sourceId: string,
+    updates: Partial<FeedSource>,
+  ): Promise<void> {
     const setClause = [];
     const values = [];
     let paramIndex = 1;
@@ -973,7 +1053,9 @@ export class FeedProcessorService extends EventEmitter {
       await client.query('BEGIN');
 
       // Delete feed items
-      await client.query('DELETE FROM feed_items WHERE source_id = $1', [sourceId]);
+      await client.query('DELETE FROM feed_items WHERE source_id = $1', [
+        sourceId,
+      ]);
 
       // Delete source
       await client.query('DELETE FROM feed_sources WHERE id = $1', [sourceId]);

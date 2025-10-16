@@ -20,4 +20,5 @@ spec:
 apiVersion: v1
 kind: Service
 metadata: { name: aer-ledger }
-spec: { selector: { app: aer-ledger }, ports: [{ port: 7201, targetPort: 7201 }] }
+spec:
+  { selector: { app: aer-ledger }, ports: [{ port: 7201, targetPort: 7201 }] }

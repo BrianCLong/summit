@@ -1,179 +1,323 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Maestro Conductor</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f1f5f9; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .header { background: white; border-bottom: 1px solid #e5e7eb; padding: 1rem; }
-        .header-content { display: flex; align-items: center; gap: 12px; }
-        .logo { width: 32px; height: 32px; background: #4f46e5; border-radius: 4px; }
-        .header-title { font-weight: 600; color: #374151; }
-        .header-subtitle { font-size: 12px; color: #6b7280; }
-        .main { padding: 2rem; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
-        .card { background: white; border-radius: 8px; padding: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        .card-title { font-weight: 600; color: #374151; margin-bottom: 1rem; }
-        .status-indicator { display: inline-block; width: 8px; height: 8px; background: #10b981; border-radius: 50%; margin-right: 8px; }
-        .metric { display: flex; justify-content: space-between; margin: 8px 0; }
-        .metric-value { font-weight: 600; color: #4f46e5; }
-        .nav { background: white; border-right: 1px solid #e5e7eb; width: 250px; height: 100vh; position: fixed; left: 0; top: 64px; overflow-y: auto; }
-        .nav-item { display: block; padding: 12px 16px; color: #6b7280; text-decoration: none; border-bottom: 1px solid #f3f4f6; }
-        .nav-item:hover, .nav-item.active { background: #f3f4f6; color: #374151; }
-        .content { margin-left: 250px; padding-top: 64px; }
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background: #f1f5f9;
+      }
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .header {
+        background: white;
+        border-bottom: 1px solid #e5e7eb;
+        padding: 1rem;
+      }
+      .header-content {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .logo {
+        width: 32px;
+        height: 32px;
+        background: #4f46e5;
+        border-radius: 4px;
+      }
+      .header-title {
+        font-weight: 600;
+        color: #374151;
+      }
+      .header-subtitle {
+        font-size: 12px;
+        color: #6b7280;
+      }
+      .main {
+        padding: 2rem;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 1.5rem;
+      }
+      .card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.5rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      .card-title {
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 1rem;
+      }
+      .status-indicator {
+        display: inline-block;
+        width: 8px;
+        height: 8px;
+        background: #10b981;
+        border-radius: 50%;
+        margin-right: 8px;
+      }
+      .metric {
+        display: flex;
+        justify-content: space-between;
+        margin: 8px 0;
+      }
+      .metric-value {
+        font-weight: 600;
+        color: #4f46e5;
+      }
+      .nav {
+        background: white;
+        border-right: 1px solid #e5e7eb;
+        width: 250px;
+        height: 100vh;
+        position: fixed;
+        left: 0;
+        top: 64px;
+        overflow-y: auto;
+      }
+      .nav-item {
+        display: block;
+        padding: 12px 16px;
+        color: #6b7280;
+        text-decoration: none;
+        border-bottom: 1px solid #f3f4f6;
+      }
+      .nav-item:hover,
+      .nav-item.active {
+        background: #f3f4f6;
+        color: #374151;
+      }
+      .content {
+        margin-left: 250px;
+        padding-top: 64px;
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div id="root"></div>
-    
+
     <script type="text/babel">
-        const { useState, useEffect } = React;
-        
-        function MaestroApp() {
-            const [currentPage, setCurrentPage] = useState('home');
-            
-            const Header = () => (
-                <div className="header">
-                    <div className="container">
-                        <div className="header-content">
-                            <div className="logo"></div>
-                            <div>
-                                <div className="header-title">Maestro builds IntelGraph</div>
-                                <div className="header-subtitle">Maestro ≠ IntelGraph — Control Plane</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            );
-            
-            const Navigation = () => (
-                <div className="nav">
-                    {[
-                        ['home', 'Home'],
-                        ['runs', 'Runs'],
-                        ['pipelines', 'Pipelines'],
-                        ['observability', 'Observability & SLOs'],
-                        ['autonomy', 'Autonomy & Guardrails'],
-                        ['recipes', 'Recipes'],
-                        ['cost', 'Costs & Budgets'],
-                        ['tickets', 'Tickets & Projects'],
-                        ['admin', 'Admin Studio']
-                    ].map(([key, label]) => (
-                        <a key={key} 
-                           href="#" 
-                           className={`nav-item ${currentPage === key ? 'active' : ''}`}
-                           onClick={(e) => { e.preventDefault(); setCurrentPage(key); }}>
-                            {label}
-                        </a>
-                    ))}
-                </div>
-            );
-            
-            const HomePage = () => (
-                <div className="grid">
-                    <div className="card">
-                        <div className="card-title">System Status</div>
-                        <div className="metric">
-                            <span><span className="status-indicator"></span>Environment</span>
-                            <span className="metric-value">Development</span>
-                        </div>
-                        <div className="metric">
-                            <span>Version</span>
-                            <span className="metric-value">2.0.0</span>
-                        </div>
-                        <div className="metric">
-                            <span>Uptime</span>
-                            <span className="metric-value">1d 4h</span>
-                        </div>
-                    </div>
-                    
-                    <div className="card">
-                        <div className="card-title">Health & SLOs</div>
-                        <div className="metric">
-                            <span>Success Rate</span>
-                            <span className="metric-value">99.2%</span>
-                        </div>
-                        <div className="metric">
-                            <span>P95 Latency</span>
-                            <span className="metric-value">145ms</span>
-                        </div>
-                        <div className="metric">
-                            <span>Error Rate</span>
-                            <span className="metric-value">0.8%</span>
-                        </div>
-                    </div>
-                    
-                    <div className="card">
-                        <div className="card-title">Autonomy Level</div>
-                        <div className="metric">
-                            <span>Current Level</span>
-                            <span className="metric-value">L2</span>
-                        </div>
-                        <div className="metric">
-                            <span>Canary %</span>
-                            <span className="metric-value">10%</span>
-                        </div>
-                        <div className="metric">
-                            <span>Active Policies</span>
-                            <span className="metric-value">4</span>
-                        </div>
-                    </div>
-                    
-                    <div className="card">
-                        <div className="card-title">Recent Activity</div>
-                        <div style={{ fontSize: '14px', color: '#6b7280' }}>
-                            <div style={{ marginBottom: '8px' }}>✅ Pipeline run-2849 completed</div>
-                            <div style={{ marginBottom: '8px' }}>🔄 Autonomy level updated to L2</div>
-                            <div style={{ marginBottom: '8px' }}>📊 SLO breach detected & resolved</div>
-                            <div>💰 Budget alert: 75% utilization</div>
-                        </div>
-                    </div>
-                </div>
-            );
-            
-            const ContentPage = ({ title, description }) => (
-                <div className="card">
-                    <div className="card-title">{title}</div>
-                    <p style={{ color: '#6b7280', marginTop: '1rem' }}>{description}</p>
-                </div>
-            );
-            
-            const renderPage = () => {
-                switch(currentPage) {
-                    case 'home': return <HomePage />;
-                    case 'runs': return <ContentPage title="Runs" description="View and manage pipeline runs, execution history, and performance metrics." />;
-                    case 'pipelines': return <ContentPage title="Pipelines" description="Configure and deploy data processing pipelines with built-in monitoring." />;
-                    case 'observability': return <ContentPage title="Observability & SLOs" description="Monitor system health, track SLOs, and analyze performance metrics." />;
-                    case 'autonomy': return <ContentPage title="Autonomy & Guardrails" description="Configure autonomous operation levels and safety guardrails." />;
-                    case 'recipes': return <ContentPage title="Recipes" description="Browse and deploy pre-built pipeline templates and configurations." />;
-                    case 'cost': return <ContentPage title="Costs & Budgets" description="Track spending, set budgets, and optimize resource utilization." />;
-                    case 'tickets': return <ContentPage title="Tickets & Projects" description="Manage support tickets, issues, and project tracking." />;
-                    case 'admin': return <ContentPage title="Admin Studio" description="System administration, user management, and configuration." />;
-                    default: return <HomePage />;
-                }
-            };
-            
-            return (
+      const { useState, useEffect } = React;
+
+      function MaestroApp() {
+        const [currentPage, setCurrentPage] = useState('home');
+
+        const Header = () => (
+          <div className="header">
+            <div className="container">
+              <div className="header-content">
+                <div className="logo"></div>
                 <div>
-                    <Header />
-                    <Navigation />
-                    <div className="content">
-                        <div className="main">
-                            {renderPage()}
-                        </div>
-                    </div>
+                  <div className="header-title">Maestro builds IntelGraph</div>
+                  <div className="header-subtitle">
+                    Maestro ≠ IntelGraph — Control Plane
+                  </div>
                 </div>
-            );
-        }
-        
-        // Render the app
-        ReactDOM.render(<MaestroApp />, document.getElementById('root'));
+              </div>
+            </div>
+          </div>
+        );
+
+        const Navigation = () => (
+          <div className="nav">
+            {[
+              ['home', 'Home'],
+              ['runs', 'Runs'],
+              ['pipelines', 'Pipelines'],
+              ['observability', 'Observability & SLOs'],
+              ['autonomy', 'Autonomy & Guardrails'],
+              ['recipes', 'Recipes'],
+              ['cost', 'Costs & Budgets'],
+              ['tickets', 'Tickets & Projects'],
+              ['admin', 'Admin Studio'],
+            ].map(([key, label]) => (
+              <a
+                key={key}
+                href="#"
+                className={`nav-item ${currentPage === key ? 'active' : ''}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  setCurrentPage(key);
+                }}
+              >
+                {label}
+              </a>
+            ))}
+          </div>
+        );
+
+        const HomePage = () => (
+          <div className="grid">
+            <div className="card">
+              <div className="card-title">System Status</div>
+              <div className="metric">
+                <span>
+                  <span className="status-indicator"></span>Environment
+                </span>
+                <span className="metric-value">Development</span>
+              </div>
+              <div className="metric">
+                <span>Version</span>
+                <span className="metric-value">2.0.0</span>
+              </div>
+              <div className="metric">
+                <span>Uptime</span>
+                <span className="metric-value">1d 4h</span>
+              </div>
+            </div>
+
+            <div className="card">
+              <div className="card-title">Health & SLOs</div>
+              <div className="metric">
+                <span>Success Rate</span>
+                <span className="metric-value">99.2%</span>
+              </div>
+              <div className="metric">
+                <span>P95 Latency</span>
+                <span className="metric-value">145ms</span>
+              </div>
+              <div className="metric">
+                <span>Error Rate</span>
+                <span className="metric-value">0.8%</span>
+              </div>
+            </div>
+
+            <div className="card">
+              <div className="card-title">Autonomy Level</div>
+              <div className="metric">
+                <span>Current Level</span>
+                <span className="metric-value">L2</span>
+              </div>
+              <div className="metric">
+                <span>Canary %</span>
+                <span className="metric-value">10%</span>
+              </div>
+              <div className="metric">
+                <span>Active Policies</span>
+                <span className="metric-value">4</span>
+              </div>
+            </div>
+
+            <div className="card">
+              <div className="card-title">Recent Activity</div>
+              <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                <div style={{ marginBottom: '8px' }}>
+                  ✅ Pipeline run-2849 completed
+                </div>
+                <div style={{ marginBottom: '8px' }}>
+                  🔄 Autonomy level updated to L2
+                </div>
+                <div style={{ marginBottom: '8px' }}>
+                  📊 SLO breach detected & resolved
+                </div>
+                <div>💰 Budget alert: 75% utilization</div>
+              </div>
+            </div>
+          </div>
+        );
+
+        const ContentPage = ({ title, description }) => (
+          <div className="card">
+            <div className="card-title">{title}</div>
+            <p style={{ color: '#6b7280', marginTop: '1rem' }}>{description}</p>
+          </div>
+        );
+
+        const renderPage = () => {
+          switch (currentPage) {
+            case 'home':
+              return <HomePage />;
+            case 'runs':
+              return (
+                <ContentPage
+                  title="Runs"
+                  description="View and manage pipeline runs, execution history, and performance metrics."
+                />
+              );
+            case 'pipelines':
+              return (
+                <ContentPage
+                  title="Pipelines"
+                  description="Configure and deploy data processing pipelines with built-in monitoring."
+                />
+              );
+            case 'observability':
+              return (
+                <ContentPage
+                  title="Observability & SLOs"
+                  description="Monitor system health, track SLOs, and analyze performance metrics."
+                />
+              );
+            case 'autonomy':
+              return (
+                <ContentPage
+                  title="Autonomy & Guardrails"
+                  description="Configure autonomous operation levels and safety guardrails."
+                />
+              );
+            case 'recipes':
+              return (
+                <ContentPage
+                  title="Recipes"
+                  description="Browse and deploy pre-built pipeline templates and configurations."
+                />
+              );
+            case 'cost':
+              return (
+                <ContentPage
+                  title="Costs & Budgets"
+                  description="Track spending, set budgets, and optimize resource utilization."
+                />
+              );
+            case 'tickets':
+              return (
+                <ContentPage
+                  title="Tickets & Projects"
+                  description="Manage support tickets, issues, and project tracking."
+                />
+              );
+            case 'admin':
+              return (
+                <ContentPage
+                  title="Admin Studio"
+                  description="System administration, user management, and configuration."
+                />
+              );
+            default:
+              return <HomePage />;
+          }
+        };
+
+        return (
+          <div>
+            <Header />
+            <Navigation />
+            <div className="content">
+              <div className="main">{renderPage()}</div>
+            </div>
+          </div>
+        );
+      }
+
+      // Render the app
+      ReactDOM.render(<MaestroApp />, document.getElementById('root'));
     </script>
-</body>
+  </body>
 </html>

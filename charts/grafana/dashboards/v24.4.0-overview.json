@@ -3,7 +3,16 @@
     "id": null,
     "title": "Maestro Conductor v24.4.0 - Release Overview",
     "description": "Comprehensive dashboard for Sprint +3 features: Provenance, Abuse Detection, Cost Management, RTBF, and Tenant SLOs",
-    "tags": ["v24.4.0", "release", "overview", "E18", "E19", "E20", "E21", "E22"],
+    "tags": [
+      "v24.4.0",
+      "release",
+      "overview",
+      "E18",
+      "E19",
+      "E20",
+      "E21",
+      "E22"
+    ],
     "style": "dark",
     "timezone": "browser",
     "editable": true,
@@ -14,7 +23,17 @@
       "to": "now"
     },
     "timepicker": {
-      "refresh_intervals": ["10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d"],
+      "refresh_intervals": [
+        "10s",
+        "30s",
+        "1m",
+        "5m",
+        "15m",
+        "30m",
+        "1h",
+        "2h",
+        "1d"
+      ],
       "time_options": ["5m", "15m", "1h", "6h", "12h", "24h", "2d", "7d", "30d"]
     },
     "refresh": "30s",
@@ -32,7 +51,7 @@
             "legendFormat": "v{{ $labels.version }}"
           }
         ],
-        "gridPos": {"h": 3, "w": 6, "x": 0, "y": 0},
+        "gridPos": { "h": 3, "w": 6, "x": 0, "y": 0 },
         "options": {
           "colorMode": "background",
           "graphMode": "none",
@@ -41,15 +60,23 @@
         },
         "fieldConfig": {
           "defaults": {
-            "color": {"mode": "palette-classic"},
+            "color": { "mode": "palette-classic" },
             "mappings": [
-              {"options": {"v24.4.0": {"color": "green", "index": 0, "text": "v24.4.0 ACTIVE"}}}
+              {
+                "options": {
+                  "v24.4.0": {
+                    "color": "green",
+                    "index": 0,
+                    "text": "v24.4.0 ACTIVE"
+                  }
+                }
+              }
             ]
           }
         }
       },
       {
-        "id": 2, 
+        "id": 2,
         "title": "🎯 Epic Completion Status",
         "type": "bargauge",
         "targets": [
@@ -58,7 +85,7 @@
             "legendFormat": "E18 - Provenance"
           },
           {
-            "expr": "vector(100)", 
+            "expr": "vector(100)",
             "legendFormat": "E19 - Abuse Detection"
           },
           {
@@ -74,15 +101,19 @@
             "legendFormat": "E22 - Tenant SLOs"
           }
         ],
-        "gridPos": {"h": 6, "w": 6, "x": 6, "y": 0},
+        "gridPos": { "h": 6, "w": 6, "x": 6, "y": 0 },
         "options": {
           "orientation": "horizontal",
-          "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
           "showUnfilled": false
         },
         "fieldConfig": {
           "defaults": {
-            "color": {"mode": "continuous-GrYlRd"},
+            "color": { "mode": "continuous-GrYlRd" },
             "min": 0,
             "max": 100,
             "unit": "percent"
@@ -91,7 +122,7 @@
       },
       {
         "id": 3,
-        "title": "⚠️ Active Alerts by Epic", 
+        "title": "⚠️ Active Alerts by Epic",
         "type": "stat",
         "targets": [
           {
@@ -99,7 +130,7 @@
             "legendFormat": "{{ $labels.epic }}"
           }
         ],
-        "gridPos": {"h": 6, "w": 6, "x": 12, "y": 0},
+        "gridPos": { "h": 6, "w": 6, "x": 12, "y": 0 },
         "options": {
           "colorMode": "background",
           "graphMode": "area",
@@ -107,12 +138,12 @@
         },
         "fieldConfig": {
           "defaults": {
-            "color": {"mode": "thresholds"},
+            "color": { "mode": "thresholds" },
             "thresholds": {
               "steps": [
-                {"color": "green", "value": null},
-                {"color": "yellow", "value": 1},
-                {"color": "red", "value": 3}
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 1 },
+                { "color": "red", "value": 3 }
               ]
             }
           }
@@ -132,12 +163,16 @@
             "legendFormat": "Unhealthy Services"
           }
         ],
-        "gridPos": {"h": 6, "w": 6, "x": 18, "y": 0},
+        "gridPos": { "h": 6, "w": 6, "x": 18, "y": 0 },
         "options": {
-          "reduceOptions": {"values": false, "calcs": ["lastNotNull"], "fields": ""},
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"],
+            "fields": ""
+          },
           "pieType": "pie",
-          "tooltip": {"mode": "single"},
-          "legend": {"displayMode": "list", "placement": "bottom"}
+          "tooltip": { "mode": "single" },
+          "legend": { "displayMode": "list", "placement": "bottom" }
         }
       },
 
@@ -145,7 +180,7 @@
         "id": 10,
         "title": "🔐 E18 - Provenance & Trust",
         "type": "row",
-        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 7},
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 7 },
         "collapsed": false
       },
       {
@@ -158,15 +193,15 @@
             "legendFormat": "Success Rate"
           }
         ],
-        "gridPos": {"h": 4, "w": 4, "x": 0, "y": 8},
+        "gridPos": { "h": 4, "w": 4, "x": 0, "y": 8 },
         "fieldConfig": {
           "defaults": {
-            "color": {"mode": "thresholds"},
+            "color": { "mode": "thresholds" },
             "thresholds": {
               "steps": [
-                {"color": "red", "value": null},
-                {"color": "yellow", "value": 95},
-                {"color": "green", "value": 99.9}
+                { "color": "red", "value": null },
+                { "color": "yellow", "value": 95 },
+                { "color": "green", "value": 99.9 }
               ]
             },
             "unit": "percent"
@@ -187,27 +222,21 @@
             "legendFormat": "Sign Failures"
           }
         ],
-        "gridPos": {"h": 4, "w": 8, "x": 4, "y": 8},
-        "yAxes": [
-          {"min": 0, "unit": "short"},
-          {"show": false}
-        ]
+        "gridPos": { "h": 4, "w": 8, "x": 4, "y": 8 },
+        "yAxes": [{ "min": 0, "unit": "short" }, { "show": false }]
       },
       {
         "id": 13,
         "title": "Ledger Append Latency (P95)",
-        "type": "graph", 
+        "type": "graph",
         "targets": [
           {
             "expr": "histogram_quantile(0.95, provenance_ledger_append_duration_seconds_bucket)",
             "legendFormat": "P95 Latency"
           }
         ],
-        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 8},
-        "yAxes": [
-          {"min": 0, "unit": "s"},
-          {"show": false}
-        ]
+        "gridPos": { "h": 4, "w": 6, "x": 12, "y": 8 },
+        "yAxes": [{ "min": 0, "unit": "s" }, { "show": false }]
       },
       {
         "id": 14,
@@ -219,10 +248,10 @@
             "legendFormat": "Verified"
           }
         ],
-        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 8},
+        "gridPos": { "h": 4, "w": 6, "x": 18, "y": 8 },
         "fieldConfig": {
           "defaults": {
-            "color": {"mode": "palette-classic"},
+            "color": { "mode": "palette-classic" },
             "unit": "short"
           }
         }
@@ -232,7 +261,7 @@
         "id": 20,
         "title": "🛡️ E19 - Abuse Detection & Mitigation",
         "type": "row",
-        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 13},
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 13 },
         "collapsed": false
       },
       {
@@ -245,15 +274,12 @@
             "legendFormat": "Throttles/sec - {{ $labels.tenant_id }}"
           },
           {
-            "expr": "rate(abuseguard_false_positive_total[5m])", 
+            "expr": "rate(abuseguard_false_positive_total[5m])",
             "legendFormat": "False Positives/sec"
           }
         ],
-        "gridPos": {"h": 4, "w": 8, "x": 0, "y": 14},
-        "yAxes": [
-          {"min": 0, "unit": "ops"},
-          {"show": false}
-        ]
+        "gridPos": { "h": 4, "w": 8, "x": 0, "y": 14 },
+        "yAxes": [{ "min": 0, "unit": "ops" }, { "show": false }]
       },
       {
         "id": 22,
@@ -269,11 +295,8 @@
             "legendFormat": "P95 Complexity Score"
           }
         ],
-        "gridPos": {"h": 4, "w": 8, "x": 8, "y": 14},
-        "yAxes": [
-          {"min": 0, "unit": "short"},
-          {"show": false}
-        ]
+        "gridPos": { "h": 4, "w": 8, "x": 8, "y": 14 },
+        "yAxes": [{ "min": 0, "unit": "short" }, { "show": false }]
       },
       {
         "id": 23,
@@ -285,15 +308,15 @@
             "legendFormat": "Rejection Rate"
           }
         ],
-        "gridPos": {"h": 4, "w": 8, "x": 16, "y": 14},
+        "gridPos": { "h": 4, "w": 8, "x": 16, "y": 14 },
         "fieldConfig": {
           "defaults": {
-            "color": {"mode": "thresholds"},
+            "color": { "mode": "thresholds" },
             "thresholds": {
               "steps": [
-                {"color": "green", "value": null},
-                {"color": "yellow", "value": 1},
-                {"color": "red", "value": 5}
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 1 },
+                { "color": "red", "value": 5 }
               ]
             },
             "unit": "percent"
@@ -304,8 +327,8 @@
       {
         "id": 30,
         "title": "💰 E20 - Cost Management & Partitioning",
-        "type": "row", 
-        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 19},
+        "type": "row",
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 19 },
         "collapsed": false
       },
       {
@@ -318,11 +341,8 @@
             "legendFormat": "Cost - {{ $labels.tenant_id }}"
           }
         ],
-        "gridPos": {"h": 4, "w": 12, "x": 0, "y": 20},
-        "yAxes": [
-          {"min": 0, "unit": "currencyUSD"},
-          {"show": false}
-        ]
+        "gridPos": { "h": 4, "w": 12, "x": 0, "y": 20 },
+        "yAxes": [{ "min": 0, "unit": "currencyUSD" }, { "show": false }]
       },
       {
         "id": 32,
@@ -334,15 +354,15 @@
             "legendFormat": "Average Accuracy"
           }
         ],
-        "gridPos": {"h": 4, "w": 6, "x": 12, "y": 20},
+        "gridPos": { "h": 4, "w": 6, "x": 12, "y": 20 },
         "fieldConfig": {
           "defaults": {
-            "color": {"mode": "thresholds"},
+            "color": { "mode": "thresholds" },
             "thresholds": {
               "steps": [
-                {"color": "red", "value": null},
-                {"color": "yellow", "value": 85},
-                {"color": "green", "value": 95}
+                { "color": "red", "value": null },
+                { "color": "yellow", "value": 85 },
+                { "color": "green", "value": 95 }
               ]
             },
             "unit": "percent"
@@ -351,7 +371,7 @@
       },
       {
         "id": 33,
-        "title": "Active Partition Migrations", 
+        "title": "Active Partition Migrations",
         "type": "stat",
         "targets": [
           {
@@ -359,10 +379,10 @@
             "legendFormat": "Active Migrations"
           }
         ],
-        "gridPos": {"h": 4, "w": 6, "x": 18, "y": 20},
+        "gridPos": { "h": 4, "w": 6, "x": 18, "y": 20 },
         "fieldConfig": {
           "defaults": {
-            "color": {"mode": "palette-classic"},
+            "color": { "mode": "palette-classic" },
             "unit": "short"
           }
         }
@@ -372,7 +392,7 @@
         "id": 40,
         "title": "🔐 E21 - RTBF at Scale",
         "type": "row",
-        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 25},
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 25 },
         "collapsed": false
       },
       {
@@ -389,11 +409,8 @@
             "legendFormat": "SLA (2h)"
           }
         ],
-        "gridPos": {"h": 4, "w": 8, "x": 0, "y": 26},
-        "yAxes": [
-          {"min": 0, "unit": "s"},
-          {"show": false}
-        ]
+        "gridPos": { "h": 4, "w": 8, "x": 0, "y": 26 },
+        "yAxes": [{ "min": 0, "unit": "s" }, { "show": false }]
       },
       {
         "id": 42,
@@ -405,11 +422,8 @@
             "legendFormat": "Records/sec"
           }
         ],
-        "gridPos": {"h": 4, "w": 8, "x": 8, "y": 26},
-        "yAxes": [
-          {"min": 0, "unit": "ops"},
-          {"show": false}
-        ]
+        "gridPos": { "h": 4, "w": 8, "x": 8, "y": 26 },
+        "yAxes": [{ "min": 0, "unit": "ops" }, { "show": false }]
       },
       {
         "id": 43,
@@ -421,10 +435,10 @@
             "legendFormat": "Workers"
           }
         ],
-        "gridPos": {"h": 4, "w": 8, "x": 16, "y": 26},
+        "gridPos": { "h": 4, "w": 8, "x": 16, "y": 26 },
         "fieldConfig": {
           "defaults": {
-            "color": {"mode": "palette-classic"},
+            "color": { "mode": "palette-classic" },
             "unit": "short"
           }
         }
@@ -432,9 +446,9 @@
 
       {
         "id": 50,
-        "title": "📊 E22 - Tenant SLO Observability", 
+        "title": "📊 E22 - Tenant SLO Observability",
         "type": "row",
-        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 31},
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 31 },
         "collapsed": false
       },
       {
@@ -447,15 +461,12 @@
             "legendFormat": "5m Burn - {{ $labels.tenant_id }}"
           },
           {
-            "expr": "tenant_error_budget_burn_rate_1h", 
+            "expr": "tenant_error_budget_burn_rate_1h",
             "legendFormat": "1h Burn - {{ $labels.tenant_id }}"
           }
         ],
-        "gridPos": {"h": 4, "w": 12, "x": 0, "y": 32},
-        "yAxes": [
-          {"min": 0, "unit": "short"},
-          {"show": false}
-        ]
+        "gridPos": { "h": 4, "w": 12, "x": 0, "y": 32 },
+        "yAxes": [{ "min": 0, "unit": "short" }, { "show": false }]
       },
       {
         "id": 52,
@@ -467,14 +478,14 @@
             "legendFormat": "{{ $labels.tenant_id }} - {{ $labels.slo_type }}"
           }
         ],
-        "gridPos": {"h": 4, "w": 12, "x": 12, "y": 32},
+        "gridPos": { "h": 4, "w": 12, "x": 12, "y": 32 },
         "heatmap": {
           "hideZeroBuckets": true,
           "highlightCards": true,
           "cardColor": "#b4ff00",
           "cardPadding": null,
           "cardRound": null,
-          "color": {"mode": "spectrum"},
+          "color": { "mode": "spectrum" },
           "colorScale": "sqrt",
           "colorScheme": "interpolateSpectral",
           "exponent": 0.5,
@@ -495,18 +506,15 @@
             "legendFormat": "Violations - {{ $labels.environment }}"
           }
         ],
-        "gridPos": {"h": 4, "w": 24, "x": 0, "y": 36},
-        "yAxes": [
-          {"min": 0, "unit": "short"},
-          {"show": false}
-        ]
+        "gridPos": { "h": 4, "w": 24, "x": 0, "y": 36 },
+        "yAxes": [{ "min": 0, "unit": "short" }, { "show": false }]
       },
 
       {
         "id": 60,
         "title": "🔍 Cross-Epic Correlations",
         "type": "row",
-        "gridPos": {"h": 1, "w": 24, "x": 0, "y": 41},
+        "gridPos": { "h": 1, "w": 24, "x": 0, "y": 41 },
         "collapsed": false
       },
       {
@@ -522,13 +530,13 @@
           {
             "expr": "rate(tenant_cost_spike_total[5m])",
             "legendFormat": "Cost Spikes/sec",
-            "yAxis": 2  
+            "yAxis": 2
           }
         ],
-        "gridPos": {"h": 4, "w": 8, "x": 0, "y": 42},
+        "gridPos": { "h": 4, "w": 8, "x": 0, "y": 42 },
         "yAxes": [
-          {"min": 0, "unit": "ops", "label": "Abuse Events"},
-          {"min": 0, "unit": "ops", "label": "Cost Events"}
+          { "min": 0, "unit": "ops", "label": "Abuse Events" },
+          { "min": 0, "unit": "ops", "label": "Cost Events" }
         ]
       },
       {
@@ -545,11 +553,8 @@
             "legendFormat": "Active RTBF Jobs"
           }
         ],
-        "gridPos": {"h": 4, "w": 8, "x": 8, "y": 42},
-        "yAxes": [
-          {"min": 0, "unit": "short"},
-          {"show": false}
-        ]
+        "gridPos": { "h": 4, "w": 8, "x": 8, "y": 42 },
+        "yAxes": [{ "min": 0, "unit": "short" }, { "show": false }]
       },
       {
         "id": 63,
@@ -565,11 +570,8 @@
             "legendFormat": "HTTP Requests/sec"
           }
         ],
-        "gridPos": {"h": 4, "w": 8, "x": 16, "y": 42},
-        "yAxes": [
-          {"min": 0, "unit": "ops"},
-          {"show": false}
-        ]
+        "gridPos": { "h": 4, "w": 8, "x": 16, "y": 42 },
+        "yAxes": [{ "min": 0, "unit": "ops" }, { "show": false }]
       }
     ],
     "templating": {
@@ -578,16 +580,16 @@
           "name": "environment",
           "type": "query",
           "query": "label_values(up, environment)",
-          "current": {"value": "production", "text": "production"},
+          "current": { "value": "production", "text": "production" },
           "options": [],
           "includeAll": false,
           "multi": false
         },
         {
           "name": "tenant",
-          "type": "query", 
+          "type": "query",
           "query": "label_values(tenant_slo_availability, tenant_id)",
-          "current": {"value": "All", "text": "All"},
+          "current": { "value": "All", "text": "All" },
           "options": [],
           "includeAll": true,
           "multi": true
@@ -606,7 +608,7 @@
         },
         {
           "name": "Critical Alerts",
-          "datasource": "Prometheus", 
+          "datasource": "Prometheus",
           "expr": "ALERTS{severity=\"critical\", epic=~\"E1[8-9]|E2[0-2]\"}",
           "iconColor": "rgba(255, 96, 96, 1)",
           "titleFormat": "{{ $labels.alertname }}",

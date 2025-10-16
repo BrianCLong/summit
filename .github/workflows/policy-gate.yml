@@ -1,7 +1,7 @@
 name: Policy Gate
 
 on:
-  push: { branches: [ main, feature/dev-aws-green ] }
+  push: { branches: [main, feature/dev-aws-green] }
   pull_request:
 
 permissions:
@@ -14,16 +14,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: trufflesecurity/trufflehog@v3
-        with: { path: ".", base: "origin/main", head: "${{ github.sha }}" }
+        with: { path: '.', base: 'origin/main', head: '${{ github.sha }}' }
 
   license-scan:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: pilosus/action-pip-license-checker@v2
-        with: { requirements: "requirements.txt", fail: "strong" }
+        with: { requirements: 'requirements.txt', fail: 'strong' }
       - uses: pilosus/action-licensefinder@v2
-        with: { decisions-file: "doc/license-decisions.yml" }
+        with: { decisions-file: 'doc/license-decisions.yml' }
 
   npm-audit:
     runs-on: ubuntu-latest
@@ -35,4 +35,3 @@ jobs:
         with: { version: 9 }
       - run: pnpm install --frozen-lockfile
       - run: pnpm audit --audit-level=high || true
-

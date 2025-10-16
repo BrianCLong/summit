@@ -1,4 +1,3 @@
-
 # .semgrep.yml
 rules:
   - id: generic.secrets.security.detected-private-key.detected-private-key

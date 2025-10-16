@@ -17,10 +17,12 @@ spec:
     matchLabels: { app: maestro-server }
   ingress:
     - from:
-        - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: ingress-nginx } }
+        - namespaceSelector:
+            { matchLabels: { kubernetes.io/metadata.name: ingress-nginx } }
   egress:
     - to: # Neo4j/Postgres/Redis in-cluster
-        - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: data } }
+        - namespaceSelector:
+            { matchLabels: { kubernetes.io/metadata.name: data } }
       ports:
         [
           { protocol: TCP, port: 5432 },

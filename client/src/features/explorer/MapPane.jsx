@@ -5,7 +5,9 @@ import { explorerData } from './data';
 const MapPane = () => {
   const { state, dispatch } = useExplorer();
   const { selected, timeRange, activePane } = state;
-  const visible = explorerData.filter((d) => d.year >= timeRange[0] && d.year <= timeRange[1]);
+  const visible = explorerData.filter(
+    (d) => d.year >= timeRange[0] && d.year <= timeRange[1],
+  );
 
   useEffect(() => {
     if (activePane !== 'map') return;

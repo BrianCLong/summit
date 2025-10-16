@@ -4,7 +4,8 @@ import { useTheme } from '@mui/material/styles';
 
 function IntelGraphButton({ children, 'aria-label': ariaLabel, ...props }) {
   const theme = useTheme();
-  const computedAria = ariaLabel || (typeof children === 'string' ? children : undefined);
+  const computedAria =
+    ariaLabel || (typeof children === 'string' ? children : undefined);
 
   return (
     <Button

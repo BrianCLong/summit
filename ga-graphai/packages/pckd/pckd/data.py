@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import hashlib
 import json
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass, field
-from typing import Dict, Iterable, List, Sequence
 
 import numpy as np
 
@@ -17,7 +17,7 @@ class Example:
     example_id: str
     features: Sequence[float]
     label: int
-    metadata: Dict[str, str] = field(default_factory=dict)
+    metadata: dict[str, str] = field(default_factory=dict)
 
     def feature_array(self) -> np.ndarray:
         return np.asarray(self.features, dtype=np.float64)
@@ -27,14 +27,14 @@ class Example:
 class TaintScreenResult:
     """Result of applying policy filters to a dataset."""
 
-    allowed: List[Example]
-    rejected: List[Example]
-    rejection_reasons: Dict[str, str]
+    allowed: list[Example]
+    rejected: list[Example]
+    rejection_reasons: dict[str, str]
 
-    def allowed_ids(self) -> List[str]:
+    def allowed_ids(self) -> list[str]:
         return [example.example_id for example in self.allowed]
 
-    def rejected_ids(self) -> List[str]:
+    def rejected_ids(self) -> list[str]:
         return [example.example_id for example in self.rejected]
 
 
@@ -52,7 +52,7 @@ class Dataset:
     def __len__(self) -> int:  # pragma: no cover - trivial
         return len(self._examples)
 
-    def examples(self) -> List[Example]:
+    def examples(self) -> list[Example]:
         return list(self._examples)
 
     def feature_matrix(self, subset: Iterable[Example] | None = None) -> np.ndarray:
@@ -78,7 +78,7 @@ class Dataset:
         return hashlib.sha256(raw).hexdigest()
 
 
-def compute_rejection_digest(rejection_reasons: Dict[str, str]) -> str:
+def compute_rejection_digest(rejection_reasons: dict[str, str]) -> str:
     """Create a deterministic digest for rejection reasons."""
 
     raw = json.dumps(

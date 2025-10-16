@@ -228,7 +228,14 @@ jobs:
   # =============================================================================
   security-summary:
     name: 📋 Security Summary
-    needs: [secret-scanning, vulnerability-scan, code-analysis, dependency-review, license-check]
+    needs:
+      [
+        secret-scanning,
+        vulnerability-scan,
+        code-analysis,
+        dependency-review,
+        license-check,
+      ]
     if: always()
     runs-on: ubuntu-latest
     steps:

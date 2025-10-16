@@ -6,12 +6,17 @@ interface SLODashboardProps {
   className?: string;
 }
 
-export default function SLODashboard({ service, className = '' }: SLODashboardProps) {
+export default function SLODashboard({
+  service,
+  className = '',
+}: SLODashboardProps) {
   const { slos, loading, error, fetchSLOs, generateReport } = useSLO();
   const [selectedSLO, setSelectedSLO] = useState<string | null>(null);
   const [reportData, setReportData] = useState<object | null>(null);
   const [timeRange, setTimeRange] = useState('24h');
-  const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null);
+  const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(
+    null,
+  );
 
   useEffect(() => {
     fetchSLOs(service ? { service } : undefined);
@@ -60,12 +65,19 @@ export default function SLODashboard({ service, className = '' }: SLODashboardPr
     }
   };
 
-  const getStatusColor = (status: string, compliance?: number, objective?: number) => {
+  const getStatusColor = (
+    status: string,
+    compliance?: number,
+    objective?: number,
+  ) => {
     if (status === 'critical') return 'text-red-600 bg-red-50 border-red-200';
-    if (status === 'warning') return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+    if (status === 'warning')
+      return 'text-yellow-600 bg-yellow-50 border-yellow-200';
     if (compliance !== undefined && objective !== undefined) {
-      if (compliance >= objective) return 'text-green-600 bg-green-50 border-green-200';
-      if (compliance >= objective - 5) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
+      if (compliance >= objective)
+        return 'text-green-600 bg-green-50 border-green-200';
+      if (compliance >= objective - 5)
+        return 'text-yellow-600 bg-yellow-50 border-yellow-200';
       return 'text-red-600 bg-red-50 border-red-200';
     }
     return 'text-gray-600 bg-gray-50 border-gray-200';
@@ -87,7 +99,11 @@ export default function SLODashboard({ service, className = '' }: SLODashboardPr
   const renderErrorBudgetBar = (errorBudget: ErrorBudget) => {
     const percentage = Math.min(100, errorBudget.consumedPercentage);
     const color =
-      percentage > 90 ? 'bg-red-500' : percentage > 70 ? 'bg-yellow-500' : 'bg-green-500';
+      percentage > 90
+        ? 'bg-red-500'
+        : percentage > 70
+          ? 'bg-yellow-500'
+          : 'bg-green-500';
 
     return (
       <div className="w-full bg-gray-200 rounded-full h-2">
@@ -99,7 +115,12 @@ export default function SLODashboard({ service, className = '' }: SLODashboardPr
     );
   };
 
-  const renderSLOCard = (sloData: { slo: SLO; compliance: number; errorBudget: ErrorBudget; trend: 'improving' | 'degrading' | 'stable'; }) => {
+  const renderSLOCard = (sloData: {
+    slo: SLO;
+    compliance: number;
+    errorBudget: ErrorBudget;
+    trend: 'improving' | 'degrading' | 'stable';
+  }) => {
     const { slo, compliance, errorBudget, trend } = sloData;
     const isSelected = selectedSLO === slo.id;
     const statusColor = getStatusColor(
@@ -128,7 +149,9 @@ export default function SLODashboard({ service, className = '' }: SLODashboardPr
 
           <div className="flex items-center space-x-2 ml-4">
             {getTrendIcon(trend)}
-            <div className={`px-2 py-1 rounded-full text-xs font-medium border ${statusColor}`}>
+            <div
+              className={`px-2 py-1 rounded-full text-xs font-medium border ${statusColor}`}
+            >
               {compliance >= slo.objective ? 'Compliant' : 'At Risk'}
             </div>
           </div>
@@ -137,25 +160,32 @@ export default function SLODashboard({ service, className = '' }: SLODashboardPr
         <div className="grid grid-cols-2 gap-4 mb-3">
           <div>
             <div className="text-xs text-gray-500">Current SLI</div>
-            <div className="text-lg font-bold text-gray-900">{formatPercentage(compliance)}</div>
+            <div className="text-lg font-bold text-gray-900">
+              {formatPercentage(compliance)}
+            </div>
           </div>
           <div>
             <div className="text-xs text-gray-500">Objective</div>
-            <div className="text-lg font-bold text-gray-600">{formatPercentage(slo.objective)}</div>
+            <div className="text-lg font-bold text-gray-600">
+              {formatPercentage(slo.objective)}
+            </div>
           </div>
         </div>
 
         <div className="mb-3">
           <div className="flex justify-between text-xs text-gray-500 mb-1">
             <span>Error Budget</span>
-            <span>{formatPercentage(errorBudget.consumedPercentage)} consumed</span>
+            <span>
+              {formatPercentage(errorBudget.consumedPercentage)} consumed
+            </span>
           </div>
           {renderErrorBudgetBar(errorBudget)}
         </div>
 
         {errorBudget.exhaustionDate && (
           <div className="text-xs text-gray-500">
-            Budget exhaustion: {new Date(errorBudget.exhaustionDate).toLocaleDateString()}
+            Budget exhaustion:{' '}
+            {new Date(errorBudget.exhaustionDate).toLocaleDateString()}
           </div>
         )}
 
@@ -168,11 +198,15 @@ export default function SLODashboard({ service, className = '' }: SLODashboardPr
               </div>
               <div>
                 <span className="text-gray-500">Burn Rate:</span>
-                <span className="ml-1 font-medium">{errorBudget.burnRate.toFixed(2)}/hr</span>
+                <span className="ml-1 font-medium">
+                  {errorBudget.burnRate.toFixed(2)}/hr
+                </span>
               </div>
               <div>
                 <span className="text-gray-500">Remaining:</span>
-                <span className="ml-1 font-medium">{errorBudget.remaining} errors</span>
+                <span className="ml-1 font-medium">
+                  {errorBudget.remaining} errors
+                </span>
               </div>
               <div>
                 <span className="ml-1 font-medium">{slo.sli.type}</span>
@@ -219,8 +253,12 @@ export default function SLODashboard({ service, className = '' }: SLODashboardPr
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h2 className="text-xl font-bold text-gray-900">Service Level Objectives</h2>
-          {service && <p className="text-sm text-gray-600 mt-1">Service: {service}</p>}
+          <h2 className="text-xl font-bold text-gray-900">
+            Service Level Objectives
+          </h2>
+          {service && (
+            <p className="text-sm text-gray-600 mt-1">Service: {service}</p>
+          )}
         </div>
 
         <div className="flex items-center space-x-3">
@@ -271,7 +309,9 @@ export default function SLODashboard({ service, className = '' }: SLODashboardPr
         <div className="grid grid-cols-4 gap-4 mb-6">
           <div className="bg-white border rounded-lg p-4">
             <div className="text-sm text-gray-500">Total SLOs</div>
-            <div className="text-2xl font-bold text-gray-900">{reportData.summary.totalSLOs}</div>
+            <div className="text-2xl font-bold text-gray-900">
+              {reportData.summary.totalSLOs}
+            </div>
           </div>
           <div className="bg-white border rounded-lg p-4">
             <div className="text-sm text-gray-500">Compliant</div>
@@ -281,7 +321,9 @@ export default function SLODashboard({ service, className = '' }: SLODashboardPr
           </div>
           <div className="bg-white border rounded-lg p-4">
             <div className="text-sm text-gray-500">At Risk</div>
-            <div className="text-2xl font-bold text-red-600">{reportData.summary.atRiskSLOs}</div>
+            <div className="text-2xl font-bold text-red-600">
+              {reportData.summary.atRiskSLOs}
+            </div>
           </div>
           <div className="bg-white border rounded-lg p-4">
             <div className="text-sm text-gray-500">Avg Compliance</div>
@@ -323,7 +365,14 @@ export default function SLODashboard({ service, className = '' }: SLODashboardPr
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {reportData
-            ? reportData.slos.map((sloData: { slo: SLO; compliance: number; errorBudget: ErrorBudget; trend: 'improving' | 'degrading' | 'stable'; }) => renderSLOCard(sloData))
+            ? reportData.slos.map(
+                (sloData: {
+                  slo: SLO;
+                  compliance: number;
+                  errorBudget: ErrorBudget;
+                  trend: 'improving' | 'degrading' | 'stable';
+                }) => renderSLOCard(sloData),
+              )
             : slos.map((slo) =>
                 renderSLOCard({
                   slo,

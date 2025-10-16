@@ -1,35 +1,36 @@
 from __future__ import annotations
+
 import json
 import random
-from collections import defaultdict
-from typing import Dict, List, Tuple
 
 import networkx as nx
 import numpy as np
 from gensim.models import Word2Vec
 from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import roc_auc_score, average_precision_score
+from sklearn.metrics import average_precision_score, roc_auc_score
 
 
-def load_snapshot(path: str) -> Tuple[List[str], List[Tuple[str, str]]]:
-    with open(path, 'r') as f:
+def load_snapshot(path: str) -> tuple[list[str], list[tuple[str, str]]]:
+    with open(path) as f:
         obj = json.load(f)
-    nodes = list(obj.get('nodes') or [])
-    edges = [(e['source'], e['target']) for e in obj.get('edges') or []]
+    nodes = list(obj.get("nodes") or [])
+    edges = [(e["source"], e["target"]) for e in obj.get("edges") or []]
     return nodes, edges
 
 
-def build_graph(nodes: List[str], edges: List[Tuple[str, str]]) -> nx.Graph:
+def build_graph(nodes: list[str], edges: list[tuple[str, str]]) -> nx.Graph:
     G = nx.Graph()
     G.add_nodes_from(nodes)
     G.add_edges_from(edges)
     return G
 
 
-def generate_random_walks(G: nx.Graph, walk_length: int = 10, num_walks: int = 10, seed: int = 42) -> List[List[str]]:
+def generate_random_walks(
+    G: nx.Graph, walk_length: int = 10, num_walks: int = 10, seed: int = 42
+) -> list[list[str]]:
     rng = random.Random(seed)
     nodes = list(G.nodes())
-    walks: List[List[str]] = []
+    walks: list[list[str]] = []
     for _ in range(num_walks):
         rng.shuffle(nodes)
         for n in nodes:
@@ -45,9 +46,26 @@ def generate_random_walks(G: nx.Graph, walk_length: int = 10, num_walks: int = 1
     return walks
 
 
-def train_deepwalk_embeddings(G: nx.Graph, dimensions: int = 64, walk_length: int = 10, num_walks: int = 10, window_size: int = 5, workers: int = 1, seed: int = 42) -> Dict[str, np.ndarray]:
+def train_deepwalk_embeddings(
+    G: nx.Graph,
+    dimensions: int = 64,
+    walk_length: int = 10,
+    num_walks: int = 10,
+    window_size: int = 5,
+    workers: int = 1,
+    seed: int = 42,
+) -> dict[str, np.ndarray]:
     walks = generate_random_walks(G, walk_length=walk_length, num_walks=num_walks, seed=seed)
-    model = Word2Vec(sentences=walks, vector_size=dimensions, window=window_size, min_count=0, sg=1, workers=workers, seed=seed, epochs=5)
+    model = Word2Vec(
+        sentences=walks,
+        vector_size=dimensions,
+        window=window_size,
+        min_count=0,
+        sg=1,
+        workers=workers,
+        seed=seed,
+        epochs=5,
+    )
     emb = {}
     for n in G.nodes():
         key = str(n)
@@ -58,7 +76,7 @@ def train_deepwalk_embeddings(G: nx.Graph, dimensions: int = 64, walk_length: in
     return emb
 
 
-def split_edges(edges: List[Tuple[str, str]], test_ratio: float = 0.2, seed: int = 42):
+def split_edges(edges: list[tuple[str, str]], test_ratio: float = 0.2, seed: int = 42):
     rng = random.Random(seed)
     e = edges[:]
     rng.shuffle(e)
@@ -66,7 +84,7 @@ def split_edges(edges: List[Tuple[str, str]], test_ratio: float = 0.2, seed: int
     return e[:split], e[split:]
 
 
-def sample_non_edges(G: nx.Graph, k: int, seed: int = 42) -> List[Tuple[str, str]]:
+def sample_non_edges(G: nx.Graph, k: int, seed: int = 42) -> list[tuple[str, str]]:
     rng = random.Random(seed)
     non_edges = []
     nodes = list(G.nodes())
@@ -85,7 +103,7 @@ def sample_non_edges(G: nx.Graph, k: int, seed: int = 42) -> List[Tuple[str, str
     return non_edges
 
 
-def edge_features(u: str, v: str, emb: Dict[str, np.ndarray]) -> np.ndarray:
+def edge_features(u: str, v: str, emb: dict[str, np.ndarray]) -> np.ndarray:
     a = emb.get(str(u))
     b = emb.get(str(v))
     if a is None or b is None:
@@ -95,22 +113,24 @@ def edge_features(u: str, v: str, emb: Dict[str, np.ndarray]) -> np.ndarray:
     return np.concatenate([a, b])  # simple concatenation
 
 
-def train_lr_linkpred(G: nx.Graph, emb: Dict[str, np.ndarray], train_pos, train_neg, test_pos, test_neg):
+def train_lr_linkpred(
+    G: nx.Graph, emb: dict[str, np.ndarray], train_pos, train_neg, test_pos, test_neg
+):
     X_train = []
     y_train = []
-    for (u, v) in train_pos:
+    for u, v in train_pos:
         X_train.append(edge_features(u, v, emb))
         y_train.append(1)
-    for (u, v) in train_neg:
+    for u, v in train_neg:
         X_train.append(edge_features(u, v, emb))
         y_train.append(0)
 
     X_test = []
     y_test = []
-    for (u, v) in test_pos:
+    for u, v in test_pos:
         X_test.append(edge_features(u, v, emb))
         y_test.append(1)
-    for (u, v) in test_neg:
+    for u, v in test_neg:
         X_test.append(edge_features(u, v, emb))
         y_test.append(0)
 
@@ -134,16 +154,17 @@ def train_lr_linkpred(G: nx.Graph, emb: Dict[str, np.ndarray], train_pos, train_
     return {"auc": round(auc, 4), "pr_auc": round(pr_auc, 4)}
 
 
-def save_embeddings(embeddings: Dict[str, np.ndarray], output_path: str):
-    with open(output_path, 'w') as f:
+def save_embeddings(embeddings: dict[str, np.ndarray], output_path: str):
+    with open(output_path, "w") as f:
         # Convert to a list of dictionaries for easier CSV-like import
         serializable_embeddings = [
-            {"nodeId": k, "embedding": v.tolist()}
-            for k, v in embeddings.items()
+            {"nodeId": k, "embedding": v.tolist()} for k, v in embeddings.items()
         ]
         json.dump(serializable_embeddings, f, indent=4)
 
+
 import argparse
+
 
 def run_node2vec_lr(snapshot_path: str, embeddings_output_path: str = None, seed: int = 42) -> dict:
     nodes, edges = load_snapshot(snapshot_path)
@@ -155,8 +176,10 @@ def run_node2vec_lr(snapshot_path: str, embeddings_output_path: str = None, seed
     G_train = build_graph(nodes, train_pos)
     train_neg = sample_non_edges(G_train, k=len(train_pos), seed=seed)
     test_neg = sample_non_edges(G_train, k=len(test_pos), seed=seed + 1)
-    emb = train_deepwalk_embeddings(G_train, dimensions=64, walk_length=10, num_walks=10, window_size=5, workers=1, seed=seed)
-    
+    emb = train_deepwalk_embeddings(
+        G_train, dimensions=64, walk_length=10, num_walks=10, window_size=5, workers=1, seed=seed
+    )
+
     if embeddings_output_path:
         save_embeddings(emb, embeddings_output_path)
 
@@ -164,15 +187,21 @@ def run_node2vec_lr(snapshot_path: str, embeddings_output_path: str = None, seed
     metrics.update({"nodes": len(nodes), "edges": len(edges), "method": "deepwalk_lr"})
     return metrics
 
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Run Node2Vec and Logistic Regression for link prediction.")
+    parser = argparse.ArgumentParser(
+        description="Run Node2Vec and Logistic Regression for link prediction."
+    )
     parser.add_argument("snapshot_path", type=str, help="Path to the graph snapshot JSON file.")
-    parser.add_argument("--embeddings_output_path", type=str, default=None,
-                        help="Optional path to save the generated embeddings JSON file.")
+    parser.add_argument(
+        "--embeddings_output_path",
+        type=str,
+        default=None,
+        help="Optional path to save the generated embeddings JSON file.",
+    )
     parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility.")
-    
+
     args = parser.parse_args()
-    
+
     results = run_node2vec_lr(args.snapshot_path, args.embeddings_output_path, args.seed)
     print(json.dumps(results, indent=4))
-

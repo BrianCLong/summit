@@ -1,4 +1,3 @@
-
 // conductor-ui/frontend/src/sw-setup.ts
 import { register } from 'service-worker-loader';
 

@@ -24,11 +24,11 @@ repos:
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.18.2
     hooks:
-    -   id: gitleaks
+      - id: gitleaks
   - repo: https://github.com/trufflesecurity/trufflehog
     rev: v3.63.0
     hooks:
-    -   id: trufflehog
+      - id: trufflehog
         args: [--only-verified]
   - repo: https://github.com/okonet/lint-staged
     rev: v14.0.1

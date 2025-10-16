@@ -4,7 +4,15 @@ permissions:
   contents: read
 on:
   pull_request:
-    paths: ['docs/**', 'docs-site/**', '**/*.md', '.markdownlint.*', 'cspell.json', 'lychee.toml']
+    paths:
+      [
+        'docs/**',
+        'docs-site/**',
+        '**/*.md',
+        '.markdownlint.*',
+        'cspell.json',
+        'lychee.toml',
+      ]
 jobs:
   check:
     runs-on: ubuntu-latest

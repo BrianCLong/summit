@@ -10,7 +10,7 @@ metadata:
     component: pg-backup
     version: v24.3.0
 spec:
-  schedule: "*/5 * * * *"  # Every 5 minutes for RPO ≤ 5m
+  schedule: '*/5 * * * *' # Every 5 minutes for RPO ≤ 5m
   concurrencyPolicy: Forbid
   failedJobsHistoryLimit: 3
   successfulJobsHistoryLimit: 10
@@ -24,150 +24,150 @@ spec:
         spec:
           restartPolicy: Never
           containers:
-          - name: pg-backup
-            image: postgres:15
-            env:
-            - name: PGHOST
-              value: "maestro-pg-primary"
-            - name: PGPORT
-              value: "5432"
-            - name: PGDATABASE
-              value: "maestro"
-            - name: PGUSER
-              valueFrom:
-                secretKeyRef:
-                  name: maestro-pg-secret
-                  key: username
-            - name: PGPASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: maestro-pg-secret
-                  key: password
-            - name: AWS_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: maestro-backup-secret
-                  key: aws_access_key_id
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: maestro-backup-secret
-                  key: aws_secret_access_key
-            - name: AWS_DEFAULT_REGION
-              value: "us-east-1"
-            - name: S3_BUCKET
-              value: "maestro-backups-primary"
-            - name: BACKUP_RETENTION_DAYS
-              value: "30"
-            command:
-            - /bin/bash
-            - -c
-            - |
-              set -euo pipefail
-              
-              # Install AWS CLI
-              apt-get update && apt-get install -y awscli gzip
-              
-              # Generate timestamp
-              TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-              REGION=${CURRENT_REGION:-us-east-1}
-              BACKUP_FILE="pg_backup_${REGION}_${TIMESTAMP}.sql.gz"
-              WAL_FILE="pg_wal_${REGION}_${TIMESTAMP}.tar.gz"
-              
-              echo "Starting PostgreSQL backup at $(date)"
-              echo "Backup file: ${BACKUP_FILE}"
-              
-              # Create database dump with PITR consistency
-              pg_dump --verbose --format=custom --compress=9 \
-                --no-password --clean --if-exists \
-                --exclude-table-data='logs' \
-                --exclude-table-data='audit_trail' \
-                maestro | gzip > "/tmp/${BACKUP_FILE}"
-              
-              # Backup WAL files for PITR
-              pg_receivewal -D /tmp/wal_backup --synchronous -v
-              tar -czf "/tmp/${WAL_FILE}" -C /tmp wal_backup/
-              
-              # Upload to S3 with region-specific path
-              aws s3 cp "/tmp/${BACKUP_FILE}" "s3://${S3_BUCKET}/postgresql/${REGION}/dumps/${BACKUP_FILE}"
-              aws s3 cp "/tmp/${WAL_FILE}" "s3://${S3_BUCKET}/postgresql/${REGION}/wal/${WAL_FILE}"
-              
-              # Create manifest for restore procedures
-              cat > "/tmp/backup_manifest_${TIMESTAMP}.json" << EOF
-              {
-                "timestamp": "${TIMESTAMP}",
-                "region": "${REGION}",
-                "type": "postgresql",
-                "files": {
-                  "dump": "${BACKUP_FILE}",
-                  "wal": "${WAL_FILE}"
-                },
-                "metadata": {
-                  "pg_version": "$(psql -t -c 'SELECT version()')",
-                  "database_size": "$(psql -t -c \"SELECT pg_size_pretty(pg_database_size('maestro'))\")",
-                  "backup_method": "pg_dump+pg_receivewal",
-                  "retention_days": ${BACKUP_RETENTION_DAYS}
-                },
-                "checksums": {
-                  "dump_sha256": "$(sha256sum /tmp/${BACKUP_FILE} | cut -d' ' -f1)",
-                  "wal_sha256": "$(sha256sum /tmp/${WAL_FILE} | cut -d' ' -f1)"
-                }
-              }
-              EOF
-              
-              aws s3 cp "/tmp/backup_manifest_${TIMESTAMP}.json" \
-                "s3://${S3_BUCKET}/postgresql/${REGION}/manifests/backup_manifest_${TIMESTAMP}.json"
-              
-              # Update latest backup pointer
-              echo "${TIMESTAMP}" | aws s3 cp - "s3://${S3_BUCKET}/postgresql/${REGION}/LATEST"
-              
-              # Cleanup old backups based on retention
-              aws s3 ls "s3://${S3_BUCKET}/postgresql/${REGION}/dumps/" | \
-                awk '{print $4}' | sort | head -n -${BACKUP_RETENTION_DAYS} | \
-                while read backup; do
-                  if [ -n "$backup" ]; then
-                    echo "Deleting old backup: $backup"
-                    aws s3 rm "s3://${S3_BUCKET}/postgresql/${REGION}/dumps/${backup}"
-                  fi
-                done
-              
-              # Cleanup old WAL files
-              aws s3 ls "s3://${S3_BUCKET}/postgresql/${REGION}/wal/" | \
-                awk '{print $4}' | sort | head -n -${BACKUP_RETENTION_DAYS} | \
-                while read walfile; do
-                  if [ -n "$walfile" ]; then
-                    aws s3 rm "s3://${S3_BUCKET}/postgresql/${REGION}/wal/${walfile}"
-                  fi
-                done
-              
-              # Cleanup old manifests
-              aws s3 ls "s3://${S3_BUCKET}/postgresql/${REGION}/manifests/" | \
-                awk '{print $4}' | sort | head -n -${BACKUP_RETENTION_DAYS} | \
-                while read manifest; do
-                  if [ -n "$manifest" ]; then
-                    aws s3 rm "s3://${S3_BUCKET}/postgresql/${REGION}/manifests/${manifest}"
-                  fi
-                done
-              
-              echo "PostgreSQL backup completed successfully at $(date)"
-              echo "Files uploaded:"
-              echo "  - s3://${S3_BUCKET}/postgresql/${REGION}/dumps/${BACKUP_FILE}"
-              echo "  - s3://${S3_BUCKET}/postgresql/${REGION}/wal/${WAL_FILE}"
-              echo "  - s3://${S3_BUCKET}/postgresql/${REGION}/manifests/backup_manifest_${TIMESTAMP}.json"
-            
-            resources:
-              requests:
-                memory: "512Mi"
-                cpu: "200m"
-              limits:
-                memory: "2Gi"
-                cpu: "1000m"
-            
-            volumeMounts:
-            - name: backup-temp
-              mountPath: /tmp
-          
+            - name: pg-backup
+              image: postgres:15
+              env:
+                - name: PGHOST
+                  value: 'maestro-pg-primary'
+                - name: PGPORT
+                  value: '5432'
+                - name: PGDATABASE
+                  value: 'maestro'
+                - name: PGUSER
+                  valueFrom:
+                    secretKeyRef:
+                      name: maestro-pg-secret
+                      key: username
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: maestro-pg-secret
+                      key: password
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: maestro-backup-secret
+                      key: aws_access_key_id
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: maestro-backup-secret
+                      key: aws_secret_access_key
+                - name: AWS_DEFAULT_REGION
+                  value: 'us-east-1'
+                - name: S3_BUCKET
+                  value: 'maestro-backups-primary'
+                - name: BACKUP_RETENTION_DAYS
+                  value: '30'
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -euo pipefail
+
+                  # Install AWS CLI
+                  apt-get update && apt-get install -y awscli gzip
+
+                  # Generate timestamp
+                  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                  REGION=${CURRENT_REGION:-us-east-1}
+                  BACKUP_FILE="pg_backup_${REGION}_${TIMESTAMP}.sql.gz"
+                  WAL_FILE="pg_wal_${REGION}_${TIMESTAMP}.tar.gz"
+
+                  echo "Starting PostgreSQL backup at $(date)"
+                  echo "Backup file: ${BACKUP_FILE}"
+
+                  # Create database dump with PITR consistency
+                  pg_dump --verbose --format=custom --compress=9 \
+                    --no-password --clean --if-exists \
+                    --exclude-table-data='logs' \
+                    --exclude-table-data='audit_trail' \
+                    maestro | gzip > "/tmp/${BACKUP_FILE}"
+
+                  # Backup WAL files for PITR
+                  pg_receivewal -D /tmp/wal_backup --synchronous -v
+                  tar -czf "/tmp/${WAL_FILE}" -C /tmp wal_backup/
+
+                  # Upload to S3 with region-specific path
+                  aws s3 cp "/tmp/${BACKUP_FILE}" "s3://${S3_BUCKET}/postgresql/${REGION}/dumps/${BACKUP_FILE}"
+                  aws s3 cp "/tmp/${WAL_FILE}" "s3://${S3_BUCKET}/postgresql/${REGION}/wal/${WAL_FILE}"
+
+                  # Create manifest for restore procedures
+                  cat > "/tmp/backup_manifest_${TIMESTAMP}.json" << EOF
+                  {
+                    "timestamp": "${TIMESTAMP}",
+                    "region": "${REGION}",
+                    "type": "postgresql",
+                    "files": {
+                      "dump": "${BACKUP_FILE}",
+                      "wal": "${WAL_FILE}"
+                    },
+                    "metadata": {
+                      "pg_version": "$(psql -t -c 'SELECT version()')",
+                      "database_size": "$(psql -t -c \"SELECT pg_size_pretty(pg_database_size('maestro'))\")",
+                      "backup_method": "pg_dump+pg_receivewal",
+                      "retention_days": ${BACKUP_RETENTION_DAYS}
+                    },
+                    "checksums": {
+                      "dump_sha256": "$(sha256sum /tmp/${BACKUP_FILE} | cut -d' ' -f1)",
+                      "wal_sha256": "$(sha256sum /tmp/${WAL_FILE} | cut -d' ' -f1)"
+                    }
+                  }
+                  EOF
+
+                  aws s3 cp "/tmp/backup_manifest_${TIMESTAMP}.json" \
+                    "s3://${S3_BUCKET}/postgresql/${REGION}/manifests/backup_manifest_${TIMESTAMP}.json"
+
+                  # Update latest backup pointer
+                  echo "${TIMESTAMP}" | aws s3 cp - "s3://${S3_BUCKET}/postgresql/${REGION}/LATEST"
+
+                  # Cleanup old backups based on retention
+                  aws s3 ls "s3://${S3_BUCKET}/postgresql/${REGION}/dumps/" | \
+                    awk '{print $4}' | sort | head -n -${BACKUP_RETENTION_DAYS} | \
+                    while read backup; do
+                      if [ -n "$backup" ]; then
+                        echo "Deleting old backup: $backup"
+                        aws s3 rm "s3://${S3_BUCKET}/postgresql/${REGION}/dumps/${backup}"
+                      fi
+                    done
+
+                  # Cleanup old WAL files
+                  aws s3 ls "s3://${S3_BUCKET}/postgresql/${REGION}/wal/" | \
+                    awk '{print $4}' | sort | head -n -${BACKUP_RETENTION_DAYS} | \
+                    while read walfile; do
+                      if [ -n "$walfile" ]; then
+                        aws s3 rm "s3://${S3_BUCKET}/postgresql/${REGION}/wal/${walfile}"
+                      fi
+                    done
+
+                  # Cleanup old manifests
+                  aws s3 ls "s3://${S3_BUCKET}/postgresql/${REGION}/manifests/" | \
+                    awk '{print $4}' | sort | head -n -${BACKUP_RETENTION_DAYS} | \
+                    while read manifest; do
+                      if [ -n "$manifest" ]; then
+                        aws s3 rm "s3://${S3_BUCKET}/postgresql/${REGION}/manifests/${manifest}"
+                      fi
+                    done
+
+                  echo "PostgreSQL backup completed successfully at $(date)"
+                  echo "Files uploaded:"
+                  echo "  - s3://${S3_BUCKET}/postgresql/${REGION}/dumps/${BACKUP_FILE}"
+                  echo "  - s3://${S3_BUCKET}/postgresql/${REGION}/wal/${WAL_FILE}"
+                  echo "  - s3://${S3_BUCKET}/postgresql/${REGION}/manifests/backup_manifest_${TIMESTAMP}.json"
+
+              resources:
+                requests:
+                  memory: '512Mi'
+                  cpu: '200m'
+                limits:
+                  memory: '2Gi'
+                  cpu: '1000m'
+
+              volumeMounts:
+                - name: backup-temp
+                  mountPath: /tmp
+
           volumes:
-          - name: backup-temp
-            emptyDir:
-              sizeLimit: 10Gi
+            - name: backup-temp
+              emptyDir:
+                sizeLimit: 10Gi

@@ -4,9 +4,21 @@
   box-sizing: border-box;
 }
 
-html, body, #root { height: 100%; }
+html,
+body,
+#root {
+  height: 100%;
+}
 body {
-  font-family: ui-sans-serif, -apple-system, Segoe UI, Roboto, Inter, Helvetica, Arial, sans-serif;
+  font-family:
+    ui-sans-serif,
+    -apple-system,
+    Segoe UI,
+    Roboto,
+    Inter,
+    Helvetica,
+    Arial,
+    sans-serif;
   line-height: 1.55;
   color: #0c0d0e;
   background-color: #fafbfc;
@@ -43,11 +55,29 @@ body {
 
 /* Tufte/Wright-inspired refinements */
 :root {
-  --hairline: rgba(12,13,14,0.08);
+  --hairline: rgba(12, 13, 14, 0.08);
 }
-.hairline { border-color: var(--hairline) !important; }
-.muted { color: rgba(12,13,14,0.56); }
-.smallcaps { font-variant-caps: small-caps; letter-spacing: 0.06em; }
-.note { color: rgba(12,13,14,0.56); font-size: 0.85rem; }
-.section-title { font-weight: 600; letter-spacing: 0.12rem; text-transform: none; }
-.panel { border: 1px solid var(--hairline); border-radius: 6px; background: #fff; }
+.hairline {
+  border-color: var(--hairline) !important;
+}
+.muted {
+  color: rgba(12, 13, 14, 0.56);
+}
+.smallcaps {
+  font-variant-caps: small-caps;
+  letter-spacing: 0.06em;
+}
+.note {
+  color: rgba(12, 13, 14, 0.56);
+  font-size: 0.85rem;
+}
+.section-title {
+  font-weight: 600;
+  letter-spacing: 0.12rem;
+  text-transform: none;
+}
+.panel {
+  border: 1px solid var(--hairline);
+  border-radius: 6px;
+  background: #fff;
+}

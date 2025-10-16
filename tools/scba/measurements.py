@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict
 
 
 @dataclass
@@ -29,7 +28,7 @@ class Measurement:
     latency_ms: float
     payload_bytes: int
     cache_hint: float
-    meta: Dict[str, float] | None = None
+    meta: dict[str, float] | None = None
 
     def channel(self, name: str) -> float:
         """Return a measurement channel by name."""

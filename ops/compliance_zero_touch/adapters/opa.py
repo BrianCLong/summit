@@ -50,7 +50,9 @@ class OPAAdapter(PolicyAdapter):
             )
 
         coverage = 1.0 if findings else 0.85
-        return PolicyEvaluationResult(adapter=self.name, findings=findings, metrics=metrics, coverage=coverage)
+        return PolicyEvaluationResult(
+            adapter=self.name, findings=findings, metrics=metrics, coverage=coverage
+        )
 
     def regulatory_alignment(self) -> dict[str, list[RegulatoryRequirement]]:
         return {

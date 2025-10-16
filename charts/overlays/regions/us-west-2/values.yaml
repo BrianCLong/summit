@@ -10,7 +10,7 @@ global:
   region: us-west-2
   isPrimary: false
   imageRegistry: ghcr.io
-  imageTag: "24.3.0"
+  imageTag: '24.3.0'
 
 # Service configuration
 service:
@@ -26,8 +26,8 @@ ingress:
   className: nginx
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
   hosts:
     - host: api-us-west.maestro.dev
       paths:
@@ -76,31 +76,31 @@ app:
   replicas: 3 # Fewer replicas for read-only region
   image:
     repository: ghcr.io/maestro/conductor
-    tag: "24.3.0"
+    tag: '24.3.0'
     pullPolicy: IfNotPresent
 
   env:
     NODE_ENV: production
     CURRENT_REGION: us-west-2
-    IS_PRIMARY_REGION: "false"
-    READ_ONLY_REGION: "true"
+    IS_PRIMARY_REGION: 'false'
+    READ_ONLY_REGION: 'true'
     LOG_LEVEL: info
-    
+
     # Database connection strings (read-only)
     DATABASE_URL: postgresql://maestro_reader:${POSTGRES_READ_PASSWORD}@maestro-postgres-replica-us-west.us-west-2.rds.amazonaws.com:5432/maestro_production?sslmode=require&options=-c%20default_transaction_isolation=repeatable_read
     DATABASE_READ_URL: postgresql://maestro_reader:${POSTGRES_READ_PASSWORD}@maestro-postgres-replica-us-west.us-west-2.rds.amazonaws.com:5432/maestro_production?sslmode=require&options=-c%20default_transaction_isolation=repeatable_read
-    
+
     # For writes, redirect to primary
     DATABASE_WRITE_URL: postgresql://maestro:${POSTGRES_PASSWORD}@maestro-postgres-primary.us-east-1.rds.amazonaws.com:5432/maestro_production?sslmode=require
-    
+
     NEO4J_URI: bolt://maestro-neo4j-replica-us-west.us-west-2.amazonaws.com:7687
     NEO4J_USER: neo4j
     NEO4J_PASSWORD: ${NEO4J_PASSWORD}
     NEO4J_READ_URI: bolt://maestro-neo4j-replica-us-west.us-west-2.amazonaws.com:7687
-    
+
     # For Neo4j writes, use primary
     NEO4J_WRITE_URI: bolt://maestro-neo4j-primary.us-east-1.amazonaws.com:7687
-    
+
     REDIS_URL: redis://maestro-redis-replica.cache.us-west-2.amazonaws.com:6379
 
     # Region routing
@@ -175,7 +175,7 @@ costMonitoring:
 # Backup and DR (replica participates in DR)
 backupDrills:
   enabled: true
-  schedule: "0 3 * * 2" # Weekly on Tuesday at 3 AM (offset from primary)
+  schedule: '0 3 * * 2' # Weekly on Tuesday at 3 AM (offset from primary)
   drillType: replica-validation
   s3Bucket: maestro-backups-us-west-2
   awsRegion: us-west-2
@@ -205,7 +205,7 @@ failover:
   readOnlyMode:
     enabled: true
     banner: true
-    message: "Running in read-only mode. Write operations are not available."
+    message: 'Running in read-only mode. Write operations are not available.'
 
 # Replica-specific configuration
 replica:
@@ -215,12 +215,12 @@ replica:
     lagThresholds:
       warning: 30s
       critical: 60s
-  
+
   # Read-only banner configuration
   readOnlyBanner:
     enabled: true
-    message: "US West region - Read operations only"
-    color: "#FFA500"
+    message: 'US West region - Read operations only'
+    color: '#FFA500'
     position: top
 
 # Feature flags for replica region

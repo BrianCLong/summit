@@ -3,7 +3,6 @@ from __future__ import annotations
 import hashlib
 import json
 from pathlib import Path
-from typing import Dict, Optional
 
 import httpx
 
@@ -17,7 +16,7 @@ class SyncManager:
         self.storage_dir.mkdir(parents=True, exist_ok=True)
 
     # ------------------------------------------------------------------
-    def store(self, record: Dict) -> Path:
+    def store(self, record: dict) -> Path:
         """Persist a record locally with a checksum for validation."""
         data = json.dumps(record, sort_keys=True).encode()
         checksum = hashlib.sha256(data).hexdigest()
@@ -28,15 +27,17 @@ class SyncManager:
         return path
 
     # ------------------------------------------------------------------
-    def sync(self, client: Optional[httpx.Client] = None) -> None:
+    def sync(self, client: httpx.Client | None = None) -> None:
         """Attempt to upload stored records to the central service."""
         own_client = client or httpx.Client()
         for path in list(self.storage_dir.glob("*.json")):
-            with open(path, "r", encoding="utf-8") as f:
+            with open(path, encoding="utf-8") as f:
                 record = json.load(f)
             try:
                 resp = own_client.post(self.endpoint, json=record, timeout=5.0)
-                if resp.status_code == 200 and resp.json().get("checksum") == record.get("checksum"):
+                if resp.status_code == 200 and resp.json().get("checksum") == record.get(
+                    "checksum"
+                ):
                     path.unlink()  # Delete once server confirms
             except Exception:
                 # Connectivity issues are ignored; records remain for later attempts

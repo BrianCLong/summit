@@ -7,21 +7,23 @@ Cryptographic verification of disaster recovery capabilities and business contin
 Provides tamper-proof evidence of DR readiness through automated drill execution.
 """
 
-import json
+import asyncio
 import hashlib
 import hmac
-import time
-import asyncio
-from typing import Dict, Any, List, Optional, NamedTuple
-from dataclasses import dataclass, asdict
-from datetime import datetime, timezone, timedelta
-from enum import Enum
+import json
 import logging
+import time
+from dataclasses import asdict, dataclass
+from datetime import datetime, timezone
+from enum import Enum
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
+
 class DrillType(Enum):
     """Types of disaster recovery drills"""
+
     FAILOVER = "failover"
     BACKUP_RESTORE = "backup_restore"
     NETWORK_PARTITION = "network_partition"
@@ -29,45 +31,52 @@ class DrillType(Enum):
     RANSOMWARE_SIMULATION = "ransomware_simulation"
     SUPPLY_CHAIN_ATTACK = "supply_chain_attack"
 
+
 class DrillStatus(Enum):
     """Drill execution status"""
+
     PLANNED = "planned"
     RUNNING = "running"
     COMPLETED = "completed"
     FAILED = "failed"
     ABORTED = "aborted"
 
+
 @dataclass
 class DrillStep:
     """Individual step in disaster recovery drill"""
+
     step_id: str
     description: str
     expected_duration_s: int
-    actual_duration_s: Optional[int] = None
+    actual_duration_s: int | None = None
     status: DrillStatus = DrillStatus.PLANNED
-    evidence: Dict[str, Any] = None
-    error_msg: Optional[str] = None
+    evidence: dict[str, Any] = None
+    error_msg: str | None = None
     timestamp: str = ""
+
 
 @dataclass
 class PoDRProof:
     """Proof-of-DR cryptographic evidence bundle"""
+
     proof_id: str
     drill_id: str
     drill_type: DrillType
     tenant_id: str
     start_time: str
-    end_time: Optional[str]
-    total_duration_s: Optional[int]
-    steps: List[DrillStep]
-    rto_target_s: int          # Recovery Time Objective
-    rpo_target_s: int          # Recovery Point Objective
-    rto_achieved_s: Optional[int]
-    rpo_achieved_s: Optional[int]
+    end_time: str | None
+    total_duration_s: int | None
+    steps: list[DrillStep]
+    rto_target_s: int  # Recovery Time Objective
+    rpo_target_s: int  # Recovery Point Objective
+    rto_achieved_s: int | None
+    rpo_achieved_s: int | None
     overall_success: bool
-    compliance_score: float    # 0.0-1.0
+    compliance_score: float  # 0.0-1.0
     cryptographic_signature: str
     evidence_hash: str
+
 
 class PoDRTracer:
     """Proof-of-DR drill execution and verification tracer
@@ -81,8 +90,8 @@ class PoDRTracer:
     def __init__(self, tenant_id: str, signing_key: bytes):
         self.tenant_id = tenant_id
         self.signing_key = signing_key
-        self.active_drills: Dict[str, PoDRProof] = {}
-        self.completed_drills: List[PoDRProof] = []
+        self.active_drills: dict[str, PoDRProof] = {}
+        self.completed_drills: list[PoDRProof] = []
 
         # Performance tracking
         self.total_drills = 0
@@ -91,9 +100,9 @@ class PoDRTracer:
 
         logger.info(f"PoDR Tracer initialized for tenant: {tenant_id}")
 
-    async def execute_drill(self, drill_type: DrillType,
-                           rto_target_s: int = 300,
-                           rpo_target_s: int = 60) -> PoDRProof:
+    async def execute_drill(
+        self, drill_type: DrillType, rto_target_s: int = 300, rpo_target_s: int = 60
+    ) -> PoDRProof:
         """Execute disaster recovery drill with cryptographic verification
 
         Args:
@@ -107,8 +116,10 @@ class PoDRTracer:
         start_time = time.time()
         drill_id = self._generate_drill_id(drill_type)
 
-        logger.info(f"Starting DR drill: {drill_id}, type={drill_type.value}, "
-                   f"RTO={rto_target_s}s, RPO={rpo_target_s}s")
+        logger.info(
+            f"Starting DR drill: {drill_id}, type={drill_type.value}, "
+            f"RTO={rto_target_s}s, RPO={rpo_target_s}s"
+        )
 
         # Initialize proof structure
         proof = PoDRProof(
@@ -127,7 +138,7 @@ class PoDRTracer:
             overall_success=False,
             compliance_score=0.0,
             cryptographic_signature="",
-            evidence_hash=""
+            evidence_hash="",
         )
 
         self.active_drills[drill_id] = proof
@@ -146,7 +157,10 @@ class PoDRTracer:
                 step_success = await self._execute_drill_step(step, proof)
                 if not step_success:
                     all_steps_success = False
-                    if drill_type in [DrillType.RANSOMWARE_SIMULATION, DrillType.SUPPLY_CHAIN_ATTACK]:
+                    if drill_type in [
+                        DrillType.RANSOMWARE_SIMULATION,
+                        DrillType.SUPPLY_CHAIN_ATTACK,
+                    ]:
                         # Critical drills abort on failure
                         break
 
@@ -183,10 +197,12 @@ class PoDRTracer:
             self.completed_drills.append(proof)
             del self.active_drills[drill_id]
 
-            logger.info(f"DR drill completed: {drill_id}, success={proof.overall_success}, "
-                       f"RTO={proof.rto_achieved_s}s/{proof.rto_target_s}s, "
-                       f"RPO={proof.rpo_achieved_s}s/{proof.rpo_target_s}s, "
-                       f"compliance={proof.compliance_score:.3f}")
+            logger.info(
+                f"DR drill completed: {drill_id}, success={proof.overall_success}, "
+                f"RTO={proof.rto_achieved_s}s/{proof.rto_target_s}s, "
+                f"RPO={proof.rpo_achieved_s}s/{proof.rpo_target_s}s, "
+                f"compliance={proof.compliance_score:.3f}"
+            )
 
             return proof
 
@@ -209,7 +225,7 @@ class PoDRTracer:
 
             return proof
 
-    def _generate_drill_steps(self, drill_type: DrillType) -> List[DrillStep]:
+    def _generate_drill_steps(self, drill_type: DrillType) -> list[DrillStep]:
         """Generate drill steps based on type"""
         steps = []
 
@@ -219,7 +235,7 @@ class PoDRTracer:
                 DrillStep("initiate_failover", "Initiate automatic failover", 60),
                 DrillStep("verify_secondary", "Verify secondary system health", 45),
                 DrillStep("redirect_traffic", "Redirect traffic to secondary", 30),
-                DrillStep("validate_operations", "Validate operational continuity", 90)
+                DrillStep("validate_operations", "Validate operational continuity", 90),
             ]
 
         elif drill_type == DrillType.BACKUP_RESTORE:
@@ -228,7 +244,7 @@ class PoDRTracer:
                 DrillStep("initiate_restore", "Initiate backup restoration", 180),
                 DrillStep("verify_data_integrity", "Verify data integrity", 60),
                 DrillStep("test_application", "Test application functionality", 120),
-                DrillStep("validate_consistency", "Validate data consistency", 45)
+                DrillStep("validate_consistency", "Validate data consistency", 45),
             ]
 
         elif drill_type == DrillType.NETWORK_PARTITION:
@@ -237,7 +253,7 @@ class PoDRTracer:
                 DrillStep("detect_partition", "Detect network partition", 20),
                 DrillStep("activate_redundancy", "Activate redundant paths", 40),
                 DrillStep("maintain_quorum", "Maintain consensus quorum", 60),
-                DrillStep("restore_connectivity", "Restore full connectivity", 30)
+                DrillStep("restore_connectivity", "Restore full connectivity", 30),
             ]
 
         elif drill_type == DrillType.DATA_CENTER_OUTAGE:
@@ -246,7 +262,7 @@ class PoDRTracer:
                 DrillStep("detect_outage", "Detect data center failure", 25),
                 DrillStep("activate_dr_site", "Activate DR data center", 120),
                 DrillStep("migrate_workloads", "Migrate critical workloads", 180),
-                DrillStep("verify_operations", "Verify full operational capacity", 90)
+                DrillStep("verify_operations", "Verify full operational capacity", 90),
             ]
 
         elif drill_type == DrillType.RANSOMWARE_SIMULATION:
@@ -255,7 +271,7 @@ class PoDRTracer:
                 DrillStep("isolate_systems", "Isolate affected systems", 60),
                 DrillStep("activate_clean_backups", "Activate clean backup systems", 90),
                 DrillStep("restore_from_backup", "Restore from verified clean backups", 300),
-                DrillStep("verify_malware_free", "Verify systems are malware-free", 120)
+                DrillStep("verify_malware_free", "Verify systems are malware-free", 120),
             ]
 
         elif drill_type == DrillType.SUPPLY_CHAIN_ATTACK:
@@ -264,7 +280,7 @@ class PoDRTracer:
                 DrillStep("isolate_components", "Isolate compromised components", 30),
                 DrillStep("activate_alternatives", "Activate alternative suppliers", 120),
                 DrillStep("verify_integrity", "Verify component integrity", 180),
-                DrillStep("restore_operations", "Restore full operations", 150)
+                DrillStep("restore_operations", "Restore full operations", 150),
             ]
 
         # Add timestamps and evidence placeholders
@@ -294,7 +310,9 @@ class PoDRTracer:
             step.actual_duration_s = int(time.time() - step_start)
 
             # Determine success based on timing and evidence
-            timing_success = step.actual_duration_s <= step.expected_duration_s * 1.5  # 50% tolerance
+            timing_success = (
+                step.actual_duration_s <= step.expected_duration_s * 1.5
+            )  # 50% tolerance
             evidence_success = step.evidence.get("success", True)
 
             if timing_success and evidence_success:
@@ -312,14 +330,16 @@ class PoDRTracer:
             logger.error(f"Step failed: {step.step_id}, error={e}")
             return False
 
-    async def _collect_step_evidence(self, step: DrillStep, drill_type: DrillType) -> Dict[str, Any]:
+    async def _collect_step_evidence(
+        self, step: DrillStep, drill_type: DrillType
+    ) -> dict[str, Any]:
         """Collect cryptographic evidence for drill step"""
         # Simulate evidence collection with step-specific data
         evidence = {
             "step_id": step.step_id,
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "success": True,  # Simulate mostly successful steps
-            "metrics": {}
+            "metrics": {},
         }
 
         # Add step-specific evidence
@@ -327,19 +347,19 @@ class PoDRTracer:
             evidence["metrics"] = {
                 "failover_time_ms": 2500,
                 "traffic_loss_pct": 0.1,
-                "health_check_pass": True
+                "health_check_pass": True,
             }
         elif "restore" in step.step_id:
             evidence["metrics"] = {
                 "restored_records": 1000000,
                 "integrity_check_pass": True,
-                "checksum_verified": True
+                "checksum_verified": True,
             }
         elif "detect" in step.step_id:
             evidence["metrics"] = {
                 "detection_time_s": 15,
                 "alert_triggered": True,
-                "confidence_score": 0.95
+                "confidence_score": 0.95,
             }
 
         # Add cryptographic hash of evidence
@@ -366,20 +386,24 @@ class PoDRTracer:
         step_success_rate = successful_steps / max(len(proof.steps), 1)
 
         # RTO compliance
-        rto_compliance = 1.0 if proof.rto_achieved_s <= proof.rto_target_s else max(
-            0.0, 1.0 - (proof.rto_achieved_s - proof.rto_target_s) / proof.rto_target_s
+        rto_compliance = (
+            1.0
+            if proof.rto_achieved_s <= proof.rto_target_s
+            else max(0.0, 1.0 - (proof.rto_achieved_s - proof.rto_target_s) / proof.rto_target_s)
         )
 
         # RPO compliance
-        rpo_compliance = 1.0 if proof.rpo_achieved_s <= proof.rpo_target_s else max(
-            0.0, 1.0 - (proof.rpo_achieved_s - proof.rpo_target_s) / proof.rpo_target_s
+        rpo_compliance = (
+            1.0
+            if proof.rpo_achieved_s <= proof.rpo_target_s
+            else max(0.0, 1.0 - (proof.rpo_achieved_s - proof.rpo_target_s) / proof.rpo_target_s)
         )
 
         # Weighted score
         compliance_score = (
-            step_success_rate * step_success_weight +
-            rto_compliance * rto_weight +
-            rpo_compliance * rpo_weight
+            step_success_rate * step_success_weight
+            + rto_compliance * rto_weight
+            + rpo_compliance * rpo_weight
         )
 
         return min(1.0, max(0.0, compliance_score))
@@ -398,10 +422,10 @@ class PoDRTracer:
             "rto_achieved_s": proof.rto_achieved_s,
             "rpo_achieved_s": proof.rpo_achieved_s,
             "overall_success": proof.overall_success,
-            "compliance_score": proof.compliance_score
+            "compliance_score": proof.compliance_score,
         }
 
-        canonical_json = json.dumps(evidence_data, sort_keys=True, separators=(',', ':'))
+        canonical_json = json.dumps(evidence_data, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(canonical_json.encode()).hexdigest()
 
     def _sign_proof(self, proof: PoDRProof) -> str:
@@ -410,14 +434,12 @@ class PoDRTracer:
         signature_data = {
             "evidence_hash": proof.evidence_hash,
             "tenant_id": proof.tenant_id,
-            "timestamp": proof.end_time or proof.start_time
+            "timestamp": proof.end_time or proof.start_time,
         }
 
-        signature_json = json.dumps(signature_data, sort_keys=True, separators=(',', ':'))
+        signature_json = json.dumps(signature_data, sort_keys=True, separators=(",", ":"))
         signature_bytes = hmac.new(
-            self.signing_key,
-            b"PODR_PROOF:" + signature_json.encode(),
-            hashlib.sha256
+            self.signing_key, b"PODR_PROOF:" + signature_json.encode(), hashlib.sha256
         ).hexdigest()
 
         return signature_bytes
@@ -441,14 +463,12 @@ class PoDRTracer:
             signature_data = {
                 "evidence_hash": proof.evidence_hash,
                 "tenant_id": proof.tenant_id,
-                "timestamp": proof.end_time or proof.start_time
+                "timestamp": proof.end_time or proof.start_time,
             }
 
-            signature_json = json.dumps(signature_data, sort_keys=True, separators=(',', ':'))
+            signature_json = json.dumps(signature_data, sort_keys=True, separators=(",", ":"))
             expected_signature = hmac.new(
-                self.signing_key,
-                b"PODR_PROOF:" + signature_json.encode(),
-                hashlib.sha256
+                self.signing_key, b"PODR_PROOF:" + signature_json.encode(), hashlib.sha256
             ).hexdigest()
 
             return hmac.compare_digest(expected_signature, proof.cryptographic_signature)
@@ -457,7 +477,7 @@ class PoDRTracer:
             logger.error(f"Proof verification error: {e}")
             return False
 
-    def get_performance_metrics(self) -> Dict[str, Any]:
+    def get_performance_metrics(self) -> dict[str, Any]:
         """Get tracer performance metrics"""
         success_rate = self.successful_drills / max(self.total_drills, 1)
 
@@ -468,7 +488,8 @@ class PoDRTracer:
             "success_rate_pct": success_rate * 100,
             "active_drills": len(self.active_drills),
             "completed_drills": len(self.completed_drills),
-            "avg_compliance_score": sum(p.compliance_score for p in self.completed_drills) / max(len(self.completed_drills), 1)
+            "avg_compliance_score": sum(p.compliance_score for p in self.completed_drills)
+            / max(len(self.completed_drills), 1),
         }
 
     def export_proof(self, proof: PoDRProof) -> str:
@@ -494,10 +515,12 @@ if __name__ == "__main__":
 
         for drill_type in drill_types:
             proof = await tracer.execute_drill(drill_type, rto_target_s=300, rpo_target_s=60)
-            print(f"Drill {proof.drill_id}: {drill_type.value}, "
-                  f"success={proof.overall_success}, "
-                  f"compliance={proof.compliance_score:.3f}, "
-                  f"RTO={proof.rto_achieved_s}s, RPO={proof.rpo_achieved_s}s")
+            print(
+                f"Drill {proof.drill_id}: {drill_type.value}, "
+                f"success={proof.overall_success}, "
+                f"compliance={proof.compliance_score:.3f}, "
+                f"RTO={proof.rto_achieved_s}s, RPO={proof.rpo_achieved_s}s"
+            )
 
             # Verify proof
             verified = tracer.verify_proof(proof)

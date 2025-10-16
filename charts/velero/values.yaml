@@ -60,14 +60,14 @@ logLevel: info
 # Schedule daily backups of all namespaces
 schedules:
   default:
-    schedule: "0 1 * * *" # Every day at 1 AM UTC
+    schedule: '0 1 * * *' # Every day at 1 AM UTC
     template:
       includedNamespaces:
-        - "*" # Backup all namespaces
+        - '*' # Backup all namespaces
       excludedResources:
         - events
         - events.events.k8s.io
         - backups.velero.io
         - restores.velero.io
         - resticrepositories.velero.io
-      ttl: "720h" # Keep backups for 30 days
+      ttl: '720h' # Keep backups for 30 days

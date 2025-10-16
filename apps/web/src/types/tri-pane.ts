@@ -3,7 +3,16 @@
 export interface Entity {
   id: string
   name: string
-  type: 'PERSON' | 'ORGANIZATION' | 'LOCATION' | 'IP_ADDRESS' | 'DOMAIN' | 'EMAIL' | 'FILE' | 'PROJECT' | 'SYSTEM'
+  type:
+    | 'PERSON'
+    | 'ORGANIZATION'
+    | 'LOCATION'
+    | 'IP_ADDRESS'
+    | 'DOMAIN'
+    | 'EMAIL'
+    | 'FILE'
+    | 'PROJECT'
+    | 'SYSTEM'
   confidence: number
   properties: Record<string, any>
   lastSeen?: string
@@ -62,7 +71,7 @@ export function formatDate(date: string | Date): string {
     month: 'short',
     day: 'numeric',
     hour: '2-digit',
-    minute: '2-digit'
+    minute: '2-digit',
   })
 }
 

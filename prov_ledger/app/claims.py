@@ -1,12 +1,11 @@
-from datetime import datetime
-from typing import Dict
 import uuid
+from datetime import datetime
 
 from .nlp.embedder import embed
 
 STOPWORDS = {"the", "a", "an", "of", "and", "to"}
 
-_claims: Dict[str, dict] = {}
+_claims: dict[str, dict] = {}
 
 
 def normalize(text: str) -> str:

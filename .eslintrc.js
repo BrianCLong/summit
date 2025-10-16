@@ -1,23 +1,24 @@
 module.exports = {
   env: {
     node: true,
-    es2021: true
+    es2021: true,
   },
-  extends: [
-    'eslint:recommended'
-  ],
+  extends: ['eslint:recommended'],
   parserOptions: {
     ecmaVersion: 'latest',
-    sourceType: 'module'
+    sourceType: 'module',
   },
   rules: {
-    'no-unused-vars': ['error', { 
-      'argsIgnorePattern': '^_',
-      'varsIgnorePattern': '^_' 
-    }],
+    'no-unused-vars': [
+      'error',
+      {
+        argsIgnorePattern: '^_',
+        varsIgnorePattern: '^_',
+      },
+    ],
     'no-console': 'warn',
     'prefer-const': 'error',
-    'no-var': 'error'
+    'no-var': 'error',
   },
   ignorePatterns: [
     'node_modules/',
@@ -35,6 +36,6 @@ module.exports = {
     'logs/',
     'temp/',
     'tmp/',
-    'backups/'
-  ]
+    'backups/',
+  ],
 };

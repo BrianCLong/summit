@@ -3,8 +3,9 @@
 from __future__ import annotations
 
 from collections import deque
-from dataclasses import dataclass, field
-from typing import Any, Deque, Iterable, Sequence
+from collections.abc import Iterable, Sequence
+from dataclasses import dataclass
+from typing import Any
 
 import numpy as np
 
@@ -83,12 +84,14 @@ class EvaluationReport:
 class AdaptiveThreshold:
     """Adaptive threshold using a robust MAD driven strategy."""
 
-    def __init__(self, base: float, sensitivity: float, window: int = 512, min_samples: int = 10) -> None:
+    def __init__(
+        self, base: float, sensitivity: float, window: int = 512, min_samples: int = 10
+    ) -> None:
         self.base = base
         self.sensitivity = sensitivity
         self.window = window
         self.min_samples = min_samples
-        self.history: Deque[float] = deque(maxlen=window)
+        self.history: deque[float] = deque(maxlen=window)
 
     def update(self, scores: Sequence[float]) -> float:
         if not scores:
@@ -159,7 +162,9 @@ class LinearPredictor:
         idx = np.arange(len(values), dtype=float)
         series = np.asarray(list(values), dtype=float)
         slope, intercept = np.polyfit(idx, series, 1)
-        forecast = [float(intercept + slope * (len(values) + step)) for step in range(1, horizon + 1)]
+        forecast = [
+            float(intercept + slope * (len(values) + step)) for step in range(1, horizon + 1)
+        ]
         return PredictionReport(horizon=horizon, forecast=forecast)
 
 
@@ -209,7 +214,7 @@ class AnomalyEngine:
     def __init__(self, alert_client: AlertingClient | None = None) -> None:
         self._configs: dict[str, DetectorConfig] = {}
         self._thresholds: dict[str, AdaptiveThreshold | float] = {}
-        self._history: dict[str, Deque[float]] = {}
+        self._history: dict[str, deque[float]] = {}
         self._cooldowns: dict[str, int] = {}
         self._alert_client = alert_client or InMemoryAlertingClient()
         self._correlation_analyzer = CorrelationAnalyzer()
@@ -253,7 +258,9 @@ class AnomalyEngine:
         config = self._configs[model_id]
         detector_result = score_records(records, config)
 
-        threshold_value = self._resolve_threshold(model_id, detector_result.scores, threshold_override)
+        threshold_value = self._resolve_threshold(
+            model_id, detector_result.scores, threshold_override
+        )
 
         anomalies, suppressed = self._build_anomalies(
             records, detector_result, threshold_value, config
@@ -332,7 +339,9 @@ class AnomalyEngine:
                 },
                 "rationale": {
                     "features": rationale_features,
-                    "details": {feature: records[idx].get(feature) for feature in rationale_features},
+                    "details": {
+                        feature: records[idx].get(feature) for feature in rationale_features
+                    },
                 },
                 "root_cause": root_cause,
                 "impact_ratio": (score - threshold) / (threshold + 1e-6),
@@ -412,10 +421,10 @@ class AnomalyEngine:
         if len(scores) != len(labels):
             raise ValueError("labels length must match scores length")
         preds = [1 if score > threshold else 0 for score in scores]
-        tp = sum(1 for pred, label in zip(preds, labels) if pred == 1 and label == 1)
-        fp = sum(1 for pred, label in zip(preds, labels) if pred == 1 and label == 0)
-        fn = sum(1 for pred, label in zip(preds, labels) if pred == 0 and label == 1)
-        tn = sum(1 for pred, label in zip(preds, labels) if pred == 0 and label == 0)
+        tp = sum(1 for pred, label in zip(preds, labels, strict=False) if pred == 1 and label == 1)
+        fp = sum(1 for pred, label in zip(preds, labels, strict=False) if pred == 1 and label == 0)
+        fn = sum(1 for pred, label in zip(preds, labels, strict=False) if pred == 0 and label == 1)
+        tn = sum(1 for pred, label in zip(preds, labels, strict=False) if pred == 0 and label == 0)
         precision = tp / (tp + fp) if (tp + fp) else 0.0
         recall = tp / (tp + fn) if (tp + fn) else 0.0
         f1 = 2 * precision * recall / (precision + recall) if (precision + recall) else 0.0

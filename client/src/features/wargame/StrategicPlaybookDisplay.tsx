@@ -36,14 +36,19 @@ interface StrategicPlaybookDisplayProps {
   scenarioId: string;
 }
 
-const StrategicPlaybookDisplay: React.FC<StrategicPlaybookDisplayProps> = ({ scenarioId }) => {
+const StrategicPlaybookDisplay: React.FC<StrategicPlaybookDisplayProps> = ({
+  scenarioId,
+}) => {
   const { loading, error, data } = useQuery(GET_STRATEGIC_PLAYBOOKS, {
     variables: { scenarioId },
     pollInterval: 20000, // Poll every 20 seconds
   });
 
   if (loading) return <CircularProgress />;
-  if (error) return <Alert severity="error">Error loading playbooks: {error.message}</Alert>;
+  if (error)
+    return (
+      <Alert severity="error">Error loading playbooks: {error.message}</Alert>
+    );
 
   const playbooks = data?.getStrategicResponsePlaybooks || [];
 
@@ -53,12 +58,14 @@ const StrategicPlaybookDisplay: React.FC<StrategicPlaybookDisplayProps> = ({ sce
         Strategic Response Playbooks
       </Typography>
       <Alert severity="info" sx={{ mb: 2 }}>
-        WAR-GAMED SIMULATION - Playbooks are theoretical and for training/simulation purposes only.
+        WAR-GAMED SIMULATION - Playbooks are theoretical and for
+        training/simulation purposes only.
       </Alert>
 
       {playbooks.length === 0 ? (
         <Typography variant="body1" color="text.secondary">
-          No strategic response playbooks available for this scenario yet. Run a simulation to generate data.
+          No strategic response playbooks available for this scenario yet. Run a
+          simulation to generate data.
         </Typography>
       ) : (
         <Box>
@@ -72,8 +79,13 @@ const StrategicPlaybookDisplay: React.FC<StrategicPlaybookDisplayProps> = ({ sce
                 <Typography variant="h6">{playbook.name}</Typography>
               </AccordionSummary>
               <AccordionDetails>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  <strong>Doctrine Reference:</strong> {playbook.doctrineReference}
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 1 }}
+                >
+                  <strong>Doctrine Reference:</strong>{' '}
+                  {playbook.doctrineReference}
                 </Typography>
                 <Typography variant="body1" sx={{ mb: 2 }}>
                   {playbook.description}
@@ -98,7 +110,12 @@ const StrategicPlaybookDisplay: React.FC<StrategicPlaybookDisplayProps> = ({ sce
                 </Typography>
                 <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
                   {playbook.metricsOfEffectiveness.map((moe, index) => (
-                    <Chip key={index} label={moe} variant="outlined" color="success" />
+                    <Chip
+                      key={index}
+                      label={moe}
+                      variant="outlined"
+                      color="success"
+                    />
                   ))}
                 </Stack>
 
@@ -107,7 +124,12 @@ const StrategicPlaybookDisplay: React.FC<StrategicPlaybookDisplayProps> = ({ sce
                 </Typography>
                 <Stack direction="row" spacing={1} sx={{ flexWrap: 'wrap' }}>
                   {playbook.metricsOfPerformance.map((mop, index) => (
-                    <Chip key={index} label={mop} variant="outlined" color="info" />
+                    <Chip
+                      key={index}
+                      label={mop}
+                      variant="outlined"
+                      color="info"
+                    />
                   ))}
                 </Stack>
               </AccordionDetails>

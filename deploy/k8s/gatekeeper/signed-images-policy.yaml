@@ -6,9 +6,9 @@ kind: ConstraintTemplate
 metadata:
   name: requiresignedimages
   annotations:
-    description: "Requires all container images to have valid signatures"
-    policy.gatekeeper.sh/category: "Security"
-    policy.gatekeeper.sh/severity: "high"
+    description: 'Requires all container images to have valid signatures'
+    policy.gatekeeper.sh/category: 'Security'
+    policy.gatekeeper.sh/severity: 'high'
 spec:
   crd:
     spec:
@@ -20,17 +20,17 @@ spec:
           properties:
             allowedRegistries:
               type: array
-              description: "List of allowed container registries"
+              description: 'List of allowed container registries'
               items:
                 type: string
             exemptNamespaces:
               type: array
-              description: "Namespaces exempt from this policy"
+              description: 'Namespaces exempt from this policy'
               items:
                 type: string
             exemptImages:
               type: array
-              description: "Specific images exempt from signing requirement"
+              description: 'Specific images exempt from signing requirement'
               items:
                 type: string
             sigstoreConfig:
@@ -38,10 +38,10 @@ spec:
               properties:
                 enabled:
                   type: boolean
-                  description: "Enable Sigstore/Cosign verification"
+                  description: 'Enable Sigstore/Cosign verification'
                 publicKeys:
                   type: array
-                  description: "List of trusted public keys for signature verification"
+                  description: 'List of trusted public keys for signature verification'
                   items:
                     type: string
             notaryConfig:
@@ -49,10 +49,10 @@ spec:
               properties:
                 enabled:
                   type: boolean
-                  description: "Enable Docker Notary verification"
+                  description: 'Enable Docker Notary verification'
                 trustServer:
                   type: string
-                  description: "Notary trust server URL"
+                  description: 'Notary trust server URL'
 
   targets:
     - target: admission.k8s.gatekeeper.sh
@@ -166,23 +166,23 @@ metadata:
   namespace: gatekeeper-system
 spec:
   match:
-    - apiGroups: ["apps", "batch", ""]
-      kinds: ["Deployment", "StatefulSet", "DaemonSet", "Job", "CronJob", "Pod"]
-      namespaces: ["intelgraph", "production", "staging"]
+    - apiGroups: ['apps', 'batch', '']
+      kinds: ['Deployment', 'StatefulSet', 'DaemonSet', 'Job', 'CronJob', 'Pod']
+      namespaces: ['intelgraph', 'production', 'staging']
   parameters:
     allowedRegistries:
-      - "ghcr.io/intelgraph/"
-      - "registry.intelgraph.com/"
-      - "gcr.io/distroless/"
-      - "registry.k8s.io/"
+      - 'ghcr.io/intelgraph/'
+      - 'registry.intelgraph.com/'
+      - 'gcr.io/distroless/'
+      - 'registry.k8s.io/'
     exemptNamespaces:
-      - "kube-system"
-      - "gatekeeper-system"
-      - "local-development"
+      - 'kube-system'
+      - 'gatekeeper-system'
+      - 'local-development'
     exemptImages:
-      - "busybox"
-      - "alpine"
-      - "ubuntu:latest"  # Only for development
+      - 'busybox'
+      - 'alpine'
+      - 'ubuntu:latest' # Only for development
     sigstoreConfig:
       enabled: true
       publicKeys:
@@ -270,8 +270,8 @@ metadata:
   name: intelgraph-server-signed
   namespace: intelgraph
   annotations:
-    deployment.kubernetes.io/signed: "true"
-    cosign.sigstore.dev/signature: "verified"
+    deployment.kubernetes.io/signed: 'true'
+    cosign.sigstore.dev/signature: 'verified'
 spec:
   replicas: 3
   selector:
@@ -282,7 +282,7 @@ spec:
       labels:
         app: intelgraph-server
       annotations:
-        cosign.sigstore.dev/signature: "MEUCIQDxxx...signature...xxx"
+        cosign.sigstore.dev/signature: 'MEUCIQDxxx...signature...xxx'
     spec:
       containers:
         - name: intelgraph-server
@@ -292,7 +292,7 @@ spec:
             - containerPort: 4000
           env:
             - name: NODE_ENV
-              value: "production"
+              value: 'production'
           securityContext:
             runAsNonRoot: true
             runAsUser: 1000
@@ -318,9 +318,9 @@ spec:
           for: 0m
           labels:
             severity: warning
-            policy: "signed-images"
+            policy: 'signed-images'
           annotations:
-            summary: "Unsigned container image deployment blocked"
+            summary: 'Unsigned container image deployment blocked'
             description: |
               An attempt to deploy an unsigned container image was blocked by Gatekeeper.
 
@@ -334,9 +334,9 @@ spec:
           for: 2m
           labels:
             severity: high
-            policy: "signed-images"
+            policy: 'signed-images'
           annotations:
-            summary: "Image signing policy was bypassed"
+            summary: 'Image signing policy was bypassed'
             description: |
               The signed images policy was bypassed {{ $value }} times in the last 15 minutes.
 
@@ -352,9 +352,9 @@ spec:
           for: 5m
           labels:
             severity: high
-            policy: "signed-images"
+            policy: 'signed-images'
           annotations:
-            summary: "High volume of unsigned image deployment attempts"
+            summary: 'High volume of unsigned image deployment attempts'
             description: |
               More than 6 attempts per hour to deploy unsigned images.
 

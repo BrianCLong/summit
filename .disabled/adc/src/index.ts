@@ -20,17 +20,30 @@ export class ADC {
     this.aflStore = aflStore;
   }
 
-  async deployBaitDrop(payload: string, expectedFingerprint: Fingerprint): Promise<BaitDrop> {
+  async deployBaitDrop(
+    payload: string,
+    expectedFingerprint: Fingerprint,
+  ): Promise<BaitDrop> {
     const id = `bait-${Date.now()}`;
-    const baitDrop: BaitDrop = { id, payload, expectedFingerprint, triggered: false };
+    const baitDrop: BaitDrop = {
+      id,
+      payload,
+      expectedFingerprint,
+      triggered: false,
+    };
     this.baitDrops.set(id, baitDrop);
     // In a real scenario, this would deploy the bait to a monitored location
     return baitDrop;
   }
 
-  async monitorBaitDrops(actualFingerprint: Fingerprint): Promise<BaitDrop | undefined> {
+  async monitorBaitDrops(
+    actualFingerprint: Fingerprint,
+  ): Promise<BaitDrop | undefined> {
     for (const baitDrop of this.baitDrops.values()) {
-      if (baitDrop.expectedFingerprint.contentHash === actualFingerprint.contentHash) {
+      if (
+        baitDrop.expectedFingerprint.contentHash ===
+        actualFingerprint.contentHash
+      ) {
         baitDrop.triggered = true;
         await this.aflStore.put(actualFingerprint); // Log the adversary's fingerprint
         return baitDrop;
@@ -39,7 +52,10 @@ export class ADC {
     return undefined;
   }
 
-  async triggerCounterDrop(_originPath: string, _payload: CounterDropPayload): Promise<boolean> {
+  async triggerCounterDrop(
+    _originPath: string,
+    _payload: CounterDropPayload,
+  ): Promise<boolean> {
     // Placeholder for actual counter-drop mechanism (e.g., injecting contradictions)
     // console.log(`Triggering counter-drop to ${originPath} with payload type: ${payload.type}`);
     return true;

@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import List
 
 
 @dataclass(frozen=True)
@@ -35,7 +34,7 @@ class Hypothesis:
     probability: float
     novelty_score: float
     expected_impact: float
-    supporting_signals: List[str]
+    supporting_signals: list[str]
     counterfactual_penalty: float
 
 
@@ -47,8 +46,8 @@ class Task:
     title: str
     action: str
     owning_agent: str
-    dependencies: List[str] = field(default_factory=list)
-    innovation_vectors: List[str] = field(default_factory=list)
+    dependencies: list[str] = field(default_factory=list)
+    innovation_vectors: list[str] = field(default_factory=list)
     estimated_hours: float = 1.0
     verification_metric: str = ""
 
@@ -58,8 +57,8 @@ class Plan:
     """End-to-end orchestrated investigation plan."""
 
     case_id: str
-    hypotheses: List[Hypothesis]
-    tasks: List[Task]
-    differentiation_factors: List[str]
-    counterfactual_branches: List[str]
+    hypotheses: list[Hypothesis]
+    tasks: list[Task]
+    differentiation_factors: list[str]
+    counterfactual_branches: list[str]
     assurance_score: float

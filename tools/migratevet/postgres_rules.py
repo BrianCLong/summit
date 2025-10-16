@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable, List
 
 from .models import FileContext, Issue, Statement
 
@@ -40,18 +40,18 @@ INDEX_CONCURRENTLY = Rule(
 )
 
 
-def evaluate(statements: Iterable[Statement], context: FileContext) -> List[Issue]:
+def evaluate(statements: Iterable[Statement], context: FileContext) -> list[Issue]:
     """Run postgres rules for the given statements."""
-    issues: List[Issue] = []
+    issues: list[Issue] = []
     for stmt in statements:
         issues.extend(_check_statement(stmt, context))
     return issues
 
 
-def _check_statement(stmt: Statement, context: FileContext) -> List[Issue]:
+def _check_statement(stmt: Statement, context: FileContext) -> list[Issue]:
     upper = stmt.upper
     stripped_upper = upper.strip()
-    issues: List[Issue] = []
+    issues: list[Issue] = []
 
     if "ALTER TABLE" in upper and "ALTER COLUMN" in upper:
         if " TYPE" in upper or " SET DATA TYPE" in upper:
@@ -86,4 +86,6 @@ def _check_statement(stmt: Statement, context: FileContext) -> List[Issue]:
 def _make_issue(context: FileContext, stmt: Statement, relative_offset: int, rule: Rule) -> Issue:
     offset = stmt.start + max(relative_offset, 0)
     line = context.line_for_offset(offset)
-    return Issue(file_path=context.path, line=line, code=rule.code, message=rule.message, hint=rule.hint)
+    return Issue(
+        file_path=context.path, line=line, code=rule.code, message=rule.message, hint=rule.hint
+    )

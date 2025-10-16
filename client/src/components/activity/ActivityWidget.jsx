@@ -1,5 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent, CardHeader, List, ListItem, ListItemText, Typography } from '@mui/material';
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  List,
+  ListItem,
+  ListItemText,
+  Typography,
+} from '@mui/material';
 import { ActivityAPI } from '../../services/api';
 
 export default function ActivityWidget() {
@@ -23,14 +31,18 @@ export default function ActivityWidget() {
       <CardHeader title="Recent Activity" sx={{ pb: 0 }} />
       <CardContent sx={{ pt: 1 }}>
         {rows.length === 0 && (
-          <Typography variant="body2" color="text.secondary">No recent activity</Typography>
+          <Typography variant="body2" color="text.secondary">
+            No recent activity
+          </Typography>
         )}
         <List dense>
           {rows.map((r) => (
             <ListItem key={r.id} disableGutters>
               <ListItemText
                 primary={`${r.action} — ${r.resource_type || r.resourceType || ''}:${r.resource_id || r.resourceId || ''}`}
-                secondary={new Date(r.created_at || r.createdAt).toLocaleString()}
+                secondary={new Date(
+                  r.created_at || r.createdAt,
+                ).toLocaleString()}
               />
             </ListItem>
           ))}
@@ -39,4 +51,3 @@ export default function ActivityWidget() {
     </Card>
   );
 }
-

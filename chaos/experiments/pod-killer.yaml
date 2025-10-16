@@ -7,14 +7,14 @@ metadata:
   name: pod-killer-experiment
   namespace: intelgraph-staging
   annotations:
-    chaos.alpha.kubernetes.io/experiment-type: "pod-failure"
-    chaos.alpha.kubernetes.io/scope: "scoped"
-    chaos.alpha.kubernetes.io/safety-level: "high"
+    chaos.alpha.kubernetes.io/experiment-type: 'pod-failure'
+    chaos.alpha.kubernetes.io/scope: 'scoped'
+    chaos.alpha.kubernetes.io/safety-level: 'high'
 spec:
   # Scope to staging environment only
   appinfo:
     appns: intelgraph-staging
-    applabel: "app=intelgraph-server"
+    applabel: 'app=intelgraph-server'
     appkind: deployment
 
   # Chaos experiment configuration
@@ -29,77 +29,77 @@ spec:
           env:
             # Target only 1 pod at a time
             - name: TOTAL_CHAOS_DURATION
-              value: "60"  # 1 minute duration
+              value: '60' # 1 minute duration
 
             - name: CHAOS_INTERVAL
-              value: "30"  # 30 seconds between failures
+              value: '30' # 30 seconds between failures
 
             - name: FORCE
-              value: "false"  # Graceful pod termination
+              value: 'false' # Graceful pod termination
 
             # Safety constraints
             - name: PODS_AFFECTED_PERC
-              value: "25"  # Maximum 25% of pods
+              value: '25' # Maximum 25% of pods
 
             - name: TARGET_PODS
-              value: "1"   # Kill only 1 pod per experiment
+              value: '1' # Kill only 1 pod per experiment
 
             # Randomization
             - name: RANDOMNESS_ENABLED
-              value: "true"
+              value: 'true'
 
             - name: SEQUENCE
-              value: "parallel"
+              value: 'parallel'
 
         # Probe configuration for safety
         probe:
-          - name: "healthcheck-probe"
-            type: "httpProbe"
-            mode: "Continuous"
+          - name: 'healthcheck-probe'
+            type: 'httpProbe'
+            mode: 'Continuous'
             runProperties:
               probeTimeout: 5
               retry: 3
               interval: 10
             httpProbe/inputs:
-              url: "http://intelgraph-server.intelgraph-staging.svc.cluster.local:4000/health"
+              url: 'http://intelgraph-server.intelgraph-staging.svc.cluster.local:4000/health'
               insecureSkipTLS: true
               responseTimeout: 3
               method:
                 get:
-                  criteria: "=="
-                  responseCode: "200"
+                  criteria: '=='
+                  responseCode: '200'
 
-          - name: "readiness-probe"
-            type: "k8sProbe"
-            mode: "SOT"  # Start of Test
+          - name: 'readiness-probe'
+            type: 'k8sProbe'
+            mode: 'SOT' # Start of Test
             k8sProbe/inputs:
-              group: ""
-              version: "v1"
-              resource: "pods"
-              namespace: "intelgraph-staging"
-              fieldSelector: "status.phase=Running"
-              labelSelector: "app=intelgraph-server"
-              operation: "present"
+              group: ''
+              version: 'v1'
+              resource: 'pods'
+              namespace: 'intelgraph-staging'
+              fieldSelector: 'status.phase=Running'
+              labelSelector: 'app=intelgraph-server'
+              operation: 'present'
             runProperties:
               probeTimeout: 10
               retry: 5
               interval: 2
 
-          - name: "service-availability-probe"
-            type: "httpProbe"
-            mode: "Continuous"
+          - name: 'service-availability-probe'
+            type: 'httpProbe'
+            mode: 'Continuous'
             runProperties:
               probeTimeout: 10
               retry: 2
               interval: 15
             httpProbe/inputs:
-              url: "http://intelgraph-server.intelgraph-staging.svc.cluster.local:4000/health/ready"
+              url: 'http://intelgraph-server.intelgraph-staging.svc.cluster.local:4000/health/ready'
               insecureSkipTLS: true
               responseTimeout: 5
               method:
                 get:
-                  criteria: "=="
-                  responseCode: "200"
+                  criteria: '=='
+                  responseCode: '200'
 
 ---
 apiVersion: litmuschaos.io/v1alpha1
@@ -114,18 +114,18 @@ spec:
     once: false
     repeat:
       timeRange:
-        startTime: "02:00"
-        endTime: "02:30"
+        startTime: '02:00'
+        endTime: '02:30'
       properties:
-        minChaosInterval: "10m"  # Minimum 10 minutes between experiments
+        minChaosInterval: '10m' # Minimum 10 minutes between experiments
       workDays:
-        includedDays: "mon,tue,wed,thu,fri"  # Weekdays only
-        excludedDays: "sat,sun"
+        includedDays: 'mon,tue,wed,thu,fri' # Weekdays only
+        excludedDays: 'sat,sun'
 
   engineTemplateSpec:
     appinfo:
       appns: intelgraph-staging
-      applabel: "app=intelgraph-server"
+      applabel: 'app=intelgraph-server'
       appkind: deployment
 
     chaosServiceAccount: chaos-service-account
@@ -138,13 +138,13 @@ spec:
           components:
             env:
               - name: TOTAL_CHAOS_DURATION
-                value: "60"
+                value: '60'
               - name: CHAOS_INTERVAL
-                value: "30"
+                value: '30'
               - name: FORCE
-                value: "false"
+                value: 'false'
               - name: PODS_AFFECTED_PERC
-                value: "25"
+                value: '25'
 
 ---
 # Service Account for Chaos Experiments
@@ -165,15 +165,15 @@ metadata:
   namespace: intelgraph-staging
   name: chaos-role
 rules:
-  - apiGroups: [""]
-    resources: ["pods", "services", "events"]
-    verbs: ["get", "list", "patch", "create", "update", "delete"]
-  - apiGroups: ["apps"]
-    resources: ["deployments", "replicasets"]
-    verbs: ["get", "list"]
-  - apiGroups: ["litmuschaos.io"]
-    resources: ["chaosengines", "chaosexperiments", "chaosresults"]
-    verbs: ["get", "list", "create", "update", "patch", "delete"]
+  - apiGroups: ['']
+    resources: ['pods', 'services', 'events']
+    verbs: ['get', 'list', 'patch', 'create', 'update', 'delete']
+  - apiGroups: ['apps']
+    resources: ['deployments', 'replicasets']
+    verbs: ['get', 'list']
+  - apiGroups: ['litmuschaos.io']
+    resources: ['chaosengines', 'chaosexperiments', 'chaosresults']
+    verbs: ['get', 'list', 'create', 'update', 'patch', 'delete']
 
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -206,20 +206,20 @@ spec:
   definition:
     scope: Namespaced
     permissions:
-      - apiGroups: [""]
-        resources: ["pods"]
-        verbs: ["list", "delete", "get", "patch", "create", "update"]
-      - apiGroups: [""]
-        resources: ["events"]
-        verbs: ["create", "get", "list", "patch", "update"]
-      - apiGroups: [""]
-        resources: ["pods/log"]
-        verbs: ["get", "list", "watch"]
-      - apiGroups: ["litmuschaos.io"]
-        resources: ["chaosengines", "chaosexperiments", "chaosresults"]
-        verbs: ["get", "list", "patch", "update", "delete"]
+      - apiGroups: ['']
+        resources: ['pods']
+        verbs: ['list', 'delete', 'get', 'patch', 'create', 'update']
+      - apiGroups: ['']
+        resources: ['events']
+        verbs: ['create', 'get', 'list', 'patch', 'update']
+      - apiGroups: ['']
+        resources: ['pods/log']
+        verbs: ['get', 'list', 'watch']
+      - apiGroups: ['litmuschaos.io']
+        resources: ['chaosengines', 'chaosexperiments', 'chaosresults']
+        verbs: ['get', 'list', 'patch', 'update', 'delete']
 
-    image: "litmuschaos/go-runner:latest"
+    image: 'litmuschaos/go-runner:latest'
     imagePullPolicy: Always
     args:
       - -c

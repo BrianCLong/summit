@@ -10,13 +10,13 @@ CSE score ≥ 0.99 before PROMOTE; auto-HOLD if any invariant breaks.
 import asyncio
 import json
 import random
-import time
 import uuid
-from dataclasses import dataclass, asdict
+from collections.abc import Callable
+from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
-from pathlib import Path
-from typing import Dict, List, Optional, Any, Callable
 from enum import Enum
+from pathlib import Path
+from typing import Any
 
 
 class InvariantType(Enum):
@@ -30,6 +30,7 @@ class InvariantType(Enum):
 @dataclass
 class ShadowRequest:
     """Shadow traffic request for safety testing"""
+
     request_id: str
     baseline_endpoint: str
     candidate_endpoint: str
@@ -42,24 +43,26 @@ class ShadowRequest:
 @dataclass
 class InvariantCheck:
     """Single invariant check result"""
+
     invariant_id: str
     invariant_type: InvariantType
     baseline_result: Any
     candidate_result: Any
     passed: bool
-    details: Dict[str, Any]
+    details: dict[str, Any]
     timestamp: str
 
 
 @dataclass
 class CSEReport:
     """Continuous Safety Equivalence report"""
+
     report_id: str
     flow_name: str
     total_requests: int
-    invariant_checks: List[InvariantCheck]
+    invariant_checks: list[InvariantCheck]
     cse_score: float
-    safety_violations: List[str]
+    safety_violations: list[str]
     recommendation: str  # "PROMOTE", "HOLD", "EXTEND"
     timestamp: str
 
@@ -68,13 +71,13 @@ class InvariantEngine:
     """Engine for defining and checking safety invariants"""
 
     def __init__(self):
-        self.invariants: Dict[str, Callable] = {}
+        self.invariants: dict[str, Callable] = {}
         self._register_default_invariants()
 
     def _register_default_invariants(self):
         """Register default safety invariants"""
 
-        def privacy_block_invariant(baseline_resp: Dict, candidate_resp: Dict) -> InvariantCheck:
+        def privacy_block_invariant(baseline_resp: dict, candidate_resp: dict) -> InvariantCheck:
             """Verify privacy blocking behavior is equivalent"""
             baseline_blocked = baseline_resp.get("privacy_blocked", False)
             candidate_blocked = candidate_resp.get("privacy_blocked", False)
@@ -91,12 +94,14 @@ class InvariantEngine:
                     "baseline_reason": baseline_resp.get("block_reason", ""),
                     "candidate_reason": candidate_resp.get("block_reason", ""),
                     "both_blocked": baseline_blocked and candidate_blocked,
-                    "both_allowed": not baseline_blocked and not candidate_blocked
+                    "both_allowed": not baseline_blocked and not candidate_blocked,
                 },
-                timestamp=datetime.now(timezone.utc).isoformat()
+                timestamp=datetime.now(timezone.utc).isoformat(),
             )
 
-        def residency_routing_invariant(baseline_resp: Dict, candidate_resp: Dict) -> InvariantCheck:
+        def residency_routing_invariant(
+            baseline_resp: dict, candidate_resp: dict
+        ) -> InvariantCheck:
             """Verify residency routing behavior is equivalent"""
             baseline_zone = baseline_resp.get("processing_zone", "")
             candidate_zone = candidate_resp.get("processing_zone", "")
@@ -113,12 +118,12 @@ class InvariantEngine:
                 details={
                     "baseline_zone": baseline_zone,
                     "candidate_zone": candidate_zone,
-                    "zones_match": passed
+                    "zones_match": passed,
                 },
-                timestamp=datetime.now(timezone.utc).isoformat()
+                timestamp=datetime.now(timezone.utc).isoformat(),
             )
 
-        def policy_deny_invariant(baseline_resp: Dict, candidate_resp: Dict) -> InvariantCheck:
+        def policy_deny_invariant(baseline_resp: dict, candidate_resp: dict) -> InvariantCheck:
             """Verify policy denial behavior is equivalent"""
             baseline_denied = baseline_resp.get("policy_denied", False)
             candidate_denied = candidate_resp.get("policy_denied", False)
@@ -135,12 +140,12 @@ class InvariantEngine:
                     "baseline_policy": baseline_resp.get("denied_policy", ""),
                     "candidate_policy": candidate_resp.get("denied_policy", ""),
                     "both_denied": baseline_denied and candidate_denied,
-                    "both_allowed": not baseline_denied and not candidate_denied
+                    "both_allowed": not baseline_denied and not candidate_denied,
                 },
-                timestamp=datetime.now(timezone.utc).isoformat()
+                timestamp=datetime.now(timezone.utc).isoformat(),
             )
 
-        def tenant_isolation_invariant(baseline_resp: Dict, candidate_resp: Dict) -> InvariantCheck:
+        def tenant_isolation_invariant(baseline_resp: dict, candidate_resp: dict) -> InvariantCheck:
             """Verify tenant isolation is maintained"""
             baseline_tenant = baseline_resp.get("tenant_context", "")
             candidate_tenant = candidate_resp.get("tenant_context", "")
@@ -157,9 +162,9 @@ class InvariantEngine:
                 details={
                     "baseline_tenant": baseline_tenant,
                     "candidate_tenant": candidate_tenant,
-                    "isolation_maintained": passed
+                    "isolation_maintained": passed,
                 },
-                timestamp=datetime.now(timezone.utc).isoformat()
+                timestamp=datetime.now(timezone.utc).isoformat(),
             )
 
         # Register invariants
@@ -168,7 +173,9 @@ class InvariantEngine:
         self.invariants["policy_deny"] = policy_deny_invariant
         self.invariants["tenant_isolation"] = tenant_isolation_invariant
 
-    def check_invariants(self, baseline_response: Dict, candidate_response: Dict) -> List[InvariantCheck]:
+    def check_invariants(
+        self, baseline_response: dict, candidate_response: dict
+    ) -> list[InvariantCheck]:
         """Check all registered invariants"""
         checks = []
 
@@ -185,7 +192,7 @@ class InvariantEngine:
                     candidate_result=None,
                     passed=False,
                     details={"error": str(e)},
-                    timestamp=datetime.now(timezone.utc).isoformat()
+                    timestamp=datetime.now(timezone.utc).isoformat(),
                 )
                 checks.append(failed_check)
 
@@ -200,7 +207,7 @@ class ShadowTrafficRunner:
         self.evidence_dir.mkdir(parents=True, exist_ok=True)
         self.invariant_engine = InvariantEngine()
 
-    async def _simulate_request(self, endpoint: str, request: ShadowRequest) -> Dict[str, Any]:
+    async def _simulate_request(self, endpoint: str, request: ShadowRequest) -> dict[str, Any]:
         """Simulate request to baseline or candidate endpoint"""
         # Simulate network delay
         await asyncio.sleep(random.uniform(0.05, 0.2))
@@ -213,7 +220,7 @@ class ShadowTrafficRunner:
             "request_id": request.request_id,
             "tenant_context": request.tenant_id,
             "processing_zone": "us-east-1",  # Default
-            "timestamp": datetime.now(timezone.utc).isoformat()
+            "timestamp": datetime.now(timezone.utc).isoformat(),
         }
 
         # Simulate safety-critical behaviors
@@ -240,7 +247,9 @@ class ShadowTrafficRunner:
             if is_candidate:
                 # Candidate might have policy differences
                 response["policy_denied"] = random.random() < 0.98  # 98% same as baseline
-                response["denied_policy"] = "RESTRICTED_CONTENT" if response["policy_denied"] else ""
+                response["denied_policy"] = (
+                    "RESTRICTED_CONTENT" if response["policy_denied"] else ""
+                )
             else:
                 response["policy_denied"] = True
                 response["denied_policy"] = "RESTRICTED_CONTENT"
@@ -252,7 +261,7 @@ class ShadowTrafficRunner:
         flow_name: str,
         baseline_endpoint: str,
         candidate_endpoint: str,
-        request_count: int = 100
+        request_count: int = 100,
     ) -> CSEReport:
         """Run shadow traffic flow and check safety equivalence"""
         print(f"🌊 Running CSE flow: {flow_name} ({request_count} requests)")
@@ -270,7 +279,7 @@ class ShadowTrafficRunner:
                 tenant_id=random.choice(["TENANT_001", "EU_TENANT_002", "ASIA_TENANT_003"]),
                 request_type="inference",
                 payload_hash=f"payload-{i}-{random.randint(1000, 9999)}",
-                timestamp=datetime.now(timezone.utc).isoformat()
+                timestamp=datetime.now(timezone.utc).isoformat(),
             )
 
             # Send to both baseline and candidate
@@ -312,7 +321,7 @@ class ShadowTrafficRunner:
             cse_score=cse_score,
             safety_violations=safety_violations[:10],  # Limit to first 10
             recommendation=recommendation,
-            timestamp=datetime.now(timezone.utc).isoformat()
+            timestamp=datetime.now(timezone.utc).isoformat(),
         )
 
         print(f"📊 CSE Results: {cse_score:.3f} ({recommendation})")
@@ -321,7 +330,7 @@ class ShadowTrafficRunner:
     async def save_report(self, report: CSEReport):
         """Save CSE report to evidence directory"""
         report_file = self.evidence_dir / f"cse-report-{report.report_id}.json"
-        with open(report_file, 'w') as f:
+        with open(report_file, "w") as f:
             json.dump(asdict(report), f, indent=2)
 
 
@@ -333,10 +342,7 @@ class CSEOrchestrator:
         self.evidence_dir = Path("evidence/v0.3.7/cse")
 
     async def run_deployment_gate(
-        self,
-        baseline_url: str,
-        candidate_url: str,
-        flows: List[str] = None
+        self, baseline_url: str, candidate_url: str, flows: list[str] = None
     ) -> bool:
         """Run CSE as deployment gate"""
         if flows is None:
@@ -352,7 +358,7 @@ class CSEOrchestrator:
                 flow_name=flow,
                 baseline_endpoint=baseline_url,
                 candidate_endpoint=candidate_url,
-                request_count=50  # Smaller count for gate
+                request_count=50,  # Smaller count for gate
             )
 
             all_reports.append(report)
@@ -375,11 +381,11 @@ class CSEOrchestrator:
             "flows_tested": flows,
             "overall_cse_score": overall_score,
             "gate_passed": gate_passed,
-            "reports": [r.report_id for r in all_reports]
+            "reports": [r.report_id for r in all_reports],
         }
 
         gate_file = self.evidence_dir / "deployment-gate-result.json"
-        with open(gate_file, 'w') as f:
+        with open(gate_file, "w") as f:
             json.dump(gate_result, f, indent=2)
 
         print(f"\n🎯 CSE Gate Result: {'✅ PASS' if gate_passed else '❌ HOLD'}")
@@ -400,18 +406,17 @@ async def main():
         flow_name="privacy_validation",
         baseline_endpoint="https://baseline.example.com",
         candidate_endpoint="https://candidate.example.com",
-        request_count=20
+        request_count=20,
     )
 
-    print(f"\n📊 CSE Flow Results:")
+    print("\n📊 CSE Flow Results:")
     print(f"   Score: {report.cse_score:.3f}")
     print(f"   Recommendation: {report.recommendation}")
     print(f"   Violations: {len(report.safety_violations)}")
 
     # Test deployment gate
     gate_passed = await orchestrator.run_deployment_gate(
-        baseline_url="https://baseline.example.com",
-        candidate_url="https://candidate.example.com"
+        baseline_url="https://baseline.example.com", candidate_url="https://candidate.example.com"
     )
 
     if gate_passed:

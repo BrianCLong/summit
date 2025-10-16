@@ -16,7 +16,13 @@ describe('ADC', () => {
   });
 
   test('should deploy bait drop and detect trigger', async () => {
-    const expectedFp = { contentHash: randomUUID(), formatSig: 'test', timingSig: 'test', xformSig: 'test', route: 'test' };
+    const expectedFp = {
+      contentHash: randomUUID(),
+      formatSig: 'test',
+      timingSig: 'test',
+      xformSig: 'test',
+      route: 'test',
+    };
     const bait = await adc.deployBaitDrop('fake content', expectedFp);
     expect(bait).toBeDefined();
 
@@ -25,7 +31,10 @@ describe('ADC', () => {
   });
 
   test('should trigger counter-drop', async () => {
-    const result = await adc.triggerCounterDrop('adversary.com', { type: 'contradiction', content: 'This is false.' });
+    const result = await adc.triggerCounterDrop('adversary.com', {
+      type: 'contradiction',
+      content: 'This is false.',
+    });
     expect(result).toBe(true);
   });
 });

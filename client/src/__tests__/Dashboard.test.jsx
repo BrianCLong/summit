@@ -17,12 +17,13 @@ describe('Dashboard', () => {
             <Dashboard />
           </MemoryRouter>
         </Provider>
-      </MockedProvider>
+      </MockedProvider>,
     );
 
-    expect(screen.getByText('Dashboard', { selector: 'h1' })).toBeInTheDocument();
+    expect(
+      screen.getByText('Dashboard', { selector: 'h1' }),
+    ).toBeInTheDocument();
     expect(await screen.findByText('New Investigation')).toBeInTheDocument();
     expect(await screen.findByText('Send Demo Alert')).toBeInTheDocument();
   });
 });
-

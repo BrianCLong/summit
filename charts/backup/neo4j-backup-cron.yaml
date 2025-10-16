@@ -8,15 +8,15 @@ metadata:
     app.kubernetes.io/component: backup
     app.kubernetes.io/part-of: intelgraph
 spec:
-  schedule: "0 2 * * *"  # Daily at 2 AM UTC
-  timeZone: "UTC"
+  schedule: '0 2 * * *' # Daily at 2 AM UTC
+  timeZone: 'UTC'
   successfulJobsHistoryLimit: 7
   failedJobsHistoryLimit: 3
   concurrencyPolicy: Forbid
   startingDeadlineSeconds: 300
   jobTemplate:
     spec:
-      activeDeadlineSeconds: 3600  # 1 hour timeout
+      activeDeadlineSeconds: 3600 # 1 hour timeout
       backoffLimit: 2
       template:
         metadata:
@@ -32,167 +32,167 @@ spec:
             fsGroup: 65532
           serviceAccountName: neo4j-backup
           containers:
-          - name: neo4j-backup
-            image: neo4j:4.4-enterprise
-            imagePullPolicy: IfNotPresent
-            command:
-            - /bin/bash
-            - -c
-            - |
-              set -euo pipefail
-              
-              # Configuration
-              BACKUP_NAME="neo4j-backup-$(date +%Y%m%d-%H%M%S)"
-              BACKUP_DIR="/backups/${BACKUP_NAME}"
-              RETENTION_DAYS=30
-              
-              echo "Starting Neo4j backup: ${BACKUP_NAME}"
-              
-              # Create backup directory
-              mkdir -p "${BACKUP_DIR}"
-              
-              # Perform online backup with consistency checks
-              neo4j-admin backup \
-                --backup-dir="${BACKUP_DIR}" \
-                --database=neo4j \
-                --from=${NEO4J_URI} \
-                --username=${NEO4J_USERNAME} \
-                --password=${NEO4J_PASSWORD} \
-                --check-consistency=true \
-                --report-dir="${BACKUP_DIR}/consistency-report" \
-                --verbose
-              
-              # Verify backup integrity
-              neo4j-admin check-consistency \
-                --database="${BACKUP_DIR}/neo4j" \
-                --report-dir="${BACKUP_DIR}/verification-report" \
-                --verbose
-              
-              # Create backup manifest
-              cat > "${BACKUP_DIR}/backup-manifest.json" << EOF
-              {
-                "backup_name": "${BACKUP_NAME}",
-                "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-                "database": "neo4j",
-                "backup_type": "full",
-                "consistency_check": "passed",
-                "backup_size_bytes": $(du -sb "${BACKUP_DIR}" | cut -f1),
-                "neo4j_version": "$(neo4j version)",
-                "source_uri": "${NEO4J_URI}",
-                "retention_policy": "${RETENTION_DAYS} days"
-              }
-              EOF
-              
-              # Compress backup for storage efficiency
-              echo "Compressing backup..."
-              tar -czf "${BACKUP_DIR}.tar.gz" -C "/backups" "${BACKUP_NAME}"
-              rm -rf "${BACKUP_DIR}"
-              
-              # Upload to S3 with encryption
-              echo "Uploading to S3..."
-              aws s3 cp "${BACKUP_DIR}.tar.gz" \
-                "s3://${BACKUP_BUCKET}/neo4j/$(date +%Y/%m/%d)/${BACKUP_NAME}.tar.gz" \
-                --server-side-encryption AES256 \
-                --storage-class STANDARD_IA \
-                --metadata backup-type=neo4j,database=neo4j,timestamp=$(date +%s)
-              
-              # Cross-region replication
-              echo "Replicating to DR region..."
-              aws s3 cp "s3://${BACKUP_BUCKET}/neo4j/$(date +%Y/%m/%d)/${BACKUP_NAME}.tar.gz" \
-                "s3://${DR_BACKUP_BUCKET}/neo4j/$(date +%Y/%m/%d)/${BACKUP_NAME}.tar.gz" \
-                --source-region ${AWS_REGION} \
-                --region ${DR_AWS_REGION}
-              
-              # Cleanup local backup
-              rm -f "${BACKUP_DIR}.tar.gz"
-              
-              # Cleanup old backups (retention policy)
-              echo "Cleaning up old backups..."
-              aws s3 ls "s3://${BACKUP_BUCKET}/neo4j/" --recursive | \
-                awk '{if($1 < "'$(date -d "${RETENTION_DAYS} days ago" +%Y-%m-%d)'") print $4}' | \
-                xargs -r -I {} aws s3 rm "s3://${BACKUP_BUCKET}/{}"
-              
-              # Send success notification
-              curl -X POST "${SLACK_WEBHOOK_URL}" \
-                -H 'Content-Type: application/json' \
-                -d "{\"text\":\"✅ Neo4j backup completed successfully: ${BACKUP_NAME}\"}" || true
-              
-              echo "Neo4j backup completed successfully: ${BACKUP_NAME}"
-              
-            env:
-            - name: NEO4J_URI
-              value: "bolt://neo4j.database:7687"
-            - name: NEO4J_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: neo4j-backup-secrets
-                  key: username
-            - name: NEO4J_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: neo4j-backup-secrets
-                  key: password
-            - name: BACKUP_BUCKET
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: backup-bucket
-            - name: DR_BACKUP_BUCKET
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: dr-backup-bucket
-            - name: AWS_REGION
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: aws-region
-            - name: DR_AWS_REGION
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: dr-aws-region
-            - name: SLACK_WEBHOOK_URL
-              valueFrom:
-                secretKeyRef:
-                  name: backup-secrets
-                  key: slack-webhook-url
-            - name: AWS_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: backup-secrets
-                  key: aws-access-key-id
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: backup-secrets
-                  key: aws-secret-access-key
-            resources:
-              requests:
-                memory: "512Mi"
-                cpu: "250m"
-              limits:
-                memory: "2Gi"
-                cpu: "1000m"
-            volumeMounts:
-            - name: backup-storage
-              mountPath: /backups
-            - name: tmp-volume
-              mountPath: /tmp
+            - name: neo4j-backup
+              image: neo4j:4.4-enterprise
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -euo pipefail
+
+                  # Configuration
+                  BACKUP_NAME="neo4j-backup-$(date +%Y%m%d-%H%M%S)"
+                  BACKUP_DIR="/backups/${BACKUP_NAME}"
+                  RETENTION_DAYS=30
+
+                  echo "Starting Neo4j backup: ${BACKUP_NAME}"
+
+                  # Create backup directory
+                  mkdir -p "${BACKUP_DIR}"
+
+                  # Perform online backup with consistency checks
+                  neo4j-admin backup \
+                    --backup-dir="${BACKUP_DIR}" \
+                    --database=neo4j \
+                    --from=${NEO4J_URI} \
+                    --username=${NEO4J_USERNAME} \
+                    --password=${NEO4J_PASSWORD} \
+                    --check-consistency=true \
+                    --report-dir="${BACKUP_DIR}/consistency-report" \
+                    --verbose
+
+                  # Verify backup integrity
+                  neo4j-admin check-consistency \
+                    --database="${BACKUP_DIR}/neo4j" \
+                    --report-dir="${BACKUP_DIR}/verification-report" \
+                    --verbose
+
+                  # Create backup manifest
+                  cat > "${BACKUP_DIR}/backup-manifest.json" << EOF
+                  {
+                    "backup_name": "${BACKUP_NAME}",
+                    "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+                    "database": "neo4j",
+                    "backup_type": "full",
+                    "consistency_check": "passed",
+                    "backup_size_bytes": $(du -sb "${BACKUP_DIR}" | cut -f1),
+                    "neo4j_version": "$(neo4j version)",
+                    "source_uri": "${NEO4J_URI}",
+                    "retention_policy": "${RETENTION_DAYS} days"
+                  }
+                  EOF
+
+                  # Compress backup for storage efficiency
+                  echo "Compressing backup..."
+                  tar -czf "${BACKUP_DIR}.tar.gz" -C "/backups" "${BACKUP_NAME}"
+                  rm -rf "${BACKUP_DIR}"
+
+                  # Upload to S3 with encryption
+                  echo "Uploading to S3..."
+                  aws s3 cp "${BACKUP_DIR}.tar.gz" \
+                    "s3://${BACKUP_BUCKET}/neo4j/$(date +%Y/%m/%d)/${BACKUP_NAME}.tar.gz" \
+                    --server-side-encryption AES256 \
+                    --storage-class STANDARD_IA \
+                    --metadata backup-type=neo4j,database=neo4j,timestamp=$(date +%s)
+
+                  # Cross-region replication
+                  echo "Replicating to DR region..."
+                  aws s3 cp "s3://${BACKUP_BUCKET}/neo4j/$(date +%Y/%m/%d)/${BACKUP_NAME}.tar.gz" \
+                    "s3://${DR_BACKUP_BUCKET}/neo4j/$(date +%Y/%m/%d)/${BACKUP_NAME}.tar.gz" \
+                    --source-region ${AWS_REGION} \
+                    --region ${DR_AWS_REGION}
+
+                  # Cleanup local backup
+                  rm -f "${BACKUP_DIR}.tar.gz"
+
+                  # Cleanup old backups (retention policy)
+                  echo "Cleaning up old backups..."
+                  aws s3 ls "s3://${BACKUP_BUCKET}/neo4j/" --recursive | \
+                    awk '{if($1 < "'$(date -d "${RETENTION_DAYS} days ago" +%Y-%m-%d)'") print $4}' | \
+                    xargs -r -I {} aws s3 rm "s3://${BACKUP_BUCKET}/{}"
+
+                  # Send success notification
+                  curl -X POST "${SLACK_WEBHOOK_URL}" \
+                    -H 'Content-Type: application/json' \
+                    -d "{\"text\":\"✅ Neo4j backup completed successfully: ${BACKUP_NAME}\"}" || true
+
+                  echo "Neo4j backup completed successfully: ${BACKUP_NAME}"
+
+              env:
+                - name: NEO4J_URI
+                  value: 'bolt://neo4j.database:7687'
+                - name: NEO4J_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: neo4j-backup-secrets
+                      key: username
+                - name: NEO4J_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: neo4j-backup-secrets
+                      key: password
+                - name: BACKUP_BUCKET
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: backup-bucket
+                - name: DR_BACKUP_BUCKET
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: dr-backup-bucket
+                - name: AWS_REGION
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: aws-region
+                - name: DR_AWS_REGION
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: dr-aws-region
+                - name: SLACK_WEBHOOK_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-secrets
+                      key: slack-webhook-url
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-secrets
+                      key: aws-access-key-id
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-secrets
+                      key: aws-secret-access-key
+              resources:
+                requests:
+                  memory: '512Mi'
+                  cpu: '250m'
+                limits:
+                  memory: '2Gi'
+                  cpu: '1000m'
+              volumeMounts:
+                - name: backup-storage
+                  mountPath: /backups
+                - name: tmp-volume
+                  mountPath: /tmp
           volumes:
-          - name: backup-storage
-            emptyDir:
-              sizeLimit: 10Gi
-          - name: tmp-volume
-            emptyDir:
-              sizeLimit: 2Gi
+            - name: backup-storage
+              emptyDir:
+                sizeLimit: 10Gi
+            - name: tmp-volume
+              emptyDir:
+                sizeLimit: 2Gi
           tolerations:
-          - key: "backup-workload"
-            operator: "Equal"
-            value: "true"
-            effect: "NoSchedule"
+            - key: 'backup-workload'
+              operator: 'Equal'
+              value: 'true'
+              effect: 'NoSchedule'
           nodeSelector:
-            node-type: "backup-optimized"
+            node-type: 'backup-optimized'
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -203,7 +203,7 @@ metadata:
     app.kubernetes.io/name: neo4j-backup
     app.kubernetes.io/component: backup
   annotations:
-    eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/neo4j-backup-role"
+    eks.amazonaws.com/role-arn: 'arn:aws:iam::123456789012:role/neo4j-backup-role'
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -211,12 +211,12 @@ metadata:
   namespace: database
   name: neo4j-backup
 rules:
-- apiGroups: [""]
-  resources: ["pods", "services"]
-  verbs: ["get", "list"]
-- apiGroups: [""]
-  resources: ["secrets", "configmaps"]
-  verbs: ["get"]
+  - apiGroups: ['']
+    resources: ['pods', 'services']
+    verbs: ['get', 'list']
+  - apiGroups: ['']
+    resources: ['secrets', 'configmaps']
+    verbs: ['get']
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -224,9 +224,9 @@ metadata:
   name: neo4j-backup
   namespace: database
 subjects:
-- kind: ServiceAccount
-  name: neo4j-backup
-  namespace: database
+  - kind: ServiceAccount
+    name: neo4j-backup
+    namespace: database
 roleRef:
   kind: Role
   name: neo4j-backup

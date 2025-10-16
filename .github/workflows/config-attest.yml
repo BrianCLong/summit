@@ -20,7 +20,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # Need previous commit for drift detection
+          fetch-depth: 2 # Need previous commit for drift detection
 
       - name: Install Python dependencies
         run: pip3 install pyyaml

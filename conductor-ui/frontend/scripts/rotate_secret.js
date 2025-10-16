@@ -11,7 +11,7 @@ class SecretRotator {
 
   async rotateSecret(secretPath) {
     console.log(`Starting rotation for secret: ${secretPath}`);
-    
+
     try {
       // Get current secret
       const currentSecret = await this.getCurrentSecret(secretPath);
@@ -24,7 +24,7 @@ class SecretRotator {
       // Store new secret with timestamp
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
       const backupPath = `${secretPath}/backup/${timestamp}`;
-      
+
       // Backup current secret
       await this.storeSecret(backupPath, currentSecret);
       console.log(`Backed up current secret to: ${backupPath}`);
@@ -39,7 +39,6 @@ class SecretRotator {
 
       console.log(`✅ Successfully rotated secret: ${secretPath}`);
       return { success: true, secretPath, timestamp };
-
     } catch (error) {
       console.error(`❌ Failed to rotate secret ${secretPath}:`, error.message);
       throw error;
@@ -50,14 +49,16 @@ class SecretRotator {
     try {
       const params = {
         Name: path,
-        WithDecryption: true
+        WithDecryption: true,
       };
-      
+
       const result = await this.ssm.getParameter(params).promise();
       return result.Parameter.Value;
     } catch (error) {
       if (error.code === 'ParameterNotFound') {
-        console.log(`Parameter ${path} not found in SSM, checking Secrets Manager...`);
+        console.log(
+          `Parameter ${path} not found in SSM, checking Secrets Manager...`,
+        );
         return await this.getSecretFromSecretsManager(path);
       }
       throw error;
@@ -66,26 +67,31 @@ class SecretRotator {
 
   async getSecretFromSecretsManager(secretId) {
     try {
-      const result = await this.secretsManager.getSecretValue({
-        SecretId: secretId
-      }).promise();
-      
+      const result = await this.secretsManager
+        .getSecretValue({
+          SecretId: secretId,
+        })
+        .promise();
+
       return result.SecretString;
     } catch (error) {
-      throw new Error(`Failed to retrieve secret from both SSM and Secrets Manager: ${error.message}`);
+      throw new Error(
+        `Failed to retrieve secret from both SSM and Secrets Manager: ${error.message}`,
+      );
     }
   }
 
   generateSecret() {
     // Generate a secure random password
     const length = 32;
-    const charset = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
+    const charset =
+      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*';
     let secret = '';
-    
+
     for (let i = 0; i < length; i++) {
       secret += charset.charAt(Math.floor(Math.random() * charset.length));
     }
-    
+
     return secret;
   }
 
@@ -96,31 +102,37 @@ class SecretRotator {
         Name: path,
         Value: value,
         Type: 'SecureString',
-        Overwrite: true
+        Overwrite: true,
       };
-      
+
       await this.ssm.putParameter(params).promise();
     } catch (error) {
       // Fall back to Secrets Manager
-      console.log(`SSM storage failed, trying Secrets Manager: ${error.message}`);
+      console.log(
+        `SSM storage failed, trying Secrets Manager: ${error.message}`,
+      );
       await this.storeInSecretsManager(path, value);
     }
   }
 
   async storeInSecretsManager(secretId, secretValue) {
     try {
-      await this.secretsManager.updateSecret({
-        SecretId: secretId,
-        SecretString: secretValue
-      }).promise();
+      await this.secretsManager
+        .updateSecret({
+          SecretId: secretId,
+          SecretString: secretValue,
+        })
+        .promise();
     } catch (error) {
       if (error.code === 'ResourceNotFoundException') {
         // Create new secret
-        await this.secretsManager.createSecret({
-          Name: secretId,
-          SecretString: secretValue,
-          Description: 'Auto-rotated secret'
-        }).promise();
+        await this.secretsManager
+          .createSecret({
+            Name: secretId,
+            SecretString: secretValue,
+            Description: 'Auto-rotated secret',
+          })
+          .promise();
       } else {
         throw error;
       }
@@ -136,11 +148,11 @@ class SecretRotator {
       // List backup parameters
       const listParams = {
         Path: backupPrefix,
-        Recursive: true
+        Recursive: true,
       };
 
       const result = await this.ssm.getParametersByPath(listParams).promise();
-      
+
       // Delete old backups
       for (const param of result.Parameters) {
         const paramDate = new Date(param.LastModifiedDate);
@@ -159,14 +171,14 @@ class SecretRotator {
 // CLI usage
 async function main() {
   const secretPath = process.argv[2];
-  
+
   if (!secretPath) {
     console.error('Usage: node rotate_secret.js <secret-path>');
     process.exit(1);
   }
 
   const rotator = new SecretRotator();
-  
+
   try {
     await rotator.rotateSecret(secretPath);
     console.log('🎉 Secret rotation completed successfully!');

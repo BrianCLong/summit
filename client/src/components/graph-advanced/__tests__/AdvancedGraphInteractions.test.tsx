@@ -3,7 +3,13 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import AdvancedGraphInteractions from '../AdvancedGraphInteractions';
@@ -16,9 +22,27 @@ const renderWithTheme = (component: React.ReactElement) => {
 
 // Mock data
 const mockNodes = [
-  { id: '1', label: 'Person A', type: 'person', properties: {}, centrality: 0.8 },
-  { id: '2', label: 'Company X', type: 'organization', properties: {}, centrality: 0.6 },
-  { id: '3', label: 'Location Y', type: 'location', properties: {}, centrality: 0.4 },
+  {
+    id: '1',
+    label: 'Person A',
+    type: 'person',
+    properties: {},
+    centrality: 0.8,
+  },
+  {
+    id: '2',
+    label: 'Company X',
+    type: 'organization',
+    properties: {},
+    centrality: 0.6,
+  },
+  {
+    id: '3',
+    label: 'Location Y',
+    type: 'location',
+    properties: {},
+    centrality: 0.4,
+  },
 ];
 
 const mockEdges = [
@@ -53,25 +77,39 @@ describe('AdvancedGraphInteractions', () => {
   });
 
   it('renders component header with node and edge counts', () => {
-    renderWithTheme(<AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />);
+    renderWithTheme(
+      <AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />,
+    );
 
     expect(screen.getByText('Advanced Graph Analysis')).toBeInTheDocument();
     expect(screen.getByText('3 nodes, 2 edges')).toBeInTheDocument();
   });
 
   it('displays control buttons in header', () => {
-    renderWithTheme(<AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />);
+    renderWithTheme(
+      <AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />,
+    );
 
     // Check for control buttons
-    expect(screen.getByRole('button', { name: /zoom in/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /zoom out/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /center view/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /refresh/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /zoom in/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /zoom out/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /center view/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /refresh/i }),
+    ).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /export/i })).toBeInTheDocument();
   });
 
   it('renders all navigation tabs', () => {
-    renderWithTheme(<AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />);
+    renderWithTheme(
+      <AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />,
+    );
 
     expect(screen.getByText('Metrics')).toBeInTheDocument();
     expect(screen.getByText('Filters')).toBeInTheDocument();
@@ -80,7 +118,9 @@ describe('AdvancedGraphInteractions', () => {
   });
 
   it('displays network analysis metrics by default', () => {
-    renderWithTheme(<AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />);
+    renderWithTheme(
+      <AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />,
+    );
 
     expect(screen.getByText('Network Analysis')).toBeInTheDocument();
     expect(screen.getByText('Network Density')).toBeInTheDocument();
@@ -91,7 +131,9 @@ describe('AdvancedGraphInteractions', () => {
   });
 
   it('switches to filters tab when clicked', () => {
-    renderWithTheme(<AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />);
+    renderWithTheme(
+      <AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />,
+    );
 
     fireEvent.click(screen.getByText('Filters'));
 
@@ -102,7 +144,9 @@ describe('AdvancedGraphInteractions', () => {
   });
 
   it('switches to communities tab when clicked', () => {
-    renderWithTheme(<AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />);
+    renderWithTheme(
+      <AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />,
+    );
 
     fireEvent.click(screen.getByText('Communities'));
 
@@ -115,18 +159,24 @@ describe('AdvancedGraphInteractions', () => {
   });
 
   it('switches to pathfinding tab when clicked', () => {
-    renderWithTheme(<AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />);
+    renderWithTheme(
+      <AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />,
+    );
 
     fireEvent.click(screen.getByText('Pathfinding'));
 
     expect(screen.getByText('Path Analysis')).toBeInTheDocument();
     expect(
-      screen.getByText('Path analysis and shortest path algorithms coming soon...'),
+      screen.getByText(
+        'Path analysis and shortest path algorithms coming soon...',
+      ),
     ).toBeInTheDocument();
   });
 
   it('displays community detection button and handles click', async () => {
-    renderWithTheme(<AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />);
+    renderWithTheme(
+      <AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />,
+    );
 
     const communityButton = screen.getByText('Run Community Detection');
     expect(communityButton).toBeInTheDocument();
@@ -174,7 +224,9 @@ describe('AdvancedGraphInteractions', () => {
   it('handles centrality threshold slider changes', async () => {
     const user = userEvent.setup();
 
-    renderWithTheme(<AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />);
+    renderWithTheme(
+      <AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />,
+    );
 
     // Switch to filters tab
     fireEvent.click(screen.getByText('Filters'));
@@ -188,12 +240,16 @@ describe('AdvancedGraphInteractions', () => {
   });
 
   it('toggles show communities switch', async () => {
-    renderWithTheme(<AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />);
+    renderWithTheme(
+      <AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />,
+    );
 
     // Switch to filters tab
     fireEvent.click(screen.getByText('Filters'));
 
-    const showCommunitiesSwitch = screen.getByRole('switch', { name: /show communities/i });
+    const showCommunitiesSwitch = screen.getByRole('switch', {
+      name: /show communities/i,
+    });
     expect(showCommunitiesSwitch).not.toBeChecked();
 
     fireEvent.click(showCommunitiesSwitch);
@@ -201,7 +257,9 @@ describe('AdvancedGraphInteractions', () => {
   });
 
   it('handles node type filter chips', async () => {
-    renderWithTheme(<AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />);
+    renderWithTheme(
+      <AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />,
+    );
 
     // Switch to filters tab
     fireEvent.click(screen.getByText('Filters'));
@@ -220,7 +278,11 @@ describe('AdvancedGraphInteractions', () => {
     const onNodeSelect = jest.fn();
 
     renderWithTheme(
-      <AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} onNodeSelect={onNodeSelect} />,
+      <AdvancedGraphInteractions
+        nodes={mockNodes}
+        edges={mockEdges}
+        onNodeSelect={onNodeSelect}
+      />,
     );
 
     // This callback would be triggered by clicking nodes in the communities panel
@@ -248,12 +310,16 @@ describe('AdvancedGraphInteractions', () => {
     });
 
     await waitFor(() => {
-      expect(onAnalysisRun).toHaveBeenCalledWith('clustering', { algorithm: 'louvain' });
+      expect(onAnalysisRun).toHaveBeenCalledWith('clustering', {
+        algorithm: 'louvain',
+      });
     });
   });
 
   it('displays metric cards with proper formatting', () => {
-    renderWithTheme(<AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />);
+    renderWithTheme(
+      <AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />,
+    );
 
     // Check for formatted metric values
     expect(screen.getByText('0.23')).toBeInTheDocument(); // Network Density
@@ -262,7 +328,9 @@ describe('AdvancedGraphInteractions', () => {
   });
 
   it('shows proper category chips for metrics', () => {
-    renderWithTheme(<AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />);
+    renderWithTheme(
+      <AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />,
+    );
 
     // Check for category chips
     expect(screen.getAllByText('structure')).toHaveLength(2); // Network Density, Clustering Coefficient
@@ -278,15 +346,21 @@ describe('AdvancedGraphInteractions', () => {
   });
 
   it('has proper accessibility attributes', () => {
-    renderWithTheme(<AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />);
+    renderWithTheme(
+      <AdvancedGraphInteractions nodes={mockNodes} edges={mockEdges} />,
+    );
 
     // Check for tab accessibility
     const tabList = screen.getByRole('tablist');
     expect(tabList).toBeInTheDocument();
 
     // Check for button accessibility
-    expect(screen.getByRole('button', { name: /zoom in/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /refresh/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /zoom in/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /refresh/i }),
+    ).toBeInTheDocument();
   });
 
   it('enables advanced features by default', () => {

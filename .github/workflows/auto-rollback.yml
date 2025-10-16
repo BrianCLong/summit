@@ -3,9 +3,9 @@ name: 🔄 Auto-Rollback Safety Net
 on:
   deployment_status:
   workflow_run:
-    workflows: ["🚢 Release Captain"]
+    workflows: ['🚢 Release Captain']
     types: [completed]
-  workflow_dispatch:  # Allow manual runs during stabilization
+  workflow_dispatch: # Allow manual runs during stabilization
   # Disabled scheduled trigger until production environment is configured
   # schedule:
   #   # Monitor health every 5 minutes after deployments
@@ -40,142 +40,142 @@ jobs:
       rollback_target: ${{ steps.analyze.outputs.rollback_target }}
       failure_type: ${{ steps.analyze.outputs.failure_type }}
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Analyze deployment failure
-      id: analyze
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        echo "🔍 Analyzing deployment failure..."
+      - name: Analyze deployment failure
+        id: analyze
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🔍 Analyzing deployment failure..."
 
-        # Get current deployment info
-        if [[ "${{ github.event_name }}" == "deployment_status" ]]; then
-          DEPLOYMENT_ID="${{ github.event.deployment.id }}"
-          DEPLOYMENT_SHA="${{ github.event.deployment.sha }}"
-          ENVIRONMENT="${{ github.event.deployment.environment }}"
-        elif [[ "${{ github.event_name }}" == "workflow_run" ]]; then
-          DEPLOYMENT_SHA="${{ github.event.workflow_run.head_sha }}"
-          ENVIRONMENT="production"
-        fi
+          # Get current deployment info
+          if [[ "${{ github.event_name }}" == "deployment_status" ]]; then
+            DEPLOYMENT_ID="${{ github.event.deployment.id }}"
+            DEPLOYMENT_SHA="${{ github.event.deployment.sha }}"
+            ENVIRONMENT="${{ github.event.deployment.environment }}"
+          elif [[ "${{ github.event_name }}" == "workflow_run" ]]; then
+            DEPLOYMENT_SHA="${{ github.event.workflow_run.head_sha }}"
+            ENVIRONMENT="production"
+          fi
 
-        echo "Deployment SHA: $DEPLOYMENT_SHA"
-        echo "Environment: $ENVIRONMENT"
+          echo "Deployment SHA: $DEPLOYMENT_SHA"
+          echo "Environment: $ENVIRONMENT"
 
-        # Check if this is a production environment
-        if [[ "$ENVIRONMENT" != "production" && "$ENVIRONMENT" != "staging" ]]; then
-          echo "Non-critical environment, skipping rollback"
-          echo "should_rollback=false" >> $GITHUB_OUTPUT
-          exit 0
-        fi
+          # Check if this is a production environment
+          if [[ "$ENVIRONMENT" != "production" && "$ENVIRONMENT" != "staging" ]]; then
+            echo "Non-critical environment, skipping rollback"
+            echo "should_rollback=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
 
-        # Find last successful deployment
-        LAST_SUCCESS=$(gh api "/repos/$GITHUB_REPOSITORY/deployments" \
-          --jq '.[] | select(.environment == "'$ENVIRONMENT'" and .created_at < "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'") | .sha' \
-          | head -1)
+          # Find last successful deployment
+          LAST_SUCCESS=$(gh api "/repos/$GITHUB_REPOSITORY/deployments" \
+            --jq '.[] | select(.environment == "'$ENVIRONMENT'" and .created_at < "'$(date -u +%Y-%m-%dT%H:%M:%SZ)'") | .sha' \
+            | head -1)
 
-        if [[ -z "$LAST_SUCCESS" ]]; then
-          echo "No previous successful deployment found"
-          echo "should_rollback=false" >> $GITHUB_OUTPUT
-          exit 0
-        fi
+          if [[ -z "$LAST_SUCCESS" ]]; then
+            echo "No previous successful deployment found"
+            echo "should_rollback=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
 
-        # Analyze failure type
-        FAILURE_TYPE="unknown"
-        if [[ "${{ github.event.deployment_status.description }}" == *"health check"* ]]; then
-          FAILURE_TYPE="health_check"
-        elif [[ "${{ github.event.deployment_status.description }}" == *"smoke test"* ]]; then
-          FAILURE_TYPE="smoke_test"
-        elif [[ "${{ github.event.workflow_run.conclusion }}" == "failure" ]]; then
-          FAILURE_TYPE="pipeline"
-        fi
+          # Analyze failure type
+          FAILURE_TYPE="unknown"
+          if [[ "${{ github.event.deployment_status.description }}" == *"health check"* ]]; then
+            FAILURE_TYPE="health_check"
+          elif [[ "${{ github.event.deployment_status.description }}" == *"smoke test"* ]]; then
+            FAILURE_TYPE="smoke_test"
+          elif [[ "${{ github.event.workflow_run.conclusion }}" == "failure" ]]; then
+            FAILURE_TYPE="pipeline"
+          fi
 
-        echo "should_rollback=true" >> $GITHUB_OUTPUT
-        echo "rollback_target=$LAST_SUCCESS" >> $GITHUB_OUTPUT
-        echo "failure_type=$FAILURE_TYPE" >> $GITHUB_OUTPUT
+          echo "should_rollback=true" >> $GITHUB_OUTPUT
+          echo "rollback_target=$LAST_SUCCESS" >> $GITHUB_OUTPUT
+          echo "failure_type=$FAILURE_TYPE" >> $GITHUB_OUTPUT
 
-        echo "🎯 Rollback target: $LAST_SUCCESS"
-        echo "💥 Failure type: $FAILURE_TYPE"
+          echo "🎯 Rollback target: $LAST_SUCCESS"
+          echo "💥 Failure type: $FAILURE_TYPE"
 
   health-monitor:
     name: 🏥 Health Monitor
-    if: false  # Belt-and-suspenders guard during stabilization
+    if: false # Belt-and-suspenders guard during stabilization
     runs-on: ubuntu-latest
     timeout-minutes: 15
     outputs:
       health_status: ${{ steps.check.outputs.health_status }}
       critical_failure: ${{ steps.check.outputs.critical_failure }}
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Check system health
-      id: check
-      run: |
-        echo "🏥 Performing system health checks..."
+      - name: Check system health
+        id: check
+        run: |
+          echo "🏥 Performing system health checks..."
 
-        HEALTH_ENDPOINTS=(
-          "https://api.summit.dev/health"
-          "https://graph.summit.dev/health"
-          "https://auth.summit.dev/health"
-        )
+          HEALTH_ENDPOINTS=(
+            "https://api.summit.dev/health"
+            "https://graph.summit.dev/health"
+            "https://auth.summit.dev/health"
+          )
 
-        FAILED_ENDPOINTS=()
-        TOTAL_CHECKS=0
-        PASSED_CHECKS=0
+          FAILED_ENDPOINTS=()
+          TOTAL_CHECKS=0
+          PASSED_CHECKS=0
 
-        for endpoint in "${HEALTH_ENDPOINTS[@]}"; do
-          TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
-          echo "Checking: $endpoint"
+          for endpoint in "${HEALTH_ENDPOINTS[@]}"; do
+            TOTAL_CHECKS=$((TOTAL_CHECKS + 1))
+            echo "Checking: $endpoint"
 
-          if curl -f -s --max-time 30 "$endpoint" > /dev/null; then
-            echo "✅ $endpoint - OK"
-            PASSED_CHECKS=$((PASSED_CHECKS + 1))
-          else
-            echo "❌ $endpoint - FAILED"
-            FAILED_ENDPOINTS+=("$endpoint")
+            if curl -f -s --max-time 30 "$endpoint" > /dev/null; then
+              echo "✅ $endpoint - OK"
+              PASSED_CHECKS=$((PASSED_CHECKS + 1))
+            else
+              echo "❌ $endpoint - FAILED"
+              FAILED_ENDPOINTS+=("$endpoint")
+            fi
+          done
+
+          # Calculate health percentage
+          HEALTH_PERCENTAGE=$((PASSED_CHECKS * 100 / TOTAL_CHECKS))
+          echo "Health percentage: $HEALTH_PERCENTAGE%"
+
+          # Determine if this is a critical failure
+          CRITICAL_FAILURE="false"
+          if [[ $HEALTH_PERCENTAGE -lt 67 ]]; then
+            echo "🚨 Critical health failure detected"
+            CRITICAL_FAILURE="true"
           fi
-        done
 
-        # Calculate health percentage
-        HEALTH_PERCENTAGE=$((PASSED_CHECKS * 100 / TOTAL_CHECKS))
-        echo "Health percentage: $HEALTH_PERCENTAGE%"
+          echo "health_status=$HEALTH_PERCENTAGE" >> $GITHUB_OUTPUT
+          echo "critical_failure=$CRITICAL_FAILURE" >> $GITHUB_OUTPUT
 
-        # Determine if this is a critical failure
-        CRITICAL_FAILURE="false"
-        if [[ $HEALTH_PERCENTAGE -lt 67 ]]; then
-          echo "🚨 Critical health failure detected"
-          CRITICAL_FAILURE="true"
-        fi
+          # Save failure details
+          if [[ ${#FAILED_ENDPOINTS[@]} -gt 0 ]]; then
+            echo "Failed endpoints:" > /tmp/health-failures.txt
+            printf '%s\n' "${FAILED_ENDPOINTS[@]}" >> /tmp/health-failures.txt
+          fi
 
-        echo "health_status=$HEALTH_PERCENTAGE" >> $GITHUB_OUTPUT
-        echo "critical_failure=$CRITICAL_FAILURE" >> $GITHUB_OUTPUT
+      - name: Check deployment metrics
+        if: steps.check.outputs.critical_failure == 'true'
+        run: |
+          echo "📊 Checking deployment metrics for anomalies..."
 
-        # Save failure details
-        if [[ ${#FAILED_ENDPOINTS[@]} -gt 0 ]]; then
-          echo "Failed endpoints:" > /tmp/health-failures.txt
-          printf '%s\n' "${FAILED_ENDPOINTS[@]}" >> /tmp/health-failures.txt
-        fi
+          # This would integrate with your observability stack
+          # For now, we'll check basic metrics
 
-    - name: Check deployment metrics
-      if: steps.check.outputs.critical_failure == 'true'
-      run: |
-        echo "📊 Checking deployment metrics for anomalies..."
+          # Check error rates (would typically query Prometheus/Grafana)
+          echo "Checking error rate spikes..."
 
-        # This would integrate with your observability stack
-        # For now, we'll check basic metrics
+          # Check latency (would typically query your APM)
+          echo "Checking latency increases..."
 
-        # Check error rates (would typically query Prometheus/Grafana)
-        echo "Checking error rate spikes..."
+          # Check traffic drops (would typically query load balancer metrics)
+          echo "Checking traffic anomalies..."
 
-        # Check latency (would typically query your APM)
-        echo "Checking latency increases..."
-
-        # Check traffic drops (would typically query load balancer metrics)
-        echo "Checking traffic anomalies..."
-
-        echo "📈 Metrics check completed"
+          echo "📈 Metrics check completed"
 
   execute-rollback:
     name: ↩️ Execute Rollback
@@ -191,166 +191,166 @@ jobs:
       name: production-rollback
       url: https://summit.dev
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'pnpm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
 
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: ${{ env.PNPM_VERSION }}
-        run_install: false
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
 
-    - name: Prepare rollback
-      id: prepare
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        echo "↩️ Preparing rollback operation..."
+      - name: Prepare rollback
+        id: prepare
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "↩️ Preparing rollback operation..."
 
-        # Determine rollback target
-        if [[ "${{ needs.detect-deployment-failure.outputs.rollback_target }}" != "" ]]; then
-          ROLLBACK_TARGET="${{ needs.detect-deployment-failure.outputs.rollback_target }}"
-          ROLLBACK_REASON="Deployment failure: ${{ needs.detect-deployment-failure.outputs.failure_type }}"
-        else
-          # Health monitor triggered rollback - find last known good deployment
-          ROLLBACK_TARGET=$(gh api "/repos/$GITHUB_REPOSITORY/deployments" \
-            --jq '.[] | select(.environment == "production") | .sha' \
-            | head -1)
-          ROLLBACK_REASON="Critical health failure detected ({{ needs.health-monitor.outputs.health_status }}% health)"
-        fi
-
-        if [[ -z "$ROLLBACK_TARGET" ]]; then
-          echo "❌ No rollback target found"
-          exit 1
-        fi
-
-        echo "🎯 Rolling back to: $ROLLBACK_TARGET"
-        echo "📝 Reason: $ROLLBACK_REASON"
-
-        echo "rollback_target=$ROLLBACK_TARGET" >> $GITHUB_OUTPUT
-        echo "rollback_reason=$ROLLBACK_REASON" >> $GITHUB_OUTPUT
-
-    - name: Create rollback deployment
-      id: deploy
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        echo "🚀 Executing rollback deployment..."
-
-        ROLLBACK_TARGET="${{ steps.prepare.outputs.rollback_target }}"
-        ROLLBACK_REASON="${{ steps.prepare.outputs.rollback_reason }}"
-
-        # Create deployment
-        DEPLOYMENT_ID=$(gh api "/repos/$GITHUB_REPOSITORY/deployments" \
-          --method POST \
-          --field ref="$ROLLBACK_TARGET" \
-          --field environment="production" \
-          --field description="Auto-rollback: $ROLLBACK_REASON" \
-          --field auto_merge=false \
-          --jq '.id')
-
-        echo "📦 Created rollback deployment: $DEPLOYMENT_ID"
-
-        # Update deployment status to in_progress
-        gh api "/repos/$GITHUB_REPOSITORY/deployments/$DEPLOYMENT_ID/statuses" \
-          --method POST \
-          --field state="in_progress" \
-          --field description="Rollback in progress..."
-
-        # Execute the actual rollback (this would be deployment-specific)
-        echo "🔧 Executing rollback commands..."
-
-        # This is where you'd run your actual rollback scripts
-        # Examples:
-        # - Kubernetes: kubectl rollout undo deployment/app
-        # - Docker: docker service update --rollback service-name
-        # - Terraform: terraform apply -var="image_tag=$ROLLBACK_TARGET"
-
-        # For demonstration, we'll simulate the rollback
-        echo "Simulating rollback execution..."
-        sleep 10
-
-        # Verify rollback health
-        echo "🏥 Verifying rollback health..."
-
-        # Wait for services to stabilize
-        sleep 30
-
-        # Check health endpoints
-        HEALTH_CHECK_PASSED=true
-        for endpoint in "https://api.summit.dev/health" "https://graph.summit.dev/health"; do
-          if ! curl -f -s --max-time 30 "$endpoint" > /dev/null; then
-            echo "❌ Health check failed for $endpoint"
-            HEALTH_CHECK_PASSED=false
+          # Determine rollback target
+          if [[ "${{ needs.detect-deployment-failure.outputs.rollback_target }}" != "" ]]; then
+            ROLLBACK_TARGET="${{ needs.detect-deployment-failure.outputs.rollback_target }}"
+            ROLLBACK_REASON="Deployment failure: ${{ needs.detect-deployment-failure.outputs.failure_type }}"
+          else
+            # Health monitor triggered rollback - find last known good deployment
+            ROLLBACK_TARGET=$(gh api "/repos/$GITHUB_REPOSITORY/deployments" \
+              --jq '.[] | select(.environment == "production") | .sha' \
+              | head -1)
+            ROLLBACK_REASON="Critical health failure detected ({{ needs.health-monitor.outputs.health_status }}% health)"
           fi
-        done
 
-        if [[ "$HEALTH_CHECK_PASSED" == "true" ]]; then
-          echo "✅ Rollback completed successfully"
+          if [[ -z "$ROLLBACK_TARGET" ]]; then
+            echo "❌ No rollback target found"
+            exit 1
+          fi
 
-          # Update deployment status to success
+          echo "🎯 Rolling back to: $ROLLBACK_TARGET"
+          echo "📝 Reason: $ROLLBACK_REASON"
+
+          echo "rollback_target=$ROLLBACK_TARGET" >> $GITHUB_OUTPUT
+          echo "rollback_reason=$ROLLBACK_REASON" >> $GITHUB_OUTPUT
+
+      - name: Create rollback deployment
+        id: deploy
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "🚀 Executing rollback deployment..."
+
+          ROLLBACK_TARGET="${{ steps.prepare.outputs.rollback_target }}"
+          ROLLBACK_REASON="${{ steps.prepare.outputs.rollback_reason }}"
+
+          # Create deployment
+          DEPLOYMENT_ID=$(gh api "/repos/$GITHUB_REPOSITORY/deployments" \
+            --method POST \
+            --field ref="$ROLLBACK_TARGET" \
+            --field environment="production" \
+            --field description="Auto-rollback: $ROLLBACK_REASON" \
+            --field auto_merge=false \
+            --jq '.id')
+
+          echo "📦 Created rollback deployment: $DEPLOYMENT_ID"
+
+          # Update deployment status to in_progress
           gh api "/repos/$GITHUB_REPOSITORY/deployments/$DEPLOYMENT_ID/statuses" \
             --method POST \
-            --field state="success" \
-            --field description="Rollback completed successfully"
-        else
-          echo "❌ Rollback health checks failed"
+            --field state="in_progress" \
+            --field description="Rollback in progress..."
 
-          # Update deployment status to failure
-          gh api "/repos/$GITHUB_REPOSITORY/deployments/$DEPLOYMENT_ID/statuses" \
-            --method POST \
-            --field state="failure" \
-            --field description="Rollback failed health checks"
+          # Execute the actual rollback (this would be deployment-specific)
+          echo "🔧 Executing rollback commands..."
 
-          exit 1
-        fi
+          # This is where you'd run your actual rollback scripts
+          # Examples:
+          # - Kubernetes: kubectl rollout undo deployment/app
+          # - Docker: docker service update --rollback service-name
+          # - Terraform: terraform apply -var="image_tag=$ROLLBACK_TARGET"
 
-    - name: Notify stakeholders
-      if: always()
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      run: |
-        echo "📢 Notifying stakeholders of rollback..."
+          # For demonstration, we'll simulate the rollback
+          echo "Simulating rollback execution..."
+          sleep 10
 
-        ROLLBACK_STATUS="${{ job.status }}"
-        ROLLBACK_TARGET="${{ steps.prepare.outputs.rollback_target }}"
-        ROLLBACK_REASON="${{ steps.prepare.outputs.rollback_reason }}"
+          # Verify rollback health
+          echo "🏥 Verifying rollback health..."
 
-        # Create incident issue
-        ISSUE_BODY="## 🚨 Auto-Rollback Executed
+          # Wait for services to stabilize
+          sleep 30
 
-        **Status**: $ROLLBACK_STATUS
-        **Target**: $ROLLBACK_TARGET
-        **Reason**: $ROLLBACK_REASON
-        **Time**: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+          # Check health endpoints
+          HEALTH_CHECK_PASSED=true
+          for endpoint in "https://api.summit.dev/health" "https://graph.summit.dev/health"; do
+            if ! curl -f -s --max-time 30 "$endpoint" > /dev/null; then
+              echo "❌ Health check failed for $endpoint"
+              HEALTH_CHECK_PASSED=false
+            fi
+          done
 
-        ### Actions Taken
-        - ↩️ Automatic rollback triggered
-        - 🏥 Health checks performed
-        - 🔧 Deployment reverted to last known good state
+          if [[ "$HEALTH_CHECK_PASSED" == "true" ]]; then
+            echo "✅ Rollback completed successfully"
 
-        ### Next Steps
-        - [ ] Investigate root cause of failure
-        - [ ] Fix underlying issue
-        - [ ] Test fix in staging environment
-        - [ ] Plan forward deployment
+            # Update deployment status to success
+            gh api "/repos/$GITHUB_REPOSITORY/deployments/$DEPLOYMENT_ID/statuses" \
+              --method POST \
+              --field state="success" \
+              --field description="Rollback completed successfully"
+          else
+            echo "❌ Rollback health checks failed"
 
-        **Auto-generated by Release Captain 🚢**"
+            # Update deployment status to failure
+            gh api "/repos/$GITHUB_REPOSITORY/deployments/$DEPLOYMENT_ID/statuses" \
+              --method POST \
+              --field state="failure" \
+              --field description="Rollback failed health checks"
 
-        gh issue create \
-          --title "🚨 Auto-Rollback: $(date +%Y-%m-%d) - $ROLLBACK_REASON" \
-          --body "$ISSUE_BODY" \
-          --label "incident,auto-rollback,priority:high"
+            exit 1
+          fi
 
-        # Post to team channel (would integrate with Slack/Teams)
-        echo "🔔 Team notifications sent"
+      - name: Notify stakeholders
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "📢 Notifying stakeholders of rollback..."
+
+          ROLLBACK_STATUS="${{ job.status }}"
+          ROLLBACK_TARGET="${{ steps.prepare.outputs.rollback_target }}"
+          ROLLBACK_REASON="${{ steps.prepare.outputs.rollback_reason }}"
+
+          # Create incident issue
+          ISSUE_BODY="## 🚨 Auto-Rollback Executed
+
+          **Status**: $ROLLBACK_STATUS
+          **Target**: $ROLLBACK_TARGET
+          **Reason**: $ROLLBACK_REASON
+          **Time**: $(date -u +%Y-%m-%dT%H:%M:%SZ)
+
+          ### Actions Taken
+          - ↩️ Automatic rollback triggered
+          - 🏥 Health checks performed
+          - 🔧 Deployment reverted to last known good state
+
+          ### Next Steps
+          - [ ] Investigate root cause of failure
+          - [ ] Fix underlying issue
+          - [ ] Test fix in staging environment
+          - [ ] Plan forward deployment
+
+          **Auto-generated by Release Captain 🚢**"
+
+          gh issue create \
+            --title "🚨 Auto-Rollback: $(date +%Y-%m-%d) - $ROLLBACK_REASON" \
+            --body "$ISSUE_BODY" \
+            --label "incident,auto-rollback,priority:high"
+
+          # Post to team channel (would integrate with Slack/Teams)
+          echo "🔔 Team notifications sent"
 
   post-rollback-analysis:
     name: 📊 Post-Rollback Analysis
@@ -358,39 +358,39 @@ jobs:
     if: always() && needs.execute-rollback.result != 'skipped'
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Collect rollback metrics
-      run: |
-        echo "📊 Collecting rollback metrics..."
+      - name: Collect rollback metrics
+        run: |
+          echo "📊 Collecting rollback metrics..."
 
-        # Calculate rollback time
-        ROLLBACK_DURATION="Unknown"
-        if [[ "${{ needs.execute-rollback.result }}" == "success" ]]; then
-          echo "✅ Rollback completed successfully"
-          echo "⏱️ Duration: $ROLLBACK_DURATION"
-        else
-          echo "❌ Rollback failed"
-        fi
+          # Calculate rollback time
+          ROLLBACK_DURATION="Unknown"
+          if [[ "${{ needs.execute-rollback.result }}" == "success" ]]; then
+            echo "✅ Rollback completed successfully"
+            echo "⏱️ Duration: $ROLLBACK_DURATION"
+          else
+            echo "❌ Rollback failed"
+          fi
 
-        # Store metrics for analysis
-        cat > /tmp/rollback-metrics.json << EOF
-        {
-          "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-          "success": "${{ needs.execute-rollback.result == 'success' }}",
-          "duration": "$ROLLBACK_DURATION",
-          "trigger": "${{ github.event_name }}",
-          "reason": "${{ needs.detect-deployment-failure.outputs.failure_type || 'health_monitor' }}"
-        }
-        EOF
+          # Store metrics for analysis
+          cat > /tmp/rollback-metrics.json << EOF
+          {
+            "timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "success": "${{ needs.execute-rollback.result == 'success' }}",
+            "duration": "$ROLLBACK_DURATION",
+            "trigger": "${{ github.event_name }}",
+            "reason": "${{ needs.detect-deployment-failure.outputs.failure_type || 'health_monitor' }}"
+          }
+          EOF
 
-        echo "📈 Metrics saved for analysis"
+          echo "📈 Metrics saved for analysis"
 
-    - name: Update runbooks
-      run: |
-        echo "📚 Updating incident runbooks with rollback data..."
+      - name: Update runbooks
+        run: |
+          echo "📚 Updating incident runbooks with rollback data..."
 
-        # This would update your incident response documentation
-        # with lessons learned and timing data
+          # This would update your incident response documentation
+          # with lessons learned and timing data
 
-        echo "📖 Runbook updates completed"
+          echo "📖 Runbook updates completed"

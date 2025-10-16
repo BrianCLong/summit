@@ -14,22 +14,22 @@ import json
 import subprocess
 import time
 import uuid
-from dataclasses import dataclass, asdict
-from datetime import datetime, timezone, timedelta
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Tuple
-import yaml
+from typing import Any
 
 
 @dataclass
 class IncidentAlert:
     """Incident alert triggering remediation"""
+
     alert_id: str
     alert_name: str
     severity: str
     service: str
-    tenant_id: Optional[str]
-    metrics: Dict[str, float]
+    tenant_id: str | None
+    metrics: dict[str, float]
     timestamp: str
     description: str
 
@@ -37,26 +37,28 @@ class IncidentAlert:
 @dataclass
 class RemediationAction:
     """Single remediation action"""
+
     action_type: str  # "scale_hpa", "adjust_budget", "route_bias", "circuit_break"
     target_resource: str
-    current_config: Dict[str, Any]
-    proposed_config: Dict[str, Any]
+    current_config: dict[str, Any]
+    proposed_config: dict[str, Any]
     expected_impact: str
     risk_level: str  # "low", "medium", "high"
-    rollback_config: Dict[str, Any]
+    rollback_config: dict[str, Any]
 
 
 @dataclass
 class RemediationProposal:
     """Complete remediation proposal with signatures"""
+
     proposal_id: str
     incident_id: str
     timestamp: str
-    actions: List[RemediationAction]
+    actions: list[RemediationAction]
     estimated_mttr_minutes: float
     confidence_score: float
     policy_validated: bool
-    simulation_results: Dict[str, Any]
+    simulation_results: dict[str, Any]
     signature: str
     approver_required: bool
     auto_apply_threshold: float = 0.9
@@ -65,15 +67,16 @@ class RemediationProposal:
 @dataclass
 class RemediationExecution:
     """Execution record of remediation"""
+
     execution_id: str
     proposal_id: str
     approved_by: str
     approved_at: str
     executed_at: str
     status: str  # "pending", "executing", "completed", "failed", "rolled_back"
-    execution_logs: List[str]
-    rollback_plan: Dict[str, Any]
-    actual_mttr_minutes: Optional[float] = None
+    execution_logs: list[str]
+    rollback_plan: dict[str, Any]
+    actual_mttr_minutes: float | None = None
 
 
 class AutonomousRemediator:
@@ -88,9 +91,9 @@ class AutonomousRemediator:
         self.playbooks = self._load_playbooks()
 
         # Performance tracking
-        self.mttr_history: List[float] = []
+        self.mttr_history: list[float] = []
 
-    def _load_playbooks(self) -> Dict[str, Any]:
+    def _load_playbooks(self) -> dict[str, Any]:
         """Load remediation playbooks for different incident types"""
         return {
             "high_p95_latency": {
@@ -100,35 +103,31 @@ class AutonomousRemediator:
                         "type": "scale_hpa",
                         "target": "agent-workbench",
                         "scale_factor": 1.5,
-                        "max_replicas": 20
+                        "max_replicas": 20,
                     },
                     {
                         "type": "adjust_budget",
                         "target": "inference_budget",
                         "increase_percent": 20,
-                        "duration_minutes": 15
-                    }
+                        "duration_minutes": 15,
+                    },
                 ],
                 "confidence": 0.85,
-                "mttr_estimate": 4.5
+                "mttr_estimate": 4.5,
             },
             "siem_delivery_low": {
                 "description": "SIEM delivery rate below 95%",
                 "actions": [
-                    {
-                        "type": "circuit_break",
-                        "target": "low_priority_events",
-                        "threshold": 0.5
-                    },
+                    {"type": "circuit_break", "target": "low_priority_events", "threshold": 0.5},
                     {
                         "type": "route_bias",
                         "target": "siem_ingestion",
                         "bias_to": "primary_pipeline",
-                        "percentage": 90
-                    }
+                        "percentage": 90,
+                    },
                 ],
                 "confidence": 0.92,
-                "mttr_estimate": 3.2
+                "mttr_estimate": 3.2,
             },
             "canary_composite_low": {
                 "description": "Canary composite score below threshold",
@@ -137,17 +136,17 @@ class AutonomousRemediator:
                         "type": "route_bias",
                         "target": "canary_traffic",
                         "bias_to": "baseline",
-                        "percentage": 80
+                        "percentage": 80,
                     },
                     {
                         "type": "extend_bake",
                         "target": "canary_deployment",
-                        "additional_minutes": 10
-                    }
+                        "additional_minutes": 10,
+                    },
                 ],
                 "confidence": 0.95,
-                "mttr_estimate": 2.8
-            }
+                "mttr_estimate": 2.8,
+            },
         }
 
     def _classify_incident(self, alert: IncidentAlert) -> str:
@@ -163,13 +162,9 @@ class AutonomousRemediator:
         else:
             return "unknown"
 
-    def _generate_kubernetes_hpa_action(self, playbook_action: Dict[str, Any]) -> RemediationAction:
+    def _generate_kubernetes_hpa_action(self, playbook_action: dict[str, Any]) -> RemediationAction:
         """Generate HPA scaling action"""
-        current_hpa = {
-            "minReplicas": 3,
-            "maxReplicas": 10,
-            "targetCPUUtilizationPercentage": 70
-        }
+        current_hpa = {"minReplicas": 3, "maxReplicas": 10, "targetCPUUtilizationPercentage": 70}
 
         scale_factor = playbook_action.get("scale_factor", 1.5)
         max_replicas = playbook_action.get("max_replicas", 20)
@@ -177,7 +172,9 @@ class AutonomousRemediator:
         proposed_hpa = {
             "minReplicas": max(current_hpa["minReplicas"], int(current_hpa["maxReplicas"] * 0.5)),
             "maxReplicas": min(max_replicas, int(current_hpa["maxReplicas"] * scale_factor)),
-            "targetCPUUtilizationPercentage": max(50, current_hpa["targetCPUUtilizationPercentage"] - 10)
+            "targetCPUUtilizationPercentage": max(
+                50, current_hpa["targetCPUUtilizationPercentage"] - 10
+            ),
         }
 
         return RemediationAction(
@@ -187,15 +184,15 @@ class AutonomousRemediator:
             proposed_config=proposed_hpa,
             expected_impact=f"Increase capacity by {int((scale_factor - 1) * 100)}%",
             risk_level="medium",
-            rollback_config=current_hpa
+            rollback_config=current_hpa,
         )
 
-    def _generate_budget_action(self, playbook_action: Dict[str, Any]) -> RemediationAction:
+    def _generate_budget_action(self, playbook_action: dict[str, Any]) -> RemediationAction:
         """Generate budget adjustment action"""
         current_budget = {
             "daily_limit_usd": 100.0,
             "per_request_limit_ms": 5000,
-            "throttle_threshold": 0.8
+            "throttle_threshold": 0.8,
         }
 
         increase_percent = playbook_action.get("increase_percent", 20) / 100
@@ -205,7 +202,9 @@ class AutonomousRemediator:
             "daily_limit_usd": current_budget["daily_limit_usd"] * (1 + increase_percent),
             "per_request_limit_ms": current_budget["per_request_limit_ms"],
             "throttle_threshold": min(0.95, current_budget["throttle_threshold"] + 0.1),
-            "temporary_increase_until": (datetime.now(timezone.utc) + timedelta(minutes=duration_minutes)).isoformat()
+            "temporary_increase_until": (
+                datetime.now(timezone.utc) + timedelta(minutes=duration_minutes)
+            ).isoformat(),
         }
 
         return RemediationAction(
@@ -215,15 +214,15 @@ class AutonomousRemediator:
             proposed_config=proposed_budget,
             expected_impact=f"Increase budget by {int(increase_percent * 100)}% for {duration_minutes}min",
             risk_level="low",
-            rollback_config=current_budget
+            rollback_config=current_budget,
         )
 
-    def _generate_route_bias_action(self, playbook_action: Dict[str, Any]) -> RemediationAction:
+    def _generate_route_bias_action(self, playbook_action: dict[str, Any]) -> RemediationAction:
         """Generate traffic routing bias action"""
         current_routing = {
             "baseline_weight": 50,
             "canary_weight": 50,
-            "circuit_breaker_enabled": False
+            "circuit_breaker_enabled": False,
         }
 
         bias_to = playbook_action.get("bias_to", "baseline")
@@ -233,13 +232,13 @@ class AutonomousRemediator:
             proposed_routing = {
                 "baseline_weight": percentage,
                 "canary_weight": 100 - percentage,
-                "circuit_breaker_enabled": True
+                "circuit_breaker_enabled": True,
             }
         else:
             proposed_routing = {
                 "baseline_weight": 100 - percentage,
                 "canary_weight": percentage,
-                "circuit_breaker_enabled": False
+                "circuit_breaker_enabled": False,
             }
 
         return RemediationAction(
@@ -249,36 +248,36 @@ class AutonomousRemediator:
             proposed_config=proposed_routing,
             expected_impact=f"Route {percentage}% traffic to {bias_to}",
             risk_level="high" if percentage > 90 else "medium",
-            rollback_config=current_routing
+            rollback_config=current_routing,
         )
 
-    async def _validate_policy_compliance(self, actions: List[RemediationAction]) -> bool:
+    async def _validate_policy_compliance(self, actions: list[RemediationAction]) -> bool:
         """Validate proposed actions against OPA policies"""
         try:
             # Create policy input
             policy_input = {
                 "remediation_request": {
                     "actions": [asdict(action) for action in actions],
-                    "timestamp": datetime.now(timezone.utc).isoformat()
+                    "timestamp": datetime.now(timezone.utc).isoformat(),
                 }
             }
 
             # Write input to temp file
             input_file = self.evidence_dir / "policy_input.json"
-            with open(input_file, 'w') as f:
+            with open(input_file, "w") as f:
                 json.dump(policy_input, f, indent=2)
 
             # Run OPA eval (assuming opa executable is available)
-            result = subprocess.run([
-                'opa', 'eval',
-                '-d', 'opa/',
-                '-i', str(input_file),
-                'data.remediation.allow'
-            ], capture_output=True, text=True, timeout=10)
+            result = subprocess.run(
+                ["opa", "eval", "-d", "opa/", "-i", str(input_file), "data.remediation.allow"],
+                capture_output=True,
+                text=True,
+                timeout=10,
+            )
 
             if result.returncode == 0:
                 output = json.loads(result.stdout)
-                return output.get('result', [{}])[0].get('expressions', [{}])[0].get('value', False)
+                return output.get("result", [{}])[0].get("expressions", [{}])[0].get("value", False)
 
         except Exception as e:
             print(f"Policy validation failed: {e}")
@@ -286,7 +285,7 @@ class AutonomousRemediator:
         # Default to requiring approval if validation fails
         return False
 
-    async def _simulate_remediation(self, actions: List[RemediationAction]) -> Dict[str, Any]:
+    async def _simulate_remediation(self, actions: list[RemediationAction]) -> dict[str, Any]:
         """Simulate proposed remediation actions"""
         # Simplified simulation - in production: use chaos engineering framework
         simulation_results = {
@@ -294,7 +293,7 @@ class AutonomousRemediator:
             "predicted_error_rate_change": 0,
             "predicted_cost_impact_percent": 0,
             "confidence_score": 0.8,
-            "estimated_recovery_time_minutes": 5.0
+            "estimated_recovery_time_minutes": 5.0,
         }
 
         for action in actions:
@@ -322,14 +321,16 @@ class AutonomousRemediator:
             "incident_id": proposal.incident_id,
             "timestamp": proposal.timestamp,
             "actions": [asdict(action) for action in proposal.actions],
-            "confidence_score": proposal.confidence_score
+            "confidence_score": proposal.confidence_score,
         }
 
-        canonical = json.dumps(proposal_data, sort_keys=True, separators=(',', ':'))
+        canonical = json.dumps(proposal_data, sort_keys=True, separators=(",", ":"))
         signature = hmac.new(self.signing_key, canonical.encode(), hashlib.sha256).hexdigest()
         return f"mc-remediation:{signature}"
 
-    async def propose_remediation(self, alert: IncidentAlert, dry_run: bool = False) -> RemediationProposal:
+    async def propose_remediation(
+        self, alert: IncidentAlert, dry_run: bool = False
+    ) -> RemediationProposal:
         """Generate signed remediation proposal for incident"""
         proposal_id = f"rem-{uuid.uuid4().hex[:12]}"
 
@@ -337,7 +338,9 @@ class AutonomousRemediator:
         incident_type = self._classify_incident(alert)
         playbook = self.playbooks.get(incident_type, self.playbooks["high_p95_latency"])
 
-        print(f"🎯 Generating remediation for {incident_type} (confidence: {playbook['confidence']})")
+        print(
+            f"🎯 Generating remediation for {incident_type} (confidence: {playbook['confidence']})"
+        )
 
         # Generate remediation actions
         actions = []
@@ -370,7 +373,7 @@ class AutonomousRemediator:
             policy_validated=policy_validated,
             simulation_results=simulation_results,
             signature="",  # Will be set below
-            approver_required=not policy_validated or playbook["confidence"] < 0.9
+            approver_required=not policy_validated or playbook["confidence"] < 0.9,
         )
 
         # Sign proposal
@@ -379,7 +382,7 @@ class AutonomousRemediator:
         # Save proposal
         if not dry_run:
             proposal_file = self.evidence_dir / f"proposal-{proposal_id}.json"
-            with open(proposal_file, 'w') as f:
+            with open(proposal_file, "w") as f:
                 json.dump(asdict(proposal), f, indent=2)
 
             print(f"💾 Proposal saved: {proposal_file}")
@@ -393,7 +396,7 @@ class AutonomousRemediator:
 
         # Load proposal
         proposal_file = self.evidence_dir / f"proposal-{proposal_id}.json"
-        with open(proposal_file, 'r') as f:
+        with open(proposal_file) as f:
             proposal_data = json.load(f)
 
         proposal = RemediationProposal(**proposal_data)
@@ -406,7 +409,7 @@ class AutonomousRemediator:
             executed_at="",
             status="pending",
             execution_logs=[],
-            rollback_plan={}
+            rollback_plan={},
         )
 
         try:
@@ -428,11 +431,15 @@ class AutonomousRemediator:
 
                 elif action.action_type == "adjust_budget":
                     # In production: update budget configuration
-                    execution.execution_logs.append(f"✅ Adjusted budget for {action.target_resource}")
+                    execution.execution_logs.append(
+                        f"✅ Adjusted budget for {action.target_resource}"
+                    )
 
                 elif action.action_type == "route_bias":
                     # In production: update traffic routing
-                    execution.execution_logs.append(f"✅ Applied route bias to {action.target_resource}")
+                    execution.execution_logs.append(
+                        f"✅ Applied route bias to {action.target_resource}"
+                    )
 
             execution.status = "completed"
             actual_mttr = (time.time() - start_time) / 60
@@ -441,7 +448,9 @@ class AutonomousRemediator:
             # Track MTTR performance
             self.mttr_history.append(actual_mttr)
 
-            execution.execution_logs.append(f"✅ Remediation completed in {actual_mttr:.1f} minutes")
+            execution.execution_logs.append(
+                f"✅ Remediation completed in {actual_mttr:.1f} minutes"
+            )
 
         except Exception as e:
             execution.status = "failed"
@@ -449,12 +458,12 @@ class AutonomousRemediator:
 
         # Save execution record
         execution_file = self.evidence_dir / f"execution-{execution_id}.json"
-        with open(execution_file, 'w') as f:
+        with open(execution_file, "w") as f:
             json.dump(asdict(execution), f, indent=2)
 
         return execution
 
-    def get_mttr_metrics(self) -> Dict[str, float]:
+    def get_mttr_metrics(self) -> dict[str, float]:
         """Get MTTR performance metrics"""
         if not self.mttr_history:
             return {"p50_minutes": 0, "p95_minutes": 0, "count": 0}
@@ -467,7 +476,9 @@ class AutonomousRemediator:
             "p95_minutes": sorted_mttrs[int(count * 0.95)] if count > 0 else 0,
             "p99_minutes": sorted_mttrs[int(count * 0.99)] if count > 0 else 0,
             "count": count,
-            "sla_met_7min": sum(1 for mttr in sorted_mttrs if mttr <= 7) / count if count > 0 else 0
+            "sla_met_7min": (
+                sum(1 for mttr in sorted_mttrs if mttr <= 7) / count if count > 0 else 0
+            ),
         }
 
 
@@ -488,7 +499,7 @@ def main():
 
     if args.alert_file:
         # Load alert and generate proposal
-        with open(args.alert_file, 'r') as f:
+        with open(args.alert_file) as f:
             alert_data = json.load(f)
 
         alert = IncidentAlert(**alert_data)
@@ -497,11 +508,11 @@ def main():
             proposal = await remediator.propose_remediation(alert, args.dry_run)
 
             if args.out:
-                with open(args.out, 'w') as f:
+                with open(args.out, "w") as f:
                     json.dump(asdict(proposal), f, indent=2)
                 print(f"📄 Proposal written to {args.out}")
 
-            print(f"\n📊 Proposal Summary:")
+            print("\n📊 Proposal Summary:")
             print(f"   ID: {proposal.proposal_id}")
             print(f"   Actions: {len(proposal.actions)}")
             print(f"   Confidence: {proposal.confidence_score:.2f}")
@@ -515,10 +526,14 @@ def main():
         # Execute proposal
         async def run_execution():
             execution = await remediator.execute_remediation(args.execute, args.approver)
-            print(f"\n📊 Execution Summary:")
+            print("\n📊 Execution Summary:")
             print(f"   ID: {execution.execution_id}")
             print(f"   Status: {execution.status}")
-            print(f"   MTTR: {execution.actual_mttr_minutes:.1f} min" if execution.actual_mttr_minutes else "   MTTR: N/A")
+            print(
+                f"   MTTR: {execution.actual_mttr_minutes:.1f} min"
+                if execution.actual_mttr_minutes
+                else "   MTTR: N/A"
+            )
 
         asyncio.run(run_execution())
 

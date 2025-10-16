@@ -23,7 +23,13 @@ import {
   Tooltip,
   Typography,
 } from '@mui/material';
-import { Add, CheckCircle, Delete, HealthAndSafety, Refresh } from '@mui/icons-material';
+import {
+  Add,
+  CheckCircle,
+  Delete,
+  HealthAndSafety,
+  Refresh,
+} from '@mui/icons-material';
 
 type Server = {
   id: string;
@@ -60,7 +66,9 @@ export default function MCPRegistry() {
     const body = {
       name: form.name.trim(),
       url: form.url.trim(),
-      scopes: form.scopes.trim() ? form.scopes.split(',').map((s) => s.trim()) : [],
+      scopes: form.scopes.trim()
+        ? form.scopes.split(',').map((s) => s.trim())
+        : [],
       tags: form.tags.trim() ? form.tags.split(',').map((s) => s.trim()) : [],
     };
     const res = await fetch('/api/maestro/v1/mcp/servers', {
@@ -80,19 +88,37 @@ export default function MCPRegistry() {
 
   const deleteServer = async (id: string) => {
     if (!confirm('Delete this MCP server?')) return;
-    const res = await fetch(`/api/maestro/v1/mcp/servers/${id}`, { method: 'DELETE' });
+    const res = await fetch(`/api/maestro/v1/mcp/servers/${id}`, {
+      method: 'DELETE',
+    });
     if (res.status === 204) fetchServers();
   };
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          mb: 2,
+        }}
+      >
         <Typography variant="h5">MCP Server Registry</Typography>
         <Box>
-          <Button startIcon={<Refresh />} onClick={fetchServers} sx={{ mr: 1 }} disabled={loading}>
+          <Button
+            startIcon={<Refresh />}
+            onClick={fetchServers}
+            sx={{ mr: 1 }}
+            disabled={loading}
+          >
             Refresh
           </Button>
-          <Button startIcon={<Add />} variant="contained" onClick={() => setDialogOpen(true)}>
+          <Button
+            startIcon={<Add />}
+            variant="contained"
+            onClick={() => setDialogOpen(true)}
+          >
             Add Server
           </Button>
         </Box>
@@ -118,13 +144,21 @@ export default function MCPRegistry() {
                   <TableRow key={s.id}>
                     <TableCell>{s.name}</TableCell>
                     <TableCell>
-                      <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontFamily: 'monospace' }}
+                      >
                         {s.url}
                       </Typography>
                     </TableCell>
                     <TableCell>
                       {s.scopes?.map((sc) => (
-                        <Chip key={sc} size="small" label={sc} sx={{ mr: 0.5, mb: 0.5 }} />
+                        <Chip
+                          key={sc}
+                          size="small"
+                          label={sc}
+                          sx={{ mr: 0.5, mb: 0.5 }}
+                        />
                       ))}
                     </TableCell>
                     <TableCell>
@@ -140,7 +174,10 @@ export default function MCPRegistry() {
                     </TableCell>
                     <TableCell align="right">
                       <Tooltip title="Delete">
-                        <IconButton color="error" onClick={() => deleteServer(s.id)}>
+                        <IconButton
+                          color="error"
+                          onClick={() => deleteServer(s.id)}
+                        >
                           <Delete />
                         </IconButton>
                       </Tooltip>
@@ -162,7 +199,12 @@ export default function MCPRegistry() {
         </CardContent>
       </Card>
 
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} fullWidth maxWidth="sm">
+      <Dialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        fullWidth
+        maxWidth="sm"
+      >
         <DialogTitle>Register MCP Server</DialogTitle>
         <DialogContent>
           <TextField

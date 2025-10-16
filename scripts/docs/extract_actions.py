@@ -5,8 +5,8 @@ import os
 import re
 import shutil
 import subprocess
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Iterable
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
 DOCS_ROOT = REPO_ROOT / "docs"
@@ -58,8 +58,8 @@ def anchor_for_heading(title: str) -> str:
     return anchor
 
 
-def parse_actions_from_text(text: str) -> Dict[str, List[Dict[str, str]]]:
-    actions: Dict[str, List[Dict[str, str]]] = {
+def parse_actions_from_text(text: str) -> dict[str, list[dict[str, str]]]:
+    actions: dict[str, list[dict[str, str]]] = {
         "checkboxes": [],
         "checked": [],
         "todos": [],
@@ -88,7 +88,7 @@ def parse_actions_from_text(text: str) -> Dict[str, List[Dict[str, str]]]:
             if len(hm2.group("hashes")) <= level:
                 next_h = hm2.start()
                 break
-        section = text[start: next_h] if next_h is not None else text[start:]
+        section = text[start:next_h] if next_h is not None else text[start:]
         items = [m.group("text").strip() for m in BULLET_RE.finditer(section)]
         if items:
             actions["heading_lists"].append({"heading": title, "items": items})
@@ -96,7 +96,7 @@ def parse_actions_from_text(text: str) -> Dict[str, List[Dict[str, str]]]:
     return actions
 
 
-def labels_for_path(repo_rel: str) -> List[str]:
+def labels_for_path(repo_rel: str) -> list[str]:
     labels = list(DEFAULT_LABELS)
     for pattern, label in AREA_LABELS:
         if pattern.search("/" + repo_rel.replace(os.sep, "/") + "/"):
@@ -104,15 +104,20 @@ def labels_for_path(repo_rel: str) -> List[str]:
     return sorted(set(labels))
 
 
-def create_issue(repo: str, title: str, body: str, labels: List[str]) -> Optional[str]:
+def create_issue(repo: str, title: str, body: str, labels: list[str]) -> str | None:
     if shutil.which("gh") is None:
         print("gh CLI not found; skipping issue creation")
         return None
     cmd = [
-        "gh", "issue", "create",
-        "--repo", repo,
-        "--title", title,
-        "--body", body,
+        "gh",
+        "issue",
+        "create",
+        "--repo",
+        repo,
+        "--title",
+        title,
+        "--body",
+        body,
     ]
     for l in labels:
         cmd.extend(["--label", l])
@@ -126,11 +131,21 @@ def create_issue(repo: str, title: str, body: str, labels: List[str]) -> Optiona
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Extract action items from docs and optionally create GitHub issues.")
+    parser = argparse.ArgumentParser(
+        description="Extract action items from docs and optionally create GitHub issues."
+    )
     parser.add_argument("--base", default=str(DOCS_ROOT), help="Docs base directory to scan")
-    parser.add_argument("--output", default=str(META_DIR / "extracted-actions.json"), help="Output JSON path")
-    parser.add_argument("--create-issues", action="store_true", help="Create GitHub issues for each action")
-    parser.add_argument("--repo", default=os.environ.get("GITHUB_REPO"), help="owner/repo for issue creation (or set GITHUB_REPO)")
+    parser.add_argument(
+        "--output", default=str(META_DIR / "extracted-actions.json"), help="Output JSON path"
+    )
+    parser.add_argument(
+        "--create-issues", action="store_true", help="Create GitHub issues for each action"
+    )
+    parser.add_argument(
+        "--repo",
+        default=os.environ.get("GITHUB_REPO"),
+        help="owner/repo for issue creation (or set GITHUB_REPO)",
+    )
     args = parser.parse_args()
 
     base = Path(args.base)
@@ -140,30 +155,36 @@ def main():
     if args.create_issues and not args.repo:
         repo = None
         try:
-            out = subprocess.check_output(["gh", "repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"], text=True)
+            out = subprocess.check_output(
+                ["gh", "repo", "view", "--json", "nameWithOwner", "-q", ".nameWithOwner"], text=True
+            )
             repo = out.strip() or None
         except Exception:
             pass
         if not repo:
             try:
-                origin_url = subprocess.check_output(["git", "remote", "get-url", "origin"], text=True).strip()
+                origin_url = subprocess.check_output(
+                    ["git", "remote", "get-url", "origin"], text=True
+                ).strip()
                 m = re.search(r"github.com[:/]{1}([^/]+/[^/.]+)", origin_url)
                 if m:
                     repo = m.group(1)
             except Exception:
                 pass
         if not repo:
-            raise SystemExit("--create-issues requested but repo is unknown; set --repo or GITHUB_REPO")
+            raise SystemExit(
+                "--create-issues requested but repo is unknown; set --repo or GITHUB_REPO"
+            )
         args.repo = repo
 
-    results: List[Dict[str, object]] = []
+    results: list[dict[str, object]] = []
 
     for p in iter_doc_files(base):
         rel = os.path.relpath(p, REPO_ROOT)
         text = p.read_text(encoding="utf-8", errors="ignore")
         actions = parse_actions_from_text(text)
         # Flatten actionable items
-        all_items: List[Tuple[str, Optional[str]]] = []
+        all_items: list[tuple[str, str | None]] = []
         for it in actions["checkboxes"]:
             all_items.append((it["text"], None))
         for it in actions["todos"]:
@@ -181,16 +202,14 @@ def main():
                 "todos": len(actions["todos"]),
                 "heading_lists": sum(len(s["items"]) for s in actions["heading_lists"]),
             },
-            "items": [
-                {"text": t, "section": h} for (t, h) in all_items
-            ],
+            "items": [{"text": t, "section": h} for (t, h) in all_items],
         }
         results.append(entry)
 
         # Optionally create issues
         if args.create_issues and all_items:
             labels = labels_for_path(rel)
-            for (text_item, heading) in all_items:
+            for text_item, heading in all_items:
                 anchor = anchor_for_heading(heading) if heading else None
                 url = f"{rel}"
                 if anchor:
@@ -202,6 +221,7 @@ def main():
     with open(args.output, "w", encoding="utf-8") as f:
         json.dump({"results": results}, f, indent=2)
     print(f"Wrote action extraction report to {args.output}")
+
 
 if __name__ == "__main__":
     main()

@@ -6,7 +6,18 @@ spec:
     spec:
       restartPolicy: Never
       containers:
-      - name: killer
-        image: bitnami/kubectl
-        command: ["sh","-c","kubectl delete pod -n $NS -l app=maestro --wait=false && sleep 5"]
-        env: [{ name: NS, valueFrom: { fieldRef: { fieldPath: metadata.namespace }}}] 
+        - name: killer
+          image: bitnami/kubectl
+          command:
+            [
+              'sh',
+              '-c',
+              'kubectl delete pod -n $NS -l app=maestro --wait=false && sleep 5',
+            ]
+          env:
+            [
+              {
+                name: NS,
+                valueFrom: { fieldRef: { fieldPath: metadata.namespace } },
+              },
+            ]

@@ -3,12 +3,10 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import * as api from '../../api';
 import PlaybookDialog from '../../components/PlaybookDialog';
 test('playbook adds signature', async () => {
-  jest
-    .spyOn(api, 'api')
-    .mockReturnValue({
-      getDLQPolicy: async () => ({ allowSignatures: [] }),
-      putDLQPolicy: async () => ({ ok: true }),
-    });
+  jest.spyOn(api, 'api').mockReturnValue({
+    getDLQPolicy: async () => ({ allowSignatures: [] }),
+    putDLQPolicy: async () => ({ ok: true }),
+  });
   render(
     _jsx(PlaybookDialog, {
       open: true,

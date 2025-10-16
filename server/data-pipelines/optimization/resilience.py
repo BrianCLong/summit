@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import random
 import time
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable, Optional, Protocol, Tuple, Type, TypeVar
+from typing import Any, Protocol, TypeVar
 
 T = TypeVar("T")
 
@@ -15,8 +16,7 @@ class RetryError(RuntimeError):
 
 
 class SupportsCall(Protocol[T]):  # pragma: no cover - Protocol container
-    def __call__(self, *args: Any, **kwargs: Any) -> T:
-        ...
+    def __call__(self, *args: Any, **kwargs: Any) -> T: ...
 
 
 @dataclass
@@ -27,7 +27,7 @@ class CircuitBreaker:
 
     def __post_init__(self) -> None:
         self._failure_count = 0
-        self._opened_at: Optional[float] = None
+        self._opened_at: float | None = None
         self._half_open_success = 0
 
     def _in_open_state(self) -> bool:
@@ -69,9 +69,9 @@ def retry_with_backoff(
     base_delay: float = 0.2,
     max_delay: float = 2.0,
     jitter: float = 0.1,
-    circuit_breaker: Optional[CircuitBreaker] = None,
-    retry_exceptions: Tuple[Type[BaseException], ...] = (Exception,),
-    on_retry: Optional[Callable[[int, float], None]] = None,
+    circuit_breaker: CircuitBreaker | None = None,
+    retry_exceptions: tuple[type[BaseException], ...] = (Exception,),
+    on_retry: Callable[[int, float], None] | None = None,
 ) -> T:
     """Execute ``func`` with exponential backoff and optional circuit breaking."""
 

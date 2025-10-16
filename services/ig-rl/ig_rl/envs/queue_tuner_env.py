@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
-from typing import Dict, Iterable, List, Sequence, Tuple
 
 import numpy as np
 
@@ -22,14 +22,18 @@ class QueueTunerEnv:
     def __init__(self, actions: Sequence[str], cost_budget: float = 1.0) -> None:
         self._actions = list(actions)
         self._cost_budget = cost_budget
-        self._state = QueueState(backlog=0.5, sla_breach_prob=0.1, cost=0.1, action_mask=self._actions)
+        self._state = QueueState(
+            backlog=0.5, sla_breach_prob=0.1, cost=0.1, action_mask=self._actions
+        )
 
-    def reset(self) -> Tuple[np.ndarray, Dict[str, np.ndarray]]:
-        self._state = QueueState(backlog=0.5, sla_breach_prob=0.1, cost=0.1, action_mask=self._actions)
+    def reset(self) -> tuple[np.ndarray, dict[str, np.ndarray]]:
+        self._state = QueueState(
+            backlog=0.5, sla_breach_prob=0.1, cost=0.1, action_mask=self._actions
+        )
         observation = self._encode_state(self._state)
         return observation, {"mask": np.ones(len(self._actions), dtype=np.int8)}
 
-    def step(self, action_idx: int) -> Tuple[np.ndarray, float, bool, Dict[str, float]]:
+    def step(self, action_idx: int) -> tuple[np.ndarray, float, bool, dict[str, float]]:
         if action_idx >= len(self._actions):
             raise IndexError("Action index out of range")
         action = self._actions[action_idx]
@@ -45,13 +49,15 @@ class QueueTunerEnv:
         penalty = max(0.0, cost - self._cost_budget)
         reward = (1 - backlog) - sla - penalty
 
-        self._state = QueueState(backlog=backlog, sla_breach_prob=sla, cost=cost, action_mask=self._actions)
+        self._state = QueueState(
+            backlog=backlog, sla_breach_prob=sla, cost=cost, action_mask=self._actions
+        )
         observation = self._encode_state(self._state)
         done = bool(backlog < 0.1 or sla < 0.05)
         info = {"cost": cost, "penalty": penalty, "sla_breach_prob": sla}
         return observation, float(reward), done, info
 
-    def candidate_actions(self, mask: Iterable[str]) -> List[str]:
+    def candidate_actions(self, mask: Iterable[str]) -> list[str]:
         allowed = set(mask)
         return [action for action in self._actions if action in allowed]
 

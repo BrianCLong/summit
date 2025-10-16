@@ -26,8 +26,8 @@ export class OfflineEvaluator {
     try {
       const content = fs.readFileSync(this.judgmentsPath, 'utf-8');
       const lines = content.trim().split('\n');
-      
-      this.judgments = lines.map(line => {
+
+      this.judgments = lines.map((line) => {
         const [query, doc, label] = line.split('\t');
         return { query, doc, label: parseInt(label) };
       });
@@ -37,15 +37,21 @@ export class OfflineEvaluator {
     }
   }
 
-  private calculateNDCG10(rankings: Array<{doc: string, score: number}>, query: string): number {
+  private calculateNDCG10(
+    rankings: Array<{ doc: string; score: number }>,
+    query: string,
+  ): number {
     // Calculate nDCG@10 for given rankings and query
     const relevantDocs = this.judgments
-      .filter(j => j.query === query)
-      .reduce((acc, j) => ({ ...acc, [j.doc]: j.label }), {} as Record<string, number>);
+      .filter((j) => j.query === query)
+      .reduce(
+        (acc, j) => ({ ...acc, [j.doc]: j.label }),
+        {} as Record<string, number>,
+      );
 
     let dcg = 0;
     let idcg = 0;
-    
+
     // Calculate DCG@10
     for (let i = 0; i < Math.min(10, rankings.length); i++) {
       const doc = rankings[i].doc;
@@ -67,8 +73,8 @@ export class OfflineEvaluator {
 
   public evaluateVariants(): EvalMetrics {
     // Mock evaluation logic - in production, this would call actual ranking services
-    const queries = [...new Set(this.judgments.map(j => j.query))];
-    
+    const queries = [...new Set(this.judgments.map((j) => j.query))];
+
     let ndcg10_v1 = 0;
     let ndcg10_v2 = 0;
     let badClicks_v1 = 0;
@@ -99,28 +105,39 @@ export class OfflineEvaluator {
       ndcg10_v1: ndcg10_v1 / queryCount,
       ndcg10_v2: ndcg10_v2 / queryCount,
       bad_skew_v1: totalClicks_v1 === 0 ? 0 : badClicks_v1 / totalClicks_v1,
-      bad_skew_v2: totalClicks_v2 === 0 ? 0 : badClicks_v2 / totalClicks_v2
+      bad_skew_v2: totalClicks_v2 === 0 ? 0 : badClicks_v2 / totalClicks_v2,
     };
   }
 
-  private getMockRankings(query: string, variant: string): Array<{doc: string, score: number}> {
+  private getMockRankings(
+    query: string,
+    variant: string,
+  ): Array<{ doc: string; score: number }> {
     // Mock implementation - in production, this would call the actual ranking service
-    const relevantDocs = this.judgments.filter(j => j.query === query);
-    
-    return relevantDocs.map((j, i) => ({
-      doc: j.doc,
-      score: variant === 'v2' ? Math.random() * 0.9 + 0.1 : Math.random() * 0.8 + 0.2
-    })).sort((a, b) => b.score - a.score);
+    const relevantDocs = this.judgments.filter((j) => j.query === query);
+
+    return relevantDocs
+      .map((j, i) => ({
+        doc: j.doc,
+        score:
+          variant === 'v2'
+            ? Math.random() * 0.9 + 0.1
+            : Math.random() * 0.8 + 0.2,
+      }))
+      .sort((a, b) => b.score - a.score);
   }
 
-  private getMockClicks(rankings: Array<{doc: string, score: number}>, query: string): {bad: number, total: number} {
+  private getMockClicks(
+    rankings: Array<{ doc: string; score: number }>,
+    query: string,
+  ): { bad: number; total: number } {
     // Mock click analysis - in production, this would analyze actual click logs
     const totalClicks = Math.floor(Math.random() * 100) + 50;
     const badClickRate = Math.random() * 0.1; // 0-10% bad clicks
-    
+
     return {
       bad: Math.floor(totalClicks * badClickRate),
-      total: totalClicks
+      total: totalClicks,
     };
   }
 }

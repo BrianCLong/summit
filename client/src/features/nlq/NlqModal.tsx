@@ -93,7 +93,9 @@ export function NlqModal() {
               <pre>{JSON.stringify(diff, null, 2)}</pre>
             </details>
           ) : null}
-          {error ? <p style={{ color: 'crimson' }}>Error: {(error as any)?.message}</p> : null}
+          {error ? (
+            <p style={{ color: 'crimson' }}>Error: {(error as any)?.message}</p>
+          ) : null}
         </div>
       )}
     </div>

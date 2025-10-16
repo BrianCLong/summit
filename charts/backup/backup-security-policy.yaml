@@ -9,25 +9,25 @@ metadata:
     app.kubernetes.io/component: security
 data:
   # Encryption settings
-  encryption-at-rest: "AES256"
-  encryption-in-transit: "TLS1.3"
-  kms-key-rotation-days: "90"
-  
+  encryption-at-rest: 'AES256'
+  encryption-in-transit: 'TLS1.3'
+  kms-key-rotation-days: '90'
+
   # Access control settings
-  backup-retention-days: "30"
-  audit-retention-days: "365"
-  access-review-frequency: "quarterly"
-  
+  backup-retention-days: '30'
+  audit-retention-days: '365'
+  access-review-frequency: 'quarterly'
+
   # Compliance settings
-  gdpr-compliant: "true"
-  sox-compliant: "true"
-  hipaa-compliant: "false"  # Set to true if handling healthcare data
-  
+  gdpr-compliant: 'true'
+  sox-compliant: 'true'
+  hipaa-compliant: 'false' # Set to true if handling healthcare data
+
   # Security scanning settings
-  vulnerability-scan-enabled: "true"
-  malware-scan-enabled: "true"
-  integrity-check-enabled: "true"
-  
+  vulnerability-scan-enabled: 'true'
+  malware-scan-enabled: 'true'
+  integrity-check-enabled: 'true'
+
 ---
 # Backup Encryption Service
 apiVersion: apps/v1
@@ -57,74 +57,74 @@ spec:
           type: RuntimeDefault
       serviceAccountName: backup-encryption-service
       containers:
-      - name: encryption-service
-        image: ghcr.io/brianlong/intelgraph/backup-encryption:latest
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 8443
-          protocol: TCP
-          name: https
-        env:
-        - name: PORT
-          value: "8443"
-        - name: TLS_CERT_PATH
-          value: "/etc/certs/tls.crt"
-        - name: TLS_KEY_PATH
-          value: "/etc/certs/tls.key"
-        - name: KMS_KEY_ID
-          valueFrom:
-            secretKeyRef:
-              name: backup-encryption-secrets
-              key: kms-key-id
-        - name: AWS_REGION
-          valueFrom:
-            configMapKeyRef:
-              name: backup-config
-              key: aws-region
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "200m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          capabilities:
-            drop:
-              - ALL
-        volumeMounts:
-        - name: tls-certs
-          mountPath: /etc/certs
-          readOnly: true
-        - name: tmp
-          mountPath: /tmp
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8443
-            scheme: HTTPS
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: 8443
-            scheme: HTTPS
-          initialDelaySeconds: 5
-          periodSeconds: 5
+        - name: encryption-service
+          image: ghcr.io/brianlong/intelgraph/backup-encryption:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8443
+              protocol: TCP
+              name: https
+          env:
+            - name: PORT
+              value: '8443'
+            - name: TLS_CERT_PATH
+              value: '/etc/certs/tls.crt'
+            - name: TLS_KEY_PATH
+              value: '/etc/certs/tls.key'
+            - name: KMS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: backup-encryption-secrets
+                  key: kms-key-id
+            - name: AWS_REGION
+              valueFrom:
+                configMapKeyRef:
+                  name: backup-config
+                  key: aws-region
+          resources:
+            requests:
+              memory: '256Mi'
+              cpu: '200m'
+            limits:
+              memory: '512Mi'
+              cpu: '500m'
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: tls-certs
+              mountPath: /etc/certs
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8443
+              scheme: HTTPS
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8443
+              scheme: HTTPS
+            initialDelaySeconds: 5
+            periodSeconds: 5
       volumes:
-      - name: tls-certs
-        secret:
-          secretName: backup-encryption-tls
-      - name: tmp
-        emptyDir: {}
+        - name: tls-certs
+          secret:
+            secretName: backup-encryption-tls
+        - name: tmp
+          emptyDir: {}
       tolerations:
-      - key: "backup-workload"
-        operator: "Equal"
-        value: "true"
-        effect: "NoSchedule"
+        - key: 'backup-workload'
+          operator: 'Equal'
+          value: 'true'
+          effect: 'NoSchedule'
 ---
 apiVersion: v1
 kind: Service
@@ -136,10 +136,10 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: 443
-    targetPort: 8443
-    protocol: TCP
-    name: https
+    - port: 443
+      targetPort: 8443
+      protocol: TCP
+      name: https
   selector:
     app.kubernetes.io/name: backup-encryption-service
 ---
@@ -153,14 +153,14 @@ metadata:
     app.kubernetes.io/name: backup-security-audit
     app.kubernetes.io/component: security
 spec:
-  schedule: "0 6 * * 0"  # Weekly on Sunday at 6 AM UTC
-  timeZone: "UTC"
+  schedule: '0 6 * * 0' # Weekly on Sunday at 6 AM UTC
+  timeZone: 'UTC'
   successfulJobsHistoryLimit: 4
   failedJobsHistoryLimit: 2
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
-      activeDeadlineSeconds: 3600  # 1 hour timeout
+      activeDeadlineSeconds: 3600 # 1 hour timeout
       template:
         spec:
           restartPolicy: Never
@@ -170,268 +170,268 @@ spec:
             runAsGroup: 65532
           serviceAccountName: backup-security-audit
           containers:
-          - name: security-auditor
-            image: ghcr.io/brianlong/intelgraph/security-scanner:latest
-            command:
-            - /bin/bash
-            - -c
-            - |
-              set -euo pipefail
-              
-              AUDIT_NAME="backup-security-audit-$(date +%Y%m%d-%H%M%S)"
-              AUDIT_DIR="/audits/${AUDIT_NAME}"
-              
-              echo "Starting backup security audit: ${AUDIT_NAME}"
-              mkdir -p "${AUDIT_DIR}"
-              
-              # Initialize audit report
-              cat > "${AUDIT_DIR}/security-audit-report.json" << EOF
-              {
-                "audit_name": "${AUDIT_NAME}",
-                "start_time": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-                "audit_type": "backup_security",
-                "compliance_frameworks": ["GDPR", "SOX"],
-                "findings": {},
-                "recommendations": [],
-                "risk_score": 0
-              }
-              EOF
-              
-              RISK_SCORE=0
-              FINDINGS=()
-              RECOMMENDATIONS=()
-              
-              # Audit 1: Encryption Compliance
-              echo "Auditing encryption compliance..."
-              
-              # Check S3 bucket encryption
-              BUCKET_ENCRYPTION=$(aws s3api get-bucket-encryption --bucket ${BACKUP_BUCKET} --query 'ServerSideEncryptionConfiguration.Rules[0].ApplyServerSideEncryptionByDefault.SSEAlgorithm' --output text 2>/dev/null || echo "None")
-              
-              if [[ "${BUCKET_ENCRYPTION}" == "AES256" || "${BUCKET_ENCRYPTION}" == "aws:kms" ]]; then
-                echo "✅ S3 bucket encryption enabled: ${BUCKET_ENCRYPTION}"
-                jq '.findings.encryption = {"status": "compliant", "details": "S3 bucket properly encrypted with '${BUCKET_ENCRYPTION}'"}' "${AUDIT_DIR}/security-audit-report.json" > "${AUDIT_DIR}/tmp.json" && mv "${AUDIT_DIR}/tmp.json" "${AUDIT_DIR}/security-audit-report.json"
-              else
-                echo "❌ S3 bucket encryption not properly configured"
-                RISK_SCORE=$((RISK_SCORE + 25))
-                FINDINGS+=("S3 bucket encryption not configured")
-                RECOMMENDATIONS+=("Enable S3 bucket encryption with AES256 or KMS")
-                jq '.findings.encryption = {"status": "non_compliant", "details": "S3 bucket encryption not configured"}' "${AUDIT_DIR}/security-audit-report.json" > "${AUDIT_DIR}/tmp.json" && mv "${AUDIT_DIR}/tmp.json" "${AUDIT_DIR}/security-audit-report.json"
-              fi
-              
-              # Audit 2: Access Control Review
-              echo "Auditing access controls..."
-              
-              # Check IAM policies for backup service accounts
-              BACKUP_ROLES=(
-                "neo4j-backup-role"
-                "postgres-backup-role" 
-                "redis-backup-role"
-                "k8s-backup-role"
-              )
-              
-              EXCESSIVE_PERMISSIONS=0
-              for role in "${BACKUP_ROLES[@]}"; do
-                POLICIES=$(aws iam list-attached-role-policies --role-name ${role} --query 'AttachedPolicies[].PolicyArn' --output text 2>/dev/null || echo "")
-                if echo "${POLICIES}" | grep -q "arn:aws:iam::aws:policy/AdministratorAccess"; then
-                  echo "⚠️ Role ${role} has excessive permissions (AdministratorAccess)"
-                  EXCESSIVE_PERMISSIONS=$((EXCESSIVE_PERMISSIONS + 1))
-                  RISK_SCORE=$((RISK_SCORE + 10))
-                fi
-              done
-              
-              if [[ ${EXCESSIVE_PERMISSIONS} -eq 0 ]]; then
-                echo "✅ IAM roles follow principle of least privilege"
-                jq '.findings.access_control = {"status": "compliant", "details": "All backup roles follow least privilege"}' "${AUDIT_DIR}/security-audit-report.json" > "${AUDIT_DIR}/tmp.json" && mv "${AUDIT_DIR}/tmp.json" "${AUDIT_DIR}/security-audit-report.json"
-              else
-                FINDINGS+=("${EXCESSIVE_PERMISSIONS} backup roles have excessive permissions")
-                RECOMMENDATIONS+=("Review and restrict IAM permissions for backup roles")
-                jq '.findings.access_control = {"status": "non_compliant", "details": "'${EXCESSIVE_PERMISSIONS}' roles have excessive permissions"}' "${AUDIT_DIR}/security-audit-report.json" > "${AUDIT_DIR}/tmp.json" && mv "${AUDIT_DIR}/tmp.json" "${AUDIT_DIR}/security-audit-report.json"
-              fi
-              
-              # Audit 3: Backup Integrity and Tampering Protection
-              echo "Auditing backup integrity..."
-              
-              # Check for backup integrity checksums
-              RECENT_BACKUPS=$(aws s3 ls "s3://${BACKUP_BUCKET}/" --recursive | tail -5)
-              INTEGRITY_VIOLATIONS=0
-              
-              while IFS= read -r backup_line; do
-                BACKUP_FILE=$(echo "${backup_line}" | awk '{print $4}')
-                if [[ -n "${BACKUP_FILE}" ]]; then
-                  # Check if backup has integrity metadata
-                  INTEGRITY_META=$(aws s3api head-object --bucket ${BACKUP_BUCKET} --key "${BACKUP_FILE}" --query 'Metadata.integrity-hash' --output text 2>/dev/null || echo "None")
-                  if [[ "${INTEGRITY_META}" == "None" ]]; then
-                    INTEGRITY_VIOLATIONS=$((INTEGRITY_VIOLATIONS + 1))
+            - name: security-auditor
+              image: ghcr.io/brianlong/intelgraph/security-scanner:latest
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -euo pipefail
+
+                  AUDIT_NAME="backup-security-audit-$(date +%Y%m%d-%H%M%S)"
+                  AUDIT_DIR="/audits/${AUDIT_NAME}"
+
+                  echo "Starting backup security audit: ${AUDIT_NAME}"
+                  mkdir -p "${AUDIT_DIR}"
+
+                  # Initialize audit report
+                  cat > "${AUDIT_DIR}/security-audit-report.json" << EOF
+                  {
+                    "audit_name": "${AUDIT_NAME}",
+                    "start_time": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+                    "audit_type": "backup_security",
+                    "compliance_frameworks": ["GDPR", "SOX"],
+                    "findings": {},
+                    "recommendations": [],
+                    "risk_score": 0
+                  }
+                  EOF
+
+                  RISK_SCORE=0
+                  FINDINGS=()
+                  RECOMMENDATIONS=()
+
+                  # Audit 1: Encryption Compliance
+                  echo "Auditing encryption compliance..."
+
+                  # Check S3 bucket encryption
+                  BUCKET_ENCRYPTION=$(aws s3api get-bucket-encryption --bucket ${BACKUP_BUCKET} --query 'ServerSideEncryptionConfiguration.Rules[0].ApplyServerSideEncryptionByDefault.SSEAlgorithm' --output text 2>/dev/null || echo "None")
+
+                  if [[ "${BUCKET_ENCRYPTION}" == "AES256" || "${BUCKET_ENCRYPTION}" == "aws:kms" ]]; then
+                    echo "✅ S3 bucket encryption enabled: ${BUCKET_ENCRYPTION}"
+                    jq '.findings.encryption = {"status": "compliant", "details": "S3 bucket properly encrypted with '${BUCKET_ENCRYPTION}'"}' "${AUDIT_DIR}/security-audit-report.json" > "${AUDIT_DIR}/tmp.json" && mv "${AUDIT_DIR}/tmp.json" "${AUDIT_DIR}/security-audit-report.json"
+                  else
+                    echo "❌ S3 bucket encryption not properly configured"
+                    RISK_SCORE=$((RISK_SCORE + 25))
+                    FINDINGS+=("S3 bucket encryption not configured")
+                    RECOMMENDATIONS+=("Enable S3 bucket encryption with AES256 or KMS")
+                    jq '.findings.encryption = {"status": "non_compliant", "details": "S3 bucket encryption not configured"}' "${AUDIT_DIR}/security-audit-report.json" > "${AUDIT_DIR}/tmp.json" && mv "${AUDIT_DIR}/tmp.json" "${AUDIT_DIR}/security-audit-report.json"
                   fi
-                fi
-              done <<< "${RECENT_BACKUPS}"
-              
-              if [[ ${INTEGRITY_VIOLATIONS} -eq 0 ]]; then
-                echo "✅ All backups have integrity protection"
-                jq '.findings.integrity = {"status": "compliant", "details": "All backups have integrity checksums"}' "${AUDIT_DIR}/security-audit-report.json" > "${AUDIT_DIR}/tmp.json" && mv "${AUDIT_DIR}/tmp.json" "${AUDIT_DIR}/security-audit-report.json"
-              else
-                echo "⚠️ ${INTEGRITY_VIOLATIONS} backups missing integrity protection"
-                RISK_SCORE=$((RISK_SCORE + 15))
-                FINDINGS+=("${INTEGRITY_VIOLATIONS} backups missing integrity protection")
-                RECOMMENDATIONS+=("Implement integrity checksums for all backups")
-                jq '.findings.integrity = {"status": "non_compliant", "details": "'${INTEGRITY_VIOLATIONS}' backups missing integrity protection"}' "${AUDIT_DIR}/security-audit-report.json" > "${AUDIT_DIR}/tmp.json" && mv "${AUDIT_DIR}/tmp.json" "${AUDIT_DIR}/security-audit-report.json"
-              fi
-              
-              # Audit 4: Retention Policy Compliance
-              echo "Auditing retention policy compliance..."
-              
-              # Check for old backups beyond retention period
-              OLD_BACKUPS=$(aws s3 ls "s3://${BACKUP_BUCKET}/" --recursive | awk '{if($1 < "'$(date -d "30 days ago" +%Y-%m-%d)'") print $4}' | wc -l)
-              
-              if [[ ${OLD_BACKUPS} -eq 0 ]]; then
-                echo "✅ Retention policy properly enforced"
-                jq '.findings.retention = {"status": "compliant", "details": "No backups beyond retention period"}' "${AUDIT_DIR}/security-audit-report.json" > "${AUDIT_DIR}/tmp.json" && mv "${AUDIT_DIR}/tmp.json" "${AUDIT_DIR}/security-audit-report.json"
-              else
-                echo "⚠️ ${OLD_BACKUPS} backups exceed retention period"
-                RISK_SCORE=$((RISK_SCORE + 5))
-                FINDINGS+=("${OLD_BACKUPS} backups exceed retention period")
-                RECOMMENDATIONS+=("Improve automated cleanup of old backups")
-                jq '.findings.retention = {"status": "non_compliant", "details": "'${OLD_BACKUPS}' backups exceed retention period"}' "${AUDIT_DIR}/security-audit-report.json" > "${AUDIT_DIR}/tmp.json" && mv "${AUDIT_DIR}/tmp.json" "${AUDIT_DIR}/security-audit-report.json"
-              fi
-              
-              # Audit 5: Network Security
-              echo "Auditing network security..."
-              
-              # Check if backups are transferred over encrypted connections
-              NETWORK_SECURE=true
-              
-              # In a real implementation, this would check SSL/TLS configuration
-              # For now, we'll assume secure if S3 is used (HTTPS by default)
-              if aws s3 ls "s3://${BACKUP_BUCKET}" >/dev/null 2>&1; then
-                echo "✅ Network transfers use encrypted connections (HTTPS)"
-                jq '.findings.network_security = {"status": "compliant", "details": "All transfers use HTTPS encryption"}' "${AUDIT_DIR}/security-audit-report.json" > "${AUDIT_DIR}/tmp.json" && mv "${AUDIT_DIR}/tmp.json" "${AUDIT_DIR}/security-audit-report.json"
-              else
-                echo "❌ Network security cannot be verified"
-                RISK_SCORE=$((RISK_SCORE + 20))
-                FINDINGS+=("Network security cannot be verified")
-                RECOMMENDATIONS+=("Verify all backup transfers use encrypted connections")
-                jq '.findings.network_security = {"status": "non_compliant", "details": "Network security cannot be verified"}' "${AUDIT_DIR}/security-audit-report.json" > "${AUDIT_DIR}/tmp.json" && mv "${AUDIT_DIR}/tmp.json" "${AUDIT_DIR}/security-audit-report.json"
-              fi
-              
-              # Finalize audit report
-              RISK_LEVEL="LOW"
-              if [[ ${RISK_SCORE} -gt 50 ]]; then
-                RISK_LEVEL="HIGH"
-              elif [[ ${RISK_SCORE} -gt 25 ]]; then
-                RISK_LEVEL="MEDIUM"
-              fi
-              
-              jq --argjson risk_score ${RISK_SCORE} --arg risk_level "${RISK_LEVEL}" --arg end_time "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-                --argjson recommendations "$(printf '%s\n' "${RECOMMENDATIONS[@]}" | jq -R . | jq -s .)" \
-                '. + {
-                  "end_time": $end_time,
-                  "risk_score": $risk_score,
-                  "risk_level": $risk_level,
-                  "recommendations": $recommendations,
-                  "findings_count": (.findings | length),
-                  "compliance_status": (if $risk_score < 10 then "compliant" else "non_compliant" end)
-                }' "${AUDIT_DIR}/security-audit-report.json" > "${AUDIT_DIR}/tmp.json" && mv "${AUDIT_DIR}/tmp.json" "${AUDIT_DIR}/security-audit-report.json"
-              
-              # Create detailed findings report
-              cat > "${AUDIT_DIR}/findings-summary.txt" << EOF
-              Backup Security Audit Summary
-              ============================
-              
-              Audit ID: ${AUDIT_NAME}
-              Date: $(date -u +%Y-%m-%d)
-              Risk Level: ${RISK_LEVEL} (Score: ${RISK_SCORE}/100)
-              
-              Findings:
-              $(printf '- %s\n' "${FINDINGS[@]}")
-              
-              Recommendations:
-              $(printf '- %s\n' "${RECOMMENDATIONS[@]}")
-              
-              Compliance Status:
-              - GDPR: $(if [[ ${RISK_SCORE} -lt 20 ]]; then echo "COMPLIANT"; else echo "NEEDS REVIEW"; fi)
-              - SOX: $(if [[ ${RISK_SCORE} -lt 15 ]]; then echo "COMPLIANT"; else echo "NEEDS REVIEW"; fi)
-              EOF
-              
-              # Upload audit reports
-              echo "Uploading audit reports..."
-              aws s3 cp "${AUDIT_DIR}/security-audit-report.json" \
-                "s3://${BACKUP_BUCKET}/security-audits/$(date +%Y/%m/%d)/${AUDIT_NAME}.json" \
-                --server-side-encryption AES256
-              
-              aws s3 cp "${AUDIT_DIR}/findings-summary.txt" \
-                "s3://${BACKUP_BUCKET}/security-audits/$(date +%Y/%m/%d)/${AUDIT_NAME}-summary.txt" \
-                --server-side-encryption AES256
-              
-              # Send notification
-              RISK_EMOJI="✅"
-              if [[ "${RISK_LEVEL}" == "HIGH" ]]; then
-                RISK_EMOJI="🚨"
-              elif [[ "${RISK_LEVEL}" == "MEDIUM" ]]; then
-                RISK_EMOJI="⚠️"
-              fi
-              
-              curl -X POST "${SLACK_WEBHOOK_URL}" \
-                -H 'Content-Type: application/json' \
-                -d "{
-                  \"text\": \"${RISK_EMOJI} Backup Security Audit Completed: ${AUDIT_NAME}\",
-                  \"attachments\": [{
-                    \"color\": \"$(if [[ "${RISK_LEVEL}" == "HIGH" ]]; then echo "danger"; elif [[ "${RISK_LEVEL}" == "MEDIUM" ]]; then echo "warning"; else echo "good"; fi)\",
-                    \"fields\": [
-                      {\"title\": \"Risk Level\", \"value\": \"${RISK_LEVEL}\", \"short\": true},
-                      {\"title\": \"Risk Score\", \"value\": \"${RISK_SCORE}/100\", \"short\": true},
-                      {\"title\": \"Findings\", \"value\": \"${#FINDINGS[@]}\", \"short\": true},
-                      {\"title\": \"Recommendations\", \"value\": \"${#RECOMMENDATIONS[@]}\", \"short\": true}
-                    ]
-                  }]
-                }" || true
-              
-              echo "Backup security audit completed: ${RISK_LEVEL} risk (${RISK_SCORE}/100)"
-              
-              # Exit with error code if high risk
-              if [[ "${RISK_LEVEL}" == "HIGH" ]]; then
-                exit 1
-              fi
-              
-            env:
-            - name: BACKUP_BUCKET
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: backup-bucket
-            - name: AWS_REGION
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: aws-region
-            - name: SLACK_WEBHOOK_URL
-              valueFrom:
-                secretKeyRef:
-                  name: backup-secrets
-                  key: slack-webhook-url
-            - name: AWS_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: backup-secrets
-                  key: aws-access-key-id
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: backup-secrets
-                  key: aws-secret-access-key
-            resources:
-              requests:
-                memory: "512Mi"
-                cpu: "250m"
-              limits:
-                memory: "1Gi"
-                cpu: "500m"
-            volumeMounts:
-            - name: audit-storage
-              mountPath: /audits
+
+                  # Audit 2: Access Control Review
+                  echo "Auditing access controls..."
+
+                  # Check IAM policies for backup service accounts
+                  BACKUP_ROLES=(
+                    "neo4j-backup-role"
+                    "postgres-backup-role" 
+                    "redis-backup-role"
+                    "k8s-backup-role"
+                  )
+
+                  EXCESSIVE_PERMISSIONS=0
+                  for role in "${BACKUP_ROLES[@]}"; do
+                    POLICIES=$(aws iam list-attached-role-policies --role-name ${role} --query 'AttachedPolicies[].PolicyArn' --output text 2>/dev/null || echo "")
+                    if echo "${POLICIES}" | grep -q "arn:aws:iam::aws:policy/AdministratorAccess"; then
+                      echo "⚠️ Role ${role} has excessive permissions (AdministratorAccess)"
+                      EXCESSIVE_PERMISSIONS=$((EXCESSIVE_PERMISSIONS + 1))
+                      RISK_SCORE=$((RISK_SCORE + 10))
+                    fi
+                  done
+
+                  if [[ ${EXCESSIVE_PERMISSIONS} -eq 0 ]]; then
+                    echo "✅ IAM roles follow principle of least privilege"
+                    jq '.findings.access_control = {"status": "compliant", "details": "All backup roles follow least privilege"}' "${AUDIT_DIR}/security-audit-report.json" > "${AUDIT_DIR}/tmp.json" && mv "${AUDIT_DIR}/tmp.json" "${AUDIT_DIR}/security-audit-report.json"
+                  else
+                    FINDINGS+=("${EXCESSIVE_PERMISSIONS} backup roles have excessive permissions")
+                    RECOMMENDATIONS+=("Review and restrict IAM permissions for backup roles")
+                    jq '.findings.access_control = {"status": "non_compliant", "details": "'${EXCESSIVE_PERMISSIONS}' roles have excessive permissions"}' "${AUDIT_DIR}/security-audit-report.json" > "${AUDIT_DIR}/tmp.json" && mv "${AUDIT_DIR}/tmp.json" "${AUDIT_DIR}/security-audit-report.json"
+                  fi
+
+                  # Audit 3: Backup Integrity and Tampering Protection
+                  echo "Auditing backup integrity..."
+
+                  # Check for backup integrity checksums
+                  RECENT_BACKUPS=$(aws s3 ls "s3://${BACKUP_BUCKET}/" --recursive | tail -5)
+                  INTEGRITY_VIOLATIONS=0
+
+                  while IFS= read -r backup_line; do
+                    BACKUP_FILE=$(echo "${backup_line}" | awk '{print $4}')
+                    if [[ -n "${BACKUP_FILE}" ]]; then
+                      # Check if backup has integrity metadata
+                      INTEGRITY_META=$(aws s3api head-object --bucket ${BACKUP_BUCKET} --key "${BACKUP_FILE}" --query 'Metadata.integrity-hash' --output text 2>/dev/null || echo "None")
+                      if [[ "${INTEGRITY_META}" == "None" ]]; then
+                        INTEGRITY_VIOLATIONS=$((INTEGRITY_VIOLATIONS + 1))
+                      fi
+                    fi
+                  done <<< "${RECENT_BACKUPS}"
+
+                  if [[ ${INTEGRITY_VIOLATIONS} -eq 0 ]]; then
+                    echo "✅ All backups have integrity protection"
+                    jq '.findings.integrity = {"status": "compliant", "details": "All backups have integrity checksums"}' "${AUDIT_DIR}/security-audit-report.json" > "${AUDIT_DIR}/tmp.json" && mv "${AUDIT_DIR}/tmp.json" "${AUDIT_DIR}/security-audit-report.json"
+                  else
+                    echo "⚠️ ${INTEGRITY_VIOLATIONS} backups missing integrity protection"
+                    RISK_SCORE=$((RISK_SCORE + 15))
+                    FINDINGS+=("${INTEGRITY_VIOLATIONS} backups missing integrity protection")
+                    RECOMMENDATIONS+=("Implement integrity checksums for all backups")
+                    jq '.findings.integrity = {"status": "non_compliant", "details": "'${INTEGRITY_VIOLATIONS}' backups missing integrity protection"}' "${AUDIT_DIR}/security-audit-report.json" > "${AUDIT_DIR}/tmp.json" && mv "${AUDIT_DIR}/tmp.json" "${AUDIT_DIR}/security-audit-report.json"
+                  fi
+
+                  # Audit 4: Retention Policy Compliance
+                  echo "Auditing retention policy compliance..."
+
+                  # Check for old backups beyond retention period
+                  OLD_BACKUPS=$(aws s3 ls "s3://${BACKUP_BUCKET}/" --recursive | awk '{if($1 < "'$(date -d "30 days ago" +%Y-%m-%d)'") print $4}' | wc -l)
+
+                  if [[ ${OLD_BACKUPS} -eq 0 ]]; then
+                    echo "✅ Retention policy properly enforced"
+                    jq '.findings.retention = {"status": "compliant", "details": "No backups beyond retention period"}' "${AUDIT_DIR}/security-audit-report.json" > "${AUDIT_DIR}/tmp.json" && mv "${AUDIT_DIR}/tmp.json" "${AUDIT_DIR}/security-audit-report.json"
+                  else
+                    echo "⚠️ ${OLD_BACKUPS} backups exceed retention period"
+                    RISK_SCORE=$((RISK_SCORE + 5))
+                    FINDINGS+=("${OLD_BACKUPS} backups exceed retention period")
+                    RECOMMENDATIONS+=("Improve automated cleanup of old backups")
+                    jq '.findings.retention = {"status": "non_compliant", "details": "'${OLD_BACKUPS}' backups exceed retention period"}' "${AUDIT_DIR}/security-audit-report.json" > "${AUDIT_DIR}/tmp.json" && mv "${AUDIT_DIR}/tmp.json" "${AUDIT_DIR}/security-audit-report.json"
+                  fi
+
+                  # Audit 5: Network Security
+                  echo "Auditing network security..."
+
+                  # Check if backups are transferred over encrypted connections
+                  NETWORK_SECURE=true
+
+                  # In a real implementation, this would check SSL/TLS configuration
+                  # For now, we'll assume secure if S3 is used (HTTPS by default)
+                  if aws s3 ls "s3://${BACKUP_BUCKET}" >/dev/null 2>&1; then
+                    echo "✅ Network transfers use encrypted connections (HTTPS)"
+                    jq '.findings.network_security = {"status": "compliant", "details": "All transfers use HTTPS encryption"}' "${AUDIT_DIR}/security-audit-report.json" > "${AUDIT_DIR}/tmp.json" && mv "${AUDIT_DIR}/tmp.json" "${AUDIT_DIR}/security-audit-report.json"
+                  else
+                    echo "❌ Network security cannot be verified"
+                    RISK_SCORE=$((RISK_SCORE + 20))
+                    FINDINGS+=("Network security cannot be verified")
+                    RECOMMENDATIONS+=("Verify all backup transfers use encrypted connections")
+                    jq '.findings.network_security = {"status": "non_compliant", "details": "Network security cannot be verified"}' "${AUDIT_DIR}/security-audit-report.json" > "${AUDIT_DIR}/tmp.json" && mv "${AUDIT_DIR}/tmp.json" "${AUDIT_DIR}/security-audit-report.json"
+                  fi
+
+                  # Finalize audit report
+                  RISK_LEVEL="LOW"
+                  if [[ ${RISK_SCORE} -gt 50 ]]; then
+                    RISK_LEVEL="HIGH"
+                  elif [[ ${RISK_SCORE} -gt 25 ]]; then
+                    RISK_LEVEL="MEDIUM"
+                  fi
+
+                  jq --argjson risk_score ${RISK_SCORE} --arg risk_level "${RISK_LEVEL}" --arg end_time "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+                    --argjson recommendations "$(printf '%s\n' "${RECOMMENDATIONS[@]}" | jq -R . | jq -s .)" \
+                    '. + {
+                      "end_time": $end_time,
+                      "risk_score": $risk_score,
+                      "risk_level": $risk_level,
+                      "recommendations": $recommendations,
+                      "findings_count": (.findings | length),
+                      "compliance_status": (if $risk_score < 10 then "compliant" else "non_compliant" end)
+                    }' "${AUDIT_DIR}/security-audit-report.json" > "${AUDIT_DIR}/tmp.json" && mv "${AUDIT_DIR}/tmp.json" "${AUDIT_DIR}/security-audit-report.json"
+
+                  # Create detailed findings report
+                  cat > "${AUDIT_DIR}/findings-summary.txt" << EOF
+                  Backup Security Audit Summary
+                  ============================
+
+                  Audit ID: ${AUDIT_NAME}
+                  Date: $(date -u +%Y-%m-%d)
+                  Risk Level: ${RISK_LEVEL} (Score: ${RISK_SCORE}/100)
+
+                  Findings:
+                  $(printf '- %s\n' "${FINDINGS[@]}")
+
+                  Recommendations:
+                  $(printf '- %s\n' "${RECOMMENDATIONS[@]}")
+
+                  Compliance Status:
+                  - GDPR: $(if [[ ${RISK_SCORE} -lt 20 ]]; then echo "COMPLIANT"; else echo "NEEDS REVIEW"; fi)
+                  - SOX: $(if [[ ${RISK_SCORE} -lt 15 ]]; then echo "COMPLIANT"; else echo "NEEDS REVIEW"; fi)
+                  EOF
+
+                  # Upload audit reports
+                  echo "Uploading audit reports..."
+                  aws s3 cp "${AUDIT_DIR}/security-audit-report.json" \
+                    "s3://${BACKUP_BUCKET}/security-audits/$(date +%Y/%m/%d)/${AUDIT_NAME}.json" \
+                    --server-side-encryption AES256
+
+                  aws s3 cp "${AUDIT_DIR}/findings-summary.txt" \
+                    "s3://${BACKUP_BUCKET}/security-audits/$(date +%Y/%m/%d)/${AUDIT_NAME}-summary.txt" \
+                    --server-side-encryption AES256
+
+                  # Send notification
+                  RISK_EMOJI="✅"
+                  if [[ "${RISK_LEVEL}" == "HIGH" ]]; then
+                    RISK_EMOJI="🚨"
+                  elif [[ "${RISK_LEVEL}" == "MEDIUM" ]]; then
+                    RISK_EMOJI="⚠️"
+                  fi
+
+                  curl -X POST "${SLACK_WEBHOOK_URL}" \
+                    -H 'Content-Type: application/json' \
+                    -d "{
+                      \"text\": \"${RISK_EMOJI} Backup Security Audit Completed: ${AUDIT_NAME}\",
+                      \"attachments\": [{
+                        \"color\": \"$(if [[ "${RISK_LEVEL}" == "HIGH" ]]; then echo "danger"; elif [[ "${RISK_LEVEL}" == "MEDIUM" ]]; then echo "warning"; else echo "good"; fi)\",
+                        \"fields\": [
+                          {\"title\": \"Risk Level\", \"value\": \"${RISK_LEVEL}\", \"short\": true},
+                          {\"title\": \"Risk Score\", \"value\": \"${RISK_SCORE}/100\", \"short\": true},
+                          {\"title\": \"Findings\", \"value\": \"${#FINDINGS[@]}\", \"short\": true},
+                          {\"title\": \"Recommendations\", \"value\": \"${#RECOMMENDATIONS[@]}\", \"short\": true}
+                        ]
+                      }]
+                    }" || true
+
+                  echo "Backup security audit completed: ${RISK_LEVEL} risk (${RISK_SCORE}/100)"
+
+                  # Exit with error code if high risk
+                  if [[ "${RISK_LEVEL}" == "HIGH" ]]; then
+                    exit 1
+                  fi
+
+              env:
+                - name: BACKUP_BUCKET
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: backup-bucket
+                - name: AWS_REGION
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: aws-region
+                - name: SLACK_WEBHOOK_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-secrets
+                      key: slack-webhook-url
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-secrets
+                      key: aws-access-key-id
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-secrets
+                      key: aws-secret-access-key
+              resources:
+                requests:
+                  memory: '512Mi'
+                  cpu: '250m'
+                limits:
+                  memory: '1Gi'
+                  cpu: '500m'
+              volumeMounts:
+                - name: audit-storage
+                  mountPath: /audits
           volumes:
-          - name: audit-storage
-            emptyDir:
-              sizeLimit: 1Gi
+            - name: audit-storage
+              emptyDir:
+                sizeLimit: 1Gi
 ---
 # Network Policies for Backup Security
 apiVersion: networking.k8s.io/v1
@@ -442,50 +442,50 @@ metadata:
 spec:
   podSelector: {}
   policyTypes:
-  - Ingress
-  - Egress
+    - Ingress
+    - Egress
   ingress:
-  - from:
-    - namespaceSelector:
-        matchLabels:
-          name: monitoring
-    ports:
-    - protocol: TCP
-      port: 8080  # Metrics
-    - protocol: TCP
-      port: 8443  # HTTPS
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              name: monitoring
+      ports:
+        - protocol: TCP
+          port: 8080 # Metrics
+        - protocol: TCP
+          port: 8443 # HTTPS
   egress:
-  # DNS
-  - to: []
-    ports:
-    - protocol: UDP
-      port: 53
-    - protocol: TCP
-      port: 53
-  # HTTPS for AWS APIs
-  - to: []
-    ports:
-    - protocol: TCP
-      port: 443
-  # Database connections (for backups)
-  - to:
-    - namespaceSelector:
-        matchLabels:
-          name: database
-    ports:
-    - protocol: TCP
-      port: 5432  # PostgreSQL
-    - protocol: TCP
-      port: 7687  # Neo4j Bolt
-    - protocol: TCP
-      port: 6379  # Redis
-  # Slack webhooks
-  - to: []
-    ports:
-    - protocol: TCP
-      port: 443
-    - protocol: TCP
-      port: 80
+    # DNS
+    - to: []
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+    # HTTPS for AWS APIs
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
+    # Database connections (for backups)
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              name: database
+      ports:
+        - protocol: TCP
+          port: 5432 # PostgreSQL
+        - protocol: TCP
+          port: 7687 # Neo4j Bolt
+        - protocol: TCP
+          port: 6379 # Redis
+    # Slack webhooks
+    - to: []
+      ports:
+        - protocol: TCP
+          port: 443
+        - protocol: TCP
+          port: 80
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -493,7 +493,7 @@ metadata:
   name: backup-encryption-service
   namespace: backup-system
   annotations:
-    eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/backup-encryption-service-role"
+    eks.amazonaws.com/role-arn: 'arn:aws:iam::123456789012:role/backup-encryption-service-role'
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -501,4 +501,4 @@ metadata:
   name: backup-security-audit
   namespace: backup-system
   annotations:
-    eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/backup-security-audit-role"
+    eks.amazonaws.com/role-arn: 'arn:aws:iam::123456789012:role/backup-security-audit-role'

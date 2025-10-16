@@ -6,12 +6,12 @@ const config: CodegenConfig = {
   generates: {
     'apps/web/src/__generated__/': {
       preset: 'client',
-      plugins: []
+      plugins: [],
     },
     'apps/server/src/__generated__/types.ts': {
-      plugins: ['typescript','typescript-resolvers']
-    }
+      plugins: ['typescript', 'typescript-resolvers'],
+    },
   },
-  hooks: { afterAllFileWrite: ['prettier --write'] }
+  hooks: { afterAllFileWrite: ['prettier --write'] },
 };
 export default config;

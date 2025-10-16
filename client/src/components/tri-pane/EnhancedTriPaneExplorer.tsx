@@ -52,9 +52,13 @@ export const EnhancedTriPaneExplorer: React.FC = () => {
     goldenPathActive: false,
   });
 
-  const [selectedEntity, setSelectedEntity] = useState<EntitySelection | null>(null);
+  const [selectedEntity, setSelectedEntity] = useState<EntitySelection | null>(
+    null,
+  );
   const [xaiData, setXaiData] = useState<XAIOverlayData | null>(null);
-  const [provenanceData, setProvenanceData] = useState<ProvenanceData | null>(null);
+  const [provenanceData, setProvenanceData] = useState<ProvenanceData | null>(
+    null,
+  );
   const [goldenPathStep, setGoldenPathStep] = useState(0);
 
   const timelineRef = useRef<HTMLDivElement>(null);
@@ -108,12 +112,19 @@ export const EnhancedTriPaneExplorer: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Reason-For-Access': 'Tri-pane explorer XAI explanation for user analysis',
+          'X-Reason-For-Access':
+            'Tri-pane explorer XAI explanation for user analysis',
         },
         body: JSON.stringify({
           query: `Explain entity ${entity.id} in investigation context`,
           graph_data: {
-            nodes: [{ id: entity.id, type: entity.type, properties: entity.properties }],
+            nodes: [
+              {
+                id: entity.id,
+                type: entity.type,
+                properties: entity.properties,
+              },
+            ],
             edges: [], // Would include actual graph context
           },
           explanation_type: 'node_importance',
@@ -144,7 +155,8 @@ export const EnhancedTriPaneExplorer: React.FC = () => {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'X-Reason-For-Access': 'Tri-pane explorer provenance verification for data integrity',
+          'X-Reason-For-Access':
+            'Tri-pane explorer provenance verification for data integrity',
         },
         body: JSON.stringify({
           entity_ids: [entity.id],
@@ -232,8 +244,15 @@ export const EnhancedTriPaneExplorer: React.FC = () => {
       // Pane navigation (Committee requirement)
       if (e.ctrlKey && e.key >= '1' && e.key <= '3') {
         e.preventDefault();
-        const panes: ('timeline' | 'map' | 'graph')[] = ['timeline', 'map', 'graph'];
-        setState((prev) => ({ ...prev, activePane: panes[parseInt(e.key) - 1] }));
+        const panes: ('timeline' | 'map' | 'graph')[] = [
+          'timeline',
+          'map',
+          'graph',
+        ];
+        setState((prev) => ({
+          ...prev,
+          activePane: panes[parseInt(e.key) - 1],
+        }));
       }
 
       // Toggle sync mode
@@ -245,13 +264,19 @@ export const EnhancedTriPaneExplorer: React.FC = () => {
       // Toggle XAI overlay
       if (e.ctrlKey && e.key === 'x') {
         e.preventDefault();
-        setState((prev) => ({ ...prev, xaiOverlayEnabled: !prev.xaiOverlayEnabled }));
+        setState((prev) => ({
+          ...prev,
+          xaiOverlayEnabled: !prev.xaiOverlayEnabled,
+        }));
       }
 
       // Toggle provenance overlay
       if (e.ctrlKey && e.key === 'p') {
         e.preventDefault();
-        setState((prev) => ({ ...prev, provenanceOverlayEnabled: !prev.provenanceOverlayEnabled }));
+        setState((prev) => ({
+          ...prev,
+          provenanceOverlayEnabled: !prev.provenanceOverlayEnabled,
+        }));
       }
 
       // Start golden path demo
@@ -270,14 +295,18 @@ export const EnhancedTriPaneExplorer: React.FC = () => {
       {/* Committee requirement: Tri-pane header with controls */}
       <div className="bg-white border-b border-gray-200 p-4 flex justify-between items-center">
         <div className="flex items-center space-x-4">
-          <h2 className="text-xl font-semibold text-gray-900">IntelGraph Explorer</h2>
+          <h2 className="text-xl font-semibold text-gray-900">
+            IntelGraph Explorer
+          </h2>
 
           {/* Pane selector */}
           <div className="flex space-x-1">
             {(['timeline', 'map', 'graph'] as const).map((pane, index) => (
               <button
                 key={pane}
-                onClick={() => setState((prev) => ({ ...prev, activePane: pane }))}
+                onClick={() =>
+                  setState((prev) => ({ ...prev, activePane: pane }))
+                }
                 className={`px-3 py-1 text-sm rounded-md transition-colors ${
                   state.activePane === pane
                     ? 'bg-blue-100 text-blue-700 border border-blue-300'
@@ -298,7 +327,9 @@ export const EnhancedTriPaneExplorer: React.FC = () => {
             <input
               type="checkbox"
               checked={state.syncMode}
-              onChange={(e) => setState((prev) => ({ ...prev, syncMode: e.target.checked }))}
+              onChange={(e) =>
+                setState((prev) => ({ ...prev, syncMode: e.target.checked }))
+              }
               className="w-4 h-4 text-blue-600 rounded"
             />
             <span className="text-sm text-gray-600">Sync Panes (Ctrl+S)</span>
@@ -310,7 +341,10 @@ export const EnhancedTriPaneExplorer: React.FC = () => {
               type="checkbox"
               checked={state.xaiOverlayEnabled}
               onChange={(e) =>
-                setState((prev) => ({ ...prev, xaiOverlayEnabled: e.target.checked }))
+                setState((prev) => ({
+                  ...prev,
+                  xaiOverlayEnabled: e.target.checked,
+                }))
               }
               className="w-4 h-4 text-blue-600 rounded"
             />
@@ -323,7 +357,10 @@ export const EnhancedTriPaneExplorer: React.FC = () => {
               type="checkbox"
               checked={state.provenanceOverlayEnabled}
               onChange={(e) =>
-                setState((prev) => ({ ...prev, provenanceOverlayEnabled: e.target.checked }))
+                setState((prev) => ({
+                  ...prev,
+                  provenanceOverlayEnabled: e.target.checked,
+                }))
               }
               className="w-4 h-4 text-blue-600 rounded"
             />
@@ -341,7 +378,9 @@ export const EnhancedTriPaneExplorer: React.FC = () => {
             }`}
             title="Start golden path demo (Ctrl+G)"
           >
-            {state.goldenPathActive ? `Demo Step ${goldenPathStep + 1}/4` : 'Golden Path Demo'}
+            {state.goldenPathActive
+              ? `Demo Step ${goldenPathStep + 1}/4`
+              : 'Golden Path Demo'}
           </button>
         </div>
       </div>
@@ -349,7 +388,10 @@ export const EnhancedTriPaneExplorer: React.FC = () => {
       {/* Main tri-pane layout */}
       <div className="flex-1 flex">
         {/* Timeline Pane */}
-        <div ref={timelineRef} className="w-1/3 border-r border-gray-200 bg-white overflow-hidden">
+        <div
+          ref={timelineRef}
+          className="w-1/3 border-r border-gray-200 bg-white overflow-hidden"
+        >
           <div className="p-4 border-b border-gray-100">
             <h3 className="text-lg font-medium text-gray-900 flex items-center">
               📈 Timeline Analysis
@@ -372,7 +414,10 @@ export const EnhancedTriPaneExplorer: React.FC = () => {
                       {
                         id: 'event-1',
                         type: 'event',
-                        properties: { timestamp: '2025-08-29T10:00:00Z', severity: 'HIGH' },
+                        properties: {
+                          timestamp: '2025-08-29T10:00:00Z',
+                          severity: 'HIGH',
+                        },
                         confidence: 0.92,
                         source: 'timeline',
                       },
@@ -380,8 +425,12 @@ export const EnhancedTriPaneExplorer: React.FC = () => {
                     )
                   }
                 >
-                  <div className="text-sm font-medium text-gray-900">High Priority Event</div>
-                  <div className="text-xs text-gray-500">10:00 AM - Network Anomaly Detected</div>
+                  <div className="text-sm font-medium text-gray-900">
+                    High Priority Event
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    10:00 AM - Network Anomaly Detected
+                  </div>
                   {state.xaiOverlayEnabled && (
                     <div className="mt-2 text-xs text-purple-600">
                       🧠 XAI: High importance due to timing correlation
@@ -396,7 +445,10 @@ export const EnhancedTriPaneExplorer: React.FC = () => {
                       {
                         id: 'event-2',
                         type: 'event',
-                        properties: { timestamp: '2025-08-29T10:15:00Z', severity: 'MEDIUM' },
+                        properties: {
+                          timestamp: '2025-08-29T10:15:00Z',
+                          severity: 'MEDIUM',
+                        },
                         confidence: 0.78,
                         source: 'timeline',
                       },
@@ -404,8 +456,12 @@ export const EnhancedTriPaneExplorer: React.FC = () => {
                     )
                   }
                 >
-                  <div className="text-sm font-medium text-gray-900">Communication Burst</div>
-                  <div className="text-xs text-gray-500">10:15 AM - Increased Activity</div>
+                  <div className="text-sm font-medium text-gray-900">
+                    Communication Burst
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    10:15 AM - Increased Activity
+                  </div>
                   {state.provenanceOverlayEnabled && (
                     <div className="mt-2 text-xs text-green-600">
                       ✓ Provenance: Verified chain of custody
@@ -416,7 +472,9 @@ export const EnhancedTriPaneExplorer: React.FC = () => {
 
               {state.goldenPathActive && goldenPathStep === 0 && (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                  <div className="text-sm font-medium text-yellow-800">🌟 Golden Path Demo</div>
+                  <div className="text-sm font-medium text-yellow-800">
+                    🌟 Golden Path Demo
+                  </div>
                   <div className="text-xs text-yellow-700 mt-1">
                     Demonstrating temporal analysis capabilities
                   </div>
@@ -427,7 +485,10 @@ export const EnhancedTriPaneExplorer: React.FC = () => {
         </div>
 
         {/* Map Pane */}
-        <div ref={mapRef} className="w-1/3 border-r border-gray-200 bg-white overflow-hidden">
+        <div
+          ref={mapRef}
+          className="w-1/3 border-r border-gray-200 bg-white overflow-hidden"
+        >
           <div className="p-4 border-b border-gray-100">
             <h3 className="text-lg font-medium text-gray-900 flex items-center">
               🗺️ Geospatial Analysis
@@ -458,7 +519,11 @@ export const EnhancedTriPaneExplorer: React.FC = () => {
                       {
                         id: 'location-1',
                         type: 'location',
-                        properties: { lat: 40.7128, lng: -74.006, name: 'NYC Office' },
+                        properties: {
+                          lat: 40.7128,
+                          lng: -74.006,
+                          name: 'NYC Office',
+                        },
                         confidence: 0.95,
                         source: 'map',
                       },
@@ -466,8 +531,12 @@ export const EnhancedTriPaneExplorer: React.FC = () => {
                     )
                   }
                 >
-                  <div className="text-sm font-medium text-gray-900">NYC Office</div>
-                  <div className="text-xs text-gray-500">40.7128, -74.0060 - High Activity</div>
+                  <div className="text-sm font-medium text-gray-900">
+                    NYC Office
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    40.7128, -74.0060 - High Activity
+                  </div>
                   {state.xaiOverlayEnabled && xaiData && (
                     <div className="mt-2 text-xs text-purple-600">
                       🧠 XAI Confidence: {Math.round(xaiData.confidence * 100)}%
@@ -478,7 +547,9 @@ export const EnhancedTriPaneExplorer: React.FC = () => {
 
               {state.goldenPathActive && goldenPathStep === 1 && (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                  <div className="text-sm font-medium text-yellow-800">🌟 Golden Path Demo</div>
+                  <div className="text-sm font-medium text-yellow-800">
+                    🌟 Golden Path Demo
+                  </div>
                   <div className="text-xs text-yellow-700 mt-1">
                     Demonstrating geospatial correlation analysis
                   </div>
@@ -528,8 +599,12 @@ export const EnhancedTriPaneExplorer: React.FC = () => {
                     )
                   }
                 >
-                  <div className="text-sm font-medium text-gray-900">John Doe</div>
-                  <div className="text-xs text-gray-500">Central Node - 15 connections</div>
+                  <div className="text-sm font-medium text-gray-900">
+                    John Doe
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Central Node - 15 connections
+                  </div>
                   {state.xaiOverlayEnabled && (
                     <div className="mt-2 text-xs text-purple-600">
                       🧠 High centrality score explains importance
@@ -545,7 +620,9 @@ export const EnhancedTriPaneExplorer: React.FC = () => {
 
               {state.goldenPathActive && goldenPathStep >= 2 && (
                 <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
-                  <div className="text-sm font-medium text-yellow-800">🌟 Golden Path Demo</div>
+                  <div className="text-sm font-medium text-yellow-800">
+                    🌟 Golden Path Demo
+                  </div>
                   <div className="text-xs text-yellow-700 mt-1">
                     {goldenPathStep === 2
                       ? 'Network analysis with XAI explanations'
@@ -567,15 +644,17 @@ export const EnhancedTriPaneExplorer: React.FC = () => {
                 Selected: {selectedEntity.type} - {selectedEntity.id}
               </h4>
               <p className="text-sm text-gray-600 mt-1">
-                Confidence: {Math.round(selectedEntity.confidence * 100)}% | Source:{' '}
-                {selectedEntity.source}
+                Confidence: {Math.round(selectedEntity.confidence * 100)}% |
+                Source: {selectedEntity.source}
               </p>
             </div>
 
             <div className="flex space-x-2">
               {xaiData && (
                 <div className="bg-purple-50 border border-purple-200 rounded px-3 py-2">
-                  <div className="text-xs font-medium text-purple-800">XAI Explanation</div>
+                  <div className="text-xs font-medium text-purple-800">
+                    XAI Explanation
+                  </div>
                   <div className="text-xs text-purple-600">
                     Model: {xaiData.model_version} | Confidence:{' '}
                     {Math.round(xaiData.confidence * 100)}%
@@ -585,7 +664,9 @@ export const EnhancedTriPaneExplorer: React.FC = () => {
 
               {provenanceData && (
                 <div className="bg-green-50 border border-green-200 rounded px-3 py-2">
-                  <div className="text-xs font-medium text-green-800">Provenance</div>
+                  <div className="text-xs font-medium text-green-800">
+                    Provenance
+                  </div>
                   <div className="text-xs text-green-600">
                     {provenanceData.verified ? '✓ Verified' : '⚠ Unverified'}
                   </div>

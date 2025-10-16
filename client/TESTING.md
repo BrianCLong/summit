@@ -51,7 +51,9 @@ import { waitForIdle } from '../test-utils/wait';
 test('async operation completes and component becomes idle', async () => {
   // ... trigger async operation ...
   await waitForIdle();
-  expect(screen.getByRole('status', { name: /assistant-status/i })).toHaveTextContent(/Online/); // Or whatever your "idle" status text is
+  expect(
+    screen.getByRole('status', { name: /assistant-status/i }),
+  ).toHaveTextContent(/Online/); // Or whatever your "idle" status text is
 });
 ```
 
@@ -124,7 +126,10 @@ These helpers provide more resilient ways to assert text content in the DOM, han
 **Usage Example:**
 
 ```typescript
-import { expectTextAcrossElements, expectLastAssistantMessageToContain } from '../test-utils/text';
+import {
+  expectTextAcrossElements,
+  expectLastAssistantMessageToContain,
+} from '../test-utils/text';
 
 test('message content is correct', async () => {
   const log = screen.getByTestId('message-log');

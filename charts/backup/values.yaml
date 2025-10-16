@@ -1,12 +1,11 @@
 walg:
   enabled: false
-  schedule: "0 * * * *"
+  schedule: '0 * * * *'
   image: ghcr.io/wal-g/wal-g:latest
   secretRef: walg-creds
   createSecret: false
   secret:
-    WALG_S3_PREFIX: ""
-    AWS_ACCESS_KEY_ID: ""
-    AWS_SECRET_ACCESS_KEY: ""
-    AWS_REGION: "us-east-1"
-
+    WALG_S3_PREFIX: ''
+    AWS_ACCESS_KEY_ID: ''
+    AWS_SECRET_ACCESS_KEY: ''
+    AWS_REGION: 'us-east-1'

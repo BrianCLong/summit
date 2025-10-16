@@ -49,9 +49,9 @@ function DataExport({
   onExportComplete,
   showReports = true,
 }: DataExportProps) {
-  const [exportFormat, setExportFormat] = useState<'json' | 'csv' | 'xlsx' | 'pdf' | 'cypher'>(
-    'json',
-  );
+  const [exportFormat, setExportFormat] = useState<
+    'json' | 'csv' | 'xlsx' | 'pdf' | 'cypher'
+  >('json');
   const [reportTemplate, setReportTemplate] = useState<
     'executive' | 'technical' | 'forensic' | 'custom'
   >('executive');
@@ -67,7 +67,8 @@ function DataExport({
   const [exportHistory, setExportHistory] = useState<any[]>([]);
 
   const [exportData, { loading: exportLoading }] = useMutation(EXPORT_DATA);
-  const [generateReport, { loading: reportLoading }] = useMutation(GENERATE_REPORT);
+  const [generateReport, { loading: reportLoading }] =
+    useMutation(GENERATE_REPORT);
 
   const handleExport = async () => {
     try {
@@ -132,14 +133,21 @@ function DataExport({
 
   return (
     <div className="panel" style={{ padding: '24px' }}>
-      <h3 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '20px' }}>
+      <h3
+        style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '20px' }}
+      >
         📤 Data Export & Reports
       </h3>
 
       {/* Export Formats */}
       <div style={{ marginBottom: '24px' }}>
         <label
-          style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px', display: 'block' }}
+          style={{
+            fontSize: '14px',
+            fontWeight: '600',
+            marginBottom: '12px',
+            display: 'block',
+          }}
         >
           Export Format
         </label>
@@ -165,10 +173,13 @@ function DataExport({
                 alignItems: 'center',
                 padding: '12px',
                 border:
-                  exportFormat === format.value ? '2px solid #1a73e8' : '1px solid var(--hairline)',
+                  exportFormat === format.value
+                    ? '2px solid #1a73e8'
+                    : '1px solid var(--hairline)',
                 borderRadius: '6px',
                 cursor: 'pointer',
-                backgroundColor: exportFormat === format.value ? '#f0f4ff' : '#fff',
+                backgroundColor:
+                  exportFormat === format.value ? '#f0f4ff' : '#fff',
                 transition: 'all 0.2s',
               }}
             >
@@ -180,10 +191,18 @@ function DataExport({
                 onChange={(e) => setExportFormat(e.target.value as any)}
                 style={{ display: 'none' }}
               />
-              <div style={{ fontWeight: '600', fontSize: '14px', marginBottom: '4px' }}>
+              <div
+                style={{
+                  fontWeight: '600',
+                  fontSize: '14px',
+                  marginBottom: '4px',
+                }}
+              >
                 {format.label}
               </div>
-              <div style={{ fontSize: '11px', color: '#666', textAlign: 'center' }}>
+              <div
+                style={{ fontSize: '11px', color: '#666', textAlign: 'center' }}
+              >
                 {format.desc}
               </div>
             </label>
@@ -201,7 +220,9 @@ function DataExport({
             marginBottom: '12px',
           }}
         >
-          <label style={{ fontSize: '14px', fontWeight: '600' }}>Export Options</label>
+          <label style={{ fontSize: '14px', fontWeight: '600' }}>
+            Export Options
+          </label>
           <button
             onClick={() => setShowAdvanced(!showAdvanced)}
             style={{
@@ -223,7 +244,14 @@ function DataExport({
             gap: '12px',
           }}
         >
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '14px',
+            }}
+          >
             <input
               type="checkbox"
               checked={exportOptions.includeRelationships}
@@ -237,7 +265,14 @@ function DataExport({
             Include Relationships
           </label>
 
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '14px',
+            }}
+          >
             <input
               type="checkbox"
               checked={exportOptions.includeMetadata}
@@ -251,7 +286,14 @@ function DataExport({
             Include Metadata
           </label>
 
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14px' }}>
+          <label
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              fontSize: '14px',
+            }}
+          >
             <input
               type="checkbox"
               checked={exportOptions.includeAnalytics}
@@ -286,7 +328,9 @@ function DataExport({
               >
                 Date Range (Optional)
               </label>
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+              <div
+                style={{ display: 'flex', gap: '12px', alignItems: 'center' }}
+              >
                 <input
                   type="date"
                   value={exportOptions.dateRange?.[0] || ''}
@@ -360,11 +404,23 @@ function DataExport({
       {showReports && (
         <div style={{ marginBottom: '24px' }}>
           <label
-            style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px', display: 'block' }}
+            style={{
+              fontSize: '14px',
+              fontWeight: '600',
+              marginBottom: '12px',
+              display: 'block',
+            }}
           >
             📊 Generate Report
           </label>
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '16px' }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: '12px',
+              alignItems: 'center',
+              marginBottom: '16px',
+            }}
+          >
             <select
               value={reportTemplate}
               onChange={(e) => setReportTemplate(e.target.value as any)}
@@ -402,7 +458,14 @@ function DataExport({
       )}
 
       {/* Export Actions */}
-      <div style={{ display: 'flex', gap: '12px', alignItems: 'center', marginBottom: '24px' }}>
+      <div
+        style={{
+          display: 'flex',
+          gap: '12px',
+          alignItems: 'center',
+          marginBottom: '24px',
+        }}
+      >
         <button
           onClick={handleExport}
           disabled={exportLoading}
@@ -422,7 +485,8 @@ function DataExport({
         </button>
 
         <div style={{ fontSize: '12px', color: '#666' }}>
-          {selectedEntities.length > 0 && `${selectedEntities.length} entities selected • `}
+          {selectedEntities.length > 0 &&
+            `${selectedEntities.length} entities selected • `}
           Format: {exportFormat.toUpperCase()}
         </div>
       </div>
@@ -430,7 +494,13 @@ function DataExport({
       {/* Export History */}
       {exportHistory.length > 0 && (
         <div>
-          <h4 style={{ fontSize: '1rem', fontWeight: '600', marginBottom: '12px' }}>
+          <h4
+            style={{
+              fontSize: '1rem',
+              fontWeight: '600',
+              marginBottom: '12px',
+            }}
+          >
             📁 Recent Exports
           </h4>
           <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
@@ -451,12 +521,16 @@ function DataExport({
                     {item.format || exportFormat.toUpperCase()} Export
                   </div>
                   <div style={{ color: '#666', fontSize: '12px' }}>
-                    {item.createdAt ? new Date(item.createdAt).toLocaleString() : 'Just now'}
+                    {item.createdAt
+                      ? new Date(item.createdAt).toLocaleString()
+                      : 'Just now'}
                     {item.size && ` • ${formatFileSize(item.size)}`}
                   </div>
                 </div>
 
-                <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <div
+                  style={{ display: 'flex', gap: '8px', alignItems: 'center' }}
+                >
                   <span
                     style={{
                       fontSize: '10px',

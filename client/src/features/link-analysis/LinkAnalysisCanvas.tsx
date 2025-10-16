@@ -7,7 +7,10 @@ import ExplainPanel from './ExplainPanel';
 
 export const LinkAnalysisCanvas: React.FC = () => {
   return (
-    <div className="relative grid grid-cols-3 h-screen divide-x" data-testid="link-analysis-canvas">
+    <div
+      className="relative grid grid-cols-3 h-screen divide-x"
+      data-testid="link-analysis-canvas"
+    >
       <TimelinePane />
       <MapPane />
       <GraphPane />

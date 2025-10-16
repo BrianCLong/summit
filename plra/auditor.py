@@ -5,7 +5,7 @@ from __future__ import annotations
 import itertools
 import random
 from collections import Counter, OrderedDict, defaultdict
-from typing import Dict, List, Mapping, Sequence, Tuple, Union
+from collections.abc import Mapping, Sequence
 
 from .fixtures import load_seeded_fixture
 from .report import MitigationAction, MitigationPlan, RiskReport
@@ -14,7 +14,7 @@ Record = Mapping[str, object]
 Dataset = Sequence[Record]
 
 
-def _ensure_dataset(dataset: Union[Dataset, "pandas.DataFrame"]) -> List[Dict[str, object]]:
+def _ensure_dataset(dataset: Dataset | pandas.DataFrame) -> list[dict[str, object]]:
     """Normalise the input dataset into a list of dictionaries."""
 
     try:  # Support pandas without taking it as a hard dependency.
@@ -38,8 +38,8 @@ class PseudonymLinkageRiskAuditor:
 
     def analyze(
         self,
-        dataset_sample: Union[Dataset, "pandas.DataFrame", None],
-        population_reference: Union[Dataset, "pandas.DataFrame", None] = None,
+        dataset_sample: Dataset | pandas.DataFrame | None,
+        population_reference: Dataset | pandas.DataFrame | None = None,
     ) -> RiskReport:
         """Run the full audit pipeline and return a structured risk report."""
 
@@ -51,7 +51,9 @@ class PseudonymLinkageRiskAuditor:
         overlap = self._quasi_identifier_overlap(sample, population)
         linkage_simulation = self._simulate_record_linkage(sample, population, k_map)
         risk_score, high_risk_records = self._overall_risk_score(linkage_simulation)
-        mitigation_plan = self._propose_mitigations(sample, population, linkage_simulation, risk_score)
+        mitigation_plan = self._propose_mitigations(
+            sample, population, linkage_simulation, risk_score
+        )
 
         return RiskReport(
             seed=self.seed,
@@ -71,31 +73,35 @@ class PseudonymLinkageRiskAuditor:
 
         combo_counts = Counter(self._combo_key(record) for record in population)
         histogram = OrderedDict(sorted(combo_counts.items(), key=lambda item: item[0]))
-        distribution: Dict[str, float] = OrderedDict()
+        distribution: dict[str, float] = OrderedDict()
         total = float(sum(histogram.values())) or 1.0
         for combo, count in histogram.items():
             distribution[combo] = count / total
         return OrderedDict(counts=histogram, distribution=distribution)
 
-    def _uniqueness_heatmap(self, sample: Dataset, population: Dataset) -> Mapping[str, Mapping[str, float]]:
+    def _uniqueness_heatmap(
+        self, sample: Dataset, population: Dataset
+    ) -> Mapping[str, Mapping[str, float]]:
         """Compute uniqueness ratios for 1-way and 2-way quasi-identifier combos."""
 
-        heatmap: Dict[str, Dict[str, float]] = OrderedDict()
+        heatmap: dict[str, dict[str, float]] = OrderedDict()
         for size in (1, 2):
             for attributes in itertools.combinations(self.quasi_identifiers, size):
                 label = "+".join(attributes)
-                key_counts = Counter(
-                    self._subcombo_key(record, attributes) for record in sample
-                )
+                key_counts = Counter(self._subcombo_key(record, attributes) for record in sample)
                 pop_counts = Counter(
                     self._subcombo_key(record, attributes) for record in population
                 )
                 uniques = sum(1 for key in key_counts if pop_counts[key] == 1)
-                heatmap.setdefault(str(size), OrderedDict())[label] = uniques / float(len(sample) or 1)
+                heatmap.setdefault(str(size), OrderedDict())[label] = uniques / float(
+                    len(sample) or 1
+                )
         return heatmap
 
-    def _quasi_identifier_overlap(self, sample: Dataset, population: Dataset) -> Mapping[str, float]:
-        overlap: Dict[str, float] = OrderedDict()
+    def _quasi_identifier_overlap(
+        self, sample: Dataset, population: Dataset
+    ) -> Mapping[str, float]:
+        overlap: dict[str, float] = OrderedDict()
         for attr in self.quasi_identifiers:
             sample_values = {record.get(attr) for record in sample}
             population_values = {record.get(attr) for record in population}
@@ -111,13 +117,13 @@ class PseudonymLinkageRiskAuditor:
     ) -> Mapping[str, object]:
         """Simulate record linkage via a simplified Fellegi–Sunter style model."""
 
-        population_index: Dict[str, List[int]] = defaultdict(list)
+        population_index: dict[str, list[int]] = defaultdict(list)
         for idx, record in enumerate(population):
             population_index[self._combo_key(record)].append(idx)
 
         distribution = k_map["distribution"]
 
-        matches: List[Dict[str, object]] = []
+        matches: list[dict[str, object]] = []
         for sample_idx, record in enumerate(sample):
             combo = self._combo_key(record)
             candidate_indices = population_index.get(combo, [])
@@ -147,8 +153,8 @@ class PseudonymLinkageRiskAuditor:
 
     def _overall_risk_score(
         self, linkage_simulation: Mapping[str, object]
-    ) -> Tuple[float, Tuple[int, ...]]:
-        matches: List[Mapping[str, object]] = linkage_simulation["matches"]  # type: ignore[index]
+    ) -> tuple[float, tuple[int, ...]]:
+        matches: list[Mapping[str, object]] = linkage_simulation["matches"]  # type: ignore[index]
         high_risk = [m["sample_index"] for m in matches if m["risk"] == "high"]
         medium_risk = [m["sample_index"] for m in matches if m["risk"] == "medium"]
         numerator = len(high_risk) + 0.5 * len(medium_risk)
@@ -166,7 +172,7 @@ class PseudonymLinkageRiskAuditor:
             return MitigationPlan()
 
         uniqueness = self._uniqueness_heatmap(sample, population)
-        actions: List[MitigationAction] = []
+        actions: list[MitigationAction] = []
         for attr in self.quasi_identifiers:
             attr_uniqueness = uniqueness["1"].get(attr, 0.0)
             if attr_uniqueness >= 0.01:
@@ -187,14 +193,16 @@ class PseudonymLinkageRiskAuditor:
                 )
             )
 
-        details: Dict[str, float] = OrderedDict()
+        details: dict[str, float] = OrderedDict()
         mitigation_sample = [dict(record) for record in sample]
         mitigation_population = [dict(record) for record in population]
         projected_risk = baseline_risk
 
         for action in actions:
             if action.strategy == "generalise":
-                self._generalise_attribute(mitigation_sample, mitigation_population, action.attribute)
+                self._generalise_attribute(
+                    mitigation_sample, mitigation_population, action.attribute
+                )
             elif action.strategy == "suppress":
                 self._suppress_attribute(mitigation_sample, mitigation_population, action.attribute)
 
@@ -206,7 +214,9 @@ class PseudonymLinkageRiskAuditor:
             projected_risk, _ = self._overall_risk_score(simulated)
             details[f"after_{action.attribute}_{action.strategy}"] = projected_risk
 
-        return MitigationPlan(actions=tuple(actions), projected_risk_score=round(projected_risk, 4), details=details)
+        return MitigationPlan(
+            actions=tuple(actions), projected_risk_score=round(projected_risk, 4), details=details
+        )
 
     # ---- Helper methods --------------------------------------------------
 
@@ -226,16 +236,16 @@ class PseudonymLinkageRiskAuditor:
         return "no-match"
 
     def _generalise_attribute(
-        self, sample: List[Dict[str, object]], population: List[Dict[str, object]], attribute: str
+        self, sample: list[dict[str, object]], population: list[dict[str, object]], attribute: str
     ) -> None:
-        replacement = f'[generalised:{attribute}]'
+        replacement = f"[generalised:{attribute}]"
         for dataset in (sample, population):
             for record in dataset:
                 record[attribute] = replacement
 
     def _suppress_attribute(
-        self, sample: List[Dict[str, object]], population: List[Dict[str, object]], attribute: str
+        self, sample: list[dict[str, object]], population: list[dict[str, object]], attribute: str
     ) -> None:
         for dataset in (sample, population):
             for record in dataset:
-                record[attribute] = '[suppressed]'
+                record[attribute] = "[suppressed]"

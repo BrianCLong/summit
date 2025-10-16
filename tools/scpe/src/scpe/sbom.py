@@ -3,14 +3,15 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Any, Dict, Iterable, List
+from typing import Any
 
 from .errors import ConfigError, VerificationError
 from .utils import compute_file_digest
 
 
-class SBOMResult(Dict[str, Any]):
+class SBOMResult(dict[str, Any]):
     """Dictionary subclass representing SBOM verification metadata."""
 
 
@@ -18,10 +19,10 @@ SUPPORTED_FORMATS = {"cyclonedx-json"}
 
 
 def validate_sbom(
-    sbom_spec: Dict[str, Any],
+    sbom_spec: dict[str, Any],
     *,
     base_path: Path,
-    artifacts: Iterable[Dict[str, Any]],
+    artifacts: Iterable[dict[str, Any]],
 ) -> SBOMResult:
     if not sbom_spec:
         raise ConfigError("Configuration requires an 'sbom' section")
@@ -48,7 +49,7 @@ def validate_sbom(
         )
 
     document = json.loads(sbom_path.read_text(encoding="utf-8"))
-    components: List[Dict[str, Any]] = document.get("components", [])
+    components: list[dict[str, Any]] = document.get("components", [])
     if not isinstance(components, list):
         raise VerificationError("CycloneDX SBOM must contain a list of components")
 
@@ -65,8 +66,8 @@ def validate_sbom(
 
 
 def _ensure_components_cover_artifacts(
-    components: List[Dict[str, Any]],
-    artifacts: Iterable[Dict[str, Any]],
+    components: list[dict[str, Any]],
+    artifacts: Iterable[dict[str, Any]],
 ) -> None:
     component_index = {}
     for component in components:
@@ -74,7 +75,7 @@ def _ensure_components_cover_artifacts(
         if isinstance(name, str):
             component_index[name] = component
 
-    missing: List[str] = []
+    missing: list[str] = []
     for artifact in artifacts:
         name = artifact.get("name")
         digest = artifact.get("digest", {}).get("value")
@@ -86,10 +87,11 @@ def _ensure_components_cover_artifacts(
             continue
         hashes = matched_component.get("hashes", [])
         if not isinstance(hashes, list):
-            raise VerificationError(
-                f"Component '{name}' must provide a list of hashes in the SBOM"
-            )
-        if not any(_normalize_hash(h.get("alg")) == "sha-256" and h.get("content") == digest for h in hashes):
+            raise VerificationError(f"Component '{name}' must provide a list of hashes in the SBOM")
+        if not any(
+            _normalize_hash(h.get("alg")) == "sha-256" and h.get("content") == digest
+            for h in hashes
+        ):
             raise VerificationError(
                 f"SBOM entry for '{name}' does not match recorded digest",
                 hint="Update the SBOM to reference the produced artifact",

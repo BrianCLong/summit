@@ -1,9 +1,10 @@
 """Core dataclasses for the analytics layer."""
+
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Dict, Iterable, Optional
 
 
 @dataclass(frozen=True)
@@ -17,7 +18,7 @@ class ExternalMeasurement:
     sentiment: float
 
     @classmethod
-    def from_dict(cls, payload: Dict[str, object]) -> "ExternalMeasurement":
+    def from_dict(cls, payload: dict[str, object]) -> ExternalMeasurement:
         return cls(
             domain=str(payload["domain"]),
             timestamp=_ensure_datetime(payload["timestamp"]),
@@ -38,7 +39,7 @@ class InternalSignal:
     platform_health: float
 
     @classmethod
-    def from_dict(cls, payload: Dict[str, object]) -> "InternalSignal":
+    def from_dict(cls, payload: dict[str, object]) -> InternalSignal:
         return cls(
             domain=str(payload["domain"]),
             timestamp=_ensure_datetime(payload["timestamp"]),
@@ -58,7 +59,7 @@ class WorldEventTrigger:
     relevance: float
 
     @classmethod
-    def from_dict(cls, payload: Dict[str, object]) -> "WorldEventTrigger":
+    def from_dict(cls, payload: dict[str, object]) -> WorldEventTrigger:
         return cls(
             domain=str(payload["domain"]),
             timestamp=_ensure_datetime(payload["timestamp"]),
@@ -79,9 +80,9 @@ class FusedSnapshot:
     event_pressure: float
     sample_size: int
     confidence: float
-    features: Dict[str, float]
+    features: dict[str, float]
 
-    def blend(self, other: "FusedSnapshot", weight: float = 0.5) -> "FusedSnapshot":
+    def blend(self, other: FusedSnapshot, weight: float = 0.5) -> FusedSnapshot:
         """Blend two snapshots to provide smoothing for the analytics pipeline."""
 
         blended_features = {
@@ -114,10 +115,10 @@ def _ensure_datetime(value: object) -> datetime:
     raise TypeError(f"Unsupported timestamp type: {type(value)!r}")
 
 
-def extract_domain(records: Iterable[object]) -> Optional[str]:
+def extract_domain(records: Iterable[object]) -> str | None:
     """Attempt to determine the shared domain from an iterable of records."""
 
     for record in records:
         if hasattr(record, "domain"):
-            return getattr(record, "domain")
+            return record.domain
     return None

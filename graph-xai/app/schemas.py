@@ -5,7 +5,6 @@ from pydantic import BaseModel
 from typing import Dict, List, Optional
 
 
-
 class GraphNode(BaseModel):
     id: str
     features: Optional[Dict[str, float]] = None

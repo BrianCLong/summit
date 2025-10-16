@@ -22,19 +22,19 @@ normalization the resulting entity will look like::
     }
 """
 
-from typing import Dict, Mapping
+from collections.abc import Mapping
 
 import yaml
 
 
-def parse_mapping(yaml_text: str) -> Dict[str, str]:
+def parse_mapping(yaml_text: str) -> dict[str, str]:
     data = yaml.safe_load(yaml_text)
     if not isinstance(data, Mapping) or "entity" not in data or "fields" not in data:
         raise ValueError("invalid mapping")
     return {"entity": data["entity"], "fields": dict(data["fields"])}
 
 
-def apply_mapping(row: Mapping[str, str], mapping: Dict[str, str]) -> Dict[str, Dict[str, str]]:
+def apply_mapping(row: Mapping[str, str], mapping: dict[str, str]) -> dict[str, dict[str, str]]:
     fields = mapping["fields"]
     external = {k: row[v] for k, v in fields.items() if k == "id" and v in row}
     attrs = {k: row[v] for k, v in fields.items() if k != "id" and v in row}

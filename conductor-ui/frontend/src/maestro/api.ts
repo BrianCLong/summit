@@ -5,10 +5,31 @@ import { maestroApi } from './api/client';
 // Lightweight client-side facade with mock data that matches Maestro UI contracts.
 // Replace implementations with real fetches to GraphQL/REST gateway when available.
 
-interface Run { id: string; pipeline: string; status: string; durationMs: number; cost: number }
-interface Pipeline { id: string; name: string; version: string; owner: string }
-interface Recipe { id: string; name: string; version: string; verified: boolean }
-interface Ticket { id: string; status: string; owner: string; runId?: string }
+interface Run {
+  id: string;
+  pipeline: string;
+  status: string;
+  durationMs: number;
+  cost: number;
+}
+interface Pipeline {
+  id: string;
+  name: string;
+  version: string;
+  owner: string;
+}
+interface Recipe {
+  id: string;
+  name: string;
+  version: string;
+  verified: boolean;
+}
+interface Ticket {
+  id: string;
+  status: string;
+  owner: string;
+  runId?: string;
+}
 
 export function api() {
   const cfg = getMaestroConfig();
@@ -36,19 +57,19 @@ export function api() {
       const fetchSummary = async () => {
         setLoading(true);
         setError(null);
-        
+
         try {
           const response = await maestroApi.getSummary();
-          
+
           if (response.error) {
             throw new Error(response.error);
           }
-          
+
           setData(response.data);
         } catch (e) {
           console.warn('Failed to fetch summary from API, using mock data', e);
           setError(e instanceof Error ? e.message : 'Unknown error');
-          
+
           // Fallback to mock data
           setData({
             autonomy: { level: 3, canary: 0.1 },
@@ -77,10 +98,10 @@ export function api() {
           setLoading(false);
         }
       };
-      
+
       void fetchSummary();
     }, []);
-    
+
     return { data, loading, error };
   }
 
@@ -130,12 +151,14 @@ export function api() {
         if (!base) {
           // fallback mock
           setData(
-            ['Build IntelGraph', 'Run Tests', 'Publish Release'].map((name, i) => ({
-              id: `pl_${i + 1}`,
-              name,
-              version: `1.${i}.0`,
-              owner: ['alice', 'bob', 'carol'][i % 3],
-            })),
+            ['Build IntelGraph', 'Run Tests', 'Publish Release'].map(
+              (name, i) => ({
+                id: `pl_${i + 1}`,
+                name,
+                version: `1.${i}.0`,
+                owner: ['alice', 'bob', 'carol'][i % 3],
+              }),
+            ),
           );
           return;
         }
@@ -146,9 +169,24 @@ export function api() {
         } catch (e) {
           console.warn('GET /pipelines failed, fallback to mock', e);
           setData([
-            { id: 'pl_1', name: 'Build IntelGraph', version: '1.0.0', owner: 'system' },
-            { id: 'pl_2', name: 'Run Tests', version: '1.0.0', owner: 'system' },
-            { id: 'pl_3', name: 'Deploy Production', version: '1.0.0', owner: 'system' },
+            {
+              id: 'pl_1',
+              name: 'Build IntelGraph',
+              version: '1.0.0',
+              owner: 'system',
+            },
+            {
+              id: 'pl_2',
+              name: 'Run Tests',
+              version: '1.0.0',
+              owner: 'system',
+            },
+            {
+              id: 'pl_3',
+              name: 'Deploy Production',
+              version: '1.0.0',
+              owner: 'system',
+            },
           ]);
         }
       };
@@ -167,7 +205,10 @@ export function api() {
             level: 3,
             policies: [
               { title: 'Change freeze on Fridays after 12:00', state: 'ON' },
-              { title: 'Auto-rollback if error budget burn > 2%/h', state: 'ON' },
+              {
+                title: 'Auto-rollback if error budget burn > 2%/h',
+                state: 'ON',
+              },
               { title: 'Dual-approval for risk score >= 7/10', state: 'ON' },
               { title: 'Cost ceiling $200/run', state: 'ON' },
             ],
@@ -184,7 +225,10 @@ export function api() {
             level: 3,
             policies: [
               { title: 'Change freeze on Fridays after 12:00', state: 'ON' },
-              { title: 'Auto-rollback if error budget burn > 2%/h', state: 'ON' },
+              {
+                title: 'Auto-rollback if error budget burn > 2%/h',
+                state: 'ON',
+              },
               { title: 'Dual-approval for risk score >= 7/10', state: 'ON' },
               { title: 'Cost ceiling $200/run', state: 'ON' },
             ],
@@ -221,8 +265,18 @@ export function api() {
       const fetchRecipes = async () => {
         if (!base) {
           setData([
-            { id: 'r1', name: 'Rapid Attribution', version: '1.0.0', verified: true },
-            { id: 'r2', name: 'SLO Guard Enforcement', version: '1.2.0', verified: true },
+            {
+              id: 'r1',
+              name: 'Rapid Attribution',
+              version: '1.0.0',
+              verified: true,
+            },
+            {
+              id: 'r2',
+              name: 'SLO Guard Enforcement',
+              version: '1.2.0',
+              verified: true,
+            },
             { id: 'r3', name: 'Cost Clamp', version: '0.9.1', verified: false },
           ]);
           return;
@@ -234,8 +288,18 @@ export function api() {
         } catch (e) {
           console.warn('GET /recipes failed, fallback to mock', e);
           setData([
-            { id: 'r1', name: 'Rapid Attribution', version: '1.0.0', verified: true },
-            { id: 'r2', name: 'SLO Guard Enforcement', version: '1.2.0', verified: true },
+            {
+              id: 'r1',
+              name: 'Rapid Attribution',
+              version: '1.0.0',
+              verified: true,
+            },
+            {
+              id: 'r2',
+              name: 'SLO Guard Enforcement',
+              version: '1.2.0',
+              verified: true,
+            },
             { id: 'r3', name: 'Cost Clamp', version: '0.9.1', verified: false },
           ]);
         }
@@ -248,7 +312,12 @@ export function api() {
   function useObservability() {
     const [data, setData] = useState<unknown>(null);
     useEffect(() => {
-      setData({ latencyP95: 180, errorRate: 0.4, throughput: 320, queueDepth: 7 });
+      setData({
+        latencyP95: 180,
+        errorRate: 0.4,
+        throughput: 320,
+        queueDepth: 7,
+      });
     }, []);
     return { data };
   }
@@ -290,7 +359,9 @@ export function api() {
             cost: 0.23,
           });
         try {
-          const resp = await j<unknown>(`${base}/runs/${encodeURIComponent(id)}`);
+          const resp = await j<unknown>(
+            `${base}/runs/${encodeURIComponent(id)}`,
+          );
           setData(resp);
         } catch (e) {
           console.warn('GET /runs/:id failed, fallback', e);
@@ -367,16 +438,22 @@ export function api() {
             ...(nodeId ? { nodeId: String(nodeId) } : {}),
           });
           const url = `${base}/runs/${encodeURIComponent(id)}/logs?${q}`;
-          const es = new EventSource(url, { withCredentials: false } as EventSourceInit);
+          const es = new EventSource(url, {
+            withCredentials: false,
+          } as EventSourceInit);
           esRef.current = es;
           es.addEventListener('message', (ev: MessageEvent) => {
             try {
               const m = JSON.parse(ev.data);
               setLines((l) => [
                 ...l.slice(-5000),
-                { ts: m.ts || new Date().toISOString(), text: m.text || String(ev.data) },
+                {
+                  ts: m.ts || new Date().toISOString(),
+                  text: m.text || String(ev.data),
+                },
               ]);
-            } catch { /* empty */
+            } catch {
+              /* empty */
               setLines((l) => [
                 ...l.slice(-5000),
                 { ts: new Date().toISOString(), text: String(ev.data) },
@@ -392,13 +469,17 @@ export function api() {
               () =>
                 setLines((l) => [
                   ...l.slice(-5000),
-                  { ts: new Date().toISOString(), text: `run ${id}: log line ${++c}` },
+                  {
+                    ts: new Date().toISOString(),
+                    text: `run ${id}: log line ${++c}`,
+                  },
                 ]),
               500,
             );
             return () => clearInterval(t);
           });
-        } catch { /* empty */
+        } catch {
+          /* empty */
           // ignore, fallback below
         }
       }
@@ -408,7 +489,10 @@ export function api() {
           () =>
             setLines((l) => [
               ...l.slice(-5000),
-              { ts: new Date().toISOString(), text: `run ${id}: log line ${++c}` },
+              {
+                ts: new Date().toISOString(),
+                text: `run ${id}: log line ${++c}`,
+              },
             ]),
           500,
         );
@@ -430,8 +514,20 @@ export function api() {
     const [decisions, setDecisions] = useState<unknown[]>([]);
     useEffect(() => {
       setDecisions([
-        { id: 'pol1', action: 'promote', allowed: true, reasons: [], appealPath: '' },
-        { id: 'pol2', action: 'cost_check', allowed: true, reasons: [], appealPath: '' },
+        {
+          id: 'pol1',
+          action: 'promote',
+          allowed: true,
+          reasons: [],
+          appealPath: '',
+        },
+        {
+          id: 'pol2',
+          action: 'cost_check',
+          allowed: true,
+          reasons: [],
+          appealPath: '',
+        },
         {
           id: 'pol3',
           action: 'change_freeze',
@@ -458,7 +554,10 @@ export function api() {
   // Additional API helpers
   async function patchAutonomy(payload: unknown) {
     if (!base) throw new Error('gatewayBase not configured');
-    return j<unknown>(`${base}/autonomy`, { method: 'PATCH', body: JSON.stringify(payload) });
+    return j<unknown>(`${base}/autonomy`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    });
   }
 
   async function getBudgets() {
@@ -468,23 +567,34 @@ export function api() {
 
   async function putBudgets(payload: unknown) {
     if (!base) throw new Error('gatewayBase not configured');
-    return j<unknown>(`${base}/budgets`, { method: 'PUT', body: JSON.stringify(payload) });
+    return j<unknown>(`${base}/budgets`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
   }
 
   async function postTickets(payload: unknown) {
     if (!base) throw new Error('gatewayBase not configured');
-    return j<unknown>(`${base}/tickets`, { method: 'POST', body: JSON.stringify(payload) });
+    return j<unknown>(`${base}/tickets`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
   }
 
   async function postPolicyExplain(payload: unknown) {
     if (!base) throw new Error('gatewayBase not configured');
-    return j<unknown>(`${base}/policies/explain`, { method: 'POST', body: JSON.stringify(payload) });
+    return j<unknown>(`${base}/policies/explain`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
   }
 
   // CI annotations
   async function getCIAnnotations(runId: string) {
     if (!base) return { items: [] };
-    return j<unknown>(`${base}/runs/${encodeURIComponent(runId)}/ci/annotations`);
+    return j<unknown>(
+      `${base}/runs/${encodeURIComponent(runId)}/ci/annotations`,
+    );
   }
 
   async function getCIAnnotationsGlobal(
@@ -512,7 +622,9 @@ export function api() {
         errorRate: { fast: 0.005, slow: 0.004 },
         updatedAt: Date.now(),
       };
-    return j<unknown>(`${base}/metrics/slo?tenant=${encodeURIComponent(tenant)}`);
+    return j<unknown>(
+      `${base}/metrics/slo?tenant=${encodeURIComponent(tenant)}`,
+    );
   }
   async function getSLOTimeSeriesByTenant(
     tenant: string,
@@ -520,12 +632,19 @@ export function api() {
     stepMs = 10 * 60 * 1000,
   ) {
     if (!base) return { tenant, points: [] };
-    const q = new URLSearchParams({ tenant, windowMs: String(windowMs), stepMs: String(stepMs) });
+    const q = new URLSearchParams({
+      tenant,
+      windowMs: String(windowMs),
+      stepMs: String(stepMs),
+    });
     return j<unknown>(`${base}/metrics/slo/timeseries?${q.toString()}`);
   }
 
   // Tenant costs
-  async function getTenantCostSummary(tenant: string, windowMs = 24 * 3600 * 1000) {
+  async function getTenantCostSummary(
+    tenant: string,
+    windowMs = 24 * 3600 * 1000,
+  ) {
     if (!base)
       return {
         tenant,
@@ -544,20 +663,28 @@ export function api() {
     stepMs = 10 * 60 * 1000,
   ) {
     if (!base) return { tenant, points: [] };
-    const q = new URLSearchParams({ tenant, windowMs: String(windowMs), stepMs: String(stepMs) });
+    const q = new URLSearchParams({
+      tenant,
+      windowMs: String(windowMs),
+      stepMs: String(stepMs),
+    });
     return j<unknown>(`${base}/metrics/cost/tenant/timeseries?${q.toString()}`);
   }
 
   async function getTenantBudget(tenant: string) {
     if (!base) return { tenant, monthlyUsd: 100 };
-    return j<unknown>(`${base}/budgets/tenant?tenant=${encodeURIComponent(tenant)}`);
+    return j<unknown>(
+      `${base}/budgets/tenant?tenant=${encodeURIComponent(tenant)}`,
+    );
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function getTenantBudgetPolicy(tenant: string) {
     if (!base) return { tenant, type: 'hard', limit: 1000, grace: 0.1 }; // Mock policy
     // In a real scenario, this would fetch the actual policy from the backend
-    return j<unknown>(`${base}/budgets/tenant/policy?tenant=${encodeURIComponent(tenant)}`);
+    return j<unknown>(
+      `${base}/budgets/tenant/policy?tenant=${encodeURIComponent(tenant)}`,
+    );
   }
 
   async function putTenantBudget(tenant: string, monthlyUsd: number) {
@@ -598,7 +725,15 @@ export function api() {
     stepMs = 60 * 60 * 1000,
     z = 3.0,
   ) {
-    if (!base) return { tenant, mean: 0.3, std: 0.1, threshold: z, series: [], anomalies: [] };
+    if (!base)
+      return {
+        tenant,
+        mean: 0.3,
+        std: 0.1,
+        threshold: z,
+        series: [],
+        anomalies: [],
+      };
     const q = new URLSearchParams({
       tenant,
       windowMs: String(windowMs),
@@ -609,11 +744,17 @@ export function api() {
   }
   async function getModelCostAnomalies(tenant: string) {
     if (!base) return { items: [] };
-    return j<unknown>(`${base}/metrics/cost/models/anomalies?tenant=${encodeURIComponent(tenant)}`);
+    return j<unknown>(
+      `${base}/metrics/cost/models/anomalies?tenant=${encodeURIComponent(tenant)}`,
+    );
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async function billingExport(tenant: string, month: string, format: 'csv' | 'json') {
+  async function billingExport(
+    tenant: string,
+    month: string,
+    format: 'csv' | 'json',
+  ) {
     if (!base) return { csvUrl: 'mock-csv-url', jsonUrl: 'mock-json-url' };
     const q = new URLSearchParams({ tenant, month, format });
     return j<unknown>(`${base}/billing/export?${q.toString()}`);
@@ -650,7 +791,10 @@ export function api() {
     }>,
   ) {
     if (!base) throw new Error('gatewayBase not configured');
-    return j<unknown>(`${base}/ops/dlq/policy`, { method: 'PUT', body: JSON.stringify(p) });
+    return j<unknown>(`${base}/ops/dlq/policy`, {
+      method: 'PUT',
+      body: JSON.stringify(p),
+    });
   }
   async function getDLQAudit() {
     if (!base) return { items: [] };
@@ -660,13 +804,17 @@ export function api() {
     if (!base) return { items: [] };
     const q = new URLSearchParams();
     if (params.sinceMs) q.set('sinceMs', String(params.sinceMs));
-    return j<unknown>(`${base}/ops/dlq${q.toString() ? `?${q.toString()}` : ''}`);
+    return j<unknown>(
+      `${base}/ops/dlq${q.toString() ? `?${q.toString()}` : ''}`,
+    );
   }
   async function getDLQRootCauses(params: { sinceMs?: number } = {}) {
     if (!base) return { groups: [] };
     const q = new URLSearchParams();
     if (params.sinceMs) q.set('sinceMs', String(params.sinceMs));
-    return j<unknown>(`${base}/ops/dlq/rootcauses${q.toString() ? `?${q.toString()}` : ''}`);
+    return j<unknown>(
+      `${base}/ops/dlq/rootcauses${q.toString() ? `?${q.toString()}` : ''}`,
+    );
   }
   async function simulateDLQPolicy(item: {
     id?: string;
@@ -686,7 +834,10 @@ export function api() {
         reasons: [],
         normalizedSignature: 'sig',
       };
-    return j<unknown>(`${base}/ops/dlq/policy/simulate`, { method: 'POST', body: JSON.stringify({ item }) });
+    return j<unknown>(`${base}/ops/dlq/policy/simulate`, {
+      method: 'POST',
+      body: JSON.stringify({ item }),
+    });
   }
 
   // Alerts & providers & watchdog
@@ -694,30 +845,43 @@ export function api() {
     return j<unknown>(`${base}/alerts/routes`);
   }
   async function createAlertRoute(payload: unknown) {
-    return j<unknown>(`${base}/alerts/routes`, { method: 'POST', body: JSON.stringify(payload) });
+    return j<unknown>(`${base}/alerts/routes`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
   }
   async function deleteAlertRoute(id: string) {
-    return j<unknown>(`${base}/alerts/routes/${encodeURIComponent(id)}`, { method: 'DELETE' });
+    return j<unknown>(`${base}/alerts/routes/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+    });
   }
   async function listAlertEvents() {
     return j<unknown>(`${base}/alerts/events`);
   }
   async function testAlertEvent(payload: unknown) {
-    return j<unknown>(`${base}/alerts/events/test`, { method: 'POST', body: JSON.stringify(payload) });
+    return j<unknown>(`${base}/alerts/events/test`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
   }
   async function getAlertCenterEvents(params: { sinceMs?: number } = {}) {
     const q = new URLSearchParams();
     if (params.sinceMs) q.set('sinceMs', String(params.sinceMs));
-    return j<unknown>(`${base}/alertcenter/events${q.toString() ? `?${q.toString()}` : ''}`);
+    return j<unknown>(
+      `${base}/alertcenter/events${q.toString() ? `?${q.toString()}` : ''}`,
+    );
   }
   async function getProviderUsage(windowMs = 60 * 60 * 1000) {
     return j<unknown>(`${base}/providers/usage?windowMs=${windowMs}`);
   }
   async function setProviderLimit(provider: string, rpm: number) {
-    return j<unknown>(`${base}/providers/${encodeURIComponent(provider)}/limits`, {
-      method: 'PUT',
-      body: JSON.stringify({ rpm }),
-    });
+    return j<unknown>(
+      `${base}/providers/${encodeURIComponent(provider)}/limits`,
+      {
+        method: 'PUT',
+        body: JSON.stringify({ rpm }),
+      },
+    );
   }
   async function getPinHistory(route?: string) {
     return j<unknown>(
@@ -734,26 +898,41 @@ export function api() {
     return j<unknown>(`${base}/routing/watchdog/configs`);
   }
   async function putWatchdogConfigs(body: unknown) {
-    return j<unknown>(`${base}/routing/watchdog/configs`, { method: 'PUT', body: JSON.stringify(body) });
+    return j<unknown>(`${base}/routing/watchdog/configs`, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    });
   }
   async function getWatchdogEvents() {
     return j<unknown>(`${base}/routing/watchdog/events`);
   }
   // EvalOps
   async function getRunScorecard(runId: string) {
-    return j<unknown>(`${base}/eval/scorecards/run/${encodeURIComponent(runId)}`);
+    return j<unknown>(
+      `${base}/eval/scorecards/run/${encodeURIComponent(runId)}`,
+    );
   }
   async function getPipelineBaseline(pipeline: string) {
-    return j<unknown>(`${base}/eval/scorecards/pipeline/${encodeURIComponent(pipeline)}/baseline`);
+    return j<unknown>(
+      `${base}/eval/scorecards/pipeline/${encodeURIComponent(pipeline)}/baseline`,
+    );
   }
   async function putPipelineBaseline(pipeline: string, body: unknown) {
-    return j<unknown>(`${base}/eval/scorecards/pipeline/${encodeURIComponent(pipeline)}/baseline`, { method: 'PUT', body: JSON.stringify(body) });
+    return j<unknown>(
+      `${base}/eval/scorecards/pipeline/${encodeURIComponent(pipeline)}/baseline`,
+      { method: 'PUT', body: JSON.stringify(body) },
+    );
   }
   async function getPipelineGate(pipeline: string) {
-    return j<unknown>(`${base}/eval/gates/pipeline/${encodeURIComponent(pipeline)}`);
+    return j<unknown>(
+      `${base}/eval/gates/pipeline/${encodeURIComponent(pipeline)}`,
+    );
   }
   async function checkGate(payload: { runId: string; pipeline: string }) {
-    return j<unknown>(`${base}/eval/gates/check`, { method: 'POST', body: JSON.stringify(payload) });
+    return j<unknown>(`${base}/eval/gates/check`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
   }
   // Agent/HITL
   async function getAgentSteps(runId: string) {
@@ -765,7 +944,9 @@ export function api() {
     const handler = (e: MessageEvent) => {
       try {
         onStep(JSON.parse(e.data));
-      } catch { /* empty */ }
+      } catch {
+        /* empty */
+      }
     };
     es.addEventListener('message', handler);
     es.onerror = () => es.close();
@@ -773,21 +954,34 @@ export function api() {
       try {
         es.removeEventListener('step', handler as EventListener);
         es.close();
-      } catch { /* empty */ }
+      } catch {
+        /* empty */
+      }
     };
   }
   async function actOnAgent(
     runId: string,
-    payload: { stepId: string; action: 'approve' | 'block' | 'edit'; patch?: string },
+    payload: {
+      stepId: string;
+      action: 'approve' | 'block' | 'edit';
+      patch?: string;
+    },
   ) {
-    return j<unknown>(`${base}/runs/${encodeURIComponent(runId)}/agent/actions`, { method: 'POST', body: JSON.stringify(payload) });
+    return j<unknown>(
+      `${base}/runs/${encodeURIComponent(runId)}/agent/actions`,
+      { method: 'POST', body: JSON.stringify(payload) },
+    );
   }
   // Incidents
-  async function getIncidents(params: { sinceMs?: number; windowMs?: number } = {}) {
+  async function getIncidents(
+    params: { sinceMs?: number; windowMs?: number } = {},
+  ) {
     const q = new URLSearchParams();
     if (params.sinceMs) q.set('sinceMs', String(params.sinceMs));
     if (params.windowMs) q.set('windowMs', String(params.windowMs));
-    return j<unknown>(`${base}/alertcenter/incidents${q.toString() ? `?${q.toString()}` : ''}`);
+    return j<unknown>(
+      `${base}/alertcenter/incidents${q.toString() ? `?${q.toString()}` : ''}`,
+    );
   }
 
   // Graph compare
@@ -799,8 +993,12 @@ export function api() {
         current: { nodes: [], edges: [] },
         baseline: { nodes: [], edges: [] },
       };
-    const q = baselineRunId ? `?baseline=${encodeURIComponent(baselineRunId)}` : '';
-    return j<unknown>(`${base}/runs/${encodeURIComponent(runId)}/graph-compare${q}`);
+    const q = baselineRunId
+      ? `?baseline=${encodeURIComponent(baselineRunId)}`
+      : '';
+    return j<unknown>(
+      `${base}/runs/${encodeURIComponent(runId)}/graph-compare${q}`,
+    );
   }
   async function getRunNodeRouting(runId: string, nodeId: string) {
     if (!base)
@@ -818,13 +1016,18 @@ export function api() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function getRunComparePrevious(runId: string) {
     if (!base) return { durationDeltaMs: 0, costDelta: 0, changedNodes: [] };
-    return j<unknown>(`${base}/runs/${encodeURIComponent(runId)}/compare/previous`);
+    return j<unknown>(
+      `${base}/runs/${encodeURIComponent(runId)}/compare/previous`,
+    );
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function validatePipeline(id: string, body: unknown) {
     if (!base) return { valid: true, errors: [] };
-    return j<unknown>(`${base}/pipelines/${encodeURIComponent(id)}/validate`, { method: 'POST', body: JSON.stringify(body) });
+    return j<unknown>(`${base}/pipelines/${encodeURIComponent(id)}/validate`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -836,7 +1039,9 @@ export function api() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function testProvider(id: string) {
     if (!base) throw new Error('gatewayBase not configured');
-    return j<unknown>(`${base}/providers/${encodeURIComponent(id)}/test`, { method: 'POST' });
+    return j<unknown>(`${base}/providers/${encodeURIComponent(id)}/test`, {
+      method: 'POST',
+    });
   }
 
   // Routing pin management
@@ -845,15 +1050,24 @@ export function api() {
     return j<Record<string, string>>(`${base}/routing/pins`);
   }
 
-  async function putRoutingPin(payload: { route: string; model: string; note?: string }) {
+  async function putRoutingPin(payload: {
+    route: string;
+    model: string;
+    note?: string;
+  }) {
     if (!base) throw new Error('gatewayBase not configured');
-    return j<{ ok: boolean }>(`${base}/routing/pin`, { method: 'PUT', body: JSON.stringify(payload) });
+    return j<{ ok: boolean }>(`${base}/routing/pin`, {
+      method: 'PUT',
+      body: JSON.stringify(payload),
+    });
   }
 
   async function deleteRoutingPin(route: string) {
     if (!base) throw new Error('gatewayBase not configured');
     const q = new URLSearchParams({ route });
-    return j<{ ok: boolean }>(`${base}/routing/pin?${q.toString()}`, { method: 'DELETE' });
+    return j<{ ok: boolean }>(`${base}/routing/pin?${q.toString()}`, {
+      method: 'DELETE',
+    });
   }
 
   // Node-level details
@@ -879,7 +1093,8 @@ export function api() {
             `${base}/runs/${encodeURIComponent(runId)}/nodes/${encodeURIComponent(nodeId)}/metrics`,
           );
           setMetrics(resp);
-        } catch { /* empty */
+        } catch {
+          /* empty */
           setMetrics({
             cpuPct: 22.3,
             memMB: 210,
@@ -904,16 +1119,27 @@ export function api() {
       (async () => {
         if (!base)
           return setEvidence({
-            artifacts: [{ name: `${nodeId}-output.json`, digest: 'sha256:deadbeef', size: '12KB' }],
+            artifacts: [
+              {
+                name: `${nodeId}-output.json`,
+                digest: 'sha256:deadbeef',
+                size: '12KB',
+              },
+            ],
             traceId: 'trace-123-abc',
-            provenance: { sbom: 'present', cosign: 'verified', slsa: 'attested' },
+            provenance: {
+              sbom: 'present',
+              cosign: 'verified',
+              slsa: 'attested',
+            },
           });
         try {
           const resp = await j<unknown>(
             `${base}/runs/${encodeURIComponent(runId)}/nodes/${encodeURIComponent(nodeId)}/evidence`,
           );
           setEvidence(resp);
-        } catch { /* empty */
+        } catch {
+          /* empty */
           setEvidence({ artifacts: [], traceId: null, provenance: {} });
         }
       })();
@@ -928,7 +1154,9 @@ export function api() {
 
   async function rotateSecret(id: string) {
     if (!base) throw new Error('gatewayBase not configured');
-    return j<unknown>(`${base}/secrets/${encodeURIComponent(id)}/rotate`, { method: 'POST' });
+    return j<unknown>(`${base}/secrets/${encodeURIComponent(id)}/rotate`, {
+      method: 'POST',
+    });
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -938,7 +1166,10 @@ export function api() {
         decision: { model: 'gpt-4o-mini', confidence: 0.7, reason: 'dev stub' },
         candidates: [],
       };
-    return j<unknown>(`${base}/routing/preview`, { method: 'POST', body: JSON.stringify(payload) });
+    return j<unknown>(`${base}/routing/preview`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
   }
 
   async function getPipelinesAPI() {
@@ -947,17 +1178,33 @@ export function api() {
   }
 
   async function getPipeline(id: string) {
-    if (!base) return { id, name: 'Mock', version: '0.0.0', owner: 'n/a', yaml: 'steps: []' };
+    if (!base)
+      return {
+        id,
+        name: 'Mock',
+        version: '0.0.0',
+        owner: 'n/a',
+        yaml: 'steps: []',
+      };
     return j<unknown>(`${base}/pipelines/${encodeURIComponent(id)}`);
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async function planPipeline(id: string, body: unknown) {
     if (!base) return { changes: [], costEstimate: { delta: 0 } };
-    return j<unknown>(`${base}/pipelines/${encodeURIComponent(id)}/plan`, { method: 'POST', body: JSON.stringify(body) });
+    return j<unknown>(`${base}/pipelines/${encodeURIComponent(id)}/plan`, {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
   }
   async function getRunEvidence(runId: string) {
-    if (!base) return { sbom: 'present', cosign: 'verified', slsa: 'attested', attestations: [] };
+    if (!base)
+      return {
+        sbom: 'present',
+        cosign: 'verified',
+        slsa: 'attested',
+        attestations: [],
+      };
     return j<unknown>(`${base}/runs/${encodeURIComponent(runId)}/evidence`);
   }
 
@@ -976,11 +1223,17 @@ export function api() {
         slsa: { verified: true },
         sbom: { present: true },
       };
-    return j<unknown>(`${base}/supplychain/verify`, { method: 'POST', body: JSON.stringify(payload) });
+    return j<unknown>(`${base}/supplychain/verify`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  async function supplychainSbomDiff(payload: { baseUrl: string; headUrl: string }) {
+  async function supplychainSbomDiff(payload: {
+    baseUrl: string;
+    headUrl: string;
+  }) {
     if (!base)
       return {
         diff: {
@@ -997,19 +1250,27 @@ export function api() {
         },
         policyBreach: false,
       };
-    return j<unknown>(`${base}/supplychain/sbom-diff`, { method: 'POST', body: JSON.stringify(payload) });
+    return j<unknown>(`${base}/supplychain/sbom-diff`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    });
   }
 
   async function getServingMetrics() {
-    if (!base) return { summary: { qDepth: 2, batch: 4, kvHit: 0.8 }, series: [] };
+    if (!base)
+      return { summary: { qDepth: 2, batch: 4, kvHit: 0.8 }, series: [] };
     return j<unknown>(`${base}/serving/metrics`);
   }
-  async function getCITrends(params: { sinceMs?: number; stepMs?: number } = {}) {
+  async function getCITrends(
+    params: { sinceMs?: number; stepMs?: number } = {},
+  ) {
     if (!base) return { buckets: [] };
     const q = new URLSearchParams();
     if (params.sinceMs) q.set('sinceMs', String(params.sinceMs));
     if (params.stepMs) q.set('stepMs', String(params.stepMs));
-    return j<unknown>(`${base}/ci/annotations/trends${q.toString() ? `?${q.toString()}` : ''}`);
+    return j<unknown>(
+      `${base}/ci/annotations/trends${q.toString() ? `?${q.toString()}` : ''}`,
+    );
   }
 
   return useMemo(

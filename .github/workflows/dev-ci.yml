@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [ main, feature/dev-aws-green ]
+    branches: [main, feature/dev-aws-green]
 
 permissions:
   contents: read
@@ -54,7 +54,7 @@ jobs:
     services:
       neo4j:
         image: neo4j:5.23-community
-        ports: [ "7687:7687", "7474:7474" ]
+        ports: ['7687:7687', '7474:7474']
         env:
           NEO4J_AUTH: neo4j/testtest
     steps:
@@ -81,4 +81,3 @@ jobs:
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: ${{ runner.os }}-buildx-
       - run: docker buildx build --load -f deploy/docker/Dockerfile -t intelgraph/app:ci . || echo "no root Dockerfile; skipping"
-

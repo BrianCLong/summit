@@ -22,7 +22,7 @@ spec:
         pattern:
           metadata:
             labels:
-              cosign.sigstore.dev/verified: "true"
+              cosign.sigstore.dev/verified: 'true'
     - name: require-slsa-attestation-digest
       match:
         resources:
@@ -35,4 +35,4 @@ spec:
         pattern:
           metadata:
             annotations:
-              disclosures.intelgraph.com/bundle-sha256: "?*"
+              disclosures.intelgraph.com/bundle-sha256: '?*'

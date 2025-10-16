@@ -2,6 +2,7 @@
 
 import yaml
 
+
 def parse_policy_definition(policy_string):
     """Parses a policy definition string (YAML format) into a Python dictionary."""
     try:
@@ -10,6 +11,7 @@ def parse_policy_definition(policy_string):
     except yaml.YAMLError as e:
         print(f"Error parsing policy YAML: {e}")
         return None
+
 
 def generate_policy_from_definition(policy_definition):
     """Generates a callable policy evaluator from a structured policy definition."""
@@ -51,11 +53,11 @@ def generate_policy_from_definition(policy_definition):
 
     def policy_evaluator(policy_data, query_data):
         for rule in policy_definition.get("rules", []):
-            effect = rule.get("effect", "allow") # Default effect is allow
+            effect = rule.get("effect", "allow")  # Default effect is allow
             condition = rule.get("condition", {})
 
             if evaluate_condition(condition, policy_data, query_data):
                 return effect == "allow"
-        return True # Default to allow if no rules match
+        return True  # Default to allow if no rules match
 
     return policy_evaluator

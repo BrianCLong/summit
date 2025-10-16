@@ -22,7 +22,13 @@ interface CanaryConfig {
   runId: string
   version: string
   trafficPercent: number
-  status: 'pending' | 'running' | 'paused' | 'promoting' | 'aborting' | 'completed'
+  status:
+    | 'pending'
+    | 'running'
+    | 'paused'
+    | 'promoting'
+    | 'aborting'
+    | 'completed'
   startedAt: string
   duration: number // minutes
   successCriteria: {
@@ -40,10 +46,15 @@ interface AutoCanaryControllerProps {
   onCanaryComplete?: (success: boolean, metrics: CanaryMetrics) => void
 }
 
-export function AutoCanaryController({ runId, onCanaryComplete }: AutoCanaryControllerProps) {
+export function AutoCanaryController({
+  runId,
+  onCanaryComplete,
+}: AutoCanaryControllerProps) {
   const [canaryConfig, setCanaryConfig] = useState<CanaryConfig | null>(null)
   const [loading, setLoading] = useState(true)
-  const [manualOverride, setManualOverride] = useState<'promote' | 'abort' | null>(null)
+  const [manualOverride, setManualOverride] = useState<
+    'promote' | 'abort' | null
+  >(null)
 
   useEffect(() => {
     fetchCanaryStatus()
@@ -65,18 +76,23 @@ export function AutoCanaryController({ runId, onCanaryComplete }: AutoCanaryCont
     }
   }
 
-  const handleManualAction = async (action: 'promote' | 'abort' | 'pause' | 'resume') => {
+  const handleManualAction = async (
+    action: 'promote' | 'abort' | 'pause' | 'resume'
+  ) => {
     if (!canaryConfig) return
 
     try {
-      const response = await fetch(`/api/maestro/v1/runs/${runId}/canary/${action}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          reason: `Manual ${action} by user`,
-          timestamp: new Date().toISOString()
-        })
-      })
+      const response = await fetch(
+        `/api/maestro/v1/runs/${runId}/canary/${action}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            reason: `Manual ${action} by user`,
+            timestamp: new Date().toISOString(),
+          }),
+        }
+      )
 
       if (response.ok) {
         await fetchCanaryStatus()
@@ -93,13 +109,18 @@ export function AutoCanaryController({ runId, onCanaryComplete }: AutoCanaryCont
     if (!canaryConfig) return 0
 
     const { currentMetrics, baselineMetrics, successCriteria } = canaryConfig
-    
+
     const errorRateOk = currentMetrics.errorRate <= successCriteria.maxErrorRate
     const latencyOk = currentMetrics.p95Latency <= successCriteria.maxP95Latency
-    const successRateOk = currentMetrics.successRate >= successCriteria.minSuccessRate
-    const costOk = (currentMetrics.costPerRequest / baselineMetrics.costPerRequest - 1) <= successCriteria.maxCostIncrease
-    
-    const passedChecks = [errorRateOk, latencyOk, successRateOk, costOk].filter(Boolean).length
+    const successRateOk =
+      currentMetrics.successRate >= successCriteria.minSuccessRate
+    const costOk =
+      currentMetrics.costPerRequest / baselineMetrics.costPerRequest - 1 <=
+      successCriteria.maxCostIncrease
+
+    const passedChecks = [errorRateOk, latencyOk, successRateOk, costOk].filter(
+      Boolean
+    ).length
     return (passedChecks / 4) * 100
   }
 
@@ -148,9 +169,13 @@ export function AutoCanaryController({ runId, onCanaryComplete }: AutoCanaryCont
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center space-x-3">
           <ChartBarIcon className="h-6 w-6 text-blue-600" />
-          <h3 className="text-lg font-semibold text-gray-900">Auto-Canary Controller</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            Auto-Canary Controller
+          </h3>
         </div>
-        <div className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(canaryConfig.status)}`}>
+        <div
+          className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(canaryConfig.status)}`}
+        >
           {canaryConfig.status.toUpperCase()}
         </div>
       </div>
@@ -159,15 +184,17 @@ export function AutoCanaryController({ runId, onCanaryComplete }: AutoCanaryCont
       <div className="mb-6 p-4 bg-gradient-to-r from-blue-50 to-green-50 border border-blue-200 rounded-lg">
         <div className="flex items-center justify-between mb-2">
           <span className="font-medium text-gray-800">Victory Probability</span>
-          <span className="text-2xl font-bold text-blue-900">{victoryProbability.toFixed(1)}%</span>
+          <span className="text-2xl font-bold text-blue-900">
+            {victoryProbability.toFixed(1)}%
+          </span>
         </div>
         <div className="w-full bg-gray-200 rounded-full h-3">
           <div
             className={`h-3 rounded-full transition-all duration-500 ${
-              victoryProbability >= 80 
-                ? 'bg-green-500' 
-                : victoryProbability >= 60 
-                  ? 'bg-yellow-500' 
+              victoryProbability >= 80
+                ? 'bg-green-500'
+                : victoryProbability >= 60
+                  ? 'bg-yellow-500'
                   : 'bg-red-500'
             }`}
             style={{ width: `${victoryProbability}%` }}
@@ -191,7 +218,9 @@ export function AutoCanaryController({ runId, onCanaryComplete }: AutoCanaryCont
         </div>
         <div className="bg-gray-50 p-3 rounded">
           <div className="text-sm text-gray-600">Started</div>
-          <div className="font-semibold">{new Date(canaryConfig.startedAt).toLocaleTimeString()}</div>
+          <div className="font-semibold">
+            {new Date(canaryConfig.startedAt).toLocaleTimeString()}
+          </div>
         </div>
       </div>
 
@@ -203,12 +232,18 @@ export function AutoCanaryController({ runId, onCanaryComplete }: AutoCanaryCont
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-600">Success Rate</span>
             <div className="flex items-center space-x-2">
-              <span className="text-sm font-mono">{canaryConfig.baselineMetrics.successRate.toFixed(2)}%</span>
+              <span className="text-sm font-mono">
+                {canaryConfig.baselineMetrics.successRate.toFixed(2)}%
+              </span>
               <span className="text-gray-400">→</span>
-              <span className={`text-sm font-mono font-semibold ${
-                canaryConfig.currentMetrics.successRate >= canaryConfig.successCriteria.minSuccessRate
-                  ? 'text-green-600' : 'text-red-600'
-              }`}>
+              <span
+                className={`text-sm font-mono font-semibold ${
+                  canaryConfig.currentMetrics.successRate >=
+                  canaryConfig.successCriteria.minSuccessRate
+                    ? 'text-green-600'
+                    : 'text-red-600'
+                }`}
+              >
                 {canaryConfig.currentMetrics.successRate.toFixed(2)}%
               </span>
             </div>
@@ -218,12 +253,18 @@ export function AutoCanaryController({ runId, onCanaryComplete }: AutoCanaryCont
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-600">P95 Latency</span>
             <div className="flex items-center space-x-2">
-              <span className="text-sm font-mono">{canaryConfig.baselineMetrics.p95Latency}ms</span>
+              <span className="text-sm font-mono">
+                {canaryConfig.baselineMetrics.p95Latency}ms
+              </span>
               <span className="text-gray-400">→</span>
-              <span className={`text-sm font-mono font-semibold ${
-                canaryConfig.currentMetrics.p95Latency <= canaryConfig.successCriteria.maxP95Latency
-                  ? 'text-green-600' : 'text-red-600'
-              }`}>
+              <span
+                className={`text-sm font-mono font-semibold ${
+                  canaryConfig.currentMetrics.p95Latency <=
+                  canaryConfig.successCriteria.maxP95Latency
+                    ? 'text-green-600'
+                    : 'text-red-600'
+                }`}
+              >
                 {canaryConfig.currentMetrics.p95Latency}ms
               </span>
             </div>
@@ -233,12 +274,18 @@ export function AutoCanaryController({ runId, onCanaryComplete }: AutoCanaryCont
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-600">Error Rate</span>
             <div className="flex items-center space-x-2">
-              <span className="text-sm font-mono">{canaryConfig.baselineMetrics.errorRate.toFixed(3)}%</span>
+              <span className="text-sm font-mono">
+                {canaryConfig.baselineMetrics.errorRate.toFixed(3)}%
+              </span>
               <span className="text-gray-400">→</span>
-              <span className={`text-sm font-mono font-semibold ${
-                canaryConfig.currentMetrics.errorRate <= canaryConfig.successCriteria.maxErrorRate
-                  ? 'text-green-600' : 'text-red-600'
-              }`}>
+              <span
+                className={`text-sm font-mono font-semibold ${
+                  canaryConfig.currentMetrics.errorRate <=
+                  canaryConfig.successCriteria.maxErrorRate
+                    ? 'text-green-600'
+                    : 'text-red-600'
+                }`}
+              >
                 {canaryConfig.currentMetrics.errorRate.toFixed(3)}%
               </span>
             </div>
@@ -248,12 +295,20 @@ export function AutoCanaryController({ runId, onCanaryComplete }: AutoCanaryCont
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-600">Cost/Request</span>
             <div className="flex items-center space-x-2">
-              <span className="text-sm font-mono">${canaryConfig.baselineMetrics.costPerRequest.toFixed(4)}</span>
+              <span className="text-sm font-mono">
+                ${canaryConfig.baselineMetrics.costPerRequest.toFixed(4)}
+              </span>
               <span className="text-gray-400">→</span>
-              <span className={`text-sm font-mono font-semibold ${
-                (canaryConfig.currentMetrics.costPerRequest / canaryConfig.baselineMetrics.costPerRequest - 1) <= canaryConfig.successCriteria.maxCostIncrease
-                  ? 'text-green-600' : 'text-red-600'
-              }`}>
+              <span
+                className={`text-sm font-mono font-semibold ${
+                  canaryConfig.currentMetrics.costPerRequest /
+                    canaryConfig.baselineMetrics.costPerRequest -
+                    1 <=
+                  canaryConfig.successCriteria.maxCostIncrease
+                    ? 'text-green-600'
+                    : 'text-red-600'
+                }`}
+              >
                 ${canaryConfig.currentMetrics.costPerRequest.toFixed(4)}
               </span>
             </div>
@@ -265,10 +320,19 @@ export function AutoCanaryController({ runId, onCanaryComplete }: AutoCanaryCont
       <div className="mb-6 p-3 bg-gray-50 rounded-lg">
         <h4 className="font-medium text-gray-700 mb-2">Success Criteria</h4>
         <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
-          <div>Max Error Rate: {canaryConfig.successCriteria.maxErrorRate}%</div>
-          <div>Max P95 Latency: {canaryConfig.successCriteria.maxP95Latency}ms</div>
-          <div>Min Success Rate: {canaryConfig.successCriteria.minSuccessRate}%</div>
-          <div>Max Cost Increase: {(canaryConfig.successCriteria.maxCostIncrease * 100).toFixed(1)}%</div>
+          <div>
+            Max Error Rate: {canaryConfig.successCriteria.maxErrorRate}%
+          </div>
+          <div>
+            Max P95 Latency: {canaryConfig.successCriteria.maxP95Latency}ms
+          </div>
+          <div>
+            Min Success Rate: {canaryConfig.successCriteria.minSuccessRate}%
+          </div>
+          <div>
+            Max Cost Increase:{' '}
+            {(canaryConfig.successCriteria.maxCostIncrease * 100).toFixed(1)}%
+          </div>
         </div>
       </div>
 
@@ -282,14 +346,14 @@ export function AutoCanaryController({ runId, onCanaryComplete }: AutoCanaryCont
             <CheckCircleIcon className="h-4 w-4 mr-2" />
             Promote Now
           </button>
-          
+
           <button
             onClick={() => handleManualAction('pause')}
             className="flex items-center justify-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
           >
             <PauseIcon className="h-4 w-4" />
           </button>
-          
+
           <button
             onClick={() => handleManualAction('abort')}
             className="flex-1 flex items-center justify-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
@@ -309,7 +373,7 @@ export function AutoCanaryController({ runId, onCanaryComplete }: AutoCanaryCont
             <PlayIcon className="h-4 w-4 mr-2" />
             Resume Canary
           </button>
-          
+
           <button
             onClick={() => handleManualAction('abort')}
             className="flex-1 flex items-center justify-center px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
@@ -320,10 +384,13 @@ export function AutoCanaryController({ runId, onCanaryComplete }: AutoCanaryCont
         </div>
       )}
 
-      {(canaryConfig.status === 'promoting' || canaryConfig.status === 'aborting') && (
+      {(canaryConfig.status === 'promoting' ||
+        canaryConfig.status === 'aborting') && (
         <div className="flex items-center justify-center py-4 text-gray-600">
           <ArrowPathIcon className="h-5 w-5 mr-2 animate-spin" />
-          {canaryConfig.status === 'promoting' ? 'Promoting deployment...' : 'Aborting canary...'}
+          {canaryConfig.status === 'promoting'
+            ? 'Promoting deployment...'
+            : 'Aborting canary...'}
         </div>
       )}
     </div>

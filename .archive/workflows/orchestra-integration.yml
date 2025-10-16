@@ -377,7 +377,13 @@ jobs:
   orchestra-summary:
     name: 📋 Orchestra Integration Summary
     runs-on: ubuntu-latest
-    needs: [orchestra-setup, orchestra-routing, orchestra-execution, orchestra-observability]
+    needs:
+      [
+        orchestra-setup,
+        orchestra-routing,
+        orchestra-execution,
+        orchestra-observability,
+      ]
     if: always()
     steps:
       - name: Generate Orchestra summary

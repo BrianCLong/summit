@@ -24,6 +24,8 @@ async function main() {
 }
 
 if (process.env.NODE_ENV !== 'test') {
-  main().catch((e) => { console.error(e); process.exit(1); });
+  main().catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });
 }
-

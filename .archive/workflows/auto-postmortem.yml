@@ -14,6 +14,6 @@ jobs:
       - name: Draft PM
         uses: peter-evans/create-issue-from-file@v5
         with:
-          title: "Postmortem: #${{ github.event.issue.number }}"
+          title: 'Postmortem: #${{ github.event.issue.number }}'
           content-file: runbooks/postmortem_template.md
           labels: postmortem

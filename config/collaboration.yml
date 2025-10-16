@@ -3,46 +3,46 @@
 
 collaboration:
   enabled: true
-  
+
   # WebSocket Server Configuration
   websocket:
     port: 8080
-    host: "0.0.0.0"
-    path: "/ws"
+    host: '0.0.0.0'
+    path: '/ws'
     max_connections: 10000
-    heartbeat_interval: 30000  # 30 seconds
-    timeout: 60000  # 1 minute
+    heartbeat_interval: 30000 # 30 seconds
+    timeout: 60000 # 1 minute
     compression: true
-    
+
   # Session Management
   sessions:
     max_concurrent: 1000
     max_participants_per_session: 50
-    session_timeout: 86400000  # 24 hours
-    cleanup_interval: 300000   # 5 minutes
+    session_timeout: 86400000 # 24 hours
+    cleanup_interval: 300000 # 5 minutes
     allow_guest_sessions: true
     require_authentication: true
-    
+
   # Operational Transforms
   operations:
     max_operations_per_session: 100000
-    operation_history_retention: 604800000  # 7 days
-    conflict_resolution_timeout: 5000  # 5 seconds
+    operation_history_retention: 604800000 # 7 days
+    conflict_resolution_timeout: 5000 # 5 seconds
     auto_transform: true
     merge_conflicts: true
-    
-  # Presence Management  
+
+  # Presence Management
   presence:
-    heartbeat_interval: 30000    # 30 seconds
-    idle_timeout: 300000         # 5 minutes
-    away_timeout: 900000         # 15 minutes
-    offline_timeout: 60000       # 1 minute
-    cursor_update_throttle: 50   # 20fps
-    selection_update_throttle: 100  # 10fps
+    heartbeat_interval: 30000 # 30 seconds
+    idle_timeout: 300000 # 5 minutes
+    away_timeout: 900000 # 15 minutes
+    offline_timeout: 60000 # 1 minute
+    cursor_update_throttle: 50 # 20fps
+    selection_update_throttle: 100 # 10fps
     max_presence_history: 1000
     enable_activity_tracking: true
     enable_cursor_smoothing: true
-    
+
   # Real-time Features
   features:
     chat:
@@ -52,207 +52,207 @@ collaboration:
       file_attachments: true
       emoji_reactions: true
       threading: true
-      
+
     voice:
       enabled: false
-      codec: "opus"
+      codec: 'opus'
       bitrate: 64000
       echo_cancellation: true
       noise_suppression: true
-      
+
     video:
       enabled: false
-      resolution: "720p"
+      resolution: '720p'
       framerate: 30
       screen_sharing: true
-      
+
     whiteboard:
       enabled: true
       max_strokes: 10000
-      export_formats: ["png", "svg", "pdf"]
-      
+      export_formats: ['png', 'svg', 'pdf']
+
     annotations:
       enabled: true
-      types: ["note", "highlight", "arrow", "shape"]
+      types: ['note', 'highlight', 'arrow', 'shape']
       persistence: true
-      
+
   # Conflict Resolution
   conflict_resolution:
-    strategy: "operational_transform"  # operational_transform, last_write_wins, manual
-    auto_resolve_threshold: 0.8  # Confidence threshold for auto-resolution
+    strategy: 'operational_transform' # operational_transform, last_write_wins, manual
+    auto_resolve_threshold: 0.8 # Confidence threshold for auto-resolution
     preserve_user_intent: true
     maintain_consistency: true
-    
+
     resolution_strategies:
-      concurrent_edit: "merge"
-      version_mismatch: "transform"
-      permission_denied: "reject" 
-      data_validation: "manual"
-      
+      concurrent_edit: 'merge'
+      version_mismatch: 'transform'
+      permission_denied: 'reject'
+      data_validation: 'manual'
+
   # Permissions and Security
   permissions:
-    default_role: "viewer"
+    default_role: 'viewer'
     roles:
       owner:
-        - "read"
-        - "write" 
-        - "delete"
-        - "admin"
-        - "share"
-        - "export"
+        - 'read'
+        - 'write'
+        - 'delete'
+        - 'admin'
+        - 'share'
+        - 'export'
       admin:
-        - "read"
-        - "write"
-        - "delete"
-        - "share"
-        - "export"
+        - 'read'
+        - 'write'
+        - 'delete'
+        - 'share'
+        - 'export'
       editor:
-        - "read"
-        - "write"
-        - "share"
+        - 'read'
+        - 'write'
+        - 'share'
       viewer:
-        - "read"
-        
+        - 'read'
+
     session_controls:
-      lock_session: ["admin", "owner"]
-      kick_user: ["admin", "owner"] 
-      change_permissions: ["owner"]
-      record_session: ["admin", "owner"]
-      
+      lock_session: ['admin', 'owner']
+      kick_user: ['admin', 'owner']
+      change_permissions: ['owner']
+      record_session: ['admin', 'owner']
+
   # Data Synchronization
   sync:
     batch_operations: true
     batch_size: 100
-    batch_timeout: 1000  # 1 second
+    batch_timeout: 1000 # 1 second
     optimistic_updates: true
     rollback_on_conflict: true
-    
+
     compression:
       enabled: true
-      algorithm: "gzip"
-      threshold: 1024  # bytes
-      
+      algorithm: 'gzip'
+      threshold: 1024 # bytes
+
   # Performance Optimization
   performance:
-    operation_debounce: 100  # ms
-    presence_throttle: 50    # ms
+    operation_debounce: 100 # ms
+    presence_throttle: 50 # ms
     message_queue_size: 1000
     worker_threads: 4
     memory_limit_mb: 512
-    
+
     caching:
       session_state: true
       operation_history: true
       presence_data: true
-      cache_ttl: 300  # 5 minutes
-      
+      cache_ttl: 300 # 5 minutes
+
   # Analytics and Monitoring
   analytics:
     enabled: true
     track_user_activity: true
     track_session_metrics: true
     track_performance_metrics: true
-    
+
     metrics:
-      - "concurrent_sessions"
-      - "active_users"
-      - "operations_per_second"
-      - "message_latency"
-      - "conflict_rate"
-      - "session_duration"
-      
+      - 'concurrent_sessions'
+      - 'active_users'
+      - 'operations_per_second'
+      - 'message_latency'
+      - 'conflict_rate'
+      - 'session_duration'
+
     retention:
-      session_analytics: 30  # days
-      user_analytics: 90     # days
+      session_analytics: 30 # days
+      user_analytics: 90 # days
       performance_metrics: 7 # days
-      
+
   # Storage Configuration
   storage:
     operations:
-      provider: "redis"  # redis, mongodb, postgresql
-      host: "${REDIS_HOST}"
-      port: "${REDIS_PORT}"
+      provider: 'redis' # redis, mongodb, postgresql
+      host: '${REDIS_HOST}'
+      port: '${REDIS_PORT}'
       database: 1
-      
+
     sessions:
-      provider: "redis"
-      host: "${REDIS_HOST}"
-      port: "${REDIS_PORT}"
+      provider: 'redis'
+      host: '${REDIS_HOST}'
+      port: '${REDIS_PORT}'
       database: 2
-      
+
     chat:
-      provider: "mongodb"
-      connection_string: "${MONGODB_URL}"
-      database: "collaboration"
-      collection: "chat_messages"
-      
+      provider: 'mongodb'
+      connection_string: '${MONGODB_URL}'
+      database: 'collaboration'
+      collection: 'chat_messages'
+
     presence:
-      provider: "memory"  # memory, redis
-      ttl: 300  # 5 minutes
-      
+      provider: 'memory' # memory, redis
+      ttl: 300 # 5 minutes
+
   # Integration Configuration
   integrations:
     # Slack Integration
     slack:
       enabled: false
-      webhook_url: "${SLACK_WEBHOOK_URL}"
+      webhook_url: '${SLACK_WEBHOOK_URL}'
       notify_on_session_start: true
       notify_on_conflicts: true
-      
+
     # Microsoft Teams
     teams:
       enabled: false
-      webhook_url: "${TEAMS_WEBHOOK_URL}"
-      
+      webhook_url: '${TEAMS_WEBHOOK_URL}'
+
     # Email Notifications
     email:
       enabled: true
-      smtp_server: "${SMTP_SERVER}"
-      sender: "noreply@intelgraph.com"
+      smtp_server: '${SMTP_SERVER}'
+      sender: 'noreply@intelgraph.com'
       notify_on_invite: true
       notify_on_session_end: true
-      
+
     # Calendar Integration
     calendar:
       enabled: false
-      provider: "google"  # google, outlook, ical
+      provider: 'google' # google, outlook, ical
       create_events: false
-      
+
   # Security Configuration
   security:
     authentication:
       required: true
-      providers: ["jwt", "oauth2", "saml"]
-      session_timeout: 3600000  # 1 hour
-      
+      providers: ['jwt', 'oauth2', 'saml']
+      session_timeout: 3600000 # 1 hour
+
     authorization:
       enable_rbac: true
       check_permissions_realtime: true
-      
+
     encryption:
-      enable_transport: true  # WSS
+      enable_transport: true # WSS
       enable_at_rest: false
-      algorithm: "AES-256-GCM"
-      
+      algorithm: 'AES-256-GCM'
+
     rate_limiting:
       enabled: true
       operations_per_minute: 1000
       messages_per_minute: 100
       connections_per_ip: 10
-      
+
     audit:
       log_operations: true
-      log_messages: false  # Privacy consideration
+      log_messages: false # Privacy consideration
       log_presence: false
       retention_days: 90
-      
+
   # Development and Testing
   development:
     enable_debug_logs: false
     mock_users: false
-    simulate_latency: 0  # ms
-    simulate_packet_loss: 0  # percentage
-    
+    simulate_latency: 0 # ms
+    simulate_packet_loss: 0 # percentage
+
     testing:
       load_test_mode: false
       max_test_sessions: 100
@@ -269,7 +269,7 @@ environments:
       development:
         enable_debug_logs: true
         mock_users: true
-        
+
   staging:
     collaboration:
       websocket:
@@ -279,7 +279,7 @@ environments:
       security:
         rate_limiting:
           operations_per_minute: 500
-          
+
   production:
     collaboration:
       websocket:

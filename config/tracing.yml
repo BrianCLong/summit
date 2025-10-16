@@ -3,92 +3,92 @@
 
 tracing:
   enabled: true
-  
+
   # Service Information
   service:
-    name: "intelgraph"
-    version: "${APP_VERSION}"
-    environment: "${NODE_ENV}"
-    instance_id: "${HOSTNAME}"
-    
+    name: 'intelgraph'
+    version: '${APP_VERSION}'
+    environment: '${NODE_ENV}'
+    instance_id: '${HOSTNAME}'
+
   # OpenTelemetry Configuration
   otel:
     # SDK Configuration
     sdk:
       auto_instrumentations: true
       resource_detection: true
-      
+
     # Resource Attributes
     resource:
-      service.name: "intelgraph"
-      service.version: "${APP_VERSION}"
-      service.instance.id: "${HOSTNAME}"
-      deployment.environment: "${NODE_ENV}"
+      service.name: 'intelgraph'
+      service.version: '${APP_VERSION}'
+      service.instance.id: '${HOSTNAME}'
+      deployment.environment: '${NODE_ENV}'
       # Custom attributes
-      team: "platform"
-      component: "intelligence-analysis"
-      layer: "application"
-      
+      team: 'platform'
+      component: 'intelligence-analysis'
+      layer: 'application'
+
   # Trace Exporters
   exporters:
     # Jaeger Exporter
     jaeger:
       enabled: true
-      endpoint: "${JAEGER_ENDPOINT}"
+      endpoint: '${JAEGER_ENDPOINT}'
       headers:
-        authorization: "Bearer ${JAEGER_API_KEY}"
-      batch_timeout: 5000  # 5 seconds
+        authorization: 'Bearer ${JAEGER_API_KEY}'
+      batch_timeout: 5000 # 5 seconds
       max_export_batch_size: 512
       max_queue_size: 2048
-      
-    # Zipkin Exporter  
+
+    # Zipkin Exporter
     zipkin:
       enabled: false
-      endpoint: "${ZIPKIN_ENDPOINT}"
+      endpoint: '${ZIPKIN_ENDPOINT}'
       headers: {}
-      
+
     # OTLP Exporter (OpenTelemetry Protocol)
     otlp:
       enabled: true
-      endpoint: "${OTEL_EXPORTER_OTLP_ENDPOINT}"
+      endpoint: '${OTEL_EXPORTER_OTLP_ENDPOINT}'
       headers:
-        authorization: "Bearer ${OTEL_API_KEY}"
-      compression: "gzip"
-      timeout: 10000  # 10 seconds
-      
+        authorization: 'Bearer ${OTEL_API_KEY}'
+      compression: 'gzip'
+      timeout: 10000 # 10 seconds
+
     # Console Exporter (for development)
     console:
-      enabled: false  # Set to true for development
-      
+      enabled: false # Set to true for development
+
   # Sampling Configuration
   sampling:
     # Default sampling ratio (0.0 to 1.0)
-    ratio: 0.1  # 10% of traces
-    
+    ratio: 0.1 # 10% of traces
+
     # Rules-based sampling
     rules:
-      - service_name: "intelgraph"
-        operation_name: "/health"
-        sampling_ratio: 0.01  # 1% for health checks
-        
-      - service_name: "intelgraph"
-        operation_name: "/api/v1/*"
-        sampling_ratio: 0.3   # 30% for API calls
-        
-      - service_name: "intelgraph"
-        operation_name: "graphql*"
-        sampling_ratio: 0.5   # 50% for GraphQL operations
-        
-      - service_name: "intelgraph"
-        span_kind: "CONSUMER"
-        sampling_ratio: 1.0   # 100% for message consumers
-        
+      - service_name: 'intelgraph'
+        operation_name: '/health'
+        sampling_ratio: 0.01 # 1% for health checks
+
+      - service_name: 'intelgraph'
+        operation_name: '/api/v1/*'
+        sampling_ratio: 0.3 # 30% for API calls
+
+      - service_name: 'intelgraph'
+        operation_name: 'graphql*'
+        sampling_ratio: 0.5 # 50% for GraphQL operations
+
+      - service_name: 'intelgraph'
+        span_kind: 'CONSUMER'
+        sampling_ratio: 1.0 # 100% for message consumers
+
     # Error-based sampling (always sample errors)
     sample_on_error: true
-    
+
     # Parent-based sampling
     parent_based: true
-    
+
   # Instrumentation Configuration
   instrumentations:
     # HTTP Client/Server
@@ -97,301 +97,317 @@ tracing:
       capture_headers: true
       sanitize_headers: true
       ignored_paths:
-        - "/health"
-        - "/metrics"
-        - "/favicon.ico"
+        - '/health'
+        - '/metrics'
+        - '/favicon.ico'
       request_hook: true
       response_hook: true
-      
+
     # Express Framework
     express:
       enabled: true
       ignore_incoming_requests: false
       request_hook: true
-      
+
     # GraphQL
     graphql:
       enabled: true
       merge_items: true
       depth: 10
-      
+
     # Database Instrumentations
     mongodb:
       enabled: true
       enhanced_database_reporting: true
       capture_statement: true
-      db_statement_serializer: "default"
-      
+      db_statement_serializer: 'default'
+
     redis:
       enabled: true
       capture_statement: true
-      db_statement_serializer: "redis"
-      
+      db_statement_serializer: 'redis'
+
     neo4j:
       enabled: true
       capture_statement: true
-      
+
     # Messaging
     kafka:
       enabled: true
       producer_hook: true
       consumer_hook: true
-      
+
     amqp:
       enabled: false
-      
+
     # Other instrumentations
     fs:
-      enabled: false  # Can be noisy
-      
+      enabled: false # Can be noisy
+
     dns:
-      enabled: false  # Can be noisy
-      
+      enabled: false # Can be noisy
+
   # Performance Profiling
   profiling:
     enabled: true
-    
+
     # CPU Profiling
     cpu:
       enabled: true
-      interval: 1000  # 1 second
-      duration: 30000  # 30 seconds
-      
+      interval: 1000 # 1 second
+      duration: 30000 # 30 seconds
+
     # Memory Profiling
     memory:
       enabled: true
-      interval: 5000   # 5 seconds
+      interval: 5000 # 5 seconds
       heap_snapshots: true
-      
+
     # Slow Operation Detection
     slow_operations:
       enabled: true
-      threshold: 1000  # 1 second
-      
+      threshold: 1000 # 1 second
+
     # Resource Usage Tracking
     resources:
       enabled: true
       track_memory: true
       track_cpu: true
       track_handles: true
-      
+
   # Custom Attributes and Tags
   attributes:
     # Always added to spans
     global:
-      environment: "${NODE_ENV}"
-      region: "${AWS_REGION}"
-      cluster: "${CLUSTER_NAME}"
-      pod_name: "${POD_NAME}"
-      node_name: "${NODE_NAME}"
-      
+      environment: '${NODE_ENV}'
+      region: '${AWS_REGION}'
+      cluster: '${CLUSTER_NAME}'
+      pod_name: '${POD_NAME}'
+      node_name: '${NODE_NAME}'
+
     # Service-specific attributes
     service_specific:
-      intelgraph.component: "core"
-      intelgraph.version: "${APP_VERSION}"
-      intelgraph.deployment_id: "${DEPLOYMENT_ID}"
-      
+      intelgraph.component: 'core'
+      intelgraph.version: '${APP_VERSION}'
+      intelgraph.deployment_id: '${DEPLOYMENT_ID}'
+
   # Baggage Configuration
   baggage:
     enabled: true
     max_members: 180
     max_bytes: 8192
-    
+
     # Propagation keys
     propagate:
-      - "user.id"
-      - "session.id" 
-      - "trace.feature"
-      - "tenant.id"
-      
+      - 'user.id'
+      - 'session.id'
+      - 'trace.feature'
+      - 'tenant.id'
+
   # Context Propagation
   propagation:
     # Propagators to use
     propagators:
-      - "tracecontext"   # W3C Trace Context
-      - "baggage"        # W3C Baggage
-      - "b3"             # B3 (Zipkin)
-      - "jaeger"         # Jaeger
-      
+      - 'tracecontext' # W3C Trace Context
+      - 'baggage' # W3C Baggage
+      - 'b3' # B3 (Zipkin)
+      - 'jaeger' # Jaeger
+
   # Span Configuration
   spans:
     # Maximum span attributes
     max_attributes: 128
     max_events: 128
     max_links: 128
-    
+
     # Attribute value limits
     attribute_value_length_limit: 1024
     attribute_count_limit: 128
-    
+
     # Event limits
     event_count_limit: 128
     link_count_limit: 128
-    
+
   # Metrics Integration
   metrics:
     enabled: true
-    
+
     # Runtime metrics
     runtime:
       enabled: true
-      interval: 10000  # 10 seconds
-      
+      interval: 10000 # 10 seconds
+
     # Trace metrics
     traces:
       enabled: true
-      histogram_buckets: [0.005, 0.01, 0.025, 0.05, 0.075, 0.1, 0.25, 0.5, 0.75, 1.0, 2.5, 5.0, 7.5, 10.0]
-      
+      histogram_buckets:
+        [
+          0.005,
+          0.01,
+          0.025,
+          0.05,
+          0.075,
+          0.1,
+          0.25,
+          0.5,
+          0.75,
+          1.0,
+          2.5,
+          5.0,
+          7.5,
+          10.0,
+        ]
+
   # Logging Integration
   logging:
     # Correlation
     correlation:
       enabled: true
-      trace_id_key: "trace_id"
-      span_id_key: "span_id"
-      
+      trace_id_key: 'trace_id'
+      span_id_key: 'span_id'
+
     # Log injection
     inject_trace_id: true
-    
+
   # Error Tracking
   error_tracking:
     enabled: true
-    
+
     # Error attributes to capture
     capture_attributes:
-      - "error.type"
-      - "error.message"
-      - "error.stack"
-      - "error.code"
-      
+      - 'error.type'
+      - 'error.message'
+      - 'error.stack'
+      - 'error.code'
+
     # Stack trace configuration
     stack_traces:
       enabled: true
-      limit: 50  # lines
-      
+      limit: 50 # lines
+
   # Service Dependencies
   dependencies:
     # Dependency mapping
     mapping:
       enabled: true
-      analysis_interval: 300000  # 5 minutes
-      retention_period: 86400000  # 24 hours
-      
+      analysis_interval: 300000 # 5 minutes
+      retention_period: 86400000 # 24 hours
+
     # Critical path analysis
     critical_paths:
       enabled: true
       max_paths: 10
-      min_duration: 100  # milliseconds
-      
+      min_duration: 100 # milliseconds
+
     # Anomaly detection
     anomaly_detection:
       enabled: true
-      latency_threshold: 2.0  # 2x increase
-      error_threshold: 0.1    # 10% error rate
-      
+      latency_threshold: 2.0 # 2x increase
+      error_threshold: 0.1 # 10% error rate
+
   # Security and Privacy
   security:
     # Data sanitization
     sanitization:
       enabled: true
-      
+
       # Sanitize HTTP headers
       sanitize_headers:
-        - "authorization"
-        - "cookie"
-        - "x-api-key"
-        - "x-auth-token"
-        
+        - 'authorization'
+        - 'cookie'
+        - 'x-api-key'
+        - 'x-auth-token'
+
       # Sanitize URL parameters
       sanitize_params:
-        - "password"
-        - "token"
-        - "secret"
-        - "key"
-        
+        - 'password'
+        - 'token'
+        - 'secret'
+        - 'key'
+
       # Sanitize SQL queries
       sanitize_sql: true
-      
+
     # PII Protection
     pii_protection:
       enabled: true
       detect_patterns: true
-      
+
   # Development and Debug
   debug:
     enabled: false
-    log_level: "info"  # error, warn, info, debug
+    log_level: 'info' # error, warn, info, debug
     console_span_exporter: false
-    
+
   # Advanced Configuration
   advanced:
     # Resource detection
     resource_detection:
       enabled: true
       detectors:
-        - "env"
-        - "host"
-        - "os"
-        - "process"
-        - "docker"
-        - "k8s"
-        - "aws"
-        - "gcp"
-        - "azure"
-        
+        - 'env'
+        - 'host'
+        - 'os'
+        - 'process'
+        - 'docker'
+        - 'k8s'
+        - 'aws'
+        - 'gcp'
+        - 'azure'
+
     # Batch Span Processor
     batch_processor:
-      schedule_delay: 5000      # 5 seconds
-      export_timeout: 30000     # 30 seconds
+      schedule_delay: 5000 # 5 seconds
+      export_timeout: 30000 # 30 seconds
       max_export_batch_size: 512
       max_queue_size: 2048
-      
+
     # Memory management
     memory:
       max_spans_in_memory: 10000
-      cleanup_interval: 60000   # 1 minute
-      
+      cleanup_interval: 60000 # 1 minute
+
 # Environment-specific overrides
 environments:
   development:
     tracing:
       sampling:
-        ratio: 1.0  # 100% sampling in development
+        ratio: 1.0 # 100% sampling in development
       exporters:
         console:
           enabled: true
         jaeger:
-          endpoint: "http://localhost:14268/api/traces"
+          endpoint: 'http://localhost:14268/api/traces'
       debug:
         enabled: true
-        log_level: "debug"
+        log_level: 'debug'
         console_span_exporter: true
-        
+
   staging:
     tracing:
       sampling:
-        ratio: 0.5  # 50% sampling in staging
+        ratio: 0.5 # 50% sampling in staging
       exporters:
         jaeger:
-          endpoint: "${JAEGER_STAGING_ENDPOINT}"
+          endpoint: '${JAEGER_STAGING_ENDPOINT}'
         otlp:
-          endpoint: "${OTEL_STAGING_ENDPOINT}"
-          
+          endpoint: '${OTEL_STAGING_ENDPOINT}'
+
   production:
     tracing:
       sampling:
-        ratio: 0.1  # 10% sampling in production
+        ratio: 0.1 # 10% sampling in production
       exporters:
         jaeger:
           enabled: true
-          endpoint: "${JAEGER_PROD_ENDPOINT}"
+          endpoint: '${JAEGER_PROD_ENDPOINT}'
         otlp:
-          enabled: true 
-          endpoint: "${OTEL_PROD_ENDPOINT}"
+          enabled: true
+          endpoint: '${OTEL_PROD_ENDPOINT}'
       profiling:
         cpu:
-          duration: 60000  # 1 minute in production
+          duration: 60000 # 1 minute in production
         memory:
-          interval: 10000  # 10 seconds in production
+          interval: 10000 # 10 seconds in production
       advanced:
-        max_spans_in_memory: 5000  # Reduced for production
+        max_spans_in_memory: 5000 # Reduced for production

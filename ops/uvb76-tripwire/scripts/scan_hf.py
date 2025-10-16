@@ -9,8 +9,8 @@ import subprocess
 import sys
 import tempfile
 import time
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable
 
 import soundfile as sf
 
@@ -21,7 +21,9 @@ else:  # pragma: no branch
     from detector import utils
 
 
-def iter_frequencies(start: float, end: float, step: float, avoid: Iterable[float]) -> Iterable[float]:
+def iter_frequencies(
+    start: float, end: float, step: float, avoid: Iterable[float]
+) -> Iterable[float]:
     avoid_set = {round(freq, 3) for freq in avoid}
     freq = start
     while freq <= end:
@@ -36,7 +38,9 @@ def run_capture(command_template: str, freq: float, dwell: float, output_dir: Pa
     subprocess.run(shlex.split(cmd), check=False)
 
 
-def analyze_directory(temp_dir: Path, cfg: dict, freq: float, sensor_id: str | None, events_file: Path) -> None:
+def analyze_directory(
+    temp_dir: Path, cfg: dict, freq: float, sensor_id: str | None, events_file: Path
+) -> None:
     for wav_path in sorted(temp_dir.glob("*.wav")):
         audio, fs = utils.load_audio(wav_path)
         filtered = utils.bandpass(audio, fs)
@@ -67,7 +71,11 @@ def analyze_directory(temp_dir: Path, cfg: dict, freq: float, sensor_id: str | N
 def main() -> None:
     parser = argparse.ArgumentParser(description="Sweep HF spectrum and detect bursts")
     parser.add_argument("--config", required=True, type=Path)
-    parser.add_argument("--capture-cmd", required=True, help="Command template with {freq}, {dwell}, {out} placeholders")
+    parser.add_argument(
+        "--capture-cmd",
+        required=True,
+        help="Command template with {freq}, {dwell}, {out} placeholders",
+    )
     parser.add_argument("--sensor-id", help="Optional sensor identifier", default=None)
     parser.add_argument("--sleep", type=float, default=1.0, help="Delay between steps")
     args = parser.parse_args()

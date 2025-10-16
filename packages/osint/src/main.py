@@ -1,8 +1,8 @@
 """Minimal OSINT service providing HTML-to-text extraction."""
 
+from bs4 import BeautifulSoup
 from fastapi import FastAPI
 from pydantic import BaseModel
-from bs4 import BeautifulSoup
 
 app = FastAPI(title="OSINT Service")
 

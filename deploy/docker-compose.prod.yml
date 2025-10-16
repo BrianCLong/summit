@@ -1,4 +1,4 @@
-version: "3.9"
+version: '3.9'
 
 services:
   summit:
@@ -13,9 +13,9 @@ services:
       - JWT_SECRET=${JWT_SECRET}
       - OTEL_EXPORTER_OTLP_ENDPOINT=${OTEL_EXPORTER_OTLP_ENDPOINT:-}
     ports:
-      - "127.0.0.1:3000:3000"
+      - '127.0.0.1:3000:3000'
     healthcheck:
-      test: ["CMD", "curl", "-sf", "http://localhost:3000/healthz"]
+      test: ['CMD', 'curl', '-sf', 'http://localhost:3000/healthz']
       interval: 15s
       timeout: 3s
       retries: 20
@@ -24,9 +24,9 @@ services:
       - ./logs:/app/logs
       - ./data:/app/data
     labels:
-      - "app=summit"
-      - "env=production"
-      - "version=${TAG:-latest}"
+      - 'app=summit'
+      - 'env=production'
+      - 'version=${TAG:-latest}'
     networks:
       - summit-network
 
@@ -35,7 +35,7 @@ services:
     image: redis:7-alpine
     restart: always
     ports:
-      - "127.0.0.1:6379:6379"
+      - '127.0.0.1:6379:6379'
     volumes:
       - redis-data:/data
     command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru

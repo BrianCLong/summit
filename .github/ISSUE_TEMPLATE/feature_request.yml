@@ -1,5 +1,5 @@
 name: Feature request
-labels: ["prio:P1"]
+labels: ['prio:P1']
 body:
   - type: textarea
     id: context
@@ -15,7 +15,20 @@ body:
     id: area
     attributes:
       label: Area
-      options: [Graph, Ingest, ER, Analytics, Copilot, Governance, Prov-Ledger, Ops, UI, Docs, Fuzzer]
+      options:
+        [
+          Graph,
+          Ingest,
+          ER,
+          Analytics,
+          Copilot,
+          Governance,
+          Prov-Ledger,
+          Ops,
+          UI,
+          Docs,
+          Fuzzer,
+        ]
   - type: input
     id: exit
     attributes:

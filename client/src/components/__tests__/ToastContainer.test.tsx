@@ -1,5 +1,11 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from '@testing-library/react';
 import { ToastProvider, useToast, useToastHelpers } from '../ToastContainer';
 
 // Test component that uses the toast hook
@@ -9,11 +15,21 @@ function TestComponent() {
 
   return (
     <div>
-      <button onClick={() => addToast({ type: 'info', title: 'Test Toast' })}>Add Toast</button>
-      <button onClick={() => success('Success!', 'Operation completed')}>Success Toast</button>
-      <button onClick={() => error('Error!', 'Something went wrong')}>Error Toast</button>
-      <button onClick={() => warning('Warning!', 'Please be careful')}>Warning Toast</button>
-      <button onClick={() => info('Info', 'Just so you know')}>Info Toast</button>
+      <button onClick={() => addToast({ type: 'info', title: 'Test Toast' })}>
+        Add Toast
+      </button>
+      <button onClick={() => success('Success!', 'Operation completed')}>
+        Success Toast
+      </button>
+      <button onClick={() => error('Error!', 'Something went wrong')}>
+        Error Toast
+      </button>
+      <button onClick={() => warning('Warning!', 'Please be careful')}>
+        Warning Toast
+      </button>
+      <button onClick={() => info('Info', 'Just so you know')}>
+        Info Toast
+      </button>
       <button onClick={clearAllToasts}>Clear All</button>
     </div>
   );
@@ -172,7 +188,9 @@ describe('ToastContainer', () => {
   });
 
   test('toast positioning works correctly', () => {
-    const { rerender } = renderWithToastProvider(<TestComponent />, { position: 'top-left' });
+    const { rerender } = renderWithToastProvider(<TestComponent />, {
+      position: 'top-left',
+    });
 
     fireEvent.click(screen.getByText('Add Toast'));
 
@@ -240,7 +258,9 @@ describe('ToastContainer', () => {
     // Wait for toast to appear and check for animation classes
     await waitFor(() => {
       const el = screen.getByText('Test Toast');
-      const animated = (el as HTMLElement).closest('[class*="transition-all"]') as HTMLElement | null;
+      const animated = (el as HTMLElement).closest(
+        '[class*="transition-all"]',
+      ) as HTMLElement | null;
       expect(animated).toBeTruthy();
       expect(animated).toHaveClass('transition-all');
       expect(animated).toHaveClass('duration-300');
@@ -264,7 +284,9 @@ describe('ToastContainer', () => {
     render(<TestOutsideProvider />);
 
     expect(screen.getByText(/Error caught/)).toBeInTheDocument();
-    expect(screen.getByText(/must be used within ToastProvider/)).toBeInTheDocument();
+    expect(
+      screen.getByText(/must be used within ToastProvider/),
+    ).toBeInTheDocument();
 
     console.error = originalError;
   });

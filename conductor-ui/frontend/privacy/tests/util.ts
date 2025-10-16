@@ -10,15 +10,16 @@ export interface LogEntry {
 
 export async function getLogs(
   logPath: string = process.env.LOG_PATH || './logs',
-  maxLines: number = 10000
+  maxLines: number = 10000,
 ): Promise<string> {
   try {
     // In production, this would connect to your logging infrastructure
     // For testing, we'll read from local log files or mock data
-    
+
     if (fs.existsSync(logPath)) {
-      const files = fs.readdirSync(logPath)
-        .filter(f => f.endsWith('.log'))
+      const files = fs
+        .readdirSync(logPath)
+        .filter((f) => f.endsWith('.log'))
         .sort()
         .reverse(); // Most recent first
 
@@ -27,11 +28,11 @@ export async function getLogs(
 
       for (const file of files) {
         if (lineCount >= maxLines) break;
-        
+
         const filePath = path.join(logPath, file);
         const content = fs.readFileSync(filePath, 'utf-8');
         const lines = content.split('\n').slice(0, maxLines - lineCount);
-        
+
         allLogs += lines.join('\n') + '\n';
         lineCount += lines.length;
       }
@@ -57,8 +58,8 @@ function generateMockLogs(): string {
         userId: 'user-123',
         tenantId: 'tenant-456',
         // Note: email should be scrubbed from actual logs
-        ipAddress: '10.0.0.1'
-      }
+        ipAddress: '10.0.0.1',
+      },
     },
     {
       timestamp: new Date().toISOString(),
@@ -68,7 +69,7 @@ function generateMockLogs(): string {
         query: 'SELECT * FROM events WHERE tenant_id = ?',
         duration: '45ms',
         // Note: parameters should be scrubbed
-      }
+      },
     },
     {
       timestamp: new Date().toISOString(),
@@ -77,17 +78,17 @@ function generateMockLogs(): string {
       metadata: {
         reason: 'invalid_token',
         // Note: no sensitive token data should appear
-        ipAddress: '192.168.1.100'
-      }
-    }
+        ipAddress: '192.168.1.100',
+      },
+    },
   ];
 
-  return mockEntries
-    .map(entry => JSON.stringify(entry))
-    .join('\n');
+  return mockEntries.map((entry) => JSON.stringify(entry)).join('\n');
 }
 
-export async function getMetrics(metricsEndpoint: string = 'http://localhost:9090/metrics'): Promise<string> {
+export async function getMetrics(
+  metricsEndpoint: string = 'http://localhost:9090/metrics',
+): Promise<string> {
   try {
     // In production, this would fetch from Prometheus
     const response = await fetch(metricsEndpoint);
@@ -125,19 +126,26 @@ export class PrivacyValidator {
     /authorization:\s*bearer\s+[\w\d\-_.]+/gi, // Auth tokens
   ];
 
-  public static validateNoPII(content: string): { valid: boolean; violations: string[] } {
+  public static validateNoPII(content: string): {
+    valid: boolean;
+    violations: string[];
+  } {
     const violations: string[] = [];
 
     for (const pattern of this.PII_PATTERNS) {
       const matches = content.match(pattern);
       if (matches) {
-        violations.push(...matches.map(match => `PII detected: ${match.substring(0, 20)}...`));
+        violations.push(
+          ...matches.map(
+            (match) => `PII detected: ${match.substring(0, 20)}...`,
+          ),
+        );
       }
     }
 
     return {
       valid: violations.length === 0,
-      violations
+      violations,
     };
   }
 
@@ -145,17 +153,25 @@ export class PrivacyValidator {
     let scrubbed = content;
 
     // Replace emails with [EMAIL_REDACTED]
-    scrubbed = scrubbed.replace(/\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g, '[EMAIL_REDACTED]');
-    
+    scrubbed = scrubbed.replace(
+      /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
+      '[EMAIL_REDACTED]',
+    );
+
     // Replace SSNs with [SSN_REDACTED]
     scrubbed = scrubbed.replace(/\b\d{3}-\d{2}-\d{4}\b/g, '[SSN_REDACTED]');
-    
+
     // Replace credit cards with [CC_REDACTED]
-    scrubbed = scrubbed.replace(/\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b/g, '[CC_REDACTED]');
-    
+    scrubbed = scrubbed.replace(
+      /\b\d{4}[-\s]?\d{4}[-\s]?\d{4}[-\s]?\d{4}\b/g,
+      '[CC_REDACTED]',
+    );
+
     // Replace passwords/secrets
-    scrubbed = scrubbed.replace(/\b(?:password|pwd|secret|token|key)[:=]\s*[\w\d\-_.@$#!%^&*()]+/gi, 
-      (match) => match.split(/[:=]/)[0] + '=[REDACTED]');
+    scrubbed = scrubbed.replace(
+      /\b(?:password|pwd|secret|token|key)[:=]\s*[\w\d\-_.@$#!%^&*()]+/gi,
+      (match) => match.split(/[:=]/)[0] + '=[REDACTED]',
+    );
 
     return scrubbed;
   }

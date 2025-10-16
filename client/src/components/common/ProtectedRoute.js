@@ -1,7 +1,7 @@
-import React from "react";
-import { Navigate, Outlet } from "react-router-dom";
-import { LinearProgress } from "@mui/material";
-import { useAuth } from "../../context/AuthContext.jsx";
+import React from 'react';
+import { Navigate, Outlet } from 'react-router-dom';
+import { LinearProgress } from '@mui/material';
+import { useAuth } from '../../context/AuthContext.jsx';
 
 export default function ProtectedRoute({ roles, permissions }) {
   const { user, loading, hasRole, hasPermission } = useAuth();

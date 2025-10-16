@@ -145,13 +145,20 @@ def main():
 
     # Also drop individual epic markdown files for human review
     for epic in epics:
-        md = [f"# Epic: {epic['name']}", "", f"Milestone: {epic['milestone']}", "", "## Child Issues"]
+        md = [
+            f"# Epic: {epic['name']}",
+            "",
+            f"Milestone: {epic['milestone']}",
+            "",
+            "## Child Issues",
+        ]
         md.extend(f"- [ ] {t}" for t in epic["issues"])
-        (EPICS_MD_DIR / f"{epic['name'].replace(' ', '_')}.md").write_text("\n".join(md) + "\n", encoding="utf-8")
+        (EPICS_MD_DIR / f"{epic['name'].replace(' ', '_')}.md").write_text(
+            "\n".join(md) + "\n", encoding="utf-8"
+        )
 
     print(f"Wrote {ISSUES_CSV} and epic markdown in {EPICS_MD_DIR}")
 
 
 if __name__ == "__main__":
     main()
-

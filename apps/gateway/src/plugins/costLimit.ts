@@ -1,4 +1,6 @@
-export function costLimitPlugin(limitDefault = Number(process.env.GQL_MAX_COST || 1000)) {
+export function costLimitPlugin(
+  limitDefault = Number(process.env.GQL_MAX_COST || 1000),
+) {
   return {
     async didResolveOperation(ctx: any) {
       const roles = (ctx.contextValue?.roles as string[]) || [];
@@ -9,7 +11,8 @@ export function costLimitPlugin(limitDefault = Number(process.env.GQL_MAX_COST |
         const name = s?.name?.value || 'unknown';
         cost += name.includes('search') ? 50 : 10;
       }
-      if (cost > limit) throw new Error(`Query exceeds cost limit (${cost} > ${limit})`);
+      if (cost > limit)
+        throw new Error(`Query exceeds cost limit (${cost} > ${limit})`);
     },
   };
 }

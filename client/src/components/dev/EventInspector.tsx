@@ -140,7 +140,12 @@ export function EventInspector() {
               <ListItemText
                 primary={
                   <Box
-                    sx={{ display: 'flex', alignItems: 'center', gap: 1, cursor: 'pointer' }}
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1,
+                      cursor: 'pointer',
+                    }}
                     onClick={() => toggleExpanded(event.id)}
                   >
                     <Chip
@@ -161,7 +166,9 @@ export function EventInspector() {
                     <ExpandMore
                       sx={{
                         fontSize: 16,
-                        transform: expanded[event.id] ? 'rotate(180deg)' : 'rotate(0deg)',
+                        transform: expanded[event.id]
+                          ? 'rotate(180deg)'
+                          : 'rotate(0deg)',
                         transition: 'transform 0.2s',
                       }}
                     />
@@ -175,14 +182,20 @@ export function EventInspector() {
               />
 
               <Collapse in={expanded[event.id]} sx={{ width: '100%' }}>
-                <Box sx={{ p: 1, bgcolor: 'grey.50', borderRadius: 1, mt: 0.5 }}>
+                <Box
+                  sx={{ p: 1, bgcolor: 'grey.50', borderRadius: 1, mt: 0.5 }}
+                >
                   <Typography
                     variant="caption"
                     component="pre"
                     sx={{ fontSize: '0.6rem', overflow: 'auto' }}
                   >
                     {JSON.stringify(
-                      { data: event.data, variables: event.variables, error: event.error },
+                      {
+                        data: event.data,
+                        variables: event.variables,
+                        error: event.error,
+                      },
                       null,
                       2,
                     )}

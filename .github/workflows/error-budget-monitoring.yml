@@ -17,7 +17,7 @@ env:
 
 jobs:
   error-budget-check:
-    if: false  # Belt-and-suspenders guard during stabilization
+    if: false # Belt-and-suspenders guard during stabilization
     runs-on: ubuntu-latest
     steps:
       - name: Checkout

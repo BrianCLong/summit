@@ -4,7 +4,7 @@ inputs:
   namespace: { required: true }
   values: { required: false }
 runs:
-  using: "composite"
+  using: 'composite'
   steps:
     - uses: azure/setup-helm@v4
     - run: |

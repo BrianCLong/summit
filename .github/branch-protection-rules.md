@@ -1,4 +1,3 @@
-
 # Branch Protection Rules for `main`
 
 This document outlines the required branch protection rules for the `main` branch to enforce the release train and quality gates.

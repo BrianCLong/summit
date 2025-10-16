@@ -7,7 +7,10 @@ import { Pool } from 'pg';
 import neo4j from 'neo4j-driver';
 import { createClient } from 'redis';
 import { WorkflowService } from './services/WorkflowService';
-import { WorkflowBuilder, BuiltInWorkflowTemplates } from './services/WorkflowBuilder';
+import {
+  WorkflowBuilder,
+  BuiltInWorkflowTemplates,
+} from './services/WorkflowBuilder';
 import { logger } from './utils/logger';
 import { config } from './config';
 import { authenticate, authorize } from './middleware/auth';
@@ -75,7 +78,10 @@ async function initializeServices() {
     // Neo4j connection
     neo4jDriver = neo4j.driver(
       config.database.neo4j.uri,
-      neo4j.auth.basic(config.database.neo4j.user, config.database.neo4j.password),
+      neo4j.auth.basic(
+        config.database.neo4j.user,
+        config.database.neo4j.password,
+      ),
     );
 
     // Test Neo4j connection
@@ -126,7 +132,10 @@ app.use('/api', authenticate);
 // Workflow Definition API Routes
 app.post('/api/workflows', authorize(['user', 'admin']), async (req, res) => {
   try {
-    const workflow = await workflowService.createWorkflow(req.body, req.user.id);
+    const workflow = await workflowService.createWorkflow(
+      req.body,
+      req.user.id,
+    );
     res.status(201).json(workflow);
   } catch (error) {
     logger.error('Error creating workflow:', error);
@@ -143,7 +152,8 @@ app.get('/api/workflows', authorize(['user', 'admin']), async (req, res) => {
       limit: parseInt(limit as string),
       offset: (parseInt(page as string) - 1) * parseInt(limit as string),
       search: search as string,
-      isActive: isActive === 'true' ? true : isActive === 'false' ? false : undefined,
+      isActive:
+        isActive === 'true' ? true : isActive === 'false' ? false : undefined,
     });
 
     res.json(workflows);
@@ -153,30 +163,38 @@ app.get('/api/workflows', authorize(['user', 'admin']), async (req, res) => {
   }
 });
 
-app.get('/api/workflows/:id', authorize(['user', 'admin']), async (req, res) => {
-  try {
-    const workflow = await workflowService.getWorkflow(req.params.id);
+app.get(
+  '/api/workflows/:id',
+  authorize(['user', 'admin']),
+  async (req, res) => {
+    try {
+      const workflow = await workflowService.getWorkflow(req.params.id);
 
-    if (!workflow) {
-      return res.status(404).json({ error: 'Workflow not found' });
+      if (!workflow) {
+        return res.status(404).json({ error: 'Workflow not found' });
+      }
+
+      res.json(workflow);
+    } catch (error) {
+      logger.error('Error getting workflow:', error);
+      res.status(500).json({ error: 'Failed to get workflow' });
     }
+  },
+);
 
-    res.json(workflow);
-  } catch (error) {
-    logger.error('Error getting workflow:', error);
-    res.status(500).json({ error: 'Failed to get workflow' });
-  }
-});
-
-app.put('/api/workflows/:id', authorize(['user', 'admin']), async (req, res) => {
-  try {
-    // Update workflow implementation would go here
-    res.status(501).json({ error: 'Update workflow not implemented yet' });
-  } catch (error) {
-    logger.error('Error updating workflow:', error);
-    res.status(500).json({ error: 'Failed to update workflow' });
-  }
-});
+app.put(
+  '/api/workflows/:id',
+  authorize(['user', 'admin']),
+  async (req, res) => {
+    try {
+      // Update workflow implementation would go here
+      res.status(501).json({ error: 'Update workflow not implemented yet' });
+    } catch (error) {
+      logger.error('Error updating workflow:', error);
+      res.status(500).json({ error: 'Failed to update workflow' });
+    }
+  },
+);
 
 app.delete('/api/workflows/:id', authorize(['admin']), async (req, res) => {
   try {
@@ -189,23 +207,27 @@ app.delete('/api/workflows/:id', authorize(['admin']), async (req, res) => {
 });
 
 // Workflow Execution API Routes
-app.post('/api/workflows/:id/execute', authorize(['user', 'admin']), async (req, res) => {
-  try {
-    const { triggerData } = req.body;
+app.post(
+  '/api/workflows/:id/execute',
+  authorize(['user', 'admin']),
+  async (req, res) => {
+    try {
+      const { triggerData } = req.body;
 
-    const execution = await workflowService.executeWorkflow(
-      req.params.id,
-      'manual',
-      triggerData,
-      req.user.id,
-    );
+      const execution = await workflowService.executeWorkflow(
+        req.params.id,
+        'manual',
+        triggerData,
+        req.user.id,
+      );
 
-    res.status(201).json(execution);
-  } catch (error) {
-    logger.error('Error executing workflow:', error);
-    res.status(500).json({ error: 'Failed to execute workflow' });
-  }
-});
+      res.status(201).json(execution);
+    } catch (error) {
+      logger.error('Error executing workflow:', error);
+      res.status(500).json({ error: 'Failed to execute workflow' });
+    }
+  },
+);
 
 app.get('/api/executions', authorize(['user', 'admin']), async (req, res) => {
   try {
@@ -226,40 +248,52 @@ app.get('/api/executions', authorize(['user', 'admin']), async (req, res) => {
   }
 });
 
-app.get('/api/executions/:id', authorize(['user', 'admin']), async (req, res) => {
-  try {
-    const execution = await workflowService.getExecution(req.params.id);
+app.get(
+  '/api/executions/:id',
+  authorize(['user', 'admin']),
+  async (req, res) => {
+    try {
+      const execution = await workflowService.getExecution(req.params.id);
 
-    if (!execution) {
-      return res.status(404).json({ error: 'Execution not found' });
+      if (!execution) {
+        return res.status(404).json({ error: 'Execution not found' });
+      }
+
+      res.json(execution);
+    } catch (error) {
+      logger.error('Error getting execution:', error);
+      res.status(500).json({ error: 'Failed to get execution' });
     }
+  },
+);
 
-    res.json(execution);
-  } catch (error) {
-    logger.error('Error getting execution:', error);
-    res.status(500).json({ error: 'Failed to get execution' });
-  }
-});
+app.post(
+  '/api/executions/:id/cancel',
+  authorize(['user', 'admin']),
+  async (req, res) => {
+    try {
+      // Cancel execution implementation would go here
+      res.status(501).json({ error: 'Cancel execution not implemented yet' });
+    } catch (error) {
+      logger.error('Error cancelling execution:', error);
+      res.status(500).json({ error: 'Failed to cancel execution' });
+    }
+  },
+);
 
-app.post('/api/executions/:id/cancel', authorize(['user', 'admin']), async (req, res) => {
-  try {
-    // Cancel execution implementation would go here
-    res.status(501).json({ error: 'Cancel execution not implemented yet' });
-  } catch (error) {
-    logger.error('Error cancelling execution:', error);
-    res.status(500).json({ error: 'Failed to cancel execution' });
-  }
-});
-
-app.post('/api/executions/:id/retry', authorize(['user', 'admin']), async (req, res) => {
-  try {
-    // Retry execution implementation would go here
-    res.status(501).json({ error: 'Retry execution not implemented yet' });
-  } catch (error) {
-    logger.error('Error retrying execution:', error);
-    res.status(500).json({ error: 'Failed to retry execution' });
-  }
-});
+app.post(
+  '/api/executions/:id/retry',
+  authorize(['user', 'admin']),
+  async (req, res) => {
+    try {
+      // Retry execution implementation would go here
+      res.status(501).json({ error: 'Retry execution not implemented yet' });
+    } catch (error) {
+      logger.error('Error retrying execution:', error);
+      res.status(500).json({ error: 'Failed to retry execution' });
+    }
+  },
+);
 
 // Human Tasks API Routes
 app.get('/api/human-tasks', authorize(['user', 'admin']), async (req, res) => {
@@ -281,191 +315,244 @@ app.get('/api/human-tasks', authorize(['user', 'admin']), async (req, res) => {
   }
 });
 
-app.get('/api/human-tasks/:id', authorize(['user', 'admin']), async (req, res) => {
-  try {
-    // Get human task implementation would go here
-    res.status(501).json({ error: 'Get human task not implemented yet' });
-  } catch (error) {
-    logger.error('Error getting human task:', error);
-    res.status(500).json({ error: 'Failed to get human task' });
-  }
-});
+app.get(
+  '/api/human-tasks/:id',
+  authorize(['user', 'admin']),
+  async (req, res) => {
+    try {
+      // Get human task implementation would go here
+      res.status(501).json({ error: 'Get human task not implemented yet' });
+    } catch (error) {
+      logger.error('Error getting human task:', error);
+      res.status(500).json({ error: 'Failed to get human task' });
+    }
+  },
+);
 
-app.post('/api/human-tasks/:id/complete', authorize(['user', 'admin']), async (req, res) => {
-  try {
-    const { formData } = req.body;
+app.post(
+  '/api/human-tasks/:id/complete',
+  authorize(['user', 'admin']),
+  async (req, res) => {
+    try {
+      const { formData } = req.body;
 
-    // Complete human task implementation would go here
-    // This would update the task status and continue workflow execution
+      // Complete human task implementation would go here
+      // This would update the task status and continue workflow execution
 
-    res.json({ success: true, message: 'Task completed successfully' });
-  } catch (error) {
-    logger.error('Error completing human task:', error);
-    res.status(500).json({ error: 'Failed to complete human task' });
-  }
-});
+      res.json({ success: true, message: 'Task completed successfully' });
+    } catch (error) {
+      logger.error('Error completing human task:', error);
+      res.status(500).json({ error: 'Failed to complete human task' });
+    }
+  },
+);
 
 // Workflow Builder API Routes
-app.get('/api/workflow-templates', authorize(['user', 'admin']), async (req, res) => {
-  try {
-    const { category } = req.query;
+app.get(
+  '/api/workflow-templates',
+  authorize(['user', 'admin']),
+  async (req, res) => {
+    try {
+      const { category } = req.query;
 
-    let templates = BuiltInWorkflowTemplates;
+      let templates = BuiltInWorkflowTemplates;
 
-    if (category) {
-      templates = templates.filter((template) => template.category === category);
+      if (category) {
+        templates = templates.filter(
+          (template) => template.category === category,
+        );
+      }
+
+      res.json(templates);
+    } catch (error) {
+      logger.error('Error getting workflow templates:', error);
+      res.status(500).json({ error: 'Failed to get workflow templates' });
     }
+  },
+);
 
-    res.json(templates);
-  } catch (error) {
-    logger.error('Error getting workflow templates:', error);
-    res.status(500).json({ error: 'Failed to get workflow templates' });
-  }
-});
+app.post(
+  '/api/workflow-templates/:id/create',
+  authorize(['user', 'admin']),
+  async (req, res) => {
+    try {
+      const { name, customizations } = req.body;
 
-app.post('/api/workflow-templates/:id/create', authorize(['user', 'admin']), async (req, res) => {
-  try {
-    const { name, customizations } = req.body;
+      if (!name) {
+        return res.status(400).json({ error: 'Workflow name is required' });
+      }
 
-    if (!name) {
-      return res.status(400).json({ error: 'Workflow name is required' });
+      const template = BuiltInWorkflowTemplates.find(
+        (t) => t.id === req.params.id,
+      );
+      if (!template) {
+        return res.status(404).json({ error: 'Template not found' });
+      }
+
+      // Create workflow from template
+      let workflowDefinition = {
+        ...template.definition,
+        name,
+      };
+
+      // Apply customizations if provided
+      if (customizations) {
+        workflowDefinition = { ...workflowDefinition, ...customizations };
+      }
+
+      const workflow = await workflowService.createWorkflow(
+        workflowDefinition,
+        req.user.id,
+      );
+
+      res.status(201).json(workflow);
+    } catch (error) {
+      logger.error('Error creating workflow from template:', error);
+      res
+        .status(500)
+        .json({ error: 'Failed to create workflow from template' });
     }
-
-    const template = BuiltInWorkflowTemplates.find((t) => t.id === req.params.id);
-    if (!template) {
-      return res.status(404).json({ error: 'Template not found' });
-    }
-
-    // Create workflow from template
-    let workflowDefinition = {
-      ...template.definition,
-      name,
-    };
-
-    // Apply customizations if provided
-    if (customizations) {
-      workflowDefinition = { ...workflowDefinition, ...customizations };
-    }
-
-    const workflow = await workflowService.createWorkflow(workflowDefinition, req.user.id);
-
-    res.status(201).json(workflow);
-  } catch (error) {
-    logger.error('Error creating workflow from template:', error);
-    res.status(500).json({ error: 'Failed to create workflow from template' });
-  }
-});
+  },
+);
 
 // Workflow Builder endpoint
-app.post('/api/workflow-builder', authorize(['user', 'admin']), async (req, res) => {
-  try {
-    const { type, name, config } = req.body;
+app.post(
+  '/api/workflow-builder',
+  authorize(['user', 'admin']),
+  async (req, res) => {
+    try {
+      const { type, name, config } = req.body;
 
-    if (!type || !name) {
-      return res.status(400).json({ error: 'Type and name are required' });
-    }
-
-    let builder: WorkflowBuilder;
-
-    switch (type) {
-      case 'data-processing':
-        builder = WorkflowBuilder.createDataProcessingWorkflow(name);
-        break;
-      case 'incident-response':
-        builder = WorkflowBuilder.createIncidentResponseWorkflow(name);
-        break;
-      case 'approval':
-        builder = WorkflowBuilder.createApprovalWorkflow(name);
-        break;
-      default:
-        builder = new WorkflowBuilder(name);
-    }
-
-    // Apply additional configuration if provided
-    if (config) {
-      if (config.description) builder.setDescription(config.description);
-      if (config.errorHandling) builder.setErrorHandling(config.errorHandling);
-      if (config.logging) builder.setLogging(config.logging);
-      if (config.concurrency) builder.setConcurrency(config.concurrency);
-      if (config.timeout) builder.setTimeout(config.timeout);
-      if (config.variables) {
-        Object.entries(config.variables).forEach(([key, value]) => {
-          builder.setGlobalVariable(key, value);
-        });
+      if (!type || !name) {
+        return res.status(400).json({ error: 'Type and name are required' });
       }
+
+      let builder: WorkflowBuilder;
+
+      switch (type) {
+        case 'data-processing':
+          builder = WorkflowBuilder.createDataProcessingWorkflow(name);
+          break;
+        case 'incident-response':
+          builder = WorkflowBuilder.createIncidentResponseWorkflow(name);
+          break;
+        case 'approval':
+          builder = WorkflowBuilder.createApprovalWorkflow(name);
+          break;
+        default:
+          builder = new WorkflowBuilder(name);
+      }
+
+      // Apply additional configuration if provided
+      if (config) {
+        if (config.description) builder.setDescription(config.description);
+        if (config.errorHandling)
+          builder.setErrorHandling(config.errorHandling);
+        if (config.logging) builder.setLogging(config.logging);
+        if (config.concurrency) builder.setConcurrency(config.concurrency);
+        if (config.timeout) builder.setTimeout(config.timeout);
+        if (config.variables) {
+          Object.entries(config.variables).forEach(([key, value]) => {
+            builder.setGlobalVariable(key, value);
+          });
+        }
+      }
+
+      const workflowDefinition = builder.build();
+      const workflow = await workflowService.createWorkflow(
+        workflowDefinition,
+        req.user.id,
+      );
+
+      res.status(201).json(workflow);
+    } catch (error) {
+      logger.error('Error building workflow:', error);
+      res.status(500).json({ error: 'Failed to build workflow' });
     }
-
-    const workflowDefinition = builder.build();
-    const workflow = await workflowService.createWorkflow(workflowDefinition, req.user.id);
-
-    res.status(201).json(workflow);
-  } catch (error) {
-    logger.error('Error building workflow:', error);
-    res.status(500).json({ error: 'Failed to build workflow' });
-  }
-});
+  },
+);
 
 // Webhook endpoints for external triggers
-app.post('/api/webhooks/workflow/:workflowId/:triggerPath', async (req, res) => {
-  try {
-    const { workflowId, triggerPath } = req.params;
+app.post(
+  '/api/webhooks/workflow/:workflowId/:triggerPath',
+  async (req, res) => {
+    try {
+      const { workflowId, triggerPath } = req.params;
 
-    // Verify webhook trigger exists and is enabled
-    const workflow = await workflowService.getWorkflow(workflowId);
-    if (!workflow) {
-      return res.status(404).json({ error: 'Workflow not found' });
+      // Verify webhook trigger exists and is enabled
+      const workflow = await workflowService.getWorkflow(workflowId);
+      if (!workflow) {
+        return res.status(404).json({ error: 'Workflow not found' });
+      }
+
+      const webhookTrigger = workflow.triggers.find(
+        (trigger) =>
+          trigger.type === 'webhook' &&
+          trigger.config.webhookPath === triggerPath &&
+          trigger.isEnabled,
+      );
+
+      if (!webhookTrigger) {
+        return res
+          .status(404)
+          .json({ error: 'Webhook trigger not found or disabled' });
+      }
+
+      // Execute workflow with webhook data
+      const execution = await workflowService.executeWorkflow(
+        workflowId,
+        'webhook',
+        {
+          ...req.body,
+          headers: req.headers,
+          query: req.query,
+        },
+      );
+
+      res.json({
+        success: true,
+        executionId: execution.id,
+        message: 'Workflow triggered successfully',
+      });
+    } catch (error) {
+      logger.error('Error processing webhook:', error);
+      res.status(500).json({ error: 'Failed to process webhook' });
     }
-
-    const webhookTrigger = workflow.triggers.find(
-      (trigger) =>
-        trigger.type === 'webhook' &&
-        trigger.config.webhookPath === triggerPath &&
-        trigger.isEnabled,
-    );
-
-    if (!webhookTrigger) {
-      return res.status(404).json({ error: 'Webhook trigger not found or disabled' });
-    }
-
-    // Execute workflow with webhook data
-    const execution = await workflowService.executeWorkflow(workflowId, 'webhook', {
-      ...req.body,
-      headers: req.headers,
-      query: req.query,
-    });
-
-    res.json({
-      success: true,
-      executionId: execution.id,
-      message: 'Workflow triggered successfully',
-    });
-  } catch (error) {
-    logger.error('Error processing webhook:', error);
-    res.status(500).json({ error: 'Failed to process webhook' });
-  }
-});
+  },
+);
 
 // Analytics and monitoring endpoints
-app.get('/api/analytics/workflow-stats', authorize(['user', 'admin']), async (req, res) => {
-  try {
-    const stats = await getWorkflowStats();
-    res.json(stats);
-  } catch (error) {
-    logger.error('Error getting workflow stats:', error);
-    res.status(500).json({ error: 'Failed to get workflow stats' });
-  }
-});
+app.get(
+  '/api/analytics/workflow-stats',
+  authorize(['user', 'admin']),
+  async (req, res) => {
+    try {
+      const stats = await getWorkflowStats();
+      res.json(stats);
+    } catch (error) {
+      logger.error('Error getting workflow stats:', error);
+      res.status(500).json({ error: 'Failed to get workflow stats' });
+    }
+  },
+);
 
-app.get('/api/analytics/execution-metrics', authorize(['user', 'admin']), async (req, res) => {
-  try {
-    const { workflowId, period = '7d' } = req.query;
-    const metrics = await getExecutionMetrics(workflowId as string, period as string);
-    res.json(metrics);
-  } catch (error) {
-    logger.error('Error getting execution metrics:', error);
-    res.status(500).json({ error: 'Failed to get execution metrics' });
-  }
-});
+app.get(
+  '/api/analytics/execution-metrics',
+  authorize(['user', 'admin']),
+  async (req, res) => {
+    try {
+      const { workflowId, period = '7d' } = req.query;
+      const metrics = await getExecutionMetrics(
+        workflowId as string,
+        period as string,
+      );
+      res.json(metrics);
+    } catch (error) {
+      logger.error('Error getting execution metrics:', error);
+      res.status(500).json({ error: 'Failed to get execution metrics' });
+    }
+  },
+);
 
 // Placeholder implementations for database queries
 async function getWorkflows(options: any) {
@@ -537,7 +624,9 @@ async function getWorkflowStats() {
     "SELECT COUNT(*) as pending_tasks FROM human_tasks WHERE status IN ('pending', 'assigned')",
   ];
 
-  const results = await Promise.all(queries.map((query) => pgPool.query(query)));
+  const results = await Promise.all(
+    queries.map((query) => pgPool.query(query)),
+  );
 
   return {
     totalWorkflows: parseInt(results[0].rows[0].total_workflows),
@@ -579,13 +668,21 @@ async function getExecutionMetrics(workflowId: string, period: string) {
 }
 
 // Error handling middleware
-app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  logger.error('Unhandled error:', error);
-  res.status(500).json({
-    error: 'Internal server error',
-    message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-  });
-});
+app.use(
+  (
+    error: Error,
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ) => {
+    logger.error('Unhandled error:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message:
+        process.env.NODE_ENV === 'development' ? error.message : undefined,
+    });
+  },
+);
 
 // 404 handler
 app.use('*', (req, res) => {

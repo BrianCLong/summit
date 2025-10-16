@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from "react";
-import { useMutation, gql } from "@apollo/client";
-import * as d3 from "d3";
+import React, { useState, useRef, useEffect } from 'react';
+import { useMutation, gql } from '@apollo/client';
+import * as d3 from 'd3';
 
 const ANALYZE_STEGO_MUTATION = gql`
   mutation AnalyzeStego($mediaDataInput: JSON!) {
@@ -27,12 +27,12 @@ const MatrixGraph: React.FC<{ matrix: number[][] }> = ({ matrix }) => {
     const height = cellSize * numRows;
 
     const container = d3.select(ref.current);
-    container.selectAll("*").remove();
+    container.selectAll('*').remove();
 
     const svg = container
-      .append("svg")
-      .attr("width", width)
-      .attr("height", height);
+      .append('svg')
+      .attr('width', width)
+      .attr('height', height);
 
     const x = d3
       .scaleBand<number>()
@@ -47,49 +47,49 @@ const MatrixGraph: React.FC<{ matrix: number[][] }> = ({ matrix }) => {
     const color = d3.scaleSequential(d3.interpolateBlues).domain([0, maxValue]);
 
     const tooltip = container
-      .append("div")
-      .style("position", "absolute")
-      .style("visibility", "hidden")
-      .style("background", "#fff")
-      .style("padding", "4px 8px")
-      .style("border", "1px solid #ccc")
-      .style("border-radius", "4px")
-      .style("font-size", "12px");
+      .append('div')
+      .style('position', 'absolute')
+      .style('visibility', 'hidden')
+      .style('background', '#fff')
+      .style('padding', '4px 8px')
+      .style('border', '1px solid #ccc')
+      .style('border-radius', '4px')
+      .style('font-size', '12px');
 
     svg
-      .selectAll("g")
+      .selectAll('g')
       .data(matrix)
       .enter()
-      .append("g")
-      .attr("transform", (_, i) => `translate(0,${y(i)!})`)
-      .selectAll("rect")
+      .append('g')
+      .attr('transform', (_, i) => `translate(0,${y(i)!})`)
+      .selectAll('rect')
       .data((row, i) => row.map((value, j) => ({ value, row: i, col: j })))
       .enter()
-      .append("rect")
-      .attr("x", (d) => x(d.col)!)
-      .attr("y", 0)
-      .attr("width", x.bandwidth())
-      .attr("height", y.bandwidth())
-      .attr("fill", (d) => color(d.value))
-      .on("mouseover", (event, d) => {
+      .append('rect')
+      .attr('x', (d) => x(d.col)!)
+      .attr('y', 0)
+      .attr('width', x.bandwidth())
+      .attr('height', y.bandwidth())
+      .attr('fill', (d) => color(d.value))
+      .on('mouseover', (event, d) => {
         tooltip
-          .style("visibility", "visible")
+          .style('visibility', 'visible')
           .text(`Encoded ${d.row}, Decoded ${d.col}: ${d.value}`);
       })
-      .on("mousemove", (event) => {
+      .on('mousemove', (event) => {
         tooltip
-          .style("top", `${event.pageY - 10}px`)
-          .style("left", `${event.pageX + 10}px`);
+          .style('top', `${event.pageY - 10}px`)
+          .style('left', `${event.pageX + 10}px`);
       })
-      .on("mouseout", () => tooltip.style("visibility", "hidden"));
+      .on('mouseout', () => tooltip.style('visibility', 'hidden'));
   }, [matrix]);
 
   return <div ref={ref} className="relative" />;
 };
 
 const StegoAnalyzer: React.FC = () => {
-  const [mediaData, setMediaData] = useState("");
-  const [stegoParams, setStegoParams] = useState("");
+  const [mediaData, setMediaData] = useState('');
+  const [stegoParams, setStegoParams] = useState('');
   const [analyzeStego, { data, loading, error }] = useMutation(
     ANALYZE_STEGO_MUTATION,
   );
@@ -105,7 +105,7 @@ const StegoAnalyzer: React.FC = () => {
       });
     } catch (e) {
       alert(
-        "Invalid input. Media data should be base64 string, params should be JSON.",
+        'Invalid input. Media data should be base64 string, params should be JSON.',
       );
       console.error(e);
     }
@@ -132,7 +132,7 @@ const StegoAnalyzer: React.FC = () => {
         onClick={handleSubmit}
         disabled={loading}
       >
-        {loading ? "Analyzing..." : "Run Steganographic Analysis"}
+        {loading ? 'Analyzing...' : 'Run Steganographic Analysis'}
       </button>
 
       {error && <p className="text-red-500 mt-4">Error: {error.message}</p>}

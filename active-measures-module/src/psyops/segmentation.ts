@@ -81,7 +81,10 @@ export enum VulnerabilityType {
 /**
  * Segment audience based on tuning parameters and available data
  */
-export function segmentAudience(tuners: any, targetData?: any): AudienceSegment[] {
+export function segmentAudience(
+  tuners: any,
+  targetData?: any,
+): AudienceSegment[] {
   const segments: AudienceSegment[] = [];
 
   // Generate primary segments based on vulnerability assessment
@@ -151,9 +154,13 @@ function generateHighSusceptibilitySegment(tuners: any): AudienceSegment {
         type: VulnerabilityType.COGNITIVE_BIAS,
         severity: 0.8,
         exploitability: 0.7,
-        description: 'Susceptible to confirmation bias and availability heuristic',
+        description:
+          'Susceptible to confirmation bias and availability heuristic',
         triggers: ['Information that confirms existing beliefs'],
-        mitigations: ['Critical thinking training', 'Diverse information sources'],
+        mitigations: [
+          'Critical thinking training',
+          'Diverse information sources',
+        ],
       },
     ],
     communicationChannels: [
@@ -166,10 +173,18 @@ function generateHighSusceptibilitySegment(tuners: any): AudienceSegment {
       'Traditional radio',
     ],
     influenceNetwork: {
-      keyInfluencers: ['Local leaders', 'Social media personalities', 'Traditional media'],
+      keyInfluencers: [
+        'Local leaders',
+        'Social media personalities',
+        'Traditional media',
+      ],
       informationSources: ['Social media', 'Local news', 'Word of mouth'],
       socialConnections: ['Family', 'Local community', 'Work colleagues'],
-      trustNetworks: ['Close friends', 'Religious leaders', 'Local authorities'],
+      trustNetworks: [
+        'Close friends',
+        'Religious leaders',
+        'Local authorities',
+      ],
     },
     riskProfile: {
       susceptibilityScore: 0.9,
@@ -218,7 +233,10 @@ function generateModerateSusceptibilitySegment(tuners: any): AudienceSegment {
         exploitability: 0.5,
         description: 'May lack time to verify complex information',
         triggers: ['Time pressure', 'Complex topics', 'Authoritative sources'],
-        mitigations: ['Simplified fact-checking', 'Trusted source verification'],
+        mitigations: [
+          'Simplified fact-checking',
+          'Trusted source verification',
+        ],
       },
       {
         type: VulnerabilityType.SOCIAL_PRESSURE,
@@ -239,14 +257,29 @@ function generateModerateSusceptibilitySegment(tuners: any): AudienceSegment {
       'Instagram',
     ],
     influenceNetwork: {
-      keyInfluencers: ['Industry experts', 'Professional leaders', 'Moderate politicians'],
-      informationSources: ['Professional media', 'Peer networks', 'Expert analysis'],
-      socialConnections: ['Professional networks', 'Community groups', 'Family'],
+      keyInfluencers: [
+        'Industry experts',
+        'Professional leaders',
+        'Moderate politicians',
+      ],
+      informationSources: [
+        'Professional media',
+        'Peer networks',
+        'Expert analysis',
+      ],
+      socialConnections: [
+        'Professional networks',
+        'Community groups',
+        'Family',
+      ],
       trustNetworks: ['Professional associations', 'Educational institutions'],
     },
     riskProfile: {
       susceptibilityScore: 0.5,
-      resistanceFactors: ['Critical thinking skills', 'Diverse information sources'],
+      resistanceFactors: [
+        'Critical thinking skills',
+        'Diverse information sources',
+      ],
       amplificationPotential: 0.6,
       backfireRisk: 0.5,
     },
@@ -290,7 +323,11 @@ function generateLowSusceptibilitySegment(tuners: any): AudienceSegment {
         severity: 0.3,
         exploitability: 0.2,
         description: 'May be susceptible to sophisticated intellectual appeals',
-        triggers: ['Complex arguments', 'Academic framing', 'Data presentation'],
+        triggers: [
+          'Complex arguments',
+          'Academic framing',
+          'Data presentation',
+        ],
         mitigations: ['Peer review', 'Multiple source verification'],
       },
     ],
@@ -303,14 +340,25 @@ function generateLowSusceptibilitySegment(tuners: any): AudienceSegment {
       'Policy analysis platforms',
     ],
     influenceNetwork: {
-      keyInfluencers: ['Academic experts', 'Research institutions', 'Think tanks'],
-      informationSources: ['Peer-reviewed sources', 'Original research', 'Expert analysis'],
+      keyInfluencers: [
+        'Academic experts',
+        'Research institutions',
+        'Think tanks',
+      ],
+      informationSources: [
+        'Peer-reviewed sources',
+        'Original research',
+        'Expert analysis',
+      ],
       socialConnections: ['Academic networks', 'Professional associations'],
       trustNetworks: ['Scientific institutions', 'Peer review systems'],
     },
     riskProfile: {
       susceptibilityScore: 0.2,
-      resistanceFactors: ['Critical thinking training', 'Methodological awareness'],
+      resistanceFactors: [
+        'Critical thinking training',
+        'Methodological awareness',
+      ],
       amplificationPotential: 0.3,
       backfireRisk: 0.8,
     },
@@ -358,7 +406,11 @@ function generateOceanBasedSegments(tuners: any): AudienceSegment[] {
           mitigations: ['Emotional support', 'Reassurance', 'Positive framing'],
         },
       ],
-      communicationChannels: ['Social media', 'Support forums', 'Mental health platforms'],
+      communicationChannels: [
+        'Social media',
+        'Support forums',
+        'Mental health platforms',
+      ],
       influenceNetwork: {
         keyInfluencers: ['Mental health advocates', 'Support group leaders'],
         informationSources: ['Social media', 'Health websites'],
@@ -395,7 +447,11 @@ function generateVoterSegments(tuners: any): AudienceSegment {
       interests: ['Local issues', 'Economic concerns', 'Practical solutions'],
       lifestyle: 'Moderate media consumption, locally focused',
       attitudes: ['Pragmatic', 'Issue-focused', 'Skeptical of extremes'],
-      motivations: ['Better outcomes', 'Effective governance', 'Local improvement'],
+      motivations: [
+        'Better outcomes',
+        'Effective governance',
+        'Local improvement',
+      ],
       fears: ['Bad governance', 'Extremism', 'Economic decline'],
     },
     oceanTraits: {
@@ -416,7 +472,12 @@ function generateVoterSegments(tuners: any): AudienceSegment {
         mitigations: ['Simplified explanations', 'Fact-checking'],
       },
     ],
-    communicationChannels: ['Local news', 'Facebook', 'Direct mail', 'Local events'],
+    communicationChannels: [
+      'Local news',
+      'Facebook',
+      'Direct mail',
+      'Local events',
+    ],
     influenceNetwork: {
       keyInfluencers: ['Local leaders', 'Community figures', 'Local media'],
       informationSources: ['Local news', 'Word of mouth', 'Social media'],
@@ -475,9 +536,21 @@ function generateEconomicSegments(tuners: any): AudienceSegment {
     ],
     communicationChannels: ['Local radio', 'Facebook', 'Union communications'],
     influenceNetwork: {
-      keyInfluencers: ['Union leaders', 'Local politicians', 'Economic advocates'],
-      informationSources: ['Local media', 'Union communications', 'Word of mouth'],
-      socialConnections: ['Work colleagues', 'Union members', 'Local community'],
+      keyInfluencers: [
+        'Union leaders',
+        'Local politicians',
+        'Economic advocates',
+      ],
+      informationSources: [
+        'Local media',
+        'Union communications',
+        'Word of mouth',
+      ],
+      socialConnections: [
+        'Work colleagues',
+        'Union members',
+        'Local community',
+      ],
       trustNetworks: ['Labor organizations', 'Local leaders'],
     },
     riskProfile: {
@@ -492,7 +565,9 @@ function generateEconomicSegments(tuners: any): AudienceSegment {
 /**
  * Create vulnerability heatmap for visualization
  */
-export function createVulnerabilityHeatmap(segments: AudienceSegment[]): VulnerabilityHeatmap {
+export function createVulnerabilityHeatmap(
+  segments: AudienceSegment[],
+): VulnerabilityHeatmap {
   const heatmap: VulnerabilityHeatmap = {
     segments: [],
     vulnerabilityTypes: Object.values(VulnerabilityType),
@@ -507,7 +582,9 @@ export function createVulnerabilityHeatmap(segments: AudienceSegment[]): Vulnera
     };
 
     Object.values(VulnerabilityType).forEach((vulnType) => {
-      const vulnerability = segment.vulnerabilities.find((v) => v.type === vulnType);
+      const vulnerability = segment.vulnerabilities.find(
+        (v) => v.type === vulnType,
+      );
       const severity = vulnerability ? vulnerability.severity : 0;
       const exploitability = vulnerability ? vulnerability.exploitability : 0;
 

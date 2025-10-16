@@ -156,7 +156,12 @@ const RealTimePresence: React.FC<RealTimePresenceProps> = ({
   }, [currentUser]);
 
   const generateMockActivity = (): Activity[] => {
-    const users = ['Sarah Chen', 'Marcus Rodriguez', 'Emma Thompson', 'Alex Kumar'];
+    const users = [
+      'Sarah Chen',
+      'Marcus Rodriguez',
+      'Emma Thompson',
+      'Alex Kumar',
+    ];
     const activities = [
       {
         type: 'search' as const,
@@ -196,10 +201,13 @@ const RealTimePresence: React.FC<RealTimePresenceProps> = ({
       },
     ];
 
-    const randomActivity = activities[Math.floor(Math.random() * activities.length)];
+    const randomActivity =
+      activities[Math.floor(Math.random() * activities.length)];
     const randomUser = users[Math.floor(Math.random() * users.length)];
     const randomDescription =
-      randomActivity.descriptions[Math.floor(Math.random() * randomActivity.descriptions.length)];
+      randomActivity.descriptions[
+        Math.floor(Math.random() * randomActivity.descriptions.length)
+      ];
 
     return [
       {
@@ -210,7 +218,10 @@ const RealTimePresence: React.FC<RealTimePresenceProps> = ({
         description: randomDescription,
         timestamp: Date.now(),
         metadata: {
-          investigationId: randomActivity.type === 'investigation' ? 'INV-2024-089' : undefined,
+          investigationId:
+            randomActivity.type === 'investigation'
+              ? 'INV-2024-089'
+              : undefined,
           searchQuery:
             randomActivity.type === 'search'
               ? randomDescription.match(/"([^"]+)"/)?.[1]
@@ -278,7 +289,9 @@ const RealTimePresence: React.FC<RealTimePresenceProps> = ({
   };
 
   return (
-    <div className={`real-time-presence bg-white border rounded-lg shadow-sm ${className}`}>
+    <div
+      className={`real-time-presence bg-white border rounded-lg shadow-sm ${className}`}
+    >
       {/* Header */}
       <div className="flex items-center justify-between p-4 border-b">
         <div className="flex items-center gap-3">
@@ -342,7 +355,9 @@ const RealTimePresence: React.FC<RealTimePresenceProps> = ({
               {/* Tooltip */}
               <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-10">
                 <div className="font-semibold">{user.name}</div>
-                <div className="text-gray-300">{user.currentLocation?.action || 'Active'}</div>
+                <div className="text-gray-300">
+                  {user.currentLocation?.action || 'Active'}
+                </div>
                 <div
                   className={`inline-block px-2 py-1 rounded text-xs mt-1 ${getRoleColor(user.role)}`}
                 >
@@ -369,14 +384,23 @@ const RealTimePresence: React.FC<RealTimePresenceProps> = ({
           {/* User List */}
           <div className="border-t">
             <div className="p-4">
-              <h4 className="font-medium text-gray-900 mb-3">Active Team Members</h4>
+              <h4 className="font-medium text-gray-900 mb-3">
+                Active Team Members
+              </h4>
               <div className="space-y-3 max-h-40 overflow-y-auto">
                 {connectedUsers.map((user) => (
-                  <div key={user.id} className="flex items-center justify-between">
+                  <div
+                    key={user.id}
+                    className="flex items-center justify-between"
+                  >
                     <div className="flex items-center gap-3">
                       <div className="relative">
                         {user.avatar ? (
-                          <img src={user.avatar} alt={user.name} className="w-6 h-6 rounded-full" />
+                          <img
+                            src={user.avatar}
+                            alt={user.name}
+                            className="w-6 h-6 rounded-full"
+                          />
                         ) : (
                           <div className="w-6 h-6 rounded-full bg-gray-300 flex items-center justify-center text-xs font-semibold text-gray-600">
                             {user.name
@@ -391,7 +415,9 @@ const RealTimePresence: React.FC<RealTimePresenceProps> = ({
                       </div>
 
                       <div>
-                        <div className="text-sm font-medium text-gray-900">{user.name}</div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {user.name}
+                        </div>
                         <div className="text-xs text-gray-500">
                           {user.currentLocation?.action ||
                             `Last seen ${formatTimeAgo(user.lastSeen)}`}
@@ -399,7 +425,9 @@ const RealTimePresence: React.FC<RealTimePresenceProps> = ({
                       </div>
                     </div>
 
-                    <div className={`px-2 py-1 rounded text-xs ${getRoleColor(user.role)}`}>
+                    <div
+                      className={`px-2 py-1 rounded text-xs ${getRoleColor(user.role)}`}
+                    >
                       {user.role}
                     </div>
                   </div>
@@ -411,7 +439,9 @@ const RealTimePresence: React.FC<RealTimePresenceProps> = ({
           {/* Activity Feed */}
           <div className="border-t">
             <div className="p-4">
-              <h4 className="font-medium text-gray-900 mb-3">Recent Activity</h4>
+              <h4 className="font-medium text-gray-900 mb-3">
+                Recent Activity
+              </h4>
               <div className="space-y-3 max-h-48 overflow-y-auto">
                 {recentActivity.slice(0, 10).map((activity) => (
                   <div key={activity.id} className="flex items-start gap-3">
@@ -453,7 +483,9 @@ const RealTimePresence: React.FC<RealTimePresenceProps> = ({
                 Connecting to collaboration server...
               </span>
             ) : (
-              <span className="text-red-600">⚠️ Connection lost. Trying to reconnect...</span>
+              <span className="text-red-600">
+                ⚠️ Connection lost. Trying to reconnect...
+              </span>
             )}
           </div>
         </div>

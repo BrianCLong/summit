@@ -141,7 +141,9 @@
   <body>
     <div class="wrap">
       <h1>🎼 IntelGraph Orchestra</h1>
-      <div class="subtitle">Conductor Dashboard • Real-time Symphony Status</div>
+      <div class="subtitle">
+        Conductor Dashboard • Real-time Symphony Status
+      </div>
 
       <div class="row">
         <button onclick="refresh()">🔄 Refresh</button>
@@ -215,7 +217,8 @@
 
           // Services status
           const svc = j.services || {};
-          const statusIcon = (b) => (b === true ? '🟢' : b === false ? '🔴' : '🟡');
+          const statusIcon = (b) =>
+            b === true ? '🟢' : b === false ? '🔴' : '🟡';
           const statusText = (b) =>
             b === true
               ? '<span class="ok">Online</span>'
@@ -252,11 +255,16 @@
           document.getElementById('rag-files').textContent = rag.files ?? '–';
 
           // Raw data
-          document.getElementById('raw').textContent = JSON.stringify(j, null, 2);
+          document.getElementById('raw').textContent = JSON.stringify(
+            j,
+            null,
+            2,
+          );
         } catch (e) {
           document.getElementById('when').textContent =
             'No status.json yet. Run "just dash-refresh".';
-          document.getElementById('raw').textContent = (e && e.message) || String(e);
+          document.getElementById('raw').textContent =
+            (e && e.message) || String(e);
         }
       }
 

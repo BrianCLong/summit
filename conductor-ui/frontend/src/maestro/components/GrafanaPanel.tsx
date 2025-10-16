@@ -12,7 +12,8 @@ export default function GrafanaPanel({
   if (!base) {
     return (
       <div className="rounded border p-3 text-sm text-slate-500">
-        Configure window.__MAESTRO_CFG__.grafanaBase to embed Grafana panel {uid}.
+        Configure window.__MAESTRO_CFG__.grafanaBase to embed Grafana panel{' '}
+        {uid}.
       </div>
     );
   }
@@ -20,7 +21,9 @@ export default function GrafanaPanel({
   params.set('orgId', '1');
   params.set('kiosk', '');
   params.set('refresh', '30s');
-  Object.entries(vars || {}).forEach(([k, v]) => params.set(`var-${k}`, String(v)));
+  Object.entries(vars || {}).forEach(([k, v]) =>
+    params.set(`var-${k}`, String(v)),
+  );
   const src = `${base.replace(/\/$/, '')}/d/${encodeURIComponent(uid)}?${params.toString()}`;
   return (
     <iframe

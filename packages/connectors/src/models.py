@@ -10,7 +10,7 @@ simple Python dictionaries in lieu of a real database.
 
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -23,7 +23,7 @@ class Connector(BaseModel):
     id: int
     name: str
     kind: ConnectorKind
-    config: Dict[str, Any]
+    config: dict[str, Any]
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
@@ -31,7 +31,7 @@ class Stream(BaseModel):
     id: int
     connector_id: int
     name: str
-    schema: Dict[str, Any]
+    schema: dict[str, Any]
 
 
 class RunStatus(str, Enum):
@@ -46,21 +46,22 @@ class Run(BaseModel):
     connector_id: int
     status: RunStatus
     started_at: datetime = Field(default_factory=datetime.utcnow)
-    finished_at: Optional[datetime] = None
-    stats: Dict[str, Any] = Field(default_factory=dict)
-    dq_failures: List[str] = Field(default_factory=list)
+    finished_at: datetime | None = None
+    stats: dict[str, Any] = Field(default_factory=dict)
+    dq_failures: list[str] = Field(default_factory=list)
 
 
 class DQRule(BaseModel):
     id: int
     target: str  # "stream" or "entity"
     target_ref: str
-    rule: Dict[str, Any]
+    rule: dict[str, Any]
     severity: str = "FAIL"
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 # In-memory stores ----------------------------------------------------------
+
 
 class Store:
     """In-memory repository storing connectors related objects.
@@ -71,10 +72,10 @@ class Store:
     """
 
     def __init__(self) -> None:
-        self.connectors: Dict[int, Connector] = {}
-        self.streams: Dict[int, Stream] = {}
-        self.runs: Dict[int, Run] = {}
-        self.dq_rules: Dict[int, DQRule] = {}
+        self.connectors: dict[int, Connector] = {}
+        self.streams: dict[int, Stream] = {}
+        self.runs: dict[int, Run] = {}
+        self.dq_rules: dict[int, DQRule] = {}
         self._ids = {
             "connector": 0,
             "stream": 0,
@@ -88,13 +89,13 @@ class Store:
 
     # Connector management -------------------------------------------------
 
-    def create_connector(self, name: str, kind: ConnectorKind, config: Dict[str, Any]) -> Connector:
+    def create_connector(self, name: str, kind: ConnectorKind, config: dict[str, Any]) -> Connector:
         cid = self._next_id("connector")
         conn = Connector(id=cid, name=name, kind=kind, config=config)
         self.connectors[cid] = conn
         return conn
 
-    def add_stream(self, connector_id: int, name: str, schema: Dict[str, Any]) -> Stream:
+    def add_stream(self, connector_id: int, name: str, schema: dict[str, Any]) -> Stream:
         sid = self._next_id("stream")
         stream = Stream(id=sid, connector_id=connector_id, name=name, schema=schema)
         self.streams[sid] = stream
@@ -106,7 +107,9 @@ class Store:
         self.runs[rid] = run
         return run
 
-    def add_dq_rule(self, target: str, target_ref: str, rule: Dict[str, Any], severity: str) -> DQRule:
+    def add_dq_rule(
+        self, target: str, target_ref: str, rule: dict[str, Any], severity: str
+    ) -> DQRule:
         did = self._next_id("dq")
         dq = DQRule(id=did, target=target, target_ref=target_ref, rule=rule, severity=severity)
         self.dq_rules[did] = dq

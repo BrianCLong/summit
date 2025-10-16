@@ -2,7 +2,7 @@ name: Deploy with Cosign Verification
 
 on:
   workflow_run:
-    workflows: ["Cosign Sign & Attest"]
+    workflows: ['Cosign Sign & Attest']
     types:
       - completed
   workflow_dispatch:

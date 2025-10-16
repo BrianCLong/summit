@@ -8,18 +8,56 @@ interface Command {
   onSelect: () => void;
 }
 
-export function CommandPalette({ open, onClose, basePath }: { open: boolean; onClose: () => void; basePath: string }) {
+export function CommandPalette({
+  open,
+  onClose,
+  basePath,
+}: {
+  open: boolean;
+  onClose: () => void;
+  basePath: string;
+}) {
   const navigate = useNavigate();
   const [query, setQuery] = React.useState('');
 
   const commands = React.useMemo<Command[]>(
     () => [
-      { id: 'dashboard', label: 'Go to Dashboard', shortcut: 'g d', onSelect: () => navigate(`${basePath}dashboard`) },
-      { id: 'pipelines', label: 'Open Pipelines', shortcut: 'g p', onSelect: () => navigate(`${basePath}pipelines`) },
-      { id: 'runs', label: 'Open Latest Run', shortcut: 'g r', onSelect: () => navigate(`${basePath}runs/run-1`) },
-      { id: 'releases', label: 'View Releases', shortcut: 'g l', onSelect: () => navigate(`${basePath}releases`) },
-      { id: 'observability', label: 'Open Observability', shortcut: 'g o', onSelect: () => navigate(`${basePath}observability`) },
-      { id: 'admin', label: 'View Audit Log', shortcut: 'g a', onSelect: () => navigate(`${basePath}admin`) },
+      {
+        id: 'dashboard',
+        label: 'Go to Dashboard',
+        shortcut: 'g d',
+        onSelect: () => navigate(`${basePath}dashboard`),
+      },
+      {
+        id: 'pipelines',
+        label: 'Open Pipelines',
+        shortcut: 'g p',
+        onSelect: () => navigate(`${basePath}pipelines`),
+      },
+      {
+        id: 'runs',
+        label: 'Open Latest Run',
+        shortcut: 'g r',
+        onSelect: () => navigate(`${basePath}runs/run-1`),
+      },
+      {
+        id: 'releases',
+        label: 'View Releases',
+        shortcut: 'g l',
+        onSelect: () => navigate(`${basePath}releases`),
+      },
+      {
+        id: 'observability',
+        label: 'Open Observability',
+        shortcut: 'g o',
+        onSelect: () => navigate(`${basePath}observability`),
+      },
+      {
+        id: 'admin',
+        label: 'View Audit Log',
+        shortcut: 'g a',
+        onSelect: () => navigate(`${basePath}admin`),
+      },
     ],
     [basePath, navigate],
   );
@@ -27,7 +65,9 @@ export function CommandPalette({ open, onClose, basePath }: { open: boolean; onC
   const filtered = React.useMemo(() => {
     const trimmed = query.trim().toLowerCase();
     if (!trimmed) return commands;
-    return commands.filter((command) => command.label.toLowerCase().includes(trimmed));
+    return commands.filter((command) =>
+      command.label.toLowerCase().includes(trimmed),
+    );
   }, [commands, query]);
 
   React.useEffect(() => {
@@ -72,13 +112,17 @@ export function CommandPalette({ open, onClose, basePath }: { open: boolean; onC
               >
                 <span>{command.label}</span>
                 {command.shortcut ? (
-                  <span className="rounded-lg border border-slate-600 px-2 py-1 text-xs text-slate-300">{command.shortcut}</span>
+                  <span className="rounded-lg border border-slate-600 px-2 py-1 text-xs text-slate-300">
+                    {command.shortcut}
+                  </span>
                 ) : null}
               </button>
             </li>
           ))}
           {filtered.length === 0 ? (
-            <li className="px-4 py-6 text-center text-sm text-slate-400">No commands match “{query}”.</li>
+            <li className="px-4 py-6 text-center text-sm text-slate-400">
+              No commands match “{query}”.
+            </li>
           ) : null}
         </ul>
       </div>

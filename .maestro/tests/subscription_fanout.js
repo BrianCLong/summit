@@ -1,27 +1,57 @@
 const { io } = require('socket.io-client');
 const fetch = require('node-fetch');
 const url = process.env.GRAPHQL_URL; // e.g., http://localhost:4000/graphql
-const subUrl = process.env.SUB_URL || (url.replace('/graphql',''));
+const subUrl = process.env.SUB_URL || url.replace('/graphql', '');
 const jwt = process.env.JWT;
 const tenant = process.env.TENANT_ID || 'tenant-123';
 const runs = Number(process.env.RUNS || 200);
 
-function now() { return Date.now(); }
+function now() {
+  return Date.now();
+}
 
 async function publish(value) {
   // Use persisted mutation hash for fanout test
-  const persistedHash = 'f62e45c84c814268c222a14707625d5a0d94939ff450701bce5bfcaba608e7db';
-  const body = { id: persistedHash, variables: { input: { tenantId: tenant, type: 'subtest', value, source: 'fanout', ts: new Date().toISOString() } } };
-  const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${jwt}` }, body: JSON.stringify(body) });
+  const persistedHash =
+    'f62e45c84c814268c222a14707625d5a0d94939ff450701bce5bfcaba608e7db';
+  const body = {
+    id: persistedHash,
+    variables: {
+      input: {
+        tenantId: tenant,
+        type: 'subtest',
+        value,
+        source: 'fanout',
+        ts: new Date().toISOString(),
+      },
+    },
+  };
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${jwt}`,
+    },
+    body: JSON.stringify(body),
+  });
   if (!res.ok) throw new Error('publish failed ' + res.status);
 }
 
 (async () => {
-  const socket = io(subUrl, { auth: { token: jwt }, transports: ['websocket'] });
+  const socket = io(subUrl, {
+    auth: { token: jwt },
+    transports: ['websocket'],
+  });
   const lats = [];
   await new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => reject(new Error('connect timeout')), 10000);
-    socket.on('connect', () => { clearTimeout(timeout); resolve(); });
+    const timeout = setTimeout(
+      () => reject(new Error('connect timeout')),
+      10000,
+    );
+    socket.on('connect', () => {
+      clearTimeout(timeout);
+      resolve();
+    });
     socket.on('connect_error', reject);
   });
   socket.emit('subscribe', { tenantId: tenant });
@@ -42,11 +72,16 @@ async function publish(value) {
     await publish(Math.random());
     // mark time origin for latency calc; server should echo _t0 back in event for precision
     socket.emit('t0', { _t0: now(), tenantId: tenant });
-    await new Promise(r => setTimeout(r, 10));
+    await new Promise((r) => setTimeout(r, 10));
   }
 })();
 
 function quantile(arr, q) {
-  const a = arr.slice().sort((x,y)=>x-y); const pos = (a.length - 1) * q; const base = Math.floor(pos); const rest = pos - base;
-  return a[base + 1] !== undefined ? a[base] + rest * (a[base + 1] - a[base]) : a[base];
+  const a = arr.slice().sort((x, y) => x - y);
+  const pos = (a.length - 1) * q;
+  const base = Math.floor(pos);
+  const rest = pos - base;
+  return a[base + 1] !== undefined
+    ? a[base] + rest * (a[base + 1] - a[base])
+    : a[base];
 }

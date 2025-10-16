@@ -4,7 +4,7 @@ metadata:
   name: maestro-retention
   namespace: maestro
 spec:
-  schedule: "0 3 * * *" # daily at 03:00
+  schedule: '0 3 * * *' # daily at 03:00
   jobTemplate:
     spec:
       template:
@@ -18,7 +18,7 @@ spec:
                     secretKeyRef:
                       name: maestro-db
                       key: password
-              command: ["/bin/sh","-c"]
+              command: ['/bin/sh', '-c']
               args:
                 - psql -h $(DB_HOST) -U $(DB_USER) -d $(DB_NAME) -f /retention/retention.sql
               volumeMounts:

@@ -68,7 +68,11 @@
 
     <script>
       const fmt = (n) =>
-        n == null ? '—' : typeof n === 'number' ? n.toFixed(3).replace(/\.?0+$/, '') : n;
+        n == null
+          ? '—'
+          : typeof n === 'number'
+            ? n.toFixed(3).replace(/\.?0+$/, '')
+            : n;
       const pct = (x) => (x == null ? '—' : Math.round(x * 100) + '%');
       const rel = (s) => (s ? new Date(s).toLocaleTimeString() : '—');
 
@@ -92,7 +96,8 @@
           const names = Object.keys(per).sort();
           names.forEach((m) => {
             const v = per[m];
-            const cap = v.caps && v.caps.minute_rpm_cap ? v.caps.minute_rpm_cap : null;
+            const cap =
+              v.caps && v.caps.minute_rpm_cap ? v.caps.minute_rpm_cap : null;
             html += meterRow(
               m,
               v.req,
@@ -126,7 +131,8 @@
         el.innerHTML = names
           .map((p) => {
             const b = B[p];
-            const frac = b.fraction_used == null ? 0 : Math.round(b.fraction_used * 100);
+            const frac =
+              b.fraction_used == null ? 0 : Math.round(b.fraction_used * 100);
             return `
       <div class="row">
         <div><b>${p}</b> <span class="muted">resets ${rel(b.resets_at)}</span></div>

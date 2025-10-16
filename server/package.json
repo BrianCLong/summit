@@ -25,7 +25,6 @@
     "seed:small": "SEED_ENTITIES=1000 SEED_RELATIONSHIPS=5000 ts-node scripts/seed-data.ts",
     "seed:large": "SEED_ENTITIES=50000 SEED_RELATIONSHIPS=250000 ts-node scripts/seed-data.ts"
   },
-  },
   "dependencies": {
     "@apollo/server": "5.0.0",
     "@as-integrations/express4": "1.1.2",

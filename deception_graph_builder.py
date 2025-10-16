@@ -8,9 +8,8 @@ counter‑response agent can reason about the trap that was laid.
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
 import uuid
-from typing import Dict, Tuple
+from dataclasses import dataclass, field
 
 
 @dataclass
@@ -23,8 +22,8 @@ class DeceptionGraphBuilder:
     while providing a familiar graph-like API.
     """
 
-    nodes: Dict[str, dict] = field(default_factory=dict)
-    edges: Dict[Tuple[str, str], dict] = field(default_factory=dict)
+    nodes: dict[str, dict] = field(default_factory=dict)
+    edges: dict[tuple[str, str], dict] = field(default_factory=dict)
 
     def create_decoy(
         self,

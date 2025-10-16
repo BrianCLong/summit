@@ -10,7 +10,7 @@ describe('createMcpServer', () => {
       version: '0.0.1',
       transport: 'stdio',
       registries: { tools: new ToolRegistry() },
-      transportFactory: () => serverTransport
+      transportFactory: () => serverTransport,
     });
 
     expect(server).toBeDefined();

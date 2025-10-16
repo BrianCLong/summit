@@ -13,7 +13,7 @@ Brief description of what this PR accomplishes.
 - [ ] Documentation
 - [ ] Observability
 - [ ] Security
-- [ ] Other: ****\_\_\_****
+- [ ] Other: \***\*\_\_\_\*\***
 
 ## Changes Made
 
@@ -42,9 +42,7 @@ Brief description of what this PR accomplishes.
 
 **Rollback Plan:**
 
--
-
-**Monitoring:**
+- **Monitoring:**
 
 -
 

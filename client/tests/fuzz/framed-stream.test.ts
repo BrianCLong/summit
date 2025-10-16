@@ -87,7 +87,9 @@ describe('Framed Stream Parser Fuzz Test', () => {
     });
     transport.on((evt) => receivedEvents.push(evt));
 
-    const testCases = [JSON.stringify({ type: 'token', value: 'Partial' }).slice(0, 10)];
+    const testCases = [
+      JSON.stringify({ type: 'token', value: 'Partial' }).slice(0, 10),
+    ];
 
     // Simulate fetch call
     // @ts-ignore

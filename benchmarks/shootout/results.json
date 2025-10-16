@@ -6,8 +6,8 @@
       "server": "github",
       "platform": "intelgraph",
       "metrics": {
-        "latency_ms": {"p50": 112, "p95": 204, "p99": 311},
-        "cold_start_ms": {"p95": 281},
+        "latency_ms": { "p50": 112, "p95": 204, "p99": 311 },
+        "cold_start_ms": { "p95": 281 },
         "error_rate": 0.0012,
         "cost_per_1k_calls_usd": 0.072
       }
@@ -16,8 +16,8 @@
       "server": "github",
       "platform": "metorial",
       "metrics": {
-        "latency_ms": {"p50": 189, "p95": 356, "p99": 512},
-        "cold_start_ms": {"p95": 618},
+        "latency_ms": { "p50": 189, "p95": 356, "p99": 512 },
+        "cold_start_ms": { "p95": 618 },
         "error_rate": 0.0041,
         "cost_per_1k_calls_usd": 0.105
       }

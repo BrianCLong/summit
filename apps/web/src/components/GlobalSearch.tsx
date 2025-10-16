@@ -99,9 +99,10 @@ export function GlobalSearch() {
     ]
 
     // Filter results based on query
-    return mockResults.filter(result =>
-      result.title.toLowerCase().includes(query.toLowerCase()) ||
-      result.description?.toLowerCase().includes(query.toLowerCase())
+    return mockResults.filter(
+      result =>
+        result.title.toLowerCase().includes(query.toLowerCase()) ||
+        result.description?.toLowerCase().includes(query.toLowerCase())
     )
   }
 
@@ -126,23 +127,35 @@ export function GlobalSearch() {
 
   const getTypeIcon = (type: string) => {
     switch (type) {
-      case 'entity': return User
-      case 'investigation': return Search
-      case 'alert': return AlertTriangle
-      case 'case': return FileText
-      case 'command': return Zap
-      default: return Search
+      case 'entity':
+        return User
+      case 'investigation':
+        return Search
+      case 'alert':
+        return AlertTriangle
+      case 'case':
+        return FileText
+      case 'command':
+        return Zap
+      default:
+        return Search
     }
   }
 
   const getTypeBadgeVariant = (type: string) => {
     switch (type) {
-      case 'entity': return 'secondary'
-      case 'investigation': return 'default'
-      case 'alert': return 'destructive'
-      case 'case': return 'outline'
-      case 'command': return 'intel'
-      default: return 'secondary'
+      case 'entity':
+        return 'secondary'
+      case 'investigation':
+        return 'default'
+      case 'alert':
+        return 'destructive'
+      case 'case':
+        return 'outline'
+      case 'command':
+        return 'intel'
+      default:
+        return 'secondary'
     }
   }
 
@@ -161,14 +174,14 @@ export function GlobalSearch() {
               className="flex h-12 w-full bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground disabled:cursor-not-allowed disabled:opacity-50"
             />
           </div>
-          
+
           <Command.List className="max-h-96 overflow-y-auto p-2">
             {loading && (
               <div className="py-6 text-center text-sm text-muted-foreground">
                 Searching...
               </div>
             )}
-            
+
             {!loading && query && results.length === 0 && (
               <div className="py-6 text-center text-sm text-muted-foreground">
                 No results found for "{query}"
@@ -184,54 +197,67 @@ export function GlobalSearch() {
             {results.length > 0 && (
               <>
                 {/* Group results by type */}
-                {['command', 'entity', 'investigation', 'alert', 'case'].map(type => {
-                  const typeResults = results.filter(r => r.type === type)
-                  if (typeResults.length === 0) return null
+                {['command', 'entity', 'investigation', 'alert', 'case'].map(
+                  type => {
+                    const typeResults = results.filter(r => r.type === type)
+                    if (typeResults.length === 0) return null
 
-                  return (
-                    <Command.Group key={type} heading={type.charAt(0).toUpperCase() + type.slice(1)}>
-                      {typeResults.map((result) => {
-                        const Icon = result.icon || getTypeIcon(result.type)
-                        return (
-                          <Command.Item
-                            key={result.id}
-                            value={result.id}
-                            onSelect={() => handleSelect(result)}
-                            className="flex items-center gap-3 px-3 py-2 text-sm cursor-pointer hover:bg-accent rounded-md"
-                          >
-                            <Icon className="h-4 w-4 text-muted-foreground" />
-                            <div className="flex-1 min-w-0">
-                              <div className="font-medium truncate">{result.title}</div>
-                              {result.description && (
-                                <div className="text-xs text-muted-foreground truncate">
-                                  {result.description}
+                    return (
+                      <Command.Group
+                        key={type}
+                        heading={type.charAt(0).toUpperCase() + type.slice(1)}
+                      >
+                        {typeResults.map(result => {
+                          const Icon = result.icon || getTypeIcon(result.type)
+                          return (
+                            <Command.Item
+                              key={result.id}
+                              value={result.id}
+                              onSelect={() => handleSelect(result)}
+                              className="flex items-center gap-3 px-3 py-2 text-sm cursor-pointer hover:bg-accent rounded-md"
+                            >
+                              <Icon className="h-4 w-4 text-muted-foreground" />
+                              <div className="flex-1 min-w-0">
+                                <div className="font-medium truncate">
+                                  {result.title}
                                 </div>
+                                {result.description && (
+                                  <div className="text-xs text-muted-foreground truncate">
+                                    {result.description}
+                                  </div>
+                                )}
+                              </div>
+                              {result.badge && (
+                                <Badge
+                                  variant={
+                                    getTypeBadgeVariant(result.type) as any
+                                  }
+                                  className="text-xs"
+                                >
+                                  {result.badge}
+                                </Badge>
                               )}
-                            </div>
-                            {result.badge && (
-                              <Badge 
-                                variant={getTypeBadgeVariant(result.type) as any}
-                                className="text-xs"
-                              >
-                                {result.badge}
-                              </Badge>
-                            )}
-                          </Command.Item>
-                        )
-                      })}
-                    </Command.Group>
-                  )
-                })}
+                            </Command.Item>
+                          )
+                        })}
+                      </Command.Group>
+                    )
+                  }
+                )}
               </>
             )}
           </Command.List>
-          
+
           <div className="border-t px-3 py-2 text-xs text-muted-foreground">
             <div className="flex items-center justify-between">
               <span>Press Enter to select, Esc to close</span>
               <div className="flex items-center gap-1">
-                <kbd className="h-5 px-1.5 rounded border bg-muted text-[10px] font-medium">↑</kbd>
-                <kbd className="h-5 px-1.5 rounded border bg-muted text-[10px] font-medium">↓</kbd>
+                <kbd className="h-5 px-1.5 rounded border bg-muted text-[10px] font-medium">
+                  ↑
+                </kbd>
+                <kbd className="h-5 px-1.5 rounded border bg-muted text-[10px] font-medium">
+                  ↓
+                </kbd>
                 <span className="text-[10px]">to navigate</span>
               </div>
             </div>

@@ -1,5 +1,9 @@
 import fs from 'fs';
-import { BaseConnector, createEmitter, ConnectorContext } from '@intelgraph/connector-js';
+import {
+  BaseConnector,
+  createEmitter,
+  ConnectorContext,
+} from '@intelgraph/connector-js';
 
 class CsvConnector extends BaseConnector {
   constructor(private file: string) {

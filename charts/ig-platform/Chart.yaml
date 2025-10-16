@@ -3,7 +3,7 @@ name: ig-platform
 description: IntelGraph Platform + Maestro Conductor umbrella chart
 type: application
 version: 0.1.0
-appVersion: "1.0.0"
+appVersion: '1.0.0'
 
 keywords:
   - intelligence
@@ -23,19 +23,19 @@ maintainers:
 
 dependencies:
   - name: postgresql
-    version: "12.12.10"
+    version: '12.12.10'
     repository: https://charts.bitnami.com/bitnami
     condition: postgresql.enabled
   - name: redis
-    version: "18.6.4"
+    version: '18.6.4'
     repository: https://charts.bitnami.com/bitnami
     condition: redis.enabled
   - name: kafka
-    version: "25.3.5"
+    version: '25.3.5'
     repository: https://charts.bitnami.com/bitnami
     condition: kafka.enabled
   - name: elasticsearch
-    version: "19.15.0"
+    version: '19.15.0'
     repository: https://charts.bitnami.com/bitnami
     condition: elasticsearch.enabled
 

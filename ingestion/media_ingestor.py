@@ -5,12 +5,12 @@ from __future__ import annotations
 import mimetypes
 from dataclasses import asdict
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any
 
 from intelgraph_ai_ml.deepfake_detector import DeepfakeDetector
 
 
-def ingest_media(path: str) -> Dict[str, Any]:
+def ingest_media(path: str) -> dict[str, Any]:
     """Ingest a media item and return detection metadata.
 
     Parameters
@@ -26,7 +26,7 @@ def ingest_media(path: str) -> Dict[str, Any]:
     detector = DeepfakeDetector()
     result = detector.detect(str(file_path), media_type)
 
-    meta: Dict[str, Any] = asdict(result)
+    meta: dict[str, Any] = asdict(result)
     meta.update({"media_type": result.media_type, "path": str(file_path)})
     return meta
 

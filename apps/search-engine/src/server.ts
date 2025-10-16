@@ -11,7 +11,11 @@ const port = process.env.PORT || 4006;
 
 const logger = createLogger({
   level: process.env.LOG_LEVEL || 'info',
-  format: format.combine(format.timestamp(), format.errors({ stack: true }), format.json()),
+  format: format.combine(
+    format.timestamp(),
+    format.errors({ stack: true }),
+    format.json(),
+  ),
   transports: [
     new transports.Console({
       format: format.combine(format.colorize(), format.simple()),
@@ -47,7 +51,9 @@ app.use(
 
 app.use(
   cors({
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || [
+      'http://localhost:3000',
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
@@ -131,30 +137,43 @@ app.use('*', (req, res) => {
   });
 });
 
-app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  logger.error('Unhandled error', {
-    error: error.message,
-    stack: error.stack,
-    url: req.url,
-    method: req.method,
-  });
+app.use(
+  (
+    error: Error,
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ) => {
+    logger.error('Unhandled error', {
+      error: error.message,
+      stack: error.stack,
+      url: req.url,
+      method: req.method,
+    });
 
-  if (res.headersSent) {
-    return next(error);
-  }
+    if (res.headersSent) {
+      return next(error);
+    }
 
-  res.status(500).json({
-    error: 'Internal server error',
-    message: process.env.NODE_ENV === 'development' ? error.message : 'Something went wrong',
-  });
-});
+    res.status(500).json({
+      error: 'Internal server error',
+      message:
+        process.env.NODE_ENV === 'development'
+          ? error.message
+          : 'Something went wrong',
+    });
+  },
+);
 
 process.on('unhandledRejection', (reason, promise) => {
   logger.error('Unhandled Rejection', { reason, promise });
 });
 
 process.on('uncaughtException', (error) => {
-  logger.error('Uncaught Exception', { error: error.message, stack: error.stack });
+  logger.error('Uncaught Exception', {
+    error: error.message,
+    stack: error.stack,
+  });
   process.exit(1);
 });
 
@@ -171,7 +190,9 @@ const gracefulShutdown = (signal: string) => {
   });
 
   setTimeout(() => {
-    logger.error('Could not close connections in time, forcefully shutting down');
+    logger.error(
+      'Could not close connections in time, forcefully shutting down',
+    );
     process.exit(1);
   }, 30000);
 };

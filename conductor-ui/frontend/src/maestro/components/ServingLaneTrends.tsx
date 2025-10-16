@@ -23,7 +23,7 @@ import {
   ListItem,
   ListItemText,
   Chip,
-  LinearProgress
+  LinearProgress,
 } from '@mui/material';
 import {
   RefreshOutlined as RefreshIcon,
@@ -31,22 +31,22 @@ import {
   TrendingUpOutlined as TrendingUpIcon,
   TrendingDownOutlined as TrendingDownIcon,
   RemoveOutlined as SteadyIcon,
-  WarningAmberOutlined as WarningIcon
+  WarningAmberOutlined as WarningIcon,
 } from '@mui/icons-material';
-import { 
-  ResponsiveContainer, 
-  LineChart, 
-  Line, 
-  XAxis, 
-  YAxis, 
-  Tooltip as RechartsTooltip, 
+import {
+  ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip as RechartsTooltip,
   Legend,
   AreaChart,
   Area,
   BarChart,
   Bar,
   ComposedChart,
-  CartesianGrid
+  CartesianGrid,
 } from 'recharts';
 import { api } from '../api';
 
@@ -86,16 +86,18 @@ export default function ServingLaneTrends() {
   const [error, setError] = useState<string | null>(null);
   const [tabValue, setTabValue] = useState(0);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
-  const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(null);
+  const [refreshInterval, setRefreshInterval] = useState<NodeJS.Timeout | null>(
+    null,
+  );
 
   const fetchData = async () => {
     try {
       setError(null);
       const r = await getServingMetrics({
         backend: selectedBackend === 'all' ? undefined : selectedBackend,
-        timeRange: selectedTimeRange
+        timeRange: selectedTimeRange,
       });
-      
+
       if (r.series) {
         const metrics: ServingMetric[] = r.series.map((p: any) => ({
           timestamp: p.ts,
@@ -112,42 +114,47 @@ export default function ServingLaneTrends() {
           model: p.model || 'unknown',
           requestsPerSecond: p.rps || 0,
           errorRate: p.errorRate || 0,
-          ...p
+          ...p,
         }));
         setData(metrics);
       }
-      
+
       if (r.backends) {
         setBackends(r.backends);
       }
-      
+
       setLoading(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch serving metrics');
+      setError(
+        err instanceof Error ? err.message : 'Failed to fetch serving metrics',
+      );
       setLoading(false);
     }
   };
 
   useEffect(() => {
     fetchData();
-    
+
     // Set up refresh interval
     const interval = setInterval(fetchData, 30000); // Refresh every 30 seconds
     setRefreshInterval(interval);
-    
+
     return () => {
       if (refreshInterval) clearInterval(refreshInterval);
     };
   }, [selectedBackend, selectedTimeRange]);
 
-  const calculateTrend = (data: ServingMetric[], key: keyof ServingMetric): 'up' | 'down' | 'steady' => {
+  const calculateTrend = (
+    data: ServingMetric[],
+    key: keyof ServingMetric,
+  ): 'up' | 'down' | 'steady' => {
     if (data.length < 2) return 'steady';
-    
+
     const recent = data.slice(-5);
-    const values = recent.map(d => Number(d[key]) || 0);
+    const values = recent.map((d) => Number(d[key]) || 0);
     const first = values[0];
     const last = values[values.length - 1];
-    
+
     if (last > first * 1.1) return 'up';
     if (last < first * 0.9) return 'down';
     return 'steady';
@@ -155,54 +162,81 @@ export default function ServingLaneTrends() {
 
   const getTrendIcon = (trend: string) => {
     switch (trend) {
-      case 'up': return <TrendingUpIcon color="success" />;
-      case 'down': return <TrendingDownIcon color="error" />;
-      default: return <SteadyIcon color="action" />;
+      case 'up':
+        return <TrendingUpIcon color="success" />;
+      case 'down':
+        return <TrendingDownIcon color="error" />;
+      default:
+        return <SteadyIcon color="action" />;
     }
   };
 
-  const getCurrentValue = (data: ServingMetric[], key: keyof ServingMetric): number => {
+  const getCurrentValue = (
+    data: ServingMetric[],
+    key: keyof ServingMetric,
+  ): number => {
     if (data.length === 0) return 0;
     return Number(data[data.length - 1][key]) || 0;
   };
 
   const formatValue = (value: number, type: string): string => {
     switch (type) {
-      case 'percentage': return `${value.toFixed(1)}%`;
-      case 'latency': return `${value.toFixed(0)}ms`;
-      case 'throughput': return `${value.toFixed(1)} rps`;
-      case 'memory': return `${(value / 1024 / 1024).toFixed(1)} MB`;
-      default: return value.toFixed(0);
+      case 'percentage':
+        return `${value.toFixed(1)}%`;
+      case 'latency':
+        return `${value.toFixed(0)}ms`;
+      case 'throughput':
+        return `${value.toFixed(1)} rps`;
+      case 'memory':
+        return `${(value / 1024 / 1024).toFixed(1)} MB`;
+      default:
+        return value.toFixed(0);
     }
   };
 
-  const renderMetricCard = (title: string, dataKey: keyof ServingMetric, type: string, color: string) => {
+  const renderMetricCard = (
+    title: string,
+    dataKey: keyof ServingMetric,
+    type: string,
+    color: string,
+  ) => {
     const currentValue = getCurrentValue(data, dataKey);
     const trend = calculateTrend(data, dataKey);
-    
+
     return (
       <Card>
         <CardContent>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              mb: 1,
+            }}
+          >
             <Typography variant="subtitle2" color="textSecondary">
               {title}
             </Typography>
-            <Tooltip title={`Trend: ${trend}`}>
-              {getTrendIcon(trend)}
-            </Tooltip>
+            <Tooltip title={`Trend: ${trend}`}>{getTrendIcon(trend)}</Tooltip>
           </Box>
-          
+
           <Typography variant="h4" component="div" sx={{ mb: 1 }}>
             {formatValue(currentValue, type)}
           </Typography>
-          
+
           <Box sx={{ height: 120 }}>
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={data}>
                 <defs>
-                  <linearGradient id={`gradient-${dataKey}`} x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={color} stopOpacity={0.3}/>
-                    <stop offset="95%" stopColor={color} stopOpacity={0.1}/>
+                  <linearGradient
+                    id={`gradient-${dataKey}`}
+                    x1="0"
+                    y1="0"
+                    x2="0"
+                    y2="1"
+                  >
+                    <stop offset="5%" stopColor={color} stopOpacity={0.3} />
+                    <stop offset="95%" stopColor={color} stopOpacity={0.1} />
                   </linearGradient>
                 </defs>
                 <Area
@@ -213,8 +247,13 @@ export default function ServingLaneTrends() {
                   strokeWidth={2}
                 />
                 <RechartsTooltip
-                  labelFormatter={(value) => new Date(value).toLocaleTimeString()}
-                  formatter={(value: number) => [formatValue(value, type), title]}
+                  labelFormatter={(value) =>
+                    new Date(value).toLocaleTimeString()
+                  }
+                  formatter={(value: number) => [
+                    formatValue(value, type),
+                    title,
+                  ]}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -233,7 +272,12 @@ export default function ServingLaneTrends() {
         {renderMetricCard('Batch Size', 'batchSize', 'number', '#82ca9d')}
       </Grid>
       <Grid item xs={12} sm={6} md={3}>
-        {renderMetricCard('KV Cache Hit Rate', 'kvCacheHitRate', 'percentage', '#ffc658')}
+        {renderMetricCard(
+          'KV Cache Hit Rate',
+          'kvCacheHitRate',
+          'percentage',
+          '#ffc658',
+        )}
       </Grid>
       <Grid item xs={12} sm={6} md={3}>
         {renderMetricCard('P95 Latency', 'p95Latency', 'latency', '#ff7c7c')}
@@ -249,16 +293,24 @@ export default function ServingLaneTrends() {
               <ResponsiveContainer width="100%" height="100%">
                 <ComposedChart data={data}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="time" 
-                    tick={{ fontSize: 12 }}
-                  />
+                  <XAxis dataKey="time" tick={{ fontSize: 12 }} />
                   <YAxis yAxisId="left" />
                   <YAxis yAxisId="right" orientation="right" />
                   <RechartsTooltip />
                   <Legend />
-                  <Bar yAxisId="left" dataKey="throughput" fill="#8884d8" name="Throughput (RPS)" />
-                  <Line yAxisId="right" type="monotone" dataKey="p95Latency" stroke="#ff7c7c" name="P95 Latency (ms)" />
+                  <Bar
+                    yAxisId="left"
+                    dataKey="throughput"
+                    fill="#8884d8"
+                    name="Throughput (RPS)"
+                  />
+                  <Line
+                    yAxisId="right"
+                    type="monotone"
+                    dataKey="p95Latency"
+                    stroke="#ff7c7c"
+                    name="P95 Latency (ms)"
+                  />
                 </ComposedChart>
               </ResponsiveContainer>
             </Box>
@@ -276,10 +328,7 @@ export default function ServingLaneTrends() {
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={data}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="time" 
-                    tick={{ fontSize: 12 }}
-                  />
+                  <XAxis dataKey="time" tick={{ fontSize: 12 }} />
                   <YAxis />
                   <RechartsTooltip />
                   <Legend />
@@ -313,48 +362,74 @@ export default function ServingLaneTrends() {
       <Grid item xs={12}>
         <Card>
           <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
-              <Typography variant="h6">
-                Backend Overview
-              </Typography>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                mb: 2,
+              }}
+            >
+              <Typography variant="h6">Backend Overview</Typography>
               <IconButton onClick={() => setDetailDialogOpen(true)}>
                 <InfoIcon />
               </IconButton>
             </Box>
-            
+
             <Grid container spacing={2}>
               {backends.map((backend) => (
                 <Grid item xs={12} sm={6} md={4} key={backend.name}>
                   <Paper sx={{ p: 2 }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        mb: 1,
+                      }}
+                    >
                       <Typography variant="subtitle1">
                         {backend.name}
                       </Typography>
-                      <Chip 
-                        label={backend.status} 
-                        color={backend.status === 'healthy' ? 'success' : 'error'}
+                      <Chip
+                        label={backend.status}
+                        color={
+                          backend.status === 'healthy' ? 'success' : 'error'
+                        }
                         size="small"
                       />
                     </Box>
-                    
-                    <Typography variant="body2" color="textSecondary" gutterBottom>
+
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      gutterBottom
+                    >
                       Type: {backend.type}
                     </Typography>
-                    
-                    <Typography variant="body2" color="textSecondary" gutterBottom>
+
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      gutterBottom
+                    >
                       Instances: {backend.instances}
                     </Typography>
-                    
-                    <Typography variant="body2" color="textSecondary" gutterBottom>
+
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      gutterBottom
+                    >
                       Models: {backend.models.join(', ')}
                     </Typography>
-                    
+
                     <Box sx={{ mt: 2 }}>
                       <Typography variant="body2" gutterBottom>
                         Utilization: {backend.utilization.toFixed(1)}%
                       </Typography>
-                      <LinearProgress 
-                        variant="determinate" 
+                      <LinearProgress
+                        variant="determinate"
                         value={backend.utilization}
                         color={backend.utilization > 80 ? 'warning' : 'primary'}
                       />
@@ -377,16 +452,28 @@ export default function ServingLaneTrends() {
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={data}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="time" 
-                    tick={{ fontSize: 12 }}
-                  />
+                  <XAxis dataKey="time" tick={{ fontSize: 12 }} />
                   <YAxis />
                   <RechartsTooltip />
                   <Legend />
-                  <Line type="monotone" dataKey="queueDepth" stroke="#8884d8" name="Queue Depth" />
-                  <Line type="monotone" dataKey="batchSize" stroke="#82ca9d" name="Batch Size" />
-                  <Line type="monotone" dataKey="kvCacheHitRate" stroke="#ffc658" name="KV Cache Hit %" />
+                  <Line
+                    type="monotone"
+                    dataKey="queueDepth"
+                    stroke="#8884d8"
+                    name="Queue Depth"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="batchSize"
+                    stroke="#82ca9d"
+                    name="Batch Size"
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="kvCacheHitRate"
+                    stroke="#ffc658"
+                    name="KV Cache Hit %"
+                  />
                 </LineChart>
               </ResponsiveContainer>
             </Box>
@@ -397,7 +484,12 @@ export default function ServingLaneTrends() {
   );
 
   const renderDetailDialog = () => (
-    <Dialog open={detailDialogOpen} onClose={() => setDetailDialogOpen(false)} maxWidth="md" fullWidth>
+    <Dialog
+      open={detailDialogOpen}
+      onClose={() => setDetailDialogOpen(false)}
+      maxWidth="md"
+      fullWidth
+    >
       <DialogTitle>Backend Details</DialogTitle>
       <DialogContent>
         <List>
@@ -408,13 +500,15 @@ export default function ServingLaneTrends() {
                 secondary={
                   <>
                     <Typography variant="body2">
-                      Type: {backend.type} | Status: {backend.status} | Instances: {backend.instances}
+                      Type: {backend.type} | Status: {backend.status} |
+                      Instances: {backend.instances}
                     </Typography>
                     <Typography variant="body2">
                       Models: {backend.models.join(', ')}
                     </Typography>
                     <Typography variant="body2">
-                      Last Updated: {new Date(backend.lastUpdate).toLocaleString()}
+                      Last Updated:{' '}
+                      {new Date(backend.lastUpdate).toLocaleString()}
                     </Typography>
                   </>
                 }
@@ -447,11 +541,16 @@ export default function ServingLaneTrends() {
 
   return (
     <Box sx={{ p: 2 }}>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
-        <Typography variant="h5">
-          Serving Lane Trends
-        </Typography>
-        
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          mb: 3,
+        }}
+      >
+        <Typography variant="h5">Serving Lane Trends</Typography>
+
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel>Backend</InputLabel>
@@ -467,7 +566,7 @@ export default function ServingLaneTrends() {
               <MenuItem value="kserve">KServe</MenuItem>
             </Select>
           </FormControl>
-          
+
           <FormControl size="small" sx={{ minWidth: 120 }}>
             <InputLabel>Time Range</InputLabel>
             <Select
@@ -481,21 +580,25 @@ export default function ServingLaneTrends() {
               <MenuItem value="7d">Last 7 Days</MenuItem>
             </Select>
           </FormControl>
-          
+
           <IconButton onClick={fetchData}>
             <RefreshIcon />
           </IconButton>
         </Box>
       </Box>
 
-      <Tabs value={tabValue} onChange={(_, newValue) => setTabValue(newValue)} sx={{ mb: 3 }}>
+      <Tabs
+        value={tabValue}
+        onChange={(_, newValue) => setTabValue(newValue)}
+        sx={{ mb: 3 }}
+      >
         <Tab label="Overview" />
         <Tab label="Backend Details" />
       </Tabs>
 
       {tabValue === 0 && renderOverviewTab()}
       {tabValue === 1 && renderBackendDetail()}
-      
+
       {renderDetailDialog()}
     </Box>
   );

@@ -31,7 +31,10 @@ import { useQuery } from '@apollo/client';
 import { gql } from '@apollo/client';
 
 const ATTACK_COVERAGE_QUERY = gql`
-  query GetAttackCoverage($timeRange: String!, $filters: AttackCoverageFilters) {
+  query GetAttackCoverage(
+    $timeRange: String!
+    $filters: AttackCoverageFilters
+  ) {
     attackCoverage(timeRange: $timeRange, filters: $filters) {
       tactics {
         id
@@ -124,7 +127,8 @@ export default function AttackHeatmapWidget({
     severity: [],
     hasAlerts: false,
   });
-  const [selectedTechnique, setSelectedTechnique] = useState<AttackTechnique | null>(null);
+  const [selectedTechnique, setSelectedTechnique] =
+    useState<AttackTechnique | null>(null);
   const [techniqueDialogOpen, setTechniqueDialogOpen] = useState(false);
 
   const { data, loading, error } = useQuery(ATTACK_COVERAGE_QUERY, {
@@ -145,14 +149,14 @@ export default function AttackHeatmapWidget({
 
   const handleExport = () => {
     if (!data?.attackCoverage) return;
-    
+
     const exportData = {
       timestamp: new Date().toISOString(),
       timeRange,
       summary: data.attackCoverage.summary,
       tactics: data.attackCoverage.tactics,
     };
-    
+
     const blob = new Blob([JSON.stringify(exportData, null, 2)], {
       type: 'application/json',
     });
@@ -164,17 +168,17 @@ export default function AttackHeatmapWidget({
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    
+
     handleMenuClose();
   };
 
   const getCoverageColor = (technique: AttackTechnique) => {
     const { coverage, alerts } = technique;
-    
+
     if (alerts.count === 0 && coverage.detectionRules === 0) {
       return '#f5f5f5'; // No coverage
     }
-    
+
     if (alerts.count > 0) {
       // Color based on alert severity and count
       const intensity = Math.min(alerts.count / 10, 1); // Cap at 10 alerts
@@ -189,13 +193,13 @@ export default function AttackHeatmapWidget({
           return `rgba(76, 175, 80, ${0.3 + intensity * 0.7})`;
       }
     }
-    
+
     if (coverage.detectionRules > 0) {
       // Detection coverage only
       const intensity = Math.min(coverage.detectionRules / 5, 1);
       return `rgba(63, 81, 181, ${0.2 + intensity * 0.5})`;
     }
-    
+
     return '#e0e0e0';
   };
 
@@ -209,9 +213,7 @@ export default function AttackHeatmapWidget({
         <Typography variant="body2">
           Detection Rules: {coverage.detectionRules}
         </Typography>
-        <Typography variant="body2">
-          Recent Alerts: {alerts.count}
-        </Typography>
+        <Typography variant="body2">Recent Alerts: {alerts.count}</Typography>
         {alerts.count > 0 && (
           <Typography variant="body2">
             Severity: {alerts.severity.toUpperCase()}
@@ -219,7 +221,8 @@ export default function AttackHeatmapWidget({
         )}
         {coverage.lastDetected && (
           <Typography variant="body2">
-            Last Detected: {new Date(coverage.lastDetected).toLocaleDateString()}
+            Last Detected:{' '}
+            {new Date(coverage.lastDetected).toLocaleDateString()}
           </Typography>
         )}
         <Typography variant="body2">
@@ -237,7 +240,11 @@ export default function AttackHeatmapWidget({
     }
   };
 
-  const renderHeatmapCell = (technique: AttackTechnique, tacticIndex: number, techniqueIndex: number) => (
+  const renderHeatmapCell = (
+    technique: AttackTechnique,
+    tacticIndex: number,
+    techniqueIndex: number,
+  ) => (
     <Tooltip
       key={`${technique.id}`}
       title={getTechniqueTooltip(technique)}
@@ -276,7 +283,15 @@ export default function AttackHeatmapWidget({
   );
 
   const renderLegend = () => (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mt: 2, flexWrap: 'wrap' }}>
+    <Box
+      sx={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: 2,
+        mt: 2,
+        flexWrap: 'wrap',
+      }}
+    >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
         <Box
           sx={{
@@ -353,7 +368,14 @@ export default function AttackHeatmapWidget({
           <Typography variant="h6" gutterBottom>
             ATT&CK Coverage Heatmap
           </Typography>
-          <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50%' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '50%',
+            }}
+          >
             <LinearProgress sx={{ width: '50%' }} />
           </Box>
         </CardContent>
@@ -383,18 +405,30 @@ export default function AttackHeatmapWidget({
       <Card sx={{ height }}>
         <CardContent>
           {/* Header */}
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              mb: 2,
+            }}
+          >
             <Box>
               <Typography variant="h6">ATT&CK Coverage Heatmap</Typography>
               <Typography variant="body2" color="text.secondary">
-                {summary.coveragePercentage}% technique coverage ({summary.coveredTechniques}/{summary.totalTechniques})
+                {summary.coveragePercentage}% technique coverage (
+                {summary.coveredTechniques}/{summary.totalTechniques})
               </Typography>
             </Box>
             <Box>
               <IconButton onClick={handleMenuClick}>
                 <MoreVert />
               </IconButton>
-              <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleMenuClose}>
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+              >
                 <MenuItem onClick={() => setFilterDialogOpen(true)}>
                   <FilterList sx={{ mr: 1 }} />
                   Filter
@@ -472,35 +506,46 @@ export default function AttackHeatmapWidget({
 
               {/* Technique Rows */}
               {tactics.map((tactic: AttackTactic) =>
-                tactic.techniques.map((technique: AttackTechnique, techIndex: number) => (
-                  <Box key={technique.id} sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                tactic.techniques.map(
+                  (technique: AttackTechnique, techIndex: number) => (
                     <Box
-                      sx={{
-                        width: 150,
-                        fontSize: '11px',
-                        pr: 1,
-                        textAlign: 'right',
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                      }}
+                      key={technique.id}
+                      sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}
                     >
-                      <Tooltip title={technique.name}>
-                        <span>{technique.id}</span>
-                      </Tooltip>
-                    </Box>
-                    {MITRE_TACTICS.map((tacticName, tacticIndex) => (
                       <Box
-                        key={`${technique.id}-${tacticName}`}
-                        sx={{ width: 120, display: 'flex', justifyContent: 'center' }}
+                        sx={{
+                          width: 150,
+                          fontSize: '11px',
+                          pr: 1,
+                          textAlign: 'right',
+                          overflow: 'hidden',
+                          textOverflow: 'ellipsis',
+                          whiteSpace: 'nowrap',
+                        }}
                       >
-                        {tactic.name === tacticName
-                          ? renderHeatmapCell(technique, tacticIndex, techIndex)
-                          : <Box sx={{ width: 40, height: 30 }} />}
+                        <Tooltip title={technique.name}>
+                          <span>{technique.id}</span>
+                        </Tooltip>
                       </Box>
-                    ))}
-                  </Box>
-                ))
+                      {MITRE_TACTICS.map((tacticName, tacticIndex) => (
+                        <Box
+                          key={`${technique.id}-${tacticName}`}
+                          sx={{
+                            width: 120,
+                            display: 'flex',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          {tactic.name === tacticName ? (
+                            renderHeatmapCell(technique, tacticIndex, techIndex)
+                          ) : (
+                            <Box sx={{ width: 40, height: 30 }} />
+                          )}
+                        </Box>
+                      ))}
+                    </Box>
+                  ),
+                ),
               )}
             </Box>
           </Box>
@@ -530,8 +575,8 @@ export default function AttackHeatmapWidget({
                     selectedTechnique.alerts.severity === 'critical'
                       ? 'error'
                       : selectedTechnique.alerts.severity === 'high'
-                      ? 'warning'
-                      : 'default'
+                        ? 'warning'
+                        : 'default'
                   }
                 />
               </Box>
@@ -546,11 +591,18 @@ export default function AttackHeatmapWidget({
                     Rules: {selectedTechnique.coverage.detectionRules}
                   </Typography>
                   <Typography variant="body2">
-                    False Positive Rate: {(selectedTechnique.coverage.falsePositiveRate * 100).toFixed(1)}%
+                    False Positive Rate:{' '}
+                    {(
+                      selectedTechnique.coverage.falsePositiveRate * 100
+                    ).toFixed(1)}
+                    %
                   </Typography>
                   {selectedTechnique.coverage.lastDetected && (
                     <Typography variant="body2">
-                      Last Detection: {new Date(selectedTechnique.coverage.lastDetected).toLocaleString()}
+                      Last Detection:{' '}
+                      {new Date(
+                        selectedTechnique.coverage.lastDetected,
+                      ).toLocaleString()}
                     </Typography>
                   )}
                 </Grid>
@@ -571,7 +623,9 @@ export default function AttackHeatmapWidget({
               </Grid>
             </DialogContent>
             <DialogActions>
-              <Button onClick={() => setTechniqueDialogOpen(false)}>Close</Button>
+              <Button onClick={() => setTechniqueDialogOpen(false)}>
+                Close
+              </Button>
               <Button variant="contained" startIcon={<ZoomIn />}>
                 View Details
               </Button>
@@ -581,7 +635,12 @@ export default function AttackHeatmapWidget({
       </Dialog>
 
       {/* Filter Dialog */}
-      <Dialog open={filterDialogOpen} onClose={() => setFilterDialogOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={filterDialogOpen}
+        onClose={() => setFilterDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>Filter ATT&CK Coverage</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>

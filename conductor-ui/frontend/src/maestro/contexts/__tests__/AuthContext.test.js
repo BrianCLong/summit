@@ -4,7 +4,9 @@ import userEvent from '@testing-library/user-event';
 import { AuthProvider, useAuth } from '../AuthContext';
 // Mock the API calls
 jest.mock('../../api/auth', () => ({
-  initiateLogin: jest.fn(() => Promise.resolve({ authorizeUrl: 'http://mock-auth.com/authorize' })),
+  initiateLogin: jest.fn(() =>
+    Promise.resolve({ authorizeUrl: 'http://mock-auth.com/authorize' }),
+  ),
   exchangeCodeForTokens: jest.fn(() =>
     Promise.resolve({
       idToken: 'mock-id-token',
@@ -62,16 +64,28 @@ const TestComponent = () => {
         'data-testid': 'isAuthenticated',
         children: auth.isAuthenticated ? 'true' : 'false',
       }),
-      _jsx('span', { 'data-testid': 'loading', children: auth.loading ? 'true' : 'false' }),
+      _jsx('span', {
+        'data-testid': 'loading',
+        children: auth.loading ? 'true' : 'false',
+      }),
       _jsx('span', { 'data-testid': 'user-email', children: auth.user?.email }),
-      _jsx('span', { 'data-testid': 'user-tenant', children: auth.user?.tenant }),
-      _jsx('span', { 'data-testid': 'access-token', children: auth.accessToken }),
+      _jsx('span', {
+        'data-testid': 'user-tenant',
+        children: auth.user?.tenant,
+      }),
+      _jsx('span', {
+        'data-testid': 'access-token',
+        children: auth.accessToken,
+      }),
       _jsx('span', { 'data-testid': 'id-token', children: auth.idToken }),
       _jsx('span', { 'data-testid': 'expires-at', children: auth.expiresAt }),
       _jsx('button', { onClick: () => auth.login('auth0'), children: 'Login' }),
       _jsx('button', { onClick: auth.logout, children: 'Logout' }),
       _jsx('button', { onClick: auth.refreshToken, children: 'Refresh Token' }),
-      _jsx('button', { onClick: () => auth.switchTenant('tenantB'), children: 'Switch Tenant' }),
+      _jsx('button', {
+        onClick: () => auth.switchTenant('tenantB'),
+        children: 'Switch Tenant',
+      }),
       _jsx('span', {
         'data-testid': 'has-viewer-role',
         children: auth.hasRole('viewer') ? 'true' : 'false',
@@ -113,12 +127,18 @@ describe('AuthProvider', () => {
     await waitFor(() => {
       expect(screen.getByTestId('loading')).toHaveTextContent('false');
       expect(screen.getByTestId('isAuthenticated')).toHaveTextContent('true');
-      expect(screen.getByTestId('user-email')).toHaveTextContent('test@example.com');
-      expect(screen.getByTestId('access-token')).toHaveTextContent('mock-access-token');
+      expect(screen.getByTestId('user-email')).toHaveTextContent(
+        'test@example.com',
+      );
+      expect(screen.getByTestId('access-token')).toHaveTextContent(
+        'mock-access-token',
+      );
     });
   });
   it('should handle logout correctly', async () => {
-    const { getByText } = render(_jsx(AuthProvider, { children: _jsx(TestComponent, {}) }));
+    const { getByText } = render(
+      _jsx(AuthProvider, { children: _jsx(TestComponent, {}) }),
+    );
     await waitFor(() => {
       expect(getByText('true')).toBeInTheDocument(); // isAuthenticated
     });
@@ -148,12 +168,16 @@ describe('AuthProvider', () => {
     expect(screen.getByTestId('has-tenantC-access')).toHaveTextContent('false');
   });
   it('should schedule and perform token refresh before expiry', async () => {
-    const { getByTestId } = render(_jsx(AuthProvider, { children: _jsx(TestComponent, {}) }));
+    const { getByTestId } = render(
+      _jsx(AuthProvider, { children: _jsx(TestComponent, {}) }),
+    );
     await waitFor(() => {
       expect(getByTestId('isAuthenticated')).toHaveTextContent('true');
     });
     const initialAccessToken = getByTestId('access-token').textContent;
-    const initialExpiresAt = parseInt(getByTestId('expires-at').textContent || '0');
+    const initialExpiresAt = parseInt(
+      getByTestId('expires-at').textContent || '0',
+    );
     // Advance timers to just before refresh (expiresAt - 60s - jitter)
     const timeToAdvance = initialExpiresAt - Date.now() - 60 * 1000 - 1000; // Subtracting 1s for jitter buffer
     act(() => {
@@ -161,7 +185,9 @@ describe('AuthProvider', () => {
     });
     await waitFor(
       () => {
-        expect(getByTestId('access-token')).not.toHaveTextContent(initialAccessToken);
+        expect(getByTestId('access-token')).not.toHaveTextContent(
+          initialAccessToken,
+        );
         expect(getByTestId('id-token')).not.toHaveTextContent('mock-id-token');
       },
       { timeout: 5000 },
@@ -169,7 +195,9 @@ describe('AuthProvider', () => {
     expect(refreshTokenApi).toHaveBeenCalledTimes(1);
   });
   it('should logout if refresh token fails (e.g., 401)', async () => {
-    const { getByTestId } = render(_jsx(AuthProvider, { children: _jsx(TestComponent, {}) }));
+    const { getByTestId } = render(
+      _jsx(AuthProvider, { children: _jsx(TestComponent, {}) }),
+    );
     await waitFor(() => {
       expect(getByTestId('isAuthenticated')).toHaveTextContent('true');
     });
@@ -187,7 +215,9 @@ describe('AuthProvider', () => {
     expect(logoutApi).toHaveBeenCalledTimes(1);
   });
   it('should logout after idle timeout', async () => {
-    const { getByTestId } = render(_jsx(AuthProvider, { children: _jsx(TestComponent, {}) }));
+    const { getByTestId } = render(
+      _jsx(AuthProvider, { children: _jsx(TestComponent, {}) }),
+    );
     await waitFor(() => {
       expect(getByTestId('isAuthenticated')).toHaveTextContent('true');
     });
@@ -202,7 +232,9 @@ describe('AuthProvider', () => {
     expect(logoutApi).toHaveBeenCalledTimes(1);
   });
   it('should reset idle timer on user activity', async () => {
-    const { getByTestId } = render(_jsx(AuthProvider, { children: _jsx(TestComponent, {}) }));
+    const { getByTestId } = render(
+      _jsx(AuthProvider, { children: _jsx(TestComponent, {}) }),
+    );
     await waitFor(() => {
       expect(getByTestId('isAuthenticated')).toHaveTextContent('true');
     });

@@ -3,7 +3,13 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  act,
+} from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import EnhancedAnalyticsDashboard from '../EnhancedAnalyticsDashboard';
@@ -84,7 +90,9 @@ describe('EnhancedAnalyticsDashboard', () => {
   it('renders time range selector with default value', () => {
     const onConfigChange = jest.fn();
 
-    renderWithTheme(<EnhancedAnalyticsDashboard onConfigChange={onConfigChange} />);
+    renderWithTheme(
+      <EnhancedAnalyticsDashboard onConfigChange={onConfigChange} />,
+    );
 
     // Verify the time range select is present
     const timeRangeSelect = screen.getByRole('combobox');
@@ -97,7 +105,9 @@ describe('EnhancedAnalyticsDashboard', () => {
   it('toggles real-time monitoring', async () => {
     const onConfigChange = jest.fn();
 
-    renderWithTheme(<EnhancedAnalyticsDashboard onConfigChange={onConfigChange} />);
+    renderWithTheme(
+      <EnhancedAnalyticsDashboard onConfigChange={onConfigChange} />,
+    );
 
     const realTimeSwitch = screen.getByRole('switch', { name: /real-time/i });
     expect(realTimeSwitch).toBeChecked();
@@ -143,12 +153,16 @@ describe('EnhancedAnalyticsDashboard', () => {
     // Click on Performance tab
     fireEvent.click(screen.getByText('Performance'));
 
-    expect(screen.getByText('Performance analytics view coming soon...')).toBeInTheDocument();
+    expect(
+      screen.getByText('Performance analytics view coming soon...'),
+    ).toBeInTheDocument();
 
     // Click on Usage tab
     fireEvent.click(screen.getByText('Usage'));
 
-    expect(screen.getByText('Usage analytics view coming soon...')).toBeInTheDocument();
+    expect(
+      screen.getByText('Usage analytics view coming soon...'),
+    ).toBeInTheDocument();
   });
 
   it('calls onExport when export button is clicked', async () => {

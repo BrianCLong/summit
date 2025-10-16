@@ -29,7 +29,9 @@ export default class ErrorBoundary extends React.Component<Props, State> {
       return (
         <div style={{ padding: 16 }} role="alert" aria-live="assertive">
           <h2 style={{ marginTop: 0 }}>Something went wrong</h2>
-          <pre style={{ whiteSpace: 'pre-wrap' }}>{this.state.error?.message}</pre>
+          <pre style={{ whiteSpace: 'pre-wrap' }}>
+            {this.state.error?.message}
+          </pre>
           <button onClick={this.handleRetry} style={{ marginTop: 12 }}>
             Reload
           </button>

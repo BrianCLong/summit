@@ -1,20 +1,19 @@
-
 area: orchestration
 intent: optimize
 release_tag: v2.1.0-alpha2
 window: { start: 2025-12-01, end: 2025-12-12 }
-objective: "Implement initial components for price-aware routing and capacity futures to optimize resource allocation."
+objective: 'Implement initial components for price-aware routing and capacity futures to optimize resource allocation.'
 work_items:
   - id: PAO-1
-    story: "Integrate with external APIs to fetch real-time pricing for compute/LLM tokens."
+    story: 'Integrate with external APIs to fetch real-time pricing for compute/LLM tokens.'
     acceptance:
-      - "Price signals are ingested and available in the system."
+      - 'Price signals are ingested and available in the system.'
   - id: PAO-2
-    story: "Implement a mock system for reserving off-peak compute capacity (Capacity Futures)."
+    story: 'Implement a mock system for reserving off-peak compute capacity (Capacity Futures).'
     acceptance:
-      - "Mock capacity can be reserved and released."
+      - 'Mock capacity can be reserved and released.'
   - id: PAO-3
-    story: "Develop a simple router that uses price signals to select the cheapest available resource."
+    story: 'Develop a simple router that uses price signals to select the cheapest available resource.'
     acceptance:
-      - "Router can select resources based on mock price data."
-owners: { DRI: "platform-orchestration", support: ["sre", "ai-copilot"] }
+      - 'Router can select resources based on mock price data.'
+owners: { DRI: 'platform-orchestration', support: ['sre', 'ai-copilot'] }

@@ -12,16 +12,17 @@
 
 ### ✅ Performance Metrics (All Targets Met)
 
-| Metric | Target | Observed | Alert Status | Evidence |
-|--------|--------|----------|--------------|----------|
-| **API read p95** | ≤350ms | 285ms avg (±15ms) | ✅ No alerts | grafana-api-p95-24h.png |
-| **Path 3-hop p95** | ≤1200ms | 875ms avg (±45ms) | ✅ No alerts | grafana-path-p95-24h.png |
-| **Error rate** | <1% | 0.6% avg (±0.2%) | ✅ No alerts | grafana-error-rate-24h.png |
-| **Ingest throughput** | ≥50MB/s | 68MB/s avg (±8MB/s) | ✅ No alerts | grafana-ingest-24h.png |
-| **Neo4j GC pause p95** | <300ms | 185ms avg (±25ms) | ✅ No alerts | grafana-neo4j-gc-24h.png |
-| **Budget burn** | ≤80% | 69% of monthly | ✅ No alerts | grafana-finops-24h.png |
+| Metric                 | Target  | Observed            | Alert Status | Evidence                   |
+| ---------------------- | ------- | ------------------- | ------------ | -------------------------- |
+| **API read p95**       | ≤350ms  | 285ms avg (±15ms)   | ✅ No alerts | grafana-api-p95-24h.png    |
+| **Path 3-hop p95**     | ≤1200ms | 875ms avg (±45ms)   | ✅ No alerts | grafana-path-p95-24h.png   |
+| **Error rate**         | <1%     | 0.6% avg (±0.2%)    | ✅ No alerts | grafana-error-rate-24h.png |
+| **Ingest throughput**  | ≥50MB/s | 68MB/s avg (±8MB/s) | ✅ No alerts | grafana-ingest-24h.png     |
+| **Neo4j GC pause p95** | <300ms  | 185ms avg (±25ms)   | ✅ No alerts | grafana-neo4j-gc-24h.png   |
+| **Budget burn**        | ≤80%    | 69% of monthly      | ✅ No alerts | grafana-finops-24h.png     |
 
 ### 📈 Performance Stability Analysis
+
 - **Peak Traffic**: 14:00-16:00 UTC, 2.3× baseline load
 - **Off-Peak**: 02:00-06:00 UTC, 0.4× baseline load
 - **SLO Variance**: All metrics within ±15% of targets
@@ -66,14 +67,15 @@
 ### ✅ PII Redaction Validation
 
 **Sample Decision Logs**:
+
 ```json
 {
   "decision_samples": [
     {
       "timestamp": "2025-09-24T15:30:00.000Z",
       "input": {
-        "user": {"scopes": []},
-        "resource": {"pii_flags": {"ssn": true, "email": true}}
+        "user": { "scopes": [] },
+        "resource": { "pii_flags": { "ssn": true, "email": true } }
       },
       "result": {
         "allow": true,
@@ -84,8 +86,8 @@
     {
       "timestamp": "2025-09-24T20:45:00.000Z",
       "input": {
-        "user": {"scopes": ["scope:pii"]},
-        "resource": {"pii_flags": {"ssn": true}}
+        "user": { "scopes": ["scope:pii"] },
+        "resource": { "pii_flags": { "ssn": true } }
       },
       "result": {
         "allow": true,
@@ -104,6 +106,7 @@
 
 **Test Dataset**: 1,000 synthetic `short-30d` records
 **Deletion Simulation**: ✅ Complete success
+
 ```bash
 # TTL Test Results
 Records created: 1000
@@ -122,18 +125,20 @@ Provenance chain: INTACT
 
 **Trace Samples Collected**: 120 traces (5 per hour)
 
-| Operation | Sample Traces | Avg Duration | Status |
-|-----------|---------------|--------------|--------|
-| **entityById** | 60 traces | 285ms | ✅ Complete spans |
-| **pathBetween** | 60 traces | 875ms | ✅ Complete spans |
+| Operation       | Sample Traces | Avg Duration | Status            |
+| --------------- | ------------- | ------------ | ----------------- |
+| **entityById**  | 60 traces     | 285ms        | ✅ Complete spans |
+| **pathBetween** | 60 traces     | 875ms        | ✅ Complete spans |
 
 **Sample Trace IDs**:
+
 - entityById: `4f8e3d2c1b9a7e6f5d4c3b2a1e9f8d7c6b5a4e3d`
 - pathBetween: `9a8b7c6d5e4f3a2b1c9d8e7f6a5b4c3d2e1f0a9b`
 
 ### ✅ Log Analysis
 
 **24-Hour Log Summary**:
+
 ```json
 {
   "total_log_entries": 145000,
@@ -185,12 +190,12 @@ Provenance chain: INTACT
 
 ### ✅ All Exit Criteria Met
 
-| Exit Criteria | Status | Evidence |
-|---------------|---------|----------|
-| **No paging alerts triggered** | ✅ PASS | Zero pages in 24h period |
-| **No WARN sustained >60m** | ✅ PASS | Max warn: 15 minutes (Neo4j GC) |
-| **All policy proofs captured** | ✅ PASS | 1,200 test cases, 100% success |
-| **Cost baseline recorded** | ✅ PASS | Complete 24h analysis attached |
+| Exit Criteria                  | Status  | Evidence                        |
+| ------------------------------ | ------- | ------------------------------- |
+| **No paging alerts triggered** | ✅ PASS | Zero pages in 24h period        |
+| **No WARN sustained >60m**     | ✅ PASS | Max warn: 15 minutes (Neo4j GC) |
+| **All policy proofs captured** | ✅ PASS | 1,200 test cases, 100% success  |
+| **Cost baseline recorded**     | ✅ PASS | Complete 24h analysis attached  |
 
 ---
 
@@ -198,13 +203,13 @@ Provenance chain: INTACT
 
 ### ✅ Pre-Flight Checklist
 
-| Pre-Flight Item | Status | Validation |
-|-----------------|---------|------------|
-| **Freeze Window Check** | ✅ CLEAR | Outside Tuesday 20:00-23:00Z |
-| **Image Provenance** | ✅ VERIFIED | All signatures valid, SBOM present |
-| **Zero Critical CVEs** | ✅ CONFIRMED | Security scan clean |
-| **Data Plane Ready** | ✅ PREPARED | Prod buckets with US tags + KMS |
-| **Secrets Validated** | ✅ VERIFIED | OIDC clients and Vault roles active |
+| Pre-Flight Item         | Status       | Validation                          |
+| ----------------------- | ------------ | ----------------------------------- |
+| **Freeze Window Check** | ✅ CLEAR     | Outside Tuesday 20:00-23:00Z        |
+| **Image Provenance**    | ✅ VERIFIED  | All signatures valid, SBOM present  |
+| **Zero Critical CVEs**  | ✅ CONFIRMED | Security scan clean                 |
+| **Data Plane Ready**    | ✅ PREPARED  | Prod buckets with US tags + KMS     |
+| **Secrets Validated**   | ✅ VERIFIED  | OIDC clients and Vault roles active |
 
 ### ✅ Canary Strategy Approved
 
@@ -217,22 +222,26 @@ Provenance chain: INTACT
 ## 📋 **EVIDENCE ARTIFACTS COLLECTED**
 
 ### Performance Evidence
+
 - `grafana-api-p95-24h.png` - API response time trends
 - `grafana-path-p95-24h.png` - Path query performance
 - `grafana-error-rate-24h.png` - Error rate stability
 - `grafana-ingest-24h.png` - Ingest throughput consistency
 
 ### Security Evidence
+
 - `opa-decisions-24h.json` - Complete policy validation results
 - `pii-redaction-audit.json` - PII handling compliance proof
 - `residency-enforcement.json` - US-only access validation
 
 ### Observability Evidence
+
 - `jaeger-traces-24h.json` - End-to-end trace samples
 - `log-analysis-24h.json` - Structured logging validation
 - `metrics-baseline-24h.json` - Performance baseline establishment
 
 ### Cost Evidence
+
 - `cost-analysis-24h.json` - Detailed cost breakdown and projections
 - `finops-baseline.json` - Anomaly detection baseline
 
@@ -243,6 +252,7 @@ Provenance chain: INTACT
 **IntelGraph Platform v0.1.0 - 24-Hour Observation: ✅ COMPLETE SUCCESS**
 
 ### Key Achievements
+
 - **100% SLO Compliance**: All performance targets met with margin
 - **Perfect Security Posture**: Zero policy violations in 1,200+ tests
 - **Cost Efficiency**: 69% of budget with stable baselines

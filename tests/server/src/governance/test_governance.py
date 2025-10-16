@@ -1,15 +1,23 @@
-
-import unittest
+import datetime
 import os
 import sys
-import datetime
+import unittest
 
 # Add the project root to sys.path to allow absolute imports
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../'))
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../"))
 sys.path.insert(0, project_root)
 
-from server.src.governance.access_manager import check_access, check_warrant_and_authority, enforce_license_and_tos
-from server.src.governance.audit_logger import log_audit_event, prompt_reason_for_access, detect_misuse_and_poisoning
+from server.src.governance.access_manager import (
+    check_access,
+    check_warrant_and_authority,
+    enforce_license_and_tos,
+)
+from server.src.governance.audit_logger import (
+    detect_misuse_and_poisoning,
+    log_audit_event,
+    prompt_reason_for_access,
+)
+
 
 class TestGovernanceStubs(unittest.TestCase):
 
@@ -56,7 +64,13 @@ class TestGovernanceStubs(unittest.TestCase):
     def test_log_audit_event(self):
         # Just ensure it runs without error
         try:
-            log_audit_event("test_user", "data_access", "testing", datetime.datetime.now(), {"file": "report.pdf"})
+            log_audit_event(
+                "test_user",
+                "data_access",
+                "testing",
+                datetime.datetime.now(),
+                {"file": "report.pdf"},
+            )
             self.assertTrue(True)
         except Exception as e:
             self.fail(f"log_audit_event raised an exception: {e}")
@@ -69,12 +83,13 @@ class TestGovernanceStubs(unittest.TestCase):
         logs = [
             {"who": "user1", "what": "login", "details": {}},
             {"who": "user2", "what": "data_mod", "details": {"unusual_activity": True}},
-            {"who": "user3", "what": "data_ingest", "details": {"data_poisoning_attempt": True}}
+            {"who": "user3", "what": "data_ingest", "details": {"data_poisoning_attempt": True}},
         ]
         alerts = detect_misuse_and_poisoning(logs)
         self.assertEqual(len(alerts), 2)
         self.assertIn("Misuse alert", alerts[0])
         self.assertIn("Poisoning alert", alerts[1])
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

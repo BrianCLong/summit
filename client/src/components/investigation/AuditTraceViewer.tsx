@@ -1,12 +1,6 @@
 import React, { useState } from 'react';
 import { useQuery } from '@apollo/client';
-import {
-  Box,
-  Button,
-  TextField,
-  Tooltip,
-  Typography,
-} from '@mui/material';
+import { Box, Button, TextField, Tooltip, Typography } from '@mui/material';
 import {
   Timeline,
   TimelineItem,
@@ -28,7 +22,9 @@ interface AuditTraceViewerProps {
   investigationId: string;
 }
 
-const AuditTraceViewer: React.FC<AuditTraceViewerProps> = ({ investigationId }) => {
+const AuditTraceViewer: React.FC<AuditTraceViewerProps> = ({
+  investigationId,
+}) => {
   const [filters, setFilters] = useState<FilterState>({
     userId: '',
     entityType: '',
@@ -105,7 +101,8 @@ const AuditTraceViewer: React.FC<AuditTraceViewerProps> = ({ investigationId }) 
             <TimelineContent>
               <Tooltip title={log.action}>
                 <Typography variant="body2">
-                  {new Date(log.createdAt).toLocaleString()} - {log.resourceType}
+                  {new Date(log.createdAt).toLocaleString()} -{' '}
+                  {log.resourceType}
                 </Typography>
               </Tooltip>
             </TimelineContent>

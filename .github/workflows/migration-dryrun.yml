@@ -1,7 +1,7 @@
 name: migration-dryrun
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'server/src/migrations/**'
       - 'db/**'
@@ -17,7 +17,7 @@ jobs:
         env:
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: summit_ci
-        ports: [ "5432:5432" ]
+        ports: ['5432:5432']
         options: >-
           --health-cmd="pg_isready -U postgres"
           --health-interval=5s
@@ -25,7 +25,7 @@ jobs:
           --health-retries=20
       redis:
         image: redis:7-alpine
-        ports: [ "6379:6379" ]
+        ports: ['6379:6379']
         options: >-
           --health-cmd="redis-cli ping"
           --health-interval=5s
@@ -36,7 +36,7 @@ jobs:
         env:
           NEO4J_AUTH: neo4j/password
           NEO4J_PLUGINS: '["apoc"]'
-        ports: [ "7474:7474", "7687:7687" ]
+        ports: ['7474:7474', '7687:7687']
         options: >-
           --health-cmd="neo4j status"
           --health-interval=10s

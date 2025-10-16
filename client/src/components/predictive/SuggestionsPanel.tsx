@@ -36,10 +36,10 @@ const REJECT = gql`
   }
 `;
 
-export const SuggestionsPanel: React.FC<{ caseId: string; seeds: string[] }> = ({
-  caseId,
-  seeds,
-}) => {
+export const SuggestionsPanel: React.FC<{
+  caseId: string;
+  seeds: string[];
+}> = ({ caseId, seeds }) => {
   const { data, refetch, loading } = useQuery(SUGGEST, {
     variables: { input: { caseId, seedNodeIds: seeds, topK: 20 } },
   });
@@ -49,7 +49,9 @@ export const SuggestionsPanel: React.FC<{ caseId: string; seeds: string[] }> = (
   const items = data?.suggestLinks?.suggestions || [];
   return (
     <div className="p-3 border rounded-xl">
-      <div className="font-semibold mb-2">Predictive Links {loading ? '…' : ''}</div>
+      <div className="font-semibold mb-2">
+        Predictive Links {loading ? '…' : ''}
+      </div>
       <ul className="space-y-2">
         {items.map((s: any) => (
           <li
@@ -64,7 +66,8 @@ export const SuggestionsPanel: React.FC<{ caseId: string; seeds: string[] }> = (
                 {s.sourceId} → {s.targetId}{' '}
               </div>
               <div className="text-xs opacity-70">
-                score: {s.score.toFixed(3)} • {s.reasons.map((r: any) => r.label).join(', ')}
+                score: {s.score.toFixed(3)} •{' '}
+                {s.reasons.map((r: any) => r.label).join(', ')}
               </div>
             </div>
             <div className="flex gap-2">

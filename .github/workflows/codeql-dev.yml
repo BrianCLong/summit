@@ -1,9 +1,9 @@
 name: CodeQL
 
 on:
-  push: { branches: [ main, feature/dev-aws-green ] }
+  push: { branches: [main, feature/dev-aws-green] }
   pull_request:
-  schedule: [ { cron: '0 6 * * 1' } ]
+  schedule: [{ cron: '0 6 * * 1' }]
 
 permissions:
   security-events: write
@@ -17,4 +17,3 @@ jobs:
       - uses: github/codeql-action/init@v3
         with: { languages: 'javascript,python' }
       - uses: github/codeql-action/analyze@v3
-

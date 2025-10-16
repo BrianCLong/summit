@@ -106,7 +106,10 @@ export class ResilientEventSource {
 
     // Handle page visibility changes
     if (this.options.reconnectOnVisibilityChange) {
-      document.addEventListener('visibilitychange', this.handleVisibilityChange);
+      document.addEventListener(
+        'visibilitychange',
+        this.handleVisibilityChange,
+      );
     }
   }
 
@@ -148,7 +151,10 @@ export class ResilientEventSource {
 
     // Register with EventSource if connected
     if (this.eventSource && event !== 'message') {
-      this.eventSource.addEventListener(event, this.createEventHandler(event, handler));
+      this.eventSource.addEventListener(
+        event,
+        this.createEventHandler(event, handler),
+      );
     }
   }
 
@@ -236,7 +242,10 @@ export class ResilientEventSource {
     }
   };
 
-  private createEventHandler(eventType: string, handler: (event: StreamEvent) => void) {
+  private createEventHandler(
+    eventType: string,
+    handler: (event: StreamEvent) => void,
+  ) {
     return (event: MessageEvent) => {
       const streamEvent: StreamEvent = {
         id: event.lastEventId,
@@ -268,7 +277,8 @@ export class ResilientEventSource {
     }
 
     const delay = Math.min(
-      this.options.initialRetryDelay * Math.pow(this.options.backoffMultiplier, this.retryCount),
+      this.options.initialRetryDelay *
+        Math.pow(this.options.backoffMultiplier, this.retryCount),
       this.options.maxRetryDelay,
     );
 
@@ -285,7 +295,10 @@ export class ResilientEventSource {
   private startHeartbeat(): void {
     this.clearHeartbeat();
     this.heartbeatTimer = setInterval(() => {
-      if (!this.isConnected && this.eventSource?.readyState !== EventSource.OPEN) {
+      if (
+        !this.isConnected &&
+        this.eventSource?.readyState !== EventSource.OPEN
+      ) {
         console.log('Heartbeat detected disconnection');
         this.handleError();
       }
@@ -316,7 +329,10 @@ export class ResilientEventSource {
 
   destroy(): void {
     this.disconnect();
-    document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+    document.removeEventListener(
+      'visibilitychange',
+      this.handleVisibilityChange,
+    );
     this.eventHandlers.clear();
     this.seenEventIds.clear();
   }
@@ -354,7 +370,11 @@ export class ResilientWebSocket {
   private lastResolvedUrl: string;
   private hasVisibilityListener = false;
 
-  constructor(url: string, protocols?: string | string[], options: WebSocketOptions = {}) {
+  constructor(
+    url: string,
+    protocols?: string | string[],
+    options: WebSocketOptions = {},
+  ) {
     this.url = url;
     this.protocols = protocols;
     const meshEndpoints =
@@ -377,7 +397,8 @@ export class ResilientWebSocket {
   connect(): void {
     this.manualClose = false;
     this.clearReconnectTimer();
-    const nextState: WebSocketClientState = this.retryCount === 0 ? 'connecting' : 'reconnecting';
+    const nextState: WebSocketClientState =
+      this.retryCount === 0 ? 'connecting' : 'reconnecting';
     this.updateState(nextState, { attempt: this.retryCount + 1 });
     this.openSocket();
   }
@@ -395,7 +416,12 @@ export class ResilientWebSocket {
   send(data: any): boolean {
     this.refillTokens();
     const serialized = this.serializeMessage(data);
-    if (this.state === 'connected' && this.ws && this.ws.readyState === WebSocket.OPEN && this.hasCapacity()) {
+    if (
+      this.state === 'connected' &&
+      this.ws &&
+      this.ws.readyState === WebSocket.OPEN &&
+      this.hasCapacity()
+    ) {
       const sent = this.performSend(serialized, data, false);
       if (sent) {
         return true;
@@ -475,7 +501,9 @@ export class ResilientWebSocket {
       try {
         this.ws.close(1000, reason);
       } catch (error) {
-        this.logger.warn?.(`Failed to close WebSocket cleanly: ${String(error)}`);
+        this.logger.warn?.(
+          `Failed to close WebSocket cleanly: ${String(error)}`,
+        );
       }
       this.ws = null;
     }
@@ -486,8 +514,14 @@ export class ResilientWebSocket {
       window.addEventListener('online', this.handleNetworkOnline);
       window.addEventListener('offline', this.handleNetworkOffline);
     }
-    if (typeof document !== 'undefined' && this.options.reconnectOnVisibilityChange) {
-      document.addEventListener('visibilitychange', this.handleVisibilityChange);
+    if (
+      typeof document !== 'undefined' &&
+      this.options.reconnectOnVisibilityChange
+    ) {
+      document.addEventListener(
+        'visibilitychange',
+        this.handleVisibilityChange,
+      );
       this.hasVisibilityListener = true;
     }
   }
@@ -498,7 +532,10 @@ export class ResilientWebSocket {
       window.removeEventListener('offline', this.handleNetworkOffline);
     }
     if (typeof document !== 'undefined' && this.hasVisibilityListener) {
-      document.removeEventListener('visibilitychange', this.handleVisibilityChange);
+      document.removeEventListener(
+        'visibilitychange',
+        this.handleVisibilityChange,
+      );
       this.hasVisibilityListener = false;
     }
   }
@@ -508,7 +545,9 @@ export class ResilientWebSocket {
       return;
     }
     if (document.visibilityState === 'visible' && this.state !== 'connected') {
-      this.logger.info?.('Document became visible; verifying WebSocket connectivity');
+      this.logger.info?.(
+        'Document became visible; verifying WebSocket connectivity',
+      );
       this.scheduleReconnect('visibility');
     }
   };
@@ -572,7 +611,10 @@ export class ResilientWebSocket {
       if (data?.type === 'pong') {
         this.pongReceived = true;
         this.options.metricsCollector?.record('pong', {
-          latency: typeof data.timestamp === 'number' ? Date.now() - data.timestamp : undefined,
+          latency:
+            typeof data.timestamp === 'number'
+              ? Date.now() - data.timestamp
+              : undefined,
         });
         return;
       }
@@ -586,7 +628,10 @@ export class ResilientWebSocket {
     }
   };
 
-  private updateState(state: WebSocketClientState, context?: Record<string, unknown>): void {
+  private updateState(
+    state: WebSocketClientState,
+    context?: Record<string, unknown>,
+  ): void {
     if (this.state === state) {
       return;
     }
@@ -629,7 +674,12 @@ export class ResilientWebSocket {
     return true;
   }
 
-  private performSend(serialized: string, raw: any, fromQueue: boolean, enqueuedAt?: number): boolean {
+  private performSend(
+    serialized: string,
+    raw: any,
+    fromQueue: boolean,
+    enqueuedAt?: number,
+  ): boolean {
     if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
       return false;
     }
@@ -665,7 +715,9 @@ export class ResilientWebSocket {
   private enqueue(serialized: string, raw: any): void {
     if (this.messageQueue.length >= this.options.maxQueueSize) {
       this.messageQueue.shift();
-      this.logger.warn?.('Dropping queued WebSocket message due to queue capacity');
+      this.logger.warn?.(
+        'Dropping queued WebSocket message due to queue capacity',
+      );
       this.options.metricsCollector?.record('queue_dropped', {
         maxQueueSize: this.options.maxQueueSize,
       });
@@ -702,7 +754,12 @@ export class ResilientWebSocket {
     let failureIndex = -1;
     for (let index = 0; index < batch.length; index += 1) {
       const item = batch[index];
-      const success = this.performSend(item.serialized, item.raw, true, item.enqueuedAt);
+      const success = this.performSend(
+        item.serialized,
+        item.raw,
+        true,
+        item.enqueuedAt,
+      );
       if (!success) {
         item.attempts += 1;
         failureIndex = index;
@@ -723,7 +780,8 @@ export class ResilientWebSocket {
 
   private computeReconnectDelay(): number {
     const base = Math.min(
-      this.options.initialRetryDelay * Math.pow(this.options.backoffMultiplier, this.retryCount),
+      this.options.initialRetryDelay *
+        Math.pow(this.options.backoffMultiplier, this.retryCount),
       this.options.maxRetryDelay,
     );
     const jitter = base * this.options.jitter;
@@ -759,7 +817,8 @@ export class ResilientWebSocket {
     this.reconnectTimer = setTimeout(() => {
       this.retryCount += 1;
       if (this.options.meshEndpoints.length > 0) {
-        this.currentEndpointIndex = (this.currentEndpointIndex + 1) % this.options.meshEndpoints.length;
+        this.currentEndpointIndex =
+          (this.currentEndpointIndex + 1) % this.options.meshEndpoints.length;
       }
       this.connect();
     }, delay);
@@ -773,7 +832,9 @@ export class ResilientWebSocket {
       try {
         this.ws.close(4000, reason);
       } catch (error) {
-        this.logger.warn?.(`Error while closing WebSocket after loss: ${String(error)}`);
+        this.logger.warn?.(
+          `Error while closing WebSocket after loss: ${String(error)}`,
+        );
       }
       this.ws = null;
     }
@@ -889,7 +950,10 @@ export class ResilientWebSocket {
       this.lastResolvedUrl = this.url;
       return this.lastResolvedUrl;
     }
-    const candidate = this.options.meshEndpoints[this.currentEndpointIndex % this.options.meshEndpoints.length];
+    const candidate =
+      this.options.meshEndpoints[
+        this.currentEndpointIndex % this.options.meshEndpoints.length
+      ];
     if (!candidate) {
       this.lastResolvedUrl = this.url;
       return this.lastResolvedUrl;
@@ -918,7 +982,8 @@ export class ResilientWebSocket {
     if (!this.options.meshEndpoints.length) {
       return this.url;
     }
-    const nextIndex = (this.currentEndpointIndex + 1) % this.options.meshEndpoints.length;
+    const nextIndex =
+      (this.currentEndpointIndex + 1) % this.options.meshEndpoints.length;
     return this.options.meshEndpoints[nextIndex] ?? this.url;
   }
 
@@ -929,7 +994,10 @@ export class ResilientWebSocket {
     try {
       return JSON.stringify(data);
     } catch (error) {
-      this.logger.error?.('Failed to serialize WebSocket message payload:', error);
+      this.logger.error?.(
+        'Failed to serialize WebSocket message payload:',
+        error,
+      );
       this.options.metricsCollector?.record('serialization_error', {
         message: error instanceof Error ? error.message : 'unknown',
       });
@@ -1004,7 +1072,12 @@ export class WebSocketConnectionPool {
       });
     });
 
-    this.connections.set(id, { socket, url, protocols, options: mergedOptions });
+    this.connections.set(id, {
+      socket,
+      url,
+      protocols,
+      options: mergedOptions,
+    });
     return socket;
   }
 
@@ -1039,8 +1112,14 @@ export class WebSocketConnectionPool {
     }
   }
 
-  getDiagnostics(): Record<string, ReturnType<ResilientWebSocket['getSnapshot']>> {
-    const diagnostics: Record<string, ReturnType<ResilientWebSocket['getSnapshot']>> = {};
+  getDiagnostics(): Record<
+    string,
+    ReturnType<ResilientWebSocket['getSnapshot']>
+  > {
+    const diagnostics: Record<
+      string,
+      ReturnType<ResilientWebSocket['getSnapshot']>
+    > = {};
     for (const [id, { socket }] of this.connections.entries()) {
       diagnostics[id] = socket.getSnapshot();
     }
@@ -1048,8 +1127,12 @@ export class WebSocketConnectionPool {
   }
 }
 // React hook for resilient streaming
-export const useResilientStream = (url: string, options: StreamOptions = {}) => {
-  const [connection, setConnection] = React.useState<ResilientEventSource | null>(null);
+export const useResilientStream = (
+  url: string,
+  options: StreamOptions = {},
+) => {
+  const [connection, setConnection] =
+    React.useState<ResilientEventSource | null>(null);
   const [connected, setConnected] = React.useState(false);
   const [events, setEvents] = React.useState<StreamEvent[]>([]);
   const [error, setError] = React.useState<string | null>(null);

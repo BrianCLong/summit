@@ -5,22 +5,19 @@ Intelligent budget protection with <120s enforcement and ML-driven optimization
 """
 
 import json
-import time
-import asyncio
-import random
-import math
-from datetime import datetime, timedelta, timezone
-from typing import Dict, List, Any, Optional, Tuple, Union
-from dataclasses import dataclass, asdict
-from enum import Enum
 import logging
+import random
+import time
+from dataclasses import asdict, dataclass
+from datetime import datetime, timedelta, timezone
+from enum import Enum
 from pathlib import Path
-import hashlib
-import hmac
+from typing import Any
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
 
 class BudgetStatus(Enum):
     HEALTHY = "healthy"
@@ -28,14 +25,17 @@ class BudgetStatus(Enum):
     CRITICAL = "critical"
     EXCEEDED = "exceeded"
 
+
 class EnforcementMode(Enum):
     ALERT_ONLY = "alert_only"
     THROTTLE = "throttle"
     BLOCK = "block"
 
+
 @dataclass
 class BudgetLimit:
     """Budget limit configuration for a tenant"""
+
     tenant_id: str
     daily_limit: float
     monthly_limit: float
@@ -44,9 +44,11 @@ class BudgetLimit:
     enforcement_mode: EnforcementMode
     auto_tune_enabled: bool = True
 
+
 @dataclass
 class BudgetConsumption:
     """Current budget consumption tracking"""
+
     tenant_id: str
     daily_spent: float
     monthly_spent: float
@@ -55,38 +57,43 @@ class BudgetConsumption:
     last_updated: datetime
     status: BudgetStatus
 
+
 @dataclass
 class BudgetAlert:
     """Budget alert with actionable recommendations"""
+
     tenant_id: str
     alert_type: str
     severity: str
     current_usage: float
     threshold: float
-    projected_exhaustion: Optional[datetime]
+    projected_exhaustion: datetime | None
     recommendation: str
-    auto_action_taken: Optional[str]
+    auto_action_taken: str | None
     timestamp: datetime
+
 
 @dataclass
 class MLPrediction:
     """ML-driven budget prediction"""
+
     tenant_id: str
     predicted_daily_usage: float
     predicted_monthly_usage: float
-    confidence_interval: Tuple[float, float]
+    confidence_interval: tuple[float, float]
     anomaly_score: float
-    recommended_limits: Dict[str, float]
+    recommended_limits: dict[str, float]
     model_version: str
+
 
 class BudgetGuardService:
     """Intelligent budget protection with ML-driven auto-tuning"""
 
     def __init__(self, config_path: str = "services/guard/config.json"):
         self.config = self._load_config(config_path)
-        self.budget_limits: Dict[str, BudgetLimit] = {}
-        self.budget_consumption: Dict[str, BudgetConsumption] = {}
-        self.alert_history: List[BudgetAlert] = []
+        self.budget_limits: dict[str, BudgetLimit] = {}
+        self.budget_consumption: dict[str, BudgetConsumption] = {}
+        self.alert_history: list[BudgetAlert] = []
         self.ml_models = {}
         self.training_data = []
 
@@ -96,7 +103,7 @@ class BudgetGuardService:
 
         logger.info("Budget Guard service initialized with ML auto-tuning")
 
-    def _load_config(self, config_path: str) -> Dict[str, Any]:
+    def _load_config(self, config_path: str) -> dict[str, Any]:
         """Load budget guard configuration"""
         default_config = {
             "default_daily_limit": 1000.0,
@@ -107,15 +114,11 @@ class BudgetGuardService:
             "ml_prediction_enabled": True,
             "auto_tune_enabled": True,
             "anomaly_detection_threshold": 0.7,
-            "budget_alert_thresholds": {
-                "warning": 0.8,
-                "critical": 0.9,
-                "exceeded": 1.0
-            }
+            "budget_alert_thresholds": {"warning": 0.8, "critical": 0.9, "exceeded": 1.0},
         }
 
         try:
-            with open(config_path, 'r') as f:
+            with open(config_path) as f:
                 user_config = json.load(f)
                 default_config.update(user_config)
         except FileNotFoundError:
@@ -133,15 +136,18 @@ class BudgetGuardService:
             "TENANT_002": {"daily": 800.0, "monthly": 20000.0, "mode": EnforcementMode.BLOCK},
             "TENANT_003": {"daily": 2000.0, "monthly": 50000.0, "mode": EnforcementMode.THROTTLE},
             "TENANT_004": {"daily": 1000.0, "monthly": 25000.0, "mode": EnforcementMode.ALERT_ONLY},
-            "TENANT_005": {"daily": 1000.0, "monthly": 25000.0, "mode": EnforcementMode.ALERT_ONLY}
+            "TENANT_005": {"daily": 1000.0, "monthly": 25000.0, "mode": EnforcementMode.ALERT_ONLY},
         }
 
         for tenant in tenants:
-            config = tenant_configs.get(tenant, {
-                "daily": self.config["default_daily_limit"],
-                "monthly": self.config["default_monthly_limit"],
-                "mode": EnforcementMode.THROTTLE
-            })
+            config = tenant_configs.get(
+                tenant,
+                {
+                    "daily": self.config["default_daily_limit"],
+                    "monthly": self.config["default_monthly_limit"],
+                    "mode": EnforcementMode.THROTTLE,
+                },
+            )
 
             self.budget_limits[tenant] = BudgetLimit(
                 tenant_id=tenant,
@@ -150,7 +156,7 @@ class BudgetGuardService:
                 query_rate_limit=self.config["default_query_rate_limit"],
                 epsilon_rate_limit=self.config["default_epsilon_rate_limit"],
                 enforcement_mode=config["mode"],
-                auto_tune_enabled=self.config["auto_tune_enabled"]
+                auto_tune_enabled=self.config["auto_tune_enabled"],
             )
 
             # Initialize consumption tracking
@@ -161,7 +167,7 @@ class BudgetGuardService:
                 query_count_1h=0,
                 epsilon_consumed_1h=0.0,
                 last_updated=datetime.now(timezone.utc),
-                status=BudgetStatus.HEALTHY
+                status=BudgetStatus.HEALTHY,
             )
 
     def _initialize_ml_models(self):
@@ -172,13 +178,13 @@ class BudgetGuardService:
                 "usage_predictor": {
                     "type": "linear_regression",
                     "coefficients": [50.0, 100.0, 200.0, 1.5],  # hour, day, tier, historical
-                    "intercept": 100.0
+                    "intercept": 100.0,
                 },
                 "anomaly_detector": {
                     "type": "statistical",
                     "mean_baseline": 500.0,
-                    "std_threshold": 2.0
-                }
+                    "std_threshold": 2.0,
+                },
             }
 
             # Generate synthetic training data for demo
@@ -197,24 +203,25 @@ class BudgetGuardService:
             for _ in range(100):
                 hour = random.randint(0, 23)
                 day = random.randint(0, 6)
-                tier = {"TENANT_001": 3, "TENANT_002": 2, "TENANT_003": 3,
-                       "TENANT_004": 1, "TENANT_005": 1}.get(tenant_id, 1)
+                tier = {
+                    "TENANT_001": 3,
+                    "TENANT_002": 2,
+                    "TENANT_003": 3,
+                    "TENANT_004": 1,
+                    "TENANT_005": 1,
+                }.get(tenant_id, 1)
 
                 # Simulate usage pattern
-                usage = (hour * 20 + day * 50 + tier * 150 +
-                        random.gauss(0, 50))
+                usage = hour * 20 + day * 50 + tier * 150 + random.gauss(0, 50)
                 usage = max(0, usage)  # No negative usage
 
-                self.training_data.append({
-                    "tenant_id": tenant_id,
-                    "hour": hour,
-                    "day": day,
-                    "tier": tier,
-                    "usage": usage
-                })
+                self.training_data.append(
+                    {"tenant_id": tenant_id, "hour": hour, "day": day, "tier": tier, "usage": usage}
+                )
 
-    def record_budget_usage(self, tenant_id: str, cost: float,
-                          query_count: int = 1, epsilon_cost: float = 0.0) -> bool:
+    def record_budget_usage(
+        self, tenant_id: str, cost: float, query_count: int = 1, epsilon_cost: float = 0.0
+    ) -> bool:
         """Record budget usage and check limits"""
         if tenant_id not in self.budget_consumption:
             logger.error(f"Unknown tenant: {tenant_id}")
@@ -243,7 +250,9 @@ class BudgetGuardService:
         if limit.auto_tune_enabled:
             self._auto_tune_limits(tenant_id)
 
-        logger.info(f"Recorded usage for {tenant_id}: ${cost:.2f} (Status: {consumption.status.value})")
+        logger.info(
+            f"Recorded usage for {tenant_id}: ${cost:.2f} (Status: {consumption.status.value})"
+        )
         return enforcement_result
 
     def _enforce_budget_limits(self, tenant_id: str) -> bool:
@@ -263,8 +272,14 @@ class BudgetGuardService:
             if daily_utilization >= 1.0 or monthly_utilization >= 1.0:
                 if limit.enforcement_mode == EnforcementMode.BLOCK:
                     enforcement_action = "BLOCKED"
-                    self._trigger_alert(tenant_id, "budget_exceeded", "critical",
-                                      daily_utilization, 1.0, "Request blocked due to budget exhaustion")
+                    self._trigger_alert(
+                        tenant_id,
+                        "budget_exceeded",
+                        "critical",
+                        daily_utilization,
+                        1.0,
+                        "Request blocked due to budget exhaustion",
+                    )
                     return False
                 elif limit.enforcement_mode == EnforcementMode.THROTTLE:
                     enforcement_action = "THROTTLED"
@@ -282,7 +297,9 @@ class BudgetGuardService:
                 return False
 
             if enforcement_action:
-                logger.info(f"Budget enforcement for {tenant_id}: {enforcement_action} ({elapsed_time:.2f}s)")
+                logger.info(
+                    f"Budget enforcement for {tenant_id}: {enforcement_action} ({elapsed_time:.2f}s)"
+                )
 
             return True
 
@@ -330,12 +347,24 @@ class BudgetGuardService:
         # Generate alerts for threshold breaches
         for threshold_name, threshold_value in self.config["budget_alert_thresholds"].items():
             if daily_utilization >= threshold_value and threshold_name != "exceeded":
-                self._trigger_alert(tenant_id, f"daily_budget_{threshold_name}",
-                                  threshold_name, daily_utilization, threshold_value,
-                                  f"Daily budget utilization: {daily_utilization:.1%}")
+                self._trigger_alert(
+                    tenant_id,
+                    f"daily_budget_{threshold_name}",
+                    threshold_name,
+                    daily_utilization,
+                    threshold_value,
+                    f"Daily budget utilization: {daily_utilization:.1%}",
+                )
 
-    def _trigger_alert(self, tenant_id: str, alert_type: str, severity: str,
-                      current_usage: float, threshold: float, description: str):
+    def _trigger_alert(
+        self,
+        tenant_id: str,
+        alert_type: str,
+        severity: str,
+        current_usage: float,
+        threshold: float,
+        description: str,
+    ):
         """Trigger budget alert with recommendations"""
 
         # Calculate projected exhaustion
@@ -361,7 +390,7 @@ class BudgetGuardService:
             projected_exhaustion=projected_exhaustion,
             recommendation=recommendation,
             auto_action_taken=None,
-            timestamp=datetime.now(timezone.utc)
+            timestamp=datetime.now(timezone.utc),
         )
 
         self.alert_history.append(alert)
@@ -371,9 +400,9 @@ class BudgetGuardService:
         """Generate actionable recommendations"""
         recommendations = {
             "daily_budget_warning": f"Consider optimizing queries or increasing daily limit. Current usage: {usage:.1%}",
-            "daily_budget_critical": f"Immediate action required. Reduce query frequency or request budget increase.",
-            "budget_exceeded": f"Budget exhausted. Contact admin for emergency budget increase or wait for reset.",
-            "anomaly_detected": f"Unusual spending pattern detected. Review recent queries for optimization opportunities."
+            "daily_budget_critical": "Immediate action required. Reduce query frequency or request budget increase.",
+            "budget_exceeded": "Budget exhausted. Contact admin for emergency budget increase or wait for reset.",
+            "anomaly_detected": "Unusual spending pattern detected. Review recent queries for optimization opportunities.",
         }
         return recommendations.get(alert_type, "Review budget usage and optimize as needed")
 
@@ -383,8 +412,13 @@ class BudgetGuardService:
             # Current features for prediction
             current_hour = datetime.now().hour
             current_day = datetime.now().weekday()
-            tenant_tier = {"TENANT_001": 3, "TENANT_002": 2, "TENANT_003": 3,
-                          "TENANT_004": 1, "TENANT_005": 1}.get(tenant_id, 1)
+            tenant_tier = {
+                "TENANT_001": 3,
+                "TENANT_002": 2,
+                "TENANT_003": 3,
+                "TENANT_004": 1,
+                "TENANT_005": 1,
+            }.get(tenant_id, 1)
 
             consumption = self.budget_consumption[tenant_id]
             historical_avg = consumption.daily_spent / max(1, datetime.now().hour or 1)
@@ -394,11 +428,11 @@ class BudgetGuardService:
             intercept = self.ml_models["usage_predictor"]["intercept"]
 
             predicted_daily = (
-                current_hour * coefficients[0] +
-                current_day * coefficients[1] +
-                tenant_tier * coefficients[2] +
-                historical_avg * coefficients[3] +
-                intercept
+                current_hour * coefficients[0]
+                + current_day * coefficients[1]
+                + tenant_tier * coefficients[2]
+                + historical_avg * coefficients[3]
+                + intercept
             )
             predicted_daily = max(0, predicted_daily)
             predicted_monthly = predicted_daily * 30
@@ -417,7 +451,7 @@ class BudgetGuardService:
             current_limit = self.budget_limits[tenant_id].daily_limit
             recommended_limits = {
                 "daily_limit": max(predicted_daily * 1.2, current_limit * 0.9),
-                "monthly_limit": max(predicted_monthly * 1.2, current_limit * 30 * 0.9)
+                "monthly_limit": max(predicted_monthly * 1.2, current_limit * 30 * 0.9),
             }
 
             return MLPrediction(
@@ -427,7 +461,7 @@ class BudgetGuardService:
                 confidence_interval=confidence_interval,
                 anomaly_score=anomaly_score,
                 recommended_limits=recommended_limits,
-                model_version="v1.0-lightweight"
+                model_version="v1.0-lightweight",
             )
 
         except Exception as e:
@@ -441,8 +475,11 @@ class BudgetGuardService:
                 predicted_monthly_usage=consumption.monthly_spent * 1.5,
                 confidence_interval=(0, consumption.daily_spent * 3),
                 anomaly_score=0.5,
-                recommended_limits={"daily_limit": current_limit, "monthly_limit": current_limit * 30},
-                model_version="fallback"
+                recommended_limits={
+                    "daily_limit": current_limit,
+                    "monthly_limit": current_limit * 30,
+                },
+                model_version="fallback",
             )
 
     def _auto_tune_limits(self, tenant_id: str):
@@ -454,21 +491,26 @@ class BudgetGuardService:
             # Only auto-tune if anomaly score is low (normal behavior)
             if prediction.anomaly_score < self.config["anomaly_detection_threshold"]:
                 # Conservative auto-tuning
-                new_daily_limit = (limit.daily_limit * 0.9 +
-                                 prediction.recommended_limits["daily_limit"] * 0.1)
+                new_daily_limit = (
+                    limit.daily_limit * 0.9 + prediction.recommended_limits["daily_limit"] * 0.1
+                )
 
                 # Apply reasonable bounds
                 new_daily_limit = max(500.0, min(5000.0, new_daily_limit))
 
-                if abs(new_daily_limit - limit.daily_limit) > limit.daily_limit * 0.05:  # 5% change threshold
-                    logger.info(f"Auto-tuning budget for {tenant_id}: ${limit.daily_limit:.2f} → ${new_daily_limit:.2f}")
+                if (
+                    abs(new_daily_limit - limit.daily_limit) > limit.daily_limit * 0.05
+                ):  # 5% change threshold
+                    logger.info(
+                        f"Auto-tuning budget for {tenant_id}: ${limit.daily_limit:.2f} → ${new_daily_limit:.2f}"
+                    )
                     limit.daily_limit = new_daily_limit
                     limit.monthly_limit = new_daily_limit * 30
 
         except Exception as e:
             logger.error(f"Auto-tune error for {tenant_id}: {e}")
 
-    def get_budget_status(self, tenant_id: str) -> Dict[str, Any]:
+    def get_budget_status(self, tenant_id: str) -> dict[str, Any]:
         """Get comprehensive budget status"""
         if tenant_id not in self.budget_consumption:
             return {"error": f"Unknown tenant: {tenant_id}"}
@@ -487,34 +529,35 @@ class BudgetGuardService:
                 "monthly_limit": limit.monthly_limit,
                 "monthly_utilization": consumption.monthly_spent / limit.monthly_limit,
                 "status": consumption.status.value,
-                "enforcement_mode": limit.enforcement_mode.value
+                "enforcement_mode": limit.enforcement_mode.value,
             },
             "ml_predictions": {
                 "predicted_daily_usage": prediction.predicted_daily_usage,
                 "confidence_interval": prediction.confidence_interval,
                 "anomaly_score": prediction.anomaly_score,
-                "recommended_limits": prediction.recommended_limits
+                "recommended_limits": prediction.recommended_limits,
             },
             "recent_alerts": [
-                asdict(alert) for alert in self.alert_history[-5:]
-                if alert.tenant_id == tenant_id
-            ]
+                asdict(alert) for alert in self.alert_history[-5:] if alert.tenant_id == tenant_id
+            ],
         }
 
-    def generate_guard_report(self) -> Dict[str, Any]:
+    def generate_guard_report(self) -> dict[str, Any]:
         """Generate comprehensive budget guard report"""
         return {
             "report_metadata": {
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "platform_version": "v0.3.4-mc",
                 "report_type": "budget_guard",
-                "tenants_monitored": len(self.budget_consumption)
+                "tenants_monitored": len(self.budget_consumption),
             },
             "enforcement_metrics": {
                 "avg_enforcement_time_ms": 45.2,  # Simulated
                 "enforcement_success_rate": 99.8,
-                "total_enforcement_actions": sum(1 for alert in self.alert_history if alert.auto_action_taken),
-                "enforcement_timeout_rate": 0.0
+                "total_enforcement_actions": sum(
+                    1 for alert in self.alert_history if alert.auto_action_taken
+                ),
+                "enforcement_timeout_rate": 0.0,
             },
             "tenant_summaries": {
                 tenant_id: self.get_budget_status(tenant_id)
@@ -524,16 +567,17 @@ class BudgetGuardService:
                 "prediction_accuracy": 94.2,  # Simulated
                 "anomaly_detection_rate": 87.5,
                 "auto_tune_success_rate": 91.3,
-                "model_version": "v1.0"
+                "model_version": "v1.0",
             },
             "alert_summary": {
                 "total_alerts": len(self.alert_history),
                 "alerts_by_severity": {
                     "warning": len([a for a in self.alert_history if a.severity == "warning"]),
-                    "critical": len([a for a in self.alert_history if a.severity == "critical"])
-                }
-            }
+                    "critical": len([a for a in self.alert_history if a.severity == "critical"]),
+                },
+            },
         }
+
 
 def main():
     """Main function for testing Budget Guard service"""
@@ -545,10 +589,10 @@ def main():
     # Simulate usage patterns
     test_scenarios = [
         ("TENANT_001", 150.0, 5, 0.2),  # Normal usage
-        ("TENANT_002", 50.0, 2, 0.1),   # Light usage
-        ("TENANT_003", 300.0, 10, 0.5), # Heavy usage
-        ("TENANT_004", 1200.0, 25, 1.0), # Approaching limit
-        ("TENANT_005", 75.0, 3, 0.15)   # New tenant
+        ("TENANT_002", 50.0, 2, 0.1),  # Light usage
+        ("TENANT_003", 300.0, 10, 0.5),  # Heavy usage
+        ("TENANT_004", 1200.0, 25, 1.0),  # Approaching limit
+        ("TENANT_005", 75.0, 3, 0.15),  # New tenant
     ]
 
     for tenant_id, cost, queries, epsilon in test_scenarios:
@@ -565,16 +609,17 @@ def main():
         print(f"  Anomaly score: {status['ml_predictions']['anomaly_score']:.3f}")
 
     # Generate comprehensive report
-    print(f"\n📋 Budget Guard Report:")
+    print("\n📋 Budget Guard Report:")
     report = guard.generate_guard_report()
     print(json.dumps(report, indent=2, default=str))
 
     # Save evidence
     evidence_path = "evidence/v0.3.4/budgets/guard-report.json"
     Path(evidence_path).parent.mkdir(parents=True, exist_ok=True)
-    with open(evidence_path, 'w') as f:
+    with open(evidence_path, "w") as f:
         json.dump(report, f, indent=2, default=str)
     print(f"\n✅ Evidence saved: {evidence_path}")
+
 
 if __name__ == "__main__":
     main()

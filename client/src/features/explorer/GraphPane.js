@@ -10,7 +10,9 @@ const edges = [
 const GraphPane = () => {
   const { state, dispatch } = useExplorer();
   const { selected, timeRange, activePane } = state;
-  const visibleNodes = explorerData.filter((d) => d.year >= timeRange[0] && d.year <= timeRange[1]);
+  const visibleNodes = explorerData.filter(
+    (d) => d.year >= timeRange[0] && d.year <= timeRange[1],
+  );
   const visibleIds = visibleNodes.map((n) => n.id);
   const visibleEdges = edges.filter(
     (e) => visibleIds.includes(e.source) && visibleIds.includes(e.target),
@@ -53,7 +55,9 @@ const GraphPane = () => {
         ))}
       </ul>
       <p className="text-sm mt-2">
-        Edges: {visibleEdges.map((e) => `${e.source}-${e.target}`).join(', ') || 'None'}
+        Edges:{' '}
+        {visibleEdges.map((e) => `${e.source}-${e.target}`).join(', ') ||
+          'None'}
       </p>
     </div>
   );

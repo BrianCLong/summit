@@ -93,7 +93,10 @@
   </head>
   <body>
     <div class="card">
-      <h2>Conductor — Studio Lite <span id="status" class="pill">disconnected</span></h2>
+      <h2>
+        Conductor — Studio Lite
+        <span id="status" class="pill">disconnected</span>
+      </h2>
       <div class="row">
         <div>
           <label>GraphQL Endpoint</label>
@@ -161,7 +164,8 @@
         const t = $('task');
         if (v === 'cypher') t.value = 'MATCH (n) RETURN count(n)';
         else if (v === 'qa')
-          t.value = 'Summarize the key connections between entity A and B in three bullets.';
+          t.value =
+            'Summarize the key connections between entity A and B in three bullets.';
         else
           t.value =
             'Write a detailed risk assessment for a hypothetical APT campaign leveraging lateral movement within a corporate graph.';
@@ -205,7 +209,11 @@
         $('outPreview').textContent = '…';
         try {
           const j = await post(Q_PREVIEW, { i: input });
-          $('outPreview').textContent = JSON.stringify(j.data.previewRouting, null, 2);
+          $('outPreview').textContent = JSON.stringify(
+            j.data.previewRouting,
+            null,
+            2,
+          );
         } catch (e) {
           $('outPreview').textContent = e.message;
         }

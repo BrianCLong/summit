@@ -7,7 +7,13 @@ interface IntelligenceFeed {
   name: string;
   description: string;
   provider: string;
-  type: 'commercial' | 'open_source' | 'government' | 'community' | 'internal' | 'custom';
+  type:
+    | 'commercial'
+    | 'open_source'
+    | 'government'
+    | 'community'
+    | 'internal'
+    | 'custom';
   category:
     | 'threat_intel'
     | 'ioc'
@@ -18,13 +24,24 @@ interface IntelligenceFeed {
     | 'dark_web'
     | 'social_media';
   format: 'stix' | 'json' | 'csv' | 'xml' | 'rss' | 'api' | 'taxii';
-  frequency: 'real_time' | 'hourly' | 'daily' | 'weekly' | 'monthly' | 'on_demand';
+  frequency:
+    | 'real_time'
+    | 'hourly'
+    | 'daily'
+    | 'weekly'
+    | 'monthly'
+    | 'on_demand';
   status: 'active' | 'paused' | 'error' | 'testing' | 'disabled';
   reliability: 'A' | 'B' | 'C' | 'D' | 'E'; // Source reliability scale
   confidence: number; // 0-100
   connection: {
     endpoint: string;
-    authentication: 'none' | 'api_key' | 'oauth' | 'certificate' | 'username_password';
+    authentication:
+      | 'none'
+      | 'api_key'
+      | 'oauth'
+      | 'certificate'
+      | 'username_password';
     credentials?: Record<string, string>;
     proxy?: string;
     timeout: number;
@@ -173,7 +190,13 @@ interface FeedCorrelation {
     minMatches: number;
   }>;
   actions: Array<{
-    type: 'create_alert' | 'enrich_entity' | 'create_case' | 'notify' | 'block_ip' | 'quarantine';
+    type:
+      | 'create_alert'
+      | 'enrich_entity'
+      | 'create_case'
+      | 'notify'
+      | 'block_ip'
+      | 'quarantine';
     parameters: Record<string, any>;
   }>;
   metrics: {
@@ -193,7 +216,9 @@ interface IntelligenceFeedsEnrichmentProps {
   onCorrelationMatch?: (correlation: any) => void;
 }
 
-const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = ({
+const IntelligenceFeedsEnrichment: React.FC<
+  IntelligenceFeedsEnrichmentProps
+> = ({
   investigationId,
   onNewIntelligence,
   onEnrichmentComplete,
@@ -203,15 +228,26 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
   // State Management
   const [feeds, setFeeds] = useState<IntelligenceFeed[]>([]);
   const [enrichmentRules, setEnrichmentRules] = useState<EnrichmentRule[]>([]);
-  const [enrichedEntities, setEnrichedEntities] = useState<EnrichedEntity[]>([]);
+  const [enrichedEntities, setEnrichedEntities] = useState<EnrichedEntity[]>(
+    [],
+  );
   const [alerts, setAlerts] = useState<IntelligenceAlert[]>([]);
   const [correlations, setCorrelations] = useState<FeedCorrelation[]>([]);
-  const [selectedFeed, setSelectedFeed] = useState<IntelligenceFeed | null>(null);
-  const [selectedEntity, setSelectedEntity] = useState<EnrichedEntity | null>(null);
+  const [selectedFeed, setSelectedFeed] = useState<IntelligenceFeed | null>(
+    null,
+  );
+  const [selectedEntity, setSelectedEntity] = useState<EnrichedEntity | null>(
+    null,
+  );
 
   // UI State
   const [activeTab, setActiveTab] = useState<
-    'dashboard' | 'feeds' | 'enrichment' | 'entities' | 'alerts' | 'correlations'
+    | 'dashboard'
+    | 'feeds'
+    | 'enrichment'
+    | 'entities'
+    | 'alerts'
+    | 'correlations'
   >('dashboard');
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<string>('all');
@@ -249,10 +285,20 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
             scan_date: 'timestamp',
             permalink: 'url',
           },
-          filters: [{ field: 'detections', operator: 'greater_than', value: '5' }],
+          filters: [
+            { field: 'detections', operator: 'greater_than', value: '5' },
+          ],
           transformations: [
-            { field: 'timestamp', action: 'convert', parameters: { format: 'iso8601' } },
-            { field: 'hash', action: 'normalize', parameters: { case: 'lower' } },
+            {
+              field: 'timestamp',
+              action: 'convert',
+              parameters: { format: 'iso8601' },
+            },
+            {
+              field: 'hash',
+              action: 'normalize',
+              parameters: { case: 'lower' },
+            },
           ],
         },
         metrics: {
@@ -280,7 +326,8 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
       {
         id: 'feed-002',
         name: 'MISP Threat Sharing',
-        description: 'MISP platform integration for threat intelligence sharing and collaboration',
+        description:
+          'MISP platform integration for threat intelligence sharing and collaboration',
         provider: 'MISP Community',
         type: 'community',
         category: 'threat_intel',
@@ -308,7 +355,11 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
             { field: 'threat_level_id', operator: 'less_than', value: '3' },
           ],
           transformations: [
-            { field: 'attributes', action: 'extract', parameters: { nested: 'value' } },
+            {
+              field: 'attributes',
+              action: 'extract',
+              parameters: { nested: 'value' },
+            },
           ],
         },
         metrics: {
@@ -352,9 +403,15 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
             'pulse.created': 'timestamp',
             'pulse.tags': 'tags',
           },
-          filters: [{ field: 'indicators', operator: 'greater_than', value: '0' }],
+          filters: [
+            { field: 'indicators', operator: 'greater_than', value: '0' },
+          ],
           transformations: [
-            { field: 'iocs', action: 'extract', parameters: { fields: ['indicator', 'type'] } },
+            {
+              field: 'iocs',
+              action: 'extract',
+              parameters: { fields: ['indicator', 'type'] },
+            },
           ],
         },
         metrics: {
@@ -381,7 +438,9 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
           'Enrich IP addresses with geolocation data and reputation scores from multiple sources',
         enabled: true,
         priority: 8,
-        triggers: [{ field: 'ip_address', condition: 'new_data', parameters: {} }],
+        triggers: [
+          { field: 'ip_address', condition: 'new_data', parameters: {} },
+        ],
         enrichments: [
           {
             type: 'ip_geolocation',
@@ -621,7 +680,8 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
           {
             action: 'Block IP address at firewall level',
             priority: 'high',
-            rationale: 'High malicious reputation score and association with known threat actors',
+            rationale:
+              'High malicious reputation score and association with known threat actors',
           },
           {
             action: 'Investigate all recent connections to this IP',
@@ -655,7 +715,8 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
           {
             action: 'Add domain to DNS blacklist',
             priority: 'medium',
-            rationale: 'Prevent users from accessing potentially malicious domain',
+            rationale:
+              'Prevent users from accessing potentially malicious domain',
           },
           {
             action: 'Monitor for email campaigns using this domain',
@@ -780,7 +841,8 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
         feed.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         feed.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         feed.provider.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = filterStatus === 'all' || feed.status === filterStatus;
+      const matchesStatus =
+        filterStatus === 'all' || feed.status === filterStatus;
       const matchesType = filterType === 'all' || feed.type === filterType;
       return matchesSearch && matchesStatus && matchesType;
     });
@@ -804,16 +866,21 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
           <h2>🧠 Intelligence Feeds & Automated Enrichment</h2>
           <div className="header-stats">
             <span className="stat">
-              <strong>{feeds.filter((f) => f.status === 'active').length}</strong> Active Feeds
+              <strong>
+                {feeds.filter((f) => f.status === 'active').length}
+              </strong>{' '}
+              Active Feeds
             </span>
             <span className="stat">
-              <strong>{enrichmentRules.filter((r) => r.enabled).length}</strong> Rules
+              <strong>{enrichmentRules.filter((r) => r.enabled).length}</strong>{' '}
+              Rules
             </span>
             <span className="stat">
               <strong>{enrichedEntities.length}</strong> Enriched
             </span>
             <span className="stat">
-              <strong>{alerts.filter((a) => !a.acknowledged).length}</strong> New Alerts
+              <strong>{alerts.filter((a) => !a.acknowledged).length}</strong>{' '}
+              New Alerts
             </span>
           </div>
         </div>
@@ -912,8 +979,10 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                       <div className="metric-value">{feeds.length}</div>
                       <div className="metric-label">Intelligence Feeds</div>
                       <div className="metric-detail">
-                        {feeds.filter((f) => f.status === 'active').length} active,
-                        {feeds.filter((f) => f.status === 'error').length} errors
+                        {feeds.filter((f) => f.status === 'active').length}{' '}
+                        active,
+                        {feeds.filter((f) => f.status === 'error').length}{' '}
+                        errors
                       </div>
                     </div>
                   </div>
@@ -922,11 +991,14 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                     <div className="metric-icon">⚡</div>
                     <div className="metric-content">
                       <div className="metric-value">
-                        {feeds.reduce((acc, f) => acc + f.metrics.totalRecords, 0).toLocaleString()}
+                        {feeds
+                          .reduce((acc, f) => acc + f.metrics.totalRecords, 0)
+                          .toLocaleString()}
                       </div>
                       <div className="metric-label">Intelligence Records</div>
                       <div className="metric-detail">
-                        Last 24 hours: +{Math.floor(Math.random() * 5000) + 1000}
+                        Last 24 hours: +
+                        {Math.floor(Math.random() * 5000) + 1000}
                       </div>
                     </div>
                   </div>
@@ -934,13 +1006,17 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                   <div className="metric-card">
                     <div className="metric-icon">🎯</div>
                     <div className="metric-content">
-                      <div className="metric-value">{enrichedEntities.length}</div>
+                      <div className="metric-value">
+                        {enrichedEntities.length}
+                      </div>
                       <div className="metric-label">Enriched Entities</div>
                       <div className="metric-detail">
                         Avg confidence:{' '}
                         {Math.round(
-                          enrichedEntities.reduce((acc, e) => acc + e.confidence, 0) /
-                            enrichedEntities.length,
+                          enrichedEntities.reduce(
+                            (acc, e) => acc + e.confidence,
+                            0,
+                          ) / enrichedEntities.length,
                         )}
                         %
                       </div>
@@ -956,8 +1032,11 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                       <div className="metric-label">Active Alerts</div>
                       <div className="metric-detail">
                         {
-                          alerts.filter((a) => a.severity === 'critical' || a.severity === 'high')
-                            .length
+                          alerts.filter(
+                            (a) =>
+                              a.severity === 'critical' ||
+                              a.severity === 'high',
+                          ).length
                         }{' '}
                         high priority
                       </div>
@@ -986,18 +1065,27 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                       severity: alert.severity,
                     })),
                   ]
-                    .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+                    .sort(
+                      (a, b) => b.timestamp.getTime() - a.timestamp.getTime(),
+                    )
                     .slice(0, 10)
                     .map((activity, index) => (
-                      <div key={index} className={`activity-item ${activity.severity}`}>
+                      <div
+                        key={index}
+                        className={`activity-item ${activity.severity}`}
+                      >
                         <div className="activity-timestamp">
                           {activity.timestamp.toLocaleTimeString()}
                         </div>
                         <div className="activity-content">
                           <div className="activity-title">{activity.title}</div>
-                          <div className="activity-description">{activity.description}</div>
+                          <div className="activity-description">
+                            {activity.description}
+                          </div>
                         </div>
-                        <div className={`activity-severity ${activity.severity}`}>
+                        <div
+                          className={`activity-severity ${activity.severity}`}
+                        >
                           {activity.severity}
                         </div>
                       </div>
@@ -1013,7 +1101,9 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                     <div key={feed.id} className="feed-performance-card">
                       <div className="feed-performance-header">
                         <span className="feed-name">{feed.name}</span>
-                        <span className={`feed-status ${feed.status}`}>{feed.status}</span>
+                        <span className={`feed-status ${feed.status}`}>
+                          {feed.status}
+                        </span>
                       </div>
 
                       <div className="performance-metrics">
@@ -1032,7 +1122,9 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
 
                         <div className="performance-metric">
                           <span className="metric-name">Avg Latency</span>
-                          <span className="metric-value">{feed.metrics.avgLatency}ms</span>
+                          <span className="metric-value">
+                            {feed.metrics.avgLatency}ms
+                          </span>
                         </div>
 
                         <div className="performance-metric">
@@ -1070,7 +1162,9 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                       <span className={`feed-type ${feed.type}`}>
                         {feed.type.replace('_', ' ')}
                       </span>
-                      <span className={`reliability-badge ${feed.reliability.toLowerCase()}`}>
+                      <span
+                        className={`reliability-badge ${feed.reliability.toLowerCase()}`}
+                      >
                         Reliability: {feed.reliability}
                       </span>
                     </div>
@@ -1090,11 +1184,15 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                     </div>
                     <div className="stat-row">
                       <span className="stat-label">Success Rate:</span>
-                      <span className="stat-value">{feed.metrics.successRate.toFixed(1)}%</span>
+                      <span className="stat-value">
+                        {feed.metrics.successRate.toFixed(1)}%
+                      </span>
                     </div>
                     <div className="stat-row">
                       <span className="stat-label">Frequency:</span>
-                      <span className="stat-value">{feed.frequency.replace('_', ' ')}</span>
+                      <span className="stat-value">
+                        {feed.frequency.replace('_', ' ')}
+                      </span>
                     </div>
                     <div className="stat-row">
                       <span className="stat-label">Last Sync:</span>
@@ -1135,7 +1233,8 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                   {feed.alerts.length > 0 && (
                     <div className="feed-alerts">
                       <strong>
-                        ⚠️ {feed.alerts.filter((a) => !a.resolved).length} Active Alerts
+                        ⚠️ {feed.alerts.filter((a) => !a.resolved).length}{' '}
+                        Active Alerts
                       </strong>
                     </div>
                   )}
@@ -1164,38 +1263,57 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                 <div key={rule.id} className="enrichment-card">
                   <div className="enrichment-header">
                     <div className="enrichment-meta">
-                      <span className="priority-badge">Priority: {rule.priority}</span>
-                      <span className={`status-indicator ${rule.enabled ? 'enabled' : 'disabled'}`}>
+                      <span className="priority-badge">
+                        Priority: {rule.priority}
+                      </span>
+                      <span
+                        className={`status-indicator ${rule.enabled ? 'enabled' : 'disabled'}`}
+                      >
                         {rule.enabled ? 'Enabled' : 'Disabled'}
                       </span>
                     </div>
                   </div>
 
                   <div className="enrichment-title">{rule.name}</div>
-                  <div className="enrichment-description">{rule.description}</div>
+                  <div className="enrichment-description">
+                    {rule.description}
+                  </div>
 
                   <div className="enrichment-stats">
                     <div className="stat-item">
                       <span className="stat-label">Executions:</span>
-                      <span className="stat-value">{rule.metrics.executions}</span>
+                      <span className="stat-value">
+                        {rule.metrics.executions}
+                      </span>
                     </div>
                     <div className="stat-item">
                       <span className="stat-label">Success Rate:</span>
                       <span className="stat-value">
-                        {((rule.metrics.successes / rule.metrics.executions) * 100).toFixed(1)}%
+                        {(
+                          (rule.metrics.successes / rule.metrics.executions) *
+                          100
+                        ).toFixed(1)}
+                        %
                       </span>
                     </div>
                     <div className="stat-item">
                       <span className="stat-label">Avg Duration:</span>
-                      <span className="stat-value">{rule.metrics.avgDuration}ms</span>
+                      <span className="stat-value">
+                        {rule.metrics.avgDuration}ms
+                      </span>
                     </div>
                   </div>
 
                   <div className="enrichment-sources">
-                    <strong>Enrichment Sources ({rule.enrichments.length}):</strong>
+                    <strong>
+                      Enrichment Sources ({rule.enrichments.length}):
+                    </strong>
                     <div className="sources-list">
                       {rule.enrichments.map((enrichment, index) => (
-                        <span key={index} className={`source-tag ${enrichment.type}`}>
+                        <span
+                          key={index}
+                          className={`source-tag ${enrichment.type}`}
+                        >
                           {enrichment.provider}
                         </span>
                       ))}
@@ -1214,11 +1332,13 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                   {rule.metrics.lastRun && (
                     <div className="enrichment-timing">
                       <div className="timing-item">
-                        <strong>Last Run:</strong> {rule.metrics.lastRun.toLocaleString()}
+                        <strong>Last Run:</strong>{' '}
+                        {rule.metrics.lastRun.toLocaleString()}
                       </div>
                       {rule.metrics.nextRun && (
                         <div className="timing-item">
-                          <strong>Next Run:</strong> {rule.metrics.nextRun.toLocaleString()}
+                          <strong>Next Run:</strong>{' '}
+                          {rule.metrics.nextRun.toLocaleString()}
                         </div>
                       )}
                     </div>
@@ -1227,7 +1347,9 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                   <div className="enrichment-actions">
                     <button className="action-button">⚙️ Configure</button>
                     <button className="action-button">▶️ Run Now</button>
-                    <button className={`action-button ${rule.enabled ? 'disable' : 'enable'}`}>
+                    <button
+                      className={`action-button ${rule.enabled ? 'disable' : 'enable'}`}
+                    >
                       {rule.enabled ? '⏸️ Disable' : '▶️ Enable'}
                     </button>
                   </div>
@@ -1284,12 +1406,21 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                   </div>
 
                   <div className="entity-enrichment-summary">
-                    <strong>Enrichment Sources ({entity.enrichmentSources.length}):</strong>
+                    <strong>
+                      Enrichment Sources ({entity.enrichmentSources.length}):
+                    </strong>
                     <div className="sources-grid">
                       {entity.enrichmentSources.map((source, index) => (
-                        <div key={index} className={`source-item ${source.status}`}>
-                          <div className="source-provider">{source.provider}</div>
-                          <div className="source-type">{source.type.replace('_', ' ')}</div>
+                        <div
+                          key={index}
+                          className={`source-item ${source.status}`}
+                        >
+                          <div className="source-provider">
+                            {source.provider}
+                          </div>
+                          <div className="source-type">
+                            {source.type.replace('_', ' ')}
+                          </div>
                           <div className="source-metrics">
                             <span>Confidence: {source.confidence}%</span>
                             <span>Latency: {source.latency}ms</span>
@@ -1303,7 +1434,9 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                     <strong>Key Enriched Data:</strong>
                     <div className="enriched-highlights">
                       {Object.entries(entity.enriched)
-                        .filter(([key]) => !['timestamp', 'source'].includes(key))
+                        .filter(
+                          ([key]) => !['timestamp', 'source'].includes(key),
+                        )
                         .slice(0, 3)
                         .map(([key, value]) => (
                           <div key={key} className="enriched-item">
@@ -1320,7 +1453,8 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
 
                   <div className="entity-metadata">
                     <div className="metadata-item">
-                      <strong>Last Enriched:</strong> {entity.lastEnriched.toLocaleString()}
+                      <strong>Last Enriched:</strong>{' '}
+                      {entity.lastEnriched.toLocaleString()}
                     </div>
                   </div>
 
@@ -1343,7 +1477,10 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                   <div className="panel-actions">
                     <button className="action-button">🔄 Re-enrich</button>
                     <button className="action-button">📤 Export</button>
-                    <button className="close-button" onClick={() => setSelectedEntity(null)}>
+                    <button
+                      className="close-button"
+                      onClick={() => setSelectedEntity(null)}
+                    >
                       ✕
                     </button>
                   </div>
@@ -1359,7 +1496,9 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                           style={{ width: `${selectedEntity.confidence}%` }}
                         ></div>
                       </div>
-                      <span className="score-value">{selectedEntity.confidence}%</span>
+                      <span className="score-value">
+                        {selectedEntity.confidence}%
+                      </span>
                     </div>
                     <div className="score-item">
                       <span className="score-label">Risk Score:</span>
@@ -1369,21 +1508,27 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                           style={{ width: `${selectedEntity.riskScore}%` }}
                         ></div>
                       </div>
-                      <span className="score-value">{selectedEntity.riskScore}</span>
+                      <span className="score-value">
+                        {selectedEntity.riskScore}
+                      </span>
                     </div>
                   </div>
 
                   <div className="detail-section">
                     <h4>Original Data</h4>
                     <div className="json-viewer">
-                      <pre>{JSON.stringify(selectedEntity.original, null, 2)}</pre>
+                      <pre>
+                        {JSON.stringify(selectedEntity.original, null, 2)}
+                      </pre>
                     </div>
                   </div>
 
                   <div className="detail-section">
                     <h4>Enriched Data</h4>
                     <div className="json-viewer">
-                      <pre>{JSON.stringify(selectedEntity.enriched, null, 2)}</pre>
+                      <pre>
+                        {JSON.stringify(selectedEntity.enriched, null, 2)}
+                      </pre>
                     </div>
                   </div>
 
@@ -1391,19 +1536,26 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                     <h4>Enrichment Sources</h4>
                     <div className="sources-detail">
                       {selectedEntity.enrichmentSources.map((source, index) => (
-                        <div key={index} className={`source-detail ${source.status}`}>
+                        <div
+                          key={index}
+                          className={`source-detail ${source.status}`}
+                        >
                           <div className="source-header">
-                            <span className="source-provider">{source.provider}</span>
+                            <span className="source-provider">
+                              {source.provider}
+                            </span>
                             <span className={`source-status ${source.status}`}>
                               {source.status}
                             </span>
                           </div>
                           <div className="source-info">
                             <div className="info-item">
-                              <strong>Type:</strong> {source.type.replace('_', ' ')}
+                              <strong>Type:</strong>{' '}
+                              {source.type.replace('_', ' ')}
                             </div>
                             <div className="info-item">
-                              <strong>Timestamp:</strong> {source.timestamp.toLocaleString()}
+                              <strong>Timestamp:</strong>{' '}
+                              {source.timestamp.toLocaleString()}
                             </div>
                             <div className="info-item">
                               <strong>Confidence:</strong> {source.confidence}%
@@ -1447,7 +1599,9 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                           {alert.type.replace('_', ' ')}
                         </span>
                         <span className="alert-source">{alert.source}</span>
-                        <span className="alert-timestamp">{alert.timestamp.toLocaleString()}</span>
+                        <span className="alert-timestamp">
+                          {alert.timestamp.toLocaleString()}
+                        </span>
                       </div>
                     </div>
                     <div className="alert-indicators">
@@ -1455,7 +1609,9 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                         {alert.severity}
                       </span>
                       {alert.acknowledged && (
-                        <span className="acknowledged-indicator">Acknowledged</span>
+                        <span className="acknowledged-indicator">
+                          Acknowledged
+                        </span>
                       )}
                     </div>
                   </div>
@@ -1467,14 +1623,21 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                       <strong>Recommended Actions:</strong>
                       <div className="recommendations-list">
                         {alert.recommendations.map((rec, index) => (
-                          <div key={index} className={`recommendation ${rec.priority}`}>
+                          <div
+                            key={index}
+                            className={`recommendation ${rec.priority}`}
+                          >
                             <div className="recommendation-action">
-                              <span className={`priority-indicator ${rec.priority}`}>
+                              <span
+                                className={`priority-indicator ${rec.priority}`}
+                              >
                                 {rec.priority.toUpperCase()}
                               </span>
                               <span>{rec.action}</span>
                             </div>
-                            <div className="recommendation-rationale">{rec.rationale}</div>
+                            <div className="recommendation-rationale">
+                              {rec.rationale}
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -1489,7 +1652,9 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
 
                   <div className="alert-actions">
                     {!alert.acknowledged && (
-                      <button className="action-button primary">✓ Acknowledge</button>
+                      <button className="action-button primary">
+                        ✓ Acknowledge
+                      </button>
                     )}
                     <button className="action-button">🔍 Investigate</button>
                     <button className="action-button">📋 Create Case</button>
@@ -1523,7 +1688,9 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                   </div>
 
                   <div className="correlation-title">{correlation.name}</div>
-                  <div className="correlation-description">{correlation.description}</div>
+                  <div className="correlation-description">
+                    {correlation.description}
+                  </div>
 
                   <div className="correlation-rules">
                     <strong>Correlation Rules:</strong>
@@ -1533,10 +1700,12 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                           <strong>Feeds:</strong> {rule.feeds.length} feeds
                         </div>
                         <div className="rule-conditions">
-                          <strong>Conditions:</strong> {rule.conditions.length} conditions
+                          <strong>Conditions:</strong> {rule.conditions.length}{' '}
+                          conditions
                         </div>
                         <div className="rule-window">
-                          <strong>Time Window:</strong> {rule.timeWindow} minutes
+                          <strong>Time Window:</strong> {rule.timeWindow}{' '}
+                          minutes
                         </div>
                         <div className="rule-matches">
                           <strong>Min Matches:</strong> {rule.minMatches}
@@ -1548,11 +1717,15 @@ const IntelligenceFeedsEnrichment: React.FC<IntelligenceFeedsEnrichmentProps> = 
                   <div className="correlation-metrics">
                     <div className="metric-item">
                       <span className="metric-label">Total Correlations:</span>
-                      <span className="metric-value">{correlation.metrics.correlations}</span>
+                      <span className="metric-value">
+                        {correlation.metrics.correlations}
+                      </span>
                     </div>
                     <div className="metric-item">
                       <span className="metric-label">Alerts Generated:</span>
-                      <span className="metric-value">{correlation.metrics.alerts}</span>
+                      <span className="metric-value">
+                        {correlation.metrics.alerts}
+                      </span>
                     </div>
                     {correlation.metrics.lastMatch && (
                       <div className="metric-item">

@@ -12,7 +12,10 @@ export const GET_GOALS = gql`
 
 export const GET_INVESTIGATIONS = gql`
   query Investigations {
-    investigations { id title }
+    investigations {
+      id
+      title
+    }
   }
 `;
 
@@ -48,8 +51,16 @@ export const mocks = [
     result: {
       data: {
         copilotGoals: [
-          { id: 'g1', text: 'Existing Goal 1', createdAt: '2023-01-01T10:00:00Z' },
-          { id: 'g2', text: 'Existing Goal 2', createdAt: '2023-01-02T11:00:00Z' },
+          {
+            id: 'g1',
+            text: 'Existing Goal 1',
+            createdAt: '2023-01-01T10:00:00Z',
+          },
+          {
+            id: 'g2',
+            text: 'Existing Goal 2',
+            createdAt: '2023-01-02T11:00:00Z',
+          },
         ],
       },
     },
@@ -61,7 +72,11 @@ export const mocks = [
     },
     result: {
       data: {
-        createCopilotGoal: { id: 'g3', text: 'Test goal', createdAt: '2023-01-03T12:00:00Z' },
+        createCopilotGoal: {
+          id: 'g3',
+          text: 'Test goal',
+          createdAt: '2023-01-03T12:00:00Z',
+        },
       },
     },
   },
@@ -74,8 +89,16 @@ export const mocks = [
       data: {
         copilotGoals: [
           { id: 'g3', text: 'Test goal', createdAt: '2023-01-03T12:00:00Z' },
-          { id: 'g1', text: 'Existing Goal 1', createdAt: '2023-01-01T10:00:00Z' },
-          { id: 'g2', text: 'Existing Goal 2', createdAt: '2023-01-02T11:00:00Z' },
+          {
+            id: 'g1',
+            text: 'Existing Goal 1',
+            createdAt: '2023-01-01T10:00:00Z',
+          },
+          {
+            id: 'g2',
+            text: 'Existing Goal 2',
+            createdAt: '2023-01-02T11:00:00Z',
+          },
         ],
       },
     },

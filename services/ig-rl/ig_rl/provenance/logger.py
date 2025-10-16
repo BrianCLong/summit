@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Dict
 
 
 @dataclass(slots=True)
@@ -12,7 +11,7 @@ class ProvenanceRecord:
     case_id: str
     action: str
     reward: float
-    reward_components: Dict[str, float]
+    reward_components: dict[str, float]
     model_hash: str
     state_hash: str
 

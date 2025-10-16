@@ -3,65 +3,65 @@
 
 audit:
   enabled: true
-  
+
   # Storage Configuration
   storage:
-    primary: "database"  # file, database, elasticsearch, s3
-    archive: "s3"        # file, s3, glacier
+    primary: 'database' # file, database, elasticsearch, s3
+    archive: 's3' # file, s3, glacier
     backup: true
-    
+
   # Retention Policies
   retention:
-    hot_storage_days: 90        # Active searchable storage
-    cold_storage_days: 365      # Compressed/archived storage
-    archive_storage_years: 7    # Long-term compliance storage
-    
+    hot_storage_days: 90 # Active searchable storage
+    cold_storage_days: 365 # Compressed/archived storage
+    archive_storage_years: 7 # Long-term compliance storage
+
   # Data Processing
   processing:
     compression: true
     encryption: true
     batch_size: 1000
     flush_interval_seconds: 30
-    
+
   # Real-time Analysis
   real_time:
     enabled: true
     anomaly_detection: true
     ml_insights: true
     correlation_tracking: true
-    
+
   # Alert Thresholds
   alerts:
     failed_auth_attempts: 5
-    data_access_volume: 10000    # Records per hour
+    data_access_volume: 10000 # Records per hour
     privilege_escalation: true
     suspicious_activity: true
     compliance_violations: true
-    
+
   # Sampling Configuration
   sampling:
     enabled: false
-    rate: 1.0  # 0.0 to 1.0 (100% by default)
+    rate: 1.0 # 0.0 to 1.0 (100% by default)
     exempt_categories:
-      - "AUTHENTICATION"
-      - "AUTHORIZATION"  
-      - "CRITICAL"
-    
+      - 'AUTHENTICATION'
+      - 'AUTHORIZATION'
+      - 'CRITICAL'
+
   # SIEM Integration
   siem:
     enabled: true
-    provider: "splunk"  # splunk, elastic, qradar, sentinel
-    endpoint: "${SIEM_ENDPOINT}"
-    api_key: "${SIEM_API_KEY}"
-    format: "CEF"       # CEF, LEEF, JSON, SYSLOG
+    provider: 'splunk' # splunk, elastic, qradar, sentinel
+    endpoint: '${SIEM_ENDPOINT}'
+    api_key: '${SIEM_API_KEY}'
+    format: 'CEF' # CEF, LEEF, JSON, SYSLOG
     batch_size: 100
     retry_attempts: 3
-    
+
   # Compliance Standards
   compliance:
     gdpr:
       enabled: true
-      data_retention_days: 1095  # 3 years
+      data_retention_days: 1095 # 3 years
       anonymization: true
     sox:
       enabled: true
@@ -75,81 +75,81 @@ audit:
       enabled: false
       phi_protection: true
       minimum_necessary: true
-      
+
   # Event Categories Configuration
   categories:
     authentication:
       severity_mapping:
-        login: "LOW"
-        logout: "LOW"
-        login_failed: "MEDIUM" 
-        password_change: "MEDIUM"
-        mfa_challenge: "MEDIUM"
-        account_locked: "HIGH"
+        login: 'LOW'
+        logout: 'LOW'
+        login_failed: 'MEDIUM'
+        password_change: 'MEDIUM'
+        mfa_challenge: 'MEDIUM'
+        account_locked: 'HIGH'
       retention_days: 365
-      
+
     authorization:
       severity_mapping:
-        access_granted: "LOW"
-        access_denied: "MEDIUM"
-        privilege_escalation: "HIGH"
-        role_change: "HIGH"
+        access_granted: 'LOW'
+        access_denied: 'MEDIUM'
+        privilege_escalation: 'HIGH'
+        role_change: 'HIGH'
       retention_days: 365
-      
+
     data_access:
       severity_mapping:
-        read: "LOW"
-        write: "MEDIUM"
-        delete: "HIGH"
-        export: "HIGH"
-        bulk_operation: "HIGH"
-      retention_days: 2555  # 7 years
-      
+        read: 'LOW'
+        write: 'MEDIUM'
+        delete: 'HIGH'
+        export: 'HIGH'
+        bulk_operation: 'HIGH'
+      retention_days: 2555 # 7 years
+
     system:
       severity_mapping:
-        startup: "LOW"
-        shutdown: "MEDIUM"
-        error: "HIGH"
-        crash: "CRITICAL"
+        startup: 'LOW'
+        shutdown: 'MEDIUM'
+        error: 'HIGH'
+        crash: 'CRITICAL'
       retention_days: 90
-      
+
     configuration:
       severity_mapping:
-        setting_change: "HIGH"
-        policy_update: "HIGH"
-        schema_change: "CRITICAL"
-      retention_days: 2555  # 7 years
-      
+        setting_change: 'HIGH'
+        policy_update: 'HIGH'
+        schema_change: 'CRITICAL'
+      retention_days: 2555 # 7 years
+
     admin:
       severity_mapping:
-        user_creation: "MEDIUM"
-        user_deletion: "HIGH"
-        permission_change: "HIGH"
-        system_maintenance: "MEDIUM"
-      retention_days: 2555  # 7 years
+        user_creation: 'MEDIUM'
+        user_deletion: 'HIGH'
+        permission_change: 'HIGH'
+        system_maintenance: 'MEDIUM'
+      retention_days: 2555 # 7 years
 
   # Data Classification Rules
   data_classification:
     public:
       retention_days: 30
       encryption_required: false
-      access_logging: "basic"
-      
+      access_logging: 'basic'
+
     internal:
       retention_days: 365
       encryption_required: false
-      access_logging: "standard"
-      
+      access_logging: 'standard'
+
     confidential:
-      retention_days: 1095  # 3 years
+      retention_days: 1095 # 3 years
       encryption_required: true
-      access_logging: "detailed"
+      access_logging: 'detailed'
       approval_required: false
-      
+
     secret:
-      retention_days: 2555  # 7 years
+      retention_days: 2555 # 7 years
       encryption_required: true
-      access_logging: "comprehensive"
+      access_logging: 'comprehensive'
       approval_required: true
       multi_party_authorization: true
 
@@ -159,157 +159,157 @@ audit:
     worker_threads: 4
     queue_timeout_seconds: 300
     memory_threshold_mb: 512
-    
+
   # Database Configuration
   database:
     connection_pool_size: 10
     query_timeout_seconds: 30
     batch_insert: true
     indexing:
-      - "timestamp"
-      - "user_id"
-      - "category"
-      - "severity"
-      - "correlation_id"
+      - 'timestamp'
+      - 'user_id'
+      - 'category'
+      - 'severity'
+      - 'correlation_id'
     partitioning:
-      strategy: "time_based"
-      partition_interval: "monthly"
-      
-  # File Storage Configuration  
+      strategy: 'time_based'
+      partition_interval: 'monthly'
+
+  # File Storage Configuration
   file_storage:
-    base_path: "/var/log/intelgraph/audit"
+    base_path: '/var/log/intelgraph/audit'
     rotation:
-      strategy: "size_and_time"
+      strategy: 'size_and_time'
       max_size_mb: 100
       max_age_days: 30
-    compression: "gzip"
-    permissions: "600"
-    
+    compression: 'gzip'
+    permissions: '600'
+
   # S3 Configuration
   s3:
-    bucket: "${AUDIT_S3_BUCKET}"
-    region: "${AWS_REGION}"
-    prefix: "audit-logs"
-    storage_class: "STANDARD_IA"
+    bucket: '${AUDIT_S3_BUCKET}'
+    region: '${AWS_REGION}'
+    prefix: 'audit-logs'
+    storage_class: 'STANDARD_IA'
     lifecycle:
       transition_to_glacier: 365
       expiration_days: 2555
     encryption:
-      kms_key_id: "${AUDIT_KMS_KEY}"
-      
+      kms_key_id: '${AUDIT_KMS_KEY}'
+
   # Elasticsearch Configuration
   elasticsearch:
     nodes:
-      - "${ES_NODE_1}"
-      - "${ES_NODE_2}"
-    index_pattern: "audit-logs-%{+yyyy.MM.dd}"
-    template_name: "audit-logs-template"
+      - '${ES_NODE_1}'
+      - '${ES_NODE_2}'
+    index_pattern: 'audit-logs-%{+yyyy.MM.dd}'
+    template_name: 'audit-logs-template'
     shards: 2
     replicas: 1
-    refresh_interval: "30s"
-    
+    refresh_interval: '30s'
+
   # Monitoring and Alerting
   monitoring:
     metrics:
       enabled: true
-      push_gateway: "${PROMETHEUS_PUSHGATEWAY}"
+      push_gateway: '${PROMETHEUS_PUSHGATEWAY}'
       labels:
-        environment: "${ENVIRONMENT}"
-        service: "intelgraph-audit"
-        
+        environment: '${ENVIRONMENT}'
+        service: 'intelgraph-audit'
+
     health_checks:
       storage_connectivity: true
       siem_connectivity: true
       performance_thresholds: true
-      
+
     notifications:
       slack:
         enabled: true
-        webhook_url: "${SLACK_WEBHOOK_URL}"
-        channel: "#security-alerts"
+        webhook_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#security-alerts'
       email:
         enabled: true
-        smtp_server: "${SMTP_SERVER}"
+        smtp_server: '${SMTP_SERVER}'
         recipients:
-          - "security@company.com"
-          - "compliance@company.com"
+          - 'security@company.com'
+          - 'compliance@company.com'
       pagerduty:
         enabled: true
-        integration_key: "${PAGERDUTY_KEY}"
-        
+        integration_key: '${PAGERDUTY_KEY}'
+
   # Privacy and Redaction
   privacy:
     field_redaction:
       enabled: true
       patterns:
-        - "password"
-        - "token" 
-        - "secret"
-        - "key"
-        - "ssn"
-        - "credit_card"
-      replacement: "[REDACTED]"
-      
+        - 'password'
+        - 'token'
+        - 'secret'
+        - 'key'
+        - 'ssn'
+        - 'credit_card'
+      replacement: '[REDACTED]'
+
     ip_anonymization:
       enabled: true
-      method: "hash"  # hash, truncate, remove
-      
+      method: 'hash' # hash, truncate, remove
+
     user_consent_tracking: true
     data_subject_requests: true
-    
+
   # Forensics and Investigation
   forensics:
     chain_of_custody: true
     digital_signatures: true
     tamper_detection: true
     evidence_export:
-      formats: ["json", "csv", "pdf"]
+      formats: ['json', 'csv', 'pdf']
       encryption: true
-      
+
   # Integration Hooks
   webhooks:
     enabled: true
     endpoints:
-      security_team: "${SECURITY_WEBHOOK_URL}"
-      compliance_team: "${COMPLIANCE_WEBHOOK_URL}"
+      security_team: '${SECURITY_WEBHOOK_URL}'
+      compliance_team: '${COMPLIANCE_WEBHOOK_URL}'
     retry_policy:
       max_attempts: 3
       backoff_multiplier: 2
-      
+
   # Development and Testing
   development:
     mock_siem: false
     test_alerts: false
     debug_logging: false
     sample_data_generation: false
-    
+
 # Environment-specific overrides
 environments:
   development:
     audit:
       storage:
-        primary: "file"
+        primary: 'file'
       retention:
         hot_storage_days: 7
       siem:
         enabled: false
       development:
         debug_logging: true
-        
+
   staging:
     audit:
       storage:
-        primary: "database"
+        primary: 'database'
       retention:
         hot_storage_days: 30
       siem:
         enabled: true
-        
+
   production:
     audit:
       storage:
-        primary: "elasticsearch"
-        archive: "s3"
+        primary: 'elasticsearch'
+        archive: 's3'
       real_time:
         enabled: true
       siem:

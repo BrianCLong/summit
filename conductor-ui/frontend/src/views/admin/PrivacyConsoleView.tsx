@@ -10,7 +10,7 @@ type PolicyEntity = {
 
 // Mock API
 const fetchPolicyEntity = async (entityId: string): Promise<PolicyEntity> => {
-  await new Promise(res => setTimeout(res, 200));
+  await new Promise((res) => setTimeout(res, 200));
   return {
     id: entityId,
     purposeTags: ['investigation', 'threat-intel'],
@@ -18,11 +18,18 @@ const fetchPolicyEntity = async (entityId: string): Promise<PolicyEntity> => {
   };
 };
 
-const updatePolicyEntity = async (entityId: string, data: Partial<PolicyEntity>): Promise<PolicyEntity> => {
+const updatePolicyEntity = async (
+  entityId: string,
+  data: Partial<PolicyEntity>,
+): Promise<PolicyEntity> => {
   console.log(`Updating ${entityId} with`, data);
-  await new Promise(res => setTimeout(res, 400));
+  await new Promise((res) => setTimeout(res, 400));
   // In a real app, this would return the updated entity from the server.
-  return { id: entityId, purposeTags: data.purposeTags || [], retentionTier: data.retentionTier || '' };
+  return {
+    id: entityId,
+    purposeTags: data.purposeTags || [],
+    retentionTier: data.retentionTier || '',
+  };
 };
 
 export const PrivacyConsoleView = () => {
@@ -33,7 +40,7 @@ export const PrivacyConsoleView = () => {
   useEffect(() => {
     if (entityId) {
       setIsLoading(true);
-      fetchPolicyEntity(entityId).then(data => {
+      fetchPolicyEntity(entityId).then((data) => {
         setEntity(data);
         setIsLoading(false);
       });
@@ -45,10 +52,12 @@ export const PrivacyConsoleView = () => {
     // This would typically open a modal with OPA checks
     const newTier = prompt('Enter new retention tier:', entity.retentionTier);
     if (newTier) {
-      updatePolicyEntity(entity.id, { retentionTier: newTier }).then(updatedEntity => {
-        // In a real app, you'd update state with the response.
-        alert('Update request sent.');
-      });
+      updatePolicyEntity(entity.id, { retentionTier: newTier }).then(
+        (updatedEntity) => {
+          // In a real app, you'd update state with the response.
+          alert('Update request sent.');
+        },
+      );
     }
   };
 
@@ -63,15 +72,27 @@ export const PrivacyConsoleView = () => {
   return (
     <div>
       <h1>Privacy & Retention Console</h1>
-      <input type="text" value={entityId} onChange={e => setEntityId(e.target.value)} placeholder="Enter Entity ID" />
+      <input
+        type="text"
+        value={entityId}
+        onChange={(e) => setEntityId(e.target.value)}
+        placeholder="Enter Entity ID"
+      />
       {isLoading && <p>Loading entity...</p>}
       {entity && (
         <div>
           <h2>Entity: {entity.id}</h2>
-          <p><strong>Retention Tier:</strong> {entity.retentionTier} <button onClick={handleUpdateRetention}>Edit</button></p>
-          <p><strong>Purpose Tags:</strong> {entity.purposeTags.join(', ')}</p>
+          <p>
+            <strong>Retention Tier:</strong> {entity.retentionTier}{' '}
+            <button onClick={handleUpdateRetention}>Edit</button>
+          </p>
+          <p>
+            <strong>Purpose Tags:</strong> {entity.purposeTags.join(', ')}
+          </p>
           <hr />
-          <button onClick={handleRtbfRequest}>Initiate Right To Be Forgotten (RTBF)</button>
+          <button onClick={handleRtbfRequest}>
+            Initiate Right To Be Forgotten (RTBF)
+          </button>
         </div>
       )}
     </div>

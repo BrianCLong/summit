@@ -8,7 +8,10 @@ import DataExport from '../components/DataExport';
 import InvestigationManager from '../components/InvestigationManager';
 import PerformanceMonitor from '../components/PerformanceMonitor';
 import HelpSystem, { useHelpSystem } from '../components/HelpSystem';
-import { useKeyboardShortcuts, ShortcutsHelp } from '../components/KeyboardShortcuts';
+import {
+  useKeyboardShortcuts,
+  ShortcutsHelp,
+} from '../components/KeyboardShortcuts';
 import { ToastProvider, useToast } from '../components/ToastContainer';
 import EnhancedAIAssistant from '../components/ai-enhanced/EnhancedAIAssistant';
 import RealTimePresence from '../components/collaboration/RealTimePresence';
@@ -301,7 +304,10 @@ function HomeRouteInner() {
       description: 'New investigation',
       action: () => {
         setActiveTab('investigations');
-        toast.success('New Investigation', 'Navigate to investigations to create');
+        toast.success(
+          'New Investigation',
+          'Navigate to investigations to create',
+        );
       },
       category: 'Investigations',
     },
@@ -375,10 +381,19 @@ function HomeRouteInner() {
           }}
         >
           <div>
-            <h1 style={{ fontSize: '2.5rem', fontWeight: '600', marginBottom: '8px' }}>
+            <h1
+              style={{
+                fontSize: '2.5rem',
+                fontWeight: '600',
+                marginBottom: '8px',
+              }}
+            >
               IntelGraph Platform
             </h1>
-            <p className="muted" style={{ fontSize: '1.1rem', marginBottom: '20px' }}>
+            <p
+              className="muted"
+              style={{ fontSize: '1.1rem', marginBottom: '20px' }}
+            >
               Intelligence Analysis & Graph Visualization System
             </p>
           </div>
@@ -437,7 +452,10 @@ function HomeRouteInner() {
                 padding: '12px 20px',
                 backgroundColor: 'transparent',
                 border: 'none',
-                borderBottom: activeTab === tab.key ? '2px solid #1a73e8' : '2px solid transparent',
+                borderBottom:
+                  activeTab === tab.key
+                    ? '2px solid #1a73e8'
+                    : '2px solid transparent',
                 cursor: 'pointer',
                 fontSize: '14px',
                 fontWeight: activeTab === tab.key ? '600' : '400',
@@ -456,7 +474,11 @@ function HomeRouteInner() {
         <div style={{ marginBottom: '32px' }}>
           <div
             className="panel"
-            style={{ padding: '24px', marginBottom: '24px', backgroundColor: '#f8f9fa' }}
+            style={{
+              padding: '24px',
+              marginBottom: '24px',
+              backgroundColor: '#f8f9fa',
+            }}
           >
             <h2
               style={{
@@ -490,8 +512,17 @@ function HomeRouteInner() {
             </div>
           </div>
 
-          <div className="panel" style={{ padding: '24px', marginBottom: '24px' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '16px' }}>
+          <div
+            className="panel"
+            style={{ padding: '24px', marginBottom: '24px' }}
+          >
+            <h3
+              style={{
+                fontSize: '1.1rem',
+                fontWeight: '600',
+                marginBottom: '16px',
+              }}
+            >
               🔍 Navigate to Action
             </h3>
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -507,7 +538,9 @@ function HomeRouteInner() {
                   flex: 1,
                   fontSize: '14px',
                 }}
-                onKeyPress={(e) => e.key === 'Enter' && handleNavigateToAction()}
+                onKeyPress={(e) =>
+                  e.key === 'Enter' && handleNavigateToAction()
+                }
               />
               <button
                 onClick={handleNavigateToAction}
@@ -528,7 +561,13 @@ function HomeRouteInner() {
           </div>
 
           <div style={{ marginBottom: '24px' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '16px' }}>
+            <h3
+              style={{
+                fontSize: '1.1rem',
+                fontWeight: '600',
+                marginBottom: '16px',
+              }}
+            >
               ⚡ Quick Actions
             </h3>
             <div
@@ -545,11 +584,19 @@ function HomeRouteInner() {
                   style={{ padding: '16px', cursor: 'pointer' }}
                   onClick={item.action}
                 >
-                  <h4 style={{ fontWeight: '600', marginBottom: '8px' }}>{item.title}</h4>
+                  <h4 style={{ fontWeight: '600', marginBottom: '8px' }}>
+                    {item.title}
+                  </h4>
                   <p className="muted note" style={{ marginBottom: '12px' }}>
                     {item.description}
                   </p>
-                  <div style={{ color: '#1a73e8', fontSize: '14px', fontWeight: '500' }}>
+                  <div
+                    style={{
+                      color: '#1a73e8',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                    }}
+                  >
                     → Try it now
                   </div>
                 </div>
@@ -569,9 +616,19 @@ function HomeRouteInner() {
               style={{ padding: '20px', cursor: 'pointer' }}
               onClick={() => setActiveTab('graph-viz')}
             >
-              <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>🌐 Graph Analysis</h3>
-              <p className="muted note">Interactive graph visualization with physics simulation</p>
-              <div style={{ marginTop: '12px', color: '#6c757d', fontSize: '12px' }}>
+              <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>
+                🌐 Graph Analysis
+              </h3>
+              <p className="muted note">
+                Interactive graph visualization with physics simulation
+              </p>
+              <div
+                style={{
+                  marginTop: '12px',
+                  color: '#6c757d',
+                  fontSize: '12px',
+                }}
+              >
                 Neo4j • D3.js • Canvas Rendering
               </div>
             </div>
@@ -581,9 +638,19 @@ function HomeRouteInner() {
               style={{ padding: '20px', cursor: 'pointer' }}
               onClick={() => setActiveTab('social-network')}
             >
-              <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>🕸️ Social Network Analysis</h3>
-              <p className="muted note">Advanced relationship mapping and community detection</p>
-              <div style={{ marginTop: '12px', color: '#6c757d', fontSize: '12px' }}>
+              <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>
+                🕸️ Social Network Analysis
+              </h3>
+              <p className="muted note">
+                Advanced relationship mapping and community detection
+              </p>
+              <div
+                style={{
+                  marginTop: '12px',
+                  color: '#6c757d',
+                  fontSize: '12px',
+                }}
+              >
                 Centrality • Communities • Influence
               </div>
             </div>
@@ -593,9 +660,19 @@ function HomeRouteInner() {
               style={{ padding: '20px', cursor: 'pointer' }}
               onClick={() => setActiveTab('behavioral')}
             >
-              <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>🧬 Behavioral Analytics</h3>
-              <p className="muted note">Pattern recognition and anomaly detection engine</p>
-              <div style={{ marginTop: '12px', color: '#6c757d', fontSize: '12px' }}>
+              <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>
+                🧬 Behavioral Analytics
+              </h3>
+              <p className="muted note">
+                Pattern recognition and anomaly detection engine
+              </p>
+              <div
+                style={{
+                  marginTop: '12px',
+                  color: '#6c757d',
+                  fontSize: '12px',
+                }}
+              >
                 ML-Based • Multi-dimensional • Real-time
               </div>
             </div>
@@ -605,9 +682,19 @@ function HomeRouteInner() {
               style={{ padding: '20px', cursor: 'pointer' }}
               onClick={() => setActiveTab('threat-hunting')}
             >
-              <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>🎯 Threat Hunting</h3>
-              <p className="muted note">Proactive threat detection with dark web monitoring</p>
-              <div style={{ marginTop: '12px', color: '#6c757d', fontSize: '12px' }}>
+              <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>
+                🎯 Threat Hunting
+              </h3>
+              <p className="muted note">
+                Proactive threat detection with dark web monitoring
+              </p>
+              <div
+                style={{
+                  marginTop: '12px',
+                  color: '#6c757d',
+                  fontSize: '12px',
+                }}
+              >
                 MITRE ATT&CK • Dark Web • Proactive
               </div>
             </div>
@@ -617,9 +704,19 @@ function HomeRouteInner() {
               style={{ padding: '20px', cursor: 'pointer' }}
               onClick={() => setActiveTab('intel-feeds')}
             >
-              <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>📡 Intelligence Feeds</h3>
-              <p className="muted note">Real-time feeds with automated enrichment</p>
-              <div style={{ marginTop: '12px', color: '#6c757d', fontSize: '12px' }}>
+              <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>
+                📡 Intelligence Feeds
+              </h3>
+              <p className="muted note">
+                Real-time feeds with automated enrichment
+              </p>
+              <div
+                style={{
+                  marginTop: '12px',
+                  color: '#6c757d',
+                  fontSize: '12px',
+                }}
+              >
                 Multi-source • STIX/TAXII • Automated
               </div>
             </div>
@@ -629,9 +726,19 @@ function HomeRouteInner() {
               style={{ padding: '20px', cursor: 'pointer' }}
               onClick={() => setActiveTab('case-management')}
             >
-              <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>📋 Case Management</h3>
-              <p className="muted note">Comprehensive case lifecycle with evidence tracking</p>
-              <div style={{ marginTop: '12px', color: '#6c757d', fontSize: '12px' }}>
+              <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>
+                📋 Case Management
+              </h3>
+              <p className="muted note">
+                Comprehensive case lifecycle with evidence tracking
+              </p>
+              <div
+                style={{
+                  marginTop: '12px',
+                  color: '#6c757d',
+                  fontSize: '12px',
+                }}
+              >
                 Evidence • Reports • Collaboration
               </div>
             </div>
@@ -641,9 +748,19 @@ function HomeRouteInner() {
               style={{ padding: '20px', cursor: 'pointer' }}
               onClick={() => setActiveTab('ai-assistant')}
             >
-              <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>🤖 AI Assistant</h3>
-              <p className="muted note">Context-aware investigation assistance</p>
-              <div style={{ marginTop: '12px', color: '#6c757d', fontSize: '12px' }}>
+              <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>
+                🤖 AI Assistant
+              </h3>
+              <p className="muted note">
+                Context-aware investigation assistance
+              </p>
+              <div
+                style={{
+                  marginTop: '12px',
+                  color: '#6c757d',
+                  fontSize: '12px',
+                }}
+              >
                 NLP • Voice Input • Multi-modal
               </div>
             </div>
@@ -653,9 +770,19 @@ function HomeRouteInner() {
               style={{ padding: '20px', cursor: 'pointer' }}
               onClick={() => setActiveTab('security')}
             >
-              <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>🔒 Security & Compliance</h3>
-              <p className="muted note">Comprehensive audit framework and controls</p>
-              <div style={{ marginTop: '12px', color: '#6c757d', fontSize: '12px' }}>
+              <h3 style={{ fontWeight: '600', marginBottom: '8px' }}>
+                🔒 Security & Compliance
+              </h3>
+              <p className="muted note">
+                Comprehensive audit framework and controls
+              </p>
+              <div
+                style={{
+                  marginTop: '12px',
+                  color: '#6c757d',
+                  fontSize: '12px',
+                }}
+              >
                 ABAC • RBAC • Audit Trail
               </div>
             </div>
@@ -674,12 +801,16 @@ function HomeRouteInner() {
               title="📊 Graph Overview"
               height={300}
               maxNodes={15}
-              onNodeClick={(node: unknown) => console.log('Clicked node:', node)}
+              onNodeClick={(node: unknown) =>
+                console.log('Clicked node:', node)
+              }
             />
 
             <RealTimePresence
               currentUser={currentUser}
-              onUserClick={(user: unknown) => console.log('Clicked user:', user)}
+              onUserClick={(user: unknown) =>
+                console.log('Clicked user:', user)
+              }
               className="h-80"
             />
           </div>
@@ -696,7 +827,13 @@ function HomeRouteInner() {
       {activeTab === 'search' && (
         <div style={{ maxWidth: '800px', margin: '0 auto' }}>
           <div style={{ marginBottom: '32px' }}>
-            <h2 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '16px' }}>
+            <h2
+              style={{
+                fontSize: '1.3rem',
+                fontWeight: '600',
+                marginBottom: '16px',
+              }}
+            >
               🔎 Advanced Search & Analysis
             </h2>
             <AdvancedSearch
@@ -707,7 +844,13 @@ function HomeRouteInner() {
           </div>
 
           <div className="panel" style={{ padding: '24px' }}>
-            <h3 style={{ fontSize: '1.1rem', fontWeight: '600', marginBottom: '16px' }}>
+            <h3
+              style={{
+                fontSize: '1.1rem',
+                fontWeight: '600',
+                marginBottom: '16px',
+              }}
+            >
               🎯 Search Tips
             </h3>
             <div style={{ display: 'grid', gap: '12px', fontSize: '14px' }}>
@@ -716,13 +859,16 @@ function HomeRouteInner() {
                 <code>confidence:&gt;80</code>
               </div>
               <div>
-                <strong>Investigation:</strong> <code>investigation:APT-2024-001</code>
+                <strong>Investigation:</strong>{' '}
+                <code>investigation:APT-2024-001</code>
               </div>
               <div>
-                <strong>Date Range:</strong> <code>created:2024-01-01..2024-12-31</code>
+                <strong>Date Range:</strong>{' '}
+                <code>created:2024-01-01..2024-12-31</code>
               </div>
               <div>
-                <strong>Boolean:</strong> <code>malware AND (APT OR campaign)</code>
+                <strong>Boolean:</strong>{' '}
+                <code>malware AND (APT OR campaign)</code>
               </div>
             </div>
           </div>
@@ -755,7 +901,9 @@ function HomeRouteInner() {
 
       {activeTab === 'ai-assistant' && (
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px' }}>
+          <div
+            style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '24px' }}
+          >
             <div style={{ height: '70vh' }}>
               <EnhancedAIAssistant
                 context={aiContext}
@@ -773,25 +921,46 @@ function HomeRouteInner() {
       {activeTab === 'graph-viz' && (
         <div>
           <div style={{ marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '8px' }}>
+            <h2
+              style={{
+                fontSize: '1.3rem',
+                fontWeight: '600',
+                marginBottom: '8px',
+              }}
+            >
               🌐 Interactive Graph Visualization
             </h2>
-            <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              Advanced graph analysis with physics simulation, multi-select, and real-time
-              performance monitoring
+            <p
+              className="muted"
+              style={{ fontSize: '1rem', marginBottom: '20px' }}
+            >
+              Advanced graph analysis with physics simulation, multi-select, and
+              real-time performance monitoring
             </p>
           </div>
 
-          <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
+          <div
+            style={{
+              height: '75vh',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+            }}
+          >
             <InteractiveGraphCanvas
               investigationId={selectedInvestigation?.id}
               onNodeSelect={(nodes: any[]) => {
                 console.log('Selected nodes:', nodes);
-                toast.info('Graph Selection', `Selected ${nodes.length} node(s)`);
+                toast.info(
+                  'Graph Selection',
+                  `Selected ${nodes.length} node(s)`,
+                );
               }}
               onEdgeSelect={(edges: any[]) => {
                 console.log('Selected edges:', edges);
-                toast.info('Graph Selection', `Selected ${edges.length} edge(s)`);
+                toast.info(
+                  'Graph Selection',
+                  `Selected ${edges.length} edge(s)`,
+                );
               }}
               layoutAlgorithm="force"
               enablePhysics={true}
@@ -805,11 +974,21 @@ function HomeRouteInner() {
       {activeTab === 'timeline' && (
         <div>
           <div style={{ marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '8px' }}>
+            <h2
+              style={{
+                fontSize: '1.3rem',
+                fontWeight: '600',
+                marginBottom: '8px',
+              }}
+            >
               ⏰ Temporal Analysis & Timeline
             </h2>
-            <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              Interactive timeline with event clustering, anomaly detection, and pattern analysis
+            <p
+              className="muted"
+              style={{ fontSize: '1rem', marginBottom: '20px' }}
+            >
+              Interactive timeline with event clustering, anomaly detection, and
+              pattern analysis
             </p>
           </div>
 
@@ -847,20 +1026,39 @@ function HomeRouteInner() {
       {activeTab === 'threat-intel' && (
         <div>
           <div style={{ marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '8px' }}>
+            <h2
+              style={{
+                fontSize: '1.3rem',
+                fontWeight: '600',
+                marginBottom: '8px',
+              }}
+            >
               🛡️ Threat Intelligence Hub
             </h2>
-            <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              Comprehensive threat intelligence with IOCs, campaigns, actors, and real-time feeds
+            <p
+              className="muted"
+              style={{ fontSize: '1rem', marginBottom: '20px' }}
+            >
+              Comprehensive threat intelligence with IOCs, campaigns, actors,
+              and real-time feeds
             </p>
           </div>
 
-          <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
+          <div
+            style={{
+              height: '75vh',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+            }}
+          >
             <ThreatIntelligenceHub
               investigationId={selectedInvestigation?.id}
               onIndicatorSelect={(indicator: any) => {
                 console.log('Selected threat indicator:', indicator);
-                toast.info('Threat Intel', `Selected: ${indicator.type} ${indicator.value}`);
+                toast.info(
+                  'Threat Intel',
+                  `Selected: ${indicator.type} ${indicator.value}`,
+                );
               }}
               onCampaignSelect={(campaign: any) => {
                 console.log('Selected campaign:', campaign);
@@ -881,16 +1079,31 @@ function HomeRouteInner() {
       {activeTab === 'mlops' && (
         <div>
           <div style={{ marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '8px' }}>
+            <h2
+              style={{
+                fontSize: '1.3rem',
+                fontWeight: '600',
+                marginBottom: '8px',
+              }}
+            >
               🧠 MLOps Model Management
             </h2>
-            <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              End-to-end ML lifecycle management with training, deployment, monitoring, and
-              experimentation
+            <p
+              className="muted"
+              style={{ fontSize: '1rem', marginBottom: '20px' }}
+            >
+              End-to-end ML lifecycle management with training, deployment,
+              monitoring, and experimentation
             </p>
           </div>
 
-          <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
+          <div
+            style={{
+              height: '75vh',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+            }}
+          >
             <ModelManagementDashboard
               investigationId={selectedInvestigation?.id}
               onModelSelect={(model: any) => {
@@ -899,7 +1112,10 @@ function HomeRouteInner() {
               }}
               onDeployModel={(modelId, environment) => {
                 console.log('Deploying model:', modelId, 'to', environment);
-                toast.success('MLOps', `Deploying model ${modelId} to ${environment}`);
+                toast.success(
+                  'MLOps',
+                  `Deploying model ${modelId} to ${environment}`,
+                );
               }}
               onExperimentSelect={(experiment: any) => {
                 console.log('Selected experiment:', experiment);
@@ -913,16 +1129,31 @@ function HomeRouteInner() {
       {activeTab === 'collaboration' && (
         <div>
           <div style={{ marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '8px' }}>
+            <h2
+              style={{
+                fontSize: '1.3rem',
+                fontWeight: '600',
+                marginBottom: '8px',
+              }}
+            >
               👥 Collaborative Workspace
             </h2>
-            <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              Real-time collaboration with live cursors, annotations, workspace sharing, and team
-              coordination
+            <p
+              className="muted"
+              style={{ fontSize: '1rem', marginBottom: '20px' }}
+            >
+              Real-time collaboration with live cursors, annotations, workspace
+              sharing, and team coordination
             </p>
           </div>
 
-          <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
+          <div
+            style={{
+              height: '75vh',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+            }}
+          >
             <CollaborativeWorkspace
               investigationId={selectedInvestigation?.id}
               currentUser={currentUser}
@@ -945,30 +1176,54 @@ function HomeRouteInner() {
       {activeTab === 'security' && (
         <div>
           <div style={{ marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '8px' }}>
+            <h2
+              style={{
+                fontSize: '1.3rem',
+                fontWeight: '600',
+                marginBottom: '8px',
+              }}
+            >
               🔒 Security Audit Dashboard
             </h2>
-            <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              Comprehensive security monitoring with event tracking, compliance rules, and risk
-              assessment
+            <p
+              className="muted"
+              style={{ fontSize: '1rem', marginBottom: '20px' }}
+            >
+              Comprehensive security monitoring with event tracking, compliance
+              rules, and risk assessment
             </p>
           </div>
 
-          <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
+          <div
+            style={{
+              height: '75vh',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+            }}
+          >
             <SecurityAuditDashboard
               investigationId={selectedInvestigation?.id}
               currentUser={currentUser}
               onSecurityEvent={(event) => {
                 console.log('Security event:', event);
-                if (event.severity === 'high' || event.severity === 'critical') {
-                  toast.error('Security Alert', `${event.category}: ${event.description}`);
+                if (
+                  event.severity === 'high' ||
+                  event.severity === 'critical'
+                ) {
+                  toast.error(
+                    'Security Alert',
+                    `${event.category}: ${event.description}`,
+                  );
                 } else {
                   toast.info('Security Event', event.description);
                 }
               }}
               onComplianceViolation={(violation) => {
                 console.log('Compliance violation:', violation);
-                toast.warning('Compliance', `${violation.rule}: ${violation.description}`);
+                toast.warning(
+                  'Compliance',
+                  `${violation.rule}: ${violation.description}`,
+                );
               }}
               className="h-full w-full"
             />
@@ -979,16 +1234,31 @@ function HomeRouteInner() {
       {activeTab === 'monitoring' && (
         <div>
           <div style={{ marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '8px' }}>
+            <h2
+              style={{
+                fontSize: '1.3rem',
+                fontWeight: '600',
+                marginBottom: '8px',
+              }}
+            >
               📈 System Observability
             </h2>
-            <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              System-wide monitoring with service health, performance metrics, log aggregation, and
-              alerting
+            <p
+              className="muted"
+              style={{ fontSize: '1rem', marginBottom: '20px' }}
+            >
+              System-wide monitoring with service health, performance metrics,
+              log aggregation, and alerting
             </p>
           </div>
 
-          <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
+          <div
+            style={{
+              height: '75vh',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+            }}
+          >
             <SystemObservabilityDashboard
               investigationId={selectedInvestigation?.id}
               onServiceAlert={(service, alert) => {
@@ -997,12 +1267,18 @@ function HomeRouteInner() {
               }}
               onMetricThreshold={(metric, threshold) => {
                 console.log('Metric threshold:', metric, threshold);
-                toast.info('Performance', `${metric.name} exceeded ${threshold.value}`);
+                toast.info(
+                  'Performance',
+                  `${metric.name} exceeded ${threshold.value}`,
+                );
               }}
               onLogEvent={(logEvent) => {
                 console.log('Log event:', logEvent);
                 if (logEvent.level === 'ERROR') {
-                  toast.error('System Error', logEvent.message.substring(0, 100));
+                  toast.error(
+                    'System Error',
+                    logEvent.message.substring(0, 100),
+                  );
                 }
               }}
               className="h-full w-full"
@@ -1014,16 +1290,31 @@ function HomeRouteInner() {
       {activeTab === 'integrations' && (
         <div>
           <div style={{ marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '8px' }}>
+            <h2
+              style={{
+                fontSize: '1.3rem',
+                fontWeight: '600',
+                marginBottom: '8px',
+              }}
+            >
               🔌 Data Connectors & Integrations
             </h2>
-            <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              Advanced data integration with multiple connector types, health monitoring, and data
-              flow tracking
+            <p
+              className="muted"
+              style={{ fontSize: '1rem', marginBottom: '20px' }}
+            >
+              Advanced data integration with multiple connector types, health
+              monitoring, and data flow tracking
             </p>
           </div>
 
-          <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
+          <div
+            style={{
+              height: '75vh',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+            }}
+          >
             <DataConnectorsDashboard
               investigationId={selectedInvestigation?.id}
               onConnectorStatus={(connector, status) => {
@@ -1036,11 +1327,17 @@ function HomeRouteInner() {
               }}
               onDataFlow={(source, target, records) => {
                 console.log('Data flow:', source, target, records);
-                toast.info('Data Flow', `${source} → ${target}: ${records} records`);
+                toast.info(
+                  'Data Flow',
+                  `${source} → ${target}: ${records} records`,
+                );
               }}
               onTemplateApply={(template, connector) => {
                 console.log('Template applied:', template, connector);
-                toast.success('Template', `Applied ${template.name} to ${connector.name}`);
+                toast.success(
+                  'Template',
+                  `Applied ${template.name} to ${connector.name}`,
+                );
               }}
               className="h-full w-full"
             />
@@ -1051,22 +1348,40 @@ function HomeRouteInner() {
       {activeTab === 'ai-recommendations' && (
         <div>
           <div style={{ marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '8px' }}>
+            <h2
+              style={{
+                fontSize: '1.3rem',
+                fontWeight: '600',
+                marginBottom: '8px',
+              }}
+            >
               🔮 AI Investigation Recommendations
             </h2>
-            <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              AI-powered investigation assistance with ML-based recommendations and similar case
-              analysis
+            <p
+              className="muted"
+              style={{ fontSize: '1rem', marginBottom: '20px' }}
+            >
+              AI-powered investigation assistance with ML-based recommendations
+              and similar case analysis
             </p>
           </div>
 
-          <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
+          <div
+            style={{
+              height: '75vh',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+            }}
+          >
             <InvestigationRecommendationsEngine
               investigationId={selectedInvestigation?.id}
               context={aiContext}
               onRecommendationSelect={(recommendation) => {
                 console.log('Selected recommendation:', recommendation);
-                toast.info('AI Recommendation', `${recommendation.type}: ${recommendation.title}`);
+                toast.info(
+                  'AI Recommendation',
+                  `${recommendation.type}: ${recommendation.title}`,
+                );
               }}
               onSimilarCaseSelect={(similarCase) => {
                 console.log('Selected similar case:', similarCase);
@@ -1077,7 +1392,10 @@ function HomeRouteInner() {
               }}
               onStrategyApply={(strategy) => {
                 console.log('Applied strategy:', strategy);
-                toast.success('Strategy Applied', `${strategy.name}: ${strategy.description}`);
+                toast.success(
+                  'Strategy Applied',
+                  `${strategy.name}: ${strategy.description}`,
+                );
               }}
               className="h-full w-full"
             />
@@ -1088,22 +1406,40 @@ function HomeRouteInner() {
       {activeTab === 'enterprise' && (
         <div>
           <div style={{ marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '8px' }}>
+            <h2
+              style={{
+                fontSize: '1.3rem',
+                fontWeight: '600',
+                marginBottom: '8px',
+              }}
+            >
               💼 Enterprise Dashboard
             </h2>
-            <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              Executive-level dashboard with role-based widgets, automated reporting, and
-              customizable analytics
+            <p
+              className="muted"
+              style={{ fontSize: '1rem', marginBottom: '20px' }}
+            >
+              Executive-level dashboard with role-based widgets, automated
+              reporting, and customizable analytics
             </p>
           </div>
 
-          <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
+          <div
+            style={{
+              height: '75vh',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+            }}
+          >
             <EnterpriseDashboard
               investigationId={selectedInvestigation?.id}
               currentUser={currentUser}
               onReportGenerate={(report: any) => {
                 console.log('Report generated:', report);
-                toast.success('Report Generated', `${report.name} (${report.format})`);
+                toast.success(
+                  'Report Generated',
+                  `${report.name} (${report.format})`,
+                );
               }}
               onWidgetInteraction={(widget, action, data) => {
                 console.log('Widget interaction:', widget, action, data);
@@ -1121,21 +1457,39 @@ function HomeRouteInner() {
       {activeTab === 'social-network' && (
         <div>
           <div style={{ marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '8px' }}>
+            <h2
+              style={{
+                fontSize: '1.3rem',
+                fontWeight: '600',
+                marginBottom: '8px',
+              }}
+            >
               🕸️ Social Network Analysis
             </h2>
-            <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              Advanced social network analysis with graph visualization, centrality metrics, and
-              community detection
+            <p
+              className="muted"
+              style={{ fontSize: '1rem', marginBottom: '20px' }}
+            >
+              Advanced social network analysis with graph visualization,
+              centrality metrics, and community detection
             </p>
           </div>
 
-          <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
+          <div
+            style={{
+              height: '75vh',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+            }}
+          >
             <SocialNetworkAnalysis
               investigationId={selectedInvestigation?.id}
               onNodeSelect={(nodes) => {
                 console.log('Selected social nodes:', nodes);
-                toast.info('Social Network', `Selected ${nodes.length} node(s)`);
+                toast.info(
+                  'Social Network',
+                  `Selected ${nodes.length} node(s)`,
+                );
               }}
               onCommunitySelect={(community: any) => {
                 console.log('Selected community:', community);
@@ -1156,16 +1510,31 @@ function HomeRouteInner() {
       {activeTab === 'behavioral' && (
         <div>
           <div style={{ marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '8px' }}>
+            <h2
+              style={{
+                fontSize: '1.3rem',
+                fontWeight: '600',
+                marginBottom: '8px',
+              }}
+            >
               🧬 Behavioral Analytics
             </h2>
-            <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              Advanced behavioral pattern analysis with anomaly detection across temporal, spatial,
-              and digital patterns
+            <p
+              className="muted"
+              style={{ fontSize: '1rem', marginBottom: '20px' }}
+            >
+              Advanced behavioral pattern analysis with anomaly detection across
+              temporal, spatial, and digital patterns
             </p>
           </div>
 
-          <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
+          <div
+            style={{
+              height: '75vh',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+            }}
+          >
             <BehavioralAnalytics
               investigationId={selectedInvestigation?.id}
               onProfileSelect={(profile: any) => {
@@ -1177,7 +1546,10 @@ function HomeRouteInner() {
               }}
               onAnomalyDetected={(anomaly: any) => {
                 console.log('Anomaly detected:', anomaly);
-                toast.warning('Anomaly Detected', `${anomaly.type}: ${anomaly.description}`);
+                toast.warning(
+                  'Anomaly Detected',
+                  `${anomaly.type}: ${anomaly.description}`,
+                );
               }}
               onPatternAnalysis={(analysis: any) => {
                 console.log('Pattern analysis:', analysis);
@@ -1194,30 +1566,54 @@ function HomeRouteInner() {
       {activeTab === 'case-management' && (
         <div>
           <div style={{ marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '8px' }}>
+            <h2
+              style={{
+                fontSize: '1.3rem',
+                fontWeight: '600',
+                marginBottom: '8px',
+              }}
+            >
               📋 Case Management & Reporting
             </h2>
-            <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              Comprehensive case lifecycle management with evidence tracking, automated reporting,
-              and team collaboration
+            <p
+              className="muted"
+              style={{ fontSize: '1rem', marginBottom: '20px' }}
+            >
+              Comprehensive case lifecycle management with evidence tracking,
+              automated reporting, and team collaboration
             </p>
           </div>
 
-          <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
+          <div
+            style={{
+              height: '75vh',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+            }}
+          >
             <ReportingCaseManagement
               investigationId={selectedInvestigation?.id}
               currentUser={currentUser}
               onCaseSelect={(caseFile: any) => {
                 console.log('Selected case:', caseFile);
-                toast.info('Case Selected', `${caseFile.title} (${caseFile.caseType})`);
+                toast.info(
+                  'Case Selected',
+                  `${caseFile.title} (${caseFile.caseType})`,
+                );
               }}
               onReportGenerate={(report: any) => {
                 console.log('Report generated:', report);
-                toast.success('Report Generated', `${report.template} - ${report.format}`);
+                toast.success(
+                  'Report Generated',
+                  `${report.template} - ${report.format}`,
+                );
               }}
               onEvidenceUpdate={(evidence: any) => {
                 console.log('Evidence updated:', evidence);
-                toast.info('Evidence', `Updated: ${evidence.type} - ${evidence.name}`);
+                toast.info(
+                  'Evidence',
+                  `Updated: ${evidence.type} - ${evidence.name}`,
+                );
               }}
               onTaskAssign={(task: any, assignee: any) => {
                 console.log('Task assigned:', task, assignee);
@@ -1231,33 +1627,60 @@ function HomeRouteInner() {
       {activeTab === 'threat-hunting' && (
         <div>
           <div style={{ marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '8px' }}>
+            <h2
+              style={{
+                fontSize: '1.3rem',
+                fontWeight: '600',
+                marginBottom: '8px',
+              }}
+            >
               🎯 Threat Hunting & Dark Web Monitoring
             </h2>
-            <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              Advanced threat hunting with MITRE ATT&CK integration, dark web monitoring, and
-              proactive threat detection
+            <p
+              className="muted"
+              style={{ fontSize: '1rem', marginBottom: '20px' }}
+            >
+              Advanced threat hunting with MITRE ATT&CK integration, dark web
+              monitoring, and proactive threat detection
             </p>
           </div>
 
-          <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
+          <div
+            style={{
+              height: '75vh',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+            }}
+          >
             <ThreatHuntingDarkWeb
               investigationId={selectedInvestigation?.id}
               onHuntCreate={(hunt: any) => {
                 console.log('Threat hunt created:', hunt);
-                toast.success('Threat Hunt', `Created: ${hunt.name} (${hunt.type})`);
+                toast.success(
+                  'Threat Hunt',
+                  `Created: ${hunt.name} (${hunt.type})`,
+                );
               }}
               onThreatDetected={(threat: any) => {
                 console.log('Threat detected:', threat);
-                toast.warning('Threat Detected', `${threat.type}: ${threat.description}`);
+                toast.warning(
+                  'Threat Detected',
+                  `${threat.type}: ${threat.description}`,
+                );
               }}
               onDarkWebHit={(hit: any) => {
                 console.log('Dark web hit:', hit);
-                toast.info('Dark Web', `New content: ${hit.platform} - ${hit.keywords.join(', ')}`);
+                toast.info(
+                  'Dark Web',
+                  `New content: ${hit.platform} - ${hit.keywords.join(', ')}`,
+                );
               }}
               onTTPMapping={(ttp: any) => {
                 console.log('TTP mapped:', ttp);
-                toast.info('MITRE ATT&CK', `Mapped: ${ttp.tactic} - ${ttp.technique}`);
+                toast.info(
+                  'MITRE ATT&CK',
+                  `Mapped: ${ttp.tactic} - ${ttp.technique}`,
+                );
               }}
             />
           </div>
@@ -1267,24 +1690,45 @@ function HomeRouteInner() {
       {activeTab === 'intel-feeds' && (
         <div>
           <div style={{ marginBottom: '24px' }}>
-            <h2 style={{ fontSize: '1.3rem', fontWeight: '600', marginBottom: '8px' }}>
+            <h2
+              style={{
+                fontSize: '1.3rem',
+                fontWeight: '600',
+                marginBottom: '8px',
+              }}
+            >
               📡 Intelligence Feeds & Enrichment
             </h2>
-            <p className="muted" style={{ fontSize: '1rem', marginBottom: '20px' }}>
-              Real-time intelligence feeds with automated enrichment, correlation engine, and
-              multi-source data integration
+            <p
+              className="muted"
+              style={{ fontSize: '1rem', marginBottom: '20px' }}
+            >
+              Real-time intelligence feeds with automated enrichment,
+              correlation engine, and multi-source data integration
             </p>
           </div>
 
-          <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
+          <div
+            style={{
+              height: '75vh',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+            }}
+          >
             <IntelligenceFeedsEnrichment
               investigationId={selectedInvestigation?.id}
               onFeedStatus={(feed, status) => {
                 console.log('Feed status:', feed, status);
                 if (status === 'connected') {
-                  toast.success('Intelligence Feed', `${feed.provider}: Connected`);
+                  toast.success(
+                    'Intelligence Feed',
+                    `${feed.provider}: Connected`,
+                  );
                 } else if (status === 'error') {
-                  toast.error('Intelligence Feed', `${feed.provider}: Connection error`);
+                  toast.error(
+                    'Intelligence Feed',
+                    `${feed.provider}: Connection error`,
+                  );
                 }
               }}
               onEnrichmentComplete={(entity, enrichments) => {
@@ -1303,8 +1747,14 @@ function HomeRouteInner() {
               }}
               onAlertGenerated={(alert) => {
                 console.log('Alert generated:', alert);
-                if (alert.severity === 'high' || alert.severity === 'critical') {
-                  toast.error('Intelligence Alert', `${alert.title}: ${alert.description}`);
+                if (
+                  alert.severity === 'high' ||
+                  alert.severity === 'critical'
+                ) {
+                  toast.error(
+                    'Intelligence Alert',
+                    `${alert.title}: ${alert.description}`,
+                  );
                 } else {
                   toast.info('Intelligence Alert', alert.title);
                 }

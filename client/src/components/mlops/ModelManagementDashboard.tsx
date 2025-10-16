@@ -110,7 +110,8 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
         id: 'model-001',
         version: 'v2.3.1',
         name: 'Entity Resolution Neural Network',
-        description: 'Deep learning model for entity resolution and deduplication',
+        description:
+          'Deep learning model for entity resolution and deduplication',
         algorithm: 'Siamese Neural Network',
         status: 'production',
         createdAt: new Date(2024, 0, 15),
@@ -147,7 +148,8 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
         id: 'model-002',
         version: 'v1.8.4',
         name: 'Anomaly Detection Ensemble',
-        description: 'Ensemble model for detecting anomalous patterns in intelligence data',
+        description:
+          'Ensemble model for detecting anomalous patterns in intelligence data',
         algorithm: 'Random Forest + Isolation Forest',
         status: 'staging',
         createdAt: new Date(2024, 0, 10),
@@ -183,7 +185,8 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
         id: 'model-003',
         version: 'v3.1.0-beta',
         name: 'Sentiment Analysis Transformer',
-        description: 'BERT-based model for sentiment analysis of intelligence reports',
+        description:
+          'BERT-based model for sentiment analysis of intelligence reports',
         algorithm: 'BERT Transformer',
         status: 'development',
         createdAt: new Date(2024, 0, 25),
@@ -205,7 +208,11 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
         modelSize: 342.1,
         environment: {
           python: '3.10.2',
-          frameworks: { transformers: '4.18.0', pytorch: '1.11.0', tokenizers: '0.12.1' },
+          frameworks: {
+            transformers: '4.18.0',
+            pytorch: '1.11.0',
+            tokenizers: '0.12.1',
+          },
           hardware: 'NVIDIA A100',
         },
         isActive: false,
@@ -270,7 +277,11 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
           'Model validation passed',
           'Artifacts saved to model registry',
         ],
-        artifacts: ['model_v1.8.4.pkl', 'feature_importance.json', 'validation_report.html'],
+        artifacts: [
+          'model_v1.8.4.pkl',
+          'feature_importance.json',
+          'validation_report.html',
+        ],
         resource_usage: {
           gpu: 0,
           cpu: 65,
@@ -287,11 +298,13 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
       {
         id: 'exp-001',
         name: 'Entity Resolution Optimization',
-        description: 'A/B testing different neural network architectures for entity resolution',
+        description:
+          'A/B testing different neural network architectures for entity resolution',
         status: 'completed',
         models: ['model-001', 'model-002'],
         baselineModel: 'model-baseline-001',
-        objective: 'Maximize F1 Score while maintaining inference latency < 15ms',
+        objective:
+          'Maximize F1 Score while maintaining inference latency < 15ms',
         metrics: ['f1Score', 'latency', 'accuracy'],
         startDate: new Date(2024, 0, 1),
         endDate: new Date(2024, 0, 20),
@@ -316,9 +329,12 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
       const matchesSearch =
         searchQuery === '' ||
         model.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        model.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+        model.tags.some((tag) =>
+          tag.toLowerCase().includes(searchQuery.toLowerCase()),
+        );
 
-      const matchesStatus = filterStatus === 'all' || model.status === filterStatus;
+      const matchesStatus =
+        filterStatus === 'all' || model.status === filterStatus;
 
       return matchesSearch && matchesStatus;
     });
@@ -382,7 +398,13 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
     >
       {/* Header */}
       <div style={{ marginBottom: '24px' }}>
-        <h3 style={{ fontSize: '1.2rem', fontWeight: '600', marginBottom: '16px' }}>
+        <h3
+          style={{
+            fontSize: '1.2rem',
+            fontWeight: '600',
+            marginBottom: '16px',
+          }}
+        >
           🤖 MLOps Model Management
         </h3>
 
@@ -396,8 +418,16 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
         >
           {[
             { key: 'models', label: '🎯 Models', count: filteredModels.length },
-            { key: 'training', label: '🏋️ Training Jobs', count: mockTrainingJobs.length },
-            { key: 'experiments', label: '🧪 Experiments', count: mockExperiments.length },
+            {
+              key: 'training',
+              label: '🏋️ Training Jobs',
+              count: mockTrainingJobs.length,
+            },
+            {
+              key: 'experiments',
+              label: '🧪 Experiments',
+              count: mockExperiments.length,
+            },
             { key: 'monitoring', label: '📊 Monitoring', count: 0 },
           ].map((tab) => (
             <button
@@ -408,7 +438,9 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
                 backgroundColor: 'transparent',
                 border: 'none',
                 borderBottom:
-                  activeView === tab.key ? '2px solid #1a73e8' : '2px solid transparent',
+                  activeView === tab.key
+                    ? '2px solid #1a73e8'
+                    : '2px solid transparent',
                 cursor: 'pointer',
                 fontSize: '14px',
                 fontWeight: activeView === tab.key ? '600' : '400',
@@ -421,7 +453,14 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
         </div>
 
         {/* Search and Filters */}
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div
+          style={{
+            display: 'flex',
+            gap: '12px',
+            alignItems: 'center',
+            flexWrap: 'wrap',
+          }}
+        >
           <input
             type="text"
             placeholder="Search models, tags, or algorithms..."
@@ -468,7 +507,11 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
           >
             {/* Models List */}
             <div
-              style={{ overflow: 'auto', border: '1px solid var(--hairline)', borderRadius: '8px' }}
+              style={{
+                overflow: 'auto',
+                border: '1px solid var(--hairline)',
+                borderRadius: '8px',
+              }}
             >
               <div
                 style={{
@@ -491,7 +534,10 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
                       padding: '16px',
                       borderBottom: '1px solid #f0f0f0',
                       cursor: 'pointer',
-                      backgroundColor: selectedModel?.id === model.id ? '#e3f2fd' : 'transparent',
+                      backgroundColor:
+                        selectedModel?.id === model.id
+                          ? '#e3f2fd'
+                          : 'transparent',
                       transition: 'background-color 0.2s',
                     }}
                     onMouseEnter={(e) => {
@@ -514,7 +560,13 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
                       }}
                     >
                       <div>
-                        <h5 style={{ fontSize: '14px', fontWeight: '600', margin: '0 0 4px 0' }}>
+                        <h5
+                          style={{
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            margin: '0 0 4px 0',
+                          }}
+                        >
                           {model.name}
                         </h5>
                         <div style={{ fontSize: '12px', color: '#666' }}>
@@ -522,8 +574,16 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
                         </div>
                       </div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '16px' }}>{getStatusIcon(model.status)}</span>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                        }}
+                      >
+                        <span style={{ fontSize: '16px' }}>
+                          {getStatusIcon(model.status)}
+                        </span>
                         <span
                           style={{
                             fontSize: '11px',
@@ -560,7 +620,12 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
                     </div>
 
                     <div
-                      style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '8px' }}
+                      style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '4px',
+                        marginBottom: '8px',
+                      }}
                     >
                       {model.tags.slice(0, 3).map((tag) => (
                         <span
@@ -606,11 +671,17 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
                     alignItems: 'center',
                   }}
                 >
-                  <h4 style={{ margin: 0, fontSize: '14px', fontWeight: '600' }}>Model Details</h4>
+                  <h4
+                    style={{ margin: 0, fontSize: '14px', fontWeight: '600' }}
+                  >
+                    Model Details
+                  </h4>
 
                   {selectedModel.status !== 'production' && (
                     <button
-                      onClick={() => handleDeploy(selectedModel.id, 'production')}
+                      onClick={() =>
+                        handleDeploy(selectedModel.id, 'production')
+                      }
                       disabled={isLoading}
                       style={{
                         padding: '6px 12px',
@@ -630,16 +701,34 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
 
                 <div style={{ padding: '16px' }}>
                   <div style={{ marginBottom: '24px' }}>
-                    <h5 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '8px' }}>
+                    <h5
+                      style={{
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        marginBottom: '8px',
+                      }}
+                    >
                       {selectedModel.name} {selectedModel.version}
                     </h5>
-                    <p style={{ fontSize: '13px', color: '#666', lineHeight: '1.4' }}>
+                    <p
+                      style={{
+                        fontSize: '13px',
+                        color: '#666',
+                        lineHeight: '1.4',
+                      }}
+                    >
                       {selectedModel.description}
                     </p>
                   </div>
 
                   <div style={{ marginBottom: '24px' }}>
-                    <h6 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>
+                    <h6
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        marginBottom: '8px',
+                      }}
+                    >
                       Performance Metrics
                     </h6>
                     <div
@@ -651,16 +740,19 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
                       }}
                     >
                       <div>
-                        <strong>Accuracy:</strong> {selectedModel.metrics.accuracy}%
+                        <strong>Accuracy:</strong>{' '}
+                        {selectedModel.metrics.accuracy}%
                       </div>
                       <div>
-                        <strong>Precision:</strong> {selectedModel.metrics.precision}%
+                        <strong>Precision:</strong>{' '}
+                        {selectedModel.metrics.precision}%
                       </div>
                       <div>
                         <strong>Recall:</strong> {selectedModel.metrics.recall}%
                       </div>
                       <div>
-                        <strong>F1 Score:</strong> {selectedModel.metrics.f1Score}%
+                        <strong>F1 Score:</strong>{' '}
+                        {selectedModel.metrics.f1Score}%
                       </div>
                       <div>
                         <strong>AUC:</strong> {selectedModel.metrics.auc}%
@@ -669,16 +761,24 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
                         <strong>Loss:</strong> {selectedModel.metrics.loss}
                       </div>
                       <div>
-                        <strong>Latency:</strong> {selectedModel.metrics.latency}ms
+                        <strong>Latency:</strong>{' '}
+                        {selectedModel.metrics.latency}ms
                       </div>
                       <div>
-                        <strong>Throughput:</strong> {selectedModel.metrics.throughput}/sec
+                        <strong>Throughput:</strong>{' '}
+                        {selectedModel.metrics.throughput}/sec
                       </div>
                     </div>
                   </div>
 
                   <div style={{ marginBottom: '24px' }}>
-                    <h6 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>
+                    <h6
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        marginBottom: '8px',
+                      }}
+                    >
                       Model Information
                     </h6>
                     <div style={{ fontSize: '13px', lineHeight: '1.4' }}>
@@ -689,54 +789,72 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
                         <strong>Size:</strong> {selectedModel.modelSize} MB
                       </div>
                       <div>
-                        <strong>Training Duration:</strong> {selectedModel.trainingDuration} minutes
+                        <strong>Training Duration:</strong>{' '}
+                        {selectedModel.trainingDuration} minutes
                       </div>
                       <div>
-                        <strong>Dataset Version:</strong> {selectedModel.datasetVersion}
+                        <strong>Dataset Version:</strong>{' '}
+                        {selectedModel.datasetVersion}
                       </div>
                       <div>
                         <strong>Author:</strong> {selectedModel.author}
                       </div>
                       <div>
-                        <strong>Created:</strong> {selectedModel.createdAt.toLocaleString()}
+                        <strong>Created:</strong>{' '}
+                        {selectedModel.createdAt.toLocaleString()}
                       </div>
                       {selectedModel.deployedAt && (
                         <div>
-                          <strong>Deployed:</strong> {selectedModel.deployedAt.toLocaleString()}
+                          <strong>Deployed:</strong>{' '}
+                          {selectedModel.deployedAt.toLocaleString()}
                         </div>
                       )}
                     </div>
                   </div>
 
                   <div style={{ marginBottom: '24px' }}>
-                    <h6 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>
+                    <h6
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        marginBottom: '8px',
+                      }}
+                    >
                       Environment
                     </h6>
                     <div style={{ fontSize: '13px', lineHeight: '1.4' }}>
                       <div>
-                        <strong>Python:</strong> {selectedModel.environment.python}
+                        <strong>Python:</strong>{' '}
+                        {selectedModel.environment.python}
                       </div>
                       <div>
-                        <strong>Hardware:</strong> {selectedModel.environment.hardware}
+                        <strong>Hardware:</strong>{' '}
+                        {selectedModel.environment.hardware}
                       </div>
                       <div>
                         <strong>Frameworks:</strong>
                       </div>
                       <div style={{ marginLeft: '16px' }}>
-                        {Object.entries(selectedModel.environment.frameworks).map(
-                          ([name, version]) => (
-                            <div key={name}>
-                              • {name}: {version}
-                            </div>
-                          ),
-                        )}
+                        {Object.entries(
+                          selectedModel.environment.frameworks,
+                        ).map(([name, version]) => (
+                          <div key={name}>
+                            • {name}: {version}
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
 
                   {selectedModel.endpoints && (
                     <div style={{ marginBottom: '24px' }}>
-                      <h6 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>
+                      <h6
+                        style={{
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          marginBottom: '8px',
+                        }}
+                      >
                         Endpoints
                       </h6>
                       <div style={{ fontSize: '13px', lineHeight: '1.4' }}>
@@ -757,10 +875,18 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
                   )}
 
                   <div style={{ marginBottom: '24px' }}>
-                    <h6 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>
+                    <h6
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        marginBottom: '8px',
+                      }}
+                    >
                       Tags
                     </h6>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                    <div
+                      style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}
+                    >
                       {selectedModel.tags.map((tag) => (
                         <span
                           key={tag}
@@ -785,7 +911,11 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
 
         {activeView === 'training' && (
           <div
-            style={{ overflow: 'auto', border: '1px solid var(--hairline)', borderRadius: '8px' }}
+            style={{
+              overflow: 'auto',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+            }}
           >
             <div
               style={{
@@ -817,11 +947,18 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
                     }}
                   >
                     <div>
-                      <h5 style={{ fontSize: '14px', fontWeight: '600', margin: '0 0 4px 0' }}>
+                      <h5
+                        style={{
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          margin: '0 0 4px 0',
+                        }}
+                      >
                         Training Job {job.id}
                       </h5>
                       <div style={{ fontSize: '12px', color: '#666' }}>
-                        Model: {job.modelId} • Started: {job.startTime.toLocaleString()}
+                        Model: {job.modelId} • Started:{' '}
+                        {job.startTime.toLocaleString()}
                       </div>
                     </div>
 
@@ -904,13 +1041,22 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
                   </div>
 
                   {job.metrics.accuracy && (
-                    <div style={{ fontSize: '12px', color: '#666', marginBottom: '8px' }}>
-                      Current Metrics: Accuracy {job.metrics.accuracy}% • Loss {job.metrics.loss}
+                    <div
+                      style={{
+                        fontSize: '12px',
+                        color: '#666',
+                        marginBottom: '8px',
+                      }}
+                    >
+                      Current Metrics: Accuracy {job.metrics.accuracy}% • Loss{' '}
+                      {job.metrics.loss}
                     </div>
                   )}
 
                   <details style={{ fontSize: '12px' }}>
-                    <summary style={{ cursor: 'pointer', fontWeight: '600' }}>View Logs</summary>
+                    <summary style={{ cursor: 'pointer', fontWeight: '600' }}>
+                      View Logs
+                    </summary>
                     <div
                       style={{
                         marginTop: '8px',
@@ -922,7 +1068,11 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
                       {job.logs.map((log, index) => (
                         <div
                           key={index}
-                          style={{ fontFamily: 'monospace', fontSize: '11px', marginBottom: '2px' }}
+                          style={{
+                            fontFamily: 'monospace',
+                            fontSize: '11px',
+                            marginBottom: '2px',
+                          }}
                         >
                           {log}
                         </div>
@@ -937,9 +1087,19 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
 
         {activeView === 'experiments' && (
           <div
-            style={{ padding: '16px', border: '1px solid var(--hairline)', borderRadius: '8px' }}
+            style={{
+              padding: '16px',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+            }}
           >
-            <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>
+            <h4
+              style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                marginBottom: '16px',
+              }}
+            >
               ML Experiments
             </h4>
 
@@ -963,7 +1123,9 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
                     marginBottom: '8px',
                   }}
                 >
-                  <h5 style={{ fontSize: '14px', fontWeight: '600', margin: 0 }}>
+                  <h5
+                    style={{ fontSize: '14px', fontWeight: '600', margin: 0 }}
+                  >
                     {experiment.name}
                   </h5>
                   <span
@@ -971,7 +1133,10 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
                       fontSize: '11px',
                       padding: '2px 6px',
                       borderRadius: '12px',
-                      backgroundColor: experiment.status === 'completed' ? '#28a745' : '#17a2b8',
+                      backgroundColor:
+                        experiment.status === 'completed'
+                          ? '#28a745'
+                          : '#17a2b8',
                       color: 'white',
                     }}
                   >
@@ -1004,10 +1169,12 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
                     }}
                   >
                     <div>
-                      <strong>Best Model:</strong> {experiment.results.bestModel}
+                      <strong>Best Model:</strong>{' '}
+                      {experiment.results.bestModel}
                     </div>
                     <div>
-                      <strong>Improvement:</strong> +{experiment.results.improvement}%
+                      <strong>Improvement:</strong> +
+                      {experiment.results.improvement}%
                     </div>
                     <div>
                       <strong>Key Insights:</strong>
@@ -1020,7 +1187,9 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
                   </div>
                 )}
 
-                <div style={{ fontSize: '12px', color: '#666', marginTop: '8px' }}>
+                <div
+                  style={{ fontSize: '12px', color: '#666', marginTop: '8px' }}
+                >
                   <div>
                     Duration: {experiment.startDate.toLocaleDateString()} -{' '}
                     {experiment.endDate?.toLocaleDateString()}
@@ -1042,12 +1211,24 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
             }}
           >
             <div style={{ padding: '40px' }}>
-              <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>
+              <h4
+                style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  marginBottom: '16px',
+                }}
+              >
                 📊 Model Monitoring Dashboard
               </h4>
-              <p style={{ fontSize: '14px', color: '#666', marginBottom: '24px' }}>
-                Real-time monitoring of model performance, drift detection, and system health
-                metrics.
+              <p
+                style={{
+                  fontSize: '14px',
+                  color: '#666',
+                  marginBottom: '24px',
+                }}
+              >
+                Real-time monitoring of model performance, drift detection, and
+                system health metrics.
               </p>
               <div
                 style={{
@@ -1059,7 +1240,13 @@ const ModelManagementDashboard: React.FC<ModelManagementDashboardProps> = ({
                 }}
               >
                 🚧 Monitoring dashboard coming soon - will include:
-                <ul style={{ textAlign: 'left', marginTop: '12px', marginLeft: '20px' }}>
+                <ul
+                  style={{
+                    textAlign: 'left',
+                    marginTop: '12px',
+                    marginLeft: '20px',
+                  }}
+                >
                   <li>Real-time performance metrics</li>
                   <li>Data drift detection</li>
                   <li>Model degradation alerts</li>

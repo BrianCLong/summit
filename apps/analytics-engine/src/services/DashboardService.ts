@@ -164,7 +164,10 @@ export class DashboardService {
     }
   }
 
-  async getDashboard(dashboardId: string, userId: string): Promise<Dashboard | null> {
+  async getDashboard(
+    dashboardId: string,
+    userId: string,
+  ): Promise<Dashboard | null> {
     // Check cache first
     const cacheKey = `dashboard:${dashboardId}:${userId}`;
     const cached = await this.redisClient.get(cacheKey);
@@ -189,9 +192,15 @@ export class DashboardService {
         WHERE d.id = $1
       `;
 
-      const dashboardResult = await this.pgPool.query(dashboardQuery, [dashboardId, userId]);
+      const dashboardResult = await this.pgPool.query(dashboardQuery, [
+        dashboardId,
+        userId,
+      ]);
 
-      if (dashboardResult.rows.length === 0 || !dashboardResult.rows[0].has_access) {
+      if (
+        dashboardResult.rows.length === 0 ||
+        !dashboardResult.rows[0].has_access
+      ) {
         return null;
       }
 
@@ -213,7 +222,11 @@ export class DashboardService {
         createdBy: row.created_by,
         createdAt: row.created_at,
         updatedAt: row.updated_at,
-        accessControl: row.access_control || { viewers: [], editors: [], owners: [] },
+        accessControl: row.access_control || {
+          viewers: [],
+          editors: [],
+          owners: [],
+        },
         settings: row.settings || {},
       };
 
@@ -238,7 +251,11 @@ export class DashboardService {
       await client.query('BEGIN');
 
       // Check permissions
-      const hasEditAccess = await this.checkDashboardAccess(dashboardId, userId, 'edit');
+      const hasEditAccess = await this.checkDashboardAccess(
+        dashboardId,
+        userId,
+        'edit',
+      );
       if (!hasEditAccess) {
         throw new Error('Insufficient permissions to edit dashboard');
       }
@@ -274,7 +291,10 @@ export class DashboardService {
       // Update widgets if provided
       if (updates.widgets) {
         // Delete existing widgets
-        await client.query('DELETE FROM dashboard_widgets WHERE dashboard_id = $1', [dashboardId]);
+        await client.query(
+          'DELETE FROM dashboard_widgets WHERE dashboard_id = $1',
+          [dashboardId],
+        );
 
         // Insert new widgets
         for (const widget of updates.widgets) {
@@ -306,13 +326,19 @@ export class DashboardService {
   async deleteDashboard(dashboardId: string, userId: string): Promise<void> {
     try {
       // Check permissions
-      const hasOwnerAccess = await this.checkDashboardAccess(dashboardId, userId, 'owner');
+      const hasOwnerAccess = await this.checkDashboardAccess(
+        dashboardId,
+        userId,
+        'owner',
+      );
       if (!hasOwnerAccess) {
         throw new Error('Insufficient permissions to delete dashboard');
       }
 
       // Delete dashboard (cascade will handle widgets)
-      await this.pgPool.query('DELETE FROM dashboards WHERE id = $1', [dashboardId]);
+      await this.pgPool.query('DELETE FROM dashboards WHERE id = $1', [
+        dashboardId,
+      ]);
 
       // Clear cache
       await this.invalidateDashboardCache(dashboardId);
@@ -352,7 +378,11 @@ export class DashboardService {
 
       // Cache result if TTL specified
       if (widget.dataSource.cacheTTL && widget.dataSource.cacheTTL > 0) {
-        await this.redisClient.setEx(cacheKey, widget.dataSource.cacheTTL, JSON.stringify(data));
+        await this.redisClient.setEx(
+          cacheKey,
+          widget.dataSource.cacheTTL,
+          JSON.stringify(data),
+        );
       }
 
       return data;
@@ -441,7 +471,10 @@ export class DashboardService {
     };
   }
 
-  private async executeDataSource(dataSource: DataSource, userId: string): Promise<any> {
+  private async executeDataSource(
+    dataSource: DataSource,
+    userId: string,
+  ): Promise<any> {
     switch (dataSource.type) {
       case 'sql':
         return this.executeSqlDataSource(dataSource, userId);
@@ -456,7 +489,10 @@ export class DashboardService {
     }
   }
 
-  private async executeSqlDataSource(dataSource: DataSource, userId: string): Promise<any> {
+  private async executeSqlDataSource(
+    dataSource: DataSource,
+    userId: string,
+  ): Promise<any> {
     // Security: Only allow SELECT statements and safe operations
     const query = dataSource.query.trim().toLowerCase();
     if (!query.startsWith('select') && !query.startsWith('with')) {
@@ -478,7 +514,10 @@ export class DashboardService {
     return result.rows;
   }
 
-  private async executeCypherDataSource(dataSource: DataSource, userId: string): Promise<any> {
+  private async executeCypherDataSource(
+    dataSource: DataSource,
+    userId: string,
+  ): Promise<any> {
     const session = this.neo4jDriver.session();
 
     try {
@@ -488,7 +527,10 @@ export class DashboardService {
 
       if (dataSource.parameters) {
         for (const [key, value] of Object.entries(dataSource.parameters)) {
-          finalQuery = finalQuery.replace(new RegExp(`{{${key}}}`, 'g'), `$${key}`);
+          finalQuery = finalQuery.replace(
+            new RegExp(`{{${key}}}`, 'g'),
+            `$${key}`,
+          );
           params[key] = value;
         }
       }
@@ -504,7 +546,10 @@ export class DashboardService {
     }
   }
 
-  private async executeApiDataSource(dataSource: DataSource, userId: string): Promise<any> {
+  private async executeApiDataSource(
+    dataSource: DataSource,
+    userId: string,
+  ): Promise<any> {
     // This would implement API calls to external services
     // For security, only allow whitelisted endpoints
     throw new Error('API data sources not implemented yet');
@@ -596,14 +641,20 @@ export class DashboardService {
 
       // Apply aggregation functions
       for (const [field, func] of Object.entries(aggregations)) {
-        const values = items.map((item) => item[field]).filter((v) => v != null);
+        const values = items
+          .map((item) => item[field])
+          .filter((v) => v != null);
 
         switch (func) {
           case 'sum':
-            aggregated[field] = values.reduce((sum, val) => sum + Number(val), 0);
+            aggregated[field] = values.reduce(
+              (sum, val) => sum + Number(val),
+              0,
+            );
             break;
           case 'avg':
-            aggregated[field] = values.reduce((sum, val) => sum + Number(val), 0) / values.length;
+            aggregated[field] =
+              values.reduce((sum, val) => sum + Number(val), 0) / values.length;
             break;
           case 'count':
             aggregated[field] = values.length;
@@ -674,7 +725,11 @@ export class DashboardService {
     }
 
     const row = result.rows[0];
-    const accessControl = row.access_control || { viewers: [], editors: [], owners: [] };
+    const accessControl = row.access_control || {
+      viewers: [],
+      editors: [],
+      owners: [],
+    };
 
     // Owner has all access
     if (row.created_by === userId) {
@@ -691,7 +746,10 @@ export class DashboardService {
           accessControl.owners?.includes(userId)
         );
       case 'edit':
-        return accessControl.editors?.includes(userId) || accessControl.owners?.includes(userId);
+        return (
+          accessControl.editors?.includes(userId) ||
+          accessControl.owners?.includes(userId)
+        );
       case 'owner':
         return accessControl.owners?.includes(userId);
       default:
@@ -747,7 +805,9 @@ export class DashboardService {
     let paramIndex = 2;
 
     if (search) {
-      whereConditions.push(`(d.name ILIKE $${paramIndex} OR d.description ILIKE $${paramIndex})`);
+      whereConditions.push(
+        `(d.name ILIKE $${paramIndex} OR d.description ILIKE $${paramIndex})`,
+      );
       params.push(`%${search}%`);
       paramIndex++;
     }
@@ -758,7 +818,10 @@ export class DashboardService {
       paramIndex++;
     }
 
-    const whereClause = whereConditions.length > 0 ? `WHERE ${whereConditions.join(' AND ')}` : '';
+    const whereClause =
+      whereConditions.length > 0
+        ? `WHERE ${whereConditions.join(' AND ')}`
+        : '';
 
     // Count query
     const countQuery = `
@@ -802,7 +865,11 @@ export class DashboardService {
       createdBy: row.created_by,
       createdAt: row.created_at,
       updatedAt: row.updated_at,
-      accessControl: row.access_control || { viewers: [], editors: [], owners: [] },
+      accessControl: row.access_control || {
+        viewers: [],
+        editors: [],
+        owners: [],
+      },
       settings: row.settings || {},
       _widgetCount: row.widget_count,
     }));
@@ -844,7 +911,9 @@ export class DashboardService {
     try {
       // Get template
       const templateQuery = 'SELECT * FROM dashboard_templates WHERE id = $1';
-      const templateResult = await this.pgPool.query(templateQuery, [templateId]);
+      const templateResult = await this.pgPool.query(templateQuery, [
+        templateId,
+      ]);
 
       if (templateResult.rows.length === 0) {
         throw new Error('Template not found');

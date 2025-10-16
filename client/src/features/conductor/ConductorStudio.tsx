@@ -34,7 +34,17 @@ import {
   AccordionSummary,
   AccordionDetails,
 } from '@mui/material';
-import { PlayArrow, Preview, Psychology, Engineering, CloudDownload, Timeline, ExpandMore, Refresh, OpenInNew } from '@mui/icons-material';
+import {
+  PlayArrow,
+  Preview,
+  Psychology,
+  Engineering,
+  CloudDownload,
+  Timeline,
+  ExpandMore,
+  Refresh,
+  OpenInNew,
+} from '@mui/icons-material';
 import { RolloutTimeline, RolloutStep } from './panels/RolloutTimeline';
 import { CanaryHealthPanel } from './panels/CanaryHealthPanel';
 import { BudgetGuardrails, Denial } from './panels/BudgetGuardrails';
@@ -42,7 +52,12 @@ import { ProvenanceTree, StepNode } from './panels/ProvenanceTree';
 import { SLODashboardEmbed } from './panels/SLODashboardEmbed';
 import { NLToCypherPreview } from './panels/NLToCypherPreview';
 import { DualControlModal } from '../conductor/components/DualControlModal';
-import { useBudgetDenials, useCanaryHealth, useProvenanceRoot, useRolloutSteps } from './hooks';
+import {
+  useBudgetDenials,
+  useCanaryHealth,
+  useProvenanceRoot,
+  useRolloutSteps,
+} from './hooks';
 
 // GraphQL operations (preview conduct only)
 const PREVIEW_ROUTING = gql`
@@ -151,7 +166,8 @@ function RoutingPreview({
   const denials = useBudgetDenials();
   const prov = useProvenanceRoot();
   const [dualOpen, setDualOpen] = useState<null | 'promote' | 'abort'>(null);
-  const [previewRouting, { loading, data, error }] = useLazyQuery(PREVIEW_ROUTING);
+  const [previewRouting, { loading, data, error }] =
+    useLazyQuery(PREVIEW_ROUTING);
 
   const handlePreview = useCallback(() => {
     if (!taskInput.trim()) return;
@@ -239,7 +255,9 @@ function RoutingPreview({
                   <Chip
                     label={data.previewRouting.expert}
                     sx={{
-                      backgroundColor: getExpertColor(data.previewRouting.expert),
+                      backgroundColor: getExpertColor(
+                        data.previewRouting.expert,
+                      ),
                       color: 'white',
                     }}
                   />
@@ -257,29 +275,32 @@ function RoutingPreview({
                   <Accordion>
                     <AccordionSummary expandIcon={<ExpandMore />}>
                       <Typography>
-                        Alternative Options ({data.previewRouting.alternatives.length})
+                        Alternative Options (
+                        {data.previewRouting.alternatives.length})
                       </Typography>
                     </AccordionSummary>
                     <AccordionDetails>
                       <List dense>
-                        {data.previewRouting.alternatives.map((alt: Alternative) => (
-                          <ListItem key={alt.expert}>
-                            <ListItemIcon>
-                              <Chip
-                                size="small"
-                                label={alt.expert}
-                                sx={{
-                                  backgroundColor: getExpertColor(alt.expert),
-                                  color: 'white',
-                                }}
+                        {data.previewRouting.alternatives.map(
+                          (alt: Alternative) => (
+                            <ListItem key={alt.expert}>
+                              <ListItemIcon>
+                                <Chip
+                                  size="small"
+                                  label={alt.expert}
+                                  sx={{
+                                    backgroundColor: getExpertColor(alt.expert),
+                                    color: 'white',
+                                  }}
+                                />
+                              </ListItemIcon>
+                              <ListItemText
+                                primary={`${Math.round(alt.confidence * 100)}% confidence`}
+                                secondary={alt.reason}
                               />
-                            </ListItemIcon>
-                            <ListItemText
-                              primary={`${Math.round(alt.confidence * 100)}% confidence`}
-                              secondary={alt.reason}
-                            />
-                          </ListItem>
-                        ))}
+                            </ListItem>
+                          ),
+                        )}
                       </List>
                     </AccordionDetails>
                   </Accordion>
@@ -313,7 +334,11 @@ function RoutingPreview({
                         data.previewRouting.features.keywords.map(
                           (keyword: string, idx: number) => (
                             <Grid item key={idx}>
-                              <Chip size="small" variant="outlined" label={keyword} />
+                              <Chip
+                                size="small"
+                                variant="outlined"
+                                label={keyword}
+                              />
                             </Grid>
                           ),
                         )}
@@ -328,7 +353,12 @@ function RoutingPreview({
       {/* Rollouts & SLO/Guardrails/Provenance */}
       <Grid item xs={12}>
         <Paper>
-          <Tabs value={0} variant="scrollable" scrollButtons allowScrollButtonsMobile>
+          <Tabs
+            value={0}
+            variant="scrollable"
+            scrollButtons
+            allowScrollButtonsMobile
+          >
             <Tab label="Rollout" />
             <Tab label="SLO" />
             <Tab label="Budgets" />
@@ -338,13 +368,34 @@ function RoutingPreview({
             <Grid container spacing={2}>
               <Grid item xs={12} md={6}>
                 <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
-                  <Button variant="contained" size="small" onClick={() => setDualOpen('promote')}>Promote</Button>
-                  <Button variant="outlined" color="error" size="small" onClick={() => setDualOpen('abort')}>Abort</Button>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={() => setDualOpen('promote')}
+                  >
+                    Promote
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    size="small"
+                    onClick={() => setDualOpen('abort')}
+                  >
+                    Abort
+                  </Button>
                 </Box>
-                <RolloutTimeline name="maestro-server-rollout" steps={(rollout.data as RolloutStep[]) || []} />
+                <RolloutTimeline
+                  name="maestro-server-rollout"
+                  steps={(rollout.data as RolloutStep[]) || []}
+                />
               </Grid>
               <Grid item xs={12} md={6}>
-                <CanaryHealthPanel availability={canary.data?.availability || 0} p95TtfbMs={canary.data?.p95TtfbMs || 0} errorRate={canary.data?.errorRate || 0} target={target} />
+                <CanaryHealthPanel
+                  availability={canary.data?.availability || 0}
+                  p95TtfbMs={canary.data?.p95TtfbMs || 0}
+                  errorRate={canary.data?.errorRate || 0}
+                  target={target}
+                />
               </Grid>
               <Grid item xs={12} md={6}>
                 <BudgetGuardrails denials={(denials.data as Denial[]) || []} />
@@ -466,24 +517,37 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
                   Execution Results
                 </Typography>
 
-                <Grid container spacing={1} sx={{ mb: 2, alignItems: 'center' }}>
+                <Grid
+                  container
+                  spacing={1}
+                  sx={{ mb: 2, alignItems: 'center' }}
+                >
                   <Grid item xs={6}>
                     <Paper sx={{ p: 1, textAlign: 'center' }}>
                       <Typography variant="caption">Latency</Typography>
-                      <Typography variant="h6">{data.conduct.latencyMs}ms</Typography>
+                      <Typography variant="h6">
+                        {data.conduct.latencyMs}ms
+                      </Typography>
                     </Paper>
                   </Grid>
                   <Grid item xs={6}>
                     <Paper sx={{ p: 1, textAlign: 'center' }}>
                       <Typography variant="caption">Cost</Typography>
-                      <Typography variant="h6">${data.conduct.cost?.toFixed(4)}</Typography>
+                      <Typography variant="h6">
+                        ${data.conduct.cost?.toFixed(4)}
+                      </Typography>
                     </Paper>
                   </Grid>
-                  {Number(data.conduct.cost || 0) === 0 && Number(data.conduct.latencyMs || 0) < 50 && (
-                    <Grid item xs={12}>
-                      <Chip size="small" color="success" label="from cache (heuristic)" />
-                    </Grid>
-                  )}
+                  {Number(data.conduct.cost || 0) === 0 &&
+                    Number(data.conduct.latencyMs || 0) < 50 && (
+                      <Grid item xs={12}>
+                        <Chip
+                          size="small"
+                          color="success"
+                          label="from cache (heuristic)"
+                        />
+                      </Grid>
+                    )}
                 </Grid>
 
                 <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
@@ -506,7 +570,11 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
 
                 {data.conduct.result && (
                   <Paper sx={{ p: 2, backgroundColor: 'grey.50' }}>
-                    <Typography variant="body2" component="pre" sx={{ whiteSpace: 'pre-wrap' }}>
+                    <Typography
+                      variant="body2"
+                      component="pre"
+                      sx={{ whiteSpace: 'pre-wrap' }}
+                    >
                       {typeof data.conduct.result === 'string'
                         ? data.conduct.result
                         : JSON.stringify(data.conduct.result, null, 2)}
@@ -572,7 +640,9 @@ function ExecutionPanel({ taskInput }: { taskInput: string }) {
 // MCP Registry Panel
 function MCPRegistry() {
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<{ mcpServers: MCPServer[] }>({ mcpServers: [] });
+  const [data, setData] = useState<{ mcpServers: MCPServer[] }>({
+    mcpServers: [],
+  });
   const [error, setError] = useState<Error | null>(null);
 
   const refetch = useCallback(async () => {
@@ -582,7 +652,12 @@ function MCPRegistry() {
       const res = await fetch('/api/maestro/v1/mcp/servers');
       if (!res.ok) throw new Error(`Failed ${res.status}`);
       const servers = await res.json();
-      setData({ mcpServers: servers.map((s: MCPServer) => ({ ...s, status: 'healthy' })) });
+      setData({
+        mcpServers: servers.map((s: MCPServer) => ({
+          ...s,
+          status: 'healthy',
+        })),
+      });
     } catch (e: unknown) {
       setError(e as Error);
     } finally {
@@ -615,13 +690,22 @@ function MCPRegistry() {
         <Card>
           <CardContent>
             <Box
-              sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}
+              sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                mb: 2,
+              }}
             >
               <Typography variant="h6">
                 <Engineering sx={{ mr: 1, verticalAlign: 'middle' }} />
                 MCP Server Registry
               </Typography>
-              <Button startIcon={<Refresh />} onClick={() => refetch()} disabled={loading}>
+              <Button
+                startIcon={<Refresh />}
+                onClick={() => refetch()}
+                disabled={loading}
+              >
                 Refresh
               </Button>
             </Box>
@@ -649,7 +733,9 @@ function MCPRegistry() {
                     {data.mcpServers.map((server: MCPServer, idx: number) => (
                       <TableRow key={idx}>
                         <TableCell>
-                          <Typography variant="subtitle2">{server.name}</Typography>
+                          <Typography variant="subtitle2">
+                            {server.name}
+                          </Typography>
                         </TableCell>
                         <TableCell>
                           <Chip
@@ -659,15 +745,24 @@ function MCPRegistry() {
                           />
                         </TableCell>
                         <TableCell>
-                          <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+                          <Typography
+                            variant="body2"
+                            sx={{ fontFamily: 'monospace' }}
+                          >
                             {server.url}
                           </Typography>
                         </TableCell>
                         <TableCell>
-                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                          <Box
+                            sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}
+                          >
                             {server.tools?.map((tool: MCPTool) => (
                               <Tooltip key={tool.name} title={tool.description}>
-                                <Chip size="small" variant="outlined" label={tool.name} />
+                                <Chip
+                                  size="small"
+                                  variant="outlined"
+                                  label={tool.name}
+                                />
                               </Tooltip>
                             ))}
                           </Box>
@@ -680,7 +775,8 @@ function MCPRegistry() {
             ) : (
               !loading && (
                 <Alert severity="info">
-                  No MCP servers found. Make sure the Conductor system is running.
+                  No MCP servers found. Make sure the Conductor system is
+                  running.
                 </Alert>
               )
             )}
@@ -709,7 +805,9 @@ export default function ConductorStudio() {
 
   const loadInvocations = useCallback(async () => {
     try {
-      const res = await await fetch(`/api/maestro/v1/runs/demo-run/mcp/invocations`);
+      const res = await await fetch(
+        `/api/maestro/v1/runs/demo-run/mcp/invocations`,
+      );
       if (res.ok) setInvocations(await res.json());
     } catch {
       /* noop */
@@ -771,11 +869,18 @@ export default function ConductorStudio() {
                 <Typography variant="h6" gutterBottom>
                   Attached MCP Sessions
                 </Typography>
-                <Button size="small" startIcon={<Refresh />} onClick={loadSessions} sx={{ mb: 2 }}>
+                <Button
+                  size="small"
+                  startIcon={<Refresh />}
+                  onClick={loadSessions}
+                  sx={{ mb: 2 }}
+                >
                   Refresh
                 </Button>
                 {sessions.length === 0 ? (
-                  <Alert severity="info">No active sessions for run: demo-run</Alert>
+                  <Alert severity="info">
+                    No active sessions for run: demo-run
+                  </Alert>
                 ) : (
                   <List>
                     {sessions.map((s, i) => (
@@ -810,7 +915,9 @@ export default function ConductorStudio() {
                   Refresh
                 </Button>
                 {invocations.length === 0 ? (
-                  <Alert severity="info">No invocations recorded for run: demo-run</Alert>
+                  <Alert severity="info">
+                    No invocations recorded for run: demo-run
+                  </Alert>
                 ) : (
                   <List>
                     {invocations.map((v, i) => (

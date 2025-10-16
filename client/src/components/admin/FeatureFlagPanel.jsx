@@ -31,7 +31,8 @@ const FeatureFlagPanel = () => {
     const handleFlagUpdate = () => loadFlags();
     window.addEventListener('feature-flags-updated', handleFlagUpdate);
 
-    return () => window.removeEventListener('feature-flags-updated', handleFlagUpdate);
+    return () =>
+      window.removeEventListener('feature-flags-updated', handleFlagUpdate);
   }, []);
 
   const flagDefinitions = {
@@ -111,7 +112,9 @@ const FeatureFlagPanel = () => {
 
     updateFlag(flagKey, {
       enabled: newEnabled,
-      rollout: newEnabled ? currentFlag.rollout || flagDefinitions[flagKey].defaultRollout : 0,
+      rollout: newEnabled
+        ? currentFlag.rollout || flagDefinitions[flagKey].defaultRollout
+        : 0,
     });
   };
 
@@ -125,7 +128,11 @@ const FeatureFlagPanel = () => {
   };
 
   const emergencyDisableAll = () => {
-    if (!confirm('⚠️ This will disable all non-essential feature flags. Continue?')) {
+    if (
+      !confirm(
+        '⚠️ This will disable all non-essential feature flags. Continue?',
+      )
+    ) {
       return;
     }
 
@@ -151,14 +158,18 @@ const FeatureFlagPanel = () => {
     return <div className="p-4">Loading feature flags...</div>;
   }
 
-  const categories = [...new Set(Object.values(flagDefinitions).map((f) => f.category))];
+  const categories = [
+    ...new Set(Object.values(flagDefinitions).map((f) => f.category)),
+  ];
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h2 className="text-2xl font-bold">Feature Flags</h2>
-          <p className="text-muted-foreground">Manage feature rollouts and toggles</p>
+          <p className="text-muted-foreground">
+            Manage feature rollouts and toggles
+          </p>
         </div>
 
         <div className="space-x-2">
@@ -183,7 +194,8 @@ const FeatureFlagPanel = () => {
                 .map(([flagKey, definition]) => {
                   const currentFlag = flags[flagKey] || {};
                   const isEnabled = currentFlag.enabled ?? true;
-                  const rollout = currentFlag.rollout ?? definition.defaultRollout;
+                  const rollout =
+                    currentFlag.rollout ?? definition.defaultRollout;
 
                   return (
                     <div
@@ -193,20 +205,28 @@ const FeatureFlagPanel = () => {
                       <div className="flex-1">
                         <div className="flex items-center gap-2 mb-1">
                           <h4 className="font-medium">{definition.name}</h4>
-                          {definition.devOnly && <Badge variant="secondary">Dev Only</Badge>}
+                          {definition.devOnly && (
+                            <Badge variant="secondary">Dev Only</Badge>
+                          )}
                           <Badge variant={isEnabled ? 'default' : 'secondary'}>
                             {rollout}% rollout
                           </Badge>
                         </div>
-                        <p className="text-sm text-muted-foreground">{definition.description}</p>
+                        <p className="text-sm text-muted-foreground">
+                          {definition.description}
+                        </p>
                       </div>
 
                       <div className="flex items-center gap-4 ml-4">
                         <div className="w-32">
-                          <div className="text-xs mb-1">Rollout: {rollout}%</div>
+                          <div className="text-xs mb-1">
+                            Rollout: {rollout}%
+                          </div>
                           <Slider
                             value={[rollout]}
-                            onValueChange={([value]) => handleRolloutChange(flagKey, value)}
+                            onValueChange={([value]) =>
+                              handleRolloutChange(flagKey, value)
+                            }
                             max={100}
                             step={5}
                             disabled={!isEnabled}
@@ -233,14 +253,19 @@ const FeatureFlagPanel = () => {
         <CardContent>
           <div className="text-sm space-y-2">
             <div>
-              <strong>Total Flags:</strong> {Object.keys(flagDefinitions).length}
+              <strong>Total Flags:</strong>{' '}
+              {Object.keys(flagDefinitions).length}
             </div>
             <div>
-              <strong>Enabled:</strong> {Object.values(flags).filter((f) => f.enabled).length}
+              <strong>Enabled:</strong>{' '}
+              {Object.values(flags).filter((f) => f.enabled).length}
             </div>
             <div>
               <strong>Partial Rollout:</strong>{' '}
-              {Object.values(flags).filter((f) => f.enabled && f.rollout < 100).length}
+              {
+                Object.values(flags).filter((f) => f.enabled && f.rollout < 100)
+                  .length
+              }
             </div>
           </div>
         </CardContent>

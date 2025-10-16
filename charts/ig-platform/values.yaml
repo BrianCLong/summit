@@ -2,26 +2,26 @@
 # Default values for ig-platform umbrella chart
 
 global:
-  imageRegistry: "ghcr.io/brianlong"
+  imageRegistry: 'ghcr.io/brianlong'
   imagePullPolicy: IfNotPresent
-  storageClass: ""
+  storageClass: ''
 
 # Core Services
 apiGateway:
   enabled: true
   image:
     repository: summit/api-gateway
-    tag: ""
+    tag: ''
   service:
     type: ClusterIP
     port: 4000
   resources:
     requests:
-      memory: "256Mi"
-      cpu: "250m"
+      memory: '256Mi'
+      cpu: '250m'
     limits:
-      memory: "512Mi"
-      cpu: "500m"
+      memory: '512Mi'
+      cpu: '500m'
   autoscaling:
     enabled: true
     minReplicas: 2
@@ -32,233 +32,233 @@ graphXai:
   enabled: true
   image:
     repository: summit/graph-xai
-    tag: ""
+    tag: ''
   service:
     port: 4011
   resources:
     requests:
-      memory: "512Mi"
-      cpu: "500m"
+      memory: '512Mi'
+      cpu: '500m'
     limits:
-      memory: "2Gi"
-      cpu: "1000m"
+      memory: '2Gi'
+      cpu: '1000m'
 
 provLedger:
   enabled: true
   image:
     repository: summit/prov-ledger
-    tag: ""
+    tag: ''
   service:
     port: 4010
   resources:
     requests:
-      memory: "256Mi"
-      cpu: "250m"
+      memory: '256Mi'
+      cpu: '250m'
     limits:
-      memory: "512Mi"
-      cpu: "500m"
+      memory: '512Mi'
+      cpu: '500m'
 
 agentRuntime:
   enabled: true
   image:
     repository: summit/agent-runtime
-    tag: ""
+    tag: ''
   service:
     port: 4012
   resources:
     requests:
-      memory: "256Mi"
-      cpu: "250m"
+      memory: '256Mi'
+      cpu: '250m'
     limits:
-      memory: "512Mi"
-      cpu: "500m"
+      memory: '512Mi'
+      cpu: '500m'
 
 predictiveSuite:
   enabled: true
   image:
     repository: summit/predictive-suite
-    tag: ""
+    tag: ''
   service:
     port: 4013
   resources:
     requests:
-      memory: "512Mi"
-      cpu: "500m"
+      memory: '512Mi'
+      cpu: '500m'
     limits:
-      memory: "2Gi"
-      cpu: "1000m"
+      memory: '2Gi'
+      cpu: '1000m'
 
 feedProcessor:
   enabled: true
   image:
     repository: summit/feed-processor
-    tag: ""
+    tag: ''
   replicas: 3
   resources:
     requests:
-      memory: "256Mi"
-      cpu: "250m"
+      memory: '256Mi'
+      cpu: '250m'
     limits:
-      memory: "512Mi"
-      cpu: "500m"
+      memory: '512Mi'
+      cpu: '500m'
 
 licenseRegistry:
   enabled: true
   image:
     repository: summit/license-registry
-    tag: ""
+    tag: ''
   service:
     port: 4030
   resources:
     requests:
-      memory: "128Mi"
-      cpu: "100m"
+      memory: '128Mi'
+      cpu: '100m'
     limits:
-      memory: "256Mi"
-      cpu: "250m"
+      memory: '256Mi'
+      cpu: '250m'
 
 conductorApi:
   enabled: true
   image:
     repository: summit/conductor-api
-    tag: ""
+    tag: ''
   service:
     port: 4020
   resources:
     requests:
-      memory: "256Mi"
-      cpu: "250m"
+      memory: '256Mi'
+      cpu: '250m'
     limits:
-      memory: "512Mi"
-      cpu: "500m"
+      memory: '512Mi'
+      cpu: '500m'
 
 syncBroker:
   enabled: true
   image:
     repository: summit/sync-broker
-    tag: ""
+    tag: ''
   replicas: 2
   resources:
     requests:
-      memory: "128Mi"
-      cpu: "100m"
+      memory: '128Mi'
+      cpu: '100m'
     limits:
-      memory: "256Mi"
-      cpu: "250m"
+      memory: '256Mi'
+      cpu: '250m'
 
 # External Secrets Operator
 externalSecrets:
-  enabled: false  # Enable for production
-  refreshInterval: "5m"
+  enabled: false # Enable for production
+  refreshInterval: '5m'
   provider:
     vault:
       enabled: false
-      server: "https://vault.example.com"
-      path: "secret"
+      server: 'https://vault.example.com'
+      path: 'secret'
       auth:
-        mountPath: "kubernetes"
-        role: "intelgraph"
+        mountPath: 'kubernetes'
+        role: 'intelgraph'
     aws:
       enabled: false
-      region: "us-west-2"
+      region: 'us-west-2'
     gcp:
       enabled: false
-      projectId: "my-project"
-      clusterLocation: "us-central1"
-      clusterName: "my-cluster"
+      projectId: 'my-project'
+      clusterLocation: 'us-central1'
+      clusterName: 'my-cluster'
     azure:
       enabled: false
-      vaultUrl: "https://my-vault.vault.azure.net/"
-      identityId: "my-identity-id"
+      vaultUrl: 'https://my-vault.vault.azure.net/'
+      identityId: 'my-identity-id'
   secrets:
     database:
       postgresUser:
-        key: "database/postgres"
-        property: "username"
+        key: 'database/postgres'
+        property: 'username'
       postgresPassword:
-        key: "database/postgres"
-        property: "password"
+        key: 'database/postgres'
+        property: 'password'
       postgresDatabase:
-        key: "database/postgres"
-        property: "database"
+        key: 'database/postgres'
+        property: 'database'
       neo4jUser:
-        key: "database/neo4j"
-        property: "username"
+        key: 'database/neo4j'
+        property: 'username'
       neo4jPassword:
-        key: "database/neo4j"
-        property: "password"
+        key: 'database/neo4j'
+        property: 'password'
       redisPassword:
-        key: "database/redis"
-        property: "password"
+        key: 'database/redis'
+        property: 'password'
       minioAccessKey:
-        key: "storage/minio"
-        property: "access_key"
+        key: 'storage/minio'
+        property: 'access_key'
       minioSecretKey:
-        key: "storage/minio"
-        property: "secret_key"
+        key: 'storage/minio'
+        property: 'secret_key'
     auth:
       jwtSecret:
-        key: "auth/jwt"
-        property: "secret"
+        key: 'auth/jwt'
+        property: 'secret'
       oidcClientSecret:
-        key: "auth/oidc"
-        property: "client_secret"
+        key: 'auth/oidc'
+        property: 'client_secret'
     apiKeys:
       openai:
-        key: "api-keys/openai"
-        property: "api_key"
+        key: 'api-keys/openai'
+        property: 'api_key'
       slack:
-        key: "api-keys/slack"
-        property: "webhook_url"
+        key: 'api-keys/slack'
+        property: 'webhook_url'
       teams:
-        key: "api-keys/teams"
-        property: "webhook_url"
+        key: 'api-keys/teams'
+        property: 'webhook_url'
       pagerduty:
-        key: "api-keys/pagerduty"
-        property: "integration_key"
+        key: 'api-keys/pagerduty'
+        property: 'integration_key'
 
 # Sealed Secrets
 sealedSecrets:
-  enabled: true  # Enable for development/staging
-  keyRenewPeriod: "30d"
+  enabled: true # Enable for development/staging
+  keyRenewPeriod: '30d'
   updateStatus: true
-  logLevel: "info"
+  logLevel: 'info'
   controller:
     image:
-      repository: "bitnami/sealed-secrets-controller"
-      tag: "v0.24.0"
+      repository: 'bitnami/sealed-secrets-controller'
+      tag: 'v0.24.0'
       pullPolicy: IfNotPresent
     resources:
       requests:
-        memory: "256Mi"
-        cpu: "250m"
+        memory: '256Mi'
+        cpu: '250m'
       limits:
-        memory: "512Mi"
-        cpu: "500m"
+        memory: '512Mi'
+        cpu: '500m'
   developmentSecrets:
     enabled: true
     # These are base64-encoded placeholder values for development
     # Replace with actual sealed values in real deployments
-    postgresUser: "AgBH...base64-sealed-value"
-    postgresPassword: "AgBH...base64-sealed-value"
-    postgresDatabase: "AgBH...base64-sealed-value"
-    neo4jUser: "AgBH...base64-sealed-value"
-    neo4jPassword: "AgBH...base64-sealed-value"
-    redisPassword: "AgBH...base64-sealed-value"
-    minioAccessKey: "AgBH...base64-sealed-value"
-    minioSecretKey: "AgBH...base64-sealed-value"
-    jwtSecret: "AgBH...base64-sealed-value"
-    oidcClientSecret: "AgBH...base64-sealed-value"
-    openaiApiKey: "AgBH...base64-sealed-value"
-    slackWebhookUrl: "AgBH...base64-sealed-value"
-    teamsWebhookUrl: "AgBH...base64-sealed-value"
-    pagerdutyIntegrationKey: "AgBH...base64-sealed-value"
+    postgresUser: 'AgBH...base64-sealed-value'
+    postgresPassword: 'AgBH...base64-sealed-value'
+    postgresDatabase: 'AgBH...base64-sealed-value'
+    neo4jUser: 'AgBH...base64-sealed-value'
+    neo4jPassword: 'AgBH...base64-sealed-value'
+    redisPassword: 'AgBH...base64-sealed-value'
+    minioAccessKey: 'AgBH...base64-sealed-value'
+    minioSecretKey: 'AgBH...base64-sealed-value'
+    jwtSecret: 'AgBH...base64-sealed-value'
+    oidcClientSecret: 'AgBH...base64-sealed-value'
+    openaiApiKey: 'AgBH...base64-sealed-value'
+    slackWebhookUrl: 'AgBH...base64-sealed-value'
+    teamsWebhookUrl: 'AgBH...base64-sealed-value'
+    pagerdutyIntegrationKey: 'AgBH...base64-sealed-value'
 
 # Progressive Delivery
 flagger:
-  enabled: false  # Enable for Istio-based canary deployments
+  enabled: false # Enable for Istio-based canary deployments
   analysis:
-    interval: "30s"
+    interval: '30s'
     iterations: 10
     threshold: 3
     stepWeight: 10
@@ -275,26 +275,26 @@ flagger:
   webhooks:
     slack:
       enabled: false
-      url: ""
+      url: ''
 
 argoRollouts:
-  enabled: true  # Enable for blue/green and canary deployments
-  strategy: "canary"  # canary or blueGreen
+  enabled: true # Enable for blue/green and canary deployments
+  strategy: 'canary' # canary or blueGreen
   blueGreen:
     autoPromotionEnabled: false
     scaleDownDelaySeconds: 30
   canary:
     steps:
-    - weight: 20
-      pause:
-        duration: "1m"
-    - weight: 40
-      pause: {}
-    - weight: 60
-      pause:
-        duration: "30s"
-    - weight: 80
-      pause: {}
+      - weight: 20
+        pause:
+          duration: '1m'
+      - weight: 40
+        pause: {}
+      - weight: 60
+        pause:
+          duration: '30s'
+      - weight: 80
+        pause: {}
   trafficRouting:
     istio:
       enabled: false
@@ -318,83 +318,83 @@ progressiveDelivery:
     maxRequestsPerConnection: 2
     maxRetries: 3
     consecutiveErrors: 5
-    interval: "30s"
-    baseEjectionTime: "30s"
+    interval: '30s'
+    baseEjectionTime: '30s'
     maxEjectionPercent: 50
     minHealthPercent: 30
 
 # Backup and Disaster Recovery
 backup:
   enabled: true
-  timezone: "UTC"
+  timezone: 'UTC'
   s3:
-    bucket: "intelgraph-backups"
-    region: "us-west-2"
+    bucket: 'intelgraph-backups'
+    region: 'us-west-2'
   postgres:
     enabled: true
-    schedule: "0 2 * * *"  # Daily at 2 AM
+    schedule: '0 2 * * *' # Daily at 2 AM
     retentionDays: 30
     historyLimit: 3
-    version: "15"
-    host: "postgres"
-    port: "5432"
+    version: '15'
+    host: 'postgres'
+    port: '5432'
     restoreFromBackup: false
-    restoreBackupFile: ""
+    restoreBackupFile: ''
   neo4j:
     enabled: true
-    schedule: "0 3 * * *"  # Daily at 3 AM
+    schedule: '0 3 * * *' # Daily at 3 AM
     retentionDays: 30
     historyLimit: 3
-    version: "5.15"
-    host: "neo4j"
-    port: "7687"
+    version: '5.15'
+    host: 'neo4j'
+    port: '7687'
     restoreFromBackup: false
-    restoreBackupFile: ""
+    restoreBackupFile: ''
   minio:
     enabled: true
-    schedule: "0 4 * * *"  # Daily at 4 AM
+    schedule: '0 4 * * *' # Daily at 4 AM
     retentionDays: 30
     historyLimit: 3
   config:
     enabled: true
-    schedule: "0 1 * * *"  # Daily at 1 AM
+    schedule: '0 1 * * *' # Daily at 1 AM
     retentionDays: 90
     historyLimit: 5
 
 disasterRecovery:
   enabled: true
-  rto: "30m"  # Recovery Time Objective
-  rpo: "1h"   # Recovery Point Objective
+  rto: '30m' # Recovery Time Objective
+  rpo: '1h' # Recovery Point Objective
   drSite:
     enabled: false
-    region: "us-east-1"
+    region: 'us-east-1'
     autoFailover: false
   monitoring:
     enabled: true
-    healthCheckInterval: "30s"
-    alertThreshold: "3"
+    healthCheckInterval: '30s'
+    alertThreshold: '3'
   communication:
-    statusPage: "https://status.intelgraph.com"
+    statusPage: 'https://status.intelgraph.com'
     slack:
       enabled: true
-      channel: "#incidents"
+      channel: '#incidents'
     email:
       enabled: true
-      recipients: ["ops-team@company.com"]
+      recipients: ['ops-team@company.com']
 
 # Web Applications
 web:
   enabled: true
   image:
     repository: summit/web
-    tag: ""
+    tag: ''
   service:
     type: LoadBalancer
     port: 80
     targetPort: 3000
   ingress:
     enabled: false
-    className: ""
+    className: ''
     annotations: {}
     hosts:
       - host: intelgraph.local
@@ -404,52 +404,52 @@ web:
     tls: []
   resources:
     requests:
-      memory: "256Mi"
-      cpu: "250m"
+      memory: '256Mi'
+      cpu: '250m'
     limits:
-      memory: "512Mi"
-      cpu: "500m"
+      memory: '512Mi'
+      cpu: '500m'
 
 offlineKit:
   enabled: false
   image:
     repository: summit/offline-kit
-    tag: ""
+    tag: ''
   service:
     type: ClusterIP
     port: 3001
   resources:
     requests:
-      memory: "128Mi"
-      cpu: "100m"
+      memory: '128Mi'
+      cpu: '100m'
     limits:
-      memory: "256Mi"
-      cpu: "250m"
+      memory: '256Mi'
+      cpu: '250m'
 
 jupyterkit:
   enabled: false
   image:
     repository: summit/jupyterkit
-    tag: ""
+    tag: ''
   service:
     port: 8888
   resources:
     requests:
-      memory: "1Gi"
-      cpu: "500m"
+      memory: '1Gi'
+      cpu: '500m'
     limits:
-      memory: "4Gi"
-      cpu: "2000m"
+      memory: '4Gi'
+      cpu: '2000m'
 
 # Infrastructure Dependencies
 neo4j:
   enabled: true
   image:
     repository: neo4j
-    tag: "5.21"
+    tag: '5.21'
   auth:
     username: neo4j
-    password: "changeme"
+    password: 'changeme'
   service:
     ports:
       http: 7474
@@ -459,28 +459,28 @@ neo4j:
     size: 10Gi
   resources:
     requests:
-      memory: "1Gi"
-      cpu: "500m"
+      memory: '1Gi'
+      cpu: '500m'
     limits:
-      memory: "4Gi"
-      cpu: "2000m"
+      memory: '4Gi'
+      cpu: '2000m'
 
 postgresql:
   enabled: true
   auth:
-    postgresPassword: "changeme"
-    database: "intelgraph"
+    postgresPassword: 'changeme'
+    database: 'intelgraph'
   primary:
     persistence:
       enabled: true
       size: 8Gi
     resources:
       requests:
-        memory: "256Mi"
-        cpu: "250m"
+        memory: '256Mi'
+        cpu: '250m'
       limits:
-        memory: "1Gi"
-        cpu: "1000m"
+        memory: '1Gi'
+        cpu: '1000m'
 
 redis:
   enabled: true
@@ -492,11 +492,11 @@ redis:
       size: 8Gi
     resources:
       requests:
-        memory: "256Mi"
-        cpu: "250m"
+        memory: '256Mi'
+        cpu: '250m'
       limits:
-        memory: "1Gi"
-        cpu: "500m"
+        memory: '1Gi'
+        cpu: '500m'
 
 kafka:
   enabled: false
@@ -525,16 +525,16 @@ openlineage:
   enabled: true
   image:
     repository: openlineage/marquez
-    tag: "latest"
+    tag: 'latest'
   service:
     port: 5000
   resources:
     requests:
-      memory: "512Mi"
-      cpu: "250m"
+      memory: '512Mi'
+      cpu: '250m'
     limits:
-      memory: "1Gi"
-      cpu: "500m"
+      memory: '1Gi'
+      cpu: '500m'
 
 # Observability
 observability:
@@ -544,7 +544,7 @@ observability:
     enabled: true
     image:
       repository: otel/opentelemetry-collector-contrib
-      tag: "0.99.0"
+      tag: '0.99.0'
     service:
       ports:
         grpc: 4317
@@ -553,14 +553,14 @@ observability:
   prometheus:
     enabled: true
     server:
-      retention: "15d"
+      retention: '15d'
       persistentVolume:
         enabled: true
         size: 8Gi
 
   grafana:
     enabled: true
-    adminPassword: "admin"
+    adminPassword: 'admin'
     persistence:
       enabled: true
       size: 1Gi
@@ -589,7 +589,7 @@ security:
 
 # Policy Configuration
 policy:
-  dryRun: false  # Set to true for dev environments
+  dryRun: false # Set to true for dev environments
   enforceAuthority: true
   enforceReasonForAccess: true
 

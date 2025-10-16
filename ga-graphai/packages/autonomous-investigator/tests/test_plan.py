@@ -62,7 +62,9 @@ def test_plan_generation_contains_patent_advantages():
 
     assert body["case_id"] == "case-42"
     assert len(body["hypotheses"]) >= 3
-    assert any("Triangulated hypothesis graph" in factor for factor in body["differentiation_factors"])
+    assert any(
+        "Triangulated hypothesis graph" in factor for factor in body["differentiation_factors"]
+    )
     assert body["assurance_score"] >= 0.65
 
     first_task = body["tasks"][0]

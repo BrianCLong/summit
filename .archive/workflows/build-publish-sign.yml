@@ -1,10 +1,10 @@
 name: build-publish-sign
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 permissions:
   contents: read
-  id-token: write   # for keyless signing
+  id-token: write # for keyless signing
   packages: write
 env:
   REGISTRY: ghcr.io

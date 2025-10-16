@@ -1,5 +1,6 @@
 import networkx as nx
 
+
 def export(graph: nx.DiGraph) -> dict:
     return {
         "nodes": list(graph.nodes),

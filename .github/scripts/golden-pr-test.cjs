@@ -38,7 +38,7 @@ class GoldenPRTester {
         name: testName,
         status: 'PASS',
         duration,
-        result
+        result,
       });
 
       this.log(`Test passed: ${testName} (${duration}ms)`, 'success');
@@ -47,7 +47,7 @@ class GoldenPRTester {
       this.results.push({
         name: testName,
         status: 'FAIL',
-        error: error.message
+        error: error.message,
       });
 
       this.log(`Test failed: ${testName} - ${error.message}`, 'error');
@@ -75,12 +75,15 @@ class GoldenPRTester {
       execSync(`git push origin ${branchName}`, { stdio: 'pipe' });
 
       // Create PR
-      const prData = execSync(`gh pr create \
+      const prData = execSync(
+        `gh pr create \
         --title "${scenario.title}" \
         --body "${scenario.body}" \
         --label "${scenario.labels.join(',')}" \
         ${scenario.draft ? '--draft' : ''} \
-        --json number,url`, { encoding: 'utf8' });
+        --json number,url`,
+        { encoding: 'utf8' },
+      );
 
       const pr = JSON.parse(prData);
       this.log(`Created PR #${pr.number}: ${pr.url}`);
@@ -88,14 +91,14 @@ class GoldenPRTester {
       return {
         number: pr.number,
         url: pr.url,
-        branch: branchName
+        branch: branchName,
       };
     } else {
       this.log('Dry run: Would create PR with changes');
       return {
         number: 999,
         url: 'https://github.com/example/repo/pull/999',
-        branch: branchName
+        branch: branchName,
       };
     }
   }
@@ -126,7 +129,7 @@ class GoldenPRTester {
     if (!this.dryRun) {
       // Post comment to trigger Release Captain
       execSync(`gh pr comment ${prNumber} --body "${command} ${prNumber}"`, {
-        env: { ...process.env, GH_TOKEN: this.githubToken }
+        env: { ...process.env, GH_TOKEN: this.githubToken },
       });
 
       // Wait for workflow to complete
@@ -142,20 +145,25 @@ class GoldenPRTester {
     const startTime = Date.now();
     while (Date.now() - startTime < timeoutMs) {
       try {
-        const runs = execSync(`gh run list --workflow=release-captain.yml --limit=5 --json status,conclusion,databaseId`, {
-          encoding: 'utf8',
-          env: { ...process.env, GH_TOKEN: this.githubToken }
-        });
+        const runs = execSync(
+          `gh run list --workflow=release-captain.yml --limit=5 --json status,conclusion,databaseId`,
+          {
+            encoding: 'utf8',
+            env: { ...process.env, GH_TOKEN: this.githubToken },
+          },
+        );
 
         const runList = JSON.parse(runs);
         const latestRun = runList[0];
 
         if (latestRun.status === 'completed') {
-          this.log(`Workflow completed with conclusion: ${latestRun.conclusion}`);
+          this.log(
+            `Workflow completed with conclusion: ${latestRun.conclusion}`,
+          );
           return latestRun;
         }
 
-        await new Promise(resolve => setTimeout(resolve, 10000)); // Wait 10 seconds
+        await new Promise((resolve) => setTimeout(resolve, 10000)); // Wait 10 seconds
       } catch (error) {
         this.log(`Error checking workflow status: ${error.message}`);
       }
@@ -171,7 +179,7 @@ class GoldenPRTester {
       try {
         // Close PR
         execSync(`gh pr close ${pr.number} --delete-branch`, {
-          env: { ...process.env, GH_TOKEN: this.githubToken }
+          env: { ...process.env, GH_TOKEN: this.githubToken },
         });
 
         this.log(`Cleaned up PR #${pr.number} and branch ${pr.branch}`);
@@ -216,7 +224,7 @@ export const Avatar: React.FC<AvatarProps> = ({ src, alt, size = 'md' }) => {
       className={\`rounded-full \${sizeClasses[size]}\`}
     />
   );
-};`
+};`,
           },
           {
             type: 'create_file',
@@ -237,10 +245,10 @@ describe('Avatar', () => {
     const img = screen.getByRole('img');
     expect(img).toHaveClass('w-16', 'h-16');
   });
-});`
-          }
+});`,
+          },
         ],
-        expectedOutcome: 'approved'
+        expectedOutcome: 'approved',
       },
       {
         name: 'medium-risk-backend',
@@ -275,7 +283,7 @@ router.put('/preferences', validateRequest(preferencesSchema), async (req, res) 
   res.json({ success: true });
 });
 
-export default router;`
+export default router;`,
           },
           {
             type: 'create_file',
@@ -300,10 +308,10 @@ describe('Preferences API', () => {
 
     expect(response.body.success).toBe(true);
   });
-});`
-          }
+});`,
+          },
         ],
-        expectedOutcome: 'approved'
+        expectedOutcome: 'approved',
       },
       {
         name: 'high-risk-migration',
@@ -335,7 +343,7 @@ CREATE TABLE user_settings (
 CREATE INDEX idx_user_settings_user_id ON user_settings(user_id);
 CREATE INDEX idx_user_settings_key ON user_settings(setting_key);
 
-COMMIT;`
+COMMIT;`,
           },
           {
             type: 'create_file',
@@ -347,10 +355,10 @@ BEGIN;
 
 DROP TABLE IF EXISTS user_settings;
 
-COMMIT;`
-          }
+COMMIT;`,
+          },
         ],
-        expectedOutcome: 'requires_migration_review'
+        expectedOutcome: 'requires_migration_review',
       },
       {
         name: 'blocking-security-issue',
@@ -370,10 +378,10 @@ export const config = {
     host: process.env.DB_HOST,
     password: 'hardcoded-password-123'  // This should also trigger scan
   }
-};`
-          }
+};`,
+          },
         ],
-        expectedOutcome: 'blocked_security'
+        expectedOutcome: 'blocked_security',
       },
       {
         name: 'failing-tests',
@@ -388,7 +396,7 @@ export const config = {
             path: 'services/api/src/broken-feature.ts',
             content: `export function brokenFunction() {
   throw new Error('This function is intentionally broken');
-}`
+}`,
           },
           {
             type: 'create_file',
@@ -400,11 +408,11 @@ describe('Broken Feature', () => {
     // This test will fail
     expect(brokenFunction()).toBe('success');
   });
-});`
-          }
+});`,
+          },
         ],
-        expectedOutcome: 'blocked_tests'
-      }
+        expectedOutcome: 'blocked_tests',
+      },
     ];
   }
 
@@ -436,7 +444,10 @@ describe('Broken Feature', () => {
       } catch (error) {
         failedTests++;
         if (!this.dryRun) {
-          this.log(`Test scenario ${scenario.name} failed: ${error.message}`, 'error');
+          this.log(
+            `Test scenario ${scenario.name} failed: ${error.message}`,
+            'error',
+          );
         }
       }
     }
@@ -450,12 +461,14 @@ describe('Broken Feature', () => {
       failedTests,
       totalTests: scenarios.length,
       report,
-      results: this.results
+      results: this.results,
     };
   }
 
   async verifyOutcome(prNumber, expectedOutcome) {
-    this.log(`Verifying outcome for PR #${prNumber}: expected ${expectedOutcome}`);
+    this.log(
+      `Verifying outcome for PR #${prNumber}: expected ${expectedOutcome}`,
+    );
 
     if (this.dryRun) {
       this.log('Dry run: Skipping outcome verification');
@@ -463,10 +476,13 @@ describe('Broken Feature', () => {
     }
 
     // Get PR comments to check Release Captain's response
-    const comments = execSync(`gh pr view ${prNumber} --json comments --jq '.comments[].body'`, {
-      encoding: 'utf8',
-      env: { ...process.env, GH_TOKEN: this.githubToken }
-    });
+    const comments = execSync(
+      `gh pr view ${prNumber} --json comments --jq '.comments[].body'`,
+      {
+        encoding: 'utf8',
+        env: { ...process.env, GH_TOKEN: this.githubToken },
+      },
+    );
 
     switch (expectedOutcome) {
       case 'approved':
@@ -496,7 +512,7 @@ describe('Broken Feature', () => {
 
   generateReport(passed, failed) {
     const total = passed + failed;
-    const passRate = total > 0 ? (passed / total * 100).toFixed(1) : 0;
+    const passRate = total > 0 ? ((passed / total) * 100).toFixed(1) : 0;
 
     return `
 # 🏆 Golden PR Test Results
@@ -504,9 +520,12 @@ describe('Broken Feature', () => {
 **Summary**: ${passed}/${total} tests passed (${passRate}%)
 
 ## Test Results
-${this.results.map(result =>
-  `- **${result.name}**: ${result.status}${result.duration ? ` (${result.duration}ms)` : ''}${result.error ? ` - ${result.error}` : ''}`
-).join('\n')}
+${this.results
+  .map(
+    (result) =>
+      `- **${result.name}**: ${result.status}${result.duration ? ` (${result.duration}ms)` : ''}${result.error ? ` - ${result.error}` : ''}`,
+  )
+  .join('\n')}
 
 ## Release Captain Validation
 ${passed === total ? '✅ Release Captain is functioning correctly' : '❌ Release Captain has issues that need attention'}
@@ -524,7 +543,7 @@ async function main() {
     dryRun: args.includes('--dry-run'),
     verbose: args.includes('--verbose'),
     testRepo: process.env.GITHUB_REPOSITORY,
-    githubToken: process.env.GITHUB_TOKEN
+    githubToken: process.env.GITHUB_TOKEN,
   };
 
   if (!options.testRepo) {

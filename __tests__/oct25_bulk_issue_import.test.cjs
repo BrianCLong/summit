@@ -21,7 +21,10 @@ const makeBatch = (dir, index, { start = 1, count = 5 } = {}) => {
       filePath: `project/file_${index}_${n}.md`,
     });
   }
-  const filePath = path.join(dir, `batch_${String(index).padStart(4, '0')}.json`);
+  const filePath = path.join(
+    dir,
+    `batch_${String(index).padStart(4, '0')}.json`,
+  );
   fs.writeJsonSync(filePath, records, { spaces: 2 });
   return { filePath, records };
 };
@@ -55,7 +58,7 @@ const writeCsv = (destination, records) => {
         csvEscape('BrianCLong/summit'),
         '',
         csvEscape(record.filePath || ''),
-      ].join(',')
+      ].join(','),
     );
   });
   fs.outputFileSync(destination, `${lines.join('\n')}\n`, 'utf8');
@@ -86,7 +89,9 @@ const mockCreateIssues = (times, { attach = false } = {}) => {
     nock(API_BASE)
       .post('/graphql')
       .times(times)
-      .reply(200, { data: { addProjectV2ItemById: { item: { id: `PVTI_${Date.now()}` } } } });
+      .reply(200, {
+        data: { addProjectV2ItemById: { item: { id: `PVTI_${Date.now()}` } } },
+      });
   }
   return postScope;
 };
@@ -122,7 +127,11 @@ describe('oct25 bulk importer', () => {
   beforeEach(() => {
     tmpDir = tmp.dirSync({ unsafeCleanup: true }).name;
     const scriptsDir = path.join(tmpDir, 'scripts');
-    batchesDir = path.join(tmpDir, 'project_management', 'october2025_issue_json');
+    batchesDir = path.join(
+      tmpDir,
+      'project_management',
+      'october2025_issue_json',
+    );
     fs.ensureDirSync(scriptsDir);
     fs.ensureDirSync(batchesDir);
 
@@ -176,7 +185,9 @@ describe('oct25 bulk importer', () => {
 
     nock.cleanAll();
 
-    const existing = Array.from({ length: 5 }, (_, idx) => ({ title: `e2e_batch_1_issue_${idx + 1}` }));
+    const existing = Array.from({ length: 5 }, (_, idx) => ({
+      title: `e2e_batch_1_issue_${idx + 1}`,
+    }));
     mockExistingIssues([existing, []]);
 
     const { stdout } = await runImporter({
@@ -211,7 +222,9 @@ describe('oct25 bulk importer', () => {
     nock(API_BASE)
       .post('/graphql')
       .times(5)
-      .reply(200, { data: { addProjectV2ItemById: { item: { id: 'PVTI_retry' } } } });
+      .reply(200, {
+        data: { addProjectV2ItemById: { item: { id: 'PVTI_retry' } } },
+      });
 
     const { stdout } = await runImporter({
       cwd: tmpDir,

@@ -185,16 +185,26 @@ const MLAnalysisPanel = ({ investigationId = 'inv-001', entityId = '1' }) => {
             🧠 AI/ML Intelligence Analysis
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Advanced machine learning insights for investigation {investigationId}, entity{' '}
-            {entityId}
+            Advanced machine learning insights for investigation{' '}
+            {investigationId}, entity {entityId}
           </Typography>
         </CardContent>
       </Card>
 
       {/* Risk Assessment Section */}
-      <Accordion expanded={expandedSection === 'risk'} onChange={handleAccordionChange('risk')}>
+      <Accordion
+        expanded={expandedSection === 'risk'}
+        onChange={handleAccordionChange('risk')}
+      >
         <AccordionSummary expandIcon={<ExpandMore />}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              width: '100%',
+            }}
+          >
             <Security color="error" />
             <Typography variant="h6">ML Risk Assessment</Typography>
             {riskLoading && <CircularProgress size={20} />}
@@ -225,11 +235,15 @@ const MLAnalysisPanel = ({ investigationId = 'inv-001', entityId = '1' }) => {
                     <LinearProgress
                       variant="determinate"
                       value={riskData.calculateRiskScore.probability * 100}
-                      color={getRiskColor(riskData.calculateRiskScore.risk_level)}
+                      color={getRiskColor(
+                        riskData.calculateRiskScore.risk_level,
+                      )}
                       sx={{ flex: 1, height: 8, borderRadius: 4 }}
                     />
                     <Typography variant="body1" fontWeight="bold">
-                      {formatConfidence(riskData.calculateRiskScore.probability)}
+                      {formatConfidence(
+                        riskData.calculateRiskScore.probability,
+                      )}
                     </Typography>
                   </Box>
                 </Paper>
@@ -257,14 +271,16 @@ const MLAnalysisPanel = ({ investigationId = 'inv-001', entityId = '1' }) => {
                   ML Reasoning:
                 </Typography>
                 <List dense>
-                  {riskData.calculateRiskScore.reasoning.map((reason, index) => (
-                    <ListItem key={index}>
-                      <ListItemIcon>
-                        <Psychology color="primary" />
-                      </ListItemIcon>
-                      <ListItemText primary={reason} />
-                    </ListItem>
-                  ))}
+                  {riskData.calculateRiskScore.reasoning.map(
+                    (reason, index) => (
+                      <ListItem key={index}>
+                        <ListItemIcon>
+                          <Psychology color="primary" />
+                        </ListItemIcon>
+                        <ListItemText primary={reason} />
+                      </ListItem>
+                    ),
+                  )}
                 </List>
               </Grid>
             </Grid>
@@ -278,7 +294,14 @@ const MLAnalysisPanel = ({ investigationId = 'inv-001', entityId = '1' }) => {
         onChange={handleAccordionChange('behavioral')}
       >
         <AccordionSummary expandIcon={<ExpandMore />}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              width: '100%',
+            }}
+          >
             <Timeline color="info" />
             <Typography variant="h6">Behavioral Pattern Analysis</Typography>
             {behavioralLoading && <CircularProgress size={20} />}
@@ -304,7 +327,9 @@ const MLAnalysisPanel = ({ investigationId = 'inv-001', entityId = '1' }) => {
                 <Paper sx={{ p: 2 }}>
                   <Typography variant="subtitle1">Behavioral Score</Typography>
                   <Typography variant="h4" color="primary">
-                    {formatScore(behavioralData.analyzeBehavioralPatterns.behavioral_score)}
+                    {formatScore(
+                      behavioralData.analyzeBehavioralPatterns.behavioral_score,
+                    )}
                   </Typography>
                 </Paper>
               </Grid>
@@ -312,7 +337,10 @@ const MLAnalysisPanel = ({ investigationId = 'inv-001', entityId = '1' }) => {
                 <Paper sx={{ p: 2 }}>
                   <Typography variant="subtitle1">Pattern Stability</Typography>
                   <Typography variant="h4" color="success.main">
-                    {formatConfidence(behavioralData.analyzeBehavioralPatterns.pattern_stability)}
+                    {formatConfidence(
+                      behavioralData.analyzeBehavioralPatterns
+                        .pattern_stability,
+                    )}
                   </Typography>
                 </Paper>
               </Grid>
@@ -320,38 +348,51 @@ const MLAnalysisPanel = ({ investigationId = 'inv-001', entityId = '1' }) => {
                 <Typography variant="subtitle2" gutterBottom sx={{ mt: 2 }}>
                   Detected Patterns:
                 </Typography>
-                {behavioralData.analyzeBehavioralPatterns.patterns.map((pattern, index) => (
-                  <Card key={index} variant="outlined" sx={{ mb: 1 }}>
-                    <CardContent>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                        {getPatternTypeIcon(pattern.pattern_type)}
-                        <Typography variant="subtitle1">
-                          {pattern.pattern_type.replace(/_/g, ' ')}
+                {behavioralData.analyzeBehavioralPatterns.patterns.map(
+                  (pattern, index) => (
+                    <Card key={index} variant="outlined" sx={{ mb: 1 }}>
+                      <CardContent>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                            mb: 1,
+                          }}
+                        >
+                          {getPatternTypeIcon(pattern.pattern_type)}
+                          <Typography variant="subtitle1">
+                            {pattern.pattern_type.replace(/_/g, ' ')}
+                          </Typography>
+                          <Chip
+                            label={formatConfidence(pattern.confidence)}
+                            size="small"
+                            color="primary"
+                          />
+                        </Box>
+                        <Typography
+                          variant="body2"
+                          color="text.secondary"
+                          sx={{ mb: 1 }}
+                        >
+                          {pattern.description}
                         </Typography>
-                        <Chip
-                          label={formatConfidence(pattern.confidence)}
-                          size="small"
-                          color="primary"
-                        />
-                      </Box>
-                      <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                        {pattern.description}
-                      </Typography>
-                      <Box sx={{ display: 'flex', gap: 1 }}>
-                        <Chip
-                          label={`Frequency: ${formatConfidence(pattern.frequency)}`}
-                          size="small"
-                          variant="outlined"
-                        />
-                        <Chip
-                          label={`Window: ${pattern.time_window}`}
-                          size="small"
-                          variant="outlined"
-                        />
-                      </Box>
-                    </CardContent>
-                  </Card>
-                ))}
+                        <Box sx={{ display: 'flex', gap: 1 }}>
+                          <Chip
+                            label={`Frequency: ${formatConfidence(pattern.frequency)}`}
+                            size="small"
+                            variant="outlined"
+                          />
+                          <Chip
+                            label={`Window: ${pattern.time_window}`}
+                            size="small"
+                            variant="outlined"
+                          />
+                        </Box>
+                      </CardContent>
+                    </Card>
+                  ),
+                )}
               </Grid>
             </Grid>
           )}
@@ -364,7 +405,14 @@ const MLAnalysisPanel = ({ investigationId = 'inv-001', entityId = '1' }) => {
         onChange={handleAccordionChange('network')}
       >
         <AccordionSummary expandIcon={<ExpandMore />}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              width: '100%',
+            }}
+          >
             <NetworkCheck color="success" />
             <Typography variant="h6">Network Graph Analysis</Typography>
             {graphLoading && <CircularProgress size={20} />}
@@ -381,9 +429,13 @@ const MLAnalysisPanel = ({ investigationId = 'inv-001', entityId = '1' }) => {
               <Grid item xs={12} sm={6} md={3}>
                 <Tooltip title="Measure of how nodes cluster together">
                   <Paper sx={{ p: 2, textAlign: 'center' }}>
-                    <Typography variant="caption">Clustering Coefficient</Typography>
+                    <Typography variant="caption">
+                      Clustering Coefficient
+                    </Typography>
                     <Typography variant="h5" color="primary">
-                      {formatScore(graphData.analyzeGraphMetrics.clustering_coefficient)}
+                      {formatScore(
+                        graphData.analyzeGraphMetrics.clustering_coefficient,
+                      )}
                     </Typography>
                   </Paper>
                 </Tooltip>
@@ -393,7 +445,9 @@ const MLAnalysisPanel = ({ investigationId = 'inv-001', entityId = '1' }) => {
                   <Paper sx={{ p: 2, textAlign: 'center' }}>
                     <Typography variant="caption">Avg Path Length</Typography>
                     <Typography variant="h5" color="secondary">
-                      {formatScore(graphData.analyzeGraphMetrics.average_path_length)}
+                      {formatScore(
+                        graphData.analyzeGraphMetrics.average_path_length,
+                      )}
                     </Typography>
                   </Paper>
                 </Tooltip>
@@ -403,7 +457,9 @@ const MLAnalysisPanel = ({ investigationId = 'inv-001', entityId = '1' }) => {
                   <Paper sx={{ p: 2, textAlign: 'center' }}>
                     <Typography variant="caption">Network Density</Typography>
                     <Typography variant="h5" color="info.main">
-                      {formatScore(graphData.analyzeGraphMetrics.network_density)}
+                      {formatScore(
+                        graphData.analyzeGraphMetrics.network_density,
+                      )}
                     </Typography>
                   </Paper>
                 </Tooltip>
@@ -413,7 +469,9 @@ const MLAnalysisPanel = ({ investigationId = 'inv-001', entityId = '1' }) => {
                   <Paper sx={{ p: 2, textAlign: 'center' }}>
                     <Typography variant="caption">Modularity</Typography>
                     <Typography variant="h5" color="success.main">
-                      {formatScore(graphData.analyzeGraphMetrics.community_modularity)}
+                      {formatScore(
+                        graphData.analyzeGraphMetrics.community_modularity,
+                      )}
                     </Typography>
                   </Paper>
                 </Tooltip>
@@ -429,14 +487,23 @@ const MLAnalysisPanel = ({ investigationId = 'inv-001', entityId = '1' }) => {
         onChange={handleAccordionChange('anomalies')}
       >
         <AccordionSummary expandIcon={<ExpandMore />}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, width: '100%' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 1,
+              width: '100%',
+            }}
+          >
             <BugReport color="warning" />
             <Typography variant="h6">Anomaly Detection</Typography>
             {anomalyLoading && <CircularProgress size={20} />}
             {anomalyData?.detectAnomalies && (
               <Chip
                 label={`${anomalyData.detectAnomalies.length} anomalies`}
-                color={anomalyData.detectAnomalies.length > 0 ? 'warning' : 'success'}
+                color={
+                  anomalyData.detectAnomalies.length > 0 ? 'warning' : 'success'
+                }
                 size="small"
                 sx={{ ml: 'auto' }}
               />
@@ -450,12 +517,16 @@ const MLAnalysisPanel = ({ investigationId = 'inv-001', entityId = '1' }) => {
             </Alert>
           )}
           {anomalyData?.detectAnomalies?.length === 0 && (
-            <Alert severity="success">No anomalies detected in the current investigation.</Alert>
+            <Alert severity="success">
+              No anomalies detected in the current investigation.
+            </Alert>
           )}
           {anomalyData?.detectAnomalies?.map((anomaly, index) => (
             <Card key={index} variant="outlined" sx={{ mb: 2 }}>
               <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                <Box
+                  sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}
+                >
                   <Warning color="warning" />
                   <Typography variant="h6">
                     {anomaly.anomaly_type.replace(/_/g, ' ')} Anomaly
@@ -469,8 +540,13 @@ const MLAnalysisPanel = ({ investigationId = 'inv-001', entityId = '1' }) => {
                 <Typography variant="body1" sx={{ mb: 2 }}>
                   {anomaly.description}
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
-                  Entity: {anomaly.entity_id} | Deviation: {anomaly.baseline_deviation}σ
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 1 }}
+                >
+                  Entity: {anomaly.entity_id} | Deviation:{' '}
+                  {anomaly.baseline_deviation}σ
                 </Typography>
                 <Typography variant="subtitle2" sx={{ mb: 1 }}>
                   Contributing Factors:

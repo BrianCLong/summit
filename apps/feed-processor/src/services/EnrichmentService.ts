@@ -13,7 +13,12 @@ import {
 export interface EnrichmentProvider {
   id: string;
   name: string;
-  type: 'geolocation' | 'sentiment' | 'threat_intel' | 'entity_extraction' | 'translation';
+  type:
+    | 'geolocation'
+    | 'sentiment'
+    | 'threat_intel'
+    | 'entity_extraction'
+    | 'translation';
   apiUrl: string;
   apiKey?: string;
   rateLimit: {
@@ -71,7 +76,10 @@ export interface EntityExtractionResult {
 }
 
 export class EnrichmentService {
-  private rateLimiters = new Map<string, { requests: number; resetTime: number }>();
+  private rateLimiters = new Map<
+    string,
+    { requests: number; resetTime: number }
+  >();
   private providers: Map<string, EnrichmentProvider> = new Map();
 
   constructor(
@@ -163,19 +171,27 @@ export class EnrichmentService {
       });
     } catch (error) {
       logger.error(`Error enriching item ${item.id}:`, error);
-      enrichedItem.processingErrors = [...(enrichedItem.processingErrors || []), error.message];
+      enrichedItem.processingErrors = [
+        ...(enrichedItem.processingErrors || []),
+        error.message,
+      ];
     }
 
     return enrichedItem;
   }
 
-  async extractEntitiesAdvanced(item: ProcessedFeedItem): Promise<EntityExtractionResult> {
+  async extractEntitiesAdvanced(
+    item: ProcessedFeedItem,
+  ): Promise<EntityExtractionResult> {
     const provider = this.providers.get('textrazor-entities');
     if (!provider || !provider.isActive) {
       return this.extractEntitiesBasic(item);
     }
 
-    const text = `${item.title}\n${item.description}\n${item.content}`.slice(0, 200000); // API limit
+    const text = `${item.title}\n${item.description}\n${item.content}`.slice(
+      0,
+      200000,
+    ); // API limit
 
     try {
       if (!(await this.checkRateLimit(provider.id))) {
@@ -197,18 +213,20 @@ export class EnrichmentService {
 
       const result = response.data.response;
 
-      const entities: ExtractedEntity[] = (result.entities || []).map((entity: any) => ({
-        type: this.mapEntityType(entity.type),
-        text: entity.matchedText,
-        confidence: entity.confidenceScore || 0.5,
-        startIndex: entity.startingPos || 0,
-        endIndex: entity.endingPos || 0,
-        properties: {
-          wikipediaLink: entity.wikipediaLink,
-          freebaseId: entity.freebaseId,
-          types: entity.type,
-        },
-      }));
+      const entities: ExtractedEntity[] = (result.entities || []).map(
+        (entity: any) => ({
+          type: this.mapEntityType(entity.type),
+          text: entity.matchedText,
+          confidence: entity.confidenceScore || 0.5,
+          startIndex: entity.startingPos || 0,
+          endIndex: entity.endingPos || 0,
+          properties: {
+            wikipediaLink: entity.wikipediaLink,
+            freebaseId: entity.freebaseId,
+            types: entity.type,
+          },
+        }),
+      );
 
       const relationships = (result.relations || []).map((rel: any) => ({
         entity1: rel.params?.[0]?.entityId || '',
@@ -231,8 +249,11 @@ export class EnrichmentService {
     }
   }
 
-  private extractEntitiesBasic(item: ProcessedFeedItem): EntityExtractionResult {
-    const text = `${item.title} ${item.description} ${item.content}`.toLowerCase();
+  private extractEntitiesBasic(
+    item: ProcessedFeedItem,
+  ): EntityExtractionResult {
+    const text =
+      `${item.title} ${item.description} ${item.content}`.toLowerCase();
     const entities: ExtractedEntity[] = [];
 
     // Basic regex patterns for common entities
@@ -316,7 +337,9 @@ export class EnrichmentService {
     return locations;
   }
 
-  private async geocodeLocation(location: string): Promise<GeocodingResult | null> {
+  private async geocodeLocation(
+    location: string,
+  ): Promise<GeocodingResult | null> {
     const provider = this.providers.get('openstreetmap-geocoding');
     if (!provider || !provider.isActive) {
       return null;
@@ -357,7 +380,11 @@ export class EnrichmentService {
           countryCode: result.address?.country_code?.toUpperCase() || '',
           countryName: result.address?.country || '',
           region: result.address?.state || result.address?.region || '',
-          city: result.address?.city || result.address?.town || result.address?.village || '',
+          city:
+            result.address?.city ||
+            result.address?.town ||
+            result.address?.village ||
+            '',
           confidence: parseFloat(result.importance) || 0.5,
           source: provider.name,
         };
@@ -375,16 +402,23 @@ export class EnrichmentService {
     return null;
   }
 
-  async enrichThreatIntelligence(item: ProcessedFeedItem): Promise<ThreatIndicator[]> {
+  async enrichThreatIntelligence(
+    item: ProcessedFeedItem,
+  ): Promise<ThreatIndicator[]> {
     const threatIndicators: ThreatIndicator[] = [];
     const entities = item.processedData.entities || [];
 
     // Find IOCs in entities
-    const iocs = entities.filter((e) => ['ip', 'domain', 'url', 'hash', 'email'].includes(e.type));
+    const iocs = entities.filter((e) =>
+      ['ip', 'domain', 'url', 'hash', 'email'].includes(e.type),
+    );
 
     for (const ioc of iocs) {
       try {
-        const threatInfo = await this.checkThreatIntelligence(ioc.text, ioc.type as any);
+        const threatInfo = await this.checkThreatIntelligence(
+          ioc.text,
+          ioc.type as any,
+        );
         if (threatInfo) {
           threatIndicators.push({
             type: threatInfo.type,
@@ -419,7 +453,12 @@ export class EnrichmentService {
     let result: ThreatIntelResult | null = null;
 
     // Try VirusTotal first
-    if (type === 'domain' || type === 'ip' || type === 'url' || type === 'hash') {
+    if (
+      type === 'domain' ||
+      type === 'ip' ||
+      type === 'url' ||
+      type === 'hash'
+    ) {
       result = await this.checkVirusTotal(indicator, type);
     }
 
@@ -545,7 +584,9 @@ export class EnrichmentService {
           confidence,
           sources: ['AbuseIPDB'],
           categories: data.usageType ? [data.usageType] : [],
-          lastSeen: data.lastReportedAt ? new Date(data.lastReportedAt) : undefined,
+          lastSeen: data.lastReportedAt
+            ? new Date(data.lastReportedAt)
+            : undefined,
           reputation: malicious ? -confidence : confidence,
         };
       }
@@ -556,7 +597,9 @@ export class EnrichmentService {
     return null;
   }
 
-  async analyzeSentimentAdvanced(item: ProcessedFeedItem): Promise<SentimentData | null> {
+  async analyzeSentimentAdvanced(
+    item: ProcessedFeedItem,
+  ): Promise<SentimentData | null> {
     // This would integrate with advanced sentiment analysis APIs
     // For now, use basic keyword-based approach
     const text = `${item.title} ${item.description}`.toLowerCase();
@@ -593,8 +636,12 @@ export class EnrichmentService {
     ];
 
     const words = text.split(/\s+/);
-    const positiveCount = words.filter((word) => positiveWords.includes(word)).length;
-    const negativeCount = words.filter((word) => negativeWords.includes(word)).length;
+    const positiveCount = words.filter((word) =>
+      positiveWords.includes(word),
+    ).length;
+    const negativeCount = words.filter((word) =>
+      negativeWords.includes(word),
+    ).length;
     const totalSentimentWords = positiveCount + negativeCount;
 
     if (totalSentimentWords === 0) {
@@ -627,7 +674,8 @@ export class EnrichmentService {
     const type = apiType[0].toLowerCase();
 
     if (type.includes('person') || type.includes('people')) return 'person';
-    if (type.includes('organization') || type.includes('company')) return 'organization';
+    if (type.includes('organization') || type.includes('company'))
+      return 'organization';
     if (
       type.includes('location') ||
       type.includes('place') ||
@@ -646,7 +694,10 @@ export class EnrichmentService {
     if (!provider) return false;
 
     const now = Date.now();
-    const limiter = this.rateLimiters.get(providerId) || { requests: 0, resetTime: now + 60000 };
+    const limiter = this.rateLimiters.get(providerId) || {
+      requests: 0,
+      resetTime: now + 60000,
+    };
 
     // Reset if time window passed
     if (now > limiter.resetTime) {
@@ -660,7 +711,10 @@ export class EnrichmentService {
 
   private async updateRateLimit(providerId: string): Promise<void> {
     const now = Date.now();
-    const limiter = this.rateLimiters.get(providerId) || { requests: 0, resetTime: now + 60000 };
+    const limiter = this.rateLimiters.get(providerId) || {
+      requests: 0,
+      resetTime: now + 60000,
+    };
 
     limiter.requests++;
     this.rateLimiters.set(providerId, limiter);
@@ -669,10 +723,12 @@ export class EnrichmentService {
   async getProviderStats(): Promise<
     Array<{ provider: string; requests: number; resetTime: number }>
   > {
-    return Array.from(this.rateLimiters.entries()).map(([providerId, limiter]) => ({
-      provider: providerId,
-      requests: limiter.requests,
-      resetTime: limiter.resetTime,
-    }));
+    return Array.from(this.rateLimiters.entries()).map(
+      ([providerId, limiter]) => ({
+        provider: providerId,
+        requests: limiter.requests,
+        resetTime: limiter.resetTime,
+      }),
+    );
   }
 }

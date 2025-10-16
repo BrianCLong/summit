@@ -1,15 +1,25 @@
-
-import unittest
 import os
 import sys
+import unittest
 
 # Add the project root to sys.path to allow absolute imports
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
 sys.path.insert(0, project_root)
 
-from non_functional_targets.slo_monitor import check_graph_query_slo, check_ingestion_slo, generate_latency_histogram, generate_heatmap
-from non_functional_targets.chaos_runner import run_pod_kill_chaos_test, run_broker_kill_chaos_test, simulate_pitr_recovery, simulate_cross_region_failover
+from non_functional_targets.chaos_runner import (
+    run_broker_kill_chaos_test,
+    run_pod_kill_chaos_test,
+    simulate_cross_region_failover,
+    simulate_pitr_recovery,
+)
 from non_functional_targets.ingest_compliance import apply_data_minimization, apply_policy_labels
+from non_functional_targets.slo_monitor import (
+    check_graph_query_slo,
+    check_ingestion_slo,
+    generate_heatmap,
+    generate_latency_histogram,
+)
+
 
 class TestNonFunctionalTargetsStubs(unittest.TestCase):
 
@@ -28,7 +38,7 @@ class TestNonFunctionalTargetsStubs(unittest.TestCase):
         self.assertIn("counts", hist)
 
     def test_generate_heatmap(self):
-        heatmap = generate_heatmap([[1,2],[3,4]])
+        heatmap = generate_heatmap([[1, 2], [3, 4]])
         self.assertIn("type", heatmap)
         self.assertIn("data", heatmap)
 
@@ -60,5 +70,6 @@ class TestNonFunctionalTargetsStubs(unittest.TestCase):
         self.assertIn("policy_labels", labeled_data)
         self.assertEqual(labeled_data["policy_labels"], labels)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

@@ -1,9 +1,10 @@
 # This is a placeholder for the Maestro Python Worker SDK.
 # It would provide functionalities to interact with the Maestro Conductor.
 
-import json
-import requests
 import time
+
+import requests
+
 
 class MaestroWorkerSDK:
     def __init__(self, conductor_url: str, api_token: str):
@@ -11,13 +12,15 @@ class MaestroWorkerSDK:
         self.api_token = api_token
         self.headers = {
             "Authorization": f"Bearer {self.api_token}",
-            "Content-Type": "application/json"
+            "Content-Type": "application/json",
         }
 
     def lease_task(self) -> dict | None:
         """Leases a task from the Conductor."""
         try:
-            response = requests.post(f"{self.conductor_url}/tasks/lease", headers=self.headers, timeout=5)
+            response = requests.post(
+                f"{self.conductor_url}/tasks/lease", headers=self.headers, timeout=5
+            )
             response.raise_for_status()
             return response.json()
         except requests.exceptions.RequestException as e:
@@ -27,7 +30,9 @@ class MaestroWorkerSDK:
     def renew_lease(self, task_id: str) -> None:
         """Renews the lease for a given task."""
         try:
-            response = requests.post(f"{self.conductor_url}/tasks/{task_id}/renew", headers=self.headers, timeout=5)
+            response = requests.post(
+                f"{self.conductor_url}/tasks/{task_id}/renew", headers=self.headers, timeout=5
+            )
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Error renewing lease for task {task_id}: {e}")
@@ -36,7 +41,12 @@ class MaestroWorkerSDK:
         """Acknowledges task completion."""
         try:
             payload = {"checkpoint": checkpoint, "artifacts": artifacts}
-            response = requests.post(f"{self.conductor_url}/tasks/{task_id}/ack", headers=self.headers, json=payload, timeout=5)
+            response = requests.post(
+                f"{self.conductor_url}/tasks/{task_id}/ack",
+                headers=self.headers,
+                json=payload,
+                timeout=5,
+            )
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Error acknowledging task {task_id}: {e}")
@@ -45,7 +55,12 @@ class MaestroWorkerSDK:
         """Negative acknowledges task, indicating failure."""
         try:
             payload = {"retryable": retryable, "error_message": error_message}
-            response = requests.post(f"{self.conductor_url}/tasks/{task_id}/nack", headers=self.headers, json=payload, timeout=5)
+            response = requests.post(
+                f"{self.conductor_url}/tasks/{task_id}/nack",
+                headers=self.headers,
+                json=payload,
+                timeout=5,
+            )
             response.raise_for_status()
         except requests.exceptions.RequestException as e:
             print(f"Error nacking task {task_id}: {e}")
@@ -65,10 +80,12 @@ class MaestroWorkerSDK:
 
                 try:
                     result = task_handler(task)
-                    self.ack_task(task_id, result.get("checkpoint", {}), result.get("artifacts", {}))
+                    self.ack_task(
+                        task_id, result.get("checkpoint", {}), result.get("artifacts", {})
+                    )
                     print(f"Task {task_id} acknowledged successfully.")
                 except Exception as e:
-                    retryable = False # Determine based on exception type
+                    retryable = False  # Determine based on exception type
                     self.nack_task(task_id, retryable, str(e))
                     print(f"Task {task_id} failed: {e}")
                 finally:
@@ -76,7 +93,8 @@ class MaestroWorkerSDK:
                     pass
             else:
                 print("No tasks available, waiting...")
-                time.sleep(5) # Wait before trying to lease again
+                time.sleep(5)  # Wait before trying to lease again
+
 
 # Example task handler (to be implemented by the worker)
 def my_task_handler(task: dict) -> dict:
@@ -84,6 +102,7 @@ def my_task_handler(task: dict) -> dict:
     # Simulate work
     time.sleep(task.get("duration_seconds", 1))
     return {"checkpoint": {"progress": 100}, "artifacts": {"output_data": "processed"}}
+
 
 if __name__ == "__main__":
     # Example usage (replace with actual URL and token)

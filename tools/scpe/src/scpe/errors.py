@@ -2,13 +2,11 @@
 
 from __future__ import annotations
 
-from typing import Optional
-
 
 class SCPEError(Exception):
     """Base exception for SCPE-related failures."""
 
-    def __init__(self, message: str, *, hint: Optional[str] = None) -> None:
+    def __init__(self, message: str, *, hint: str | None = None) -> None:
         super().__init__(message)
         self.hint = hint
 

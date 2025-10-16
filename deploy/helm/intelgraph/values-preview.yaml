@@ -44,9 +44,9 @@ ingress:
   enabled: true
   className: nginx
   annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+    nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
+    cert-manager.io/cluster-issuer: 'letsencrypt-prod'
   host: preview.intelgraph.dev
   tls:
     enabled: true
@@ -110,41 +110,41 @@ networkPolicy:
     - Egress
   ingress:
     - from:
-      - namespaceSelector:
-          matchLabels:
-            name: ingress-nginx
+        - namespaceSelector:
+            matchLabels:
+              name: ingress-nginx
       ports:
-      - protocol: TCP
-        port: 4000
+        - protocol: TCP
+          port: 4000
   egress:
     - to: []
       ports:
-      - protocol: TCP
-        port: 443  # HTTPS
-      - protocol: TCP
-        port: 5432 # PostgreSQL
-      - protocol: TCP
-        port: 6379 # Redis
-      - protocol: TCP
-        port: 7687 # Neo4j
+        - protocol: TCP
+          port: 443 # HTTPS
+        - protocol: TCP
+          port: 5432 # PostgreSQL
+        - protocol: TCP
+          port: 6379 # Redis
+        - protocol: TCP
+          port: 7687 # Neo4j
 
 # PodDisruptionBudget
 podDisruptionBudget:
-  enabled: false  # Not needed for single replica
+  enabled: false # Not needed for single replica
 
 # ConfigMap for application configuration
 configMap:
   enabled: true
   data:
-    CORS_ORIGINS: "*"
-    OTEL_EXPORTER_OTLP_ENDPOINT: "http://otel-collector:4317"
-    PROMETHEUS_METRICS_ENABLED: "true"
+    CORS_ORIGINS: '*'
+    OTEL_EXPORTER_OTLP_ENDPOINT: 'http://otel-collector:4317'
+    PROMETHEUS_METRICS_ENABLED: 'true'
 
 # Annotations for pods
 podAnnotations:
-  prometheus.io/scrape: "true"
-  prometheus.io/port: "9090"
-  prometheus.io/path: "/metrics"
+  prometheus.io/scrape: 'true'
+  prometheus.io/port: '9090'
+  prometheus.io/path: '/metrics'
 
 # Labels for all resources
 labels:
@@ -165,15 +165,15 @@ tolerations: []
 affinity:
   podAntiAffinity:
     preferredDuringSchedulingIgnoredDuringExecution:
-    - weight: 100
-      podAffinityTerm:
-        labelSelector:
-          matchExpressions:
-          - key: app.kubernetes.io/name
-            operator: In
-            values:
-            - intelgraph
-        topologyKey: kubernetes.io/hostname
+      - weight: 100
+        podAffinityTerm:
+          labelSelector:
+            matchExpressions:
+              - key: app.kubernetes.io/name
+                operator: In
+                values:
+                  - intelgraph
+          topologyKey: kubernetes.io/hostname
 
 # Persistent volumes (disabled for preview)
 persistence:
@@ -182,11 +182,11 @@ persistence:
 # External dependencies configuration
 dependencies:
   postgresql:
-    enabled: false  # Use external managed instance
+    enabled: false # Use external managed instance
   redis:
-    enabled: false  # Use external managed instance
+    enabled: false # Use external managed instance
   neo4j:
-    enabled: false  # Use external managed instance
+    enabled: false # Use external managed instance
 
 # Backup configuration (disabled for preview)
 backup:
@@ -198,4 +198,4 @@ monitoring:
   dashboards:
     enabled: true
   alerts:
-    enabled: false  # Disable alerts for preview environments
+    enabled: false # Disable alerts for preview environments

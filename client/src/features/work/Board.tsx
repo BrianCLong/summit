@@ -45,10 +45,26 @@ export default function WorkBoard() {
           <option value="github">GitHub</option>
           <option value="jira">Jira</option>
         </select>
-        <input placeholder="Assignee" value={assignee} onChange={(e) => setAssignee(e.target.value)} />
-        <input placeholder="Label" value={label} onChange={(e) => setLabel(e.target.value)} />
-        <input placeholder="Project" value={project} onChange={(e) => setProject(e.target.value)} />
-        <input placeholder="Repo" value={repo} onChange={(e) => setRepo(e.target.value)} />
+        <input
+          placeholder="Assignee"
+          value={assignee}
+          onChange={(e) => setAssignee(e.target.value)}
+        />
+        <input
+          placeholder="Label"
+          value={label}
+          onChange={(e) => setLabel(e.target.value)}
+        />
+        <input
+          placeholder="Project"
+          value={project}
+          onChange={(e) => setProject(e.target.value)}
+        />
+        <input
+          placeholder="Repo"
+          value={repo}
+          onChange={(e) => setRepo(e.target.value)}
+        />
         <button onClick={load}>Filter</button>
       </div>
       {loading ? (
@@ -58,7 +74,9 @@ export default function WorkBoard() {
           {tickets.map((t) => (
             <li key={`${t.provider}:${t.id}`}>
               <strong>[{t.provider ?? 'pm'}]</strong>{' '}
-              <Link to={`/work/ticket?provider=${encodeURIComponent(t.provider || 'pm')}&id=${encodeURIComponent((t as any).external_id || t.id)}`}>
+              <Link
+                to={`/work/ticket?provider=${encodeURIComponent(t.provider || 'pm')}&id=${encodeURIComponent((t as any).external_id || t.id)}`}
+              >
                 {t.title}
               </Link>{' '}
               — {t.status} {t.assignee ? `· ${t.assignee}` : ''}

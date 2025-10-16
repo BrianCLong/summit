@@ -4,7 +4,14 @@ import { useToast } from '../ToastContainer';
 interface Node {
   id: string;
   label: string;
-  type: 'person' | 'organization' | 'ip' | 'email' | 'document' | 'event' | 'location';
+  type:
+    | 'person'
+    | 'organization'
+    | 'ip'
+    | 'email'
+    | 'document'
+    | 'event'
+    | 'location';
   x: number;
   y: number;
   vx?: number;
@@ -88,15 +95,21 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
 
     if (filters) {
       if (filters.nodeTypes && filters.nodeTypes.length > 0) {
-        filteredNodes = filteredNodes.filter((node) => filters.nodeTypes!.includes(node.type));
+        filteredNodes = filteredNodes.filter((node) =>
+          filters.nodeTypes!.includes(node.type),
+        );
       }
 
       if (filters.minRisk !== undefined) {
-        filteredNodes = filteredNodes.filter((node) => node.risk >= filters.minRisk!);
+        filteredNodes = filteredNodes.filter(
+          (node) => node.risk >= filters.minRisk!,
+        );
       }
 
       if (filters.minConfidence !== undefined) {
-        filteredNodes = filteredNodes.filter((node) => node.confidence >= filters.minConfidence!);
+        filteredNodes = filteredNodes.filter(
+          (node) => node.confidence >= filters.minConfidence!,
+        );
       }
 
       // Filter edges to only include those between remaining nodes
@@ -106,12 +119,20 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
       );
 
       if (filters.edgeTypes && filters.edgeTypes.length > 0) {
-        filteredEdges = filteredEdges.filter((edge) => filters.edgeTypes!.includes(edge.type));
+        filteredEdges = filteredEdges.filter((edge) =>
+          filters.edgeTypes!.includes(edge.type),
+        );
       }
     }
 
     // Apply layout algorithm
-    const layoutedNodes = applyLayout(filteredNodes, filteredEdges, layoutAlgorithm, width, height);
+    const layoutedNodes = applyLayout(
+      filteredNodes,
+      filteredEdges,
+      layoutAlgorithm,
+      width,
+      height,
+    );
 
     setNodes(layoutedNodes);
     setEdges(filteredEdges);
@@ -119,7 +140,13 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
 
   // Apply layout algorithms
   const applyLayout = useCallback(
-    (nodes: Node[], edges: Edge[], algorithm: string, width: number, height: number): Node[] => {
+    (
+      nodes: Node[],
+      edges: Edge[],
+      algorithm: string,
+      width: number,
+      height: number,
+    ): Node[] => {
       const layoutedNodes = [...nodes];
 
       switch (algorithm) {
@@ -167,10 +194,15 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
 
             const outgoingEdges = edges.filter((e) => e.source === node.id);
             outgoingEdges.forEach((edge) => {
-              const targetNode = layoutedNodes.find((n) => n.id === edge.target);
+              const targetNode = layoutedNodes.find(
+                (n) => n.id === edge.target,
+              );
               if (targetNode && !visited.has(targetNode.id)) {
                 const newLevel = level + 1;
-                if (!levels.has(targetNode.id) || levels.get(targetNode.id)! > newLevel) {
+                if (
+                  !levels.has(targetNode.id) ||
+                  levels.get(targetNode.id)! > newLevel
+                ) {
                   levels.set(targetNode.id, newLevel);
                   queue.push({ node: targetNode, level: newLevel });
                 }
@@ -365,7 +397,9 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
     if (isDragging && dragNode) {
       setNodes((prevNodes) =>
         prevNodes.map((node) =>
-          node.id === dragNode.id ? { ...node, x: pos.x, y: pos.y, vx: 0, vy: 0 } : node,
+          node.id === dragNode.id
+            ? { ...node, x: pos.x, y: pos.y, vx: 0, vy: 0 }
+            : node,
         ),
       );
       setDragNode((prev) => (prev ? { ...prev, x: pos.x, y: pos.y } : null));
@@ -496,7 +530,13 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
       if (node.risk > 7) {
         ctx.fillStyle = '#dc3545';
         ctx.beginPath();
-        ctx.arc(node.x + node.size - 3, node.y - node.size + 3, 4, 0, 2 * Math.PI);
+        ctx.arc(
+          node.x + node.size - 3,
+          node.y - node.size + 3,
+          4,
+          0,
+          2 * Math.PI,
+        );
         ctx.fill();
       }
 
@@ -512,7 +552,12 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
         const textWidth = ctx.measureText(tooltip).width;
 
         ctx.fillStyle = 'rgba(0,0,0,0.8)';
-        ctx.fillRect(node.x - textWidth / 2 - 5, node.y - node.size - 35, textWidth + 10, 20);
+        ctx.fillRect(
+          node.x - textWidth / 2 - 5,
+          node.y - node.size - 35,
+          textWidth + 10,
+          20,
+        );
 
         ctx.fillStyle = 'white';
         ctx.font = '11px Arial';
@@ -568,7 +613,10 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
         case 'Backspace':
           if (selectedNodes.size > 0) {
             // Remove selected nodes (in real app, this would trigger a callback)
-            toast.info('Delete Nodes', `Would delete ${selectedNodes.size} selected nodes`);
+            toast.info(
+              'Delete Nodes',
+              `Would delete ${selectedNodes.size} selected nodes`,
+            );
           }
           break;
         case 'a':
@@ -614,7 +662,10 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
       <div className="absolute top-2 right-2 bg-white rounded-lg shadow-lg p-2 space-x-2">
         <button
           onClick={() =>
-            setTransform((prev) => ({ ...prev, scale: Math.min(prev.scale * 1.2, 3) }))
+            setTransform((prev) => ({
+              ...prev,
+              scale: Math.min(prev.scale * 1.2, 3),
+            }))
           }
           className="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-sm"
           title="Zoom In"
@@ -623,7 +674,10 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
         </button>
         <button
           onClick={() =>
-            setTransform((prev) => ({ ...prev, scale: Math.max(prev.scale / 1.2, 0.1) }))
+            setTransform((prev) => ({
+              ...prev,
+              scale: Math.max(prev.scale / 1.2, 0.1),
+            }))
           }
           className="px-2 py-1 bg-gray-100 hover:bg-gray-200 rounded text-sm"
           title="Zoom Out"
@@ -643,7 +697,8 @@ const InteractiveGraphCanvas: React.FC<InteractiveGraphCanvasProps> = ({
       {selectedNodes.size > 0 && (
         <div className="absolute bottom-2 left-2 bg-white rounded-lg shadow-lg p-3">
           <div className="text-sm font-medium">
-            {selectedNodes.size} node{selectedNodes.size !== 1 ? 's' : ''} selected
+            {selectedNodes.size} node{selectedNodes.size !== 1 ? 's' : ''}{' '}
+            selected
           </div>
           <div className="text-xs text-gray-500 mt-1">
             Press Delete to remove • Ctrl+A to select all • Esc to clear

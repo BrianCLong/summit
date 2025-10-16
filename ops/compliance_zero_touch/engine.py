@@ -4,9 +4,9 @@ from __future__ import annotations
 
 import json
 from collections import defaultdict
+from collections.abc import Iterable
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Iterable, List
 
 from .adapters.homegrown import HomegrownAdapter
 from .adapters.kyverno import KyvernoAdapter
@@ -31,8 +31,8 @@ class ZeroTouchComplianceEngine:
 
     def execute(self) -> ComplianceRunReport:
         started_at = datetime.utcnow()
-        evaluations: List[PolicyEvaluationResult] = []
-        regulatory_alignment: Dict[str, List[RegulatoryRequirement]] = defaultdict(list)
+        evaluations: list[PolicyEvaluationResult] = []
+        regulatory_alignment: dict[str, list[RegulatoryRequirement]] = defaultdict(list)
 
         for adapter in self.adapters:
             evaluation = adapter.evaluate(self.workspace)
@@ -45,7 +45,9 @@ class ZeroTouchComplianceEngine:
         all_findings = [finding for evaluation in evaluations for finding in evaluation.findings]
         auto_patches = self._build_auto_patches(all_findings)
         human_reviews = self._build_human_reviews(all_findings)
-        scoring_adapter = next(adapter for adapter in self.adapters if isinstance(adapter, HomegrownAdapter))
+        scoring_adapter = next(
+            adapter for adapter in self.adapters if isinstance(adapter, HomegrownAdapter)
+        )
         multi_factor_score = scoring_adapter.scoring(all_findings)
         validation_results = self._load_validation_results()
         tested_artifacts = self._collect_tested_artifacts()
@@ -63,8 +65,8 @@ class ZeroTouchComplianceEngine:
             validation_results=validation_results,
         )
 
-    def _build_auto_patches(self, findings: Iterable[PolicyFinding]) -> List[AutoPatchAction]:
-        auto_patches: List[AutoPatchAction] = []
+    def _build_auto_patches(self, findings: Iterable[PolicyFinding]) -> list[AutoPatchAction]:
+        auto_patches: list[AutoPatchAction] = []
         for finding in findings:
             if finding.control_id == "OPA-S3-ENCRYPTION":
                 auto_patches.append(
@@ -72,7 +74,7 @@ class ZeroTouchComplianceEngine:
                         id="patch-s3-encryption",
                         description="Apply Terraform patch to enforce SSE-KMS on MC and Summit buckets.",
                         changes={
-                            "terraform/modules/storage.tf": "resource \"aws_s3_bucket_server_side_encryption_configuration\" ...",
+                            "terraform/modules/storage.tf": 'resource "aws_s3_bucket_server_side_encryption_configuration" ...',
                         },
                         applies_to=["mc-storage", "summit-storage"],
                         estimated_savings=4200.0,
@@ -85,7 +87,7 @@ class ZeroTouchComplianceEngine:
                         id="patch-iam-least-privilege",
                         description="Replace wildcard IAM policy with scoped roles and automated approval gates.",
                         changes={
-                            "terraform/iam/policies/admin.json": "{\"Version\":\"2012-10-17\",...}",
+                            "terraform/iam/policies/admin.json": '{"Version":"2012-10-17",...}',
                         },
                         applies_to=["iam.policy.admin"],
                         estimated_savings=2700.0,
@@ -118,8 +120,8 @@ class ZeroTouchComplianceEngine:
                 )
         return auto_patches
 
-    def _build_human_reviews(self, findings: Iterable[PolicyFinding]) -> List[HumanReviewItem]:
-        human_reviews: List[HumanReviewItem] = []
+    def _build_human_reviews(self, findings: Iterable[PolicyFinding]) -> list[HumanReviewItem]:
+        human_reviews: list[HumanReviewItem] = []
         for finding in findings:
             if finding.severity.value in {"critical", "high"}:
                 human_reviews.append(
@@ -133,7 +135,7 @@ class ZeroTouchComplianceEngine:
                 )
         return human_reviews
 
-    def _load_validation_results(self) -> Dict[str, Dict[str, float]]:
+    def _load_validation_results(self) -> dict[str, dict[str, float]]:
         test_suite_path = self.workspace / "test_suites" / "open_suite_results.json"
         suite = json.loads(test_suite_path.read_text())
         passed = sum(1 for case in suite["cases"] if case["status"] == "pass")
@@ -147,7 +149,7 @@ class ZeroTouchComplianceEngine:
             }
         }
 
-    def _collect_tested_artifacts(self) -> List[str]:
+    def _collect_tested_artifacts(self) -> list[str]:
         test_suite_path = self.workspace / "test_suites" / "open_suite_results.json"
         suite = json.loads(test_suite_path.read_text())
         artifacts = {evidence for case in suite["cases"] for evidence in case.get("evidence", [])}

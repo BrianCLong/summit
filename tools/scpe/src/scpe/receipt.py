@@ -6,12 +6,11 @@ import hashlib
 import json
 from datetime import date, datetime
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 from . import __version__
 from .errors import ReceiptError
 from .utils import canonical_json
-
 
 INTEGRITY_ALGORITHM = "sha256"
 
@@ -19,10 +18,10 @@ INTEGRITY_ALGORITHM = "sha256"
 def build_receipt(
     *,
     config_path: Path,
-    config: Dict[str, Any],
-    verification: Dict[str, Any],
-) -> Dict[str, Any]:
-    receipt: Dict[str, Any] = {
+    config: dict[str, Any],
+    verification: dict[str, Any],
+) -> dict[str, Any]:
+    receipt: dict[str, Any] = {
         "scpe": {"version": __version__},
         "config": {
             "path": config_path.as_posix(),
@@ -42,12 +41,12 @@ def build_receipt(
     return sanitized
 
 
-def write_receipt(receipt: Dict[str, Any], path: Path) -> None:
+def write_receipt(receipt: dict[str, Any], path: Path) -> None:
     serialized = canonical_json(receipt)
     path.write_text(serialized, encoding="utf-8")
 
 
-def verify_receipt(path: Path) -> Dict[str, Any]:
+def verify_receipt(path: Path) -> dict[str, Any]:
     try:
         document = json.loads(path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:  # pragma: no cover - defensive guard
@@ -70,7 +69,7 @@ def verify_receipt(path: Path) -> Dict[str, Any]:
     return document
 
 
-def _compute_integrity(document: Dict[str, Any]) -> Dict[str, str]:
+def _compute_integrity(document: dict[str, Any]) -> dict[str, str]:
     snapshot = {k: v for k, v in document.items() if k != "integrity"}
     serialized = canonical_json(snapshot)
     digest = hashlib.sha256(serialized.encode("utf-8")).hexdigest()

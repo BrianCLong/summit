@@ -341,13 +341,13 @@ const AdvancedAnalyticsDashboard = () => {
   const renderThreatIntelWidget = () => {
     if (!threatMetrics) return <LinearProgress />;
 
-    const severityData = Object.entries(threatMetrics.threatSeverityDistribution || {}).map(
-      ([severity, count]) => ({
-        name: severity.charAt(0).toUpperCase() + severity.slice(1),
-        value: count,
-        fill: getSeverityColor(severity),
-      }),
-    );
+    const severityData = Object.entries(
+      threatMetrics.threatSeverityDistribution || {},
+    ).map(([severity, count]) => ({
+      name: severity.charAt(0).toUpperCase() + severity.slice(1),
+      value: count,
+      fill: getSeverityColor(severity),
+    }));
 
     return (
       <Grid container spacing={2}>
@@ -415,7 +415,8 @@ const AdvancedAnalyticsDashboard = () => {
                   <Typography variant="h4" color="info.main">
                     {Math.round(
                       (threatMetrics.resolvedThreats /
-                        (threatMetrics.activeThreats + threatMetrics.resolvedThreats)) *
+                        (threatMetrics.activeThreats +
+                          threatMetrics.resolvedThreats)) *
                         100,
                     )}
                     %
@@ -461,12 +462,20 @@ const AdvancedAnalyticsDashboard = () => {
         {/* Top Threat Types */}
         <Grid item xs={12} md={6}>
           <Card>
-            <CardHeader title="Top Threat Types" subheader="Most common threat categories" />
+            <CardHeader
+              title="Top Threat Types"
+              subheader="Most common threat categories"
+            />
             <CardContent>
               <ResponsiveContainer width="100%" height={300}>
                 <RechartsBarChart data={threatMetrics.topThreatTypes}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="type" angle={-45} textAnchor="end" height={80} />
+                  <XAxis
+                    dataKey="type"
+                    angle={-45}
+                    textAnchor="end"
+                    height={80}
+                  />
                   <YAxis />
                   <RechartsTooltip />
                   <Bar dataKey="count" fill="#8884d8" />
@@ -496,9 +505,14 @@ const AdvancedAnalyticsDashboard = () => {
                   {threatMetrics.geographicDistribution.map((geo) => (
                     <TableRow key={geo.country}>
                       <TableCell>{geo.country}</TableCell>
-                      <TableCell align="right">{geo.threatCount.toLocaleString()}</TableCell>
                       <TableCell align="right">
-                        {Math.round((geo.threatCount / threatMetrics.activeThreats) * 100)}%
+                        {geo.threatCount.toLocaleString()}
+                      </TableCell>
+                      <TableCell align="right">
+                        {Math.round(
+                          (geo.threatCount / threatMetrics.activeThreats) * 100,
+                        )}
+                        %
                       </TableCell>
                     </TableRow>
                   ))}
@@ -514,12 +528,14 @@ const AdvancedAnalyticsDashboard = () => {
   const renderInvestigationWidget = () => {
     if (!investigationMetrics) return <LinearProgress />;
 
-    const statusData = Object.entries(investigationMetrics.investigationsByStatus || {}).map(
-      ([status, count]) => ({
-        name: status.replace('_', ' ').charAt(0).toUpperCase() + status.replace('_', ' ').slice(1),
-        value: count,
-      }),
-    );
+    const statusData = Object.entries(
+      investigationMetrics.investigationsByStatus || {},
+    ).map(([status, count]) => ({
+      name:
+        status.replace('_', ' ').charAt(0).toUpperCase() +
+        status.replace('_', ' ').slice(1),
+      value: count,
+    }));
 
     return (
       <Grid container spacing={2}>
@@ -556,7 +572,10 @@ const AdvancedAnalyticsDashboard = () => {
               <Typography variant="subtitle1">Avg Completion Time</Typography>
               <LinearProgress
                 variant="determinate"
-                value={Math.min(((72 - investigationMetrics.avgCompletionTime) / 72) * 100, 100)}
+                value={Math.min(
+                  ((72 - investigationMetrics.avgCompletionTime) / 72) * 100,
+                  100,
+                )}
                 sx={{ mt: 2 }}
               />
               <Typography variant="caption" color="text.secondary">
@@ -574,8 +593,8 @@ const AdvancedAnalyticsDashboard = () => {
               </Typography>
               <Typography variant="subtitle1">Total Evidence Items</Typography>
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-                {investigationMetrics.findingsMetrics.totalFindings.toLocaleString()} findings
-                generated
+                {investigationMetrics.findingsMetrics.totalFindings.toLocaleString()}{' '}
+                findings generated
               </Typography>
             </CardContent>
           </Card>
@@ -609,22 +628,24 @@ const AdvancedAnalyticsDashboard = () => {
             <CardHeader title="Evidence by Type" />
             <CardContent>
               <List>
-                {Object.entries(investigationMetrics.evidenceMetrics.evidenceByType || {}).map(
-                  ([type, count]) => (
-                    <ListItem key={type}>
-                      <ListItemText
-                        primary={type.charAt(0).toUpperCase() + type.slice(1)}
-                        secondary={`${count} items`}
-                      />
-                      <Typography variant="body2" color="text.secondary">
-                        {Math.round(
-                          (count / investigationMetrics.evidenceMetrics.totalEvidence) * 100,
-                        )}
-                        %
-                      </Typography>
-                    </ListItem>
-                  ),
-                )}
+                {Object.entries(
+                  investigationMetrics.evidenceMetrics.evidenceByType || {},
+                ).map(([type, count]) => (
+                  <ListItem key={type}>
+                    <ListItemText
+                      primary={type.charAt(0).toUpperCase() + type.slice(1)}
+                      secondary={`${count} items`}
+                    />
+                    <Typography variant="body2" color="text.secondary">
+                      {Math.round(
+                        (count /
+                          investigationMetrics.evidenceMetrics.totalEvidence) *
+                          100,
+                      )}
+                      %
+                    </Typography>
+                  </ListItem>
+                ))}
               </List>
             </CardContent>
           </Card>
@@ -728,10 +749,16 @@ const AdvancedAnalyticsDashboard = () => {
                   {performanceData.connectionPools.map((pool) => (
                     <TableRow key={pool.id}>
                       <TableCell>{pool.type.toUpperCase()}</TableCell>
-                      <TableCell align="right">{pool.activeConnections}</TableCell>
+                      <TableCell align="right">
+                        {pool.activeConnections}
+                      </TableCell>
                       <TableCell align="right">{pool.maxConnections}</TableCell>
-                      <TableCell align="right">{Math.round(pool.avgResponseTime)}</TableCell>
-                      <TableCell align="right">{pool.errorRate.toFixed(2)}%</TableCell>
+                      <TableCell align="right">
+                        {Math.round(pool.avgResponseTime)}
+                      </TableCell>
+                      <TableCell align="right">
+                        {pool.errorRate.toFixed(2)}%
+                      </TableCell>
                       <TableCell align="right">
                         <Chip
                           label={pool.errorRate < 1 ? 'Healthy' : 'Warning'}
@@ -789,7 +816,9 @@ const AdvancedAnalyticsDashboard = () => {
                       <TableCell align="center">
                         <Chip
                           label={strategy.compressionEnabled ? 'Yes' : 'No'}
-                          color={strategy.compressionEnabled ? 'success' : 'default'}
+                          color={
+                            strategy.compressionEnabled ? 'success' : 'default'
+                          }
                           size="small"
                         />
                       </TableCell>
@@ -822,9 +851,21 @@ const AdvancedAnalyticsDashboard = () => {
   };
 
   const tabPanels = [
-    { label: 'Threat Intelligence', content: renderThreatIntelWidget(), icon: <Security /> },
-    { label: 'Investigations', content: renderInvestigationWidget(), icon: <Assessment /> },
-    { label: 'Performance', content: renderPerformanceWidget(), icon: <Speed /> },
+    {
+      label: 'Threat Intelligence',
+      content: renderThreatIntelWidget(),
+      icon: <Security />,
+    },
+    {
+      label: 'Investigations',
+      content: renderInvestigationWidget(),
+      icon: <Assessment />,
+    },
+    {
+      label: 'Performance',
+      content: renderPerformanceWidget(),
+      icon: <Speed />,
+    },
   ];
 
   return (
@@ -837,7 +878,10 @@ const AdvancedAnalyticsDashboard = () => {
         <Box display="flex" gap={1}>
           <FormControlLabel
             control={
-              <Switch checked={autoRefresh} onChange={(e) => setAutoRefresh(e.target.checked)} />
+              <Switch
+                checked={autoRefresh}
+                onChange={(e) => setAutoRefresh(e.target.checked)}
+              />
             }
             label="Auto Refresh"
           />
@@ -858,7 +902,8 @@ const AdvancedAnalyticsDashboard = () => {
 
       {/* Status Summary */}
       <Alert severity="info" sx={{ mb: 2 }}>
-        Dashboard last updated: {dashboardConfig?.metadata?.lastUpdated || 'Loading...'}
+        Dashboard last updated:{' '}
+        {dashboardConfig?.metadata?.lastUpdated || 'Loading...'}
         {' • '}
         {dashboardConfig?.metadata?.totalWidgets || 0} widgets active
         {' • '}
@@ -873,7 +918,12 @@ const AdvancedAnalyticsDashboard = () => {
           variant="fullWidth"
         >
           {tabPanels.map((panel, index) => (
-            <Tab key={index} label={panel.label} icon={panel.icon} iconPosition="start" />
+            <Tab
+              key={index}
+              label={panel.label}
+              icon={panel.icon}
+              iconPosition="start"
+            />
           ))}
         </Tabs>
       </Paper>

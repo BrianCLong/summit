@@ -88,7 +88,9 @@ function AdvancedSearch({
 
   const activeFilterCount =
     filters.entityTypes.length +
-    (filters.confidenceRange[0] > 0 || filters.confidenceRange[1] < 100 ? 1 : 0) +
+    (filters.confidenceRange[0] > 0 || filters.confidenceRange[1] < 100
+      ? 1
+      : 0) +
     (filters.dateRange[0] || filters.dateRange[1] ? 1 : 0) +
     filters.investigations.length;
 
@@ -184,7 +186,9 @@ function AdvancedSearch({
               marginBottom: '16px',
             }}
           >
-            <h3 style={{ fontSize: '1.1rem', fontWeight: '600', margin: 0 }}>Advanced Filters</h3>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: '600', margin: 0 }}>
+              Advanced Filters
+            </h3>
             <button
               onClick={clearFilters}
               style={{
@@ -202,7 +206,12 @@ function AdvancedSearch({
           {/* Entity Types */}
           <div style={{ marginBottom: '20px' }}>
             <label
-              style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px', display: 'block' }}
+              style={{
+                fontSize: '14px',
+                fontWeight: '600',
+                marginBottom: '8px',
+                display: 'block',
+              }}
             >
               Entity Types
             </label>
@@ -216,7 +225,12 @@ function AdvancedSearch({
               {entityTypes.map((type) => (
                 <label
                   key={type}
-                  style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '14px' }}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '14px',
+                  }}
                 >
                   <input
                     type="checkbox"
@@ -237,9 +251,15 @@ function AdvancedSearch({
           {/* Confidence Range */}
           <div style={{ marginBottom: '20px' }}>
             <label
-              style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px', display: 'block' }}
+              style={{
+                fontSize: '14px',
+                fontWeight: '600',
+                marginBottom: '8px',
+                display: 'block',
+              }}
             >
-              Confidence Range: {filters.confidenceRange[0]}% - {filters.confidenceRange[1]}%
+              Confidence Range: {filters.confidenceRange[0]}% -{' '}
+              {filters.confidenceRange[1]}%
             </label>
             <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
               <input
@@ -274,7 +294,12 @@ function AdvancedSearch({
           {/* Date Range */}
           <div style={{ marginBottom: '16px' }}>
             <label
-              style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px', display: 'block' }}
+              style={{
+                fontSize: '14px',
+                fontWeight: '600',
+                marginBottom: '8px',
+                display: 'block',
+              }}
             >
               Date Range
             </label>
@@ -283,7 +308,10 @@ function AdvancedSearch({
                 type="date"
                 value={filters.dateRange[0]}
                 onChange={(e) =>
-                  handleFilterChange('dateRange', [e.target.value, filters.dateRange[1]])
+                  handleFilterChange('dateRange', [
+                    e.target.value,
+                    filters.dateRange[1],
+                  ])
                 }
                 style={{
                   flex: 1,
@@ -297,7 +325,10 @@ function AdvancedSearch({
                 type="date"
                 value={filters.dateRange[1]}
                 onChange={(e) =>
-                  handleFilterChange('dateRange', [filters.dateRange[0], e.target.value])
+                  handleFilterChange('dateRange', [
+                    filters.dateRange[0],
+                    e.target.value,
+                  ])
                 }
                 style={{
                   flex: 1,
@@ -333,13 +364,17 @@ function AdvancedSearch({
           )}
 
           {error && (
-            <div style={{ padding: '20px', textAlign: 'center', color: '#dc2626' }}>
+            <div
+              style={{ padding: '20px', textAlign: 'center', color: '#dc2626' }}
+            >
               <div>❌ Search failed: {error.message}</div>
             </div>
           )}
 
           {data?.searchEntities?.nodes?.length === 0 && !loading && (
-            <div style={{ padding: '20px', textAlign: 'center', color: '#666' }}>
+            <div
+              style={{ padding: '20px', textAlign: 'center', color: '#666' }}
+            >
               <div>🔍 No results found for "{query}"</div>
               <div style={{ fontSize: '14px', marginTop: '8px' }}>
                 Try adjusting your search terms or filters
@@ -360,8 +395,12 @@ function AdvancedSearch({
                 cursor: 'pointer',
                 transition: 'background-color 0.2s',
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f8f9fa')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+              onMouseEnter={(e) =>
+                (e.currentTarget.style.backgroundColor = '#f8f9fa')
+              }
+              onMouseLeave={(e) =>
+                (e.currentTarget.style.backgroundColor = 'transparent')
+              }
             >
               <div
                 style={{
@@ -371,7 +410,9 @@ function AdvancedSearch({
                   marginBottom: '4px',
                 }}
               >
-                <div style={{ fontWeight: '600', fontSize: '16px' }}>{result.label}</div>
+                <div style={{ fontWeight: '600', fontSize: '16px' }}>
+                  {result.label}
+                </div>
                 <div
                   style={{
                     fontSize: '12px',
@@ -385,17 +426,32 @@ function AdvancedSearch({
                 </div>
               </div>
               {result.description && (
-                <div style={{ color: '#666', fontSize: '14px', marginBottom: '8px' }}>
+                <div
+                  style={{
+                    color: '#666',
+                    fontSize: '14px',
+                    marginBottom: '8px',
+                  }}
+                >
                   {result.description.length > 100
                     ? `${result.description.substring(0, 100)}...`
                     : result.description}
                 </div>
               )}
-              <div style={{ display: 'flex', gap: '16px', fontSize: '12px', color: '#999' }}>
+              <div
+                style={{
+                  display: 'flex',
+                  gap: '16px',
+                  fontSize: '12px',
+                  color: '#999',
+                }}
+              >
                 <span>Confidence: {result.confidence}%</span>
                 <span>ID: {result.id}</span>
                 {result.updatedAt && (
-                  <span>Updated: {new Date(result.updatedAt).toLocaleDateString()}</span>
+                  <span>
+                    Updated: {new Date(result.updatedAt).toLocaleDateString()}
+                  </span>
                 )}
               </div>
             </div>

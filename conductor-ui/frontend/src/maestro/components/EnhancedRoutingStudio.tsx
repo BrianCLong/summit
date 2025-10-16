@@ -27,15 +27,15 @@ function RoutingPinPanel({ className }: RoutingPinPanelProps) {
 
   const handleAddPin = async () => {
     if (!newPin.route || !newPin.model) return;
-    
+
     try {
       await putRoutingPin({
         route: newPin.route,
         model: newPin.model,
-        note: newPin.note || undefined
+        note: newPin.note || undefined,
       });
-      
-      setPins(prev => ({ ...prev, [newPin.route]: newPin.model }));
+
+      setPins((prev) => ({ ...prev, [newPin.route]: newPin.model }));
       setNewPin({ route: '', model: '', note: '' });
       setShowAddForm(false);
     } catch (error) {
@@ -46,7 +46,7 @@ function RoutingPinPanel({ className }: RoutingPinPanelProps) {
   const handleRemovePin = async (route: string) => {
     try {
       await deleteRoutingPin(route);
-      setPins(prev => {
+      setPins((prev) => {
         const updated = { ...prev };
         delete updated[route];
         return updated;
@@ -70,27 +70,35 @@ function RoutingPinPanel({ className }: RoutingPinPanelProps) {
 
       {showAddForm && (
         <div className="mb-4 rounded-lg bg-slate-50 p-3">
-          <h3 className="mb-2 text-sm font-medium text-slate-700">Pin New Route</h3>
+          <h3 className="mb-2 text-sm font-medium text-slate-700">
+            Pin New Route
+          </h3>
           <div className="grid grid-cols-1 gap-2 md:grid-cols-3">
             <input
               type="text"
               placeholder="Route (e.g., /chat/completions)"
               value={newPin.route}
-              onChange={(e) => setNewPin(prev => ({ ...prev, route: e.target.value }))}
+              onChange={(e) =>
+                setNewPin((prev) => ({ ...prev, route: e.target.value }))
+              }
               className="rounded border px-2 py-1 text-sm"
             />
             <input
               type="text"
               placeholder="Model (e.g., gpt-4o-mini)"
               value={newPin.model}
-              onChange={(e) => setNewPin(prev => ({ ...prev, model: e.target.value }))}
+              onChange={(e) =>
+                setNewPin((prev) => ({ ...prev, model: e.target.value }))
+              }
               className="rounded border px-2 py-1 text-sm"
             />
             <input
               type="text"
               placeholder="Note (optional)"
               value={newPin.note}
-              onChange={(e) => setNewPin(prev => ({ ...prev, note: e.target.value }))}
+              onChange={(e) =>
+                setNewPin((prev) => ({ ...prev, note: e.target.value }))
+              }
               className="rounded border px-2 py-1 text-sm"
             />
           </div>
@@ -109,13 +117,19 @@ function RoutingPinPanel({ className }: RoutingPinPanelProps) {
       <div className="space-y-2">
         {Object.keys(pins).length === 0 ? (
           <div className="text-center py-8 text-slate-500">
-            No routing pins configured. Pin routes to specific models for consistent routing.
+            No routing pins configured. Pin routes to specific models for
+            consistent routing.
           </div>
         ) : (
           Object.entries(pins).map(([route, model]) => (
-            <div key={route} className="flex items-center justify-between rounded-lg bg-slate-50 p-3">
+            <div
+              key={route}
+              className="flex items-center justify-between rounded-lg bg-slate-50 p-3"
+            >
               <div>
-                <div className="text-sm font-medium text-slate-900">{route}</div>
+                <div className="text-sm font-medium text-slate-900">
+                  {route}
+                </div>
                 <div className="text-xs text-slate-600">→ {model}</div>
               </div>
               <div className="flex gap-2">
@@ -155,8 +169,8 @@ function CandidatesPanel({ className }: CandidatesPanelProps) {
         // Mock request payload
         payload: {
           messages: [{ role: 'user', content: 'Hello' }],
-          temperature: 0.7
-        }
+          temperature: 0.7,
+        },
       });
       setCandidates(response.candidates || []);
     } catch (error) {
@@ -179,7 +193,9 @@ function CandidatesPanel({ className }: CandidatesPanelProps) {
   return (
     <div className={`rounded-lg border bg-white p-4 shadow-sm ${className}`}>
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-slate-900">Routing Candidates</h2>
+        <h2 className="text-lg font-semibold text-slate-900">
+          Routing Candidates
+        </h2>
         <div className="flex items-center gap-2">
           <select
             value={requestClass}
@@ -214,21 +230,27 @@ function CandidatesPanel({ className }: CandidatesPanelProps) {
                     Score: {candidate.score.toFixed(2)}
                   </span>
                 </div>
-                
+
                 <div className="mt-1 flex items-center gap-4 text-xs text-slate-600">
                   <span>Latency: {candidate.latency}ms</span>
                   <span>Cost: ${candidate.cost.toFixed(4)}</span>
-                  <span>Reliability: {(candidate.reliability * 100).toFixed(1)}%</span>
-                  <span className={`rounded px-1.5 py-0.5 font-medium ${
-                    candidate.policyGrade === 'A' ? 'bg-green-100 text-green-800' :
-                    candidate.policyGrade === 'B' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-red-100 text-red-800'
-                  }`}>
+                  <span>
+                    Reliability: {(candidate.reliability * 100).toFixed(1)}%
+                  </span>
+                  <span
+                    className={`rounded px-1.5 py-0.5 font-medium ${
+                      candidate.policyGrade === 'A'
+                        ? 'bg-green-100 text-green-800'
+                        : candidate.policyGrade === 'B'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-red-100 text-red-800'
+                    }`}
+                  >
                     Policy: {candidate.policyGrade}
                   </span>
                 </div>
               </div>
-              
+
               <div className="flex gap-1">
                 <button
                   onClick={() => handleTogglePin(candidate)}
@@ -243,7 +265,7 @@ function CandidatesPanel({ className }: CandidatesPanelProps) {
             </div>
           </div>
         ))}
-        
+
         {candidates.length === 0 && !loading && (
           <div className="text-center py-8 text-slate-500">
             No candidates available for {requestClass}
@@ -265,72 +287,83 @@ function PolicySheet({ className }: PolicySheetProps) {
       name: 'Data Residency',
       enabled: true,
       rules: ['US/EU only', 'No China/Russia'],
-      violations: 0
+      violations: 0,
     },
     {
-      id: 'rate-limits', 
+      id: 'rate-limits',
       name: 'Rate Limits',
       enabled: true,
       rules: ['1000 RPM per tenant', '10K TPM global'],
-      violations: 3
+      violations: 3,
     },
     {
       id: 'cost-controls',
       name: 'Cost Controls',
       enabled: true,
       rules: ['$0.10 per request max', 'Emergency brake at $1K/hour'],
-      violations: 1
+      violations: 1,
     },
     {
       id: 'fallback-strategy',
       name: 'Fallback Strategy',
       enabled: false,
       rules: ['Primary → Secondary → Cache', 'Timeout: 30s'],
-      violations: 0
-    }
+      violations: 0,
+    },
   ]);
 
   return (
     <div className={`rounded-lg border bg-white p-4 shadow-sm ${className}`}>
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-slate-900">Policy Configuration</h2>
+        <h2 className="text-lg font-semibold text-slate-900">
+          Policy Configuration
+        </h2>
         <button className="rounded border px-3 py-1.5 text-sm text-slate-700 hover:bg-slate-50">
           Edit Policies
         </button>
       </div>
 
       <div className="space-y-3">
-        {policies.map(policy => (
+        {policies.map((policy) => (
           <div key={policy.id} className="rounded-lg border p-3">
             <div className="flex items-start justify-between">
               <div className="flex-1">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-slate-900">{policy.name}</span>
+                  <span className="text-sm font-medium text-slate-900">
+                    {policy.name}
+                  </span>
                   <label className="inline-flex items-center">
                     <input
                       type="checkbox"
                       checked={policy.enabled}
                       onChange={(e) => {
-                        setPolicies(prev => prev.map(p => 
-                          p.id === policy.id ? { ...p, enabled: e.target.checked } : p
-                        ));
+                        setPolicies((prev) =>
+                          prev.map((p) =>
+                            p.id === policy.id
+                              ? { ...p, enabled: e.target.checked }
+                              : p,
+                          ),
+                        );
                       }}
                       className="form-checkbox h-4 w-4 text-indigo-600"
                     />
                   </label>
                 </div>
-                
+
                 <div className="mt-1 space-y-0.5">
                   {policy.rules.map((rule, i) => (
-                    <div key={i} className="text-xs text-slate-600">• {rule}</div>
+                    <div key={i} className="text-xs text-slate-600">
+                      • {rule}
+                    </div>
                   ))}
                 </div>
               </div>
-              
+
               <div className="text-right">
                 {policy.violations > 0 ? (
                   <span className="text-xs font-medium text-red-600">
-                    {policy.violations} violation{policy.violations !== 1 ? 's' : ''}
+                    {policy.violations} violation
+                    {policy.violations !== 1 ? 's' : ''}
                   </span>
                 ) : (
                   <span className="text-xs text-green-600">✓ Compliant</span>
@@ -358,7 +391,7 @@ function TrafficHealth({ className }: TrafficHealthProps) {
       requestsPerMin: 1240,
       tokensPerSec: 15600,
       costPerHour: 8.45,
-      status: 'healthy' as const
+      status: 'healthy' as const,
     },
     {
       provider: 'Anthropic',
@@ -368,7 +401,7 @@ function TrafficHealth({ className }: TrafficHealthProps) {
       requestsPerMin: 890,
       tokensPerSec: 11200,
       costPerHour: 6.78,
-      status: 'healthy' as const
+      status: 'healthy' as const,
     },
     {
       provider: 'Google',
@@ -378,8 +411,8 @@ function TrafficHealth({ className }: TrafficHealthProps) {
       requestsPerMin: 234,
       tokensPerSec: 3400,
       costPerHour: 2.34,
-      status: 'degraded' as const
-    }
+      status: 'degraded' as const,
+    },
   ]);
 
   const [streamConnected, setStreamConnected] = useState(false);
@@ -390,10 +423,10 @@ function TrafficHealth({ className }: TrafficHealthProps) {
     if (!cfg.gatewayBase) return;
 
     const eventSource = new EventSource(`${cfg.gatewayBase}/streams/routing`);
-    
+
     eventSource.onopen = () => setStreamConnected(true);
     eventSource.onerror = () => setStreamConnected(false);
-    
+
     eventSource.addEventListener('routing_failover', (event) => {
       const data: SSEEvent = JSON.parse(event.data);
       console.log('Routing failover detected:', data.payload);
@@ -411,11 +444,15 @@ function TrafficHealth({ className }: TrafficHealthProps) {
   return (
     <div className={`rounded-lg border bg-white p-4 shadow-sm ${className}`}>
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-slate-900">Traffic & Health</h2>
+        <h2 className="text-lg font-semibold text-slate-900">
+          Traffic & Health
+        </h2>
         <div className="flex items-center gap-2">
-          <div className={`h-2 w-2 rounded-full ${
-            streamConnected ? 'bg-green-500' : 'bg-red-500'
-          }`} />
+          <div
+            className={`h-2 w-2 rounded-full ${
+              streamConnected ? 'bg-green-500' : 'bg-red-500'
+            }`}
+          />
           <span className="text-xs text-slate-500">
             {streamConnected ? 'Live' : 'Offline'}
           </span>
@@ -444,10 +481,15 @@ function TrafficHealth({ className }: TrafficHealthProps) {
                   <div className="text-xs text-slate-600">{item.model}</div>
                 </td>
                 <td className="px-3 py-2">
-                  <span className={`text-sm font-medium ${
-                    item.successRate >= 99 ? 'text-green-600' :
-                    item.successRate >= 95 ? 'text-yellow-600' : 'text-red-600'
-                  }`}>
+                  <span
+                    className={`text-sm font-medium ${
+                      item.successRate >= 99
+                        ? 'text-green-600'
+                        : item.successRate >= 95
+                          ? 'text-yellow-600'
+                          : 'text-red-600'
+                    }`}
+                  >
                     {item.successRate.toFixed(1)}%
                   </span>
                 </td>
@@ -455,16 +497,24 @@ function TrafficHealth({ className }: TrafficHealthProps) {
                 <td className="px-3 py-2">
                   <div className="text-xs">
                     <div>{item.requestsPerMin} RPM</div>
-                    <div className="text-slate-500">{item.tokensPerSec} tok/s</div>
+                    <div className="text-slate-500">
+                      {item.tokensPerSec} tok/s
+                    </div>
                   </div>
                 </td>
-                <td className="px-3 py-2 text-sm">${item.costPerHour.toFixed(2)}</td>
+                <td className="px-3 py-2 text-sm">
+                  ${item.costPerHour.toFixed(2)}
+                </td>
                 <td className="px-3 py-2">
-                  <span className={`rounded px-2 py-0.5 text-xs font-medium ${
-                    item.status === 'healthy' ? 'bg-green-100 text-green-800' :
-                    item.status === 'degraded' ? 'bg-yellow-100 text-yellow-800' :
-                    'bg-red-100 text-red-800'
-                  }`}>
+                  <span
+                    className={`rounded px-2 py-0.5 text-xs font-medium ${
+                      item.status === 'healthy'
+                        ? 'bg-green-100 text-green-800'
+                        : item.status === 'degraded'
+                          ? 'bg-yellow-100 text-yellow-800'
+                          : 'bg-red-100 text-red-800'
+                    }`}
+                  >
                     {item.status}
                   </span>
                 </td>

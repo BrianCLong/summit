@@ -37,7 +37,7 @@ performance:
       enabled: true
       ttl: 3600
       hitRateTarget: 0.7
-  
+
   rateLimiting:
     enabled: true
     requestsPerSecond: 1000
@@ -49,7 +49,7 @@ monitoring:
     enabled: true
     port: 9090
     path: /metrics
-  
+
   tracing:
     enabled: true
     samplingRate: 0.15
@@ -60,10 +60,10 @@ monitoring:
 security:
   networkPolicies:
     enabled: true
-  
+
   podSecurityPolicy:
     enabled: true
-  
+
   rbac:
     enabled: true
 
@@ -75,7 +75,7 @@ database:
     database: intelgraph
     username: intelgraph
     passwordSecret: intelgraph-db-secret
-  
+
   neo4j:
     host: neo4j-service
     port: 7687

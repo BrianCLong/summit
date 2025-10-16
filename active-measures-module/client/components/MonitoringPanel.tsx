@@ -74,9 +74,9 @@ interface HealthScore {
 }
 
 const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
-  const [activeTab, setActiveTab] = useState<'overview' | 'metrics' | 'alerts' | 'health'>(
-    'overview',
-  );
+  const [activeTab, setActiveTab] = useState<
+    'overview' | 'metrics' | 'alerts' | 'health'
+  >('overview');
   const [realTimeData, setRealTimeData] = useState<{
     metrics: MonitoringMetric[];
     alerts: Alert[];
@@ -152,7 +152,8 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
                 severity: 'medium' as const,
                 type: 'Performance',
                 title: 'Engagement Rate Below Target',
-                description: 'Current engagement rate is 5% below the target threshold',
+                description:
+                  'Current engagement rate is 5% below the target threshold',
                 timestamp: new Date(),
                 status: 'active' as const,
               },
@@ -165,7 +166,8 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
                 severity: 'high' as const,
                 type: 'Security',
                 title: 'Attribution Risk Elevated',
-                description: 'Attribution score has increased beyond acceptable limits',
+                description:
+                  'Attribution score has increased beyond acceptable limits',
                 timestamp: new Date(),
                 status: 'active' as const,
               },
@@ -199,7 +201,10 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
       const time = new Date();
       time.setMinutes(time.getMinutes() - (19 - i) * 5); // 5-minute intervals
       return {
-        time: time.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' }),
+        time: time.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
         effectiveness: 75 + Math.sin(i * 0.3) * 10 + Math.random() * 5,
         engagement: 60 + Math.cos(i * 0.4) * 15 + Math.random() * 5,
         attribution: 30 + Math.sin(i * 0.2) * 10 + Math.random() * 3,
@@ -215,7 +220,9 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
         <CardContent className="flex items-center justify-center h-64">
           <div className="text-center">
             <BarChart3 className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-            <p className="text-muted-foreground">Select an operation to view monitoring data</p>
+            <p className="text-muted-foreground">
+              Select an operation to view monitoring data
+            </p>
           </div>
         </CardContent>
       </Card>
@@ -274,15 +281,22 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
           </div>
         </CardHeader>
         <CardContent>
-          <Tabs value={activeTab} onValueChange={(value: any) => setActiveTab(value)}>
+          <Tabs
+            value={activeTab}
+            onValueChange={(value: any) => setActiveTab(value)}
+          >
             <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="overview">Overview</TabsTrigger>
               <TabsTrigger value="metrics">Metrics</TabsTrigger>
               <TabsTrigger value="alerts">
                 Alerts
-                {realTimeData.alerts.filter((a) => a.status === 'active').length > 0 && (
+                {realTimeData.alerts.filter((a) => a.status === 'active')
+                  .length > 0 && (
                   <Badge variant="destructive" className="ml-1 text-xs">
-                    {realTimeData.alerts.filter((a) => a.status === 'active').length}
+                    {
+                      realTimeData.alerts.filter((a) => a.status === 'active')
+                        .length
+                    }
                   </Badge>
                 )}
               </TabsTrigger>
@@ -296,7 +310,9 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
                   <Card key={metric.id}>
                     <CardContent className="p-4">
                       <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm font-medium">{metric.type}</span>
+                        <span className="text-sm font-medium">
+                          {metric.type}
+                        </span>
                         {getTrendIcon(metric.trend)}
                       </div>
                       <div className="text-2xl font-bold">
@@ -306,7 +322,9 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
                       <div className="mt-2">
                         <Progress
                           value={
-                            metric.type === 'Attribution Risk' ? 100 - metric.value : metric.value
+                            metric.type === 'Attribution Risk'
+                              ? 100 - metric.value
+                              : metric.value
                           }
                           className="h-2"
                         />
@@ -364,7 +382,8 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
                         <div>
                           <h3 className="font-medium">{metric.type}</h3>
                           <p className="text-sm text-muted-foreground">
-                            Last updated: {metric.timestamp.toLocaleTimeString()}
+                            Last updated:{' '}
+                            {metric.timestamp.toLocaleTimeString()}
                           </p>
                         </div>
                         <div className="text-right">
@@ -374,7 +393,11 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
                             {getTrendIcon(metric.trend)}
                           </div>
                           <Badge
-                            variant={metric.status === 'healthy' ? 'default' : 'destructive'}
+                            variant={
+                              metric.status === 'healthy'
+                                ? 'default'
+                                : 'destructive'
+                            }
                             className="mt-1"
                           >
                             {metric.status}
@@ -384,13 +407,18 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
                       <div className="mt-4">
                         <Progress
                           value={
-                            metric.type === 'Attribution Risk' ? 100 - metric.value : metric.value
+                            metric.type === 'Attribution Risk'
+                              ? 100 - metric.value
+                              : metric.value
                           }
                           className="h-3"
                         />
                         <div className="flex justify-between text-xs text-muted-foreground mt-1">
                           <span>0</span>
-                          <span>Target: {metric.type === 'Attribution Risk' ? '<30' : '>80'}</span>
+                          <span>
+                            Target:{' '}
+                            {metric.type === 'Attribution Risk' ? '<30' : '>80'}
+                          </span>
                           <span>100</span>
                         </div>
                       </div>
@@ -404,7 +432,9 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
               {realTimeData.alerts.length > 0 ? (
                 <div className="space-y-3">
                   {realTimeData.alerts
-                    .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
+                    .sort(
+                      (a, b) => b.timestamp.getTime() - a.timestamp.getTime(),
+                    )
                     .map((alert) => (
                       <Alert
                         key={alert.id}
@@ -422,12 +452,18 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
                           <div className="flex-1">
                             <div className="flex items-center space-x-2 mb-2">
                               <AlertTriangle className="h-4 w-4" />
-                              <Badge className={getSeverityColor(alert.severity)}>
+                              <Badge
+                                className={getSeverityColor(alert.severity)}
+                              >
                                 {alert.severity.toUpperCase()}
                               </Badge>
                               <Badge variant="outline">{alert.type}</Badge>
                               <Badge
-                                variant={alert.status === 'active' ? 'destructive' : 'secondary'}
+                                variant={
+                                  alert.status === 'active'
+                                    ? 'destructive'
+                                    : 'secondary'
+                                }
                               >
                                 {alert.status}
                               </Badge>
@@ -480,10 +516,14 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
                     >
                       {realTimeData.healthScore.overall.toFixed(0)}
                     </div>
-                    <div className="text-sm text-muted-foreground mb-4">Overall Health Score</div>
+                    <div className="text-sm text-muted-foreground mb-4">
+                      Overall Health Score
+                    </div>
                     <Badge
                       variant={
-                        realTimeData.healthScore.status === 'healthy' ? 'default' : 'destructive'
+                        realTimeData.healthScore.status === 'healthy'
+                          ? 'default'
+                          : 'destructive'
                       }
                       className="text-sm"
                     >
@@ -499,15 +539,29 @@ const MonitoringPanel: React.FC<MonitoringPanelProps> = ({ operationId }) => {
                   </CardHeader>
                   <CardContent className="space-y-4">
                     {[
-                      { label: 'Operational', value: realTimeData.healthScore.operational },
-                      { label: 'Technical', value: realTimeData.healthScore.technical },
-                      { label: 'Strategic', value: realTimeData.healthScore.strategic },
-                      { label: 'Compliance', value: realTimeData.healthScore.compliance },
+                      {
+                        label: 'Operational',
+                        value: realTimeData.healthScore.operational,
+                      },
+                      {
+                        label: 'Technical',
+                        value: realTimeData.healthScore.technical,
+                      },
+                      {
+                        label: 'Strategic',
+                        value: realTimeData.healthScore.strategic,
+                      },
+                      {
+                        label: 'Compliance',
+                        value: realTimeData.healthScore.compliance,
+                      },
                     ].map((item) => (
                       <div key={item.label} className="space-y-2">
                         <div className="flex justify-between text-sm">
                           <span>{item.label}</span>
-                          <span className={`font-medium ${getHealthColor(item.value)}`}>
+                          <span
+                            className={`font-medium ${getHealthColor(item.value)}`}
+                          >
                             {item.value.toFixed(0)}%
                           </span>
                         </div>

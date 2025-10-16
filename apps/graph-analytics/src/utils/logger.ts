@@ -54,7 +54,9 @@ export const performanceLogger = {
         end: () => {
           const endTime = process.hrtime.bigint();
           const duration = Number(endTime - startTime) / 1000000; // Convert to milliseconds
-          logger.info(`Performance: ${operation} completed in ${duration.toFixed(2)}ms`);
+          logger.info(
+            `Performance: ${operation} completed in ${duration.toFixed(2)}ms`,
+          );
         },
       };
     }

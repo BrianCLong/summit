@@ -1,4 +1,3 @@
-
 // conductor-ui/frontend/src/components/onboarding/OnboardingChecklist.tsx
 import React, { useState } from 'react';
 
@@ -13,8 +12,8 @@ export const OnboardingChecklist = () => {
   const [completed, setCompleted] = useState<string[]>([]);
 
   const handleToggle = (id: string) => {
-    setCompleted(prev => 
-      prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]
+    setCompleted((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
     );
   };
 
@@ -22,10 +21,14 @@ export const OnboardingChecklist = () => {
     <div>
       <h2>Getting Started</h2>
       <ul>
-        {checklistItems.map(item => (
+        {checklistItems.map((item) => (
           <li key={item.id}>
             <label>
-              <input type="checkbox" checked={completed.includes(item.id)} onChange={() => handleToggle(item.id)} />
+              <input
+                type="checkbox"
+                checked={completed.includes(item.id)}
+                onChange={() => handleToggle(item.id)}
+              />
               {item.text}
             </label>
           </li>

@@ -1,11 +1,11 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "gateway.fullname" . | default "gateway" }}
+  name: { { include "gateway.fullname" . | default "gateway" } }
   labels:
     app.kubernetes.io/name: gateway
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: { { .Values.replicaCount } }
   selector:
     matchLabels:
       app.kubernetes.io/name: gateway
@@ -16,17 +16,56 @@ spec:
     spec:
       containers:
         - name: gateway
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: '{{ .Values.image.repository }}:{{ .Values.image.tag }}'
+          imagePullPolicy: { { .Values.image.pullPolicy } }
           ports:
-            - containerPort: {{ .Values.service.targetPort | default 4000 }}
+            - containerPort: { { .Values.service.targetPort | default 4000 } }
           env:
             - name: OIDC_ISSUER
-              valueFrom: { secretKeyRef: { name: {{ .Values.oidc.secretName | default "oidc" | quote }}, key: issuer } }
+              valueFrom:
+                {
+                  secretKeyRef:
+                    {
+                      name:
+                        {
+                          { .Values.oidc.secretName | default "oidc" | quote },
+                        },
+                      key: issuer,
+                    },
+                }
             - name: OIDC_CLIENT_ID
-              valueFrom: { secretKeyRef: { name: {{ .Values.oidc.secretName | default "oidc" | quote }}, key: clientId } }
+              valueFrom:
+                {
+                  secretKeyRef:
+                    {
+                      name:
+                        {
+                          { .Values.oidc.secretName | default "oidc" | quote },
+                        },
+                      key: clientId,
+                    },
+                }
             - name: OIDC_CLIENT_SECRET
-              valueFrom: { secretKeyRef: { name: {{ .Values.oidc.secretName | default "oidc" | quote }}, key: clientSecret } }
+              valueFrom:
+                {
+                  secretKeyRef:
+                    {
+                      name:
+                        {
+                          { .Values.oidc.secretName | default "oidc" | quote },
+                        },
+                      key: clientSecret,
+                    },
+                }
             - name: SCIM_TOKEN
-              valueFrom: { secretKeyRef: { name: {{ .Values.scim.secretName | default "scim" | quote }}, key: token } }
-
+              valueFrom:
+                {
+                  secretKeyRef:
+                    {
+                      name:
+                        {
+                          { .Values.scim.secretName | default "scim" | quote },
+                        },
+                      key: token,
+                    },
+                }

@@ -22,7 +22,7 @@ export const schema = gql`
     novelFeatures: [String]
   }
   type OperationPlan {
-    graph: String  # Using String instead of JSON for now
+    graph: String # Using String instead of JSON for now
     predictedEffects: [EffectMetric]
     auditTrail: [AuditEntry]
   }

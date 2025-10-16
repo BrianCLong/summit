@@ -5,10 +5,5 @@
     "noEmit": true,
     "skipLibCheck": true
   },
-  "include": [
-    "src/**/*",
-    "src/**/*.test.*",
-    "src/**/__tests__/**/*"
-  ]
+  "include": ["src/**/*", "src/**/*.test.*", "src/**/__tests__/**/*"]
 }
-

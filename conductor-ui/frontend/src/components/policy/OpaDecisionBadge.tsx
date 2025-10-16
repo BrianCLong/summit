@@ -1,4 +1,3 @@
-
 // conductor-ui/frontend/src/components/policy/OpaDecisionBadge.tsx
 import React from 'react';
 
@@ -15,7 +14,10 @@ export const OpaDecisionBadge = ({ decision }: OpaDecisionBadgeProps) => {
   };
 
   return (
-    <span style={style} title={decision.reason || (decision.allow ? 'Allowed' : 'Denied')}>
+    <span
+      style={style}
+      title={decision.reason || (decision.allow ? 'Allowed' : 'Denied')}
+    >
       {decision.allow ? 'Allowed' : 'Denied'}
     </span>
   );

@@ -1,17 +1,17 @@
 """Policy-Constrained Knowledge Distillation (PCKD)."""
 
 from .attestations import AttestedTrainingManifest, ProofOfExclusion
-from .baselines import knowledge_distillation, dpo_alignment_stub
+from .baselines import dpo_alignment_stub, knowledge_distillation
 from .compliance import ComplianceVerifier
-from .data import Example, Dataset, TaintScreenResult
+from .data import Dataset, Example, TaintScreenResult
 from .distillation import (
     DistillationArtifacts,
     PCKDPipeline,
     TaintScreenReport,
     TeacherLogitsCache,
 )
-from .filters import PolicyFilter, MetadataPolicyFilter
-from .models import LogisticModel, LogisticTeacher, LogisticStudent
+from .filters import MetadataPolicyFilter, PolicyFilter
+from .models import LogisticModel, LogisticStudent, LogisticTeacher
 
 __all__ = [
     "AttestedTrainingManifest",

@@ -1,4 +1,8 @@
-export type DisclosureArtifact = 'audit-trail' | 'sbom' | 'attestations' | 'policy-reports';
+export type DisclosureArtifact =
+  | 'audit-trail'
+  | 'sbom'
+  | 'attestations'
+  | 'policy-reports';
 
 export interface DisclosureJob {
   id: string;
@@ -44,7 +48,10 @@ export async function createDisclosureExport(payload: {
   return body.job;
 }
 
-export async function getDisclosureJob(tenantId: string, jobId: string): Promise<DisclosureJob> {
+export async function getDisclosureJob(
+  tenantId: string,
+  jobId: string,
+): Promise<DisclosureJob> {
   const response = await fetch(`${API_BASE}/disclosures/export/${jobId}`, {
     headers: {
       'x-tenant-id': tenantId,
@@ -55,7 +62,9 @@ export async function getDisclosureJob(tenantId: string, jobId: string): Promise
   return body.job;
 }
 
-export async function listDisclosureJobs(tenantId: string): Promise<DisclosureJob[]> {
+export async function listDisclosureJobs(
+  tenantId: string,
+): Promise<DisclosureJob[]> {
   const response = await fetch(`${API_BASE}/disclosures/export`, {
     headers: {
       'x-tenant-id': tenantId,
@@ -66,7 +75,11 @@ export async function listDisclosureJobs(tenantId: string): Promise<DisclosureJo
   return body.jobs;
 }
 
-export async function sendDisclosureAnalyticsEvent(event: 'view' | 'start', tenantId: string, context?: Record<string, unknown>) {
+export async function sendDisclosureAnalyticsEvent(
+  event: 'view' | 'start',
+  tenantId: string,
+  context?: Record<string, unknown>,
+) {
   try {
     const payload = JSON.stringify({ event, tenantId, context });
     if (navigator.sendBeacon) {

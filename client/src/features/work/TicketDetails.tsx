@@ -32,7 +32,10 @@ export default function TicketDetails() {
       const r = await fetch('/graphql', {
         method: 'POST',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ query: q, variables: { provider, id: externalId } }),
+        body: JSON.stringify({
+          query: q,
+          variables: { provider, id: externalId },
+        }),
       });
       const j = await r.json();
       setTicket(j?.data?.tickets?.[0] ?? null);
@@ -72,7 +75,7 @@ export default function TicketDetails() {
           <div className="flex items-center gap-3">
             <span className="font-mono">Ext ID:</span> {ticket.external_id}
             {ticket.provider === 'github' && ticket.repo && (
-              <a 
+              <a
                 className="px-2 py-1 text-xs bg-gray-100 text-gray-700 rounded hover:bg-gray-200"
                 href={`https://github.com/${ticket.repo}/issues/${ticket.external_id}`}
                 target="_blank"
@@ -82,7 +85,7 @@ export default function TicketDetails() {
               </a>
             )}
             {ticket.provider === 'jira' && ticket.project && (
-              <a 
+              <a
                 className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
                 href={`${(import.meta as any).env.VITE_JIRA_BROWSE_URL}/browse/${ticket.external_id}`}
                 target="_blank"
@@ -93,10 +96,12 @@ export default function TicketDetails() {
             )}
           </div>
           <div>
-            <span className="font-mono">Assignee:</span> {ticket.assignee ?? '—'}
+            <span className="font-mono">Assignee:</span>{' '}
+            {ticket.assignee ?? '—'}
           </div>
           <div>
-            <span className="font-mono">Labels:</span> {(ticket.labels || []).join(', ') || '—'}
+            <span className="font-mono">Labels:</span>{' '}
+            {(ticket.labels || []).join(', ') || '—'}
           </div>
         </div>
       </section>
@@ -108,10 +113,13 @@ export default function TicketDetails() {
         ) : (
           <ul className="space-y-2">
             {(ticket.runs || []).map((r) => (
-              <li key={r.id} className="flex items-center gap-3 p-2 border rounded">
+              <li
+                key={r.id}
+                className="flex items-center gap-3 p-2 border rounded"
+              >
                 <span className="font-mono text-sm">{r.id}</span>
                 <div className="flex gap-2">
-                  <Link 
+                  <Link
                     className="px-2 py-1 text-xs bg-blue-100 text-blue-700 rounded hover:bg-blue-200"
                     to={`/runs/viewer?runId=${r.id}`}
                   >
@@ -131,10 +139,13 @@ export default function TicketDetails() {
         ) : (
           <ul className="space-y-2">
             {(ticket.deployments || []).map((d) => (
-              <li key={d.id} className="flex items-center gap-3 p-2 border rounded">
+              <li
+                key={d.id}
+                className="flex items-center gap-3 p-2 border rounded"
+              >
                 <span className="font-mono text-sm">{d.id}</span>
                 <div className="flex gap-2">
-                  <Link 
+                  <Link
                     className="px-2 py-1 text-xs bg-green-100 text-green-700 rounded hover:bg-green-200"
                     to={`/deployments/${d.id}`}
                   >
@@ -149,12 +160,22 @@ export default function TicketDetails() {
 
       <section className="flex gap-3">
         {githubNewIssueUrl && (
-          <a className="px-3 py-2 rounded bg-black text-white" href={githubNewIssueUrl} target="_blank" rel="noreferrer">
+          <a
+            className="px-3 py-2 rounded bg-black text-white"
+            href={githubNewIssueUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
             Create GitHub Defect
           </a>
         )}
         {jiraCreateUrl && (
-          <a className="px-3 py-2 rounded bg-blue-600 text-white" href={jiraCreateUrl} target="_blank" rel="noreferrer">
+          <a
+            className="px-3 py-2 rounded bg-blue-600 text-white"
+            href={jiraCreateUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
             Create Jira Defect
           </a>
         )}

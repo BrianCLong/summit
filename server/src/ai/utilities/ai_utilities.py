@@ -1,5 +1,5 @@
-
 # server/src/ai/utilities/ai_utilities.py
+
 
 def extract_text_from_document(document_path: str) -> str:
     """
@@ -8,6 +8,7 @@ def extract_text_from_document(document_path: str) -> str:
     print(f"Extracting text from: {document_path}")
     return "Extracted text content."
 
+
 def redact_sensitive_info(text: str, redaction_policy: dict) -> str:
     """
     Stub for redacting sensitive information (e.g., PII, faces in images).
@@ -15,12 +16,14 @@ def redact_sensitive_info(text: str, redaction_policy: dict) -> str:
     print(f"Redacting text with policy: {redaction_policy}")
     return "[REDACTED] text content."
 
+
 def apply_guardrails(input_data: any, guardrail_rules: list) -> bool:
     """
     Stub for applying guardrails to AI inputs/outputs.
     """
     print(f"Applying guardrails with rules: {guardrail_rules}")
     return True
+
 
 def log_xai_audit(action: str, details: dict):
     """

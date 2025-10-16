@@ -23,3 +23,11 @@ declare module './db/*' {
   const anyExport: any;
   export = anyExport;
 }
+declare module './config/*' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module './lib/*' {
+  const anyExport: any;
+  export = anyExport;
+}

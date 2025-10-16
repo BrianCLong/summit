@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable, Iterator, Sequence
 from dataclasses import dataclass
 from statistics import mean
-from typing import Iterable, Iterator, List, Sequence
 
 
 @dataclass(frozen=True)
@@ -33,8 +33,8 @@ class AdaptiveBatcher:
         self._min_batch_size = min_batch_size
         self._max_batch_size = max_batch_size
         self._latency_slo_ms = latency_slo_ms
-        self._latency_history: List[float] = []
-        self._size_history: List[int] = []
+        self._latency_history: list[float] = []
+        self._size_history: list[int] = []
 
     @property
     def latency_history(self) -> Sequence[float]:
@@ -80,10 +80,10 @@ class AdaptiveBatcher:
             self._size_history.pop(0)
             self._latency_history.pop(0)
 
-    def batch_iterable(self, records: Iterable[object], plan: BatchPlan) -> Iterator[List[object]]:
+    def batch_iterable(self, records: Iterable[object], plan: BatchPlan) -> Iterator[list[object]]:
         """Yield records grouped according to the supplied plan."""
 
-        batch: List[object] = []
+        batch: list[object] = []
         for record in records:
             batch.append(record)
             if len(batch) >= plan.size:

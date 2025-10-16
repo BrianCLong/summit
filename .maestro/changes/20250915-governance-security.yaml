@@ -1,9 +1,9 @@
 area: governance
 intent: enforce
-objective: "OPA-backed ABAC/RBAC, reason-for-access logging, step-up auth where needed."
+objective: 'OPA-backed ABAC/RBAC, reason-for-access logging, step-up auth where needed.'
 work_items:
   - id: GV-1
-    story: "Policy sets + decision logs; STRIDE mapping"
+    story: 'Policy sets + decision logs; STRIDE mapping'
 acceptance:
-  - "No critical findings at RC1; audit trail present"
-owners: { DRI: "security", support: ["server","ops"] }
+  - 'No critical findings at RC1; audit trail present'
+owners: { DRI: 'security', support: ['server', 'ops'] }

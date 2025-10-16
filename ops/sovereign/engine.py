@@ -11,24 +11,25 @@ import hashlib
 import json
 import time
 import uuid
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Optional, Any
+from typing import Any
 
 
 @dataclass
 class ComplianceStance:
     """Tenant-declared compliance stance"""
+
     tenant_id: str
     stance_version: str
     gdpr_enabled: bool
     hipaa_enabled: bool
-    soc2_controls: List[str]
+    soc2_controls: list[str]
     data_retention_days: int
     encryption_required: bool
     audit_frequency: str
-    custom_policies: List[str]
+    custom_policies: list[str]
     signature: str
     timestamp: str
 
@@ -36,24 +37,26 @@ class ComplianceStance:
 @dataclass
 class PolicyCompilation:
     """Compiled OPA policies from compliance stance"""
+
     tenant_id: str
     stance_hash: str
     opa_rules: str
-    runtime_checks: List[str]
-    audit_hooks: List[str]
+    runtime_checks: list[str]
+    audit_hooks: list[str]
     compilation_timestamp: str
 
 
 @dataclass
 class AuditPack:
     """On-demand audit pack for tenant"""
+
     pack_id: str
     tenant_id: str
     timeframe_start: str
     timeframe_end: str
-    compliance_evidence: Dict[str, Any]
-    policy_attestations: List[str]
-    violations: List[str]
+    compliance_evidence: dict[str, Any]
+    policy_attestations: list[str]
+    violations: list[str]
     generated_timestamp: str
 
 
@@ -64,16 +67,16 @@ class SovereignComplianceEngine:
         self.evidence_dir = Path("evidence/v0.3.7/sovereign")
         self.evidence_dir.mkdir(parents=True, exist_ok=True)
 
-        self.tenant_stances: Dict[str, ComplianceStance] = {}
-        self.compiled_policies: Dict[str, PolicyCompilation] = {}
-        self.request_tags: List[Dict[str, str]] = []
+        self.tenant_stances: dict[str, ComplianceStance] = {}
+        self.compiled_policies: dict[str, PolicyCompilation] = {}
+        self.request_tags: list[dict[str, str]] = []
 
-    def _sign_stance(self, stance_data: Dict[str, Any]) -> str:
+    def _sign_stance(self, stance_data: dict[str, Any]) -> str:
         """Sign compliance stance for integrity"""
-        canonical = json.dumps(stance_data, sort_keys=True, separators=(',', ':'))
+        canonical = json.dumps(stance_data, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(canonical.encode()).hexdigest()
 
-    def _compile_gdpr_rules(self, stance: ComplianceStance) -> List[str]:
+    def _compile_gdpr_rules(self, stance: ComplianceStance) -> list[str]:
         """Compile GDPR-specific OPA rules"""
         if not stance.gdpr_enabled:
             return []
@@ -105,7 +108,7 @@ allow_processing {{
             """.strip()
         ]
 
-    def _compile_hipaa_rules(self, stance: ComplianceStance) -> List[str]:
+    def _compile_hipaa_rules(self, stance: ComplianceStance) -> list[str]:
         """Compile HIPAA-specific OPA rules"""
         if not stance.hipaa_enabled:
             return []
@@ -137,7 +140,7 @@ require_phi_audit {{
             """.strip()
         ]
 
-    def _compile_soc2_rules(self, stance: ComplianceStance) -> List[str]:
+    def _compile_soc2_rules(self, stance: ComplianceStance) -> list[str]:
         """Compile SOC2-specific OPA rules"""
         if not stance.soc2_controls:
             return []
@@ -145,7 +148,8 @@ require_phi_audit {{
         rules = []
         for control in stance.soc2_controls:
             if control == "CC6.1":  # Logical access controls
-                rules.append(f"""
+                rules.append(
+                    f"""
 package policies.soc2.{stance.tenant_id}
 
 # CC6.1 - Logical access controls
@@ -158,16 +162,19 @@ allow_system_access {{
 deny_unauthorized_access {{
     input.user_authenticated != true
 }}
-                """.strip())
+                """.strip()
+                )
 
             elif control == "A1.2":  # Availability commitments
-                rules.append(f"""
+                rules.append(
+                    """
 # A1.2 - System availability
-monitor_availability {{
+monitor_availability {
     input.system_uptime >= 0.999  # 99.9% SLA
     input.response_time_p95 <= 200  # ms
-}}
-                """.strip())
+}
+                """.strip()
+                )
 
         return rules
 
@@ -232,7 +239,7 @@ retention_compliant {{
         runtime_checks = [
             "verify_tenant_isolation",
             "check_encryption_status",
-            "validate_retention_period"
+            "validate_retention_period",
         ]
 
         if stance.gdpr_enabled:
@@ -241,11 +248,7 @@ retention_compliant {{
             runtime_checks.extend(["hipaa_phi_protection", "hipaa_audit_trail"])
 
         # Audit hooks
-        audit_hooks = [
-            "log_policy_decision",
-            "record_data_access",
-            "track_compliance_events"
-        ]
+        audit_hooks = ["log_policy_decision", "record_data_access", "track_compliance_events"]
 
         compilation = PolicyCompilation(
             tenant_id=stance.tenant_id,
@@ -253,12 +256,12 @@ retention_compliant {{
             opa_rules=combined_rules,
             runtime_checks=runtime_checks,
             audit_hooks=audit_hooks,
-            compilation_timestamp=datetime.now(timezone.utc).isoformat()
+            compilation_timestamp=datetime.now(timezone.utc).isoformat(),
         )
 
         return compilation
 
-    def tag_request(self, tenant_id: str, request_id: str) -> Optional[str]:
+    def tag_request(self, tenant_id: str, request_id: str) -> str | None:
         """Tag request with tenant policy hash"""
         if tenant_id not in self.compiled_policies:
             return None
@@ -266,12 +269,14 @@ retention_compliant {{
         policy_hash = self.compiled_policies[tenant_id].stance_hash
 
         # Record tag
-        self.request_tags.append({
-            "request_id": request_id,
-            "tenant_id": tenant_id,
-            "policy_hash": policy_hash,
-            "timestamp": datetime.now(timezone.utc).isoformat()
-        })
+        self.request_tags.append(
+            {
+                "request_id": request_id,
+                "tenant_id": tenant_id,
+                "policy_hash": policy_hash,
+                "timestamp": datetime.now(timezone.utc).isoformat(),
+            }
+        )
 
         return policy_hash
 
@@ -283,11 +288,7 @@ retention_compliant {{
         declared_hash = self.compiled_policies[tenant_id].stance_hash
         return declared_hash == runtime_hash
 
-    async def generate_audit_pack(
-        self,
-        tenant_id: str,
-        timeframe_hours: int = 24
-    ) -> AuditPack:
+    async def generate_audit_pack(self, tenant_id: str, timeframe_hours: int = 24) -> AuditPack:
         """Generate on-demand audit pack for tenant"""
         start_time = time.time()
 
@@ -305,7 +306,8 @@ retention_compliant {{
 
         # Filter request tags for this tenant and timeframe
         tenant_requests = [
-            tag for tag in self.request_tags
+            tag
+            for tag in self.request_tags
             if tag["tenant_id"] == tenant_id and tag["timestamp"] >= timeframe_start
         ]
 
@@ -313,16 +315,15 @@ retention_compliant {{
         evidence = {
             "requests_processed": len(tenant_requests),
             "policy_hash_consistency": all(
-                tag["policy_hash"] == compilation.stance_hash
-                for tag in tenant_requests
+                tag["policy_hash"] == compilation.stance_hash for tag in tenant_requests
             ),
             "encryption_enforced": stance.encryption_required,
             "retention_policy": f"{stance.data_retention_days} days",
             "frameworks_enabled": {
                 "gdpr": stance.gdpr_enabled,
                 "hipaa": stance.hipaa_enabled,
-                "soc2": len(stance.soc2_controls) > 0
-            }
+                "soc2": len(stance.soc2_controls) > 0,
+            },
         }
 
         # Generate policy attestations
@@ -330,7 +331,7 @@ retention_compliant {{
             f"Tenant {tenant_id} compliance stance verified: {stance.signature[:16]}",
             f"Policy compilation hash: {compilation.stance_hash}",
             f"Runtime checks active: {len(compilation.runtime_checks)}",
-            f"Audit hooks enabled: {len(compilation.audit_hooks)}"
+            f"Audit hooks enabled: {len(compilation.audit_hooks)}",
         ]
 
         # Check for violations (simulated)
@@ -347,12 +348,12 @@ retention_compliant {{
             compliance_evidence=evidence,
             policy_attestations=attestations,
             violations=violations,
-            generated_timestamp=now.isoformat()
+            generated_timestamp=now.isoformat(),
         )
 
         # Save audit pack
         pack_file = self.evidence_dir / f"audit-pack-{pack.pack_id}.json"
-        with open(pack_file, 'w') as f:
+        with open(pack_file, "w") as f:
             json.dump(asdict(pack), f, indent=2)
 
         generation_time = time.time() - start_time
@@ -360,7 +361,7 @@ retention_compliant {{
 
         return pack
 
-    def get_compliance_metrics(self) -> Dict[str, Any]:
+    def get_compliance_metrics(self) -> dict[str, Any]:
         """Get compliance engine metrics"""
         total_tenants = len(self.tenant_stances)
         total_requests = len(self.request_tags)
@@ -380,8 +381,8 @@ retention_compliant {{
             "frameworks_active": {
                 "gdpr": sum(1 for s in self.tenant_stances.values() if s.gdpr_enabled),
                 "hipaa": sum(1 for s in self.tenant_stances.values() if s.hipaa_enabled),
-                "soc2": sum(1 for s in self.tenant_stances.values() if s.soc2_controls)
-            }
+                "soc2": sum(1 for s in self.tenant_stances.values() if s.soc2_controls),
+            },
         }
 
 
@@ -404,7 +405,7 @@ async def main():
         audit_frequency="monthly",
         custom_policies=["analytics", "personalization"],
         signature="",  # Will be set by engine
-        timestamp=datetime.now(timezone.utc).isoformat()
+        timestamp=datetime.now(timezone.utc).isoformat(),
     )
 
     stance_hash = engine.declare_compliance_stance(stance)
@@ -427,7 +428,7 @@ async def main():
 
     # Show metrics
     metrics = engine.get_compliance_metrics()
-    print(f"\n📊 Compliance metrics:")
+    print("\n📊 Compliance metrics:")
     print(f"   Tenants: {metrics['total_tenants']}")
     print(f"   Tagged requests: {metrics['total_requests_tagged']}")
     print(f"   Coverage: {metrics['tagging_coverage']:.1f}%")
@@ -435,4 +436,5 @@ async def main():
 
 if __name__ == "__main__":
     import asyncio
+
     asyncio.run(main())

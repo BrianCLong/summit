@@ -11,14 +11,16 @@ export default function ErrorPanels() {
     mock: { value: 0.0123 },
     deps: [tenant, status, operation],
   });
-  const { data: topOps } = useSafeQuery<{ operation: string; ratio: number }[]>({
-    queryKey: `err_top_ops_${tenant}_${status}`,
-    mock: [
-      { operation: 'SearchQuery', ratio: 0.034 },
-      { operation: 'UpdateCase', ratio: 0.021 },
-    ],
-    deps: [tenant, status],
-  });
+  const { data: topOps } = useSafeQuery<{ operation: string; ratio: number }[]>(
+    {
+      queryKey: `err_top_ops_${tenant}_${status}`,
+      mock: [
+        { operation: 'SearchQuery', ratio: 0.034 },
+        { operation: 'UpdateCase', ratio: 0.021 },
+      ],
+      deps: [tenant, status],
+    },
+  );
 
   const columns: GridColDef[] = [
     { field: 'operation', headerName: 'Operation', flex: 1 },

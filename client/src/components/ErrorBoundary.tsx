@@ -3,7 +3,7 @@ import React from 'react';
 
 function logErrorToTelemetry(error: Error, errorInfo: React.ErrorInfo) {
   // Old: // TODO: wire to your telemetry
-  console.log("Logging error to telemetry service...");
+  console.log('Logging error to telemetry service...');
   console.log({
     error: error.toString(),
     componentStack: errorInfo.componentStack,

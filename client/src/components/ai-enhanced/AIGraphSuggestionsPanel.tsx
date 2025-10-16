@@ -33,7 +33,10 @@ export default function AIGraphSuggestionsPanel() {
   }, [load]);
 
   const act = async (id: string, kind: 'accept' | 'reject') => {
-    await gql<{ ok: boolean }>(`mutation($id: ID!) { ${kind}Suggestion(id:$id) }`, { id });
+    await gql<{ ok: boolean }>(
+      `mutation($id: ID!) { ${kind}Suggestion(id:$id) }`,
+      { id },
+    );
     await load();
   };
 
@@ -47,12 +50,22 @@ export default function AIGraphSuggestionsPanel() {
               {s.type} • {s.createdAt}
             </div>
             <div className="text-lg font-medium">{s.label}</div>
-            <div className="text-sm">confidence: {Math.round(s.confidence * 100)}%</div>
+            <div className="text-sm">
+              confidence: {Math.round(s.confidence * 100)}%
+            </div>
             <div className="mt-2 flex gap-2">
-              <Button size="small" variant="contained" onClick={() => act(s.id, 'accept')}>
+              <Button
+                size="small"
+                variant="contained"
+                onClick={() => act(s.id, 'accept')}
+              >
                 Accept
               </Button>
-              <Button size="small" variant="outlined" onClick={() => act(s.id, 'reject')}>
+              <Button
+                size="small"
+                variant="outlined"
+                onClick={() => act(s.id, 'reject')}
+              >
                 Reject
               </Button>
             </div>

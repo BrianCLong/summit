@@ -4,16 +4,17 @@ MC Platform Config Integrity Attestation Tool
 Hashes and signs Helm values, HPA, NetworkPolicy, ServiceMonitor configurations
 """
 
-import json
-import hashlib
 import argparse
+import hashlib
+import json
 import subprocess
 import sys
-from pathlib import Path
 from datetime import datetime
-from typing import Dict, Any, List
+from pathlib import Path
+from typing import Any
 
-def collect_config_files() -> Dict[str, Any]:
+
+def collect_config_files() -> dict[str, Any]:
     """Collect all configuration files for attestation"""
     configs = {}
 
@@ -21,44 +22,46 @@ def collect_config_files() -> Dict[str, Any]:
     helm_paths = [
         "charts/agent-workbench/values.yaml",
         "charts/agent-workbench/values-prod.yaml",
-        "charts/agent-workbench/values-llm-egress.yaml"
+        "charts/agent-workbench/values-llm-egress.yaml",
     ]
 
     for path in helm_paths:
         if Path(path).exists():
-            with open(path, 'r') as f:
+            with open(path) as f:
                 configs[path] = f.read()
 
     # HPA template
     hpa_path = "charts/agent-workbench/templates/hpa.yaml"
     if Path(hpa_path).exists():
-        with open(hpa_path, 'r') as f:
+        with open(hpa_path) as f:
             configs[hpa_path] = f.read()
 
     # NetworkPolicy template
     netpol_path = "charts/agent-workbench/templates/networkpolicy.yaml"
     if Path(netpol_path).exists():
-        with open(netpol_path, 'r') as f:
+        with open(netpol_path) as f:
             configs[netpol_path] = f.read()
 
     # ServiceMonitor template
     sm_path = "charts/agent-workbench/templates/servicemonitor.yaml"
     if Path(sm_path).exists():
-        with open(sm_path, 'r') as f:
+        with open(sm_path) as f:
             configs[sm_path] = f.read()
 
     return configs
 
-def generate_config_hash(configs: Dict[str, Any]) -> str:
+
+def generate_config_hash(configs: dict[str, Any]) -> str:
     """Generate SHA-256 hash of all config content"""
     hasher = hashlib.sha256()
 
     # Sort by path for consistent hashing
     for path in sorted(configs.keys()):
         content = configs[path]
-        hasher.update(f"{path}:{content}".encode('utf-8'))
+        hasher.update(f"{path}:{content}".encode())
 
     return hasher.hexdigest()
+
 
 def create_snapshot(output_path: str) -> None:
     """Create config snapshot with hash and metadata"""
@@ -72,17 +75,18 @@ def create_snapshot(output_path: str) -> None:
         "files": list(configs.keys()),
         "configs": configs,
         "git_commit": get_git_commit(),
-        "attestation_method": "sha256_hash"
+        "attestation_method": "sha256_hash",
     }
 
     # Ensure output directory exists
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
 
-    with open(output_path, 'w') as f:
+    with open(output_path, "w") as f:
         json.dump(snapshot, f, indent=2)
 
     print(f"✅ Config snapshot created: {output_path}")
     print(f"🔒 Config hash: {config_hash}")
+
 
 def verify_snapshot(snapshot_path: str, signature_path: str = None) -> bool:
     """Verify config snapshot integrity"""
@@ -90,7 +94,7 @@ def verify_snapshot(snapshot_path: str, signature_path: str = None) -> bool:
         print(f"❌ Snapshot file not found: {snapshot_path}")
         return False
 
-    with open(snapshot_path, 'r') as f:
+    with open(snapshot_path) as f:
         snapshot = json.load(f)
 
     # Recalculate hash from current configs
@@ -99,11 +103,11 @@ def verify_snapshot(snapshot_path: str, signature_path: str = None) -> bool:
     snapshot_hash = snapshot.get("config_hash")
 
     if current_hash == snapshot_hash:
-        print(f"✅ Config integrity verified")
+        print("✅ Config integrity verified")
         print(f"🔒 Hash: {current_hash}")
         return True
     else:
-        print(f"❌ Config drift detected!")
+        print("❌ Config drift detected!")
         print(f"📄 Snapshot hash: {snapshot_hash}")
         print(f"📄 Current hash:  {current_hash}")
 
@@ -118,12 +122,13 @@ def verify_snapshot(snapshot_path: str, signature_path: str = None) -> bool:
 
         return False
 
+
 def sign_snapshot(snapshot_path: str, signature_path: str) -> None:
     """Sign config snapshot (placeholder for actual signing)"""
     # In production, this would use HSM or GPG signing
     # For now, create a simple signature file
 
-    with open(snapshot_path, 'r') as f:
+    with open(snapshot_path) as f:
         snapshot_content = f.read()
 
     # Simple signature (in production, use proper cryptographic signing)
@@ -134,29 +139,28 @@ def sign_snapshot(snapshot_path: str, signature_path: str) -> None:
         "algorithm": "sha256",
         "timestamp": datetime.utcnow().isoformat() + "Z",
         "signer": "mc-platform-config-attest",
-        "snapshot_file": snapshot_path
+        "snapshot_file": snapshot_path,
     }
 
     # Ensure output directory exists
     Path(signature_path).parent.mkdir(parents=True, exist_ok=True)
 
-    with open(signature_path, 'w') as f:
+    with open(signature_path, "w") as f:
         json.dump(signature_data, f, indent=2)
 
     print(f"✅ Signature created: {signature_path}")
+
 
 def get_git_commit() -> str:
     """Get current git commit hash"""
     try:
         result = subprocess.run(
-            ["git", "rev-parse", "HEAD"],
-            capture_output=True,
-            text=True,
-            check=True
+            ["git", "rev-parse", "HEAD"], capture_output=True, text=True, check=True
         )
         return result.stdout.strip()
     except subprocess.CalledProcessError:
         return "unknown"
+
 
 def main():
     parser = argparse.ArgumentParser(description="MC Platform Config Attestation Tool")
@@ -187,6 +191,7 @@ def main():
         sign_snapshot(args.snapshot, args.out)
     else:
         parser.print_help()
+
 
 if __name__ == "__main__":
     main()

@@ -4,11 +4,11 @@ This script demonstrates how a temporal graph model could be trained
 using PyTorch Lightning.  The implementation is deliberately minimal and
 serves as scaffolding for future development.
 """
+
 from __future__ import annotations
 
 import os
 from datetime import datetime
-from typing import Optional
 
 import pytorch_lightning as pl
 from pytorch_lightning.loggers import WandbLogger
@@ -29,7 +29,7 @@ class DummyForecaster(pl.LightningModule):
 
 def train(output_dir: str, max_epochs: int = 1, project: str = "intelgraph-forecast") -> None:
     """Run a demo training session and log to Weights & Biases."""
-    logger: Optional[WandbLogger] = None
+    logger: WandbLogger | None = None
     if os.environ.get("WANDB_API_KEY"):
         logger = WandbLogger(project=project)
     trainer = pl.Trainer(max_epochs=max_epochs, logger=logger, enable_checkpointing=False)

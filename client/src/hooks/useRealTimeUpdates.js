@@ -87,14 +87,16 @@ export function useRealTimeGraph() {
             label: `Person ${Math.floor(Math.random() * 1000)}`,
             type: 'person',
             confidence: (Math.random() * 40 + 60).toFixed(0),
-            timestamp: new Date()
+            timestamp: new Date(),
           },
           user: {
-            name: ['Alice Chen', 'Bob Rodriguez', 'Carol Kim'][Math.floor(Math.random() * 3)],
-            action: 'discovered'
-          }
+            name: ['Alice Chen', 'Bob Rodriguez', 'Carol Kim'][
+              Math.floor(Math.random() * 3)
+            ],
+            action: 'discovered',
+          },
         };
-        setLiveUpdates(prev => [newUpdate, ...prev.slice(0, 9)]);
+        setLiveUpdates((prev) => [newUpdate, ...prev.slice(0, 9)]);
       }
 
       // Simulate connection strength changes
@@ -107,24 +109,48 @@ export function useRealTimeGraph() {
             to: 'org1',
             type: 'works_at',
             strength: Math.random(),
-            confidence: (Math.random() * 30 + 70).toFixed(0)
+            confidence: (Math.random() * 30 + 70).toFixed(0),
           },
           user: {
             name: 'AI Assistant',
-            action: 'analyzed'
-          }
+            action: 'analyzed',
+          },
         };
-        setLiveUpdates(prev => [connectionUpdate, ...prev.slice(0, 9)]);
+        setLiveUpdates((prev) => [connectionUpdate, ...prev.slice(0, 9)]);
       }
     }, 4000);
 
     // Simulate connected users
     const userInterval = setInterval(() => {
       const users = [
-        { id: 1, name: 'Alice Chen', isOnline: true, role: 'Senior Analyst', lastActivity: 'Graph Explorer' },
-        { id: 2, name: 'Bob Rodriguez', isOnline: Math.random() > 0.3, role: 'Lead Investigator', lastActivity: 'AI Copilot' },
-        { id: 3, name: 'Carol Kim', isOnline: Math.random() > 0.5, role: 'Intelligence Officer', lastActivity: 'Dashboard' },
-        { id: 4, name: 'David Park', isOnline: Math.random() > 0.7, role: 'Data Analyst', lastActivity: 'Reports' }
+        {
+          id: 1,
+          name: 'Alice Chen',
+          isOnline: true,
+          role: 'Senior Analyst',
+          lastActivity: 'Graph Explorer',
+        },
+        {
+          id: 2,
+          name: 'Bob Rodriguez',
+          isOnline: Math.random() > 0.3,
+          role: 'Lead Investigator',
+          lastActivity: 'AI Copilot',
+        },
+        {
+          id: 3,
+          name: 'Carol Kim',
+          isOnline: Math.random() > 0.5,
+          role: 'Intelligence Officer',
+          lastActivity: 'Dashboard',
+        },
+        {
+          id: 4,
+          name: 'David Park',
+          isOnline: Math.random() > 0.7,
+          role: 'Data Analyst',
+          lastActivity: 'Reports',
+        },
       ];
       setConnectedUsers(users);
     }, 8000);
@@ -138,7 +164,7 @@ export function useRealTimeGraph() {
   return {
     liveUpdates,
     connectedUsers,
-    isConnected: true
+    isConnected: true,
   };
 }
 
@@ -153,48 +179,50 @@ export function useAIInsights() {
           {
             type: 'PATTERN_DETECTED',
             confidence: 85,
-            message: 'Unusual communication pattern detected between financial entities',
+            message:
+              'Unusual communication pattern detected between financial entities',
             icon: '🔍',
-            priority: 'high'
+            priority: 'high',
           },
           {
             type: 'ANOMALY_FOUND',
             confidence: 72,
             message: 'Geographic clustering suggests coordinated activity',
             icon: '📍',
-            priority: 'medium'
+            priority: 'medium',
           },
           {
             type: 'PREDICTION',
             confidence: 91,
-            message: 'High probability of new connections forming within 48 hours',
+            message:
+              'High probability of new connections forming within 48 hours',
             icon: '🔮',
-            priority: 'high'
+            priority: 'high',
           },
           {
             type: 'THREAT_ASSESSMENT',
             confidence: 78,
             message: 'Risk level elevated due to recent behavioral changes',
             icon: '⚠️',
-            priority: 'high'
+            priority: 'high',
           },
           {
             type: 'RECOMMENDATION',
             confidence: 94,
             message: 'Suggest cross-referencing with Case #2847B',
             icon: '💡',
-            priority: 'medium'
-          }
+            priority: 'medium',
+          },
         ];
 
         const newInsight = {
           id: Date.now(),
           ...aiInsights[Math.floor(Math.random() * aiInsights.length)],
           timestamp: new Date(),
-          affectedEntities: Math.floor(Math.random() * 5) + 1
+          affectedEntities: Math.floor(Math.random() * 5) + 1,
         };
 
-        setInsights(prev => [newInsight, ...prev.slice(0, 7)]);
+        setInsights((prev) => [newInsight, ...prev.slice(0, 7)]);
       }
     }, 6000);
 
@@ -219,20 +247,25 @@ export function useInvestigationCollab(investigationId) {
         'Created timeline marker',
         'Shared insight with team',
         'Flagged suspicious activity',
-        'Cross-referenced database'
+        'Cross-referenced database',
       ];
 
-      const users = ['Alice Chen', 'Bob Rodriguez', 'Carol Kim', 'AI Assistant'];
+      const users = [
+        'Alice Chen',
+        'Bob Rodriguez',
+        'Carol Kim',
+        'AI Assistant',
+      ];
 
       const newActivity = {
         id: Date.now(),
         action: activities[Math.floor(Math.random() * activities.length)],
         user: users[Math.floor(Math.random() * users.length)],
         timestamp: new Date(),
-        investigationId
+        investigationId,
       };
 
-      setRecentActivity(prev => [newActivity, ...prev.slice(0, 19)]);
+      setRecentActivity((prev) => [newActivity, ...prev.slice(0, 19)]);
     }, 7000);
 
     return () => clearInterval(interval);
@@ -240,6 +273,6 @@ export function useInvestigationCollab(investigationId) {
 
   return {
     collaborators,
-    recentActivity
+    recentActivity,
   };
 }

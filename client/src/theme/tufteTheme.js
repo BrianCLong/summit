@@ -14,7 +14,7 @@ export function createTufteTheme(mode = 'light', direction = 'ltr') {
       primary: isDark ? '#e9eef2' : '#0c0d0e',
       secondary: isDark ? '#b5bdc4' : '#5d646b',
     },
-    divider: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(12,13,14,0.08)'
+    divider: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(12,13,14,0.08)',
   };
 
   return createTheme({
@@ -41,7 +41,7 @@ export function createTufteTheme(mode = 'light', direction = 'ltr') {
             MozOsxFontSmoothing: 'grayscale',
           },
           '*, *::before, *::after': { boxSizing: 'border-box' },
-        }
+        },
       },
       MuiAppBar: {
         styleOverrides: {
@@ -49,38 +49,38 @@ export function createTufteTheme(mode = 'light', direction = 'ltr') {
             backgroundImage: 'none',
             boxShadow: 'none',
             borderBottom: `1px solid ${palette.divider}`,
-          }
-        }
+          },
+        },
       },
       MuiDrawer: {
         styleOverrides: {
           paper: {
             borderRight: `1px solid ${palette.divider}`,
-          }
-        }
+          },
+        },
       },
       MuiCard: {
         defaultProps: { elevation: 0 },
         styleOverrides: {
           root: {
             border: `1px solid ${palette.divider}`,
-          }
-        }
+          },
+        },
       },
       MuiButton: {
         styleOverrides: {
           root: { textTransform: 'none', borderRadius: 6 },
-        }
+        },
       },
       MuiChip: {
-        styleOverrides: { root: { borderRadius: 6 } }
+        styleOverrides: { root: { borderRadius: 6 } },
       },
       MuiDivider: {
-        styleOverrides: { root: { opacity: 0.9 } }
+        styleOverrides: { root: { opacity: 0.9 } },
       },
       MuiListItemText: {
-        styleOverrides: { primary: { fontWeight: 500 } }
-      }
-    }
+        styleOverrides: { primary: { fontWeight: 500 } },
+      },
+    },
   });
 }

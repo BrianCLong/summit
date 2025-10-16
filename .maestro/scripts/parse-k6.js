@@ -15,7 +15,7 @@ const result = {
   error_rate_actual: error_rate_actual,
   error_rate_target: error_rate_target,
   p95_pass: p95_actual <= p95_target,
-  error_rate_pass: error_rate_actual <= error_rate_target
+  error_rate_pass: error_rate_actual <= error_rate_target,
 };
 
 console.log(JSON.stringify(result, null, 2));

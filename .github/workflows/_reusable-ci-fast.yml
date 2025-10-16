@@ -5,15 +5,15 @@ on:
       test-command:
         required: false
         type: string
-        default: "pnpm run test:fast -- --runInBand --bail=1 --silent"
+        default: 'pnpm run test:fast -- --runInBand --bail=1 --silent'
 
 jobs:
   fast:
     runs-on: ubuntu-22.04
     timeout-minutes: 15
     env:
-      CI: "true"
-      NODE_OPTIONS: "--max-old-space-size=3072"
+      CI: 'true'
+      NODE_OPTIONS: '--max-old-space-size=3072'
       PNPM_CACHE_FOLDER: ~/.pnpm-store
     steps:
       - uses: actions/checkout@v4
@@ -27,7 +27,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20.11.x"
+          node-version: '20.11.x'
 
       - name: Enable corepack (belt & suspenders)
         run: corepack enable

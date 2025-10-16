@@ -1,4 +1,3 @@
-
 # charts/intelgraph/overlays/region-us-east-1.yaml
 # Helm values overlay for the us-east-1 region.
 
@@ -8,6 +7,6 @@ nodeSelector:
   topology.kubernetes.io/region: us-east-1
 
 config:
-  logLevel: "info"
-  redisHost: "redis-us-east-1.internal.acme.corp"
-  neo4jHost: "neo4j-us-east-1.internal.acme.corp"
+  logLevel: 'info'
+  redisHost: 'redis-us-east-1.internal.acme.corp'
+  neo4jHost: 'neo4j-us-east-1.internal.acme.corp'

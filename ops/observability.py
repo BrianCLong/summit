@@ -1,5 +1,5 @@
-
 # ops/observability.py
+
 
 def init_otel_tracing():
     """
@@ -8,12 +8,14 @@ def init_otel_tracing():
     print("Initializing OpenTelemetry tracing.")
     pass
 
+
 def record_prom_metric(metric_name: str, value: float, labels: dict = None):
     """
     Stub for recording Prometheus metrics.
     """
     print(f"Recording Prometheus metric: {metric_name}={value} with labels {labels}")
     pass
+
 
 def get_slo_dashboard_url(service_name: str) -> str:
     """

@@ -1,54 +1,56 @@
-import os, json, time, logging
-from fastapi import FastAPI, Depends, HTTPException, Header, Request, Response
-from fastapi.responses import PlainTextResponse
-from jose import jwt
+import json
+import logging
+import os
+import time
+
 import httpx
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response
+from fastapi.responses import PlainTextResponse
+
+from .agents.api import router as agent_router
+from .link_prediction import LinkPredictor
+from .monitoring import (
+    get_content_type,
+    get_metrics,
+    health_checker,
+    track_http_request,
+    track_ml_prediction,
+)
 from .schemas import (
-    NLPRequest,
-    ERRequest,
-    LinkPredRequest,
-    CommunityRequest,
-    SuggestLinksRequest,
-    SuggestLinksQueuedResponse,
-    DetectAnomaliesRequest,
-    DetectAnomaliesQueuedResponse,
-    EntityLinkRequest,
-    LinkedEntity,
-    EntityLinkResponse,
-    RelationshipExtractionRequest,
-    ExtractedRelationship,
-    RelationshipExtractionResponse,
+    AISuggestedLink,
     AISuggestLinksRequest,
     AISuggestLinksResponse,
-    AISuggestedLink,
+    CommunityRequest,
+    DetectAnomaliesQueuedResponse,
+    DetectAnomaliesRequest,
+    EntityLinkRequest,
+    EntityLinkResponse,
+    ERRequest,
+    LinkPredRequest,
+    NLPRequest,
+    RelationshipExtractionRequest,
+    RelationshipExtractionResponse,
+    SuggestLinksQueuedResponse,
+    SuggestLinksRequest,
 )  # Added RelationshipExtractionRequest, ExtractedRelationship, RelationshipExtractionResponse
-from .link_prediction import LinkPredictor
+from .security import sign_payload
 from .tasks import (
-    task_nlp_entities,
+    task_community_detect,
     task_entity_resolution,
     task_link_prediction,
-    task_community_detect,
+    task_nlp_entities,
 )
 from .tasks.gnn_tasks import (
-    task_gnn_node_classification,
-    task_gnn_link_prediction,
-    task_gnn_graph_classification,
     task_gnn_anomaly_detection,
     task_gnn_generate_embeddings,
+    task_gnn_graph_classification,
+    task_gnn_link_prediction,
+    task_gnn_node_classification,
 )
 from .tasks.nlp_tasks import (
     task_entity_linking,
     task_relationship_extraction,
 )  # Added task_relationship_extraction
-from .security import sign_payload
-from .monitoring import (
-    track_http_request,
-    track_ml_prediction,
-    get_metrics,
-    get_content_type,
-    health_checker,
-)
-from .agents.api import router as agent_router
 
 logger = logging.getLogger(__name__)
 JWT_PUBLIC_KEY = os.getenv("JWT_PUBLIC_KEY", "")
@@ -63,7 +65,7 @@ def verify_token(authorization: str = Header(...)):
             raise ValueError("invalid scheme")
 
         # Use enhanced security validation
-        from .security import validate_jwt_token, audit_security_event
+        from .security import audit_security_event, validate_jwt_token
 
         payload = validate_jwt_token(token)
 
@@ -179,6 +181,7 @@ async def health_ready():
 async def health_info():
     """Service information"""
     import platform
+
     import psutil
 
     process = psutil.Process()
@@ -227,7 +230,7 @@ async def _maybe_webhook(callback_url: str, result: dict):
 
 @api.post("/nlp/entities")
 async def nlp_entities(req: NLPRequest, request: Request, user=Depends(verify_token)):
-    from .security import security_middleware, sanitize_input, SecurityConfig
+    from .security import SecurityConfig, sanitize_input, security_middleware
 
     # Apply security checks
     security_middleware(lambda: None)()
@@ -315,9 +318,7 @@ async def nlp_entity_linking(req: EntityLinkRequest, _=Depends(verify_token)):
 
 
 @api.post("/nlp/relationship_extraction", response_model=RelationshipExtractionResponse)
-async def nlp_relationship_extraction(
-    req: RelationshipExtractionRequest, _=Depends(verify_token)
-):
+async def nlp_relationship_extraction(req: RelationshipExtractionRequest, _=Depends(verify_token)):
     """
     Perform relationship extraction on text given identified entities.
     """
@@ -337,8 +338,7 @@ async def ai_suggest_links(req: AISuggestLinksRequest, _=Depends(verify_token)):
     preds = link_predictor.suggest_links(nodes, edges, req.node_id, req.top_k)
     return AISuggestLinksResponse(
         suggestions=[
-            AISuggestedLink(source=req.node_id, target=tgt, score=score)
-            for tgt, score in preds
+            AISuggestedLink(source=req.node_id, target=tgt, score=score) for tgt, score in preds
         ]
     )
 
@@ -352,9 +352,7 @@ async def suggest_links(req: SuggestLinksRequest, _=Depends(verify_token)):
         "candidate_edges": req.candidate_edges or [],
         "focus_entity_id": req.focus_entity_id,
         "model_name": (
-            req.model_name
-            if not req.model_version
-            else f"{req.model_name}:{req.model_version}"
+            req.model_name if not req.model_version else f"{req.model_name}:{req.model_version}"
         ),
         "model_config": req.model_config or {},
         "task_mode": req.task_mode,
@@ -372,9 +370,7 @@ async def detect_anomalies(req: DetectAnomaliesRequest, _=Depends(verify_token))
         "node_features": req.node_features or {},
         "normal_nodes": req.normal_nodes or [],
         "model_name": (
-            req.model_name
-            if not req.model_version
-            else f"{req.model_name}:{req.model_version}"
+            req.model_name if not req.model_version else f"{req.model_name}:{req.model_version}"
         ),
         "model_config": req.model_config or {},
         "task_mode": req.task_mode,

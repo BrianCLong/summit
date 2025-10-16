@@ -9,4 +9,4 @@ spec:
     - from:
         - source:
             notPrincipals:
-              - "cluster.local/ns/intelgraph/*"
+              - 'cluster.local/ns/intelgraph/*'

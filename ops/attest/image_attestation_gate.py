@@ -6,10 +6,9 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List
 
 
 @dataclass
@@ -20,15 +19,17 @@ class ImageRecord:
     signed: bool
     attestations_verified: bool
     sbom_present: bool
-    issues: List[str]
+    issues: list[str]
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         data = asdict(self)
         return data
 
 
 def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Verify signatures and attestations for a release manifest")
+    parser = argparse.ArgumentParser(
+        description="Verify signatures and attestations for a release manifest"
+    )
     parser.add_argument("manifest", help="Release manifest JSON with signatures and attestations")
     parser.add_argument("--output", help="Write verification summary JSON to this path")
     parser.add_argument(
@@ -39,14 +40,14 @@ def parse_args() -> argparse.Namespace:
     return parser.parse_args()
 
 
-def load_manifest(path: Path) -> Dict[str, object]:
+def load_manifest(path: Path) -> dict[str, object]:
     data = json.loads(path.read_text())
     if "images" not in data:
         raise ValueError("Manifest missing 'images' array")
     return data
 
 
-def verify_image(image: Dict[str, object], require_sbom: bool) -> ImageRecord:
+def verify_image(image: dict[str, object], require_sbom: bool) -> ImageRecord:
     service = image.get("service") or "unknown"
     ref = image.get("image") or service
     digest = image.get("digest", "")
@@ -59,7 +60,7 @@ def verify_image(image: Dict[str, object], require_sbom: bool) -> ImageRecord:
 
     sbom_present = bool(image.get("sbom"))
 
-    issues: List[str] = []
+    issues: list[str] = []
     if not signed:
         issues.append("missing verified signature")
     if not attestations_verified:
@@ -83,7 +84,7 @@ def verify_image(image: Dict[str, object], require_sbom: bool) -> ImageRecord:
     )
 
 
-def build_summary(manifest: Dict[str, object], records: List[ImageRecord]) -> Dict[str, object]:
+def build_summary(manifest: dict[str, object], records: list[ImageRecord]) -> dict[str, object]:
     total = len(records)
     signed = sum(1 for r in records if r.signed)
     attested = sum(1 for r in records if r.attestations_verified)
@@ -114,8 +115,8 @@ def main() -> int:
     manifest_path = Path(args.manifest)
     manifest = load_manifest(manifest_path)
 
-    records: List[ImageRecord] = []
-    violations: List[str] = []
+    records: list[ImageRecord] = []
+    violations: list[str] = []
     for image in manifest.get("images", []):
         record = verify_image(image, args.require_sbom)
         records.append(record)

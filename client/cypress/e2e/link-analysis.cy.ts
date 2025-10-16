@@ -11,8 +11,13 @@ describe('link analysis canvas', () => {
   it('command palette executes a saved query', () => {
     cy.visit('/');
     cy.get('body').type('{meta}k');
-    cy.get('[data-testid="command-palette"]').contains('recent-incidents').click();
-    cy.get('[data-testid="explain-panel"]').should('contain', 'recent-incidents');
+    cy.get('[data-testid="command-palette"]')
+      .contains('recent-incidents')
+      .click();
+    cy.get('[data-testid="explain-panel"]').should(
+      'contain',
+      'recent-incidents',
+    );
   });
 
   it('explain panel reflects active filters', () => {

@@ -1,4 +1,3 @@
-
 # intelgraph/schema/graph_primitives.py
 
 # This file outlines how time, geo, and policy labels might be integrated

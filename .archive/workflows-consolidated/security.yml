@@ -321,7 +321,14 @@ jobs:
     name: Security Summary
     runs-on: ubuntu-latest
     needs:
-      [codeql, dependency-scan, container-scan, infrastructure-scan, secrets-scan, license-scan]
+      [
+        codeql,
+        dependency-scan,
+        container-scan,
+        infrastructure-scan,
+        secrets-scan,
+        license-scan,
+      ]
     if: always()
     steps:
       - name: Download all artifacts

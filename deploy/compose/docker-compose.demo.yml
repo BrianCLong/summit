@@ -8,11 +8,11 @@ services:
       POSTGRES_USER: intelgraph
       POSTGRES_PASSWORD: password
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres_demo_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U intelgraph -d intelgraph"]
+      test: ['CMD-SHELL', 'pg_isready -U intelgraph -d intelgraph']
       interval: 10s
       timeout: 5s
       retries: 30
@@ -21,14 +21,14 @@ services:
     image: neo4j:5-community
     container_name: neo4j-demo
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - '7474:7474'
+      - '7687:7687'
     volumes:
       - neo4j_demo_data:/data
     environment:
       NEO4J_AUTH: neo4j/password
     healthcheck:
-      test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "password", "RETURN 1"]
+      test: ['CMD', 'cypher-shell', '-u', 'neo4j', '-p', 'password', 'RETURN 1']
       interval: 30s
       timeout: 10s
       retries: 10
@@ -38,11 +38,11 @@ services:
     image: redis:6.2-alpine
     container_name: redis-demo
     ports:
-      - "6379:6379"
+      - '6379:6379'
     volumes:
       - redis_demo_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
       timeout: 5s
       retries: 30
@@ -52,7 +52,7 @@ services:
     image: nginx:alpine
     container_name: health-demo
     ports:
-      - "8080:80"
+      - '8080:80'
     volumes:
       - ./demo-health.html:/usr/share/nginx/html/index.html:ro
     depends_on:

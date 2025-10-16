@@ -23,8 +23,8 @@ export interface WebSocketState {
 
 export function useWebSocketUpdates(config: WebSocketConfig = {}) {
   const {
-    url = process.env.NODE_ENV === 'development' 
-      ? 'ws://localhost:3001/ws/maestro' 
+    url = process.env.NODE_ENV === 'development'
+      ? 'ws://localhost:3001/ws/maestro'
       : `wss://${window.location.host}/ws/maestro`,
     reconnectInterval = 3000,
     maxReconnectAttempts = 10,
@@ -34,7 +34,7 @@ export function useWebSocketUpdates(config: WebSocketConfig = {}) {
   const wsRef = useRef<WebSocket | null>(null)
   const heartbeatRef = useRef<NodeJS.Timeout | null>(null)
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  
+
   const [state, setState] = useState<WebSocketState>({
     isConnected: false,
     isConnecting: false,
@@ -43,7 +43,9 @@ export function useWebSocketUpdates(config: WebSocketConfig = {}) {
     lastMessage: null,
   })
 
-  const [listeners, setListeners] = useState<Map<string, Set<(data: any) => void>>>(new Map())
+  const [listeners, setListeners] = useState<
+    Map<string, Set<(data: any) => void>>
+  >(new Map())
 
   const startHeartbeat = useCallback(() => {
     if (heartbeatRef.current) {
@@ -52,7 +54,9 @@ export function useWebSocketUpdates(config: WebSocketConfig = {}) {
 
     heartbeatRef.current = setInterval(() => {
       if (wsRef.current?.readyState === WebSocket.OPEN) {
-        wsRef.current.send(JSON.stringify({ type: 'heartbeat', timestamp: Date.now() }))
+        wsRef.current.send(
+          JSON.stringify({ type: 'heartbeat', timestamp: Date.now() })
+        )
       }
     }, heartbeatInterval)
   }, [heartbeatInterval])
@@ -65,8 +69,10 @@ export function useWebSocketUpdates(config: WebSocketConfig = {}) {
   }, [])
 
   const connect = useCallback(() => {
-    if (wsRef.current?.readyState === WebSocket.CONNECTING || 
-        wsRef.current?.readyState === WebSocket.OPEN) {
+    if (
+      wsRef.current?.readyState === WebSocket.CONNECTING ||
+      wsRef.current?.readyState === WebSocket.OPEN
+    ) {
       return
     }
 
@@ -88,16 +94,23 @@ export function useWebSocketUpdates(config: WebSocketConfig = {}) {
         startHeartbeat()
 
         // Subscribe to updates on connection
-        ws.send(JSON.stringify({
-          type: 'subscribe',
-          topics: ['run_updates', 'approval_requests', 'router_decisions', 'system_alerts']
-        }))
+        ws.send(
+          JSON.stringify({
+            type: 'subscribe',
+            topics: [
+              'run_updates',
+              'approval_requests',
+              'router_decisions',
+              'system_alerts',
+            ],
+          })
+        )
       }
 
-      ws.onmessage = (event) => {
+      ws.onmessage = event => {
         try {
           const message: WebSocketMessage = JSON.parse(event.data)
-          
+
           setState(prev => ({
             ...prev,
             lastMessage: message,
@@ -110,7 +123,10 @@ export function useWebSocketUpdates(config: WebSocketConfig = {}) {
               try {
                 callback(message.payload)
               } catch (error) {
-                console.error(`Error in WebSocket listener for type ${message.type}:`, error)
+                console.error(
+                  `Error in WebSocket listener for type ${message.type}:`,
+                  error
+                )
               }
             })
           }
@@ -131,7 +147,7 @@ export function useWebSocketUpdates(config: WebSocketConfig = {}) {
         }
       }
 
-      ws.onerror = (error) => {
+      ws.onerror = error => {
         console.error('Maestro WebSocket error:', error)
         setState(prev => ({
           ...prev,
@@ -140,27 +156,36 @@ export function useWebSocketUpdates(config: WebSocketConfig = {}) {
         }))
       }
 
-      ws.onclose = (event) => {
+      ws.onclose = event => {
         console.log('Maestro WebSocket disconnected:', event.code, event.reason)
         stopHeartbeat()
-        
+
         setState(prev => ({
           ...prev,
           isConnected: false,
           isConnecting: false,
-          error: event.code === 1000 ? null : `Connection closed: ${event.reason || event.code}`,
+          error:
+            event.code === 1000
+              ? null
+              : `Connection closed: ${event.reason || event.code}`,
         }))
 
         // Attempt to reconnect if not a clean closure
-        if (event.code !== 1000 && state.reconnectAttempts < maxReconnectAttempts) {
+        if (
+          event.code !== 1000 &&
+          state.reconnectAttempts < maxReconnectAttempts
+        ) {
           setState(prev => ({
             ...prev,
             reconnectAttempts: prev.reconnectAttempts + 1,
           }))
 
-          reconnectTimeoutRef.current = setTimeout(() => {
-            connect()
-          }, reconnectInterval * Math.pow(1.5, state.reconnectAttempts))
+          reconnectTimeoutRef.current = setTimeout(
+            () => {
+              connect()
+            },
+            reconnectInterval * Math.pow(1.5, state.reconnectAttempts)
+          )
         }
       }
     } catch (error) {
@@ -171,11 +196,19 @@ export function useWebSocketUpdates(config: WebSocketConfig = {}) {
         isConnecting: false,
       }))
     }
-  }, [url, state.reconnectAttempts, maxReconnectAttempts, reconnectInterval, listeners, startHeartbeat, stopHeartbeat])
+  }, [
+    url,
+    state.reconnectAttempts,
+    maxReconnectAttempts,
+    reconnectInterval,
+    listeners,
+    startHeartbeat,
+    stopHeartbeat,
+  ])
 
   const disconnect = useCallback(() => {
     stopHeartbeat()
-    
+
     if (reconnectTimeoutRef.current) {
       clearTimeout(reconnectTimeoutRef.current)
       reconnectTimeoutRef.current = null
@@ -204,36 +237,39 @@ export function useWebSocketUpdates(config: WebSocketConfig = {}) {
     return false
   }, [])
 
-  const subscribe = useCallback((messageType: string, callback: (data: any) => void) => {
-    setListeners(prev => {
-      const newListeners = new Map(prev)
-      if (!newListeners.has(messageType)) {
-        newListeners.set(messageType, new Set())
-      }
-      newListeners.get(messageType)!.add(callback)
-      return newListeners
-    })
-
-    // Return unsubscribe function
-    return () => {
+  const subscribe = useCallback(
+    (messageType: string, callback: (data: any) => void) => {
       setListeners(prev => {
         const newListeners = new Map(prev)
-        const typeListeners = newListeners.get(messageType)
-        if (typeListeners) {
-          typeListeners.delete(callback)
-          if (typeListeners.size === 0) {
-            newListeners.delete(messageType)
-          }
+        if (!newListeners.has(messageType)) {
+          newListeners.set(messageType, new Set())
         }
+        newListeners.get(messageType)!.add(callback)
         return newListeners
       })
-    }
-  }, [])
+
+      // Return unsubscribe function
+      return () => {
+        setListeners(prev => {
+          const newListeners = new Map(prev)
+          const typeListeners = newListeners.get(messageType)
+          if (typeListeners) {
+            typeListeners.delete(callback)
+            if (typeListeners.size === 0) {
+              newListeners.delete(messageType)
+            }
+          }
+          return newListeners
+        })
+      }
+    },
+    []
+  )
 
   // Auto-connect on mount
   useEffect(() => {
     connect()
-    
+
     return () => {
       disconnect()
     }
@@ -254,11 +290,11 @@ export function useRunUpdates(runId?: string) {
   const [runs, setRuns] = useState<Record<string, any>>({})
 
   useEffect(() => {
-    const unsubscribe = ws.subscribe('run_update', (data) => {
+    const unsubscribe = ws.subscribe('run_update', data => {
       if (!runId || data.runId === runId) {
         setRuns(prev => ({
           ...prev,
-          [data.runId]: { ...prev[data.runId], ...data }
+          [data.runId]: { ...prev[data.runId], ...data },
         }))
       }
     })
@@ -277,14 +313,15 @@ export function useApprovalUpdates() {
   const [pendingApprovals, setPendingApprovals] = useState<any[]>([])
 
   useEffect(() => {
-    const unsubscribeRequests = ws.subscribe('approval_request', (data) => {
+    const unsubscribeRequests = ws.subscribe('approval_request', data => {
       setPendingApprovals(prev => [...prev, data])
     })
 
-    const unsubscribeResponses = ws.subscribe('approval_response', (data) => {
-      setPendingApprovals(prev => 
-        prev.filter(approval => 
-          !(approval.runId === data.runId && approval.stepId === data.stepId)
+    const unsubscribeResponses = ws.subscribe('approval_response', data => {
+      setPendingApprovals(prev =>
+        prev.filter(
+          approval =>
+            !(approval.runId === data.runId && approval.stepId === data.stepId)
         )
       )
     })
@@ -306,7 +343,7 @@ export function useSystemAlerts() {
   const [alerts, setAlerts] = useState<any[]>([])
 
   useEffect(() => {
-    const unsubscribe = ws.subscribe('system_alert', (data) => {
+    const unsubscribe = ws.subscribe('system_alert', data => {
       setAlerts(prev => [data, ...prev.slice(0, 99)]) // Keep last 100 alerts
     })
 

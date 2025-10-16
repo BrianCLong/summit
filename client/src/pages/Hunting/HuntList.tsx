@@ -131,7 +131,8 @@ export default function HuntList() {
         lastRun: '2025-08-27T01:15:00Z',
         findings: 3,
         severity: 'MEDIUM',
-        description: 'Detecting periodic outbound connections that may indicate C2 communication',
+        description:
+          'Detecting periodic outbound connections that may indicate C2 communication',
       },
       {
         id: 'hunt3',
@@ -142,7 +143,8 @@ export default function HuntList() {
         lastRun: '2025-08-26T22:00:00Z',
         findings: 0,
         severity: 'LOW',
-        description: 'Machine learning based detection of unusual financial transaction patterns',
+        description:
+          'Machine learning based detection of unusual financial transaction patterns',
       },
       {
         id: 'hunt4',
@@ -166,7 +168,8 @@ export default function HuntList() {
         findings: 8,
         severity: 'HIGH',
         progress: 25,
-        description: 'Detection of malicious PowerShell usage leveraging built-in Windows tools',
+        description:
+          'Detection of malicious PowerShell usage leveraging built-in Windows tools',
       },
       {
         id: 'hunt6',
@@ -177,7 +180,8 @@ export default function HuntList() {
         lastRun: '2025-08-26T18:30:00Z',
         findings: 2,
         severity: 'MEDIUM',
-        description: 'Detecting data exfiltration through DNS tunneling techniques',
+        description:
+          'Detecting data exfiltration through DNS tunneling techniques',
       },
     ],
     deps: [filterType, filterStatus],
@@ -244,7 +248,11 @@ export default function HuntList() {
       width: 100,
       type: 'number',
       renderCell: (params) => (
-        <Badge badgeContent={params.value} color={params.value > 0 ? 'error' : 'default'} showZero>
+        <Badge
+          badgeContent={params.value}
+          color={params.value > 0 ? 'error' : 'default'}
+          showZero
+        >
           <Assessment />
         </Badge>
       ),
@@ -275,7 +283,9 @@ export default function HuntList() {
       sortable: false,
       renderCell: (params) => (
         <Stack direction="row" spacing={1}>
-          <Tooltip title={params.row.status === 'RUNNING' ? 'Stop Hunt' : 'Start Hunt'}>
+          <Tooltip
+            title={params.row.status === 'RUNNING' ? 'Stop Hunt' : 'Start Hunt'}
+          >
             <IconButton size="small">
               {params.row.status === 'RUNNING' ? <Stop /> : <PlayArrow />}
             </IconButton>
@@ -299,8 +309,10 @@ export default function HuntList() {
     }) || [];
 
   const runningHunts = hunts?.filter((h) => h.status === 'RUNNING').length || 0;
-  const totalFindings = hunts?.reduce((sum, hunt) => sum + hunt.findings, 0) || 0;
-  const criticalHunts = hunts?.filter((h) => h.severity === 'CRITICAL').length || 0;
+  const totalFindings =
+    hunts?.reduce((sum, hunt) => sum + hunt.findings, 0) || 0;
+  const criticalHunts =
+    hunts?.filter((h) => h.severity === 'CRITICAL').length || 0;
   const failedHunts = hunts?.filter((h) => h.status === 'FAILED').length || 0;
 
   return (
@@ -372,7 +384,12 @@ export default function HuntList() {
       {/* Main Hunt List */}
       <Card sx={{ borderRadius: 3 }}>
         <CardContent>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            sx={{ mb: 2 }}
+          >
             <Typography variant="h6">Threat Hunting Operations</Typography>
             <Stack direction="row" spacing={2}>
               <FormControl size="small" sx={{ minWidth: 120 }}>
@@ -426,7 +443,9 @@ export default function HuntList() {
               <Tab
                 label={`Scheduled (${hunts?.filter((h) => h.status === 'SCHEDULED').length || 0})`}
               />
-              <Tab label={`With Findings (${hunts?.filter((h) => h.findings > 0).length || 0})`} />
+              <Tab
+                label={`With Findings (${hunts?.filter((h) => h.findings > 0).length || 0})`}
+              />
             </Tabs>
           </Box>
 
@@ -471,7 +490,9 @@ export default function HuntList() {
                 <MenuItem value="IOC">IOC-based Hunt</MenuItem>
                 <MenuItem value="BEHAVIORAL">Behavioral Analysis</MenuItem>
                 <MenuItem value="NETWORK">Network Traffic Analysis</MenuItem>
-                <MenuItem value="FINANCIAL">Financial Anomaly Detection</MenuItem>
+                <MenuItem value="FINANCIAL">
+                  Financial Anomaly Detection
+                </MenuItem>
                 <MenuItem value="MITRE_ATT&CK">MITRE ATT&CK Framework</MenuItem>
               </Select>
             </FormControl>
@@ -481,13 +502,17 @@ export default function HuntList() {
                 <MenuItem value="Initial Access">Initial Access</MenuItem>
                 <MenuItem value="Execution">Execution</MenuItem>
                 <MenuItem value="Persistence">Persistence</MenuItem>
-                <MenuItem value="Privilege Escalation">Privilege Escalation</MenuItem>
+                <MenuItem value="Privilege Escalation">
+                  Privilege Escalation
+                </MenuItem>
                 <MenuItem value="Defense Evasion">Defense Evasion</MenuItem>
                 <MenuItem value="Credential Access">Credential Access</MenuItem>
                 <MenuItem value="Discovery">Discovery</MenuItem>
                 <MenuItem value="Lateral Movement">Lateral Movement</MenuItem>
                 <MenuItem value="Collection">Collection</MenuItem>
-                <MenuItem value="Command and Control">Command and Control</MenuItem>
+                <MenuItem value="Command and Control">
+                  Command and Control
+                </MenuItem>
                 <MenuItem value="Exfiltration">Exfiltration</MenuItem>
                 <MenuItem value="Impact">Impact</MenuItem>
               </Select>

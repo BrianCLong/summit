@@ -9,9 +9,14 @@ import { flushMicrotasks } from '../test-utils/flush';
 const target = 'I understand your query';
 
 function chunkByIndices(s: string, cuts: number[]) {
-  const indices = [0, ...cuts.filter((n) => n > 0 && n < s.length), s.length].sort((a, b) => a - b);
+  const indices = [
+    0,
+    ...cuts.filter((n) => n > 0 && n < s.length),
+    s.length,
+  ].sort((a, b) => a - b);
   const out: string[] = [];
-  for (let i = 0; i < indices.length - 1; i++) out.push(s.slice(indices[i], indices[i + 1]));
+  for (let i = 0; i < indices.length - 1; i++)
+    out.push(s.slice(indices[i], indices[i + 1]));
   return out;
 }
 
@@ -31,7 +36,13 @@ test('chunking invariance (fuzz)', async () => {
         ];
         const transport = makeFakeTransport(script);
 
-        render(<EnhancedAIAssistant transport={transport} typingDelayMs={0} debounceMs={0} />);
+        render(
+          <EnhancedAIAssistant
+            transport={transport}
+            typingDelayMs={0}
+            debounceMs={0}
+          />,
+        );
         await userEvent.type(
           screen.getByRole('textbox', { name: /assistant-input/i }),
           'go{enter}',

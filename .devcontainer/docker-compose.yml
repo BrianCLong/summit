@@ -51,7 +51,12 @@ services:
     image: node:20-bullseye
     user: node
     working_dir: /workspace/server
-    command: ["bash", "-lc", "if [ ! -d node_modules ]; then npm install; fi; npm run dev"]
+    command:
+      [
+        'bash',
+        '-lc',
+        'if [ ! -d node_modules ]; then npm install; fi; npm run dev',
+      ]
     environment:
       NODE_ENV: development
       PORT: 4000
@@ -71,7 +76,7 @@ services:
       - node_modules:/workspace/node_modules
       - server_node_modules:/workspace/server/node_modules
     ports:
-      - "4000:4000"
+      - '4000:4000'
     networks:
       - intelgraph-dev
     depends_on:
@@ -88,7 +93,13 @@ services:
       otel-collector:
         condition: service_started
     healthcheck:
-      test: ["CMD", "node", "/workspace/scripts/health-check.js", "http://localhost:4000/health"]
+      test:
+        [
+          'CMD',
+          'node',
+          '/workspace/scripts/health-check.js',
+          'http://localhost:4000/health',
+        ]
       interval: 10s
       timeout: 5s
       retries: 6
@@ -97,7 +108,12 @@ services:
     image: node:20-bullseye
     user: node
     working_dir: /workspace/client
-    command: ["bash", "-lc", "if [ ! -d node_modules ]; then npm install; fi; npm run dev -- --host 0.0.0.0 --port 3000"]
+    command:
+      [
+        'bash',
+        '-lc',
+        'if [ ! -d node_modules ]; then npm install; fi; npm run dev -- --host 0.0.0.0 --port 3000',
+      ]
     environment:
       VITE_PORT: 3000
       VITE_HOST: 0.0.0.0
@@ -107,14 +123,18 @@ services:
       - node_modules:/workspace/node_modules
       - client_node_modules:/workspace/client/node_modules
     ports:
-      - "3000:3000"
+      - '3000:3000'
     networks:
       - intelgraph-dev
     depends_on:
       api:
         condition: service_started
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:3000 >/dev/null 2>&1 || exit 1"]
+      test:
+        [
+          'CMD-SHELL',
+          'wget -qO- http://localhost:3000 >/dev/null 2>&1 || exit 1',
+        ]
       interval: 10s
       timeout: 5s
       retries: 6
@@ -123,7 +143,12 @@ services:
     image: node:20-bullseye
     user: node
     working_dir: /workspace/server
-    command: ["bash", "-lc", "if [ ! -d node_modules ]; then npm install; fi; npm run dev:worker"]
+    command:
+      [
+        'bash',
+        '-lc',
+        'if [ ! -d node_modules ]; then npm install; fi; npm run dev:worker',
+      ]
     environment:
       NODE_ENV: development
       WORKER_PORT: 4100
@@ -140,7 +165,7 @@ services:
       - node_modules:/workspace/node_modules
       - server_node_modules:/workspace/server/node_modules
     ports:
-      - "4100:4100"
+      - '4100:4100'
     networks:
       - intelgraph-dev
     depends_on:
@@ -153,7 +178,11 @@ services:
       otel-collector:
         condition: service_started
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:4100/health >/dev/null 2>&1 || exit 1"]
+      test:
+        [
+          'CMD-SHELL',
+          'wget -qO- http://localhost:4100/health >/dev/null 2>&1 || exit 1',
+        ]
       interval: 10s
       timeout: 5s
       retries: 6
@@ -162,17 +191,23 @@ services:
     image: node:20-bullseye
     user: node
     working_dir: /workspace
-    command: ["node", "scripts/devkit/mock-services.js"]
+    command: ['node', 'scripts/devkit/mock-services.js']
     environment:
       MOCK_SERVICE_PORT: 4010
     volumes:
       - ..:/workspace:cached
     ports:
-      - "4012:4010"
+      - '4012:4010'
     networks:
       - intelgraph-dev
     healthcheck:
-      test: ["CMD", "node", "scripts/health-check.js", "http://localhost:4010/health"]
+      test:
+        [
+          'CMD',
+          'node',
+          'scripts/health-check.js',
+          'http://localhost:4010/health',
+        ]
       interval: 15s
       timeout: 5s
       retries: 4
@@ -181,7 +216,12 @@ services:
     image: node:20-bullseye
     user: node
     working_dir: /workspace/server
-    command: ["bash", "-lc", "if [ ! -d node_modules ]; then npm install; fi; npm run migrate"]
+    command:
+      [
+        'bash',
+        '-lc',
+        'if [ ! -d node_modules ]; then npm install; fi; npm run migrate',
+      ]
     environment:
       NODE_ENV: development
       POSTGRES_HOST: postgres
@@ -209,7 +249,12 @@ services:
     image: node:20-bullseye
     user: node
     working_dir: /workspace
-    command: ["bash", "-lc", "if [ ! -d node_modules ]; then npm install; fi; node scripts/devkit/seed-fixtures.js"]
+    command:
+      [
+        'bash',
+        '-lc',
+        'if [ ! -d node_modules ]; then npm install; fi; node scripts/devkit/seed-fixtures.js',
+      ]
     environment:
       POSTGRES_HOST: postgres
       POSTGRES_PORT: 5432
@@ -231,7 +276,7 @@ services:
         condition: service_completed_successfully
       opa:
         condition: service_healthy
-    restart: "no"
+    restart: 'no'
 
   postgres:
     image: postgres:16-alpine
@@ -243,11 +288,11 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ../server/db/migrations/postgres:/docker-entrypoint-initdb.d:ro
     ports:
-      - "5434:5432"
+      - '5434:5432'
     networks:
       - intelgraph-dev
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U intelgraph -d intelgraph_dev"]
+      test: ['CMD-SHELL', 'pg_isready -U intelgraph -d intelgraph_dev']
       interval: 10s
       timeout: 5s
       retries: 6
@@ -259,7 +304,7 @@ services:
     networks:
       - intelgraph-dev
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
+      test: ['CMD', 'redis-cli', 'ping']
       interval: 10s
   neo4j:
     image: neo4j:5.8
@@ -270,10 +315,10 @@ services:
       NEO4J_apoc_export_file_enabled: true
       NEO4J_apoc_import_file_enabled: true
       NEO4J_apoc_import_file_use__neo4j__config: true
-      NEO4J_ACCEPT_LICENSE_AGREEMENT: "yes"
+      NEO4J_ACCEPT_LICENSE_AGREEMENT: 'yes'
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - '7474:7474'
+      - '7687:7687'
     volumes:
       - neo4j_data:/data
       - neo4j_logs:/logs
@@ -282,7 +327,8 @@ services:
     networks:
       - intelgraph-dev
     healthcheck:
-      test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "dev_password", "RETURN 1"]
+      test:
+        ['CMD', 'cypher-shell', '-u', 'neo4j', '-p', 'dev_password', 'RETURN 1']
       interval: 20s
       timeout: 10s
       retries: 15
@@ -297,11 +343,11 @@ services:
     volumes:
       - ../policy/opa:/policy:ro
     ports:
-      - "8181:8181"
+      - '8181:8181'
     networks:
       - intelgraph-dev
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://localhost:8181/health"]
+      test: ['CMD', 'wget', '-qO-', 'http://localhost:8181/health']
       interval: 15s
       timeout: 5s
       retries: 6
@@ -310,22 +356,22 @@ services:
     image: jaegertracing/all-in-one:1.58
     platform: linux/arm64
     environment:
-      COLLECTOR_OTLP_ENABLED: "true"
+      COLLECTOR_OTLP_ENABLED: 'true'
     ports:
-      - "16686:16686"
-      - "14268:14268"
+      - '16686:16686'
+      - '14268:14268'
     networks:
       - intelgraph-dev
 
   otel-collector:
     image: otel/opentelemetry-collector-contrib:0.110.0
-    command: ["--config=/etc/otel-collector.yaml"]
+    command: ['--config=/etc/otel-collector.yaml']
     volumes:
       - ../ops/devkit/otel-collector.yaml:/etc/otel-collector.yaml:ro
     ports:
-      - "4317:4317"
-      - "4318:4318"
-      - "9464:9464"
+      - '4317:4317'
+      - '4318:4318'
+      - '9464:9464'
     networks:
       - intelgraph-dev
     depends_on:
@@ -334,7 +380,7 @@ services:
   prometheus:
     image: prom/prometheus:latest
     ports:
-      - "9090:9090"
+      - '9090:9090'
     volumes:
       - ../ops/observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus_data:/prometheus
@@ -352,10 +398,10 @@ services:
   grafana:
     image: grafana/grafana:latest
     ports:
-      - "8080:3000"
+      - '8080:3000'
     environment:
       GF_SECURITY_ADMIN_PASSWORD: dev_password
-      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_USERS_ALLOW_SIGN_UP: 'false'
       GF_INSTALL_PLUGINS: grafana-piechart-panel,grafana-worldmap-panel
     volumes:
       - grafana_data:/var/lib/grafana

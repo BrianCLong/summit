@@ -6,59 +6,74 @@
     {
       "type": "gauge",
       "title": "Availability (last 30d)",
-      "gridPos": {"x":0,"y":0,"w":8,"h":6},
-      "targets": [{
-        "expr": "avg(avg_over_time(pipeline_uptime_ratio[30d]))",
-        "legendFormat": "availability"
-      }],
-      "fieldConfig": {"defaults": {"min": 0, "max": 1, "unit": "percentunit"}}
+      "gridPos": { "x": 0, "y": 0, "w": 8, "h": 6 },
+      "targets": [
+        {
+          "expr": "avg(avg_over_time(pipeline_uptime_ratio[30d]))",
+          "legendFormat": "availability"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "min": 0, "max": 1, "unit": "percentunit" }
+      }
     },
     {
       "type": "gauge",
       "title": "Error Budget Remaining",
-      "gridPos": {"x":8,"y":0,"w":8,"h":6},
-      "targets": [{
-        "expr": "1 - (1 - avg(avg_over_time(pipeline_uptime_ratio[30d]))) / (1 - 0.995)",
-        "legendFormat": "budget"
-      }],
-      "fieldConfig": {"defaults": {"min": 0, "max": 1, "unit": "percentunit"}}
+      "gridPos": { "x": 8, "y": 0, "w": 8, "h": 6 },
+      "targets": [
+        {
+          "expr": "1 - (1 - avg(avg_over_time(pipeline_uptime_ratio[30d]))) / (1 - 0.995)",
+          "legendFormat": "budget"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "min": 0, "max": 1, "unit": "percentunit" }
+      }
     },
     {
       "type": "timeseries",
       "title": "Freshness (avg seconds)",
-      "gridPos": {"x":0,"y":6,"w":12,"h":8},
-      "targets": [{
-        "expr": "avg by (pipeline) (pipeline_freshness_seconds)",
-        "legendFormat": "{{pipeline}}"
-      }]
+      "gridPos": { "x": 0, "y": 6, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "avg by (pipeline) (pipeline_freshness_seconds)",
+          "legendFormat": "{{pipeline}}"
+        }
+      ]
     },
     {
       "type": "timeseries",
       "title": "Completeness Ratio",
-      "gridPos": {"x":12,"y":6,"w":12,"h":8},
-      "targets": [{
-        "expr": "avg by (pipeline) (pipeline_completeness_ratio)",
-        "legendFormat": "{{pipeline}}"
-      }]
+      "gridPos": { "x": 12, "y": 6, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "avg by (pipeline) (pipeline_completeness_ratio)",
+          "legendFormat": "{{pipeline}}"
+        }
+      ]
     },
     {
       "type": "timeseries",
       "title": "Correctness Ratio",
-      "gridPos": {"x":0,"y":14,"w":12,"h":8},
-      "targets": [{
-        "expr": "avg by (pipeline) (pipeline_correctness_ratio)",
-        "legendFormat": "{{pipeline}}"
-      }]
+      "gridPos": { "x": 0, "y": 14, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "avg by (pipeline) (pipeline_correctness_ratio)",
+          "legendFormat": "{{pipeline}}"
+        }
+      ]
     },
     {
       "type": "timeseries",
       "title": "Latency p95 (s)",
-      "gridPos": {"x":12,"y":14,"w":12,"h":8},
-      "targets": [{
-        "expr": "histogram_quantile(0.95, sum by (le, pipeline) (rate(pipeline_latency_seconds_bucket[5m])))",
-        "legendFormat": "{{pipeline}}"
-      }]
+      "gridPos": { "x": 12, "y": 14, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le, pipeline) (rate(pipeline_latency_seconds_bucket[5m])))",
+          "legendFormat": "{{pipeline}}"
+        }
+      ]
     }
   ]
 }
-

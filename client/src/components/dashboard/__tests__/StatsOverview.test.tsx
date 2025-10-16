@@ -50,7 +50,9 @@ describe('StatsOverview', () => {
       }),
     }));
 
-    const { useDB_ServerStatsQuery } = await import('../../../generated/graphql');
+    const { useDB_ServerStatsQuery } = await import(
+      '../../../generated/graphql'
+    );
 
     render(
       <MockedProvider mocks={[]}>

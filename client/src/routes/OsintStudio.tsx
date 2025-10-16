@@ -36,7 +36,12 @@ const CASES_Q = gql`
 `;
 
 const ADD_ITEM_M = gql`
-  mutation AddCaseItem($caseId: ID!, $kind: String!, $refId: String!, $tags: [String!]) {
+  mutation AddCaseItem(
+    $caseId: ID!
+    $kind: String!
+    $refId: String!
+    $tags: [String!]
+  ) {
     addCaseItem(caseId: $caseId, kind: $kind, refId: $refId, tags: $tags) {
       id
     }
@@ -87,7 +92,10 @@ export default function OsintStudio() {
         // eslint-disable-next-line no-console
         console.log('OSINT_EVT', evt);
         const id = evt.itemId || `${Date.now()}`;
-        cyRef.current.add({ data: { id, label: evt.message || evt.kind }, classes: 'doc' });
+        cyRef.current.add({
+          data: { id, label: evt.message || evt.kind },
+          classes: 'doc',
+        });
         cyRef.current.layout({ name: 'cose' }).run();
       });
     }
@@ -107,7 +115,9 @@ export default function OsintStudio() {
           // Only open if a node is selected
           setAddCaseModalOpen(true);
         } else {
-          $(document).trigger('intelgraph:toast', ['Please select an OSINT item first.']);
+          $(document).trigger('intelgraph:toast', [
+            'Please select an OSINT item first.',
+          ]);
         }
       }
     };
@@ -154,16 +164,28 @@ export default function OsintStudio() {
               onChange={(e) => setSearch(e.target.value)}
             />
           </Tooltip>
-          <Button variant="contained" onClick={onSearch} title="Run OSINT search (GraphQL)">
+          <Button
+            variant="contained"
+            onClick={onSearch}
+            title="Run OSINT search (GraphQL)"
+          >
             Search
           </Button>
         </div>
         <div
           ref={containerRef}
-          style={{ height: 600, borderRadius: 16, boxShadow: '0 0 12px rgba(0,0,0,0.08)' }}
+          style={{
+            height: 600,
+            borderRadius: 16,
+            boxShadow: '0 0 12px rgba(0,0,0,0.08)',
+          }}
         />
       </div>
-      <Drawer anchor="right" open={drawerOpen} onClose={() => setDrawerOpen(false)}>
+      <Drawer
+        anchor="right"
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+      >
         <div style={{ width: 340, padding: 16 }}>
           <h3 style={{ marginTop: 0 }}>OSINT Item</h3>
           {selected?.license && selected.license.allowExport === false && (
@@ -181,7 +203,14 @@ export default function OsintStudio() {
           )}
           <div style={{ marginBottom: 8 }}>
             <strong>Entities</strong>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 6 }}>
+            <div
+              style={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: 6,
+                marginTop: 6,
+              }}
+            >
               {(selected?.entities || []).slice(0, 20).map((e: any) => (
                 <Chip key={e.id} label={e.name || e.id} size="small" />
               ))}
@@ -190,16 +219,20 @@ export default function OsintStudio() {
           <div>
             <strong>Claims</strong>
             <List dense>
-              {(selected?.claims || []).slice(0, 20).map((c: any, i: number) => (
-                <ListItem key={i}>
-                  <ListItemText
-                    primary={c.text}
-                    secondary={
-                      typeof c.confidence === 'number' ? `confidence ${c.confidence}` : undefined
-                    }
-                  />
-                </ListItem>
-              ))}
+              {(selected?.claims || [])
+                .slice(0, 20)
+                .map((c: any, i: number) => (
+                  <ListItem key={i}>
+                    <ListItemText
+                      primary={c.text}
+                      secondary={
+                        typeof c.confidence === 'number'
+                          ? `confidence ${c.confidence}`
+                          : undefined
+                      }
+                    />
+                  </ListItem>
+                ))}
             </List>
           </div>
           <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
@@ -208,7 +241,9 @@ export default function OsintStudio() {
             </Button>
             <Button
               variant="contained"
-              disabled={selected?.license && selected.license.allowExport === false}
+              disabled={
+                selected?.license && selected.license.allowExport === false
+              }
               onClick={() => {
                 if (!selected) return;
                 $(document).trigger('intelgraph:toast', ['Preparing export…']);
@@ -231,7 +266,10 @@ export default function OsintStudio() {
             >
               Export
             </Button>
-            <Button variant="outlined" onClick={() => setAddCaseModalOpen(true)}>
+            <Button
+              variant="outlined"
+              onClick={() => setAddCaseModalOpen(true)}
+            >
               Add to Case
             </Button>{' '}
             {/* Open modal */}

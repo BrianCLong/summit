@@ -1,7 +1,7 @@
 name: Weekly Hygiene
 
 on:
-  schedule: [ { cron: '0 9 * * 1' } ]
+  schedule: [{ cron: '0 9 * * 1' }]
   workflow_dispatch:
 
 jobs:
@@ -16,5 +16,4 @@ jobs:
         uses: avto-dev/markdown-lint@v1
       - name: Dockerfile linter
         uses: hadolint/hadolint-action@v3.1.0
-        with: { dockerfile: "deploy/docker/Dockerfile" }
-
+        with: { dockerfile: 'deploy/docker/Dockerfile' }

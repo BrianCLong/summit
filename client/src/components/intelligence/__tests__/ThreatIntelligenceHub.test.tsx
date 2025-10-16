@@ -45,7 +45,9 @@ describe('ThreatIntelligenceHub', () => {
   it('renders search and filters', () => {
     render(<ThreatIntelligenceHub {...defaultProps} />);
 
-    expect(screen.getByPlaceholderText(/Search indicators, tags, or IOCs/)).toBeInTheDocument();
+    expect(
+      screen.getByPlaceholderText(/Search indicators, tags, or IOCs/),
+    ).toBeInTheDocument();
     expect(screen.getByDisplayValue('All Severities')).toBeInTheDocument();
     expect(screen.getByDisplayValue('All Types')).toBeInTheDocument();
   });
@@ -83,7 +85,9 @@ describe('ThreatIntelligenceHub', () => {
     const user = userEvent.setup();
     render(<ThreatIntelligenceHub {...defaultProps} />);
 
-    const searchInput = screen.getByPlaceholderText(/Search indicators, tags, or IOCs/);
+    const searchInput = screen.getByPlaceholderText(
+      /Search indicators, tags, or IOCs/,
+    );
     await user.type(searchInput, '192.168');
 
     // Should show filtered results
@@ -118,7 +122,12 @@ describe('ThreatIntelligenceHub', () => {
   it('selects indicator and shows details', async () => {
     const user = userEvent.setup();
     const onIndicatorSelect = jest.fn();
-    render(<ThreatIntelligenceHub {...defaultProps} onIndicatorSelect={onIndicatorSelect} />);
+    render(
+      <ThreatIntelligenceHub
+        {...defaultProps}
+        onIndicatorSelect={onIndicatorSelect}
+      />,
+    );
 
     // Click on an indicator
     await user.click(screen.getByText('192.168.1.100'));
@@ -132,7 +141,12 @@ describe('ThreatIntelligenceHub', () => {
   it('calls indicator select callback', async () => {
     const user = userEvent.setup();
     const onIndicatorSelect = jest.fn();
-    render(<ThreatIntelligenceHub {...defaultProps} onIndicatorSelect={onIndicatorSelect} />);
+    render(
+      <ThreatIntelligenceHub
+        {...defaultProps}
+        onIndicatorSelect={onIndicatorSelect}
+      />,
+    );
 
     await user.click(screen.getByText('192.168.1.100'));
 
@@ -148,7 +162,12 @@ describe('ThreatIntelligenceHub', () => {
   it('calls campaign select callback', async () => {
     const user = userEvent.setup();
     const onCampaignSelect = jest.fn();
-    render(<ThreatIntelligenceHub {...defaultProps} onCampaignSelect={onCampaignSelect} />);
+    render(
+      <ThreatIntelligenceHub
+        {...defaultProps}
+        onCampaignSelect={onCampaignSelect}
+      />,
+    );
 
     // Switch to campaigns tab
     await user.click(screen.getByText(/📋 Campaigns/));
@@ -167,7 +186,9 @@ describe('ThreatIntelligenceHub', () => {
   it('calls actor select callback', async () => {
     const user = userEvent.setup();
     const onActorSelect = jest.fn();
-    render(<ThreatIntelligenceHub {...defaultProps} onActorSelect={onActorSelect} />);
+    render(
+      <ThreatIntelligenceHub {...defaultProps} onActorSelect={onActorSelect} />,
+    );
 
     // Switch to actors tab
     await user.click(screen.getByText(/🕵️ Actors/));
@@ -184,7 +205,9 @@ describe('ThreatIntelligenceHub', () => {
   });
 
   it('handles investigation ID prop', () => {
-    render(<ThreatIntelligenceHub {...defaultProps} investigationId="inv-789" />);
+    render(
+      <ThreatIntelligenceHub {...defaultProps} investigationId="inv-789" />,
+    );
 
     expect(screen.getByText(/Threat Indicators/)).toBeInTheDocument();
   });
@@ -239,7 +262,12 @@ describe('ThreatIntelligenceHub', () => {
   });
 
   it('applies custom className', () => {
-    render(<ThreatIntelligenceHub {...defaultProps} className="custom-threat-class" />);
+    render(
+      <ThreatIntelligenceHub
+        {...defaultProps}
+        className="custom-threat-class"
+      />,
+    );
 
     const container = screen
       .getByText(/🛡️ Threat Intelligence Hub/)
@@ -251,7 +279,9 @@ describe('ThreatIntelligenceHub', () => {
     const user = userEvent.setup();
     render(<ThreatIntelligenceHub {...defaultProps} />);
 
-    const searchInput = screen.getByPlaceholderText(/Search indicators, tags, or IOCs/);
+    const searchInput = screen.getByPlaceholderText(
+      /Search indicators, tags, or IOCs/,
+    );
     await user.type(searchInput, 'nonexistent-indicator');
 
     // Should show no results or empty state
@@ -280,7 +310,9 @@ describe('ThreatIntelligenceHub', () => {
   });
 
   it('handles component cleanup on unmount', () => {
-    const { unmount } = render(<ThreatIntelligenceHub {...defaultProps} autoRefresh={true} />);
+    const { unmount } = render(
+      <ThreatIntelligenceHub {...defaultProps} autoRefresh={true} />,
+    );
 
     unmount();
 
@@ -291,7 +323,9 @@ describe('ThreatIntelligenceHub', () => {
   it('supports keyboard navigation', () => {
     render(<ThreatIntelligenceHub {...defaultProps} />);
 
-    const searchInput = screen.getByPlaceholderText(/Search indicators, tags, or IOCs/);
+    const searchInput = screen.getByPlaceholderText(
+      /Search indicators, tags, or IOCs/,
+    );
 
     // Test keyboard events
     fireEvent.keyDown(searchInput, { key: 'Enter' });
@@ -309,7 +343,9 @@ describe('ThreatIntelligenceHub', () => {
     expect(screen.getByText(/🎯 Indicators \(\d+\)/)).toBeInTheDocument();
 
     // Apply filter to change count
-    const searchInput = screen.getByPlaceholderText(/Search indicators, tags, or IOCs/);
+    const searchInput = screen.getByPlaceholderText(
+      /Search indicators, tags, or IOCs/,
+    );
     await user.type(searchInput, 'domain');
 
     // Count should update (though exact number depends on mock data)

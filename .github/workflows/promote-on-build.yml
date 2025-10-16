@@ -1,7 +1,7 @@
 name: promote-on-build
 on:
   workflow_run:
-    workflows: ["build-images"]
+    workflows: ['build-images']
     types: [completed]
 
 jobs:

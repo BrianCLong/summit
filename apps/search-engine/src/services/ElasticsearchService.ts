@@ -1,5 +1,11 @@
 import { Client } from '@elastic/elasticsearch';
-import { SearchQuery, SearchResponse, SearchResult, SearchIndex, QueryBuilder } from '../types';
+import {
+  SearchQuery,
+  SearchResponse,
+  SearchResult,
+  SearchIndex,
+  QueryBuilder,
+} from '../types';
 import { Logger } from 'winston';
 import { createLogger, format, transports } from 'winston';
 
@@ -23,7 +29,11 @@ export class ElasticsearchService {
 
     this.logger = createLogger({
       level: process.env.LOG_LEVEL || 'info',
-      format: format.combine(format.timestamp(), format.errors({ stack: true }), format.json()),
+      format: format.combine(
+        format.timestamp(),
+        format.errors({ stack: true }),
+        format.json(),
+      ),
       transports: [
         new transports.Console(),
         new transports.File({ filename: 'logs/search-engine.log' }),
@@ -88,7 +98,8 @@ export class ElasticsearchService {
     const esQuery: any = {
       query: this.buildQueryClause(query),
       size: query.pagination?.size || 20,
-      from: ((query.pagination?.page || 1) - 1) * (query.pagination?.size || 20),
+      from:
+        ((query.pagination?.page || 1) - 1) * (query.pagination?.size || 20),
     };
 
     // Add sorting
@@ -170,8 +181,12 @@ export class ElasticsearchService {
         boolQuery.bool.filter.push({
           range: {
             [query.filters.dateRange.field]: {
-              ...(query.filters.dateRange.from && { gte: query.filters.dateRange.from }),
-              ...(query.filters.dateRange.to && { lte: query.filters.dateRange.to }),
+              ...(query.filters.dateRange.from && {
+                gte: query.filters.dateRange.from,
+              }),
+              ...(query.filters.dateRange.to && {
+                lte: query.filters.dateRange.to,
+              }),
             },
           },
         });
@@ -229,7 +244,9 @@ export class ElasticsearchService {
     if (query.boost) {
       if (query.boost.fields) {
         Object.entries(query.boost.fields).forEach(([field, boost]) => {
-          const fieldQuery = boolQuery.bool.must.find((q: any) => q.multi_match);
+          const fieldQuery = boolQuery.bool.must.find(
+            (q: any) => q.multi_match,
+          );
           if (fieldQuery && fieldQuery.multi_match) {
             fieldQuery.multi_match.fields = fieldQuery.multi_match.fields || [];
             fieldQuery.multi_match.fields.push(`${field}^${boost}`);
@@ -263,7 +280,13 @@ export class ElasticsearchService {
     return {
       multi_match: {
         query: queryText,
-        fields: ['title^3', 'content^2', 'description^1.5', 'tags^2', 'metadata.*'],
+        fields: [
+          'title^3',
+          'content^2',
+          'description^1.5',
+          'tags^2',
+          'metadata.*',
+        ],
         type: 'best_fields',
         operator: 'or',
         fuzziness: 'AUTO',
@@ -480,7 +503,11 @@ export class ElasticsearchService {
     }
   }
 
-  async indexDocument(indexName: string, id: string, document: any): Promise<void> {
+  async indexDocument(
+    indexName: string,
+    id: string,
+    document: any,
+  ): Promise<void> {
     try {
       await this.client.index({
         index: indexName,

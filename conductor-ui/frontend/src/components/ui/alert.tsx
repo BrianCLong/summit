@@ -13,6 +13,8 @@ export const Alert: React.FC<AlertProps> = ({ className = '', children }) => {
   );
 };
 
-export const AlertDescription: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AlertDescription: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
   return <div className="text-sm">{children}</div>;
 };

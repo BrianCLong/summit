@@ -4,7 +4,9 @@ def test_analyze(client):
     data = resp.json()
     assert "rewrite" in data and "diagnostic" in data and "guidance" in data
 
+
 pytest_plugins = ["tests.fixtures"]
+
 
 def test_rate_limit(client):
     for _ in range(3):

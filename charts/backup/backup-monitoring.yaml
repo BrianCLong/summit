@@ -9,18 +9,18 @@ metadata:
     app.kubernetes.io/component: monitoring
 data:
   # Monitoring thresholds
-  backup-success-rate-threshold: "95"  # Minimum 95% success rate
-  backup-duration-threshold: "7200"    # 2 hours max duration
-  backup-size-change-threshold: "50"   # Alert if backup size changes >50%
-  
+  backup-success-rate-threshold: '95' # Minimum 95% success rate
+  backup-duration-threshold: '7200' # 2 hours max duration
+  backup-size-change-threshold: '50' # Alert if backup size changes >50%
+
   # Alert destinations
-  alert-channels: "slack,email,pagerduty"
-  slack-channel: "#ops-alerts"
-  
+  alert-channels: 'slack,email,pagerduty'
+  slack-channel: '#ops-alerts'
+
   # Metrics retention
-  metrics-retention: "90d"
-  detailed-metrics-retention: "30d"
-  
+  metrics-retention: '90d'
+  detailed-metrics-retention: '30d'
+
 ---
 # Backup Metrics Collector
 apiVersion: apps/v1
@@ -41,9 +41,9 @@ spec:
       labels:
         app.kubernetes.io/name: backup-metrics-collector
       annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "8080"
-        prometheus.io/path: "/metrics"
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8080'
+        prometheus.io/path: '/metrics'
     spec:
       securityContext:
         runAsNonRoot: true
@@ -51,71 +51,71 @@ spec:
         runAsGroup: 65532
       serviceAccountName: backup-metrics-collector
       containers:
-      - name: metrics-collector
-        image: ghcr.io/brianlong/intelgraph/backup-metrics:latest
-        imagePullPolicy: IfNotPresent
-        ports:
-        - containerPort: 8080
-          name: metrics
-        env:
-        - name: METRICS_PORT
-          value: "8080"
-        - name: BACKUP_BUCKET
-          valueFrom:
-            configMapKeyRef:
-              name: backup-config
-              key: backup-bucket
-        - name: DR_BACKUP_BUCKET
-          valueFrom:
-            configMapKeyRef:
-              name: backup-config
-              key: dr-backup-bucket
-        - name: AWS_REGION
-          valueFrom:
-            configMapKeyRef:
-              name: backup-config
-              key: aws-region
-        - name: AWS_ACCESS_KEY_ID
-          valueFrom:
-            secretKeyRef:
-              name: backup-secrets
-              key: aws-access-key-id
-        - name: AWS_SECRET_ACCESS_KEY
-          valueFrom:
-            secretKeyRef:
-              name: backup-secrets
-              key: aws-secret-access-key
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "100m"
-          limits:
-            memory: "512Mi"
-            cpu: "200m"
-        securityContext:
-          allowPrivilegeEscalation: false
-          readOnlyRootFilesystem: true
-          capabilities:
-            drop:
-              - ALL
-        volumeMounts:
-        - name: tmp
-          mountPath: /tmp
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 30
-        readinessProbe:
-          httpGet:
-            path: /metrics
-            port: 8080
-          initialDelaySeconds: 5
-          periodSeconds: 10
+        - name: metrics-collector
+          image: ghcr.io/brianlong/intelgraph/backup-metrics:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8080
+              name: metrics
+          env:
+            - name: METRICS_PORT
+              value: '8080'
+            - name: BACKUP_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: backup-config
+                  key: backup-bucket
+            - name: DR_BACKUP_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: backup-config
+                  key: dr-backup-bucket
+            - name: AWS_REGION
+              valueFrom:
+                configMapKeyRef:
+                  name: backup-config
+                  key: aws-region
+            - name: AWS_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: backup-secrets
+                  key: aws-access-key-id
+            - name: AWS_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: backup-secrets
+                  key: aws-secret-access-key
+          resources:
+            requests:
+              memory: '256Mi'
+              cpu: '100m'
+            limits:
+              memory: '512Mi'
+              cpu: '200m'
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+                - ALL
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /metrics
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
       volumes:
-      - name: tmp
-        emptyDir: {}
+        - name: tmp
+          emptyDir: {}
 ---
 apiVersion: v1
 kind: Service
@@ -125,15 +125,15 @@ metadata:
   labels:
     app.kubernetes.io/name: backup-metrics-collector
   annotations:
-    prometheus.io/scrape: "true"
-    prometheus.io/port: "8080"
+    prometheus.io/scrape: 'true'
+    prometheus.io/port: '8080'
 spec:
   type: ClusterIP
   ports:
-  - port: 8080
-    targetPort: 8080
-    protocol: TCP
-    name: metrics
+    - port: 8080
+      targetPort: 8080
+      protocol: TCP
+      name: metrics
   selector:
     app.kubernetes.io/name: backup-metrics-collector
 ---
@@ -151,14 +151,14 @@ spec:
     matchLabels:
       app.kubernetes.io/name: backup-metrics-collector
   endpoints:
-  - port: metrics
-    path: /metrics
-    interval: 60s
-    scrapeTimeout: 30s
-    honorLabels: true
+    - port: metrics
+      path: /metrics
+      interval: 60s
+      scrapeTimeout: 30s
+      honorLabels: true
   namespaceSelector:
     matchNames:
-    - backup-system
+      - backup-system
 ---
 # Prometheus Alerting Rules
 apiVersion: monitoring.coreos.com/v1
@@ -172,155 +172,155 @@ metadata:
     prometheus: kube-prometheus
 spec:
   groups:
-  - name: backup.alerts
-    interval: 60s
-    rules:
-    # Backup Job Failure
-    - alert: BackupJobFailed
-      expr: |
-        (
-          kube_cronjob_status_last_schedule_time{namespace="database", cronjob=~".*backup.*"} 
-          - on(cronjob) group_right() 
-          (kube_cronjob_status_last_successful_time{namespace="database", cronjob=~".*backup.*"} > 0)
-        ) > 86400
-      for: 5m
-      labels:
-        severity: critical
-        component: backup
-        service: "{{ $labels.cronjob }}"
-      annotations:
-        summary: "Backup job {{ $labels.cronjob }} has failed"
-        description: "Backup job {{ $labels.cronjob }} in namespace {{ $labels.namespace }} has not completed successfully in the last 24 hours."
-        runbook_url: "https://runbooks.intelgraph.ai/backup-failure"
-        
-    # Backup Duration Too Long
-    - alert: BackupDurationHigh
-      expr: |
-        backup_job_duration_seconds > 7200
-      for: 0m
-      labels:
-        severity: warning
-        component: backup
-        service: "{{ $labels.job_name }}"
-      annotations:
-        summary: "Backup job {{ $labels.job_name }} taking too long"
-        description: "Backup job {{ $labels.job_name }} has been running for {{ $value | humanizeDuration }}. Normal duration is under 2 hours."
-        
-    # Backup Size Anomaly
-    - alert: BackupSizeAnomaly
-      expr: |
-        (
-          backup_size_bytes 
-          / on(backup_type) group_right() 
-          avg_over_time(backup_size_bytes[7d])
-        ) > 1.5 or 
-        (
-          backup_size_bytes 
-          / on(backup_type) group_right() 
-          avg_over_time(backup_size_bytes[7d])
-        ) < 0.5
-      for: 15m
-      labels:
-        severity: warning
-        component: backup
-        service: "{{ $labels.backup_type }}"
-      annotations:
-        summary: "Backup size anomaly detected for {{ $labels.backup_type }}"
-        description: "Backup size for {{ $labels.backup_type }} is {{ $value | humanizePercentage }} of the average size over the last 7 days."
-        
-    # Low Backup Success Rate
-    - alert: BackupSuccessRateLow
-      expr: |
-        (
-          rate(backup_jobs_completed_total{status="success"}[24h]) 
-          / 
-          rate(backup_jobs_completed_total[24h])
-        ) * 100 < 95
-      for: 30m
-      labels:
-        severity: critical
-        component: backup
-      annotations:
-        summary: "Backup success rate is below threshold"
-        description: "Backup success rate is {{ $value | printf \"%.1f\" }}%, which is below the 95% threshold."
-        
-    # Backup Storage Usage High
-    - alert: BackupStorageUsageHigh
-      expr: |
-        backup_storage_used_bytes / backup_storage_total_bytes * 100 > 85
-      for: 15m
-      labels:
-        severity: warning
-        component: backup
-      annotations:
-        summary: "Backup storage usage is high"
-        description: "Backup storage usage is {{ $value | printf \"%.1f\" }}%, approaching capacity limits."
-        
-    # DR Replication Failure
-    - alert: DRReplicationFailed
-      expr: |
-        time() - backup_dr_replication_last_success_timestamp > 28800
-      for: 0m
-      labels:
-        severity: critical
-        component: backup
-        service: dr-replication
-      annotations:
-        summary: "Disaster recovery replication has failed"
-        description: "DR replication has not succeeded in the last 8 hours. Last success: {{ $value | humanizeTimestamp }}"
-        
-    # Backup Validation Failure
-    - alert: BackupValidationFailed
-      expr: |
-        backup_validation_failed_tests > 0
-      for: 0m
-      labels:
-        severity: warning
-        component: backup
-        service: validation
-      annotations:
-        summary: "Backup validation tests are failing"
-        description: "{{ $value }} backup validation tests are currently failing."
-        
-    # Missing Recent Backup
-    - alert: MissingRecentBackup
-      expr: |
-        time() - backup_last_successful_timestamp{backup_type!="redis"} > 97200
-      for: 0m
-      labels:
-        severity: critical
-        component: backup
-        service: "{{ $labels.backup_type }}"
-      annotations:
-        summary: "No recent backup for {{ $labels.backup_type }}"
-        description: "No successful backup for {{ $labels.backup_type }} in the last 27 hours."
-        
-    # Security Audit High Risk
-    - alert: BackupSecurityRiskHigh
-      expr: |
-        backup_security_audit_risk_score > 75
-      for: 0m
-      labels:
-        severity: critical
-        component: backup
-        service: security-audit
-      annotations:
-        summary: "High security risk detected in backup audit"
-        description: "Backup security audit shows high risk score: {{ $value }}/100. Immediate attention required."
-        
-    # Encryption Key Rotation Overdue
-    - alert: BackupEncryptionKeyRotationOverdue
-      expr: |
-        time() - backup_encryption_key_last_rotation_timestamp > 7776000
-      for: 0m
-      labels:
-        severity: warning
-        component: backup
-        service: encryption
-      annotations:
-        summary: "Backup encryption key rotation is overdue"
-        description: "Backup encryption keys have not been rotated in over 90 days."
-        
+    - name: backup.alerts
+      interval: 60s
+      rules:
+        # Backup Job Failure
+        - alert: BackupJobFailed
+          expr: |
+            (
+              kube_cronjob_status_last_schedule_time{namespace="database", cronjob=~".*backup.*"} 
+              - on(cronjob) group_right() 
+              (kube_cronjob_status_last_successful_time{namespace="database", cronjob=~".*backup.*"} > 0)
+            ) > 86400
+          for: 5m
+          labels:
+            severity: critical
+            component: backup
+            service: '{{ $labels.cronjob }}'
+          annotations:
+            summary: 'Backup job {{ $labels.cronjob }} has failed'
+            description: 'Backup job {{ $labels.cronjob }} in namespace {{ $labels.namespace }} has not completed successfully in the last 24 hours.'
+            runbook_url: 'https://runbooks.intelgraph.ai/backup-failure'
+
+        # Backup Duration Too Long
+        - alert: BackupDurationHigh
+          expr: |
+            backup_job_duration_seconds > 7200
+          for: 0m
+          labels:
+            severity: warning
+            component: backup
+            service: '{{ $labels.job_name }}'
+          annotations:
+            summary: 'Backup job {{ $labels.job_name }} taking too long'
+            description: 'Backup job {{ $labels.job_name }} has been running for {{ $value | humanizeDuration }}. Normal duration is under 2 hours.'
+
+        # Backup Size Anomaly
+        - alert: BackupSizeAnomaly
+          expr: |
+            (
+              backup_size_bytes 
+              / on(backup_type) group_right() 
+              avg_over_time(backup_size_bytes[7d])
+            ) > 1.5 or 
+            (
+              backup_size_bytes 
+              / on(backup_type) group_right() 
+              avg_over_time(backup_size_bytes[7d])
+            ) < 0.5
+          for: 15m
+          labels:
+            severity: warning
+            component: backup
+            service: '{{ $labels.backup_type }}'
+          annotations:
+            summary: 'Backup size anomaly detected for {{ $labels.backup_type }}'
+            description: 'Backup size for {{ $labels.backup_type }} is {{ $value | humanizePercentage }} of the average size over the last 7 days.'
+
+        # Low Backup Success Rate
+        - alert: BackupSuccessRateLow
+          expr: |
+            (
+              rate(backup_jobs_completed_total{status="success"}[24h]) 
+              / 
+              rate(backup_jobs_completed_total[24h])
+            ) * 100 < 95
+          for: 30m
+          labels:
+            severity: critical
+            component: backup
+          annotations:
+            summary: 'Backup success rate is below threshold'
+            description: 'Backup success rate is {{ $value | printf "%.1f" }}%, which is below the 95% threshold.'
+
+        # Backup Storage Usage High
+        - alert: BackupStorageUsageHigh
+          expr: |
+            backup_storage_used_bytes / backup_storage_total_bytes * 100 > 85
+          for: 15m
+          labels:
+            severity: warning
+            component: backup
+          annotations:
+            summary: 'Backup storage usage is high'
+            description: 'Backup storage usage is {{ $value | printf "%.1f" }}%, approaching capacity limits.'
+
+        # DR Replication Failure
+        - alert: DRReplicationFailed
+          expr: |
+            time() - backup_dr_replication_last_success_timestamp > 28800
+          for: 0m
+          labels:
+            severity: critical
+            component: backup
+            service: dr-replication
+          annotations:
+            summary: 'Disaster recovery replication has failed'
+            description: 'DR replication has not succeeded in the last 8 hours. Last success: {{ $value | humanizeTimestamp }}'
+
+        # Backup Validation Failure
+        - alert: BackupValidationFailed
+          expr: |
+            backup_validation_failed_tests > 0
+          for: 0m
+          labels:
+            severity: warning
+            component: backup
+            service: validation
+          annotations:
+            summary: 'Backup validation tests are failing'
+            description: '{{ $value }} backup validation tests are currently failing.'
+
+        # Missing Recent Backup
+        - alert: MissingRecentBackup
+          expr: |
+            time() - backup_last_successful_timestamp{backup_type!="redis"} > 97200
+          for: 0m
+          labels:
+            severity: critical
+            component: backup
+            service: '{{ $labels.backup_type }}'
+          annotations:
+            summary: 'No recent backup for {{ $labels.backup_type }}'
+            description: 'No successful backup for {{ $labels.backup_type }} in the last 27 hours.'
+
+        # Security Audit High Risk
+        - alert: BackupSecurityRiskHigh
+          expr: |
+            backup_security_audit_risk_score > 75
+          for: 0m
+          labels:
+            severity: critical
+            component: backup
+            service: security-audit
+          annotations:
+            summary: 'High security risk detected in backup audit'
+            description: 'Backup security audit shows high risk score: {{ $value }}/100. Immediate attention required.'
+
+        # Encryption Key Rotation Overdue
+        - alert: BackupEncryptionKeyRotationOverdue
+          expr: |
+            time() - backup_encryption_key_last_rotation_timestamp > 7776000
+          for: 0m
+          labels:
+            severity: warning
+            component: backup
+            service: encryption
+          annotations:
+            summary: 'Backup encryption key rotation is overdue'
+            description: 'Backup encryption keys have not been rotated in over 90 days.'
+
 ---
 # Backup Monitoring Dashboard ConfigMap
 apiVersion: v1
@@ -330,7 +330,7 @@ metadata:
   namespace: backup-system
   labels:
     app.kubernetes.io/name: backup-dashboard
-    grafana_dashboard: "1"
+    grafana_dashboard: '1'
 data:
   backup-overview.json: |
     {
@@ -555,7 +555,7 @@ data:
         details:
           firing: '{{ .Alerts.Firing | len }}'
           resolved: '{{ .Alerts.Resolved | len }}'
-          
+
 ---
 apiVersion: v1
 kind: ServiceAccount
@@ -563,4 +563,4 @@ metadata:
   name: backup-metrics-collector
   namespace: backup-system
   annotations:
-    eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/backup-metrics-collector-role"
+    eks.amazonaws.com/role-arn: 'arn:aws:iam::123456789012:role/backup-metrics-collector-role'

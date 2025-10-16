@@ -1,7 +1,7 @@
 name: Merge Queue Kicker
 on:
   workflow_run:
-    workflows: ["CI (green)"]
+    workflows: ['CI (green)']
     types: [completed]
 permissions:
   contents: write

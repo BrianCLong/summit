@@ -53,5 +53,7 @@ provider.addSpanProcessor(new SimpleSpanProcessor(new ConsoleSpanExporter()));
 provider.addSpanProcessor(new PiiRedactingWebSpanProcessor()); // Add PII redacting processor
 provider.register(); // W3C TraceContext
 registerInstrumentations({
-  instrumentations: [new FetchInstrumentation({ propagateTraceHeaderCorsUrls: /.*/ })],
+  instrumentations: [
+    new FetchInstrumentation({ propagateTraceHeaderCorsUrls: /.*/ }),
+  ],
 });

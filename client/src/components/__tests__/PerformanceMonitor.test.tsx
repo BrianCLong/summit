@@ -1,6 +1,8 @@
 import React from 'react';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import PerformanceMonitor, { usePerformanceTracking } from '../PerformanceMonitor';
+import PerformanceMonitor, {
+  usePerformanceTracking,
+} from '../PerformanceMonitor';
 
 // Mock performance.memory
 Object.defineProperty(performance, 'memory', {
@@ -88,7 +90,11 @@ describe('PerformanceMonitor', () => {
     const onMetricsUpdate = jest.fn();
 
     render(
-      <PerformanceMonitor enabled={true} sampleInterval={1000} onMetricsUpdate={onMetricsUpdate} />,
+      <PerformanceMonitor
+        enabled={true}
+        sampleInterval={1000}
+        onMetricsUpdate={onMetricsUpdate}
+      />,
     );
 
     // Initial metrics should be collected
@@ -188,7 +194,11 @@ describe('PerformanceMonitor', () => {
     const onMetricsUpdate = jest.fn();
 
     render(
-      <PerformanceMonitor enabled={true} sampleInterval={100} onMetricsUpdate={onMetricsUpdate} />,
+      <PerformanceMonitor
+        enabled={true}
+        sampleInterval={100}
+        onMetricsUpdate={onMetricsUpdate}
+      />,
     );
 
     // Collect a few samples
@@ -271,7 +281,10 @@ describe('usePerformanceTracking', () => {
     render(<TestComponent />);
 
     expect((window as any).__performanceErrors).toBe(1);
-    expect(console.error).toHaveBeenCalledWith('[Performance] Error tracked:', expect.any(Error));
+    expect(console.error).toHaveBeenCalledWith(
+      '[Performance] Error tracked:',
+      expect.any(Error),
+    );
 
     console.error = originalLog;
   });
@@ -291,7 +304,11 @@ describe('PerformanceMonitor Integration', () => {
     const onMetricsUpdate = jest.fn();
 
     render(
-      <PerformanceMonitor enabled={true} sampleInterval={100} onMetricsUpdate={onMetricsUpdate} />,
+      <PerformanceMonitor
+        enabled={true}
+        sampleInterval={100}
+        onMetricsUpdate={onMetricsUpdate}
+      />,
     );
 
     expect(onMetricsUpdate).toHaveBeenCalled();

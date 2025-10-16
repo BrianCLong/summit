@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
+import warnings
 from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
 from typing import Any, Literal
 
 import numpy as np
 from pydantic import BaseModel, ConfigDict, Field, field_validator
-
-import warnings
 
 warnings.filterwarnings(
     "ignore",
@@ -46,7 +45,6 @@ class DetectorConfig(BaseModel):
         if value <= 0:
             raise ValueError("adaptive_sensitivity must be positive")
         return value
-
 
 
 @dataclass
@@ -121,7 +119,9 @@ def mad_score(batch: np.ndarray, config: DetectorConfig) -> tuple[np.ndarray, li
     return scores, rationales
 
 
-def zscore_detector(batch: np.ndarray, config: DetectorConfig) -> tuple[np.ndarray, list[list[str]]]:
+def zscore_detector(
+    batch: np.ndarray, config: DetectorConfig
+) -> tuple[np.ndarray, list[list[str]]]:
     mean = np.asarray(config.params.get("mean", np.mean(batch, axis=0)), dtype=float)
     std = np.asarray(config.params.get("std", np.std(batch, axis=0) + 1e-6), dtype=float)
     z = (batch - mean) / (std + 1e-6)

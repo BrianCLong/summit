@@ -20,4 +20,3 @@ declare module 'jquery' {
   const jq: any;
   export default jq;
 }
-

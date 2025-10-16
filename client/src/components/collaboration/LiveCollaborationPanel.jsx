@@ -19,7 +19,7 @@ import {
   Switch,
   FormControlLabel,
   Alert,
-  LinearProgress
+  LinearProgress,
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
@@ -29,37 +29,46 @@ import {
   Psychology as PsychologyIcon,
   Person as PersonIcon,
   AccessTime as TimeIcon,
-  TrendingUp as TrendingIcon
+  TrendingUp as TrendingIcon,
 } from '@mui/icons-material';
-import { useRealTimeGraph, useAIInsights, useInvestigationCollab } from '../../hooks/useRealTimeUpdates';
+import {
+  useRealTimeGraph,
+  useAIInsights,
+  useInvestigationCollab,
+} from '../../hooks/useRealTimeUpdates';
 
 function UserAvatar({ user }) {
-  const getStatusColor = (isOnline) => isOnline ? '#4caf50' : '#9e9e9e';
-  
+  const getStatusColor = (isOnline) => (isOnline ? '#4caf50' : '#9e9e9e');
+
   return (
-    <Tooltip title={`${user.name} - ${user.role} - ${user.isOnline ? 'Online' : 'Offline'}`}>
+    <Tooltip
+      title={`${user.name} - ${user.role} - ${user.isOnline ? 'Online' : 'Offline'}`}
+    >
       <Badge
         overlap="circular"
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
         badgeContent={
-          <CircleIcon 
-            sx={{ 
+          <CircleIcon
+            sx={{
               color: getStatusColor(user.isOnline),
               fontSize: 12,
-              filter: 'drop-shadow(0px 0px 2px rgba(0,0,0,0.5))'
-            }} 
+              filter: 'drop-shadow(0px 0px 2px rgba(0,0,0,0.5))',
+            }}
           />
         }
       >
-        <Avatar 
-          sx={{ 
-            width: 32, 
+        <Avatar
+          sx={{
+            width: 32,
             height: 32,
             bgcolor: user.isOnline ? 'primary.main' : 'grey.400',
-            fontSize: '14px'
+            fontSize: '14px',
           }}
         >
-          {user.name.split(' ').map(n => n[0]).join('')}
+          {user.name
+            .split(' ')
+            .map((n) => n[0])
+            .join('')}
         </Avatar>
       </Badge>
     </Tooltip>
@@ -69,19 +78,27 @@ function UserAvatar({ user }) {
 function LiveUpdate({ update }) {
   const getUpdateIcon = (type) => {
     switch (type) {
-      case 'ENTITY_ADDED': return '🆕';
-      case 'RELATIONSHIP_UPDATED': return '🔗';
-      case 'AI_INSIGHT': return '🤖';
-      default: return '📍';
+      case 'ENTITY_ADDED':
+        return '🆕';
+      case 'RELATIONSHIP_UPDATED':
+        return '🔗';
+      case 'AI_INSIGHT':
+        return '🤖';
+      default:
+        return '📍';
     }
   };
 
   const getUpdateColor = (type) => {
     switch (type) {
-      case 'ENTITY_ADDED': return 'success';
-      case 'RELATIONSHIP_UPDATED': return 'info';
-      case 'AI_INSIGHT': return 'secondary';
-      default: return 'default';
+      case 'ENTITY_ADDED':
+        return 'success';
+      case 'RELATIONSHIP_UPDATED':
+        return 'info';
+      case 'AI_INSIGHT':
+        return 'secondary';
+      default:
+        return 'default';
     }
   };
 
@@ -96,10 +113,15 @@ function LiveUpdate({ update }) {
         primary={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography variant="body2" sx={{ flexGrow: 1 }}>
-              {update.user?.name} {update.user?.action} {update.entity?.label || update.relationship?.type}
+              {update.user?.name} {update.user?.action}{' '}
+              {update.entity?.label || update.relationship?.type}
             </Typography>
-            <Chip 
-              label={update.entity?.confidence || update.relationship?.confidence || '95'}
+            <Chip
+              label={
+                update.entity?.confidence ||
+                update.relationship?.confidence ||
+                '95'
+              }
               size="small"
               color={getUpdateColor(update.type)}
               sx={{ fontSize: '10px', height: 18 }}
@@ -108,7 +130,9 @@ function LiveUpdate({ update }) {
         }
         secondary={
           <Typography variant="caption" color="text.secondary">
-            {new Date(update.timestamp || update.entity?.timestamp).toLocaleTimeString()}
+            {new Date(
+              update.timestamp || update.entity?.timestamp,
+            ).toLocaleTimeString()}
           </Typography>
         }
       />
@@ -119,15 +143,19 @@ function LiveUpdate({ update }) {
 function AIInsightItem({ insight }) {
   const getPriorityColor = (priority) => {
     switch (priority) {
-      case 'high': return 'error';
-      case 'medium': return 'warning';
-      case 'low': return 'info';
-      default: return 'default';
+      case 'high':
+        return 'error';
+      case 'medium':
+        return 'warning';
+      case 'low':
+        return 'info';
+      default:
+        return 'default';
     }
   };
 
   return (
-    <Alert 
+    <Alert
       severity={getPriorityColor(insight.priority)}
       sx={{ mb: 1, fontSize: '0.85rem' }}
       icon={<span style={{ fontSize: '16px' }}>{insight.icon}</span>}
@@ -136,9 +164,17 @@ function AIInsightItem({ insight }) {
         <Typography variant="body2" sx={{ fontWeight: 500 }}>
           {insight.message}
         </Typography>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mt: 0.5 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mt: 0.5,
+          }}
+        >
           <Typography variant="caption" color="text.secondary">
-            Confidence: {insight.confidence}% | Entities: {insight.affectedEntities}
+            Confidence: {insight.confidence}% | Entities:{' '}
+            {insight.affectedEntities}
           </Typography>
           <Typography variant="caption" color="text.secondary">
             {new Date(insight.timestamp).toLocaleTimeString()}
@@ -158,22 +194,34 @@ export default function LiveCollaborationPanel() {
   return (
     <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <CardContent sx={{ pb: 1 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h6">
-            🌐 Live Collaboration
-          </Typography>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mb: 2,
+          }}
+        >
+          <Typography variant="h6">🌐 Live Collaboration</Typography>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Badge color={isConnected ? 'success' : 'error'} variant="dot">
-              <Typography variant="caption" color={isConnected ? 'success.main' : 'error.main'}>
+              <Typography
+                variant="caption"
+                color={isConnected ? 'success.main' : 'error.main'}
+              >
                 {isConnected ? 'Connected' : 'Disconnected'}
               </Typography>
             </Badge>
-            <IconButton 
-              size="small" 
+            <IconButton
+              size="small"
               onClick={() => setNotificationsEnabled(!notificationsEnabled)}
               color={notificationsEnabled ? 'primary' : 'default'}
             >
-              {notificationsEnabled ? <NotificationsIcon /> : <NotificationsOffIcon />}
+              {notificationsEnabled ? (
+                <NotificationsIcon />
+              ) : (
+                <NotificationsOffIcon />
+              )}
             </IconButton>
           </Box>
         </Box>
@@ -181,10 +229,11 @@ export default function LiveCollaborationPanel() {
         {/* Connected Users */}
         <Box sx={{ mb: 2 }}>
           <Typography variant="subtitle2" gutterBottom>
-            👥 Online Team ({connectedUsers.filter(u => u.isOnline).length}/{connectedUsers.length})
+            👥 Online Team ({connectedUsers.filter((u) => u.isOnline).length}/
+            {connectedUsers.length})
           </Typography>
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-            {connectedUsers.map(user => (
+            {connectedUsers.map((user) => (
               <UserAvatar key={user.id} user={user} />
             ))}
           </Box>
@@ -200,11 +249,15 @@ export default function LiveCollaborationPanel() {
           </AccordionSummary>
           <AccordionDetails sx={{ pt: 0, maxHeight: 200, overflow: 'auto' }}>
             {aiInsights.length > 0 ? (
-              aiInsights.map(insight => (
+              aiInsights.map((insight) => (
                 <AIInsightItem key={insight.id} insight={insight} />
               ))
             ) : (
-              <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 2 }}>
+              <Typography
+                variant="body2"
+                color="text.secondary"
+                sx={{ textAlign: 'center', py: 2 }}
+              >
                 🧠 AI is analyzing patterns...
               </Typography>
             )}
@@ -217,15 +270,17 @@ export default function LiveCollaborationPanel() {
               📈 Live Updates ({liveUpdates.length})
             </Typography>
           </AccordionSummary>
-          <AccordionDetails sx={{ pt: 0, maxHeight: 200, overflow: 'auto', px: 0 }}>
+          <AccordionDetails
+            sx={{ pt: 0, maxHeight: 200, overflow: 'auto', px: 0 }}
+          >
             <List dense>
               {liveUpdates.length > 0 ? (
-                liveUpdates.map(update => (
+                liveUpdates.map((update) => (
                   <LiveUpdate key={update.id} update={update} />
                 ))
               ) : (
                 <ListItem>
-                  <ListItemText 
+                  <ListItemText
                     primary="🔄 Monitoring for updates..."
                     secondary="Real-time changes will appear here"
                   />
@@ -241,10 +296,12 @@ export default function LiveCollaborationPanel() {
               ⚡ Recent Activity ({recentActivity.length})
             </Typography>
           </AccordionSummary>
-          <AccordionDetails sx={{ pt: 0, maxHeight: 150, overflow: 'auto', px: 0 }}>
+          <AccordionDetails
+            sx={{ pt: 0, maxHeight: 150, overflow: 'auto', px: 0 }}
+          >
             <List dense>
               {recentActivity.length > 0 ? (
-                recentActivity.map(activity => (
+                recentActivity.map((activity) => (
                   <ListItem key={activity.id} sx={{ py: 0.5 }}>
                     <ListItemAvatar>
                       <Avatar sx={{ width: 20, height: 20, fontSize: '10px' }}>
@@ -267,7 +324,7 @@ export default function LiveCollaborationPanel() {
                 ))
               ) : (
                 <ListItem>
-                  <ListItemText 
+                  <ListItemText
                     primary="🕒 No recent activity"
                     secondary="Team actions will appear here"
                   />
@@ -281,8 +338,8 @@ export default function LiveCollaborationPanel() {
       {/* Progress Indicator */}
       {isConnected && (
         <Box sx={{ p: 1 }}>
-          <LinearProgress 
-            variant="indeterminate" 
+          <LinearProgress
+            variant="indeterminate"
             sx={{ height: 2, borderRadius: 1, opacity: 0.3 }}
             color="primary"
           />

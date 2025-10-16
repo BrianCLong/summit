@@ -1,14 +1,16 @@
-
 # predictive_threat_suite/counterfactual_simulator.py
 
-from typing import Dict, Any
+from typing import Any
 
-def simulate_counterfactual(scenario: Dict[str, Any], intervention: Dict[str, Any]) -> Dict[str, Any]:
+
+def simulate_counterfactual(
+    scenario: dict[str, Any], intervention: dict[str, Any]
+) -> dict[str, Any]:
     """
     Simulates counterfactual scenarios based on simple rules.
     """
     print(f"Simulating counterfactual for scenario {scenario} with intervention {intervention}")
-    
+
     outcome = "unknown"
     impact = "neutral"
 
@@ -26,6 +28,7 @@ def simulate_counterfactual(scenario: Dict[str, Any], intervention: Dict[str, An
         impact = "negative"
 
     return {"outcome": outcome, "impact": impact}
+
 
 def enable_counterfactual_simulator_feature(enable: bool) -> bool:
     """

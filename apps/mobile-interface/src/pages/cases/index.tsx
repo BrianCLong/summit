@@ -122,7 +122,9 @@ const CasesPage: NextPage = () => {
           {/* Header */}
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-2xl font-bold text-intel-900 dark:text-white">Cases</h1>
+              <h1 className="text-2xl font-bold text-intel-900 dark:text-white">
+                Cases
+              </h1>
               <p className="text-intel-600 dark:text-intel-400 mt-1">
                 {filteredCases.length} of {cases.length} cases
               </p>
@@ -138,7 +140,11 @@ const CasesPage: NextPage = () => {
 
           {/* Search and Filter */}
           <div className="space-y-4">
-            <SearchBar placeholder="Search cases..." onSearch={setSearchQuery} showVoiceSearch />
+            <SearchBar
+              placeholder="Search cases..."
+              onSearch={setSearchQuery}
+              showVoiceSearch
+            />
 
             <div className="flex items-center space-x-3">
               <button
@@ -154,9 +160,14 @@ const CasesPage: NextPage = () => {
               >
                 <FunnelIcon className="w-5 h-5" />
                 <span className="text-sm font-medium">Filters</span>
-                {filters.status.length + filters.priority.length + filters.assignee.length > 0 && (
+                {filters.status.length +
+                  filters.priority.length +
+                  filters.assignee.length >
+                  0 && (
                   <Badge variant="primary" size="sm">
-                    {filters.status.length + filters.priority.length + filters.assignee.length}
+                    {filters.status.length +
+                      filters.priority.length +
+                      filters.assignee.length}
                   </Badge>
                 )}
               </button>
@@ -254,10 +265,16 @@ const CasesPage: NextPage = () => {
 
                       {/* Status and Priority */}
                       <div className="flex items-center space-x-2 mb-3">
-                        <Badge variant={getStatusColor(case_.status) as any} size="sm">
+                        <Badge
+                          variant={getStatusColor(case_.status) as any}
+                          size="sm"
+                        >
                           {case_.status}
                         </Badge>
-                        <Badge variant={getPriorityColor(case_.priority) as any} size="sm">
+                        <Badge
+                          variant={getPriorityColor(case_.priority) as any}
+                          size="sm"
+                        >
                           {case_.priority}
                         </Badge>
                         {case_.entityCount > 0 && (
@@ -303,7 +320,9 @@ const CasesPage: NextPage = () => {
                         <div className="flex items-center space-x-1">
                           <ClockIcon className="w-4 h-4" />
                           <span>
-                            {formatDistanceToNow(new Date(case_.updatedAt), { addSuffix: true })}
+                            {formatDistanceToNow(new Date(case_.updatedAt), {
+                              addSuffix: true,
+                            })}
                           </span>
                         </div>
                       </div>

@@ -1,12 +1,12 @@
 name: CI Main - Green Lock Strategy
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   merge_group:
 env:
-  NODE_VERSIONS: "18,20"
+  NODE_VERSIONS: '18,20'
   FORCE_COLOR: 3
 jobs:
   smoke-validation:
@@ -95,7 +95,13 @@ jobs:
   acceptance-criteria:
     name: IntelGraph Acceptance Criteria
     runs-on: ubuntu-latest
-    needs: [smoke-validation, security-audit, provenance-validation, observability-check]
+    needs:
+      [
+        smoke-validation,
+        security-audit,
+        provenance-validation,
+        observability-check,
+      ]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -110,7 +116,14 @@ jobs:
   status-summary:
     name: CI Status Summary
     runs-on: ubuntu-latest
-    needs: [smoke-validation, security-audit, provenance-validation, observability-check, acceptance-criteria]
+    needs:
+      [
+        smoke-validation,
+        security-audit,
+        provenance-validation,
+        observability-check,
+        acceptance-criteria,
+      ]
     if: always()
     steps:
       - name: CI Summary

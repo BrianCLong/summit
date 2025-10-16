@@ -123,7 +123,11 @@ commandTests:
   - name: 'Application directories have correct permissions'
     command: 'ls'
     args: ['-la', '/app']
-    expectedOutput: ['drwxr-xr-x.*nonroot.*nonroot.*logs', 'drwxr-xr-x.*nonroot.*nonroot.*cache']
+    expectedOutput:
+      [
+        'drwxr-xr-x.*nonroot.*nonroot.*logs',
+        'drwxr-xr-x.*nonroot.*nonroot.*cache',
+      ]
 
   # Application functionality
   - name: 'Node.js is available'

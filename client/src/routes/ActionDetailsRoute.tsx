@@ -22,7 +22,9 @@ export default function ActionDetailsRoute() {
     return (
       <div className="p-6">
         <h1 className="text-lg font-semibold">Failed to load action</h1>
-        <pre className="mt-2 text-sm whitespace-pre-wrap">{String(error.message)}</pre>
+        <pre className="mt-2 text-sm whitespace-pre-wrap">
+          {String(error.message)}
+        </pre>
       </div>
     );
   }

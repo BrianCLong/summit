@@ -44,7 +44,12 @@ const OPERATORS = {
   select: ['equals', 'in', 'not in'],
 };
 
-export function QueryChipBuilder({ chips, onChipsChange, onSave, onShare }: QueryChipBuilderProps) {
+export function QueryChipBuilder({
+  chips,
+  onChipsChange,
+  onSave,
+  onShare,
+}: QueryChipBuilderProps) {
   const [newChip, setNewChip] = useState<Partial<QueryChip>>({});
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
 
@@ -79,7 +84,12 @@ export function QueryChipBuilder({ chips, onChipsChange, onSave, onShare }: Quer
       const newChips = matches.map((match) => ({
         id: `dsl-${Date.now()}-${Math.random().toString(36).slice(2)}`,
         field: match[1],
-        operator: match[2] === ':' ? 'equals' : match[2] === '>' ? 'greater than' : 'less than',
+        operator:
+          match[2] === ':'
+            ? 'equals'
+            : match[2] === '>'
+              ? 'greater than'
+              : 'less than',
         value: match[3],
         type: 'filter' as const,
       }));
@@ -161,7 +171,9 @@ export function QueryChipBuilder({ chips, onChipsChange, onSave, onShare }: Quer
           sx={{ minWidth: 120 }}
           options={FIELDS}
           value={FIELDS.find((f) => f.value === newChip.field) || null}
-          onChange={(_, option) => setNewChip((prev) => ({ ...prev, field: option?.value }))}
+          onChange={(_, option) =>
+            setNewChip((prev) => ({ ...prev, field: option?.value }))
+          }
           renderInput={(params) => <TextField {...params} label="Field" />}
         />
 
@@ -170,7 +182,9 @@ export function QueryChipBuilder({ chips, onChipsChange, onSave, onShare }: Quer
           sx={{ minWidth: 100 }}
           options={OPERATORS.text} // Simplified - would be dynamic based on field type
           value={newChip.operator || null}
-          onChange={(_, value) => setNewChip((prev) => ({ ...prev, operator: value || '' }))}
+          onChange={(_, value) =>
+            setNewChip((prev) => ({ ...prev, operator: value || '' }))
+          }
           renderInput={(params) => <TextField {...params} label="Operator" />}
         />
 
@@ -178,7 +192,9 @@ export function QueryChipBuilder({ chips, onChipsChange, onSave, onShare }: Quer
           size="small"
           label="Value"
           value={newChip.value || ''}
-          onChange={(e) => setNewChip((prev) => ({ ...prev, value: e.target.value }))}
+          onChange={(e) =>
+            setNewChip((prev) => ({ ...prev, value: e.target.value }))
+          }
           onKeyDown={(e) => e.key === 'Enter' && addChip()}
           sx={{ minWidth: 120 }}
         />
@@ -195,7 +211,11 @@ export function QueryChipBuilder({ chips, onChipsChange, onSave, onShare }: Quer
       </Box>
 
       {chips.length > 0 && (
-        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{ mt: 1, display: 'block' }}
+        >
           {chips.length} active filter{chips.length !== 1 ? 's' : ''}
         </Typography>
       )}

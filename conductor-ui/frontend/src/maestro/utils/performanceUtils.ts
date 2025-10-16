@@ -99,7 +99,9 @@ export class PerformanceMonitor {
       if (navigation) {
         // First Contentful Paint
         const paintEntries = performance.getEntriesByType('paint');
-        const fcp = paintEntries.find((entry) => entry.name === 'first-contentful-paint');
+        const fcp = paintEntries.find(
+          (entry) => entry.name === 'first-contentful-paint',
+        );
         if (fcp) {
           this.recordMetric('fcp', fcp.startTime);
           this.checkBudget('fcp', fcp.startTime);
@@ -118,13 +120,19 @@ export class PerformanceMonitor {
         const resource = entry as PerformanceResourceTiming;
         if (resource.name.includes('/api/')) {
           const apiPath = new URL(resource.name).pathname;
-          this.recordApiResponse(apiPath, resource.responseEnd - resource.responseStart);
+          this.recordApiResponse(
+            apiPath,
+            resource.responseEnd - resource.responseStart,
+          );
         }
       });
     });
   }
 
-  private createObserver(type: string, callback: (entries: PerformanceEntry[]) => void): void {
+  private createObserver(
+    type: string,
+    callback: (entries: PerformanceEntry[]) => void,
+  ): void {
     try {
       const observer = new PerformanceObserver((list) => {
         callback(list.getEntries());
@@ -170,7 +178,9 @@ export class PerformanceMonitor {
     });
   }
 
-  onBudgetViolation(callback: (metric: string, value: number, budget: number) => void): void {
+  onBudgetViolation(
+    callback: (metric: string, value: number, budget: number) => void,
+  ): void {
     this.onViolation = callback;
   }
 
@@ -224,7 +234,8 @@ export class PerformanceMonitor {
 
     report += '## All Metrics\n\n';
     status.forEach((s) => {
-      const icon = s.status === 'good' ? '✅' : s.status === 'warning' ? '⚠️' : '❌';
+      const icon =
+        s.status === 'good' ? '✅' : s.status === 'warning' ? '⚠️' : '❌';
       report += `${icon} **${s.metric}**: ${s.value.toFixed(2)}ms (budget: ${s.budget}ms)\n`;
     });
 
@@ -238,7 +249,9 @@ export class PerformanceMonitor {
 }
 
 // React hook for performance monitoring
-export const usePerformanceMonitor = (budgets?: Partial<PerformanceBudgets>) => {
+export const usePerformanceMonitor = (
+  budgets?: Partial<PerformanceBudgets>,
+) => {
   const [monitor] = React.useState(() => new PerformanceMonitor(budgets));
   const [metrics, setMetrics] = React.useState<Partial<PerformanceMetrics>>({});
   const [violations, setViolations] = React.useState<
@@ -306,7 +319,11 @@ export const preloadRoute = (routePath: string): void => {
 };
 
 // Image optimization helpers
-export const createOptimizedImageSrc = (src: string, width: number, quality = 75): string => {
+export const createOptimizedImageSrc = (
+  src: string,
+  width: number,
+  quality = 75,
+): string => {
   // In production, this would integrate with an image optimization service
   return `${src}?w=${width}&q=${quality}`;
 };

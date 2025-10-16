@@ -24,9 +24,9 @@ from __future__ import annotations
 import argparse
 import json
 import time
-from pathlib import Path
 from collections import defaultdict
-from typing import Dict, List, Any
+from pathlib import Path
+from typing import Any
 
 import numpy as np
 
@@ -38,8 +38,8 @@ except Exception:
     from services.analytics.eval.dr_eval import doubly_robust  # type: ignore
 
 
-def load_jsonl(path: Path) -> List[Dict[str, Any]]:
-    rows: List[Dict[str, Any]] = []
+def load_jsonl(path: Path) -> list[dict[str, Any]]:
+    rows: list[dict[str, Any]] = []
     with path.open("r") as f:
         for line in f:
             line = line.strip()
@@ -49,7 +49,7 @@ def load_jsonl(path: Path) -> List[Dict[str, Any]]:
     return rows
 
 
-def eval_group(rows: List[Dict[str, Any]]) -> Dict[str, float]:
+def eval_group(rows: list[dict[str, Any]]) -> dict[str, float]:
     policy_probs = np.array([r["policy_prob"] for r in rows], dtype=float)
     logging_probs = np.array([r["logging_prob"] for r in rows], dtype=float)
     rewards = np.array([r["reward"] for r in rows], dtype=float)
@@ -76,9 +76,9 @@ def main():
     overall = eval_group(rows)
 
     # By expert and tenant tier
-    by_expert: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
-    by_tier: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
-    by_combo: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
+    by_expert: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    by_tier: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    by_combo: dict[str, list[dict[str, Any]]] = defaultdict(list)
 
     for r in rows:
         ex = r.get("expert", "unknown")
@@ -107,14 +107,14 @@ def main():
         json.dump(summary, f, indent=2)
 
     # Flatten to CSV rows
-    def rowify(scope: str, name: str, m: Dict[str, float]):
+    def rowify(scope: str, name: str, m: dict[str, float]):
         return {
             "scope": scope,
             "name": name,
             **m,
         }
 
-    csv_rows: List[Dict[str, Any]] = [rowify("overall", "all", overall)]
+    csv_rows: list[dict[str, Any]] = [rowify("overall", "all", overall)]
     csv_rows += [rowify("expert", k, v) for k, v in summary["by_expert"].items()]
     csv_rows += [rowify("tier", k, v) for k, v in summary["by_tier"].items()]
     csv_rows += [rowify("expert_tier", k, v) for k, v in summary["by_expert_tier"].items()]
@@ -141,4 +141,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

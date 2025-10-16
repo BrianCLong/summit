@@ -3,185 +3,185 @@
 
 analytics:
   enabled: true
-  
+
   # Stream Processing Configuration
   stream_processing:
-    engine: "kafka"  # kafka, pulsar, redis_streams
-    
+    engine: 'kafka' # kafka, pulsar, redis_streams
+
     kafka:
       brokers:
-        - "${KAFKA_BROKER_1}"
-        - "${KAFKA_BROKER_2}" 
-        - "${KAFKA_BROKER_3}"
-      client_id: "intelgraph-analytics"
-      group_id: "analytics-processors"
+        - '${KAFKA_BROKER_1}'
+        - '${KAFKA_BROKER_2}'
+        - '${KAFKA_BROKER_3}'
+      client_id: 'intelgraph-analytics'
+      group_id: 'analytics-processors'
       security:
-        protocol: "SASL_SSL"
-        mechanism: "PLAIN"
-        username: "${KAFKA_USERNAME}"
-        password: "${KAFKA_PASSWORD}"
-      
+        protocol: 'SASL_SSL'
+        mechanism: 'PLAIN'
+        username: '${KAFKA_USERNAME}'
+        password: '${KAFKA_PASSWORD}'
+
     processors:
       max_concurrent: 10
       default_parallelism: 4
-      checkpoint_interval: 60000  # 1 minute
-      restart_strategy: "exponential-backoff"
+      checkpoint_interval: 60000 # 1 minute
+      restart_strategy: 'exponential-backoff'
       max_restart_attempts: 3
       timeout: 30000
       buffer_size: 10000
       batch_size: 500
-      
+
     topics:
       # Input topics
-      raw_events: "intelgraph.events.raw"
-      user_activities: "intelgraph.activities.user"
-      system_metrics: "intelgraph.metrics.system"
-      audit_logs: "intelgraph.audit.logs"
-      collaboration_events: "intelgraph.collaboration.events"
-      
+      raw_events: 'intelgraph.events.raw'
+      user_activities: 'intelgraph.activities.user'
+      system_metrics: 'intelgraph.metrics.system'
+      audit_logs: 'intelgraph.audit.logs'
+      collaboration_events: 'intelgraph.collaboration.events'
+
       # Output topics
-      processed_events: "intelgraph.events.processed"
-      aggregated_metrics: "intelgraph.metrics.aggregated"
-      anomalies: "intelgraph.anomalies.detected"
-      patterns: "intelgraph.patterns.recognized"
-      alerts: "intelgraph.alerts.generated"
-      
+      processed_events: 'intelgraph.events.processed'
+      aggregated_metrics: 'intelgraph.metrics.aggregated'
+      anomalies: 'intelgraph.anomalies.detected'
+      patterns: 'intelgraph.patterns.recognized'
+      alerts: 'intelgraph.alerts.generated'
+
   # Time Series Database Configuration
   timeseries:
-    provider: "influxdb"  # influxdb, prometheus, timescaledb
-    
+    provider: 'influxdb' # influxdb, prometheus, timescaledb
+
     influxdb:
-      host: "${INFLUX_HOST}"
-      port: "${INFLUX_PORT}"
-      database: "intelgraph_metrics"
-      username: "${INFLUX_USERNAME}"
-      password: "${INFLUX_PASSWORD}"
-      retention_policy: "autogen"
-      precision: "ms"
-      
+      host: '${INFLUX_HOST}'
+      port: '${INFLUX_PORT}'
+      database: 'intelgraph_metrics'
+      username: '${INFLUX_USERNAME}'
+      password: '${INFLUX_PASSWORD}'
+      retention_policy: 'autogen'
+      precision: 'ms'
+
     # Data retention and downsampling
     retention:
-      raw_data: "7d"        # 7 days of raw data
-      hourly_avg: "30d"     # 30 days of hourly averages
-      daily_avg: "365d"     # 1 year of daily averages
-      monthly_avg: "5y"     # 5 years of monthly averages
-      
+      raw_data: '7d' # 7 days of raw data
+      hourly_avg: '30d' # 30 days of hourly averages
+      daily_avg: '365d' # 1 year of daily averages
+      monthly_avg: '5y' # 5 years of monthly averages
+
     downsampling:
       enabled: true
       rules:
-        - name: "hourly_metrics"
-          source_retention: "raw_data"
-          dest_retention: "hourly_avg"
-          every: "1h"
-          aggregations: ["mean", "max", "min", "sum", "count"]
-        - name: "daily_metrics"
-          source_retention: "hourly_avg"
-          dest_retention: "daily_avg"
-          every: "1d"
-          aggregations: ["mean", "max", "min", "sum"]
-        - name: "monthly_metrics"
-          source_retention: "daily_avg"
-          dest_retention: "monthly_avg"
-          every: "30d"
-          aggregations: ["mean", "max", "min"]
-          
+        - name: 'hourly_metrics'
+          source_retention: 'raw_data'
+          dest_retention: 'hourly_avg'
+          every: '1h'
+          aggregations: ['mean', 'max', 'min', 'sum', 'count']
+        - name: 'daily_metrics'
+          source_retention: 'hourly_avg'
+          dest_retention: 'daily_avg'
+          every: '1d'
+          aggregations: ['mean', 'max', 'min', 'sum']
+        - name: 'monthly_metrics'
+          source_retention: 'daily_avg'
+          dest_retention: 'monthly_avg'
+          every: '30d'
+          aggregations: ['mean', 'max', 'min']
+
   # Metrics Collection and Aggregation
   metrics:
-    collection_interval: 10000  # 10 seconds
+    collection_interval: 10000 # 10 seconds
     batch_size: 1000
-    buffer_timeout: 5000  # 5 seconds
-    
+    buffer_timeout: 5000 # 5 seconds
+
     # Built-in metric collectors
     collectors:
       system:
         enabled: true
-        interval: 30000  # 30 seconds
+        interval: 30000 # 30 seconds
         metrics:
-          - "cpu_usage"
-          - "memory_usage"
-          - "disk_usage"
-          - "network_io"
-          - "load_average"
-          
+          - 'cpu_usage'
+          - 'memory_usage'
+          - 'disk_usage'
+          - 'network_io'
+          - 'load_average'
+
       application:
         enabled: true
-        interval: 10000  # 10 seconds
+        interval: 10000 # 10 seconds
         metrics:
-          - "request_count"
-          - "response_time"
-          - "error_rate"
-          - "active_users"
-          - "session_count"
-          
+          - 'request_count'
+          - 'response_time'
+          - 'error_rate'
+          - 'active_users'
+          - 'session_count'
+
       database:
         enabled: true
-        interval: 30000  # 30 seconds
+        interval: 30000 # 30 seconds
         metrics:
-          - "query_count"
-          - "query_duration"
-          - "connection_count"
-          - "cache_hit_rate"
-          - "replication_lag"
-          
+          - 'query_count'
+          - 'query_duration'
+          - 'connection_count'
+          - 'cache_hit_rate'
+          - 'replication_lag'
+
       collaboration:
         enabled: true
-        interval: 5000   # 5 seconds
+        interval: 5000 # 5 seconds
         metrics:
-          - "active_sessions"
-          - "concurrent_users"
-          - "operations_per_second"
-          - "conflict_rate"
-          - "message_latency"
-          
+          - 'active_sessions'
+          - 'concurrent_users'
+          - 'operations_per_second'
+          - 'conflict_rate'
+          - 'message_latency'
+
     # Real-time aggregations
     aggregations:
-      - name: "request_rate_1m"
-        metric: "request_count"
-        time_window: 60000  # 1 minute
-        type: "rate"
-        
-      - name: "error_rate_5m"
-        metric: "error_count"
-        time_window: 300000  # 5 minutes
-        type: "rate"
-        
-      - name: "response_time_p95"
-        metric: "response_time"
-        time_window: 300000  # 5 minutes
-        type: "percentile"
+      - name: 'request_rate_1m'
+        metric: 'request_count'
+        time_window: 60000 # 1 minute
+        type: 'rate'
+
+      - name: 'error_rate_5m'
+        metric: 'error_count'
+        time_window: 300000 # 5 minutes
+        type: 'rate'
+
+      - name: 'response_time_p95'
+        metric: 'response_time'
+        time_window: 300000 # 5 minutes
+        type: 'percentile'
         percentile: 95
-        
-      - name: "active_users_by_region"
-        metric: "active_users"
-        time_window: 60000   # 1 minute
-        type: "sum"
-        group_by: ["region"]
-        
+
+      - name: 'active_users_by_region'
+        metric: 'active_users'
+        time_window: 60000 # 1 minute
+        type: 'sum'
+        group_by: ['region']
+
   # Machine Learning Pipeline
   ml:
     enabled: true
-    model_path: "/app/models"
+    model_path: '/app/models'
     enable_gpu: false
-    
+
     # Anomaly Detection
     anomaly_detection:
       enabled: true
       algorithms:
         statistical:
           enabled: true
-          threshold: 3.0  # Standard deviations
+          threshold: 3.0 # Standard deviations
           window_size: 100
-          
+
         isolation_forest:
           enabled: true
           contamination: 0.1
           n_estimators: 100
-          
+
         autoencoder:
           enabled: false
           hidden_layers: [64, 32, 16, 32, 64]
           epochs: 100
-          
+
     # Pattern Recognition
     pattern_recognition:
       enabled: true
@@ -190,156 +190,156 @@ analytics:
           enabled: true
           min_support: 0.1
           max_pattern_length: 10
-          
+
         clustering:
           enabled: true
-          algorithm: "kmeans"
+          algorithm: 'kmeans'
           n_clusters: 5
-          
+
     # Model Training
     training:
       auto_retrain: true
-      retrain_interval: "7d"
+      retrain_interval: '7d'
       min_training_samples: 1000
       validation_split: 0.2
-      
+
   # Dashboard and Visualization
   dashboards:
-    default_refresh: 30  # seconds
+    default_refresh: 30 # seconds
     max_data_points: 2000
-    
+
     # Pre-built dashboards
     system_overview:
       enabled: true
       panels:
-        - type: "graph"
-          title: "CPU Usage"
-          metrics: ["cpu_usage"]
-          time_range: "1h"
-        - type: "graph" 
-          title: "Memory Usage"
-          metrics: ["memory_usage"]
-          time_range: "1h"
-        - type: "stat"
-          title: "Active Users"
-          metrics: ["active_users"]
-        - type: "graph"
-          title: "Request Rate"
-          metrics: ["request_rate_1m"]
-          time_range: "1h"
-          
+        - type: 'graph'
+          title: 'CPU Usage'
+          metrics: ['cpu_usage']
+          time_range: '1h'
+        - type: 'graph'
+          title: 'Memory Usage'
+          metrics: ['memory_usage']
+          time_range: '1h'
+        - type: 'stat'
+          title: 'Active Users'
+          metrics: ['active_users']
+        - type: 'graph'
+          title: 'Request Rate'
+          metrics: ['request_rate_1m']
+          time_range: '1h'
+
     collaboration_metrics:
       enabled: true
       panels:
-        - type: "graph"
-          title: "Active Sessions"
-          metrics: ["active_sessions"]
-          time_range: "4h"
-        - type: "graph"
-          title: "Operations/sec"
-          metrics: ["operations_per_second"]
-          time_range: "1h"
-        - type: "heatmap"
-          title: "User Activity"
-          metrics: ["user_activity_by_hour"]
-          time_range: "24h"
-          
+        - type: 'graph'
+          title: 'Active Sessions'
+          metrics: ['active_sessions']
+          time_range: '4h'
+        - type: 'graph'
+          title: 'Operations/sec'
+          metrics: ['operations_per_second']
+          time_range: '1h'
+        - type: 'heatmap'
+          title: 'User Activity'
+          metrics: ['user_activity_by_hour']
+          time_range: '24h'
+
     security_overview:
       enabled: true
       panels:
-        - type: "stat"
-          title: "Failed Logins"
-          metrics: ["failed_login_count"]
-        - type: "graph"
-          title: "Anomalies Detected"
-          metrics: ["anomalies_per_hour"]
-          time_range: "24h"
-        - type: "table"
-          title: "Top Security Events"
-          metrics: ["security_events"]
-          
+        - type: 'stat'
+          title: 'Failed Logins'
+          metrics: ['failed_login_count']
+        - type: 'graph'
+          title: 'Anomalies Detected'
+          metrics: ['anomalies_per_hour']
+          time_range: '24h'
+        - type: 'table'
+          title: 'Top Security Events'
+          metrics: ['security_events']
+
   # Alerting Configuration
   alerting:
     enabled: true
-    evaluation_interval: 30  # seconds
-    
+    evaluation_interval: 30 # seconds
+
     rules:
       # System alerts
-      - name: "high_cpu_usage"
-        condition: "cpu_usage > 90"
-        for: "5m"
-        severity: "warning"
-        message: "CPU usage is above 90% for 5 minutes"
-        channels: ["slack", "email"]
-        
-      - name: "high_memory_usage"
-        condition: "memory_usage > 85"
-        for: "10m"
-        severity: "warning"
-        message: "Memory usage is above 85% for 10 minutes"
-        channels: ["slack", "email"]
-        
-      - name: "high_error_rate"
-        condition: "error_rate_5m > 5"
-        for: "2m"
-        severity: "critical"
-        message: "Error rate is above 5% for 2 minutes"
-        channels: ["pagerduty", "slack", "email"]
-        
+      - name: 'high_cpu_usage'
+        condition: 'cpu_usage > 90'
+        for: '5m'
+        severity: 'warning'
+        message: 'CPU usage is above 90% for 5 minutes'
+        channels: ['slack', 'email']
+
+      - name: 'high_memory_usage'
+        condition: 'memory_usage > 85'
+        for: '10m'
+        severity: 'warning'
+        message: 'Memory usage is above 85% for 10 minutes'
+        channels: ['slack', 'email']
+
+      - name: 'high_error_rate'
+        condition: 'error_rate_5m > 5'
+        for: '2m'
+        severity: 'critical'
+        message: 'Error rate is above 5% for 2 minutes'
+        channels: ['pagerduty', 'slack', 'email']
+
       # Application alerts
-      - name: "low_active_users"
-        condition: "active_users < 10"
-        for: "15m"
-        severity: "info"
-        message: "Active user count is below normal levels"
-        channels: ["slack"]
-        
-      - name: "high_response_time"
-        condition: "response_time_p95 > 2000"
-        for: "5m"
-        severity: "warning"
-        message: "95th percentile response time is above 2 seconds"
-        channels: ["slack", "email"]
-        
+      - name: 'low_active_users'
+        condition: 'active_users < 10'
+        for: '15m'
+        severity: 'info'
+        message: 'Active user count is below normal levels'
+        channels: ['slack']
+
+      - name: 'high_response_time'
+        condition: 'response_time_p95 > 2000'
+        for: '5m'
+        severity: 'warning'
+        message: '95th percentile response time is above 2 seconds'
+        channels: ['slack', 'email']
+
       # Security alerts
-      - name: "anomaly_spike"
-        condition: "anomalies_per_hour > 10"
-        for: "1m"
-        severity: "critical"
-        message: "High number of anomalies detected"
-        channels: ["security_team", "pagerduty"]
-        
+      - name: 'anomaly_spike'
+        condition: 'anomalies_per_hour > 10'
+        for: '1m'
+        severity: 'critical'
+        message: 'High number of anomalies detected'
+        channels: ['security_team', 'pagerduty']
+
     channels:
       slack:
         enabled: true
-        webhook_url: "${SLACK_WEBHOOK_URL}"
-        channel: "#alerts"
-        username: "IntelGraph Alerts"
-        
+        webhook_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#alerts'
+        username: 'IntelGraph Alerts'
+
       email:
         enabled: true
-        smtp_server: "${SMTP_SERVER}"
+        smtp_server: '${SMTP_SERVER}'
         smtp_port: 587
-        username: "${SMTP_USERNAME}"
-        password: "${SMTP_PASSWORD}"
-        from: "alerts@intelgraph.com"
-        to: ["ops@company.com", "alerts@company.com"]
-        
+        username: '${SMTP_USERNAME}'
+        password: '${SMTP_PASSWORD}'
+        from: 'alerts@intelgraph.com'
+        to: ['ops@company.com', 'alerts@company.com']
+
       pagerduty:
         enabled: true
-        integration_key: "${PAGERDUTY_INTEGRATION_KEY}"
-        
+        integration_key: '${PAGERDUTY_INTEGRATION_KEY}'
+
       security_team:
         enabled: true
-        webhook_url: "${SECURITY_WEBHOOK_URL}"
-        
+        webhook_url: '${SECURITY_WEBHOOK_URL}'
+
   # Query Engine Configuration
   query_engine:
-    timeout: 30000  # 30 seconds
+    timeout: 30000 # 30 seconds
     max_concurrent_queries: 100
-    result_cache_ttl: 300  # 5 minutes
-    max_result_size: "100MB"
-    
+    result_cache_ttl: 300 # 5 minutes
+    max_result_size: '100MB'
+
     # Query language features
     features:
       functions: true
@@ -348,7 +348,7 @@ analytics:
       subqueries: true
       regex: true
       math_operations: true
-      
+
   # API Configuration
   api:
     enabled: true
@@ -357,94 +357,94 @@ analytics:
       enabled: true
       requests_per_minute: 1000
       burst_size: 100
-      
+
     authentication:
       required: true
-      methods: ["jwt", "api_key"]
-      
+      methods: ['jwt', 'api_key']
+
     endpoints:
-      metrics: "/api/v1/metrics"
-      query: "/api/v1/query"
-      dashboards: "/api/v1/dashboards"
-      alerts: "/api/v1/alerts"
-      
+      metrics: '/api/v1/metrics'
+      query: '/api/v1/query'
+      dashboards: '/api/v1/dashboards'
+      alerts: '/api/v1/alerts'
+
   # Performance Optimization
   performance:
     # Memory management
     memory:
-      max_heap_size: "2GB"
+      max_heap_size: '2GB'
       gc_optimization: true
-      
+
     # Caching
     caching:
       query_cache:
         enabled: true
-        size: "512MB"
-        ttl: 300  # 5 minutes
-        
+        size: '512MB'
+        ttl: 300 # 5 minutes
+
       metric_cache:
         enabled: true
-        size: "1GB"
-        ttl: 60   # 1 minute
-        
+        size: '1GB'
+        ttl: 60 # 1 minute
+
     # Parallelization
     parallelization:
       query_workers: 8
       aggregation_workers: 4
       ml_workers: 2
-      
+
   # Storage Configuration
   storage:
     # Local storage for temporary data
     local:
-      path: "/app/data/analytics"
-      max_size: "10GB"
-      cleanup_interval: "1h"
-      
+      path: '/app/data/analytics'
+      max_size: '10GB'
+      cleanup_interval: '1h'
+
     # S3 for long-term archival
     s3:
       enabled: true
-      bucket: "${ANALYTICS_S3_BUCKET}"
-      region: "${AWS_REGION}"
-      prefix: "analytics-archive"
-      storage_class: "STANDARD_IA"
+      bucket: '${ANALYTICS_S3_BUCKET}'
+      region: '${AWS_REGION}'
+      prefix: 'analytics-archive'
+      storage_class: 'STANDARD_IA'
       lifecycle:
-        transition_to_glacier: "90d"
-        expiration: "7y"
-        
+        transition_to_glacier: '90d'
+        expiration: '7y'
+
   # Integration Configuration
   integrations:
     # Grafana integration
     grafana:
       enabled: true
-      url: "${GRAFANA_URL}"
-      api_key: "${GRAFANA_API_KEY}"
-      datasource_name: "IntelGraph Analytics"
-      
+      url: '${GRAFANA_URL}'
+      api_key: '${GRAFANA_API_KEY}'
+      datasource_name: 'IntelGraph Analytics'
+
     # Prometheus integration
     prometheus:
       enabled: true
-      scrape_interval: "15s"
-      metrics_path: "/metrics"
-      
+      scrape_interval: '15s'
+      metrics_path: '/metrics'
+
     # Elastic Stack integration
     elasticsearch:
       enabled: false
-      hosts: ["${ELASTIC_HOST}"]
-      index_pattern: "intelgraph-analytics-*"
-      
+      hosts: ['${ELASTIC_HOST}']
+      index_pattern: 'intelgraph-analytics-*'
+
     # External APIs
     external_apis:
       enabled: true
       timeout: 10000
       retry_attempts: 3
-      
+
   # Development and Testing
   development:
     mock_data: false
     debug_logging: false
     performance_profiling: false
-    
+
     testing:
       load_testing: false
       synthetic_metrics: false
@@ -462,7 +462,7 @@ environments:
       development:
         mock_data: true
         debug_logging: true
-        
+
   staging:
     analytics:
       stream_processing:
@@ -470,10 +470,10 @@ environments:
           max_concurrent: 5
       alerting:
         rules:
-          - name: "staging_test_alert"
-            condition: "always_false"
-            severity: "info"
-            
+          - name: 'staging_test_alert'
+            condition: 'always_false'
+            severity: 'info'
+
   production:
     analytics:
       stream_processing:
@@ -482,7 +482,7 @@ environments:
           default_parallelism: 8
       performance:
         memory:
-          max_heap_size: "4GB"
+          max_heap_size: '4GB'
         parallelization:
           query_workers: 16
           aggregation_workers: 8

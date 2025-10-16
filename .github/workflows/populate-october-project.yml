@@ -4,36 +4,36 @@ on:
   workflow_dispatch:
     inputs:
       project_owner:
-        description: "GitHub org or user that owns the Project (defaults to repository owner)"
+        description: 'GitHub org or user that owns the Project (defaults to repository owner)'
         required: false
       project_number:
-        description: "Numeric Project (v2) identifier; resolves the GraphQL project ID"
+        description: 'Numeric Project (v2) identifier; resolves the GraphQL project ID'
         required: false
       project_id:
-        description: "Project (v2) GraphQL node ID; overrides project_number when provided"
+        description: 'Project (v2) GraphQL node ID; overrides project_number when provided'
         required: false
       repo_owner:
-        description: "Repository owner (defaults to trigger repository owner)"
+        description: 'Repository owner (defaults to trigger repository owner)'
         required: false
       repo_name:
-        description: "Repository name (defaults to trigger repository)"
+        description: 'Repository name (defaults to trigger repository)'
         required: false
       start_batch:
-        description: "First batch file to import (1-indexed)"
+        description: 'First batch file to import (1-indexed)'
         required: false
-        default: "1"
+        default: '1'
       end_batch:
-        description: "Last batch file to import"
+        description: 'Last batch file to import'
         required: false
-        default: "999999"
+        default: '999999'
       add_to_project:
-        description: "Attach created issues to the Project"
+        description: 'Attach created issues to the Project'
         required: false
-        default: "true"
+        default: 'true'
       sleep_ms:
-        description: "Delay in milliseconds between GitHub API calls"
+        description: 'Delay in milliseconds between GitHub API calls'
         required: false
-        default: "200"
+        default: '200'
 
 jobs:
   import:

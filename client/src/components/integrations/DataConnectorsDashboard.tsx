@@ -17,7 +17,15 @@ interface DataSource {
   status: 'connected' | 'disconnected' | 'error' | 'pending' | 'configuring';
   lastSync: Date;
   nextSync?: Date;
-  syncFrequency: 'realtime' | '1min' | '5min' | '15min' | '1hour' | '6hour' | '24hour' | 'manual';
+  syncFrequency:
+    | 'realtime'
+    | '1min'
+    | '5min'
+    | '15min'
+    | '1hour'
+    | '6hour'
+    | '24hour'
+    | 'manual';
   recordsImported: number;
   errorCount: number;
   configuration: {
@@ -119,9 +127,15 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
     'connectors' | 'templates' | 'transformations' | 'monitoring'
   >('connectors');
   const [dataSources, setDataSources] = useState<DataSource[]>([]);
-  const [connectorTemplates, setConnectorTemplates] = useState<ConnectorTemplate[]>([]);
-  const [transformationRules, setTransformationRules] = useState<TransformationRule[]>([]);
-  const [selectedConnector, setSelectedConnector] = useState<DataSource | null>(null);
+  const [connectorTemplates, setConnectorTemplates] = useState<
+    ConnectorTemplate[]
+  >([]);
+  const [transformationRules, setTransformationRules] = useState<
+    TransformationRule[]
+  >([]);
+  const [selectedConnector, setSelectedConnector] = useState<DataSource | null>(
+    null,
+  );
   const [showAddConnector, setShowAddConnector] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -322,7 +336,8 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
       {
         id: 'template-virustotal',
         name: 'VirusTotal',
-        description: 'Connect to VirusTotal API for malware analysis and threat intelligence',
+        description:
+          'Connect to VirusTotal API for malware analysis and threat intelligence',
         provider: 'VirusTotal',
         category: 'threat_intel',
         type: 'api',
@@ -348,7 +363,8 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
       {
         id: 'template-misp',
         name: 'MISP',
-        description: 'Malware Information Sharing Platform for threat intelligence sharing',
+        description:
+          'Malware Information Sharing Platform for threat intelligence sharing',
         provider: 'MISP Project',
         category: 'threat_intel',
         type: 'api',
@@ -362,7 +378,11 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
           'Galaxy clusters',
           'Sighting data',
         ],
-        requirements: ['MISP instance URL', 'API authentication key', 'SSL certificate validation'],
+        requirements: [
+          'MISP instance URL',
+          'API authentication key',
+          'SSL certificate validation',
+        ],
         isPopular: true,
         configurationSchema: {},
         documentation: {
@@ -374,7 +394,8 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
       {
         id: 'template-elasticsearch',
         name: 'Elasticsearch',
-        description: 'Connect to Elasticsearch clusters for log analysis and search',
+        description:
+          'Connect to Elasticsearch clusters for log analysis and search',
         provider: 'Elastic',
         category: 'logs',
         type: 'database',
@@ -388,19 +409,25 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
           'Index patterns',
           'Field mapping',
         ],
-        requirements: ['Elasticsearch endpoint', 'Authentication credentials', 'Index permissions'],
+        requirements: [
+          'Elasticsearch endpoint',
+          'Authentication credentials',
+          'Index permissions',
+        ],
         isPopular: false,
         configurationSchema: {},
         documentation: {
           setupGuide: '/docs/connectors/elasticsearch',
-          apiReference: 'https://www.elastic.co/guide/en/elasticsearch/reference/',
+          apiReference:
+            'https://www.elastic.co/guide/en/elasticsearch/reference/',
           examples: '/docs/examples/elasticsearch',
         },
       },
       {
         id: 'template-shodan',
         name: 'Shodan',
-        description: 'Search engine for Internet-connected devices and services',
+        description:
+          'Search engine for Internet-connected devices and services',
         provider: 'Shodan',
         category: 'osint',
         type: 'api',
@@ -440,7 +467,11 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
           'Sentiment analysis',
           'Network mapping',
         ],
-        requirements: ['Twitter API v2 access', 'Bearer token', 'Rate limit compliance'],
+        requirements: [
+          'Twitter API v2 access',
+          'Bearer token',
+          'Rate limit compliance',
+        ],
         isPopular: false,
         configurationSchema: {},
         documentation: {
@@ -466,7 +497,11 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
           'Proxy detection',
           'Anonymous IP detection',
         ],
-        requirements: ['MaxMind license key', 'Database downloads', 'Regular updates'],
+        requirements: [
+          'MaxMind license key',
+          'Database downloads',
+          'Regular updates',
+        ],
         isPopular: true,
         configurationSchema: {},
         documentation: {
@@ -489,11 +524,16 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
       setDataSources((prev) =>
         prev.map((source) => ({
           ...source,
-          lastSync: source.status === 'connected' ? new Date() : source.lastSync,
+          lastSync:
+            source.status === 'connected' ? new Date() : source.lastSync,
           healthMetrics: {
             ...source.healthMetrics,
-            responseTime: source.healthMetrics.responseTime + (Math.random() - 0.5) * 200,
-            throughput: Math.max(0, source.healthMetrics.throughput + (Math.random() - 0.5) * 10),
+            responseTime:
+              source.healthMetrics.responseTime + (Math.random() - 0.5) * 200,
+            throughput: Math.max(
+              0,
+              source.healthMetrics.throughput + (Math.random() - 0.5) * 10,
+            ),
           },
         })),
       );
@@ -516,7 +556,9 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
     }
 
     if (categoryFilter !== 'all') {
-      filtered = filtered.filter((source) => source.category === categoryFilter);
+      filtered = filtered.filter(
+        (source) => source.category === categoryFilter,
+      );
     }
 
     if (statusFilter !== 'all') {
@@ -652,27 +694,18 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
             }}
           >
             <div
-              style={{ fontSize: '20px', fontWeight: '600', color: '#28a745', marginBottom: '4px' }}
+              style={{
+                fontSize: '20px',
+                fontWeight: '600',
+                color: '#28a745',
+                marginBottom: '4px',
+              }}
             >
               {dataSources.filter((s) => s.status === 'connected').length}
             </div>
-            <div style={{ fontSize: '12px', color: '#666' }}>Active Connectors</div>
-          </div>
-
-          <div
-            style={{
-              padding: '16px',
-              border: '1px solid var(--hairline)',
-              borderRadius: '8px',
-              backgroundColor: '#f8f9fa',
-            }}
-          >
-            <div
-              style={{ fontSize: '20px', fontWeight: '600', color: '#1a73e8', marginBottom: '4px' }}
-            >
-              {formatNumber(dataSources.reduce((sum, s) => sum + s.recordsImported, 0))}
+            <div style={{ fontSize: '12px', color: '#666' }}>
+              Active Connectors
             </div>
-            <div style={{ fontSize: '12px', color: '#666' }}>Records Imported</div>
           </div>
 
           <div
@@ -684,11 +717,43 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
             }}
           >
             <div
-              style={{ fontSize: '20px', fontWeight: '600', color: '#dc3545', marginBottom: '4px' }}
+              style={{
+                fontSize: '20px',
+                fontWeight: '600',
+                color: '#1a73e8',
+                marginBottom: '4px',
+              }}
+            >
+              {formatNumber(
+                dataSources.reduce((sum, s) => sum + s.recordsImported, 0),
+              )}
+            </div>
+            <div style={{ fontSize: '12px', color: '#666' }}>
+              Records Imported
+            </div>
+          </div>
+
+          <div
+            style={{
+              padding: '16px',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+              backgroundColor: '#f8f9fa',
+            }}
+          >
+            <div
+              style={{
+                fontSize: '20px',
+                fontWeight: '600',
+                color: '#dc3545',
+                marginBottom: '4px',
+              }}
             >
               {dataSources.filter((s) => s.status === 'error').length}
             </div>
-            <div style={{ fontSize: '12px', color: '#666' }}>Connection Errors</div>
+            <div style={{ fontSize: '12px', color: '#666' }}>
+              Connection Errors
+            </div>
           </div>
 
           <div
@@ -700,15 +765,24 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
             }}
           >
             <div
-              style={{ fontSize: '20px', fontWeight: '600', color: '#ffc107', marginBottom: '4px' }}
+              style={{
+                fontSize: '20px',
+                fontWeight: '600',
+                color: '#ffc107',
+                marginBottom: '4px',
+              }}
             >
               {Math.round(
-                dataSources.reduce((sum, s) => sum + s.healthMetrics.availability, 0) /
-                  dataSources.length,
+                dataSources.reduce(
+                  (sum, s) => sum + s.healthMetrics.availability,
+                  0,
+                ) / dataSources.length,
               )}
               %
             </div>
-            <div style={{ fontSize: '12px', color: '#666' }}>Avg Availability</div>
+            <div style={{ fontSize: '12px', color: '#666' }}>
+              Avg Availability
+            </div>
           </div>
         </div>
 
@@ -721,8 +795,16 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
           }}
         >
           {[
-            { key: 'connectors', label: '🔌 My Connectors', count: dataSources.length },
-            { key: 'templates', label: '📦 Templates', count: connectorTemplates.length },
+            {
+              key: 'connectors',
+              label: '🔌 My Connectors',
+              count: dataSources.length,
+            },
+            {
+              key: 'templates',
+              label: '📦 Templates',
+              count: connectorTemplates.length,
+            },
             { key: 'transformations', label: '⚙️ Transformations', count: 0 },
             { key: 'monitoring', label: '📊 Monitoring', count: 0 },
           ].map((tab) => (
@@ -734,7 +816,9 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
                 backgroundColor: 'transparent',
                 border: 'none',
                 borderBottom:
-                  activeView === tab.key ? '2px solid #1a73e8' : '2px solid transparent',
+                  activeView === tab.key
+                    ? '2px solid #1a73e8'
+                    : '2px solid transparent',
                 cursor: 'pointer',
                 fontSize: '14px',
                 fontWeight: activeView === tab.key ? '600' : '400',
@@ -748,7 +832,14 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
 
         {/* Filters */}
         {(activeView === 'connectors' || activeView === 'templates') && (
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: '12px',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+            }}
+          >
             <input
               type="text"
               placeholder={`Search ${activeView === 'connectors' ? 'connectors' : 'templates'}...`}
@@ -817,7 +908,11 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
           >
             {/* Connectors List */}
             <div
-              style={{ overflow: 'auto', border: '1px solid var(--hairline)', borderRadius: '8px' }}
+              style={{
+                overflow: 'auto',
+                border: '1px solid var(--hairline)',
+                borderRadius: '8px',
+              }}
             >
               <div
                 style={{
@@ -841,7 +936,9 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
                       borderBottom: '1px solid #f0f0f0',
                       cursor: 'pointer',
                       backgroundColor:
-                        selectedConnector?.id === source.id ? '#e3f2fd' : 'transparent',
+                        selectedConnector?.id === source.id
+                          ? '#e3f2fd'
+                          : 'transparent',
                       transition: 'background-color 0.2s',
                     }}
                     onMouseEnter={(e) => {
@@ -863,10 +960,20 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
                         marginBottom: '8px',
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <div style={{ fontSize: '20px' }}>{getCategoryIcon(source.category)}</div>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                        }}
+                      >
+                        <div style={{ fontSize: '20px' }}>
+                          {getCategoryIcon(source.category)}
+                        </div>
                         <div>
-                          <div style={{ fontSize: '14px', fontWeight: '600' }}>{source.name}</div>
+                          <div style={{ fontSize: '14px', fontWeight: '600' }}>
+                            {source.name}
+                          </div>
                           <div style={{ fontSize: '12px', color: '#666' }}>
                             {source.provider} • {source.type}
                           </div>
@@ -882,7 +989,9 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
                             marginBottom: '2px',
                           }}
                         >
-                          <span style={{ fontSize: '12px' }}>{getStatusIcon(source.status)}</span>
+                          <span style={{ fontSize: '12px' }}>
+                            {getStatusIcon(source.status)}
+                          </span>
                           <span
                             style={{
                               fontSize: '11px',
@@ -941,7 +1050,8 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
                           color: '#721c24',
                         }}
                       >
-                        ⚠️ {source.errorCount} error{source.errorCount > 1 ? 's' : ''} in last sync
+                        ⚠️ {source.errorCount} error
+                        {source.errorCount > 1 ? 's' : ''} in last sync
                       </div>
                     )}
                   </div>
@@ -965,7 +1075,9 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
                     backgroundColor: '#f8f9fa',
                   }}
                 >
-                  <h4 style={{ margin: 0, fontSize: '14px', fontWeight: '600' }}>
+                  <h4
+                    style={{ margin: 0, fontSize: '14px', fontWeight: '600' }}
+                  >
                     Connector Details
                   </h4>
                 </div>
@@ -984,19 +1096,32 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
                         {getCategoryIcon(selectedConnector.category)}
                       </div>
                       <div>
-                        <h5 style={{ fontSize: '18px', fontWeight: '600', margin: '0 0 4px 0' }}>
+                        <h5
+                          style={{
+                            fontSize: '18px',
+                            fontWeight: '600',
+                            margin: '0 0 4px 0',
+                          }}
+                        >
                           {selectedConnector.name}
                         </h5>
                         <div style={{ fontSize: '13px', color: '#666' }}>
                           {selectedConnector.provider} •{' '}
-                          {selectedConnector.category.replace('_', ' ')} • {selectedConnector.type}
+                          {selectedConnector.category.replace('_', ' ')} •{' '}
+                          {selectedConnector.type}
                         </div>
                       </div>
                     </div>
                   </div>
 
                   <div style={{ marginBottom: '24px' }}>
-                    <h6 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px' }}>
+                    <h6
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        marginBottom: '12px',
+                      }}
+                    >
                       Data Flow Performance
                     </h6>
 
@@ -1009,59 +1134,141 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
                       }}
                     >
                       <div
-                        style={{ padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '6px' }}
+                        style={{
+                          padding: '12px',
+                          backgroundColor: '#f8f9fa',
+                          borderRadius: '6px',
+                        }}
                       >
-                        <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                        <div
+                          style={{
+                            fontSize: '12px',
+                            color: '#666',
+                            marginBottom: '4px',
+                          }}
+                        >
                           Ingestion
                         </div>
-                        <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '4px' }}>
-                          {formatNumber(selectedConnector.dataFlow.ingestion.totalRecords)}
+                        <div
+                          style={{
+                            fontSize: '16px',
+                            fontWeight: '600',
+                            marginBottom: '4px',
+                          }}
+                        >
+                          {formatNumber(
+                            selectedConnector.dataFlow.ingestion.totalRecords,
+                          )}
                         </div>
                         <div style={{ fontSize: '11px', color: '#666' }}>
-                          Last hour: {selectedConnector.dataFlow.ingestion.lastHour} • Errors:{' '}
-                          {selectedConnector.dataFlow.ingestion.errors}
+                          Last hour:{' '}
+                          {selectedConnector.dataFlow.ingestion.lastHour} •
+                          Errors: {selectedConnector.dataFlow.ingestion.errors}
                         </div>
                       </div>
 
                       <div
-                        style={{ padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '6px' }}
+                        style={{
+                          padding: '12px',
+                          backgroundColor: '#f8f9fa',
+                          borderRadius: '6px',
+                        }}
                       >
-                        <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                        <div
+                          style={{
+                            fontSize: '12px',
+                            color: '#666',
+                            marginBottom: '4px',
+                          }}
+                        >
                           Transformation
                         </div>
-                        <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '4px' }}>
-                          {selectedConnector.dataFlow.transformation.rulesApplied}
+                        <div
+                          style={{
+                            fontSize: '16px',
+                            fontWeight: '600',
+                            marginBottom: '4px',
+                          }}
+                        >
+                          {
+                            selectedConnector.dataFlow.transformation
+                              .rulesApplied
+                          }
                         </div>
                         <div style={{ fontSize: '11px', color: '#666' }}>
                           Enrichments:{' '}
-                          {formatNumber(selectedConnector.dataFlow.transformation.enrichments)} •
-                          Errors: {selectedConnector.dataFlow.transformation.validationErrors}
+                          {formatNumber(
+                            selectedConnector.dataFlow.transformation
+                              .enrichments,
+                          )}{' '}
+                          • Errors:{' '}
+                          {
+                            selectedConnector.dataFlow.transformation
+                              .validationErrors
+                          }
                         </div>
                       </div>
 
                       <div
-                        style={{ padding: '12px', backgroundColor: '#f8f9fa', borderRadius: '6px' }}
+                        style={{
+                          padding: '12px',
+                          backgroundColor: '#f8f9fa',
+                          borderRadius: '6px',
+                        }}
                       >
-                        <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                        <div
+                          style={{
+                            fontSize: '12px',
+                            color: '#666',
+                            marginBottom: '4px',
+                          }}
+                        >
                           Storage
                         </div>
-                        <div style={{ fontSize: '16px', fontWeight: '600', marginBottom: '4px' }}>
-                          {formatNumber(selectedConnector.dataFlow.storage.entitiesCreated)}
+                        <div
+                          style={{
+                            fontSize: '16px',
+                            fontWeight: '600',
+                            marginBottom: '4px',
+                          }}
+                        >
+                          {formatNumber(
+                            selectedConnector.dataFlow.storage.entitiesCreated,
+                          )}
                         </div>
                         <div style={{ fontSize: '11px', color: '#666' }}>
                           Entities • Rels:{' '}
-                          {formatNumber(selectedConnector.dataFlow.storage.relationshipsCreated)} •
-                          Dupes: {selectedConnector.dataFlow.storage.duplicatesDetected}
+                          {formatNumber(
+                            selectedConnector.dataFlow.storage
+                              .relationshipsCreated,
+                          )}{' '}
+                          • Dupes:{' '}
+                          {
+                            selectedConnector.dataFlow.storage
+                              .duplicatesDetected
+                          }
                         </div>
                       </div>
                     </div>
                   </div>
 
                   <div style={{ marginBottom: '24px' }}>
-                    <h6 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px' }}>
+                    <h6
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        marginBottom: '12px',
+                      }}
+                    >
                       Health Metrics
                     </h6>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div
+                      style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1fr',
+                        gap: '12px',
+                      }}
+                    >
                       <div>
                         <div
                           style={{
@@ -1072,7 +1279,10 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
                         >
                           <span style={{ fontSize: '12px' }}>Availability</span>
                           <span style={{ fontSize: '12px', fontWeight: '600' }}>
-                            {selectedConnector.healthMetrics.availability.toFixed(1)}%
+                            {selectedConnector.healthMetrics.availability.toFixed(
+                              1,
+                            )}
+                            %
                           </span>
                         </div>
                         <div
@@ -1087,9 +1297,11 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
                               width: `${selectedConnector.healthMetrics.availability}%`,
                               height: '100%',
                               backgroundColor:
-                                selectedConnector.healthMetrics.availability > 95
+                                selectedConnector.healthMetrics.availability >
+                                95
                                   ? '#28a745'
-                                  : selectedConnector.healthMetrics.availability > 90
+                                  : selectedConnector.healthMetrics
+                                        .availability > 90
                                     ? '#ffc107'
                                     : '#dc3545',
                               borderRadius: '3px',
@@ -1108,7 +1320,10 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
                         >
                           <span style={{ fontSize: '12px' }}>Data Quality</span>
                           <span style={{ fontSize: '12px', fontWeight: '600' }}>
-                            {selectedConnector.healthMetrics.dataQuality.toFixed(1)}%
+                            {selectedConnector.healthMetrics.dataQuality.toFixed(
+                              1,
+                            )}
+                            %
                           </span>
                         </div>
                         <div
@@ -1125,7 +1340,8 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
                               backgroundColor:
                                 selectedConnector.healthMetrics.dataQuality > 95
                                   ? '#28a745'
-                                  : selectedConnector.healthMetrics.dataQuality > 90
+                                  : selectedConnector.healthMetrics
+                                        .dataQuality > 90
                                     ? '#ffc107'
                                     : '#dc3545',
                               borderRadius: '3px',
@@ -1146,38 +1362,69 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
                     >
                       <div>
                         <strong>Response Time:</strong>{' '}
-                        {selectedConnector.healthMetrics.responseTime.toFixed(0)}ms
+                        {selectedConnector.healthMetrics.responseTime.toFixed(
+                          0,
+                        )}
+                        ms
                       </div>
                       <div>
                         <strong>Throughput:</strong>{' '}
-                        {selectedConnector.healthMetrics.throughput.toFixed(1)} rec/s
+                        {selectedConnector.healthMetrics.throughput.toFixed(1)}{' '}
+                        rec/s
                       </div>
                     </div>
                   </div>
 
                   <div style={{ marginBottom: '24px' }}>
-                    <h6 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>
+                    <h6
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        marginBottom: '8px',
+                      }}
+                    >
                       Sync Configuration
                     </h6>
                     <div style={{ fontSize: '13px', lineHeight: '1.4' }}>
                       <div>
-                        <strong>Frequency:</strong> {selectedConnector.syncFrequency}
+                        <strong>Frequency:</strong>{' '}
+                        {selectedConnector.syncFrequency}
                       </div>
                       <div>
-                        <strong>Last Sync:</strong> {selectedConnector.lastSync.toLocaleString()}
+                        <strong>Last Sync:</strong>{' '}
+                        {selectedConnector.lastSync.toLocaleString()}
                       </div>
                       {selectedConnector.nextSync && (
                         <div>
-                          <strong>Next Sync:</strong> {selectedConnector.nextSync.toLocaleString()}
+                          <strong>Next Sync:</strong>{' '}
+                          {selectedConnector.nextSync.toLocaleString()}
                         </div>
                       )}
                       {selectedConnector.configuration.rateLimits && (
                         <div style={{ marginTop: '8px' }}>
                           <strong>Rate Limits:</strong>
-                          <div style={{ marginLeft: '12px', fontSize: '12px', color: '#666' }}>
-                            {selectedConnector.configuration.rateLimits.requestsPerMinute}/min •
-                            {selectedConnector.configuration.rateLimits.requestsPerHour}/hour •
-                            {selectedConnector.configuration.rateLimits.requestsPerDay}/day
+                          <div
+                            style={{
+                              marginLeft: '12px',
+                              fontSize: '12px',
+                              color: '#666',
+                            }}
+                          >
+                            {
+                              selectedConnector.configuration.rateLimits
+                                .requestsPerMinute
+                            }
+                            /min •
+                            {
+                              selectedConnector.configuration.rateLimits
+                                .requestsPerHour
+                            }
+                            /hour •
+                            {
+                              selectedConnector.configuration.rateLimits
+                                .requestsPerDay
+                            }
+                            /day
                           </div>
                         </div>
                       )}
@@ -1191,14 +1438,18 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
                           padding: '8px 16px',
                           fontSize: '12px',
                           backgroundColor:
-                            selectedConnector.status === 'connected' ? '#dc3545' : '#28a745',
+                            selectedConnector.status === 'connected'
+                              ? '#dc3545'
+                              : '#28a745',
                           color: 'white',
                           border: 'none',
                           borderRadius: '4px',
                           cursor: 'pointer',
                         }}
                       >
-                        {selectedConnector.status === 'connected' ? 'Disconnect' : 'Connect'}
+                        {selectedConnector.status === 'connected'
+                          ? 'Disconnect'
+                          : 'Connect'}
                       </button>
 
                       <button
@@ -1249,10 +1500,17 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
                 .filter(
                   (template) =>
                     (searchQuery === '' ||
-                      template.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                      template.provider.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                      template.description.toLowerCase().includes(searchQuery.toLowerCase())) &&
-                    (categoryFilter === 'all' || template.category === categoryFilter),
+                      template.name
+                        .toLowerCase()
+                        .includes(searchQuery.toLowerCase()) ||
+                      template.provider
+                        .toLowerCase()
+                        .includes(searchQuery.toLowerCase()) ||
+                      template.description
+                        .toLowerCase()
+                        .includes(searchQuery.toLowerCase())) &&
+                    (categoryFilter === 'all' ||
+                      template.category === categoryFilter),
                 )
                 .map((template) => (
                   <div
@@ -1292,7 +1550,13 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
                     >
                       <div style={{ fontSize: '32px' }}>{template.icon}</div>
                       <div>
-                        <h5 style={{ fontSize: '16px', fontWeight: '600', margin: '0 0 4px 0' }}>
+                        <h5
+                          style={{
+                            fontSize: '16px',
+                            fontWeight: '600',
+                            margin: '0 0 4px 0',
+                          }}
+                        >
                           {template.name}
                         </h5>
                         <div style={{ fontSize: '12px', color: '#666' }}>
@@ -1316,7 +1580,13 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
                       <div style={{ fontSize: '12px', marginBottom: '8px' }}>
                         <strong>Capabilities:</strong>
                       </div>
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                      <div
+                        style={{
+                          display: 'flex',
+                          flexWrap: 'wrap',
+                          gap: '4px',
+                        }}
+                      >
                         {template.capabilities.slice(0, 3).map((capability) => (
                           <span
                             key={capability}
@@ -1371,7 +1641,9 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
                           {template.difficulty.toUpperCase()}
                         </span>
                       </div>
-                      <div style={{ color: '#666' }}>⏱️ {template.estimatedSetupTime}</div>
+                      <div style={{ color: '#666' }}>
+                        ⏱️ {template.estimatedSetupTime}
+                      </div>
                     </div>
 
                     <button
@@ -1406,11 +1678,24 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
             }}
           >
             <div style={{ padding: '40px' }}>
-              <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>
+              <h4
+                style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  marginBottom: '16px',
+                }}
+              >
                 ⚙️ Data Transformation Engine
               </h4>
-              <p style={{ fontSize: '14px', color: '#666', marginBottom: '24px' }}>
-                Advanced data transformation, mapping, and enrichment rules for connector pipelines.
+              <p
+                style={{
+                  fontSize: '14px',
+                  color: '#666',
+                  marginBottom: '24px',
+                }}
+              >
+                Advanced data transformation, mapping, and enrichment rules for
+                connector pipelines.
               </p>
               <div
                 style={{
@@ -1422,7 +1707,13 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
                 }}
               >
                 🚧 Transformation engine coming soon - will include:
-                <ul style={{ textAlign: 'left', marginTop: '12px', marginLeft: '20px' }}>
+                <ul
+                  style={{
+                    textAlign: 'left',
+                    marginTop: '12px',
+                    marginLeft: '20px',
+                  }}
+                >
                   <li>Visual data mapping interface</li>
                   <li>Field transformation rules</li>
                   <li>Data enrichment pipelines</li>
@@ -1444,11 +1735,24 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
             }}
           >
             <div style={{ padding: '40px' }}>
-              <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>
+              <h4
+                style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  marginBottom: '16px',
+                }}
+              >
                 📊 Connector Monitoring
               </h4>
-              <p style={{ fontSize: '14px', color: '#666', marginBottom: '24px' }}>
-                Real-time monitoring, alerting, and performance analytics for all data connectors.
+              <p
+                style={{
+                  fontSize: '14px',
+                  color: '#666',
+                  marginBottom: '24px',
+                }}
+              >
+                Real-time monitoring, alerting, and performance analytics for
+                all data connectors.
               </p>
               <div
                 style={{
@@ -1460,7 +1764,13 @@ const DataConnectorsDashboard: React.FC<DataConnectorsDashboardProps> = ({
                 }}
               >
                 🚧 Advanced monitoring coming soon - will include:
-                <ul style={{ textAlign: 'left', marginTop: '12px', marginLeft: '20px' }}>
+                <ul
+                  style={{
+                    textAlign: 'left',
+                    marginTop: '12px',
+                    marginLeft: '20px',
+                  }}
+                >
                   <li>Real-time performance dashboards</li>
                   <li>SLA monitoring and alerting</li>
                   <li>Data quality metrics</li>

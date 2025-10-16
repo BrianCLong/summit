@@ -4,30 +4,35 @@ Deterministic Build Verification Tool
 Sprint 27C: Cross-runner reproducibility enforcement
 """
 
-import json
-import hashlib
 import argparse
-import sys
-from pathlib import Path
-from typing import Dict, List, Any, Optional
-from dataclasses import dataclass
+import hashlib
+import json
 import re
+import sys
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
 
 @dataclass
 class BuildArtifact:
     """Represents a build artifact with metadata"""
+
     path: str
     hash: str
     size: int
-    timestamp: Optional[str] = None
+    timestamp: str | None = None
+
 
 @dataclass
 class SBOMComparison:
     """SBOM comparison result"""
+
     identical: bool
-    differences: List[str]
+    differences: list[str]
     normalized_hash_1: str
     normalized_hash_2: str
+
 
 class DeterminismChecker:
     """Verifies build determinism across runners"""
@@ -64,7 +69,7 @@ class DeterminismChecker:
         try:
             parsed = json.loads(normalized)
             # Sort keys recursively for consistent ordering
-            normalized = json.dumps(parsed, sort_keys=True, separators=(',', ':'))
+            normalized = json.dumps(parsed, sort_keys=True, separators=(",", ":"))
         except json.JSONDecodeError:
             # If not valid JSON, return as-is
             pass
@@ -75,7 +80,7 @@ class DeterminismChecker:
         """Calculate SHA256 hash of a file"""
         hasher = hashlib.sha256()
         try:
-            with open(file_path, 'rb') as f:
+            with open(file_path, "rb") as f:
                 for chunk in iter(lambda: f.read(4096), b""):
                     hasher.update(chunk)
             return hasher.hexdigest()
@@ -85,21 +90,21 @@ class DeterminismChecker:
     def hash_normalized_content(self, content: str) -> str:
         """Calculate hash of normalized content"""
         normalized = self.normalize_json(content)
-        return hashlib.sha256(normalized.encode('utf-8')).hexdigest()
+        return hashlib.sha256(normalized.encode("utf-8")).hexdigest()
 
     def compare_sboms(self, sbom1_path: Path, sbom2_path: Path) -> SBOMComparison:
         """Compare two SBOM files with normalization"""
         try:
-            with open(sbom1_path, 'r') as f:
+            with open(sbom1_path) as f:
                 content1 = f.read()
-            with open(sbom2_path, 'r') as f:
+            with open(sbom2_path) as f:
                 content2 = f.read()
         except FileNotFoundError as e:
             return SBOMComparison(
                 identical=False,
                 differences=[f"File not found: {e}"],
                 normalized_hash_1="",
-                normalized_hash_2=""
+                normalized_hash_2="",
             )
 
         # Normalize both SBOMs
@@ -120,10 +125,10 @@ class DeterminismChecker:
             identical=identical,
             differences=differences,
             normalized_hash_1=hash1,
-            normalized_hash_2=hash2
+            normalized_hash_2=hash2,
         )
 
-    def _find_sbom_differences(self, content1: str, content2: str) -> List[str]:
+    def _find_sbom_differences(self, content1: str, content2: str) -> list[str]:
         """Find specific differences between SBOM contents"""
         differences = []
 
@@ -132,15 +137,17 @@ class DeterminismChecker:
             sbom2 = json.loads(content2)
 
             # Compare component counts
-            components1 = sbom1.get('components', [])
-            components2 = sbom2.get('components', [])
+            components1 = sbom1.get("components", [])
+            components2 = sbom2.get("components", [])
 
             if len(components1) != len(components2):
-                differences.append(f"Component count mismatch: {len(components1)} vs {len(components2)}")
+                differences.append(
+                    f"Component count mismatch: {len(components1)} vs {len(components2)}"
+                )
 
             # Compare component names and versions
-            comp_names1 = {c.get('name', '') for c in components1}
-            comp_names2 = {c.get('name', '') for c in components2}
+            comp_names1 = {c.get("name", "") for c in components1}
+            comp_names2 = {c.get("name", "") for c in components2}
 
             missing_in_2 = comp_names1 - comp_names2
             missing_in_1 = comp_names2 - comp_names1
@@ -155,13 +162,11 @@ class DeterminismChecker:
 
         return differences
 
-    def compare_artifacts(self, artifacts1: List[BuildArtifact], artifacts2: List[BuildArtifact]) -> Dict[str, Any]:
+    def compare_artifacts(
+        self, artifacts1: list[BuildArtifact], artifacts2: list[BuildArtifact]
+    ) -> dict[str, Any]:
         """Compare two sets of build artifacts"""
-        result = {
-            "identical": True,
-            "differences": [],
-            "artifact_comparison": {}
-        }
+        result = {"identical": True, "differences": [], "artifact_comparison": {}}
 
         # Create lookup dictionaries
         artifacts1_dict = {art.path: art for art in artifacts1}
@@ -190,7 +195,9 @@ class DeterminismChecker:
                 comparison["size1"] = art1.size
                 comparison["size2"] = art2.size
                 result["identical"] = False
-                result["differences"].append(f"Hash mismatch for {path}: {art1.hash[:12]}... vs {art2.hash[:12]}...")
+                result["differences"].append(
+                    f"Hash mismatch for {path}: {art1.hash[:12]}... vs {art2.hash[:12]}..."
+                )
             else:
                 comparison["status"] = "identical"
                 comparison["hash"] = art1.hash
@@ -199,7 +206,7 @@ class DeterminismChecker:
 
         return result
 
-    def scan_build_directory(self, build_dir: Path) -> List[BuildArtifact]:
+    def scan_build_directory(self, build_dir: Path) -> list[BuildArtifact]:
         """Scan build directory and collect artifacts"""
         artifacts = []
 
@@ -211,19 +218,22 @@ class DeterminismChecker:
             "*.tar.gz",
             "*.sbom.json",
             "*.sbom.spdx.json",
-            "*.sbom.cdx.json"
+            "*.sbom.cdx.json",
         ]
 
         for pattern in artifact_patterns:
             for file_path in build_dir.glob(pattern):
                 if file_path.is_file():
-                    artifacts.append(BuildArtifact(
-                        path=str(file_path.relative_to(build_dir)),
-                        hash=self.hash_file(file_path),
-                        size=file_path.stat().st_size
-                    ))
+                    artifacts.append(
+                        BuildArtifact(
+                            path=str(file_path.relative_to(build_dir)),
+                            hash=self.hash_file(file_path),
+                            size=file_path.stat().st_size,
+                        )
+                    )
 
         return artifacts
+
 
 def main():
     parser = argparse.ArgumentParser(description="Verify build determinism across runners")
@@ -232,7 +242,9 @@ def main():
     parser.add_argument("--sbom1", help="Path to first SBOM file")
     parser.add_argument("--sbom2", help="Path to second SBOM file")
     parser.add_argument("--output", help="Output file for detailed report")
-    parser.add_argument("--fail-on-diff", action="store_true", help="Exit with code 1 if differences found")
+    parser.add_argument(
+        "--fail-on-diff", action="store_true", help="Exit with code 1 if differences found"
+    )
 
     args = parser.parse_args()
 
@@ -254,13 +266,13 @@ def main():
         # Load from manifest files
         print("📋 Loading artifact manifests...")
         try:
-            with open(build1_path, 'r') as f:
+            with open(build1_path) as f:
                 manifest1 = json.load(f)
-            with open(build2_path, 'r') as f:
+            with open(build2_path) as f:
                 manifest2 = json.load(f)
 
-            artifacts1 = [BuildArtifact(**art) for art in manifest1.get('artifacts', [])]
-            artifacts2 = [BuildArtifact(**art) for art in manifest2.get('artifacts', [])]
+            artifacts1 = [BuildArtifact(**art) for art in manifest1.get("artifacts", [])]
+            artifacts2 = [BuildArtifact(**art) for art in manifest2.get("artifacts", [])]
 
         except (FileNotFoundError, json.JSONDecodeError, KeyError) as e:
             print(f"❌ Error loading manifests: {e}")
@@ -283,7 +295,7 @@ def main():
             "build1_path": str(build1_path),
             "build2_path": str(build2_path),
             "artifact_comparison": comparison,
-            "sbom_comparison": sbom_comparison.__dict__ if sbom_comparison else None
+            "sbom_comparison": sbom_comparison.__dict__ if sbom_comparison else None,
         }
     }
 
@@ -298,7 +310,7 @@ def main():
             print(f"  - {diff}")
 
         if sbom_comparison and not sbom_comparison.identical:
-            print(f"\nSBOM differences:")
+            print("\nSBOM differences:")
             for diff in sbom_comparison.differences:
                 print(f"  - {diff}")
 
@@ -306,11 +318,12 @@ def main():
 
     # Save detailed report
     if args.output:
-        with open(args.output, 'w') as f:
+        with open(args.output, "w") as f:
             json.dump(report, f, indent=2)
         print(f"📊 Detailed report saved to {args.output}")
 
     sys.exit(exit_code)
+
 
 if __name__ == "__main__":
     main()

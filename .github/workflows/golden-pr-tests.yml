@@ -15,7 +15,7 @@ on:
         type: string
   schedule:
     # Run weekly to validate Release Captain functionality
-    - cron: '0 6 * * 1'  # Monday 6 AM UTC
+    - cron: '0 6 * * 1' # Monday 6 AM UTC
 
 # Prevent concurrent golden PR test runs
 concurrency:
@@ -39,261 +39,261 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: ${{ env.NODE_VERSION }}
-        cache: 'pnpm'
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'pnpm'
 
-    - name: Setup pnpm
-      uses: pnpm/action-setup@v2
-      with:
-        version: ${{ env.PNPM_VERSION }}
-        run_install: false
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
 
-    - name: Install dependencies
-      run: |
-        corepack enable
-        pnpm install --frozen-lockfile
+      - name: Install dependencies
+        run: |
+          corepack enable
+          pnpm install --frozen-lockfile
 
-    - name: Install Release Captain dependencies
-      run: |
-        # Install OPA for policy testing
-        curl -L -o opa https://openpolicyagent.org/downloads/v0.57.0/opa_linux_amd64_static
-        chmod +x opa && sudo mv opa /usr/local/bin/
+      - name: Install Release Captain dependencies
+        run: |
+          # Install OPA for policy testing
+          curl -L -o opa https://openpolicyagent.org/downloads/v0.57.0/opa_linux_amd64_static
+          chmod +x opa && sudo mv opa /usr/local/bin/
 
-        # Install additional testing tools
-        npm install -g @types/jest
+          # Install additional testing tools
+          npm install -g @types/jest
 
-    - name: Validate OPA policies
-      run: |
-        echo "🔍 Validating OPA policies..."
+      - name: Validate OPA policies
+        run: |
+          echo "🔍 Validating OPA policies..."
 
-        # Test policy syntax
-        opa fmt .github/policies/release.rego --diff
+          # Test policy syntax
+          opa fmt .github/policies/release.rego --diff
 
-        # Run policy tests
-        opa test .github/policies/ -v
+          # Run policy tests
+          opa test .github/policies/ -v
 
-        # Test with sample data
-        cat > test-policy-input.json << EOF
-        {
-          "pr": {
-            "number": 123,
-            "title": "feat: test feature",
-            "author": "test-user",
-            "draft": false,
-            "mergeable": true,
-            "approvals": 1,
-            "changes_requested": false,
-            "codeowner_approved": true,
-            "owner_approved": false
-          },
-          "changed_files": [
-            {"path": "src/test.ts", "status": "modified", "additions": 10, "deletions": 5}
-          ],
-          "quality_gates": {
-            "build": true,
-            "typecheck": true,
-            "lint": true,
-            "tests": true,
-            "security": true,
-            "helm": true
-          },
-          "max_allowed_risk": "HIGH"
-        }
-        EOF
-
-        # Evaluate policy
-        opa eval -d .github/policies -i test-policy-input.json "data.summit.release.decision"
-
-        echo "✅ OPA policies validated"
-
-    - name: Test safety circuit
-      run: |
-        echo "🛡️ Testing safety circuit..."
-
-        # Make safety circuit executable
-        chmod +x .github/scripts/safety-circuit.cjs
-
-        # Test safety circuit commands
-        node .github/scripts/safety-circuit.cjs status
-        node .github/scripts/safety-circuit.cjs check
-
-        # Test emergency mode
-        node .github/scripts/safety-circuit.cjs emergency-on "test-mode"
-        node .github/scripts/safety-circuit.cjs emergency-off
-
-        # Test failure recording
-        node .github/scripts/safety-circuit.cjs record-failure
-        node .github/scripts/safety-circuit.cjs record-success
-
-        # Reset to clean state
-        node .github/scripts/safety-circuit.cjs reset
-
-        echo "✅ Safety circuit tested"
-
-    - name: Test golden PR scenarios
-      run: |
-        echo "🏆 Running Golden PR test scenarios..."
-
-        # Make golden PR tester executable
-        chmod +x .github/scripts/golden-pr-test.cjs
-
-        # Determine test mode
-        if [[ "${{ inputs.dry_run }}" == "true" || "${{ github.event_name }}" == "schedule" ]]; then
-          TEST_MODE="--dry-run"
-        else
-          TEST_MODE=""
-        fi
-
-        # Run golden PR tests
-        node .github/scripts/golden-pr-test.cjs $TEST_MODE --verbose
-
-        echo "✅ Golden PR tests completed"
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        GITHUB_REPOSITORY: ${{ github.repository }}
-
-    - name: Test audit gate
-      run: |
-        echo "🔐 Testing audit gate..."
-
-        # Create test package.json with vulnerabilities
-        mkdir -p test-audit
-        cd test-audit
-
-        cat > package.json << EOF
-        {
-          "name": "test-audit",
-          "version": "1.0.0",
-          "dependencies": {
-            "lodash": "4.17.19"
+          # Test with sample data
+          cat > test-policy-input.json << EOF
+          {
+            "pr": {
+              "number": 123,
+              "title": "feat: test feature",
+              "author": "test-user",
+              "draft": false,
+              "mergeable": true,
+              "approvals": 1,
+              "changes_requested": false,
+              "codeowner_approved": true,
+              "owner_approved": false
+            },
+            "changed_files": [
+              {"path": "src/test.ts", "status": "modified", "additions": 10, "deletions": 5}
+            ],
+            "quality_gates": {
+              "build": true,
+              "typecheck": true,
+              "lint": true,
+              "tests": true,
+              "security": true,
+              "helm": true
+            },
+            "max_allowed_risk": "HIGH"
           }
-        }
-        EOF
+          EOF
 
-        npm install
+          # Evaluate policy
+          opa eval -d .github/policies -i test-policy-input.json "data.summit.release.decision"
 
-        # Test audit gate script
-        chmod +x ../.github/scripts/audit-gate.js
+          echo "✅ OPA policies validated"
 
-        # This should pass with allowlist
-        npm audit --json > audit-report.json || true
-        node ../.github/scripts/audit-gate.js audit-report.json
+      - name: Test safety circuit
+        run: |
+          echo "🛡️ Testing safety circuit..."
 
-        cd ..
-        rm -rf test-audit
+          # Make safety circuit executable
+          chmod +x .github/scripts/safety-circuit.cjs
 
-        echo "✅ Audit gate tested"
+          # Test safety circuit commands
+          node .github/scripts/safety-circuit.cjs status
+          node .github/scripts/safety-circuit.cjs check
 
-    - name: Validate workflow syntax
-      run: |
-        echo "⚙️ Validating GitHub workflows..."
+          # Test emergency mode
+          node .github/scripts/safety-circuit.cjs emergency-on "test-mode"
+          node .github/scripts/safety-circuit.cjs emergency-off
 
-        # Check workflow syntax using act (if available) or basic validation
-        for workflow in .github/workflows/*.yml; do
-          echo "Checking $workflow"
-          # Basic YAML validation
-          python3 -c "import yaml; yaml.safe_load(open('$workflow'))"
-        done
+          # Test failure recording
+          node .github/scripts/safety-circuit.cjs record-failure
+          node .github/scripts/safety-circuit.cjs record-success
 
-        echo "✅ Workflow syntax validated"
+          # Reset to clean state
+          node .github/scripts/safety-circuit.cjs reset
 
-    - name: Performance benchmark
-      run: |
-        echo "⚡ Running performance benchmarks..."
+          echo "✅ Safety circuit tested"
 
-        # Benchmark OPA policy evaluation
-        echo "Testing OPA performance..."
-        time opa eval -d .github/policies -i test-policy-input.json "data.summit.release.decision"
+      - name: Test golden PR scenarios
+        run: |
+          echo "🏆 Running Golden PR test scenarios..."
 
-        # Benchmark safety circuit
-        echo "Testing safety circuit performance..."
-        time node .github/scripts/safety-circuit.cjs check
+          # Make golden PR tester executable
+          chmod +x .github/scripts/golden-pr-test.cjs
 
-        # Benchmark build steps
-        echo "Testing build performance..."
-        time pnpm run build || echo "Build not available"
-        time pnpm run typecheck || echo "Typecheck not available"
-        time pnpm run lint || echo "Lint not available"
+          # Determine test mode
+          if [[ "${{ inputs.dry_run }}" == "true" || "${{ github.event_name }}" == "schedule" ]]; then
+            TEST_MODE="--dry-run"
+          else
+            TEST_MODE=""
+          fi
 
-        echo "✅ Performance benchmarks completed"
+          # Run golden PR tests
+          node .github/scripts/golden-pr-test.cjs $TEST_MODE --verbose
 
-    - name: Generate validation report
-      if: always()
-      run: |
-        cat > validation-report.md << EOF
-        # 🚢 Release Captain Validation Report
+          echo "✅ Golden PR tests completed"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
 
-        **Date**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
-        **Workflow**: ${{ github.workflow }}
-        **Run ID**: ${{ github.run_id }}
-        **Trigger**: ${{ github.event_name }}
+      - name: Test audit gate
+        run: |
+          echo "🔐 Testing audit gate..."
 
-        ## Validation Results
+          # Create test package.json with vulnerabilities
+          mkdir -p test-audit
+          cd test-audit
 
-        | Component | Status | Notes |
-        |-----------|--------|-------|
-        | OPA Policies | ✅ | Syntax and logic validated |
-        | Safety Circuit | ✅ | All functions tested |
-        | Golden PR Tests | ✅ | Scenarios validated |
-        | Audit Gate | ✅ | Security checks working |
-        | Workflow Syntax | ✅ | All workflows valid |
-        | Performance | ✅ | Benchmarks within limits |
+          cat > package.json << EOF
+          {
+            "name": "test-audit",
+            "version": "1.0.0",
+            "dependencies": {
+              "lodash": "4.17.19"
+            }
+          }
+          EOF
 
-        ## Next Steps
+          npm install
 
-        ${
-          github.event_name == 'schedule' ?
-          '- Weekly validation completed successfully\n- No action required' :
-          '- Manual validation triggered\n- Review results and proceed with deployment'
-        }
+          # Test audit gate script
+          chmod +x ../.github/scripts/audit-gate.js
 
-        ## Resources
+          # This should pass with allowlist
+          npm audit --json > audit-report.json || true
+          node ../.github/scripts/audit-gate.js audit-report.json
 
-        - [Release Captain Verification Playbook](./RUNBOOKS/release-captain-verification.md)
-        - [Workflow Run Details](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+          cd ..
+          rm -rf test-audit
 
-        ---
-        *Generated by Release Captain Validation Suite*
-        EOF
+          echo "✅ Audit gate tested"
 
-        echo "📋 Validation report generated"
-        cat validation-report.md
+      - name: Validate workflow syntax
+        run: |
+          echo "⚙️ Validating GitHub workflows..."
 
-    - name: Create validation issue
-      if: failure()
-      run: |
-        # Create issue for failed validation
-        gh issue create \
-          --title "🚨 Release Captain Validation Failed - $(date +%Y-%m-%d)" \
-          --body "Release Captain validation failed in workflow run ${{ github.run_id }}.
+          # Check workflow syntax using act (if available) or basic validation
+          for workflow in .github/workflows/*.yml; do
+            echo "Checking $workflow"
+            # Basic YAML validation
+            python3 -c "import yaml; yaml.safe_load(open('$workflow'))"
+          done
 
-          **Failed Steps**: Check the workflow logs for details
-          **Action Required**: Review and fix validation issues
-          **Workflow URL**: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          echo "✅ Workflow syntax validated"
 
-          @platform-team @sre-team" \
-          --label "release-captain,validation-failure,urgent"
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Performance benchmark
+        run: |
+          echo "⚡ Running performance benchmarks..."
 
-    - name: Post success summary
-      if: success()
-      run: |
-        echo "🎉 Release Captain validation completed successfully!"
-        echo ""
-        echo "All components are functioning correctly:"
-        echo "✅ OPA policies validated"
-        echo "✅ Safety circuit operational"
-        echo "✅ Golden PR tests passed"
-        echo "✅ Security gates functional"
-        echo "✅ Performance within targets"
-        echo ""
-        echo "Release Captain is ready for production use."
+          # Benchmark OPA policy evaluation
+          echo "Testing OPA performance..."
+          time opa eval -d .github/policies -i test-policy-input.json "data.summit.release.decision"
+
+          # Benchmark safety circuit
+          echo "Testing safety circuit performance..."
+          time node .github/scripts/safety-circuit.cjs check
+
+          # Benchmark build steps
+          echo "Testing build performance..."
+          time pnpm run build || echo "Build not available"
+          time pnpm run typecheck || echo "Typecheck not available"
+          time pnpm run lint || echo "Lint not available"
+
+          echo "✅ Performance benchmarks completed"
+
+      - name: Generate validation report
+        if: always()
+        run: |
+          cat > validation-report.md << EOF
+          # 🚢 Release Captain Validation Report
+
+          **Date**: $(date -u +"%Y-%m-%d %H:%M:%S UTC")
+          **Workflow**: ${{ github.workflow }}
+          **Run ID**: ${{ github.run_id }}
+          **Trigger**: ${{ github.event_name }}
+
+          ## Validation Results
+
+          | Component | Status | Notes |
+          |-----------|--------|-------|
+          | OPA Policies | ✅ | Syntax and logic validated |
+          | Safety Circuit | ✅ | All functions tested |
+          | Golden PR Tests | ✅ | Scenarios validated |
+          | Audit Gate | ✅ | Security checks working |
+          | Workflow Syntax | ✅ | All workflows valid |
+          | Performance | ✅ | Benchmarks within limits |
+
+          ## Next Steps
+
+          ${
+            github.event_name == 'schedule' ?
+            '- Weekly validation completed successfully\n- No action required' :
+            '- Manual validation triggered\n- Review results and proceed with deployment'
+          }
+
+          ## Resources
+
+          - [Release Captain Verification Playbook](./RUNBOOKS/release-captain-verification.md)
+          - [Workflow Run Details](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+          ---
+          *Generated by Release Captain Validation Suite*
+          EOF
+
+          echo "📋 Validation report generated"
+          cat validation-report.md
+
+      - name: Create validation issue
+        if: failure()
+        run: |
+          # Create issue for failed validation
+          gh issue create \
+            --title "🚨 Release Captain Validation Failed - $(date +%Y-%m-%d)" \
+            --body "Release Captain validation failed in workflow run ${{ github.run_id }}.
+
+            **Failed Steps**: Check the workflow logs for details
+            **Action Required**: Review and fix validation issues
+            **Workflow URL**: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+
+            @platform-team @sre-team" \
+            --label "release-captain,validation-failure,urgent"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Post success summary
+        if: success()
+        run: |
+          echo "🎉 Release Captain validation completed successfully!"
+          echo ""
+          echo "All components are functioning correctly:"
+          echo "✅ OPA policies validated"
+          echo "✅ Safety circuit operational"
+          echo "✅ Golden PR tests passed"
+          echo "✅ Security gates functional"
+          echo "✅ Performance within targets"
+          echo ""
+          echo "Release Captain is ready for production use."

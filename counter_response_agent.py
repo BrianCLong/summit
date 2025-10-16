@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from datetime import datetime
-import logging
-from typing import Dict
 
 
 @dataclass
@@ -20,7 +19,7 @@ class CounterResponseAgent:
 
     version: str = "0.1.0"
 
-    def trigger(self, target: str, playbook: str, confidence: float = 0.0) -> Dict[str, str]:
+    def trigger(self, target: str, playbook: str, confidence: float = 0.0) -> dict[str, str]:
         """Record a countermeasure action.
 
         Args:

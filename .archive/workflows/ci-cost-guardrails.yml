@@ -1,7 +1,7 @@
 name: ci-cost-guardrails
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   schedule:
     - cron: '15 3 * * *' # daily budget sweep
   workflow_dispatch:
@@ -32,10 +32,10 @@ jobs:
           RUN_ID: ${{ github.run_id }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Guardrails (edit to your targets)
-          CI_COST_USD_MONTHLY_LIMIT: '5000'   # Prod limit for CI minutes & storage combined
-          CI_COST_ALERT_THRESHOLD: '0.8'      # 80%
-          RUN_COST_MAX_USD: '30'              # single-run cost cap
-          RUNNER_COST_PER_MIN_USD: '0.008'    # est. for GitHub-hosted linux runners
+          CI_COST_USD_MONTHLY_LIMIT: '5000' # Prod limit for CI minutes & storage combined
+          CI_COST_ALERT_THRESHOLD: '0.8' # 80%
+          RUN_COST_MAX_USD: '30' # single-run cost cap
+          RUNNER_COST_PER_MIN_USD: '0.008' # est. for GitHub-hosted linux runners
         run: |
           npx zx <<'ZX'
           import 'zx/globals';
@@ -86,7 +86,7 @@ jobs:
         env:
           REGISTRY: ghcr.io
           IMAGE: ${{ github.repository }}
-          MAX_IMAGE_SIZE_MB: '350'   # cap per image
+          MAX_IMAGE_SIZE_MB: '350' # cap per image
         run: |
           set -euo pipefail
           TAGS=$(gh api /orgs/${GITHUB_REPOSITORY_OWNER}/packages/container/${IMAGE##*/}/versions --paginate | jq -r '.[].metadata.container.tags[]' | sort -u | head -n 10)

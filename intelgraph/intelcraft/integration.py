@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable, Mapping, MutableMapping, Sequence
 from dataclasses import dataclass, field
-from typing import Any, Dict, Iterable, List, Mapping, MutableMapping, Optional, Sequence, Union
+from typing import Any, Union
 
 from ..graph_analytics.core_analytics import Graph
 
@@ -14,18 +15,18 @@ class IntelCraftRelationship:
 
     target_id: str
     relation_type: str
-    weight: Optional[float] = None
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    weight: float | None = None
+    metadata: dict[str, Any] = field(default_factory=dict)
 
-    def as_edge_attributes(self) -> Dict[str, Any]:
-        attributes: Dict[str, Any] = {"relation_type": self.relation_type}
+    def as_edge_attributes(self) -> dict[str, Any]:
+        attributes: dict[str, Any] = {"relation_type": self.relation_type}
         if self.weight is not None:
             attributes["weight"] = self.weight
         if self.metadata:
             attributes.update(self.metadata)
         return attributes
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         data = {
             "target_id": self.target_id,
             "relation_type": self.relation_type,
@@ -37,7 +38,7 @@ class IntelCraftRelationship:
         return data
 
     @classmethod
-    def from_dict(cls, payload: Mapping[str, Any]) -> "IntelCraftRelationship":
+    def from_dict(cls, payload: Mapping[str, Any]) -> IntelCraftRelationship:
         if "target_id" not in payload or "relation_type" not in payload:
             missing = {key for key in ("target_id", "relation_type") if key not in payload}
             raise ValueError(f"Relationship payload missing fields: {sorted(missing)}")
@@ -59,13 +60,13 @@ class IntelCraftElement:
     element_id: str
     name: str
     category: str
-    description: Optional[str] = None
+    description: str | None = None
     confidence: float = 0.5
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    relationships: List[IntelCraftRelationship] = field(default_factory=list)
+    metadata: dict[str, Any] = field(default_factory=dict)
+    relationships: list[IntelCraftRelationship] = field(default_factory=list)
 
-    def as_node_attributes(self) -> Dict[str, Any]:
-        attributes: Dict[str, Any] = {
+    def as_node_attributes(self) -> dict[str, Any]:
+        attributes: dict[str, Any] = {
             "name": self.name,
             "category": self.category,
             "confidence": self.confidence,
@@ -81,8 +82,8 @@ class IntelCraftElement:
         target_id: str,
         relation_type: str,
         *,
-        weight: Optional[float] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        weight: float | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> None:
         self.relationships.append(
             IntelCraftRelationship(
@@ -93,8 +94,8 @@ class IntelCraftElement:
             )
         )
 
-    def to_dict(self) -> Dict[str, Any]:
-        data: Dict[str, Any] = {
+    def to_dict(self) -> dict[str, Any]:
+        data: dict[str, Any] = {
             "element_id": self.element_id,
             "name": self.name,
             "category": self.category,
@@ -109,7 +110,7 @@ class IntelCraftElement:
         return data
 
     @classmethod
-    def from_dict(cls, payload: Mapping[str, Any]) -> "IntelCraftElement":
+    def from_dict(cls, payload: Mapping[str, Any]) -> IntelCraftElement:
         required = {"element_id", "name", "category"}
         missing = [key for key in required if key not in payload]
         if missing:
@@ -126,9 +127,11 @@ class IntelCraftElement:
             raise TypeError("relationships must be provided as a sequence")
         relationship_payloads: Sequence[Any] = raw_relationships  # type: ignore[assignment]
         relationships = [
-            relation
-            if isinstance(relation, IntelCraftRelationship)
-            else IntelCraftRelationship.from_dict(relation)
+            (
+                relation
+                if isinstance(relation, IntelCraftRelationship)
+                else IntelCraftRelationship.from_dict(relation)
+            )
             for relation in relationship_payloads
         ]
 
@@ -156,7 +159,7 @@ def integrate_intelcraft_elements(
     """Merge IntelCraft elements into an existing :class:`Graph` instance."""
 
     normalized_elements = normalize_intelcraft_elements(elements)
-    element_index: Dict[str, IntelCraftElement] = {}
+    element_index: dict[str, IntelCraftElement] = {}
 
     for element in normalized_elements:
         if element.element_id in element_index:
@@ -174,16 +177,26 @@ def integrate_intelcraft_elements(
         for relationship in element.relationships:
             edge_attributes = relationship.as_edge_attributes()
             if merge_attributes and graph.has_edge(element.element_id, relationship.target_id):
-                graph.merge_edge_attributes(element.element_id, relationship.target_id, edge_attributes)
+                graph.merge_edge_attributes(
+                    element.element_id, relationship.target_id, edge_attributes
+                )
             else:
-                graph.add_edge(element.element_id, relationship.target_id, attributes=edge_attributes)
+                graph.add_edge(
+                    element.element_id, relationship.target_id, attributes=edge_attributes
+                )
             if enrich_targets and relationship.target_id in element_index:
-                linked_from = graph.get_node_attributes(relationship.target_id).get("linked_from", [])
+                linked_from = graph.get_node_attributes(relationship.target_id).get(
+                    "linked_from", []
+                )
                 new_linked_from = sorted({*linked_from, element.element_id})
                 if merge_attributes:
-                    graph.merge_node_attributes(relationship.target_id, {"linked_from": new_linked_from})
+                    graph.merge_node_attributes(
+                        relationship.target_id, {"linked_from": new_linked_from}
+                    )
                 else:
-                    graph.update_node_attributes(relationship.target_id, {"linked_from": new_linked_from})
+                    graph.update_node_attributes(
+                        relationship.target_id, {"linked_from": new_linked_from}
+                    )
 
 
 def build_intelcraft_graph(elements: Iterable[IntelCraftElementInput]) -> Graph:
@@ -196,10 +209,10 @@ def build_intelcraft_graph(elements: Iterable[IntelCraftElementInput]) -> Graph:
 
 def normalize_intelcraft_elements(
     elements: Iterable[IntelCraftElementInput],
-) -> List[IntelCraftElement]:
+) -> list[IntelCraftElement]:
     """Return ``IntelCraftElement`` instances for ``elements`` inputs."""
 
-    normalized: List[IntelCraftElement] = []
+    normalized: list[IntelCraftElement] = []
     for element in elements:
         if isinstance(element, IntelCraftElement):
             normalized.append(element)

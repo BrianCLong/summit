@@ -22,9 +22,10 @@ async function main() {
   // eslint-disable-next-line no-constant-condition
   while (true) {
     await tick();
-    await new Promise((r) => setTimeout(r, RATE_MS + Math.floor(Math.random() * RATE_MS)));
+    await new Promise((r) =>
+      setTimeout(r, RATE_MS + Math.floor(Math.random() * RATE_MS)),
+    );
   }
 }
 
 main().catch(() => process.exit(1));
-

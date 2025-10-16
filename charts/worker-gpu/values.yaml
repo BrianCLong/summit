@@ -5,5 +5,4 @@ image:
 resources:
   gpus: 1
   mem: 8Gi
-  cpu: "2"
-
+  cpu: '2'

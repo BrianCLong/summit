@@ -46,7 +46,15 @@ import { useSafeQuery } from '../../hooks/useSafeQuery';
 
 interface IOC {
   id: string;
-  type: 'IP' | 'DOMAIN' | 'URL' | 'FILE_HASH' | 'EMAIL' | 'PHONE' | 'REGISTRY' | 'CERTIFICATE';
+  type:
+    | 'IP'
+    | 'DOMAIN'
+    | 'URL'
+    | 'FILE_HASH'
+    | 'EMAIL'
+    | 'PHONE'
+    | 'REGISTRY'
+    | 'CERTIFICATE';
   value: string;
   risk: number;
   status: 'ACTIVE' | 'INACTIVE' | 'INVESTIGATING' | 'FALSE_POSITIVE';
@@ -203,7 +211,8 @@ export default function IOCList() {
         id: 'ioc6',
         type: 'REGISTRY',
         // eslint-disable-next-line no-useless-escape
-        value: 'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\SystemUpdater',
+        value:
+          'HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Run\SystemUpdater',
         risk: 80,
         status: 'ACTIVE',
         source: 'YARA Rule',
@@ -293,7 +302,13 @@ export default function IOCList() {
       renderCell: (params) => (
         <Badge
           badgeContent={params.value}
-          color={params.value > 10 ? 'error' : params.value > 0 ? 'warning' : 'default'}
+          color={
+            params.value > 10
+              ? 'error'
+              : params.value > 0
+                ? 'warning'
+                : 'default'
+          }
           showZero
         >
           <Timeline />
@@ -380,7 +395,8 @@ export default function IOCList() {
   const activeIOCs = iocs?.filter((i) => i.status === 'ACTIVE').length || 0;
   const highRiskIOCs = iocs?.filter((i) => i.risk >= 70).length || 0;
   const totalHits = iocs?.reduce((sum, ioc) => sum + ioc.hits, 0) || 0;
-  const investigatingIOCs = iocs?.filter((i) => i.status === 'INVESTIGATING').length || 0;
+  const investigatingIOCs =
+    iocs?.filter((i) => i.status === 'INVESTIGATING').length || 0;
 
   return (
     <Box sx={{ m: 2 }}>
@@ -451,8 +467,15 @@ export default function IOCList() {
       {/* Main IOC List */}
       <Card sx={{ borderRadius: 3 }}>
         <CardContent>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mb: 2 }}>
-            <Typography variant="h6">Indicators of Compromise (IOCs)</Typography>
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+            sx={{ mb: 2 }}
+          >
+            <Typography variant="h6">
+              Indicators of Compromise (IOCs)
+            </Typography>
             <Stack direction="row" spacing={2}>
               <FormControl size="small" sx={{ minWidth: 120 }}>
                 <InputLabel>IOC Type</InputLabel>
@@ -530,7 +553,12 @@ export default function IOCList() {
       </Card>
 
       {/* Add IOC Dialog */}
-      <Dialog open={addDialogOpen} onClose={() => setAddDialogOpen(false)} maxWidth="md" fullWidth>
+      <Dialog
+        open={addDialogOpen}
+        onClose={() => setAddDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogTitle>Add New IOC</DialogTitle>
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>
@@ -540,14 +568,20 @@ export default function IOCList() {
                 <MenuItem value="IP">IP Address</MenuItem>
                 <MenuItem value="DOMAIN">Domain Name</MenuItem>
                 <MenuItem value="URL">URL</MenuItem>
-                <MenuItem value="FILE_HASH">File Hash (MD5/SHA1/SHA256)</MenuItem>
+                <MenuItem value="FILE_HASH">
+                  File Hash (MD5/SHA1/SHA256)
+                </MenuItem>
                 <MenuItem value="EMAIL">Email Address</MenuItem>
                 <MenuItem value="PHONE">Phone Number</MenuItem>
                 <MenuItem value="REGISTRY">Registry Key</MenuItem>
                 <MenuItem value="CERTIFICATE">Certificate</MenuItem>
               </Select>
             </FormControl>
-            <TextField fullWidth label="IOC Value" placeholder="Enter the indicator value..." />
+            <TextField
+              fullWidth
+              label="IOC Value"
+              placeholder="Enter the indicator value..."
+            />
             <FormControl fullWidth>
               <InputLabel>TLP Classification</InputLabel>
               <Select label="TLP Classification">
@@ -601,7 +635,8 @@ export default function IOCList() {
         <DialogContent>
           <Stack spacing={3} sx={{ mt: 1 }}>
             <Alert severity="info">
-              Upload a CSV file with columns: type, value, source, tlp, tags, description
+              Upload a CSV file with columns: type, value, source, tlp, tags,
+              description
             </Alert>
             <Paper
               variant="outlined"
@@ -614,12 +649,19 @@ export default function IOCList() {
               }}
             >
               <Upload sx={{ fontSize: 48, color: 'primary.main', mb: 1 }} />
-              <Typography variant="h6">Drop files here or click to browse</Typography>
+              <Typography variant="h6">
+                Drop files here or click to browse
+              </Typography>
               <Typography variant="body2" color="text.secondary">
                 Supported formats: CSV, JSON, STIX
               </Typography>
             </Paper>
-            <TextField fullWidth select label="Default TLP Classification" defaultValue="GREEN">
+            <TextField
+              fullWidth
+              select
+              label="Default TLP Classification"
+              defaultValue="GREEN"
+            >
               <MenuItem value="WHITE">TLP:WHITE</MenuItem>
               <MenuItem value="GREEN">TLP:GREEN</MenuItem>
               <MenuItem value="AMBER">TLP:AMBER</MenuItem>

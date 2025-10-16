@@ -66,7 +66,11 @@ app.post('/api/entity-resolution/find-duplicates', async (req, res) => {
       return res.status(400).json({ error: 'entityId is required' });
     }
 
-    const matches = await entityResolutionService.findDuplicates(entityId, limit, threshold);
+    const matches = await entityResolutionService.findDuplicates(
+      entityId,
+      limit,
+      threshold,
+    );
 
     res.json({
       entityId,
@@ -142,7 +146,10 @@ app.post('/api/entity-resolution/similarity', async (req, res) => {
       });
     }
 
-    const similarity = await entityResolutionService.calculateSimilarity(entity1Id, entity2Id);
+    const similarity = await entityResolutionService.calculateSimilarity(
+      entity1Id,
+      entity2Id,
+    );
 
     res.json({
       entity1Id,
@@ -210,7 +217,10 @@ app.post('/api/embeddings/encode', async (req, res) => {
     }
 
     // Call Python service for embedding
-    const embeddings = await entityResolutionService.getSemanticEmbeddings(texts, modelName);
+    const embeddings = await entityResolutionService.getSemanticEmbeddings(
+      texts,
+      modelName,
+    );
 
     res.json({
       embeddings,
@@ -232,11 +242,12 @@ app.post('/api/embeddings/similarity', async (req, res) => {
       return res.status(400).json({ error: 'text1 and text2 are required' });
     }
 
-    const similarity = await entityResolutionService.calculateSemanticSimilarity(
-      text1,
-      text2,
-      modelName,
-    );
+    const similarity =
+      await entityResolutionService.calculateSemanticSimilarity(
+        text1,
+        text2,
+        modelName,
+      );
 
     res.json({
       text1,
@@ -330,13 +341,21 @@ app.post('/api/models/:modelName/load', async (req, res) => {
 });
 
 // Error handling middleware
-app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  logger.error('Unhandled error:', error);
-  res.status(500).json({
-    error: 'Internal server error',
-    message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-  });
-});
+app.use(
+  (
+    error: Error,
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ) => {
+    logger.error('Unhandled error:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message:
+        process.env.NODE_ENV === 'development' ? error.message : undefined,
+    });
+  },
+);
 
 // 404 handler
 app.use('*', (req, res) => {

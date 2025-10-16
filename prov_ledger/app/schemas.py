@@ -1,31 +1,30 @@
-from typing import Dict, List, Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class SubmitText(BaseModel):
     text: str
-    lang: Optional[str] = None
-    context: Optional[str] = None
+    lang: str | None = None
+    context: str | None = None
 
 
 class Claim(BaseModel):
     id: str
     text: str
     normalized: str
-    embedding: Optional[List[float]] = None
+    embedding: list[float] | None = None
     created_at: str
 
 
 class Evidence(BaseModel):
-    id: Optional[str] = None
+    id: str | None = None
     kind: str
-    title: Optional[str] = None
-    url: Optional[str] = None
-    hash: Optional[str] = None
-    mime: Optional[str] = None
-    created_at: Optional[str] = None
-    signed: Optional[bool] = False
-    signer_fp: Optional[str] = None
+    title: str | None = None
+    url: str | None = None
+    hash: str | None = None
+    mime: str | None = None
+    created_at: str | None = None
+    signed: bool | None = False
+    signer_fp: str | None = None
 
 
 class AttachEvidenceRequest(BaseModel):
@@ -35,12 +34,12 @@ class AttachEvidenceRequest(BaseModel):
 
 class Corroboration(BaseModel):
     claim_id: str
-    evidence_ids: List[str]
+    evidence_ids: list[str]
     score: float
-    breakdown: Dict[str, float]
+    breakdown: dict[str, float]
 
 
 class ProvExport(BaseModel):
-    nodes: List[dict]
-    edges: List[dict]
-    metadata: Dict[str, str]
+    nodes: list[dict]
+    edges: list[dict]
+    metadata: dict[str, str]

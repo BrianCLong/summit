@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Dict, Any
+from typing import Any
 
 from intelgraph_neo4j_client import IntelGraphNeo4jClient
 
@@ -16,19 +16,19 @@ class CopilotContextIngestor:
     def __init__(self, client: IntelGraphNeo4jClient) -> None:
         self.client = client
 
-    def _build_node(self, case_id: str, data: Dict[str, Any]) -> Dict[str, Any]:
+    def _build_node(self, case_id: str, data: dict[str, Any]) -> dict[str, Any]:
         payload = {"case_id": case_id, **data, "labels": ["COPILOT_CONTEXT"]}
         logger.debug("Built context payload: %s", payload)
         return payload
 
-    def ingest_alert(self, case_id: str, alert: Dict[str, Any]) -> Dict[str, Any]:
+    def ingest_alert(self, case_id: str, alert: dict[str, Any]) -> dict[str, Any]:
         node = self._build_node(case_id, {"type": "alert", "data": alert})
         return self.client.create_or_update_entity("Evidence", node)
 
-    def ingest_log(self, case_id: str, log_entry: Dict[str, Any]) -> Dict[str, Any]:
+    def ingest_log(self, case_id: str, log_entry: dict[str, Any]) -> dict[str, Any]:
         node = self._build_node(case_id, {"type": "log", "data": log_entry})
         return self.client.create_or_update_entity("Evidence", node)
 
-    def ingest_note(self, case_id: str, note: str) -> Dict[str, Any]:
+    def ingest_note(self, case_id: str, note: str) -> dict[str, Any]:
         node = self._build_node(case_id, {"type": "note", "text": note})
         return self.client.create_or_update_entity("Evidence", node)

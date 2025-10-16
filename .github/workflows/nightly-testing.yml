@@ -64,7 +64,7 @@ jobs:
     timeout-minutes: 90
     strategy:
       fail-fast: false
-      max-parallel: 4  # Cap matrix fanout (was 12 parallel jobs)
+      max-parallel: 4 # Cap matrix fanout (was 12 parallel jobs)
       matrix:
         browser: [chromium, firefox, safari]
         shard: [1, 2, 3, 4]
@@ -204,7 +204,7 @@ jobs:
     if: ${{ !inputs.skip_soak && (github.event_name != 'schedule' || needs.guard.outputs.saturated != 'true') }}
     needs: [guard]
     runs-on: ubuntu-22.04
-    timeout-minutes: 300  # 5 hours for soak test
+    timeout-minutes: 300 # 5 hours for soak test
     env:
       TARGET_ENV: ${{ inputs.environment || 'stage' }}
     steps:

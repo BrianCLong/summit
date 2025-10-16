@@ -7,7 +7,7 @@ paths:
     get:
       summary: List registered agents
       responses:
-        "200":
+        '200':
           description: OK
   /actions/dispatch:
     post:
@@ -15,11 +15,11 @@ paths:
       requestBody:
         required: true
       responses:
-        "202":
+        '202':
           description: Accepted
   /meetings/token:
     post:
       summary: Mint ephemeral meeting token
       responses:
-        "200":
+        '200':
           description: OK

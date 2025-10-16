@@ -15,6 +15,12 @@ const IGNORE = [
   '**/.cache/**',
   '**/generated/**',
   'frontend/.vite/**', // legacy build artifacts
+  '**/public/**',
+  '**/*.min.js',
+  '.github/workflows/compliance-automation.yml',
+  'v4/archive/**',
+  '.venv/**',
+  'venv/**'
 ];
 
 export default [

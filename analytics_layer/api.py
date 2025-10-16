@@ -1,11 +1,12 @@
 """HTTP API for the threat analytics layer."""
+
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable
 from dataclasses import asdict, dataclass
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from typing import Dict, Iterable, List, Optional, Tuple
 
 from .data_models import ExternalMeasurement, InternalSignal, WorldEventTrigger
 from .metrics import ExplainableMetricsEngine
@@ -17,8 +18,8 @@ from .threat_index import RealTimeThreatIndexCalculator
 class ThreatIndexResponse:
     threat_index: float
     confidence: float
-    components: Dict[str, float]
-    metrics: Dict[str, float]
+    components: dict[str, float]
+    metrics: dict[str, float]
 
     def as_json(self) -> str:
         return json.dumps(asdict(self))
@@ -29,16 +30,20 @@ class ThreatIndexService:
 
     def __init__(
         self,
-        pipeline: Optional[DataFusionPipeline] = None,
-        metrics_engine: Optional[ExplainableMetricsEngine] = None,
-        calculator: Optional[RealTimeThreatIndexCalculator] = None,
+        pipeline: DataFusionPipeline | None = None,
+        metrics_engine: ExplainableMetricsEngine | None = None,
+        calculator: RealTimeThreatIndexCalculator | None = None,
     ) -> None:
         self._pipeline = pipeline or DataFusionPipeline()
         self._metrics_engine = metrics_engine or ExplainableMetricsEngine()
         self._calculator = calculator or RealTimeThreatIndexCalculator()
 
-    def compute_from_payload(self, payload: Dict[str, Iterable[Dict[str, object]]]) -> ThreatIndexResponse:
-        external = [ExternalMeasurement.from_dict(item) for item in payload.get("external_measurements", [])]
+    def compute_from_payload(
+        self, payload: dict[str, Iterable[dict[str, object]]]
+    ) -> ThreatIndexResponse:
+        external = [
+            ExternalMeasurement.from_dict(item) for item in payload.get("external_measurements", [])
+        ]
         internal = [InternalSignal.from_dict(item) for item in payload.get("internal_signals", [])]
         events = [WorldEventTrigger.from_dict(item) for item in payload.get("world_events", [])]
 
@@ -82,11 +87,15 @@ class _ThreatIndexRequestHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def log_message(self, format: str, *args: object) -> None:  # noqa: A003 - method signature fixed
+    def log_message(
+        self, format: str, *args: object
+    ) -> None:  # noqa: A003 - method signature fixed
         return  # Suppress default logging during tests
 
 
-def create_http_server(host: str = "127.0.0.1", port: int = 8080, service: Optional[ThreatIndexService] = None) -> HTTPServer:
+def create_http_server(
+    host: str = "127.0.0.1", port: int = 8080, service: ThreatIndexService | None = None
+) -> HTTPServer:
     """Instantiate an HTTP server bound to the analytics service."""
 
     handler_class = type(

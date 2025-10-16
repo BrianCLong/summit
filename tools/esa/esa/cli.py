@@ -3,9 +3,10 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from collections.abc import Iterable
 from copy import deepcopy
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional
+from typing import Any
 
 from .evaluation import Evaluation, evaluate
 from .reporting import render_markdown, write_markdown
@@ -17,20 +18,20 @@ class CLIError(Exception):
     pass
 
 
-def load_plan(config_path: Path) -> Dict[str, Any]:
+def load_plan(config_path: Path) -> dict[str, Any]:
     if not config_path.exists():
         raise CLIError(f"Sampling plan file not found: {config_path}")
     return load_json_or_yaml(config_path)
 
 
-def evaluate_plan(plan_cfg: Dict[str, Any], dataset_path: Path, metric: str) -> Evaluation:
+def evaluate_plan(plan_cfg: dict[str, Any], dataset_path: Path, metric: str) -> Evaluation:
     records = load_dataset(dataset_path)
     plan = SamplingPlan.from_config(plan_cfg)
     result = plan.execute(records)
     return evaluate(result, records, metric)
 
 
-def evaluation_to_dict(evaluation: Evaluation) -> Dict[str, Any]:
+def evaluation_to_dict(evaluation: Evaluation) -> dict[str, Any]:
     return {
         "plan_type": evaluation.plan_type,
         "proof": evaluation.proof,
@@ -55,16 +56,16 @@ def handle_evaluate(args: argparse.Namespace) -> int:
     return 0
 
 
-def parse_variant(token: str) -> tuple[str, List[str]]:
+def parse_variant(token: str) -> tuple[str, list[str]]:
     if "=" not in token:
         raise CLIError("Variants must be in key=value1,value2 format")
     key, values = token.split("=", 1)
     return key, [value.strip() for value in values.split(",") if value.strip()]
 
 
-def apply_variant(base: Dict[str, Any], key: str, value: str) -> Dict[str, Any]:
+def apply_variant(base: dict[str, Any], key: str, value: str) -> dict[str, Any]:
     variant = deepcopy(base)
-    cursor: Dict[str, Any] = variant
+    cursor: dict[str, Any] = variant
     parts = key.split(".")
     for part in parts[:-1]:
         if part not in cursor or not isinstance(cursor[part], dict):
@@ -89,12 +90,12 @@ def apply_variant(base: Dict[str, Any], key: str, value: str) -> Dict[str, Any]:
 def handle_simulate(args: argparse.Namespace) -> int:
     base_plan = load_plan(Path(args.plan))
     dataset_path = Path(args.dataset)
-    variants: Dict[str, List[str]] = {}
+    variants: dict[str, list[str]] = {}
     for token in args.vary or []:
         key, values = parse_variant(token)
         variants[key] = values
 
-    results: List[Dict[str, Any]] = []
+    results: list[dict[str, Any]] = []
     for key, values in variants.items():
         for value in values:
             plan_cfg = apply_variant(base_plan, key, value)
@@ -197,7 +198,7 @@ def build_parser() -> argparse.ArgumentParser:
     return parser
 
 
-def main(argv: Optional[Iterable[str]] = None) -> int:
+def main(argv: Iterable[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
     try:

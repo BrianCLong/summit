@@ -4,7 +4,10 @@ import { readFileSync } from 'fs';
 import path from 'path';
 import { dropResolvers } from './graphql/resolvers/drop';
 
-const typeDefs = readFileSync(path.join(__dirname, './graphql/schemas/drop.graphql'), 'utf8');
+const typeDefs = readFileSync(
+  path.join(__dirname, './graphql/schemas/drop.graphql'),
+  'utf8',
+);
 
 const server = new ApolloServer({
   typeDefs,

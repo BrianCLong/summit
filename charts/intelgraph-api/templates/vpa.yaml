@@ -1,21 +1,21 @@
 apiVersion: autoscaling.k8s.io/v1
 kind: VerticalPodAutoscaler
 metadata:
-  name: {{ include "intelgraph-api.fullname" . }}
+  name: { { include "intelgraph-api.fullname" . } }
 spec:
   targetRef:
-    apiVersion: "apps/v1"
-    kind: "Deployment"
-    name: {{ include "intelgraph-api.fullname" . }}
+    apiVersion: 'apps/v1'
+    kind: 'Deployment'
+    name: { { include "intelgraph-api.fullname" . } }
   updatePolicy:
-    updateMode: "Off" # Or "Auto" for automatic updates, "Recreate" for recreating pods
+    updateMode: 'Off' # Or "Auto" for automatic updates, "Recreate" for recreating pods
   resourcePolicy:
     containerPolicies:
-      - containerName: "*"
+      - containerName: '*'
         minAllowed:
           cpu: 100m
           memory: 128Mi
         maxAllowed:
           cpu: 2
           memory: 4Gi
-        controlledResources: ["cpu", "memory"]
+        controlledResources: ['cpu', 'memory']

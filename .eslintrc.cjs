@@ -11,12 +11,17 @@ module.exports = {
     'plugin:jsx-a11y/recommended',
     'plugin:import/recommended',
     'plugin:import/typescript',
-    'prettier'
+    'prettier',
   ],
   settings: { react: { version: '18.0' } },
   overrides: [
     {
-      files: ['**/__tests__/**/*.*', '**/*.test.*', 'tests/**/*.*', 'server/src/tests/**/*.*'],
+      files: [
+        '**/__tests__/**/*.*',
+        '**/*.test.*',
+        'tests/**/*.*',
+        'server/src/tests/**/*.*',
+      ],
       env: { jest: true, node: true },
       plugins: ['jest'],
       extends: ['plugin:jest/recommended'],
@@ -28,16 +33,20 @@ module.exports = {
           {
             object: 'console',
             property: 'error',
-            message: 'Use assertions or throw errors instead of console.error in tests',
+            message:
+              'Use assertions or throw errors instead of console.error in tests',
           },
         ],
       },
     },
   ],
   rules: {
-    'import/order': ['error', { 'newlines-between': 'always', alphabetize: { order: 'asc' } }],
+    'import/order': [
+      'error',
+      { 'newlines-between': 'always', alphabetize: { order: 'asc' } },
+    ],
     'react/prop-types': 'off',
-    '@typescript-eslint/explicit-module-boundary-types': 'off'
+    '@typescript-eslint/explicit-module-boundary-types': 'off',
   },
-  ignorePatterns: ['dist', 'build', 'coverage', 'node_modules']
+  ignorePatterns: ['dist', 'build', 'coverage', 'node_modules'],
 };

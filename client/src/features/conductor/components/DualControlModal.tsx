@@ -1,5 +1,14 @@
 import React, { useState } from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField, Box, Typography } from '@mui/material';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Button,
+  TextField,
+  Box,
+  Typography,
+} from '@mui/material';
 
 export function DualControlModal({
   open,
@@ -22,7 +31,8 @@ export function DualControlModal({
       <DialogTitle>Dual Control Required</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" gutterBottom>
-          Provide a justification and an approver (email) to proceed. This action is audited.
+          Provide a justification and an approver (email) to proceed. This
+          action is audited.
         </Typography>
         <Box sx={{ display: 'grid', gap: 2 }}>
           <TextField
@@ -43,11 +53,14 @@ export function DualControlModal({
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button disabled={!valid} variant="contained" onClick={() => onConfirm({ justification, approver })}>
+        <Button
+          disabled={!valid}
+          variant="contained"
+          onClick={() => onConfirm({ justification, approver })}
+        >
           {actionLabel}
         </Button>
       </DialogActions>
     </Dialog>
   );
 }
-

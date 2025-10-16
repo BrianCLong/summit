@@ -47,7 +47,11 @@ function EntityItem({
 
   return (
     <div style={style}>
-      <ListItem button onClick={() => data.onSelect(entity)} sx={{ px: 2, py: 1 }}>
+      <ListItem
+        button
+        onClick={() => data.onSelect(entity)}
+        sx={{ px: 2, py: 1 }}
+      >
         <ListItemText
           primary={
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -124,7 +128,10 @@ export function VirtualizedDetailPanel({
   );
 
   return (
-    <Paper elevation={1} sx={{ height, display: 'flex', flexDirection: 'column' }}>
+    <Paper
+      elevation={1}
+      sx={{ height, display: 'flex', flexDirection: 'column' }}
+    >
       <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
         <Typography variant="h6">
           Entity Details
@@ -134,7 +141,9 @@ export function VirtualizedDetailPanel({
 
       {entities.length === 0 ? (
         <Box sx={{ p: 2, textAlign: 'center', color: 'text.secondary' }}>
-          <Typography variant="body2">Select entities to view details</Typography>
+          <Typography variant="body2">
+            Select entities to view details
+          </Typography>
         </Box>
       ) : (
         <List

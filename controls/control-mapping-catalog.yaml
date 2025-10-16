@@ -2,4 +2,4 @@ external: SOC2-CC7.2
 maps_to:
   - IG-AUT-1
   - IG-SC-5
-narrative: "All merges pass policy & provenance; SBOM criticals=0; attest verify=pass"
+narrative: 'All merges pass policy & provenance; SBOM criticals=0; attest verify=pass'

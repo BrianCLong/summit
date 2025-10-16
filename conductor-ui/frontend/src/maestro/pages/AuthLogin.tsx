@@ -16,7 +16,8 @@ const AuthLogin: React.FC = () => {
 
       // Generate a random state to prevent CSRF
       const state =
-        Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+        Math.random().toString(36).substring(2, 15) +
+        Math.random().toString(36).substring(2, 15);
       sessionStorage.setItem('oauthState', state);
 
       const redirectUri = window.location.origin + '/auth/callback';
@@ -41,7 +42,9 @@ const AuthLogin: React.FC = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
       <div className="p-8 bg-white shadow-md rounded-lg text-center">
-        <h2 className="text-2xl font-bold text-slate-900 mb-6">Sign In to Maestro</h2>
+        <h2 className="text-2xl font-bold text-slate-900 mb-6">
+          Sign In to Maestro
+        </h2>
         <div className="space-y-4">
           <button
             onClick={() => handleLogin('auth0')}

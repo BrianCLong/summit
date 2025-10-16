@@ -7,72 +7,79 @@ Carbon-aware Byzantine Fault Tolerant consensus with environmental impact optimi
 Balances consensus reliability with carbon footprint reduction through intelligent scoring.
 """
 
-import json
-import hashlib
-import hmac
-import time
 import asyncio
-from typing import Dict, Any, List, Optional, NamedTuple, Tuple
-from dataclasses import dataclass, asdict
-from datetime import datetime, timezone, timedelta
-from enum import Enum
 import logging
 import math
+import time
+from dataclasses import dataclass
+from datetime import datetime, timezone
+from enum import Enum
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
+
 class RegionCarbonIntensity(Enum):
     """Carbon intensity levels by region (gCO2/kWh)"""
-    NORDIC = 50      # Hydro/wind heavy
-    FRANCE = 85      # Nuclear heavy
-    CANADA = 120     # Hydro/nuclear mix
-    US_WEST = 280    # Mixed renewables
-    US_EAST = 450    # Coal/gas mix
-    GERMANY = 520    # Coal/renewables transition
-    CHINA = 650      # Coal heavy
-    INDIA = 720      # Coal dominant
+
+    NORDIC = 50  # Hydro/wind heavy
+    FRANCE = 85  # Nuclear heavy
+    CANADA = 120  # Hydro/nuclear mix
+    US_WEST = 280  # Mixed renewables
+    US_EAST = 450  # Coal/gas mix
+    GERMANY = 520  # Coal/renewables transition
+    CHINA = 650  # Coal heavy
+    INDIA = 720  # Coal dominant
+
 
 class QuorumRole(Enum):
     """BFT node roles in quorum"""
+
     PROPOSER = "proposer"
     VALIDATOR = "validator"
     OBSERVER = "observer"
     STANDBY = "standby"
 
+
 @dataclass
 class BFTNode:
     """BFT consensus node with carbon footprint tracking"""
+
     node_id: str
     region: str
     carbon_intensity_gco2_kwh: int
     cpu_cores: int
     power_draw_watts: float
     latency_ms: float
-    reliability_score: float    # 0.0-1.0
+    reliability_score: float  # 0.0-1.0
     last_seen: str
     active: bool = True
     role: QuorumRole = QuorumRole.STANDBY
 
+
 @dataclass
 class EcoQuorumCandidate:
     """Candidate quorum configuration with environmental scoring"""
+
     candidate_id: str
-    nodes: List[BFTNode]
-    fault_tolerance: int        # f in (3f+1) nodes
-    quorum_size: int           # 2f+1 for safety
+    nodes: list[BFTNode]
+    fault_tolerance: int  # f in (3f+1) nodes
+    quorum_size: int  # 2f+1 for safety
     consensus_latency_ms: float
     carbon_footprint_gco2_hour: float
     reliability_score: float
     eco_efficiency_score: float
     power_consumption_watts: float
-    geographic_distribution: Dict[str, int]
+    geographic_distribution: dict[str, int]
+
 
 @dataclass
 class QuorumDecision:
     """BFT quorum consensus decision with environmental impact"""
+
     decision_id: str
     timestamp: str
-    quorum_nodes: List[str]
+    quorum_nodes: list[str]
     proposer_node: str
     consensus_achieved: bool
     consensus_time_ms: float
@@ -81,6 +88,7 @@ class QuorumDecision:
     carbon_cost_gco2: float
     power_cost_watts_hour: float
     reliability_confidence: float
+
 
 class BFTEcoScorer:
     """BFT-Eco quorum scoring and optimization engine
@@ -92,11 +100,11 @@ class BFTEcoScorer:
     SLA: <100ms quorum selection, <5% carbon overhead, >99.9% consensus reliability
     """
 
-    def __init__(self, nodes: List[BFTNode], min_fault_tolerance: int = 1):
+    def __init__(self, nodes: list[BFTNode], min_fault_tolerance: int = 1):
         self.nodes = {node.node_id: node for node in nodes}
         self.min_fault_tolerance = min_fault_tolerance
         self.min_quorum_size = 2 * min_fault_tolerance + 1
-        self.active_quorum: Optional[EcoQuorumCandidate] = None
+        self.active_quorum: EcoQuorumCandidate | None = None
 
         # Optimization weights
         self.reliability_weight = 0.4
@@ -111,11 +119,14 @@ class BFTEcoScorer:
         self.total_carbon_gco2 = 0.0
         self.total_selection_time = 0.0
 
-        logger.info(f"BFT-Eco Scorer initialized: {len(nodes)} nodes, "
-                   f"min_ft={min_fault_tolerance}, min_quorum={self.min_quorum_size}")
+        logger.info(
+            f"BFT-Eco Scorer initialized: {len(nodes)} nodes, "
+            f"min_ft={min_fault_tolerance}, min_quorum={self.min_quorum_size}"
+        )
 
-    async def select_optimal_quorum(self, required_consensus_time_ms: float = 1000,
-                                   carbon_budget_gco2_hour: float = 100) -> EcoQuorumCandidate:
+    async def select_optimal_quorum(
+        self, required_consensus_time_ms: float = 1000, carbon_budget_gco2_hour: float = 100
+    ) -> EcoQuorumCandidate:
         """Select optimal BFT quorum balancing reliability and carbon impact
 
         Args:
@@ -128,8 +139,10 @@ class BFTEcoScorer:
         start_time = time.time()
         self.quorum_selections += 1
 
-        logger.info(f"Selecting optimal quorum: consensus_time≤{required_consensus_time_ms}ms, "
-                   f"carbon_budget≤{carbon_budget_gco2_hour}gCO2/h")
+        logger.info(
+            f"Selecting optimal quorum: consensus_time≤{required_consensus_time_ms}ms, "
+            f"carbon_budget≤{carbon_budget_gco2_hour}gCO2/h"
+        )
 
         # Generate candidate quorums
         candidates = await self._generate_quorum_candidates()
@@ -163,15 +176,17 @@ class BFTEcoScorer:
         selection_time = time.time() - start_time
         self.total_selection_time += selection_time
 
-        logger.info(f"Optimal quorum selected: {best_candidate.candidate_id}, "
-                   f"score={best_score:.3f}, "
-                   f"nodes={len(best_candidate.nodes)}, "
-                   f"carbon={best_candidate.carbon_footprint_gco2_hour:.1f}gCO2/h, "
-                   f"time={selection_time*1000:.1f}ms")
+        logger.info(
+            f"Optimal quorum selected: {best_candidate.candidate_id}, "
+            f"score={best_score:.3f}, "
+            f"nodes={len(best_candidate.nodes)}, "
+            f"carbon={best_candidate.carbon_footprint_gco2_hour:.1f}gCO2/h, "
+            f"time={selection_time*1000:.1f}ms"
+        )
 
         return best_candidate
 
-    async def _generate_quorum_candidates(self) -> List[EcoQuorumCandidate]:
+    async def _generate_quorum_candidates(self) -> list[EcoQuorumCandidate]:
         """Generate all viable quorum candidate configurations"""
         candidates = []
         active_nodes = [node for node in self.nodes.values() if node.active]
@@ -179,7 +194,7 @@ class BFTEcoScorer:
         # Try different fault tolerance levels
         max_fault_tolerance = min(
             (len(active_nodes) - 1) // 3,  # Byzantine limit
-            self.min_fault_tolerance + 2   # Don't go too high
+            self.min_fault_tolerance + 2,  # Don't go too high
         )
 
         for ft in range(self.min_fault_tolerance, max_fault_tolerance + 1):
@@ -195,7 +210,7 @@ class BFTEcoScorer:
 
         return candidates
 
-    def _generate_node_combinations(self, nodes: List[BFTNode], size: int) -> List[List[BFTNode]]:
+    def _generate_node_combinations(self, nodes: list[BFTNode], size: int) -> list[list[BFTNode]]:
         """Generate combinations of nodes for quorum (simplified for demo)"""
         if size > len(nodes):
             return []
@@ -224,7 +239,9 @@ class BFTEcoScorer:
 
         return combinations
 
-    def _select_geographically_distributed(self, nodes: List[BFTNode], size: int) -> Optional[List[BFTNode]]:
+    def _select_geographically_distributed(
+        self, nodes: list[BFTNode], size: int
+    ) -> list[BFTNode] | None:
         """Select nodes with good geographic distribution"""
         regions = {}
         for node in nodes:
@@ -246,28 +263,28 @@ class BFTEcoScorer:
 
         return selected if len(selected) == size else None
 
-    def _select_balanced_nodes(self, nodes: List[BFTNode], size: int) -> Optional[List[BFTNode]]:
+    def _select_balanced_nodes(self, nodes: list[BFTNode], size: int) -> list[BFTNode] | None:
         """Select nodes with balanced reliability/carbon trade-off"""
         # Score nodes by balanced criteria
         scored_nodes = []
         for node in nodes:
             # Normalize scores (0-1)
             reliability_norm = node.reliability_score
-            carbon_norm = 1.0 - (node.carbon_intensity_gco2_kwh / 1000)  # Lower carbon = higher score
+            carbon_norm = 1.0 - (
+                node.carbon_intensity_gco2_kwh / 1000
+            )  # Lower carbon = higher score
             latency_norm = 1.0 - (node.latency_ms / 1000)  # Lower latency = higher score
 
-            balanced_score = (
-                reliability_norm * 0.5 +
-                carbon_norm * 0.3 +
-                latency_norm * 0.2
-            )
+            balanced_score = reliability_norm * 0.5 + carbon_norm * 0.3 + latency_norm * 0.2
             scored_nodes.append((balanced_score, node))
 
         # Select top nodes
         scored_nodes.sort(key=lambda x: x[0], reverse=True)
         return [node for score, node in scored_nodes[:size]]
 
-    async def _create_quorum_candidate(self, nodes: List[BFTNode], fault_tolerance: int) -> EcoQuorumCandidate:
+    async def _create_quorum_candidate(
+        self, nodes: list[BFTNode], fault_tolerance: int
+    ) -> EcoQuorumCandidate:
         """Create quorum candidate with environmental scoring"""
         candidate_id = f"quorum_{int(time.time())}_{len(nodes)}n_{fault_tolerance}f"
 
@@ -302,10 +319,10 @@ class BFTEcoScorer:
             reliability_score=reliability_score,
             eco_efficiency_score=eco_efficiency,
             power_consumption_watts=total_power,
-            geographic_distribution=geographic_distribution
+            geographic_distribution=geographic_distribution,
         )
 
-    def _calculate_quorum_reliability(self, nodes: List[BFTNode], fault_tolerance: int) -> float:
+    def _calculate_quorum_reliability(self, nodes: list[BFTNode], fault_tolerance: int) -> float:
         """Calculate overall quorum reliability considering Byzantine faults"""
         # Simplified reliability calculation
         # In practice, would use more sophisticated Byzantine fault analysis
@@ -328,26 +345,26 @@ class BFTEcoScorer:
 
         return min(1.0, quorum_reliability + distribution_bonus)
 
-    def _calculate_eco_efficiency(self, reliability: float, carbon_gco2_hour: float,
-                                 latency_ms: float) -> float:
+    def _calculate_eco_efficiency(
+        self, reliability: float, carbon_gco2_hour: float, latency_ms: float
+    ) -> float:
         """Calculate eco-efficiency score balancing performance and environmental impact"""
         # Normalize components
         reliability_norm = reliability  # Already 0-1
         carbon_norm = 1.0 / (1.0 + carbon_gco2_hour / 100)  # Lower carbon = higher score
-        latency_norm = 1.0 / (1.0 + latency_ms / 1000)      # Lower latency = higher score
+        latency_norm = 1.0 / (1.0 + latency_ms / 1000)  # Lower latency = higher score
 
         # Weighted eco-efficiency score
-        eco_efficiency = (
-            reliability_norm * 0.5 +
-            carbon_norm * 0.3 +
-            latency_norm * 0.2
-        )
+        eco_efficiency = reliability_norm * 0.5 + carbon_norm * 0.3 + latency_norm * 0.2
 
         return eco_efficiency
 
-    def _filter_viable_candidates(self, candidates: List[EcoQuorumCandidate],
-                                 max_latency_ms: float,
-                                 max_carbon_gco2_hour: float) -> List[EcoQuorumCandidate]:
+    def _filter_viable_candidates(
+        self,
+        candidates: list[EcoQuorumCandidate],
+        max_latency_ms: float,
+        max_carbon_gco2_hour: float,
+    ) -> list[EcoQuorumCandidate]:
         """Filter candidates by performance and environmental constraints"""
         viable = []
         for candidate in candidates:
@@ -381,10 +398,10 @@ class BFTEcoScorer:
 
         # Weighted composite score
         composite_score = (
-            reliability_score * self.reliability_weight +
-            carbon_score * self.carbon_weight +
-            latency_score * self.latency_weight +
-            distribution_score * self.distribution_weight
+            reliability_score * self.reliability_weight
+            + carbon_score * self.carbon_weight
+            + latency_score * self.latency_weight
+            + distribution_score * self.distribution_weight
         )
 
         return composite_score
@@ -406,7 +423,7 @@ class BFTEcoScorer:
             if node not in quorum.nodes:
                 node.role = QuorumRole.STANDBY
 
-    async def execute_consensus(self, proposal: Dict[str, Any]) -> QuorumDecision:
+    async def execute_consensus(self, proposal: dict[str, Any]) -> QuorumDecision:
         """Execute BFT consensus with carbon tracking"""
         if not self.active_quorum:
             raise ValueError("No active quorum configured")
@@ -420,8 +437,12 @@ class BFTEcoScorer:
 
         try:
             # Simulate consensus protocol
-            proposer = next(node for node in self.active_quorum.nodes if node.role == QuorumRole.PROPOSER)
-            validators = [node for node in self.active_quorum.nodes if node.role == QuorumRole.VALIDATOR]
+            proposer = next(
+                node for node in self.active_quorum.nodes if node.role == QuorumRole.PROPOSER
+            )
+            validators = [
+                node for node in self.active_quorum.nodes if node.role == QuorumRole.VALIDATOR
+            ]
 
             # Simulate voting
             votes_for = 0
@@ -446,14 +467,12 @@ class BFTEcoScorer:
             consensus_time_ms = (time.time() - start_time) * 1000
 
             # Carbon cost based on consensus time and quorum power consumption
-            carbon_cost_gco2 = (
-                self.active_quorum.carbon_footprint_gco2_hour *
-                (consensus_time_ms / 3600000)  # Convert ms to hours
-            )
+            carbon_cost_gco2 = self.active_quorum.carbon_footprint_gco2_hour * (
+                consensus_time_ms / 3600000
+            )  # Convert ms to hours
 
-            power_cost_watts_hour = (
-                self.active_quorum.power_consumption_watts *
-                (consensus_time_ms / 3600000)
+            power_cost_watts_hour = self.active_quorum.power_consumption_watts * (
+                consensus_time_ms / 3600000
             )
 
             if consensus_achieved:
@@ -472,14 +491,16 @@ class BFTEcoScorer:
                 votes_against=votes_against,
                 carbon_cost_gco2=carbon_cost_gco2,
                 power_cost_watts_hour=power_cost_watts_hour,
-                reliability_confidence=self.active_quorum.reliability_score
+                reliability_confidence=self.active_quorum.reliability_score,
             )
 
-            logger.info(f"Consensus result: {decision_id}, "
-                       f"achieved={consensus_achieved}, "
-                       f"votes={votes_for}/{votes_for + votes_against}, "
-                       f"time={consensus_time_ms:.1f}ms, "
-                       f"carbon={carbon_cost_gco2:.3f}gCO2")
+            logger.info(
+                f"Consensus result: {decision_id}, "
+                f"achieved={consensus_achieved}, "
+                f"votes={votes_for}/{votes_for + votes_against}, "
+                f"time={consensus_time_ms:.1f}ms, "
+                f"carbon={carbon_cost_gco2:.3f}gCO2"
+            )
 
             return decision
 
@@ -487,7 +508,7 @@ class BFTEcoScorer:
             logger.error(f"Consensus execution failed: {decision_id}, error={e}")
             raise
 
-    def get_carbon_report(self, hours: int = 24) -> Dict[str, Any]:
+    def get_carbon_report(self, hours: int = 24) -> dict[str, Any]:
         """Generate carbon footprint report"""
         # Simulate hourly data
         hourly_carbon = self.total_carbon_gco2 / max(hours, 1)
@@ -497,18 +518,17 @@ class BFTEcoScorer:
             "total_carbon_gco2": self.total_carbon_gco2,
             "average_hourly_carbon_gco2": hourly_carbon,
             "active_quorum_carbon_rate": (
-                self.active_quorum.carbon_footprint_gco2_hour
-                if self.active_quorum else 0
+                self.active_quorum.carbon_footprint_gco2_hour if self.active_quorum else 0
             ),
             "carbon_efficiency_gco2_per_consensus": (
                 self.total_carbon_gco2 / max(self.successful_consensus, 1)
             ),
             "estimated_annual_carbon_kg": hourly_carbon * 24 * 365 / 1000,
             "carbon_reduction_vs_baseline_pct": 15.2,  # Simulate 15% reduction
-            "eco_optimization_enabled": True
+            "eco_optimization_enabled": True,
         }
 
-    def get_performance_metrics(self) -> Dict[str, Any]:
+    def get_performance_metrics(self) -> dict[str, Any]:
         """Get BFT-Eco performance metrics"""
         success_rate = self.successful_consensus / max(self.consensus_attempts, 1)
         avg_selection_time = self.total_selection_time / max(self.quorum_selections, 1)
@@ -522,21 +542,37 @@ class BFTEcoScorer:
             "active_nodes": len([n for n in self.nodes.values() if n.active]),
             "total_nodes": len(self.nodes),
             "active_quorum_size": len(self.active_quorum.nodes) if self.active_quorum else 0,
-            "active_fault_tolerance": self.active_quorum.fault_tolerance if self.active_quorum else 0,
-            "sla_compliance_pct": 100.0 if avg_selection_time < 0.1 else 0.0  # <100ms SLA
+            "active_fault_tolerance": (
+                self.active_quorum.fault_tolerance if self.active_quorum else 0
+            ),
+            "sla_compliance_pct": 100.0 if avg_selection_time < 0.1 else 0.0,  # <100ms SLA
         }
 
 
 def create_demo_scorer() -> BFTEcoScorer:
     """Create demo BFT-Eco scorer with simulated nodes"""
     demo_nodes = [
-        BFTNode("node-nordic-1", "nordic", RegionCarbonIntensity.NORDIC.value, 4, 150.0, 45.0, 0.98),
-        BFTNode("node-nordic-2", "nordic", RegionCarbonIntensity.NORDIC.value, 4, 150.0, 50.0, 0.97),
-        BFTNode("node-france-1", "france", RegionCarbonIntensity.FRANCE.value, 8, 250.0, 65.0, 0.96),
-        BFTNode("node-canada-1", "canada", RegionCarbonIntensity.CANADA.value, 8, 280.0, 80.0, 0.95),
-        BFTNode("node-uswest-1", "us-west", RegionCarbonIntensity.US_WEST.value, 16, 400.0, 40.0, 0.94),
-        BFTNode("node-uswest-2", "us-west", RegionCarbonIntensity.US_WEST.value, 16, 420.0, 42.0, 0.93),
-        BFTNode("node-useast-1", "us-east", RegionCarbonIntensity.US_EAST.value, 16, 450.0, 85.0, 0.92)
+        BFTNode(
+            "node-nordic-1", "nordic", RegionCarbonIntensity.NORDIC.value, 4, 150.0, 45.0, 0.98
+        ),
+        BFTNode(
+            "node-nordic-2", "nordic", RegionCarbonIntensity.NORDIC.value, 4, 150.0, 50.0, 0.97
+        ),
+        BFTNode(
+            "node-france-1", "france", RegionCarbonIntensity.FRANCE.value, 8, 250.0, 65.0, 0.96
+        ),
+        BFTNode(
+            "node-canada-1", "canada", RegionCarbonIntensity.CANADA.value, 8, 280.0, 80.0, 0.95
+        ),
+        BFTNode(
+            "node-uswest-1", "us-west", RegionCarbonIntensity.US_WEST.value, 16, 400.0, 40.0, 0.94
+        ),
+        BFTNode(
+            "node-uswest-2", "us-west", RegionCarbonIntensity.US_WEST.value, 16, 420.0, 42.0, 0.93
+        ),
+        BFTNode(
+            "node-useast-1", "us-east", RegionCarbonIntensity.US_EAST.value, 16, 450.0, 85.0, 0.92
+        ),
     ]
 
     return BFTEcoScorer(demo_nodes, min_fault_tolerance=1)
@@ -551,8 +587,7 @@ if __name__ == "__main__":
 
         # Select optimal quorum
         quorum = await scorer.select_optimal_quorum(
-            required_consensus_time_ms=800,
-            carbon_budget_gco2_hour=75
+            required_consensus_time_ms=800, carbon_budget_gco2_hour=75
         )
 
         print(f"Selected Quorum: {quorum.candidate_id}")
@@ -566,15 +601,17 @@ if __name__ == "__main__":
         for i in range(3):
             proposal = {"operation": f"transfer_{i}", "amount": 1000 + i * 100}
             decision = await scorer.execute_consensus(proposal)
-            print(f"Consensus {i+1}: {decision.consensus_achieved}, "
-                  f"time={decision.consensus_time_ms:.1f}ms, "
-                  f"carbon={decision.carbon_cost_gco2:.4f}gCO2")
+            print(
+                f"Consensus {i+1}: {decision.consensus_achieved}, "
+                f"time={decision.consensus_time_ms:.1f}ms, "
+                f"carbon={decision.carbon_cost_gco2:.4f}gCO2"
+            )
 
         # Generate reports
         carbon_report = scorer.get_carbon_report(24)
         performance = scorer.get_performance_metrics()
 
-        print(f"\nCarbon Report:")
+        print("\nCarbon Report:")
         print(f"  Total carbon: {carbon_report['total_carbon_gco2']:.3f} gCO2")
         print(f"  Hourly rate: {carbon_report['average_hourly_carbon_gco2']:.3f} gCO2/h")
         print(f"  Annual estimate: {carbon_report['estimated_annual_carbon_kg']:.1f} kg CO2")

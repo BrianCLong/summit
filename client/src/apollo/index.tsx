@@ -1,10 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { ApolloProvider, ApolloClient, NormalizedCacheObject } from '@apollo/client';
+import {
+  ApolloProvider,
+  ApolloClient,
+  NormalizedCacheObject,
+} from '@apollo/client';
 import { CircularProgress, Box } from '@mui/material';
 import { createApolloClient } from './createApolloClient';
 
 export function WithApollo({ children }: { children: React.ReactNode }) {
-  const [client, setClient] = useState<ApolloClient<NormalizedCacheObject> | null>(null);
+  const [client, setClient] =
+    useState<ApolloClient<NormalizedCacheObject> | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
@@ -22,7 +27,12 @@ export function WithApollo({ children }: { children: React.ReactNode }) {
   if (!client) {
     return (
       <Box
-        sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          height: '100vh',
+        }}
       >
         <CircularProgress />
       </Box>

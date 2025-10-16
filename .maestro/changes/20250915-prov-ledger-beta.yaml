@@ -2,23 +2,23 @@ area: prov-ledger
 intent: release
 release_tag: v0.1.0-rc1
 window: { start: 2025-09-15, end: 2025-09-29 }
-objective: "Prov-Ledger beta with verifiable export manifests + external verifier CLI."
+objective: 'Prov-Ledger beta with verifiable export manifests + external verifier CLI.'
 work_items:
   - id: PL-1
-    story: "Hash-tree export manifest incl. transform chain; CLI verifier"
+    story: 'Hash-tree export manifest incl. transform chain; CLI verifier'
     acceptance:
-      - "CLI verifies export bundle; non-zero exit on tamper"
-      - "Manifest covers input hashes, transforms, signer, timestamp"
+      - 'CLI verifies export bundle; non-zero exit on tamper'
+      - 'Manifest covers input hashes, transforms, signer, timestamp'
   - id: PL-2
-    story: "REST: /export/prov, /claims/* under auth; /healthz, /readyz, /metrics"
+    story: 'REST: /export/prov, /claims/* under auth; /healthz, /readyz, /metrics'
     acceptance:
-      - "AuthN/Z enforced; metrics expose qps, latency, errors"
+      - 'AuthN/Z enforced; metrics expose qps, latency, errors'
   - id: PL-3
-    story: "apps/web export flow attaches manifest; UI shows verification result"
+    story: 'apps/web export flow attaches manifest; UI shows verification result'
     acceptance:
-      - "Export flow blocks on failed verification"
+      - 'Export flow blocks on failed verification'
 definition_of_done:
-  - "Unit+contract tests; golden sample passes verifier"
-  - "Docs: README + examples; OpenAPI updated"
-owners: { DRI: "prov-ledger", support: ["web-ux","docs"] }
-metrics: ["exports_verified_pct = 100"]
+  - 'Unit+contract tests; golden sample passes verifier'
+  - 'Docs: README + examples; OpenAPI updated'
+owners: { DRI: 'prov-ledger', support: ['web-ux', 'docs'] }
+metrics: ['exports_verified_pct = 100']

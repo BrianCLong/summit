@@ -3,11 +3,11 @@ image:
   tag: latest
 
 site:
-  name: "edge-site"
-  region: "us-east-1"
-  residency: "US"
-  hubUrl: "https://hub.example.com"
-  bandwidth: "med"
+  name: 'edge-site'
+  region: 'us-east-1'
+  residency: 'US'
+  hubUrl: 'https://hub.example.com'
+  bandwidth: 'med'
 
 env: []
 

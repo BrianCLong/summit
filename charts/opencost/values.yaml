@@ -1,6 +1,6 @@
 opencost:
   exporter:
-    defaultClusterId: "companyos-eks"
+    defaultClusterId: 'companyos-eks'
   ingress:
     enabled: true
     annotations:

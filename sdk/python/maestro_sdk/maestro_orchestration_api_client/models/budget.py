@@ -25,7 +25,7 @@ class Budget:
 
     tenant: str
     monthly_usd: float
-    current_spend: Union[Unset, float] = UNSET
+    current_spend: Unset | float = UNSET
     policy: Union[Unset, "BudgetPolicy"] = UNSET
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
@@ -36,7 +36,7 @@ class Budget:
 
         current_spend = self.current_spend
 
-        policy: Union[Unset, dict[str, Any]] = UNSET
+        policy: Unset | dict[str, Any] = UNSET
         if not isinstance(self.policy, Unset):
             policy = self.policy.to_dict()
 
@@ -67,7 +67,7 @@ class Budget:
         current_spend = d.pop("currentSpend", UNSET)
 
         _policy = d.pop("policy", UNSET)
-        policy: Union[Unset, BudgetPolicy]
+        policy: Unset | BudgetPolicy
         if isinstance(_policy, Unset):
             policy = UNSET
         else:

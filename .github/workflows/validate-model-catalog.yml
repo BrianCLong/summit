@@ -48,4 +48,3 @@ jobs:
         with:
           name: catalog-md
           path: model-catalog/generated/catalog.md
-

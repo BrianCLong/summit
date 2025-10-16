@@ -149,12 +149,16 @@ export class SLOManager {
   ) {
     this.endpoint = options.endpoint || '/api/maestro/v1/slo';
     this.grafanaUrl =
-      options.grafanaUrl || process.env.GRAFANA_URL || 'https://grafana.intelgraph.io';
+      options.grafanaUrl ||
+      process.env.GRAFANA_URL ||
+      'https://grafana.intelgraph.io';
     this.grafanaToken = options.grafanaToken || process.env.GRAFANA_TOKEN || '';
   }
 
   // SLO CRUD operations
-  async createSLO(slo: Omit<SLO, 'id' | 'createdAt' | 'updatedAt' | 'status'>): Promise<SLO> {
+  async createSLO(
+    slo: Omit<SLO, 'id' | 'createdAt' | 'updatedAt' | 'status'>,
+  ): Promise<SLO> {
     const response = await fetch(`${this.endpoint}/slos`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -168,7 +172,11 @@ export class SLOManager {
     return response.json();
   }
 
-  async getSLOs(filters?: { service?: string; status?: string; limit?: number }): Promise<SLO[]> {
+  async getSLOs(filters?: {
+    service?: string;
+    status?: string;
+    limit?: number;
+  }): Promise<SLO[]> {
     const params = new URLSearchParams();
     if (filters?.service) params.append('service', filters.service);
     if (filters?.status) params.append('status', filters.status);
@@ -259,13 +267,16 @@ export class SLOManager {
     const consumedPercentage = total > 0 ? (consumed / total) * 100 : 0;
 
     // Calculate burn rate (simplified)
-    const burnRate = consumed > 0 ? consumed / (windowMs / (1000 * 60 * 60)) : 0; // errors per hour
+    const burnRate =
+      consumed > 0 ? consumed / (windowMs / (1000 * 60 * 60)) : 0; // errors per hour
 
     // Project exhaustion date
     let exhaustionDate: string | undefined;
     if (burnRate > 0 && remaining > 0) {
       const hoursToExhaustion = remaining / burnRate;
-      exhaustionDate = new Date(Date.now() + hoursToExhaustion * 60 * 60 * 1000).toISOString();
+      exhaustionDate = new Date(
+        Date.now() + hoursToExhaustion * 60 * 60 * 1000,
+      ).toISOString();
     }
 
     const isHealthy = consumedPercentage < 80; // Healthy if less than 80% consumed
@@ -317,7 +328,9 @@ export class SLOManager {
     });
 
     if (!response.ok) {
-      throw new Error(`Failed to create Grafana dashboard: ${response.statusText}`);
+      throw new Error(
+        `Failed to create Grafana dashboard: ${response.statusText}`,
+      );
     }
 
     const result = await response.json();
@@ -596,9 +609,14 @@ export class SLOManager {
       }),
     );
 
-    const compliantSLOs = reports.filter((r) => r.compliance >= r.slo.objective).length;
-    const atRiskSLOs = reports.filter((r) => r.errorBudget.consumedPercentage > 80).length;
-    const averageCompliance = reports.reduce((sum, r) => sum + r.compliance, 0) / reports.length;
+    const compliantSLOs = reports.filter(
+      (r) => r.compliance >= r.slo.objective,
+    ).length;
+    const atRiskSLOs = reports.filter(
+      (r) => r.errorBudget.consumedPercentage > 80,
+    ).length;
+    const averageCompliance =
+      reports.reduce((sum, r) => sum + r.compliance, 0) / reports.length;
 
     return {
       summary: {
@@ -617,12 +635,17 @@ export class SLOManager {
     if (datapoints.length < 2) return 'stable';
 
     const recent = datapoints.slice(-Math.min(10, datapoints.length));
-    const sum = recent.reduce((acc, [, value], idx) => acc + value * (idx + 1), 0);
+    const sum = recent.reduce(
+      (acc, [, value], idx) => acc + value * (idx + 1),
+      0,
+    );
     const weightedSum = recent.reduce((acc, _value, idx) => acc + (idx + 1), 0);
     const weightedAvg = sum / weightedSum;
 
     const earlierAvg =
-      recent.slice(0, Math.floor(recent.length / 2)).reduce((acc, [, value]) => acc + value, 0) /
+      recent
+        .slice(0, Math.floor(recent.length / 2))
+        .reduce((acc, [, value]) => acc + value, 0) /
       Math.floor(recent.length / 2);
 
     const diff = weightedAvg - earlierAvg;
@@ -641,41 +664,52 @@ export const useSLO = () => {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
-  const fetchSLOs = React.useCallback(async (filters?: { service?: string; status?: string; limit?: number }) => {
-    setLoading(true);
-    setError(null);
+  const fetchSLOs = React.useCallback(
+    async (filters?: { service?: string; status?: string; limit?: number }) => {
+      setLoading(true);
+      setError(null);
 
-    try {
-      const fetchedSLOs = await sloManager.getSLOs(filters);
-      setSLOs(fetchedSLOs);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch SLOs');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+      try {
+        const fetchedSLOs = await sloManager.getSLOs(filters);
+        setSLOs(fetchedSLOs);
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch SLOs');
+      } finally {
+        setLoading(false);
+      }
+    },
+    [],
+  );
 
-  const createSLO = React.useCallback(async (sloData: Omit<SLO, 'id' | 'createdAt' | 'updatedAt' | 'status'>) => {
-    try {
-      const newSLO = await sloManager.createSLO(sloData);
-      setSLOs((prev) => [...prev, newSLO]);
-      return newSLO;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to create SLO');
-      throw err;
-    }
-  }, []);
+  const createSLO = React.useCallback(
+    async (sloData: Omit<SLO, 'id' | 'createdAt' | 'updatedAt' | 'status'>) => {
+      try {
+        const newSLO = await sloManager.createSLO(sloData);
+        setSLOs((prev) => [...prev, newSLO]);
+        return newSLO;
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to create SLO');
+        throw err;
+      }
+    },
+    [],
+  );
 
-  const updateSLO = React.useCallback(async (id: string, updates: Partial<SLO>) => {
-    try {
-      const updatedSLO = await sloManager.updateSLO(id, updates);
-      setSLOs((prev) => prev.map((slo) => (slo.id === id ? updatedSLO : slo)));
-      return updatedSLO;
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to update SLO');
-      throw err;
-    }
-  }, []);
+  const updateSLO = React.useCallback(
+    async (id: string, updates: Partial<SLO>) => {
+      try {
+        const updatedSLO = await sloManager.updateSLO(id, updates);
+        setSLOs((prev) =>
+          prev.map((slo) => (slo.id === id ? updatedSLO : slo)),
+        );
+        return updatedSLO;
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to update SLO');
+        throw err;
+      }
+    },
+    [],
+  );
 
   const deleteSLO = React.useCallback(async (id: string) => {
     try {

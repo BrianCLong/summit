@@ -69,16 +69,16 @@ jobs:
         run: |
           # Install Syft for SBOM generation
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b /usr/local/bin v1.0.1
-          
+
           # Generate SBOM for the built image
           syft ${{ steps.build.outputs.image-uri }} -o json > sbom.json
           syft ${{ steps.build.outputs.image-uri }} -o spdx-json > sbom.spdx.json
-          
+
       - name: Security scan with Grype
         run: |
           # Install Grype for vulnerability scanning
           curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b /usr/local/bin v1.0.0
-          
+
           # Scan for vulnerabilities
           grype ${{ steps.build.outputs.image-uri }} --output json > vulnerability-report.json
           grype ${{ steps.build.outputs.image-uri }} --fail-on critical --output table
@@ -97,7 +97,7 @@ jobs:
         run: |
           # Attach SBOM as attestation
           cosign attest --yes --predicate sbom.spdx.json --type spdx ${{ steps.build.outputs.image-uri }}
-          
+
       - name: Attest vulnerability scan
         run: |
           # Create vulnerability attestation
@@ -114,7 +114,7 @@ jobs:
             "low": $(jq '[.matches[] | select(.vulnerability.severity == "Low")] | length' vulnerability-report.json)
           }
           EOF
-          
+
           cosign attest --yes --predicate vuln-predicate.json --type vuln ${{ steps.build.outputs.image-uri }}
 
       - name: Generate provenance
@@ -166,7 +166,7 @@ jobs:
             }
           }
           EOF
-          
+
           # Sign provenance
           cosign attest --yes --predicate provenance.json --type slsaprovenance ${{ steps.build.outputs.image-uri }}
 
@@ -216,7 +216,7 @@ jobs:
         run: |
           # Check if image meets security policy
           CRITICAL=$(cosign verify-attestation ${{ needs.build.outputs.image-uri }} --type vuln --output json | jq -r '.payload' | base64 -d | jq '.predicate.critical')
-          
+
           if [ "$CRITICAL" -gt "0" ]; then
             echo "❌ Policy violation: $CRITICAL critical vulnerabilities found"
             exit 1
@@ -255,7 +255,7 @@ jobs:
             sbom.json sbom.spdx.json \
             vulnerability-report.json \
             provenance.json vuln-predicate.json
-          
+
           # Generate release manifest
           cat > release-manifest.json <<EOF
           {

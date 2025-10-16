@@ -1,6 +1,7 @@
 # v24_modules/narrative_impact_model.py
 # Scores narratives by their psychological and behavioral impact
 
+
 class NarrativeImpactModel:
     def __init__(self):
         pass

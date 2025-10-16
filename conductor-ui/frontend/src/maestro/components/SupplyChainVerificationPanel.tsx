@@ -10,11 +10,9 @@ interface SupplyChainVerificationPanelProps {
   className?: string;
 }
 
-const SupplyChainVerificationPanel: React.FC<SupplyChainVerificationPanelProps> = ({
-  runId,
-  artifacts = [],
-  className = '',
-}) => {
+const SupplyChainVerificationPanel: React.FC<
+  SupplyChainVerificationPanelProps
+> = ({ runId, artifacts = [], className = '' }) => {
   const { isVerifying, results, batchVerify, generateReport, clearResults } =
     useSupplyChainVerification();
 
@@ -24,7 +22,10 @@ const SupplyChainVerificationPanel: React.FC<SupplyChainVerificationPanelProps> 
     requireSBOM: true,
     requireSLSA: true,
     minSLSALevel: 2,
-    allowedIssuers: ['https://accounts.google.com', 'https://login.microsoftonline.com'],
+    allowedIssuers: [
+      'https://accounts.google.com',
+      'https://login.microsoftonline.com',
+    ],
     maxAge: 168, // 7 days
   });
 
@@ -91,7 +92,9 @@ const SupplyChainVerificationPanel: React.FC<SupplyChainVerificationPanelProps> 
                 <span
                   className={`ml-2 ${result.cosignVerification.signatureValid ? 'text-green-600' : 'text-red-600'}`}
                 >
-                  {result.cosignVerification.signatureValid ? '✓ Valid' : '✗ Invalid'}
+                  {result.cosignVerification.signatureValid
+                    ? '✓ Valid'
+                    : '✗ Invalid'}
                 </span>
               </div>
               <div>
@@ -99,7 +102,9 @@ const SupplyChainVerificationPanel: React.FC<SupplyChainVerificationPanelProps> 
                 <span
                   className={`ml-2 ${result.cosignVerification.certificateValid ? 'text-green-600' : 'text-red-600'}`}
                 >
-                  {result.cosignVerification.certificateValid ? '✓ Valid' : '✗ Invalid'}
+                  {result.cosignVerification.certificateValid
+                    ? '✓ Valid'
+                    : '✗ Invalid'}
                 </span>
               </div>
               <div>
@@ -107,7 +112,9 @@ const SupplyChainVerificationPanel: React.FC<SupplyChainVerificationPanelProps> 
                 <span
                   className={`ml-2 ${result.cosignVerification.rekorEntryValid ? 'text-green-600' : 'text-red-600'}`}
                 >
-                  {result.cosignVerification.rekorEntryValid ? '✓ Valid' : '✗ Invalid'}
+                  {result.cosignVerification.rekorEntryValid
+                    ? '✓ Valid'
+                    : '✗ Invalid'}
                 </span>
               </div>
               <div>
@@ -123,7 +130,9 @@ const SupplyChainVerificationPanel: React.FC<SupplyChainVerificationPanelProps> 
         {/* SBOM Status */}
         <div className="bg-white border rounded-lg p-4">
           <div className="flex items-center justify-between mb-2">
-            <h4 className="font-medium text-gray-900">SBOM (Software Bill of Materials)</h4>
+            <h4 className="font-medium text-gray-900">
+              SBOM (Software Bill of Materials)
+            </h4>
             <span
               className={`px-2 py-1 rounded-full text-xs font-medium ${
                 result.sbomVerification?.valid
@@ -145,7 +154,9 @@ const SupplyChainVerificationPanel: React.FC<SupplyChainVerificationPanelProps> 
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
                 <span className="text-gray-500">Components:</span>
-                <span className="font-medium">{result.sbomVerification.componentsCount}</span>
+                <span className="font-medium">
+                  {result.sbomVerification.componentsCount}
+                </span>
               </div>
 
               {result.sbomVerification.vulnerabilities &&
@@ -153,17 +164,26 @@ const SupplyChainVerificationPanel: React.FC<SupplyChainVerificationPanelProps> 
                   <div>
                     <span className="text-gray-500">Vulnerabilities:</span>
                     <div className="mt-1 space-y-1">
-                      {result.sbomVerification.vulnerabilities.slice(0, 5).map((vuln, idx) => (
-                        <div key={idx} className="flex items-center justify-between text-xs">
-                          <span className="font-mono">{vuln.id}</span>
-                          <span className={`px-2 py-1 rounded ${getSeverityColor(vuln.severity)}`}>
-                            {vuln.severity}
-                          </span>
-                        </div>
-                      ))}
+                      {result.sbomVerification.vulnerabilities
+                        .slice(0, 5)
+                        .map((vuln, idx) => (
+                          <div
+                            key={idx}
+                            className="flex items-center justify-between text-xs"
+                          >
+                            <span className="font-mono">{vuln.id}</span>
+                            <span
+                              className={`px-2 py-1 rounded ${getSeverityColor(vuln.severity)}`}
+                            >
+                              {vuln.severity}
+                            </span>
+                          </div>
+                        ))}
                       {result.sbomVerification.vulnerabilities.length > 5 && (
                         <div className="text-xs text-gray-500">
-                          ...and {result.sbomVerification.vulnerabilities.length - 5} more
+                          ...and{' '}
+                          {result.sbomVerification.vulnerabilities.length - 5}{' '}
+                          more
                         </div>
                       )}
                     </div>
@@ -226,7 +246,9 @@ const SupplyChainVerificationPanel: React.FC<SupplyChainVerificationPanelProps> 
 
             {result.errors.length > 0 && (
               <div className="mb-2">
-                <h5 className="text-sm font-medium text-red-600 mb-1">Errors:</h5>
+                <h5 className="text-sm font-medium text-red-600 mb-1">
+                  Errors:
+                </h5>
                 <ul className="text-xs text-red-600 space-y-1">
                   {result.errors.map((error, idx) => (
                     <li key={idx}>• {error}</li>
@@ -237,7 +259,9 @@ const SupplyChainVerificationPanel: React.FC<SupplyChainVerificationPanelProps> 
 
             {result.warnings.length > 0 && (
               <div>
-                <h5 className="text-sm font-medium text-yellow-600 mb-1">Warnings:</h5>
+                <h5 className="text-sm font-medium text-yellow-600 mb-1">
+                  Warnings:
+                </h5>
                 <ul className="text-xs text-yellow-600 space-y-1">
                   {result.warnings.map((warning, idx) => (
                     <li key={idx}>• {warning}</li>
@@ -257,7 +281,9 @@ const SupplyChainVerificationPanel: React.FC<SupplyChainVerificationPanelProps> 
       <div className="bg-white border-b px-6 py-4">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-gray-900">Supply Chain Verification</h3>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Supply Chain Verification
+            </h3>
             <p className="text-sm text-gray-600">
               Cosign signatures, SBOM analysis, and SLSA provenance verification
             </p>
@@ -368,19 +394,27 @@ const SupplyChainVerificationPanel: React.FC<SupplyChainVerificationPanelProps> 
         <div className="bg-white border-b px-6 py-4">
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
             <div className="text-center">
-              <div className="text-2xl font-bold text-gray-900">{reportData.summary.total}</div>
+              <div className="text-2xl font-bold text-gray-900">
+                {reportData.summary.total}
+              </div>
               <div className="text-xs text-gray-500">Total Artifacts</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-600">{reportData.summary.verified}</div>
+              <div className="text-2xl font-bold text-green-600">
+                {reportData.summary.verified}
+              </div>
               <div className="text-xs text-gray-500">Verified</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-red-600">{reportData.summary.failed}</div>
+              <div className="text-2xl font-bold text-red-600">
+                {reportData.summary.failed}
+              </div>
               <div className="text-xs text-gray-500">Failed</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-600">{reportData.summary.withSBOM}</div>
+              <div className="text-2xl font-bold text-blue-600">
+                {reportData.summary.withSBOM}
+              </div>
               <div className="text-xs text-gray-500">With SBOM</div>
             </div>
             <div className="text-center">
@@ -418,7 +452,8 @@ const SupplyChainVerificationPanel: React.FC<SupplyChainVerificationPanelProps> 
             </svg>
             <p>No artifacts to verify for this run.</p>
             <p className="text-sm mt-1">
-              Supply chain verification will appear here when artifacts are available.
+              Supply chain verification will appear here when artifacts are
+              available.
             </p>
           </div>
         ) : (
@@ -445,17 +480,22 @@ const SupplyChainVerificationPanel: React.FC<SupplyChainVerificationPanelProps> 
                     <button
                       onClick={() =>
                         setSelectedArtifact(
-                          selectedArtifact === result.artifact ? null : result.artifact,
+                          selectedArtifact === result.artifact
+                            ? null
+                            : result.artifact,
                         )
                       }
                       className="text-blue-600 hover:text-blue-800 text-sm font-medium"
                     >
-                      {selectedArtifact === result.artifact ? 'Hide Details' : 'Show Details'}
+                      {selectedArtifact === result.artifact
+                        ? 'Hide Details'
+                        : 'Show Details'}
                     </button>
                   </div>
                 </div>
 
-                {selectedArtifact === result.artifact && renderVerificationStatus(result)}
+                {selectedArtifact === result.artifact &&
+                  renderVerificationStatus(result)}
               </div>
             ))}
           </div>
@@ -485,7 +525,9 @@ const SupplyChainVerificationPanel: React.FC<SupplyChainVerificationPanelProps> 
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
               ></path>
             </svg>
-            <p className="text-sm text-gray-600">Verifying supply chain integrity...</p>
+            <p className="text-sm text-gray-600">
+              Verifying supply chain integrity...
+            </p>
           </div>
         </div>
       )}

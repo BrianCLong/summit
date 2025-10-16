@@ -1,4 +1,10 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
 import toast from 'react-hot-toast';
 
 interface OfflineContextType {
@@ -83,7 +89,10 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
         setConnectionType(connection?.effectiveType || null);
 
         // Warn about slow connections
-        if (connection?.effectiveType === 'slow-2g' || connection?.effectiveType === '2g') {
+        if (
+          connection?.effectiveType === 'slow-2g' ||
+          connection?.effectiveType === '2g'
+        ) {
           toast('Slow connection detected', {
             icon: '🐌',
             duration: 4000,
@@ -96,7 +105,10 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
     window.addEventListener('offline', handleOffline);
 
     if ('connection' in navigator) {
-      (navigator as any).connection?.addEventListener('change', handleConnectionChange);
+      (navigator as any).connection?.addEventListener(
+        'change',
+        handleConnectionChange,
+      );
     }
 
     return () => {
@@ -104,7 +116,10 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
       window.removeEventListener('offline', handleOffline);
 
       if ('connection' in navigator) {
-        (navigator as any).connection?.removeEventListener('change', handleConnectionChange);
+        (navigator as any).connection?.removeEventListener(
+          'change',
+          handleConnectionChange,
+        );
       }
     };
   }, [syncQueue.length]);
@@ -114,7 +129,9 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
     localStorage.setItem('sync_queue', JSON.stringify(syncQueue));
   }, [syncQueue]);
 
-  const addToSyncQueue = (item: Omit<SyncItem, 'id' | 'timestamp' | 'retryCount'>) => {
+  const addToSyncQueue = (
+    item: Omit<SyncItem, 'id' | 'timestamp' | 'retryCount'>,
+  ) => {
     const syncItem: SyncItem = {
       ...item,
       id: `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
@@ -153,7 +170,9 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
             retryCount: item.retryCount + 1,
           });
         } else {
-          console.error(`Max retries exceeded for item ${item.id}, removing from queue`);
+          console.error(
+            `Max retries exceeded for item ${item.id}, removing from queue`,
+          );
         }
       }
     }
@@ -166,7 +185,9 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
     }
 
     if (failedItems.length > 0) {
-      console.warn(`${failedItems.length} items failed to sync and will be retried`);
+      console.warn(
+        `${failedItems.length} items failed to sync and will be retried`,
+      );
     }
   };
 
@@ -200,7 +221,9 @@ export function OfflineProvider({ children }: { children: ReactNode }) {
     clearSyncQueue,
   };
 
-  return <OfflineContext.Provider value={value}>{children}</OfflineContext.Provider>;
+  return (
+    <OfflineContext.Provider value={value}>{children}</OfflineContext.Provider>
+  );
 }
 
 export function useOffline() {

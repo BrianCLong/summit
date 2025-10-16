@@ -1,29 +1,35 @@
-import type { ResourceTemplate, ResourceMetadata } from '@modelcontextprotocol/sdk/server/mcp';
+import type {
+  ResourceTemplate,
+  ResourceMetadata,
+} from '@modelcontextprotocol/sdk/server/mcp';
 import type {
   CallToolResult,
   GetPromptResult,
   ReadResourceResult,
   ServerNotification,
   ServerRequest,
-  ToolAnnotations
+  ToolAnnotations,
 } from '@modelcontextprotocol/sdk/types';
 import type { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol';
 import type { Variables } from '@modelcontextprotocol/sdk/shared/uriTemplate';
 import type { ZodRawShape, ZodTypeAny } from 'zod';
 import type { TenantContext } from './auth.js';
 
-export type HandlerContext = RequestHandlerExtra<ServerRequest, ServerNotification> & {
+export type HandlerContext = RequestHandlerExtra<
+  ServerRequest,
+  ServerNotification
+> & {
   tenant: TenantContext;
 };
 
 export type PolicyEvaluator = (
   tenant: TenantContext,
-  payload?: unknown
+  payload?: unknown,
 ) => boolean | Promise<boolean>;
 
 export type ToolHandler = (
   args: unknown,
-  context: HandlerContext
+  context: HandlerContext,
 ) => Promise<CallToolResult> | CallToolResult;
 
 export type PromptArgsShape = Record<string, ZodTypeAny>;
@@ -31,12 +37,12 @@ export type PromptArgsShape = Record<string, ZodTypeAny>;
 export type ResourceHandler = (
   uri: URL,
   context: HandlerContext,
-  variables?: Variables
+  variables?: Variables,
 ) => Promise<ReadResourceResult> | ReadResourceResult;
 
 export type PromptHandler = (
   args: Record<string, unknown> | undefined,
-  context: HandlerContext
+  context: HandlerContext,
 ) => Promise<GetPromptResult> | GetPromptResult;
 
 export interface ToolDefinition {

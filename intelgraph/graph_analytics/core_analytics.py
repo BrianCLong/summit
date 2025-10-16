@@ -3,18 +3,19 @@
 from __future__ import annotations
 
 from collections import deque
-from typing import Any, Dict, List, MutableMapping, Optional, Set
+from collections.abc import MutableMapping
+from typing import Any
 
 
 class Graph:
     """A simple in-memory undirected graph with attribute support."""
 
     def __init__(self) -> None:
-        self.adj: Dict[Any, List[Any]] = {}
-        self.node_attrs: Dict[Any, Dict[str, Any]] = {}
-        self.edge_attrs: Dict[tuple[Any, Any], Dict[str, Any]] = {}
+        self.adj: dict[Any, list[Any]] = {}
+        self.node_attrs: dict[Any, dict[str, Any]] = {}
+        self.edge_attrs: dict[tuple[Any, Any], dict[str, Any]] = {}
 
-    def add_node(self, node: Any, attributes: Optional[Dict[str, Any]] = None) -> None:
+    def add_node(self, node: Any, attributes: dict[str, Any] | None = None) -> None:
         if node not in self.adj:
             self.adj[node] = []
         if node not in self.node_attrs:
@@ -22,20 +23,20 @@ class Graph:
         if attributes:
             self.node_attrs[node].update(attributes)
 
-    def update_node_attributes(self, node: Any, attributes: Dict[str, Any]) -> None:
+    def update_node_attributes(self, node: Any, attributes: dict[str, Any]) -> None:
         self.add_node(node)
         self.node_attrs[node].update(attributes)
 
-    def merge_node_attributes(self, node: Any, attributes: Dict[str, Any]) -> None:
+    def merge_node_attributes(self, node: Any, attributes: dict[str, Any]) -> None:
         """Merge ``attributes`` into ``node`` using a deep merge strategy."""
 
         self.add_node(node)
         self.node_attrs[node] = _merge_attribute_dicts(self.node_attrs[node], attributes)
 
-    def get_node_attributes(self, node: Any) -> Dict[str, Any]:
+    def get_node_attributes(self, node: Any) -> dict[str, Any]:
         return dict(self.node_attrs.get(node, {}))
 
-    def add_edge(self, u: Any, v: Any, attributes: Optional[Dict[str, Any]] = None) -> None:
+    def add_edge(self, u: Any, v: Any, attributes: dict[str, Any] | None = None) -> None:
         self.add_node(u)
         self.add_node(v)
         if v not in self.adj[u]:
@@ -47,13 +48,13 @@ class Graph:
             data = self.edge_attrs.setdefault(key, {})
             data.update(attributes)
 
-    def update_edge_attributes(self, u: Any, v: Any, attributes: Dict[str, Any]) -> None:
+    def update_edge_attributes(self, u: Any, v: Any, attributes: dict[str, Any]) -> None:
         self.add_edge(u, v)
         key = self._edge_key(u, v)
         data = self.edge_attrs.setdefault(key, {})
         data.update(attributes)
 
-    def merge_edge_attributes(self, u: Any, v: Any, attributes: Dict[str, Any]) -> None:
+    def merge_edge_attributes(self, u: Any, v: Any, attributes: dict[str, Any]) -> None:
         """Merge ``attributes`` into the edge ``(u, v)``."""
 
         self.add_edge(u, v)
@@ -61,10 +62,10 @@ class Graph:
         current = self.edge_attrs.setdefault(key, {})
         self.edge_attrs[key] = _merge_attribute_dicts(current, attributes)
 
-    def get_edge_attributes(self, u: Any, v: Any) -> Dict[str, Any]:
+    def get_edge_attributes(self, u: Any, v: Any) -> dict[str, Any]:
         return dict(self.edge_attrs.get(self._edge_key(u, v), {}))
 
-    def neighbors(self, node: Any) -> List[Any]:
+    def neighbors(self, node: Any) -> list[Any]:
         return list(self.adj.get(node, []))
 
     def has_node(self, node: Any) -> bool:
@@ -81,10 +82,10 @@ class Graph:
 def _merge_attribute_dicts(
     original: MutableMapping[str, Any],
     incoming: MutableMapping[str, Any],
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Merge ``incoming`` into ``original`` preserving nested structures."""
 
-    result: Dict[str, Any] = dict(original)
+    result: dict[str, Any] = dict(original)
     for key, value in incoming.items():
         if key not in result:
             result[key] = value
@@ -100,8 +101,8 @@ def _merge_attribute_values(existing: Any, incoming: Any) -> Any:
         return _merge_attribute_dicts(existing, incoming)
 
     if isinstance(existing, list) and isinstance(incoming, list):
-        seen: Set[Any] = set()
-        merged: List[Any] = []
+        seen: set[Any] = set()
+        merged: list[Any] = []
         for item in existing + incoming:
             marker = _hashable_marker(item)
             if marker in seen:
@@ -132,7 +133,7 @@ def _hashable_marker(value: Any) -> Any:
     return value
 
 
-def find_shortest_path(graph: Graph, start_node: Any, end_node: Any) -> List[Any]:
+def find_shortest_path(graph: Graph, start_node: Any, end_node: Any) -> list[Any]:
     """Find the shortest path between ``start_node`` and ``end_node``."""
 
     if start_node not in graph.adj or end_node not in graph.adj:
@@ -160,8 +161,8 @@ def find_k_shortest_paths(
     start_node: Any,
     end_node: Any,
     k: int,
-    weight_property: Optional[str] = None,
-) -> List[List[Any]]:
+    weight_property: str | None = None,
+) -> list[list[Any]]:
     """Stub for finding the ``k`` shortest paths between two nodes."""
 
     print(f"Finding {k} shortest paths from {start_node} to {end_node}")
@@ -170,35 +171,35 @@ def find_k_shortest_paths(
     return []
 
 
-def detect_communities_louvain(graph: Graph) -> Dict[str, Any]:
+def detect_communities_louvain(graph: Graph) -> dict[str, Any]:
     """Stub for detecting communities using the Louvain method."""
 
     print("Detecting communities using Louvain method")
     return {}
 
 
-def detect_communities_leiden(graph: Graph) -> Dict[str, Any]:
+def detect_communities_leiden(graph: Graph) -> dict[str, Any]:
     """Stub for detecting communities using the Leiden method."""
 
     print("Detecting communities using Leiden method")
     return {}
 
 
-def calculate_betweenness_centrality(graph: Graph) -> Dict[str, Any]:
+def calculate_betweenness_centrality(graph: Graph) -> dict[str, Any]:
     """Stub for calculating betweenness centrality."""
 
     print("Calculating betweenness centrality")
     return {}
 
 
-def calculate_eigenvector_centrality(graph: Graph) -> Dict[str, Any]:
+def calculate_eigenvector_centrality(graph: Graph) -> dict[str, Any]:
     """Stub for calculating eigenvector centrality."""
 
     print("Calculating eigenvector centrality")
     return {}
 
 
-def detect_roles_and_brokers(graph: Graph) -> Dict[str, Any]:
+def detect_roles_and_brokers(graph: Graph) -> dict[str, Any]:
     """Stub for detecting roles and brokers in a graph."""
 
     print("Detecting roles and brokers")

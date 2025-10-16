@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import json
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
-from typing import Iterable, List, Sequence
 
 import httpx
 
@@ -25,7 +25,7 @@ class PolicyClient:
         self._endpoint = endpoint.rstrip("/")
         self._timeout = timeout_seconds
 
-    async def allowed_actions(self, case_id: str, candidates: Iterable[str]) -> List[str]:
+    async def allowed_actions(self, case_id: str, candidates: Iterable[str]) -> list[str]:
         """Return the actions permitted for the given case ID."""
 
         payload = {"input": {"case_id": case_id, "actions": list(candidates)}}
@@ -74,7 +74,9 @@ class PolicyClient:
             response.raise_for_status()
 
     @staticmethod
-    def mask_actions(candidate_actions: Sequence[str], allowed_actions: Sequence[str]) -> List[bool]:
+    def mask_actions(
+        candidate_actions: Sequence[str], allowed_actions: Sequence[str]
+    ) -> list[bool]:
         """Compute a boolean mask representing policy-approved actions."""
 
         allowed_set = set(allowed_actions)

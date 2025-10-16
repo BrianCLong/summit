@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 
+
 def safe_path_join(base_dir: Path, untrusted_path: str) -> Path:
     """
     Safely joins a base directory with an untrusted path, preventing directory traversal.
@@ -14,7 +15,7 @@ def safe_path_join(base_dir: Path, untrusted_path: str) -> Path:
         raise ValueError("Absolute paths are not allowed.")
 
     # Reject paths containing null bytes
-    if '\0' in untrusted_path:
+    if "\0" in untrusted_path:
         raise ValueError("Null bytes are not allowed in path.")
 
     # Resolve the path to prevent '..' traversal

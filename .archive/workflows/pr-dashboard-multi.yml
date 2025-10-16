@@ -122,4 +122,3 @@ jobs:
                 core.info('Dashboard up-to-date.');
               }
             }
-

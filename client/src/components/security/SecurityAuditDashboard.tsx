@@ -49,7 +49,13 @@ interface ComplianceRule {
   category: string;
   conditions: {
     field: string;
-    operator: 'equals' | 'contains' | 'greater_than' | 'less_than' | 'in' | 'not_in';
+    operator:
+      | 'equals'
+      | 'contains'
+      | 'greater_than'
+      | 'less_than'
+      | 'in'
+      | 'not_in';
     value: any;
   }[];
   actions: {
@@ -111,14 +117,18 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
   onRiskAssessment,
   className = '',
 }) => {
-  const [activeView, setActiveView] = useState<'events' | 'compliance' | 'risk' | 'config'>(
-    'events',
-  );
+  const [activeView, setActiveView] = useState<
+    'events' | 'compliance' | 'risk' | 'config'
+  >('events');
   const [securityEvents, setSecurityEvents] = useState<SecurityEvent[]>([]);
   const [complianceRules, setComplianceRules] = useState<ComplianceRule[]>([]);
   const [riskAssessments, setRiskAssessments] = useState<RiskAssessment[]>([]);
-  const [auditConfig, setAuditConfig] = useState<AuditConfiguration | null>(null);
-  const [selectedEvent, setSelectedEvent] = useState<SecurityEvent | null>(null);
+  const [auditConfig, setAuditConfig] = useState<AuditConfiguration | null>(
+    null,
+  );
+  const [selectedEvent, setSelectedEvent] = useState<SecurityEvent | null>(
+    null,
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [severityFilter, setSeverityFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
@@ -138,7 +148,8 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
         userName: 'John Doe',
         userRole: 'analyst',
         sourceIP: '192.168.1.45',
-        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        userAgent:
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         resource: '/api/export/investigation',
         action: 'POST',
         outcome: 'blocked',
@@ -171,7 +182,8 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
         userName: 'Sarah Chen',
         userRole: 'investigator',
         sourceIP: '203.0.113.15',
-        userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
+        userAgent:
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36',
         resource: '/auth/login',
         action: 'POST',
         outcome: 'success',
@@ -249,7 +261,8 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
       {
         id: 'rule-001',
         name: 'GDPR Data Export Approval',
-        description: 'All exports containing PII must be approved by data protection officer',
+        description:
+          'All exports containing PII must be approved by data protection officer',
         framework: 'GDPR',
         severity: 'high',
         category: 'data_export',
@@ -262,7 +275,10 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
           },
         ],
         actions: [
-          { type: 'require_approval', parameters: { approverRole: 'dpo', timeoutMinutes: 60 } },
+          {
+            type: 'require_approval',
+            parameters: { approverRole: 'dpo', timeoutMinutes: 60 },
+          },
           { type: 'log', parameters: { level: 'info' } },
         ],
         isActive: true,
@@ -272,13 +288,18 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
       {
         id: 'rule-002',
         name: 'SOX Financial Data Access',
-        description: 'Access to financial investigation data requires dual approval',
+        description:
+          'Access to financial investigation data requires dual approval',
         framework: 'SOX',
         severity: 'critical',
         category: 'data_access',
         conditions: [
           { field: 'resource', operator: 'contains', value: 'financial' },
-          { field: 'details.dataClassification', operator: 'equals', value: 'restricted' },
+          {
+            field: 'details.dataClassification',
+            operator: 'equals',
+            value: 'restricted',
+          },
         ],
         actions: [
           {
@@ -287,7 +308,10 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
           },
           {
             type: 'alert',
-            parameters: { channel: 'email', recipients: ['compliance@company.com'] },
+            parameters: {
+              channel: 'email',
+              recipients: ['compliance@company.com'],
+            },
           },
         ],
         isActive: true,
@@ -300,9 +324,14 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
         framework: 'Custom',
         severity: 'high',
         category: 'system',
-        conditions: [{ field: 'details.riskScore', operator: 'greater_than', value: 80 }],
+        conditions: [
+          { field: 'details.riskScore', operator: 'greater_than', value: 80 },
+        ],
         actions: [
-          { type: 'block', parameters: { reason: 'Risk score exceeded threshold' } },
+          {
+            type: 'block',
+            parameters: { reason: 'Risk score exceeded threshold' },
+          },
           { type: 'escalate', parameters: { to: 'security_team' } },
         ],
         isActive: true,
@@ -329,7 +358,13 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
         siem: true,
       },
       complianceFrameworks: ['GDPR', 'SOX', 'ISO27001'],
-      sensitiveDataPatterns: ['SSN', 'Credit Card', 'Email', 'Phone', 'IP Address'],
+      sensitiveDataPatterns: [
+        'SSN',
+        'Credit Card',
+        'Email',
+        'Phone',
+        'IP Address',
+      ],
     }),
     [],
   );
@@ -353,7 +388,9 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
       const newEvent: SecurityEvent = {
         id: `event-${Date.now()}`,
         timestamp: new Date(),
-        severity: ['low', 'medium', 'high'][Math.floor(Math.random() * 3)] as any,
+        severity: ['low', 'medium', 'high'][
+          Math.floor(Math.random() * 3)
+        ] as any,
         category: ['authentication', 'authorization', 'data_access'][
           Math.floor(Math.random() * 3)
         ] as any,
@@ -412,10 +449,18 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
         '30d': 2592000000,
       }[timeRangeFilter] || 86400000;
 
-    filtered = filtered.filter((event) => Date.now() - event.timestamp.getTime() <= timeRange);
+    filtered = filtered.filter(
+      (event) => Date.now() - event.timestamp.getTime() <= timeRange,
+    );
 
     return filtered;
-  }, [securityEvents, searchQuery, severityFilter, categoryFilter, timeRangeFilter]);
+  }, [
+    securityEvents,
+    searchQuery,
+    severityFilter,
+    categoryFilter,
+    timeRangeFilter,
+  ]);
 
   const getSeverityColor = (severity: string) => {
     switch (severity) {
@@ -481,7 +526,13 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
     >
       {/* Header */}
       <div style={{ marginBottom: '24px' }}>
-        <h3 style={{ fontSize: '1.2rem', fontWeight: '600', marginBottom: '16px' }}>
+        <h3
+          style={{
+            fontSize: '1.2rem',
+            fontWeight: '600',
+            marginBottom: '16px',
+          }}
+        >
           🔒 Security & Audit Dashboard
         </h3>
 
@@ -494,9 +545,21 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
           }}
         >
           {[
-            { key: 'events', label: '🚨 Security Events', count: filteredEvents.length },
-            { key: 'compliance', label: '📋 Compliance Rules', count: complianceRules.length },
-            { key: 'risk', label: '⚖️ Risk Assessment', count: riskAssessments.length },
+            {
+              key: 'events',
+              label: '🚨 Security Events',
+              count: filteredEvents.length,
+            },
+            {
+              key: 'compliance',
+              label: '📋 Compliance Rules',
+              count: complianceRules.length,
+            },
+            {
+              key: 'risk',
+              label: '⚖️ Risk Assessment',
+              count: riskAssessments.length,
+            },
             { key: 'config', label: '⚙️ Configuration', count: 0 },
           ].map((tab) => (
             <button
@@ -507,7 +570,9 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
                 backgroundColor: 'transparent',
                 border: 'none',
                 borderBottom:
-                  activeView === tab.key ? '2px solid #1a73e8' : '2px solid transparent',
+                  activeView === tab.key
+                    ? '2px solid #1a73e8'
+                    : '2px solid transparent',
                 cursor: 'pointer',
                 fontSize: '14px',
                 fontWeight: activeView === tab.key ? '600' : '400',
@@ -521,7 +586,14 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
 
         {/* Filters */}
         {activeView === 'events' && (
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <div
+            style={{
+              display: 'flex',
+              gap: '12px',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+            }}
+          >
             <input
               type="text"
               placeholder="Search events, users, or resources..."
@@ -603,7 +675,11 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
           >
             {/* Events List */}
             <div
-              style={{ overflow: 'auto', border: '1px solid var(--hairline)', borderRadius: '8px' }}
+              style={{
+                overflow: 'auto',
+                border: '1px solid var(--hairline)',
+                borderRadius: '8px',
+              }}
             >
               <div
                 style={{
@@ -626,7 +702,10 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
                       padding: '16px',
                       borderBottom: '1px solid #f0f0f0',
                       cursor: 'pointer',
-                      backgroundColor: selectedEvent?.id === event.id ? '#e3f2fd' : 'transparent',
+                      backgroundColor:
+                        selectedEvent?.id === event.id
+                          ? '#e3f2fd'
+                          : 'transparent',
                       transition: 'background-color 0.2s',
                     }}
                     onMouseEnter={(e) => {
@@ -648,9 +727,19 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
                         marginBottom: '8px',
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ fontSize: '16px' }}>{getSeverityIcon(event.severity)}</span>
-                        <span style={{ fontSize: '16px' }}>{getCategoryIcon(event.category)}</span>
+                      <div
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                        }}
+                      >
+                        <span style={{ fontSize: '16px' }}>
+                          {getSeverityIcon(event.severity)}
+                        </span>
+                        <span style={{ fontSize: '16px' }}>
+                          {getCategoryIcon(event.category)}
+                        </span>
                         <div>
                           <div style={{ fontSize: '13px', fontWeight: '600' }}>
                             {event.eventType.replace(/_/g, ' ')}
@@ -674,13 +763,25 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
                         >
                           {event.severity.toUpperCase()}
                         </span>
-                        <div style={{ fontSize: '11px', color: '#666', marginTop: '2px' }}>
+                        <div
+                          style={{
+                            fontSize: '11px',
+                            color: '#666',
+                            marginTop: '2px',
+                          }}
+                        >
                           {event.timestamp.toLocaleTimeString()}
                         </div>
                       </div>
                     </div>
 
-                    <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>
+                    <div
+                      style={{
+                        fontSize: '12px',
+                        color: '#666',
+                        marginBottom: '4px',
+                      }}
+                    >
                       <strong>Resource:</strong> {event.resource}
                     </div>
 
@@ -743,7 +844,11 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
                     backgroundColor: '#f8f9fa',
                   }}
                 >
-                  <h4 style={{ margin: 0, fontSize: '14px', fontWeight: '600' }}>Event Details</h4>
+                  <h4
+                    style={{ margin: 0, fontSize: '14px', fontWeight: '600' }}
+                  >
+                    Event Details
+                  </h4>
                 </div>
 
                 <div style={{ padding: '16px' }}>
@@ -763,7 +868,13 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
                         {getCategoryIcon(selectedEvent.category)}
                       </span>
                       <div>
-                        <h5 style={{ fontSize: '16px', fontWeight: '600', margin: 0 }}>
+                        <h5
+                          style={{
+                            fontSize: '16px',
+                            fontWeight: '600',
+                            margin: 0,
+                          }}
+                        >
                           {selectedEvent.eventType.replace(/_/g, ' ')}
                         </h5>
                         <div style={{ fontSize: '12px', color: '#666' }}>
@@ -774,7 +885,13 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
                   </div>
 
                   <div style={{ marginBottom: '24px' }}>
-                    <h6 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>
+                    <h6
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        marginBottom: '8px',
+                      }}
+                    >
                       User Information
                     </h6>
                     <div style={{ fontSize: '13px', lineHeight: '1.4' }}>
@@ -792,7 +909,8 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
                       </div>
                       {selectedEvent.details.geolocation && (
                         <div>
-                          <strong>Location:</strong> {selectedEvent.details.geolocation.city},{' '}
+                          <strong>Location:</strong>{' '}
+                          {selectedEvent.details.geolocation.city},{' '}
                           {selectedEvent.details.geolocation.country}
                         </div>
                       )}
@@ -800,7 +918,13 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
                   </div>
 
                   <div style={{ marginBottom: '24px' }}>
-                    <h6 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>
+                    <h6
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        marginBottom: '8px',
+                      }}
+                    >
                       Request Details
                     </h6>
                     <div style={{ fontSize: '13px', lineHeight: '1.4' }}>
@@ -837,14 +961,21 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
                         </span>
                       </div>
                       <div>
-                        <strong>Processing Time:</strong> {selectedEvent.metadata.processingTime}ms
+                        <strong>Processing Time:</strong>{' '}
+                        {selectedEvent.metadata.processingTime}ms
                       </div>
                     </div>
                   </div>
 
                   {selectedEvent.details.riskScore && (
                     <div style={{ marginBottom: '24px' }}>
-                      <h6 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>
+                      <h6
+                        style={{
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          marginBottom: '8px',
+                        }}
+                      >
                         Risk Assessment
                       </h6>
                       <div style={{ fontSize: '13px' }}>
@@ -857,7 +988,8 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
                           }}
                         >
                           <span>
-                            <strong>Risk Score:</strong> {selectedEvent.details.riskScore}/100
+                            <strong>Risk Score:</strong>{' '}
+                            {selectedEvent.details.riskScore}/100
                           </span>
                           <div
                             style={{
@@ -887,7 +1019,8 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
                         </div>
                         {selectedEvent.details.failureReason && (
                           <div>
-                            <strong>Failure Reason:</strong> {selectedEvent.details.failureReason}
+                            <strong>Failure Reason:</strong>{' '}
+                            {selectedEvent.details.failureReason}
                           </div>
                         )}
                       </div>
@@ -895,15 +1028,23 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
                   )}
 
                   <div style={{ marginBottom: '24px' }}>
-                    <h6 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>
+                    <h6
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        marginBottom: '8px',
+                      }}
+                    >
                       Metadata
                     </h6>
                     <div style={{ fontSize: '13px', lineHeight: '1.4' }}>
                       <div>
-                        <strong>Session ID:</strong> {selectedEvent.metadata.sessionId}
+                        <strong>Session ID:</strong>{' '}
+                        {selectedEvent.metadata.sessionId}
                       </div>
                       <div>
-                        <strong>Request ID:</strong> {selectedEvent.metadata.requestId}
+                        <strong>Request ID:</strong>{' '}
+                        {selectedEvent.metadata.requestId}
                       </div>
                       <div>
                         <strong>Data Classification:</strong>
@@ -913,11 +1054,14 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
                             padding: '2px 6px',
                             borderRadius: '12px',
                             backgroundColor:
-                              selectedEvent.metadata.dataClassification === 'restricted'
+                              selectedEvent.metadata.dataClassification ===
+                              'restricted'
                                 ? '#dc3545'
-                                : selectedEvent.metadata.dataClassification === 'confidential'
+                                : selectedEvent.metadata.dataClassification ===
+                                    'confidential'
                                   ? '#fd7e14'
-                                  : selectedEvent.metadata.dataClassification === 'internal'
+                                  : selectedEvent.metadata
+                                        .dataClassification === 'internal'
                                     ? '#ffc107'
                                     : '#28a745',
                             color: 'white',
@@ -936,21 +1080,30 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
 
                   {selectedEvent.details.investigationId && (
                     <div>
-                      <h6 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '8px' }}>
+                      <h6
+                        style={{
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          marginBottom: '8px',
+                        }}
+                      >
                         Related Resources
                       </h6>
                       <div style={{ fontSize: '13px', lineHeight: '1.4' }}>
                         <div>
-                          <strong>Investigation:</strong> {selectedEvent.details.investigationId}
+                          <strong>Investigation:</strong>{' '}
+                          {selectedEvent.details.investigationId}
                         </div>
                         {selectedEvent.details.entityIds && (
                           <div>
-                            <strong>Entities:</strong> {selectedEvent.details.entityIds.join(', ')}
+                            <strong>Entities:</strong>{' '}
+                            {selectedEvent.details.entityIds.join(', ')}
                           </div>
                         )}
                         {selectedEvent.details.exportFormat && (
                           <div>
-                            <strong>Export Format:</strong> {selectedEvent.details.exportFormat}
+                            <strong>Export Format:</strong>{' '}
+                            {selectedEvent.details.exportFormat}
                           </div>
                         )}
                       </div>
@@ -964,9 +1117,19 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
 
         {activeView === 'compliance' && (
           <div
-            style={{ padding: '16px', border: '1px solid var(--hairline)', borderRadius: '8px' }}
+            style={{
+              padding: '16px',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+            }}
           >
-            <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>
+            <h4
+              style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                marginBottom: '16px',
+              }}
+            >
               Compliance Rules & Policies
             </h4>
 
@@ -989,7 +1152,13 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
                   }}
                 >
                   <div>
-                    <h5 style={{ fontSize: '14px', fontWeight: '600', margin: '0 0 4px 0' }}>
+                    <h5
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        margin: '0 0 4px 0',
+                      }}
+                    >
                       {rule.name}
                     </h5>
                     <div style={{ fontSize: '12px', color: '#666' }}>
@@ -997,7 +1166,13 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                    }}
+                  >
                     <span
                       style={{
                         fontSize: '11px',
@@ -1042,7 +1217,8 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
                   </div>
                   {rule.lastTriggered && (
                     <div>
-                      <strong>Last Triggered:</strong> {rule.lastTriggered.toLocaleString()}
+                      <strong>Last Triggered:</strong>{' '}
+                      {rule.lastTriggered.toLocaleString()}
                     </div>
                   )}
                 </div>
@@ -1061,11 +1237,24 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
             }}
           >
             <div style={{ padding: '40px' }}>
-              <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>
+              <h4
+                style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  marginBottom: '16px',
+                }}
+              >
                 🔮 Risk Assessment Engine
               </h4>
-              <p style={{ fontSize: '14px', color: '#666', marginBottom: '24px' }}>
-                AI-powered risk assessment and behavioral analysis for security events.
+              <p
+                style={{
+                  fontSize: '14px',
+                  color: '#666',
+                  marginBottom: '24px',
+                }}
+              >
+                AI-powered risk assessment and behavioral analysis for security
+                events.
               </p>
               <div
                 style={{
@@ -1077,7 +1266,13 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
                 }}
               >
                 🚧 Risk assessment dashboard coming soon - will include:
-                <ul style={{ textAlign: 'left', marginTop: '12px', marginLeft: '20px' }}>
+                <ul
+                  style={{
+                    textAlign: 'left',
+                    marginTop: '12px',
+                    marginLeft: '20px',
+                  }}
+                >
                   <li>Real-time risk scoring</li>
                   <li>Behavioral anomaly detection</li>
                   <li>Risk trend analysis</li>
@@ -1091,9 +1286,19 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
 
         {activeView === 'config' && auditConfig && (
           <div
-            style={{ padding: '16px', border: '1px solid var(--hairline)', borderRadius: '8px' }}
+            style={{
+              padding: '16px',
+              border: '1px solid var(--hairline)',
+              borderRadius: '8px',
+            }}
           >
-            <h4 style={{ fontSize: '16px', fontWeight: '600', marginBottom: '16px' }}>
+            <h4
+              style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                marginBottom: '16px',
+              }}
+            >
               Audit Configuration
             </h4>
 
@@ -1105,72 +1310,115 @@ const SecurityAuditDashboard: React.FC<SecurityAuditDashboardProps> = ({
               }}
             >
               <div>
-                <h5 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px' }}>
+                <h5
+                  style={{
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    marginBottom: '12px',
+                  }}
+                >
                   General Settings
                 </h5>
                 <div style={{ fontSize: '13px', lineHeight: '1.6' }}>
                   <div>
-                    <strong>Retention Period:</strong> {auditConfig.retentionPeriodDays} days
+                    <strong>Retention Period:</strong>{' '}
+                    {auditConfig.retentionPeriodDays} days
                   </div>
                   <div>
                     <strong>Real-time Alerts:</strong>{' '}
-                    {auditConfig.enableRealTimeAlerts ? '✅ Enabled' : '❌ Disabled'}
+                    {auditConfig.enableRealTimeAlerts
+                      ? '✅ Enabled'
+                      : '❌ Disabled'}
                   </div>
                   <div>
                     <strong>Geo-location Tracking:</strong>{' '}
-                    {auditConfig.enableGeoLocationTracking ? '✅ Enabled' : '❌ Disabled'}
+                    {auditConfig.enableGeoLocationTracking
+                      ? '✅ Enabled'
+                      : '❌ Disabled'}
                   </div>
                   <div>
                     <strong>Behavioral Analysis:</strong>{' '}
-                    {auditConfig.enableBehavioralAnalysis ? '✅ Enabled' : '❌ Disabled'}
+                    {auditConfig.enableBehavioralAnalysis
+                      ? '✅ Enabled'
+                      : '❌ Disabled'}
                   </div>
                 </div>
               </div>
 
               <div>
-                <h5 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px' }}>
+                <h5
+                  style={{
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    marginBottom: '12px',
+                  }}
+                >
                   Risk Thresholds
                 </h5>
                 <div style={{ fontSize: '13px', lineHeight: '1.6' }}>
                   <div>
-                    <strong>Approval Threshold:</strong> {auditConfig.requireApprovalThreshold}/100
+                    <strong>Approval Threshold:</strong>{' '}
+                    {auditConfig.requireApprovalThreshold}/100
                   </div>
                   <div>
-                    <strong>Block Threshold:</strong> {auditConfig.blockActionsThreshold}/100
+                    <strong>Block Threshold:</strong>{' '}
+                    {auditConfig.blockActionsThreshold}/100
                   </div>
                   <div>
                     <strong>Data Classification Required:</strong>{' '}
-                    {auditConfig.dataClassificationRequired ? '✅ Yes' : '❌ No'}
+                    {auditConfig.dataClassificationRequired
+                      ? '✅ Yes'
+                      : '❌ No'}
                   </div>
                 </div>
               </div>
 
               <div>
-                <h5 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px' }}>
+                <h5
+                  style={{
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    marginBottom: '12px',
+                  }}
+                >
                   Alerting Channels
                 </h5>
                 <div style={{ fontSize: '13px', lineHeight: '1.6' }}>
                   <div>
                     <strong>Email:</strong>{' '}
-                    {auditConfig.alertingChannels.email ? '✅ Enabled' : '❌ Disabled'}
+                    {auditConfig.alertingChannels.email
+                      ? '✅ Enabled'
+                      : '❌ Disabled'}
                   </div>
                   <div>
                     <strong>Slack:</strong>{' '}
-                    {auditConfig.alertingChannels.slack ? '✅ Enabled' : '❌ Disabled'}
+                    {auditConfig.alertingChannels.slack
+                      ? '✅ Enabled'
+                      : '❌ Disabled'}
                   </div>
                   <div>
                     <strong>Webhook:</strong>{' '}
-                    {auditConfig.alertingChannels.webhook ? '✅ Enabled' : '❌ Disabled'}
+                    {auditConfig.alertingChannels.webhook
+                      ? '✅ Enabled'
+                      : '❌ Disabled'}
                   </div>
                   <div>
                     <strong>SIEM:</strong>{' '}
-                    {auditConfig.alertingChannels.siem ? '✅ Enabled' : '❌ Disabled'}
+                    {auditConfig.alertingChannels.siem
+                      ? '✅ Enabled'
+                      : '❌ Disabled'}
                   </div>
                 </div>
               </div>
 
               <div>
-                <h5 style={{ fontSize: '14px', fontWeight: '600', marginBottom: '12px' }}>
+                <h5
+                  style={{
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    marginBottom: '12px',
+                  }}
+                >
                   Compliance Frameworks
                 </h5>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>

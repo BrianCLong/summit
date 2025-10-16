@@ -9,7 +9,9 @@ export default function DLQSimulator() {
   const [sel, setSel] = useState<string>('');
 
   useEffect(() => {
-    getDLQ({ sinceMs: 7 * 24 * 3600 * 1000 }).then((r) => setItems(r.items || []));
+    getDLQ({ sinceMs: 7 * 24 * 3600 * 1000 }).then((r) =>
+      setItems(r.items || []),
+    );
   }, []);
 
   const itemFromSel = items.find((i) => i.id === sel);
@@ -66,7 +68,11 @@ export default function DLQSimulator() {
       </div>
 
       {res && (
-        <div className="space-y-2 rounded-2xl border p-4" role="status" aria-live="polite">
+        <div
+          className="space-y-2 rounded-2xl border p-4"
+          role="status"
+          aria-live="polite"
+        >
           <div className="flex items-center gap-3">
             <span
               className={`rounded px-3 py-1 text-white ${

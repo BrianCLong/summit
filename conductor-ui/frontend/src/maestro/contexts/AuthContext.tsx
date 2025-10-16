@@ -1,4 +1,10 @@
-import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
 import { oidcService } from '../services/oidcService';
 
 interface User {
@@ -10,7 +16,13 @@ interface User {
 }
 
 export interface AuthContextType {
-  user: { id: string; email: string; roles: string[]; tenant: string; tenants?: string[] } | null;
+  user: {
+    id: string;
+    email: string;
+    roles: string[];
+    tenant: string;
+    tenants?: string[];
+  } | null;
   isAuthenticated: boolean;
   loading: boolean;
   accessToken?: string;
@@ -96,10 +108,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const timeToRefresh = expiresAt - Date.now() - refreshBuffer + jitter;
 
       if (timeToRefresh > 0) {
-        console.log(`Scheduling token refresh in ${Math.round(timeToRefresh / 1000)} seconds.`);
+        console.log(
+          `Scheduling token refresh in ${Math.round(timeToRefresh / 1000)} seconds.`,
+        );
         setRefreshTimer(setTimeout(refreshToken, timeToRefresh));
       } else {
-        console.log('Token already expired or close to expiry, refreshing now.');
+        console.log(
+          'Token already expired or close to expiry, refreshing now.',
+        );
         refreshToken();
       }
     }
@@ -119,7 +135,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     setIsAuthenticated(
-      !!user && !!accessToken && !!idToken && !!expiresAt && expiresAt > Date.now(),
+      !!user &&
+        !!accessToken &&
+        !!idToken &&
+        !!expiresAt &&
+        expiresAt > Date.now(),
     );
     scheduleTokenRefresh();
   }, [user, accessToken, idToken, expiresAt]);
@@ -156,7 +176,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             // Token expired, attempt refresh if refresh token available
             if (authData.refreshToken) {
               try {
-                const newTokens = await oidcService.refreshTokens(authData.refreshToken);
+                const newTokens = await oidcService.refreshTokens(
+                  authData.refreshToken,
+                );
                 const refreshedData = {
                   ...authData,
                   accessToken: newTokens.access_token,
@@ -287,7 +309,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     hasTenantAccess,
   };
 
-  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
+  return (
+    <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>
+  );
 };
 
 export const useAuth = (): AuthContextType => {

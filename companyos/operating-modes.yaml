@@ -14,23 +14,23 @@ modes:
           contribution explicit in the final artifact.
       establish_success_metrics:
         targets:
-          open_rate: "≥40%"
-          click_through_rate: "≥12%"
+          open_rate: '≥40%'
+          click_through_rate: '≥12%'
         requirements:
           psychological_triggers: 3
           optimization_focus: >-
             Optimize copy, formatting, and offer design to hit the target engagement metrics.
       provide_context_layers:
-        business_profile: "B2B SaaS"
-        product_price: "$200/mo subscription"
-        audience: "Overworked founders"
-        historical_baseline: "Prior campaigns achieved 20% open rates"
+        business_profile: 'B2B SaaS'
+        product_price: '$200/mo subscription'
+        audience: 'Overworked founders'
+        historical_baseline: 'Prior campaigns achieved 20% open rates'
       task_breakdown:
         steps:
-          - "Step 1: Identify pain points."
-          - "Step 2: Create hook."
-          - "Step 3: Build value."
-          - "Step 4: Soft CTA."
+          - 'Step 1: Identify pain points.'
+          - 'Step 2: Create hook.'
+          - 'Step 3: Build value.'
+          - 'Step 4: Soft CTA.'
       human_feedback_loop:
         instruction: >-
           Rate the draft on clarity, persuasion, and actionability (scale 1-10). If any
@@ -49,57 +49,57 @@ modes:
           and resist imitation. Document the processes, talent patterns, or knowledge
           graphs that give the team unfair access to value.
         key_questions:
-          - "What unique skills or processes are hard to replicate?"
-          - "Which give access to multiple markets?"
+          - 'What unique skills or processes are hard to replicate?'
+          - 'Which give access to multiple markets?'
       future_market_architect:
         instruction: >-
           Imagine the industry three to five years ahead and design options for category
           leadership. Blend technology, demographic, and regulatory signals to craft a
           roadmap of experiments and platform bets.
         key_questions:
-          - "What invisible customer needs exist?"
-          - "How will technology and demographics reshape the industry?"
+          - 'What invisible customer needs exist?'
+          - 'How will technology and demographics reshape the industry?'
       bottom_of_the_pyramid_strategist:
         instruction: >-
           Reconfigure offerings for overlooked or low-income segments without compromising
           unit economics. Explore modularization, financing, and community partnerships to
           reach scale.
         key_questions:
-          - "How to redesign offerings for overlooked segments?"
-          - "What low-margin, high-volume models unlock markets?"
+          - 'How to redesign offerings for overlooked segments?'
+          - 'What low-margin, high-volume models unlock markets?'
       strategic_intent_clarifier:
         instruction: >-
           Declare an audacious destination that stretches the organization and concentrates
           energy. Capture the obsession that should inform capital allocation, hiring, and
           narrative.
         key_questions:
-          - "What audacious but achievable position to target?"
-          - "Which obsession should drive all strategic decisions?"
+          - 'What audacious but achievable position to target?'
+          - 'Which obsession should drive all strategic decisions?'
       resource_leverage_expert:
         instruction: >-
           Inventory assets, alliances, and latent capabilities to create asymmetric reach.
           Highlight opportunities to borrow, share, or remix resources instead of owning
           them outright.
         key_questions:
-          - "How to borrow, share, or combine resources uniquely?"
-          - "What resource blind spots exist?"
+          - 'How to borrow, share, or combine resources uniquely?'
+          - 'What resource blind spots exist?'
       co_creation_facilitator:
         instruction: >-
           Replace isolated development with participatory loops. Define the platforms or
           rituals that keep customers co-designing experiences and shaping personalization
           rules in real time.
         key_questions:
-          - "How to involve customers directly?"
-          - "What platforms enable ongoing collaboration?"
-          - "How to create personalized experiences?"
+          - 'How to involve customers directly?'
+          - 'What platforms enable ongoing collaboration?'
+          - 'How to create personalized experiences?'
       industry_foresight_builder:
         instruction: >-
           Stand up an early-warning system that tracks discontinuities, adjacent plays, and
           weak signals. Translate monitored trends into scenario narratives and trigger
           playbooks.
         key_questions:
-          - "What discontinuities could reshape the landscape?"
-          - "What weak signals could become dominant trends?"
+          - 'What discontinuities could reshape the landscape?'
+          - 'What weak signals could become dominant trends?'
       mindset_check:
         instruction: >-
           Anchor every strategic sprint with Prahalad’s core tenets: defend core

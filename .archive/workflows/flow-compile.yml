@@ -4,7 +4,7 @@ permissions:
   contents: read
 on:
   pull_request:
-    paths: [".maestro/flows/*.json"]
+    paths: ['.maestro/flows/*.json']
 jobs:
   compile:
     runs-on: ubuntu-latest
@@ -13,4 +13,8 @@ jobs:
       - uses: actions/checkout@v4
       - run: node packages/maestroflow/dist/compile.js .maestro/flows > compiled
       - uses: stefanzweifel/git-auto-commit-action@v5
-        with: { commit_message: "ci: compile MaestroFlow → CI backends", file_pattern: ".github/workflows/*.yml tekton/*.yaml argo/*.yaml" }
+        with:
+          {
+            commit_message: 'ci: compile MaestroFlow → CI backends',
+            file_pattern: '.github/workflows/*.yml tekton/*.yaml argo/*.yaml',
+          }

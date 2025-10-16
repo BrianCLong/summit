@@ -1,4 +1,3 @@
-
 strategy: Rollout
 rollouts:
   analysis:
@@ -16,6 +15,6 @@ canary:
   maxUnavailable: 0
   steps:
     - setWeight: 10
-    - pause: {duration: 60}
+    - pause: { duration: 60 }
     - setWeight: 25
-    - pause: {duration: 120}
+    - pause: { duration: 120 }

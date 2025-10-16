@@ -9,7 +9,7 @@ services:
     image: adversarial-misinfo-defense:latest
     container_name: amd-platform
     ports:
-      - "8000:8000"
+      - '8000:8000'
     volumes:
       - ./data:/app/data
       - ./models:/app/models
@@ -23,7 +23,7 @@ services:
       - AMD_API_HOST=0.0.0.0
       - AMD_API_PORT=8000
       - AMD_LOG_LEVEL=INFO
-    command: ["serve", "--host", "0.0.0.0", "--port", "8000"]
+    command: ['serve', '--host', '0.0.0.0', '--port', '8000']
     restart: unless-stopped
     networks:
       - amd-network
@@ -40,7 +40,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
     ports:
-      - "5432:5432"
+      - '5432:5432'
     restart: unless-stopped
     networks:
       - amd-network
@@ -50,7 +50,7 @@ services:
     image: redis:7-alpine
     container_name: amd-redis
     ports:
-      - "6379:6379"
+      - '6379:6379'
     restart: unless-stopped
     networks:
       - amd-network
@@ -67,8 +67,8 @@ services:
       - neo4j_logs:/logs
       - ./neo4j.conf:/var/lib/neo4j/conf/neo4j.conf
     ports:
-      - "7474:7474"  # HTTP browser
-      - "7687:7687"  # Bolt protocol
+      - '7474:7474' # HTTP browser
+      - '7687:7687' # Bolt protocol
     restart: unless-stopped
     networks:
       - amd-network
@@ -81,7 +81,7 @@ services:
     image: amd-web-ui:latest
     container_name: amd-web-ui
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - AMD_API_URL=http://amd-platform:8000
       - NODE_ENV=production
@@ -99,7 +99,7 @@ services:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
       - prometheus_data:/prometheus
     ports:
-      - "9090:9090"
+      - '9090:9090'
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -119,7 +119,7 @@ services:
       - ./grafana/datasources:/etc/grafana/provisioning/datasources
       - ./grafana/dashboards:/etc/grafana/provisioning/dashboards
     ports:
-      - "3001:3000"
+      - '3001:3000'
     environment:
       - GF_SECURITY_ADMIN_PASSWORD=admin_password_secure
       - GF_USERS_ALLOW_SIGN_UP=false

@@ -13,432 +13,421 @@ metadata:
     role: alert-rules
 spec:
   groups:
+    # ====================================================================
+    # SLO BURN RATE ALERTS (Error Budget Management)
+    # ====================================================================
 
-  # ====================================================================
-  # SLO BURN RATE ALERTS (Error Budget Management)
-  # ====================================================================
+    - name: intelgraph.slo.api.burn_rate
+      interval: 30s
+      rules:
+        # Fast burn rate (2x budget in 30 minutes) - CRITICAL
+        - alert: IntelGraphAPIFastBurn
+          expr: |
+            (
+              (1 - (rate(http_requests_total{job="intelgraph-api",code!~"5.."}[30m]) / rate(http_requests_total{job="intelgraph-api"}[30m])))
+              > (2 * 0.001)  # 2x the 0.1% error budget
+            )
+          for: 2m
+          labels:
+            severity: critical
+            service: intelgraph-api
+            slo: error_rate
+            team: platform
+            pager: immediate
+          annotations:
+            summary: '🚨 IntelGraph API burning error budget too fast'
+            description: |
+              API error rate {{ $value | humanizePercentage }} is burning 2x error budget over 30 minutes.
+              Current burn rate will exhaust monthly budget in {{ div 2160 (div $value 0.001) | humanizeDuration }}.
+              IMMEDIATE ACTION REQUIRED - Consider emergency rollback.
+            runbook_url: 'https://runbooks.intelgraph.ai/slo-burn-rate'
+            dashboard_url: 'https://grafana.intelgraph.ai/d/api-overview'
 
-  - name: intelgraph.slo.api.burn_rate
-    interval: 30s
-    rules:
+        # Slow burn rate (14x budget in 6 hours) - WARNING
+        - alert: IntelGraphAPISlowBurn
+          expr: |
+            (
+              (1 - (rate(http_requests_total{job="intelgraph-api",code!~"5.."}[6h]) / rate(http_requests_total{job="intelgraph-api"}[6h])))
+              > (14 * 0.001)  # 14x the 0.1% error budget
+            )
+          for: 15m
+          labels:
+            severity: warning
+            service: intelgraph-api
+            slo: error_rate
+            team: platform
+            pager: business_hours
+          annotations:
+            summary: '⚠️ IntelGraph API burning error budget consistently'
+            description: |
+              API error rate {{ $value | humanizePercentage }} is burning 14x error budget over 6 hours.
+              At this rate, monthly budget will be exhausted in {{ div 2160 (div $value 0.001) | humanizeDuration }}.
+            runbook_url: 'https://runbooks.intelgraph.ai/slo-burn-rate'
 
-    # Fast burn rate (2x budget in 30 minutes) - CRITICAL
-    - alert: IntelGraphAPIFastBurn
-      expr: |
-        (
-          (1 - (rate(http_requests_total{job="intelgraph-api",code!~"5.."}[30m]) / rate(http_requests_total{job="intelgraph-api"}[30m])))
-          > (2 * 0.001)  # 2x the 0.1% error budget
-        )
-      for: 2m
-      labels:
-        severity: critical
-        service: intelgraph-api
-        slo: error_rate
-        team: platform
-        pager: immediate
-      annotations:
-        summary: "🚨 IntelGraph API burning error budget too fast"
-        description: |
-          API error rate {{ $value | humanizePercentage }} is burning 2x error budget over 30 minutes.
-          Current burn rate will exhaust monthly budget in {{ div 2160 (div $value 0.001) | humanizeDuration }}.
-          IMMEDIATE ACTION REQUIRED - Consider emergency rollback.
-        runbook_url: "https://runbooks.intelgraph.ai/slo-burn-rate"
-        dashboard_url: "https://grafana.intelgraph.ai/d/api-overview"
+    # ====================================================================
+    # API PERFORMANCE ALERTS
+    # ====================================================================
 
-    # Slow burn rate (14x budget in 6 hours) - WARNING
-    - alert: IntelGraphAPISlowBurn
-      expr: |
-        (
-          (1 - (rate(http_requests_total{job="intelgraph-api",code!~"5.."}[6h]) / rate(http_requests_total{job="intelgraph-api"}[6h])))
-          > (14 * 0.001)  # 14x the 0.1% error budget
-        )
-      for: 15m
-      labels:
-        severity: warning
-        service: intelgraph-api
-        slo: error_rate
-        team: platform
-        pager: business_hours
-      annotations:
-        summary: "⚠️ IntelGraph API burning error budget consistently"
-        description: |
-          API error rate {{ $value | humanizePercentage }} is burning 14x error budget over 6 hours.
-          At this rate, monthly budget will be exhausted in {{ div 2160 (div $value 0.001) | humanizeDuration }}.
-        runbook_url: "https://runbooks.intelgraph.ai/slo-burn-rate"
+    - name: intelgraph.slo.api.latency
+      interval: 30s
+      rules:
+        # API P95 latency SLO breach - CRITICAL
+        - alert: IntelGraphAPILatencyBreach
+          expr: |
+            histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="intelgraph-api"}[5m])) > 0.35
+          for: 15m
+          labels:
+            severity: critical
+            service: intelgraph-api
+            slo: latency
+            team: platform
+            pager: immediate
+          annotations:
+            summary: '🐌 IntelGraph API P95 latency exceeds SLO'
+            description: |
+              API P95 latency {{ $value | humanizeDuration }} exceeds 350ms SLO for 15 minutes.
+              This impacts user experience and may indicate resource constraints or performance regressions.
+            runbook_url: 'https://runbooks.intelgraph.ai/api-latency'
+            dashboard_url: 'https://grafana.intelgraph.ai/d/api-performance'
 
-  # ====================================================================
-  # API PERFORMANCE ALERTS
-  # ====================================================================
+        # API P99 latency warning
+        - alert: IntelGraphAPILatencyP99High
+          expr: |
+            histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{job="intelgraph-api"}[5m])) > 0.7
+          for: 10m
+          labels:
+            severity: warning
+            service: intelgraph-api
+            slo: latency
+            team: platform
+          annotations:
+            summary: '🐌 IntelGraph API P99 latency high'
+            description: 'API P99 latency {{ $value | humanizeDuration }} exceeds 700ms threshold'
 
-  - name: intelgraph.slo.api.latency
-    interval: 30s
-    rules:
+        # GraphQL query complexity alerts
+        - alert: IntelGraphGraphQuerySlow
+          expr: |
+            histogram_quantile(0.95, rate(graph_query_duration_seconds_bucket{hops="3"}[5m])) > 1.2
+          for: 10m
+          labels:
+            severity: warning
+            service: intelgraph-graph
+            slo: graph_latency
+            team: platform
+          annotations:
+            summary: '🕸️ Graph 3-hop queries exceeding SLO'
+            description: '3-hop graph queries P95 {{ $value | humanizeDuration }} exceeds 1.2s SLO'
+            runbook_url: 'https://runbooks.intelgraph.ai/graph-performance'
 
-    # API P95 latency SLO breach - CRITICAL
-    - alert: IntelGraphAPILatencyBreach
-      expr: |
-        histogram_quantile(0.95, rate(http_request_duration_seconds_bucket{job="intelgraph-api"}[5m])) > 0.35
-      for: 15m
-      labels:
-        severity: critical
-        service: intelgraph-api
-        slo: latency
-        team: platform
-        pager: immediate
-      annotations:
-        summary: "🐌 IntelGraph API P95 latency exceeds SLO"
-        description: |
-          API P95 latency {{ $value | humanizeDuration }} exceeds 350ms SLO for 15 minutes.
-          This impacts user experience and may indicate resource constraints or performance regressions.
-        runbook_url: "https://runbooks.intelgraph.ai/api-latency"
-        dashboard_url: "https://grafana.intelgraph.ai/d/api-performance"
+    # ====================================================================
+    # AUTHENTICATION & AUTHORIZATION ALERTS
+    # ====================================================================
 
-    # API P99 latency warning
-    - alert: IntelGraphAPILatencyP99High
-      expr: |
-        histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{job="intelgraph-api"}[5m])) > 0.7
-      for: 10m
-      labels:
-        severity: warning
-        service: intelgraph-api
-        slo: latency
-        team: platform
-      annotations:
-        summary: "🐌 IntelGraph API P99 latency high"
-        description: "API P99 latency {{ $value | humanizeDuration }} exceeds 700ms threshold"
+    - name: intelgraph.security.auth
+      interval: 30s
+      rules:
+        # Authentication failure rate - CRITICAL
+        - alert: IntelGraphAuthFailureRate
+          expr: |
+            rate(http_requests_total{job="intelgraph-api",code="401"}[5m]) > 0.005
+          for: 5m
+          labels:
+            severity: critical
+            service: intelgraph-auth
+            category: security
+            team: security
+            pager: immediate
+          annotations:
+            summary: '🔐 High authentication failure rate detected'
+            description: |
+              Authentication error rate {{ $value | humanizePercentage }} exceeds 0.5% threshold.
+              This may indicate a credential attack or OIDC configuration issue.
+            runbook_url: 'https://runbooks.intelgraph.ai/auth-failures'
 
-    # GraphQL query complexity alerts
-    - alert: IntelGraphGraphQuerySlow
-      expr: |
-        histogram_quantile(0.95, rate(graph_query_duration_seconds_bucket{hops="3"}[5m])) > 1.2
-      for: 10m
-      labels:
-        severity: warning
-        service: intelgraph-graph
-        slo: graph_latency
-        team: platform
-      annotations:
-        summary: "🕸️ Graph 3-hop queries exceeding SLO"
-        description: "3-hop graph queries P95 {{ $value | humanizeDuration }} exceeds 1.2s SLO"
-        runbook_url: "https://runbooks.intelgraph.ai/graph-performance"
+        # OIDC JWKS rotation failure
+        - alert: IntelGraphJWKSRotationFailed
+          expr: |
+            increase(oidc_jwks_fetch_errors_total[1h]) > 0
+          for: 5m
+          labels:
+            severity: warning
+            service: intelgraph-auth
+            category: security
+            team: security
+          annotations:
+            summary: '🔑 OIDC JWKS rotation failing'
+            description: 'JWKS fetch errors detected, authentication may fail for new tokens'
 
-  # ====================================================================
-  # AUTHENTICATION & AUTHORIZATION ALERTS
-  # ====================================================================
+        # OPA policy decision latency
+        - alert: IntelGraphOPADecisionSlow
+          expr: |
+            histogram_quantile(0.95, rate(opa_decision_duration_seconds_bucket[5m])) > 0.01
+          for: 10m
+          labels:
+            severity: warning
+            service: intelgraph-opa
+            category: security
+            team: security
+          annotations:
+            summary: '🛡️ OPA policy decisions slow'
+            description: 'OPA decision P95 latency {{ $value | humanizeDuration }} exceeds 10ms threshold'
 
-  - name: intelgraph.security.auth
-    interval: 30s
-    rules:
+    # ====================================================================
+    # DATA PLATFORM ALERTS
+    # ====================================================================
 
-    # Authentication failure rate - CRITICAL
-    - alert: IntelGraphAuthFailureRate
-      expr: |
-        rate(http_requests_total{job="intelgraph-api",code="401"}[5m]) > 0.005
-      for: 5m
-      labels:
-        severity: critical
-        service: intelgraph-auth
-        category: security
-        team: security
-        pager: immediate
-      annotations:
-        summary: "🔐 High authentication failure rate detected"
-        description: |
-          Authentication error rate {{ $value | humanizePercentage }} exceeds 0.5% threshold.
-          This may indicate a credential attack or OIDC configuration issue.
-        runbook_url: "https://runbooks.intelgraph.ai/auth-failures"
+    - name: intelgraph.data.postgresql
+      interval: 60s
+      rules:
+        # PostgreSQL connection pool exhaustion
+        - alert: IntelGraphPostgreSQLPoolNearFull
+          expr: |
+            (pg_stat_activity_count / pg_settings_max_connections) > 0.8
+          for: 5m
+          labels:
+            severity: warning
+            service: postgresql
+            team: dba
+          annotations:
+            summary: '🗄️ PostgreSQL connection pool near capacity'
+            description: 'Connection pool {{ $value | humanizePercentage }} full, may impact performance'
 
-    # OIDC JWKS rotation failure
-    - alert: IntelGraphJWKSRotationFailed
-      expr: |
-        increase(oidc_jwks_fetch_errors_total[1h]) > 0
-      for: 5m
-      labels:
-        severity: warning
-        service: intelgraph-auth
-        category: security
-        team: security
-      annotations:
-        summary: "🔑 OIDC JWKS rotation failing"
-        description: "JWKS fetch errors detected, authentication may fail for new tokens"
+        # PostgreSQL replication lag
+        - alert: IntelGraphPostgreSQLReplicationLag
+          expr: |
+            pg_stat_replication_lag_seconds > 300
+          for: 10m
+          labels:
+            severity: critical
+            service: postgresql
+            team: dba
+            pager: immediate
+          annotations:
+            summary: '🗄️ PostgreSQL replication lag high'
+            description: 'Replication lag {{ $value | humanizeDuration }} exceeds 5 minutes'
 
-    # OPA policy decision latency
-    - alert: IntelGraphOPADecisionSlow
-      expr: |
-        histogram_quantile(0.95, rate(opa_decision_duration_seconds_bucket[5m])) > 0.01
-      for: 10m
-      labels:
-        severity: warning
-        service: intelgraph-opa
-        category: security
-        team: security
-      annotations:
-        summary: "🛡️ OPA policy decisions slow"
-        description: "OPA decision P95 latency {{ $value | humanizeDuration }} exceeds 10ms threshold"
+    - name: intelgraph.data.neo4j
+      interval: 60s
+      rules:
+        # Neo4j page cache hit rate low
+        - alert: IntelGraphNeo4jCacheHitRateLow
+          expr: |
+            neo4j_page_cache_hit_ratio < 0.85
+          for: 15m
+          labels:
+            severity: warning
+            service: neo4j
+            team: dba
+          annotations:
+            summary: '🕸️ Neo4j page cache hit rate low'
+            description: |
+              Page cache hit rate {{ $value | humanizePercentage }} below 85% threshold.
+              Consider increasing cache size or investigating query patterns.
 
-  # ====================================================================
-  # DATA PLATFORM ALERTS
-  # ====================================================================
+        # Neo4j cluster member down
+        - alert: IntelGraphNeo4jMemberDown
+          expr: |
+            up{job="neo4j"} == 0
+          for: 2m
+          labels:
+            severity: critical
+            service: neo4j
+            team: dba
+            pager: immediate
+          annotations:
+            summary: '🕸️ Neo4j cluster member down'
+            description: 'Neo4j cluster member {{ $labels.instance }} is unreachable'
 
-  - name: intelgraph.data.postgresql
-    interval: 60s
-    rules:
+    - name: intelgraph.data.kafka
+      interval: 30s
+      rules:
+        # Kafka consumer lag high
+        - alert: IntelGraphKafkaConsumerLagHigh
+          expr: |
+            kafka_consumer_lag_sum > 1000
+          for: 10m
+          labels:
+            severity: warning
+            service: kafka
+            team: platform
+          annotations:
+            summary: '📊 Kafka consumer lag high'
+            description: 'Consumer lag {{ $value }} messages exceeds 1000 threshold'
 
-    # PostgreSQL connection pool exhaustion
-    - alert: IntelGraphPostgreSQLPoolNearFull
-      expr: |
-        (pg_stat_activity_count / pg_settings_max_connections) > 0.8
-      for: 5m
-      labels:
-        severity: warning
-        service: postgresql
-        team: dba
-      annotations:
-        summary: "🗄️ PostgreSQL connection pool near capacity"
-        description: "Connection pool {{ $value | humanizePercentage }} full, may impact performance"
+        # Dead Letter Queue growth
+        - alert: IntelGraphDLQGrowthHigh
+          expr: |
+            rate(kafka_topic_partition_current_offset{topic=~"dlq-.*"}[5m]) > 0.1
+          for: 5m
+          labels:
+            severity: warning
+            service: kafka
+            category: data_quality
+            team: platform
+          annotations:
+            summary: '⚠️ Dead Letter Queue growing rapidly'
+            description: 'DLQ growth rate {{ $value }} messages/sec indicates processing issues'
 
-    # PostgreSQL replication lag
-    - alert: IntelGraphPostgreSQLReplicationLag
-      expr: |
-        pg_stat_replication_lag_seconds > 300
-      for: 10m
-      labels:
-        severity: critical
-        service: postgresql
-        team: dba
-        pager: immediate
-      annotations:
-        summary: "🗄️ PostgreSQL replication lag high"
-        description: "Replication lag {{ $value | humanizeDuration }} exceeds 5 minutes"
+    # ====================================================================
+    # INFRASTRUCTURE ALERTS
+    # ====================================================================
 
-  - name: intelgraph.data.neo4j
-    interval: 60s
-    rules:
+    - name: intelgraph.infrastructure.resources
+      interval: 60s
+      rules:
+        # High CPU usage
+        - alert: IntelGraphHighCPUUsage
+          expr: |
+            100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
+          for: 10m
+          labels:
+            severity: warning
+            service: infrastructure
+            team: sre
+          annotations:
+            summary: '🔥 High CPU usage detected'
+            description: 'CPU usage {{ $value }}% on {{ $labels.instance }} exceeds 85%'
 
-    # Neo4j page cache hit rate low
-    - alert: IntelGraphNeo4jCacheHitRateLow
-      expr: |
-        neo4j_page_cache_hit_ratio < 0.85
-      for: 15m
-      labels:
-        severity: warning
-        service: neo4j
-        team: dba
-      annotations:
-        summary: "🕸️ Neo4j page cache hit rate low"
-        description: |
-          Page cache hit rate {{ $value | humanizePercentage }} below 85% threshold.
-          Consider increasing cache size or investigating query patterns.
+        # High memory usage
+        - alert: IntelGraphHighMemoryUsage
+          expr: |
+            (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
+          for: 10m
+          labels:
+            severity: warning
+            service: infrastructure
+            team: sre
+          annotations:
+            summary: '🧠 High memory usage detected'
+            description: 'Memory usage {{ $value }}% on {{ $labels.instance }} exceeds 85%'
 
-    # Neo4j cluster member down
-    - alert: IntelGraphNeo4jMemberDown
-      expr: |
-        up{job="neo4j"} == 0
-      for: 2m
-      labels:
-        severity: critical
-        service: neo4j
-        team: dba
-        pager: immediate
-      annotations:
-        summary: "🕸️ Neo4j cluster member down"
-        description: "Neo4j cluster member {{ $labels.instance }} is unreachable"
+        # Pod restart rate high
+        - alert: IntelGraphPodRestartRateHigh
+          expr: |
+            rate(kube_pod_container_status_restarts_total{namespace="intelgraph-system"}[15m]) > 0.01
+          for: 5m
+          labels:
+            severity: warning
+            service: kubernetes
+            team: sre
+          annotations:
+            summary: '🔄 High pod restart rate'
+            description: 'Pod {{ $labels.pod }} restarting frequently'
 
-  - name: intelgraph.data.kafka
-    interval: 30s
-    rules:
+    # ====================================================================
+    # COST & CAPACITY ALERTS
+    # ====================================================================
 
-    # Kafka consumer lag high
-    - alert: IntelGraphKafkaConsumerLagHigh
-      expr: |
-        kafka_consumer_lag_sum > 1000
-      for: 10m
-      labels:
-        severity: warning
-        service: kafka
-        team: platform
-      annotations:
-        summary: "📊 Kafka consumer lag high"
-        description: "Consumer lag {{ $value }} messages exceeds 1000 threshold"
+    - name: intelgraph.cost.management
+      interval: 300s # 5 minutes
+      rules:
+        # Cost budget burn rate
+        - alert: IntelGraphCostBudgetBurnHigh
+          expr: |
+            kubecost_cluster_total_cost > 600  # $600/day = $18k/month
+          for: 30m
+          labels:
+            severity: warning
+            service: cost-management
+            team: finops
+          annotations:
+            summary: '💰 Daily cost exceeds budget'
+            description: 'Daily cost ${{ $value }} exceeds $600 budget (monthly projection: ${{ mul $value 30 }})'
 
-    # Dead Letter Queue growth
-    - alert: IntelGraphDLQGrowthHigh
-      expr: |
-        rate(kafka_topic_partition_current_offset{topic=~"dlq-.*"}[5m]) > 0.1
-      for: 5m
-      labels:
-        severity: warning
-        service: kafka
-        category: data_quality
-        team: platform
-      annotations:
-        summary: "⚠️ Dead Letter Queue growing rapidly"
-        description: "DLQ growth rate {{ $value }} messages/sec indicates processing issues"
+        # Resource quota near limit
+        - alert: IntelGraphResourceQuotaNearLimit
+          expr: |
+            (kube_resourcequota_used / kube_resourcequota_hard) > 0.8
+          for: 15m
+          labels:
+            severity: warning
+            service: kubernetes
+            team: sre
+          annotations:
+            summary: '📊 Resource quota near limit'
+            description: '{{ $labels.resource }} quota {{ $value | humanizePercentage }} full in {{ $labels.namespace }}'
 
-  # ====================================================================
-  # INFRASTRUCTURE ALERTS
-  # ====================================================================
+    # ====================================================================
+    # SECURITY ALERTS
+    # ====================================================================
 
-  - name: intelgraph.infrastructure.resources
-    interval: 60s
-    rules:
+    - name: intelgraph.security.threats
+      interval: 60s
+      rules:
+        # Rate limiting triggered frequently
+        - alert: IntelGraphRateLimitHitsHigh
+          expr: |
+            rate(rate_limit_exceeded_total[5m]) > 10
+          for: 5m
+          labels:
+            severity: warning
+            service: intelgraph-api
+            category: security
+            team: security
+          annotations:
+            summary: '🚦 High rate limit enforcement'
+            description: 'Rate limit hits {{ $value }}/sec may indicate abuse or traffic spike'
 
-    # High CPU usage
-    - alert: IntelGraphHighCPUUsage
-      expr: |
-        100 - (avg by (instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 85
-      for: 10m
-      labels:
-        severity: warning
-        service: infrastructure
-        team: sre
-      annotations:
-        summary: "🔥 High CPU usage detected"
-        description: "CPU usage {{ $value }}% on {{ $labels.instance }} exceeds 85%"
+        # Non-persisted GraphQL queries (security bypass attempt)
+        - alert: IntelGraphNonPersistedQueryAttempt
+          expr: |
+            rate(graphql_requests_total{status="400",reason="non_persisted"}[5m]) > 1
+          for: 2m
+          labels:
+            severity: warning
+            service: intelgraph-api
+            category: security
+            team: security
+          annotations:
+            summary: '🔒 Non-persisted GraphQL query attempts'
+            description: '{{ $value }}/sec attempts to use non-persisted queries (potential bypass attempt)'
 
-    # High memory usage
-    - alert: IntelGraphHighMemoryUsage
-      expr: |
-        (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 85
-      for: 10m
-      labels:
-        severity: warning
-        service: infrastructure
-        team: sre
-      annotations:
-        summary: "🧠 High memory usage detected"
-        description: "Memory usage {{ $value }}% on {{ $labels.instance }} exceeds 85%"
+        # Certificate expiry warning
+        - alert: IntelGraphCertificateExpiringSoon
+          expr: |
+            (cert_manager_certificate_expiration_timestamp_seconds - time()) / 86400 < 30
+          for: 24h
+          labels:
+            severity: warning
+            service: cert-manager
+            category: security
+            team: sre
+          annotations:
+            summary: '📜 TLS certificate expiring soon'
+            description: 'Certificate {{ $labels.name }} expires in {{ div (sub $value (time())) 86400 | humanizeDuration }}'
 
-    # Pod restart rate high
-    - alert: IntelGraphPodRestartRateHigh
-      expr: |
-        rate(kube_pod_container_status_restarts_total{namespace="intelgraph-system"}[15m]) > 0.01
-      for: 5m
-      labels:
-        severity: warning
-        service: kubernetes
-        team: sre
-      annotations:
-        summary: "🔄 High pod restart rate"
-        description: "Pod {{ $labels.pod }} restarting frequently"
+    # ====================================================================
+    # BUSINESS METRICS ALERTS
+    # ====================================================================
 
-  # ====================================================================
-  # COST & CAPACITY ALERTS
-  # ====================================================================
+    - name: intelgraph.business.metrics
+      interval: 300s
+      rules:
+        # Low entity ingestion rate
+        - alert: IntelGraphEntityIngestionRateLow
+          expr: |
+            rate(entities_ingested_total[1h]) < 10
+          for: 30m
+          labels:
+            severity: warning
+            service: intelgraph-ingest
+            team: product
+          annotations:
+            summary: '📥 Entity ingestion rate low'
+            description: 'Entity ingestion rate {{ $value }}/hour below expected baseline'
 
-  - name: intelgraph.cost.management
-    interval: 300s  # 5 minutes
-    rules:
-
-    # Cost budget burn rate
-    - alert: IntelGraphCostBudgetBurnHigh
-      expr: |
-        kubecost_cluster_total_cost > 600  # $600/day = $18k/month
-      for: 30m
-      labels:
-        severity: warning
-        service: cost-management
-        team: finops
-      annotations:
-        summary: "💰 Daily cost exceeds budget"
-        description: "Daily cost ${{ $value }} exceeds $600 budget (monthly projection: ${{ mul $value 30 }})"
-
-    # Resource quota near limit
-    - alert: IntelGraphResourceQuotaNearLimit
-      expr: |
-        (kube_resourcequota_used / kube_resourcequota_hard) > 0.8
-      for: 15m
-      labels:
-        severity: warning
-        service: kubernetes
-        team: sre
-      annotations:
-        summary: "📊 Resource quota near limit"
-        description: "{{ $labels.resource }} quota {{ $value | humanizePercentage }} full in {{ $labels.namespace }}"
-
-  # ====================================================================
-  # SECURITY ALERTS
-  # ====================================================================
-
-  - name: intelgraph.security.threats
-    interval: 60s
-    rules:
-
-    # Rate limiting triggered frequently
-    - alert: IntelGraphRateLimitHitsHigh
-      expr: |
-        rate(rate_limit_exceeded_total[5m]) > 10
-      for: 5m
-      labels:
-        severity: warning
-        service: intelgraph-api
-        category: security
-        team: security
-      annotations:
-        summary: "🚦 High rate limit enforcement"
-        description: "Rate limit hits {{ $value }}/sec may indicate abuse or traffic spike"
-
-    # Non-persisted GraphQL queries (security bypass attempt)
-    - alert: IntelGraphNonPersistedQueryAttempt
-      expr: |
-        rate(graphql_requests_total{status="400",reason="non_persisted"}[5m]) > 1
-      for: 2m
-      labels:
-        severity: warning
-        service: intelgraph-api
-        category: security
-        team: security
-      annotations:
-        summary: "🔒 Non-persisted GraphQL query attempts"
-        description: "{{ $value }}/sec attempts to use non-persisted queries (potential bypass attempt)"
-
-    # Certificate expiry warning
-    - alert: IntelGraphCertificateExpiringSoon
-      expr: |
-        (cert_manager_certificate_expiration_timestamp_seconds - time()) / 86400 < 30
-      for: 24h
-      labels:
-        severity: warning
-        service: cert-manager
-        category: security
-        team: sre
-      annotations:
-        summary: "📜 TLS certificate expiring soon"
-        description: "Certificate {{ $labels.name }} expires in {{ div (sub $value (time())) 86400 | humanizeDuration }}"
-
-  # ====================================================================
-  # BUSINESS METRICS ALERTS
-  # ====================================================================
-
-  - name: intelgraph.business.metrics
-    interval: 300s
-    rules:
-
-    # Low entity ingestion rate
-    - alert: IntelGraphEntityIngestionRateLow
-      expr: |
-        rate(entities_ingested_total[1h]) < 10
-      for: 30m
-      labels:
-        severity: warning
-        service: intelgraph-ingest
-        team: product
-      annotations:
-        summary: "📥 Entity ingestion rate low"
-        description: "Entity ingestion rate {{ $value }}/hour below expected baseline"
-
-    # GraphQL operation success rate low
-    - alert: IntelGraphGraphQLSuccessRateLow
-      expr: |
-        rate(graphql_operations_total{status="success"}[10m]) / rate(graphql_operations_total[10m]) < 0.95
-      for: 10m
-      labels:
-        severity: warning
-        service: intelgraph-api
-        team: product
-      annotations:
-        summary: "📊 GraphQL success rate low"
-        description: "GraphQL success rate {{ $value | humanizePercentage }} below 95% threshold"
+        # GraphQL operation success rate low
+        - alert: IntelGraphGraphQLSuccessRateLow
+          expr: |
+            rate(graphql_operations_total{status="success"}[10m]) / rate(graphql_operations_total[10m]) < 0.95
+          for: 10m
+          labels:
+            severity: warning
+            service: intelgraph-api
+            team: product
+          annotations:
+            summary: '📊 GraphQL success rate low'
+            description: 'GraphQL success rate {{ $value | humanizePercentage }} below 95% threshold'
 
 ---
 # Alert Manager Configuration for routing and escalation

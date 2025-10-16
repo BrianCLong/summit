@@ -5,4 +5,4 @@ export default async (req, res) => {
   if (!q) return res.status(200).json([]);
   // TODO: call Typesense search; for now, return empty
   return res.status(200).json([]);
-}
+};

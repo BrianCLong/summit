@@ -1,7 +1,6 @@
 import pytest
-from httpx import ASGITransport, AsyncClient
-
 from geotemporal.main import app
+from httpx import ASGITransport, AsyncClient
 
 
 @pytest.mark.asyncio

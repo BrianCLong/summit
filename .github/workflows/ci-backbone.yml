@@ -1,16 +1,16 @@
 name: CI Backbone
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
     inputs:
       reason:
-        description: "Why are you running Backbone manually?"
+        description: 'Why are you running Backbone manually?'
         required: false
         type: string
-run-name: "CI Backbone • ${{ github.event.inputs.reason || github.ref_name }}"
+run-name: 'CI Backbone • ${{ github.event.inputs.reason || github.ref_name }}'
 permissions:
   contents: read
   checks: write
@@ -63,5 +63,5 @@ jobs:
         run: pnpm -r -w run typecheck:quick || pnpm -r -w run typecheck
       - name: Unit (short)
         env:
-          SUMMIT_SKIP_FLAKY: "1"
+          SUMMIT_SKIP_FLAKY: '1'
         run: pnpm -r -w run test:unit:short -- --ci --reporters=default --maxWorkers=50%

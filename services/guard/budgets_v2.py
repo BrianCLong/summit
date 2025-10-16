@@ -4,19 +4,20 @@ Budget Guard v2 for MC Platform v0.3.5
 Self-tuning per-tenant and per-route budget enforcement with ML
 """
 
-import json
-import time
 import argparse
-from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass
-import statistics
+import json
 import random
+import statistics
+import time
+from dataclasses import dataclass
+from datetime import datetime
+from typing import Any
 
 
 @dataclass
 class BudgetEvent:
     """Budget enforcement event"""
+
     timestamp: str
     tenant_id: str
     route: str
@@ -31,11 +32,12 @@ class BudgetEvent:
 @dataclass
 class BudgetProfile:
     """Per-tenant budget profile"""
+
     tenant_id: str
     daily_limit: float
     hourly_limit: float
-    route_limits: Dict[str, float]
-    usage_patterns: Dict[str, float]
+    route_limits: dict[str, float]
+    usage_patterns: dict[str, float]
     risk_tolerance: str  # conservative, balanced, aggressive
     auto_tune_enabled: bool
 
@@ -43,7 +45,7 @@ class BudgetProfile:
 class BudgetGuardV2:
     """Self-tuning budget guard with ML-driven optimization"""
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]):
         self.config = config
         self.tenant_profiles = self._load_tenant_profiles()
         self.usage_history = []
@@ -51,7 +53,7 @@ class BudgetGuardV2:
         self.ml_models = self._initialize_ml_models()
         self.auto_tune_enabled = config.get("auto_tune_enabled", True)
 
-    def _load_tenant_profiles(self) -> Dict[str, BudgetProfile]:
+    def _load_tenant_profiles(self) -> dict[str, BudgetProfile]:
         """Load tenant budget profiles"""
 
         # Default profiles for demo
@@ -60,46 +62,34 @@ class BudgetGuardV2:
                 tenant_id="TENANT_001",
                 daily_limit=50.0,
                 hourly_limit=5.0,
-                route_limits={
-                    "/api/chat": 2.0,
-                    "/api/research": 15.0,
-                    "/api/analyze": 8.0
-                },
+                route_limits={"/api/chat": 2.0, "/api/research": 15.0, "/api/analyze": 8.0},
                 usage_patterns={"peak_hours": [9, 10, 11, 14, 15, 16]},
                 risk_tolerance="balanced",
-                auto_tune_enabled=True
+                auto_tune_enabled=True,
             ),
             "TENANT_002": BudgetProfile(
                 tenant_id="TENANT_002",
                 daily_limit=100.0,
                 hourly_limit=12.0,
-                route_limits={
-                    "/api/chat": 3.0,
-                    "/api/research": 25.0,
-                    "/api/analyze": 15.0
-                },
+                route_limits={"/api/chat": 3.0, "/api/research": 25.0, "/api/analyze": 15.0},
                 usage_patterns={"peak_hours": [8, 9, 13, 14, 15]},
                 risk_tolerance="aggressive",
-                auto_tune_enabled=True
+                auto_tune_enabled=True,
             ),
             "TENANT_003": BudgetProfile(
                 tenant_id="TENANT_003",
                 daily_limit=25.0,
                 hourly_limit=3.0,
-                route_limits={
-                    "/api/chat": 1.0,
-                    "/api/research": 8.0,
-                    "/api/analyze": 4.0
-                },
+                route_limits={"/api/chat": 1.0, "/api/research": 8.0, "/api/analyze": 4.0},
                 usage_patterns={"peak_hours": [10, 11, 12, 13, 14]},
                 risk_tolerance="conservative",
-                auto_tune_enabled=True
-            )
+                auto_tune_enabled=True,
+            ),
         }
 
         return default_profiles
 
-    def _initialize_ml_models(self) -> Dict[str, Any]:
+    def _initialize_ml_models(self) -> dict[str, Any]:
         """Initialize lightweight ML models for budget prediction"""
 
         # Simplified ML models using linear regression coefficients
@@ -109,26 +99,26 @@ class BudgetGuardV2:
                     "hour_of_day": 0.15,
                     "day_of_week": 0.08,
                     "tenant_tier": 0.25,
-                    "historical_avg": 0.52
+                    "historical_avg": 0.52,
                 },
                 "intercept": 0.1,
-                "accuracy": 0.85
+                "accuracy": 0.85,
             },
             "cost_forecaster": {
                 "coefficients": {
                     "current_usage": 0.45,
                     "time_remaining": 0.30,
                     "seasonal_factor": 0.15,
-                    "tenant_growth": 0.10
+                    "tenant_growth": 0.10,
                 },
                 "intercept": 0.05,
-                "accuracy": 0.78
+                "accuracy": 0.78,
             },
             "anomaly_detector": {
                 "z_score_threshold": 2.5,
                 "rolling_window": 24,
-                "sensitivity": 0.15
-            }
+                "sensitivity": 0.15,
+            },
         }
 
         return models
@@ -161,29 +151,25 @@ class BudgetGuardV2:
 
         # Apply linear regression
         predicted_usage = (
-            current_hour * coefficients["hour_of_day"] +
-            current_day * coefficients["day_of_week"] +
-            tenant_tier * coefficients["tenant_tier"] +
-            historical_avg * coefficients["historical_avg"] +
-            model["intercept"]
+            current_hour * coefficients["hour_of_day"]
+            + current_day * coefficients["day_of_week"]
+            + tenant_tier * coefficients["tenant_tier"]
+            + historical_avg * coefficients["historical_avg"]
+            + model["intercept"]
         )
 
         # Adjust for route-specific patterns
-        route_multiplier = {
-            "/api/chat": 0.3,
-            "/api/research": 1.5,
-            "/api/analyze": 1.0
-        }.get(route, 1.0)
+        route_multiplier = {"/api/chat": 0.3, "/api/research": 1.5, "/api/analyze": 1.0}.get(
+            route, 1.0
+        )
 
         return max(0.01, predicted_usage * route_multiplier * hours_ahead)
 
-    def detect_anomaly(self, tenant_id: str, current_usage: float) -> Tuple[bool, float]:
+    def detect_anomaly(self, tenant_id: str, current_usage: float) -> tuple[bool, float]:
         """Detect usage anomalies using statistical methods"""
 
         # Get recent usage history (simulated)
-        recent_usage = [
-            random.uniform(0.5, 2.0) for _ in range(24)
-        ]  # 24 hours of simulated data
+        recent_usage = [random.uniform(0.5, 2.0) for _ in range(24)]  # 24 hours of simulated data
 
         if len(recent_usage) < 5:
             return False, 0.0
@@ -199,7 +185,7 @@ class BudgetGuardV2:
 
         return is_anomaly, z_score
 
-    def auto_tune_limits(self, tenant_id: str) -> Dict[str, float]:
+    def auto_tune_limits(self, tenant_id: str) -> dict[str, float]:
         """Auto-tune budget limits based on usage patterns"""
 
         profile = self.tenant_profiles.get(tenant_id)
@@ -207,14 +193,17 @@ class BudgetGuardV2:
             return {}
 
         # Analyze recent enforcement events (simplified for demo)
-        recent_events = [e for e in self.enforcement_history
-                        if e.tenant_id == tenant_id][-50:]  # Last 50 events for demo
+        recent_events = [e for e in self.enforcement_history if e.tenant_id == tenant_id][
+            -50:
+        ]  # Last 50 events for demo
 
         if len(recent_events) < 10:
             return {}  # Need more data
 
         # Calculate adaptation suggestions
-        throttle_rate = len([e for e in recent_events if e.action == "throttle"]) / len(recent_events)
+        throttle_rate = len([e for e in recent_events if e.action == "throttle"]) / len(
+            recent_events
+        )
         avg_utilization = statistics.mean([e.utilization for e in recent_events])
 
         adjustments = {}
@@ -255,7 +244,7 @@ class BudgetGuardV2:
                 utilization=0.0,
                 action="pass",
                 enforcement_time_ms=(time.time() - start_time) * 1000,
-                confidence=0.5
+                confidence=0.5,
             )
 
         # Get current usage (simulated - would query actual usage in production)
@@ -314,23 +303,33 @@ class BudgetGuardV2:
             utilization=max_utilization,
             action=action,
             enforcement_time_ms=enforcement_time,
-            confidence=confidence
+            confidence=confidence,
         )
 
         self.enforcement_history.append(event)
 
         return event
 
-    def simulate_budget_scenario(self, tenant_id: str, scenario: str = "normal") -> List[BudgetEvent]:
+    def simulate_budget_scenario(
+        self, tenant_id: str, scenario: str = "normal"
+    ) -> list[BudgetEvent]:
         """Simulate budget enforcement scenarios"""
 
         print(f"🧪 Simulating budget scenario: {scenario} for {tenant_id}")
 
         events = []
         scenario_configs = {
-            "normal": {"requests": 50, "cost_range": (0.01, 0.5), "routes": ["/api/chat", "/api/research"]},
-            "burst": {"requests": 200, "cost_range": (0.1, 2.0), "routes": ["/api/research", "/api/analyze"]},
-            "breach": {"requests": 100, "cost_range": (0.5, 3.0), "routes": ["/api/research"]}
+            "normal": {
+                "requests": 50,
+                "cost_range": (0.01, 0.5),
+                "routes": ["/api/chat", "/api/research"],
+            },
+            "burst": {
+                "requests": 200,
+                "cost_range": (0.1, 2.0),
+                "routes": ["/api/research", "/api/analyze"],
+            },
+            "breach": {"requests": 100, "cost_range": (0.5, 3.0), "routes": ["/api/research"]},
         }
 
         config = scenario_configs.get(scenario, scenario_configs["normal"])
@@ -347,7 +346,7 @@ class BudgetGuardV2:
 
         return events
 
-    def generate_report(self, tenant_id: str, events: List[BudgetEvent]) -> Dict[str, Any]:
+    def generate_report(self, tenant_id: str, events: list[BudgetEvent]) -> dict[str, Any]:
         """Generate comprehensive budget enforcement report"""
 
         if not events:
@@ -365,11 +364,15 @@ class BudgetGuardV2:
 
         # Get tenant profile
         profile = self.tenant_profiles.get(tenant_id)
-        current_limits = {
-            "daily_limit": profile.daily_limit,
-            "hourly_limit": profile.hourly_limit,
-            "route_limits": profile.route_limits
-        } if profile else {}
+        current_limits = (
+            {
+                "daily_limit": profile.daily_limit,
+                "hourly_limit": profile.hourly_limit,
+                "route_limits": profile.route_limits,
+            }
+            if profile
+            else {}
+        )
 
         # Get auto-tune suggestions
         tune_suggestions = self.auto_tune_limits(tenant_id)
@@ -379,40 +382,44 @@ class BudgetGuardV2:
                 "tenant_id": tenant_id,
                 "report_timestamp": datetime.utcnow().isoformat() + "Z",
                 "events_analyzed": total_events,
-                "time_window": "simulation"
+                "time_window": "simulation",
             },
             "enforcement_summary": {
                 "total_events": total_events,
                 "throttle_events": throttle_events,
                 "alert_events": alert_events,
                 "pass_events": pass_events,
-                "throttle_rate_percent": (throttle_events / total_events * 100) if total_events > 0 else 0,
-                "false_positive_estimate": max(0, (throttle_events - (total_events * 0.05)) / total_events * 100)
+                "throttle_rate_percent": (
+                    (throttle_events / total_events * 100) if total_events > 0 else 0
+                ),
+                "false_positive_estimate": max(
+                    0, (throttle_events - (total_events * 0.05)) / total_events * 100
+                ),
             },
             "performance_metrics": {
                 "total_cost": round(total_cost, 3),
                 "avg_enforcement_time_ms": round(avg_enforcement_time, 3),
                 "max_enforcement_time_ms": round(max_enforcement_time, 3),
                 "sub_120s_target_met": max_enforcement_time < 120000,  # 120s in ms
-                "avg_confidence": round(statistics.mean([e.confidence for e in events]), 3)
+                "avg_confidence": round(statistics.mean([e.confidence for e in events]), 3),
             },
             "budget_analysis": {
                 "current_limits": current_limits,
                 "auto_tune_suggestions": tune_suggestions,
                 "cost_efficiency": self._calculate_cost_efficiency(events),
-                "utilization_patterns": self._analyze_utilization_patterns(events)
+                "utilization_patterns": self._analyze_utilization_patterns(events),
             },
             "route_breakdown": self._analyze_routes(events),
             "ml_insights": {
                 "anomaly_detection_accuracy": 0.92,
                 "usage_prediction_accuracy": 0.85,
-                "model_confidence": 0.88
-            }
+                "model_confidence": 0.88,
+            },
         }
 
         return report
 
-    def _calculate_cost_efficiency(self, events: List[BudgetEvent]) -> Dict[str, float]:
+    def _calculate_cost_efficiency(self, events: list[BudgetEvent]) -> dict[str, float]:
         """Calculate cost efficiency metrics"""
 
         if not events:
@@ -424,10 +431,12 @@ class BudgetGuardV2:
         return {
             "blocked_cost": round(blocked_cost, 3),
             "allowed_cost": round(total_cost - blocked_cost, 3),
-            "efficiency_ratio": round((total_cost - blocked_cost) / total_cost, 3) if total_cost > 0 else 0
+            "efficiency_ratio": (
+                round((total_cost - blocked_cost) / total_cost, 3) if total_cost > 0 else 0
+            ),
         }
 
-    def _analyze_utilization_patterns(self, events: List[BudgetEvent]) -> Dict[str, Any]:
+    def _analyze_utilization_patterns(self, events: list[BudgetEvent]) -> dict[str, Any]:
         """Analyze utilization patterns"""
 
         if not events:
@@ -438,11 +447,13 @@ class BudgetGuardV2:
         return {
             "avg_utilization": round(statistics.mean(utilizations), 3),
             "max_utilization": round(max(utilizations), 3),
-            "utilization_variance": round(statistics.stdev(utilizations), 3) if len(utilizations) > 1 else 0,
-            "over_limit_events": len([u for u in utilizations if u > 1.0])
+            "utilization_variance": (
+                round(statistics.stdev(utilizations), 3) if len(utilizations) > 1 else 0
+            ),
+            "over_limit_events": len([u for u in utilizations if u > 1.0]),
         }
 
-    def _analyze_routes(self, events: List[BudgetEvent]) -> Dict[str, Any]:
+    def _analyze_routes(self, events: list[BudgetEvent]) -> dict[str, Any]:
         """Analyze per-route patterns"""
 
         route_stats = {}
@@ -464,7 +475,7 @@ class BudgetGuardV2:
                 "total_cost": round(stats["total_cost"], 3),
                 "throttle_events": throttle_count,
                 "throttle_rate": round(throttle_count / len(events_list), 3),
-                "avg_cost_per_request": round(stats["total_cost"] / len(events_list), 3)
+                "avg_cost_per_request": round(stats["total_cost"] / len(events_list), 3),
             }
 
         return analysis
@@ -472,13 +483,16 @@ class BudgetGuardV2:
 
 def main():
     parser = argparse.ArgumentParser(description="Budget Guard v2 for MC Platform v0.3.5")
-    parser.add_argument('--tenant', required=True, help='Tenant ID to simulate')
-    parser.add_argument('--scenario', default='normal',
-                       choices=['normal', 'burst', 'breach'],
-                       help='Simulation scenario')
-    parser.add_argument('--simulate', action='store_true', help='Run simulation')
-    parser.add_argument('--window', type=int, default=120, help='Window size in seconds')
-    parser.add_argument('--report', required=True, help='Output file for report')
+    parser.add_argument("--tenant", required=True, help="Tenant ID to simulate")
+    parser.add_argument(
+        "--scenario",
+        default="normal",
+        choices=["normal", "burst", "breach"],
+        help="Simulation scenario",
+    )
+    parser.add_argument("--simulate", action="store_true", help="Run simulation")
+    parser.add_argument("--window", type=int, default=120, help="Window size in seconds")
+    parser.add_argument("--report", required=True, help="Output file for report")
 
     args = parser.parse_args()
 
@@ -486,10 +500,7 @@ def main():
     print("=" * 50)
 
     # Initialize budget guard
-    config = {
-        "auto_tune_enabled": True,
-        "ml_optimization": True
-    }
+    config = {"auto_tune_enabled": True, "ml_optimization": True}
 
     guard = BudgetGuardV2(config)
 
@@ -505,9 +516,10 @@ def main():
 
         # Save report
         import os
+
         os.makedirs(os.path.dirname(args.report), exist_ok=True)
 
-        with open(args.report, 'w') as f:
+        with open(args.report, "w") as f:
             json.dump(report, f, indent=2)
 
         print(f"📄 Report saved: {args.report}")
@@ -516,7 +528,7 @@ def main():
         enforcement_summary = report["enforcement_summary"]
         performance = report["performance_metrics"]
 
-        print(f"\n🎯 Summary:")
+        print("\n🎯 Summary:")
         print(f"  • Throttle rate: {enforcement_summary['throttle_rate_percent']:.1f}%")
         print(f"  • Avg enforcement time: {performance['avg_enforcement_time_ms']:.1f}ms")
         print(f"  • Sub-120s target: {'✅' if performance['sub_120s_target_met'] else '❌'}")

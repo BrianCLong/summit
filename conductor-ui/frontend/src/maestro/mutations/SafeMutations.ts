@@ -19,21 +19,33 @@ const RunConfigSchema = z.object({
 const PolicyUpdateSchema = z.object({
   id: z.string().min(1, 'Policy ID required'),
   enabled: z.boolean(),
-  rules: z.array(z.object({
-    condition: z.string(),
-    action: z.enum(['allow', 'deny', 'warn']),
-    priority: z.number().default(100),
-  })),
+  rules: z.array(
+    z.object({
+      condition: z.string(),
+      action: z.enum(['allow', 'deny', 'warn']),
+      priority: z.number().default(100),
+    }),
+  ),
   dryRun: z.boolean().default(false),
 });
 
 const BudgetUpdateSchema = z.object({
   tenantId: z.string().min(1, 'Tenant ID required'),
   monthlyUsd: z.number().positive('Monthly budget must be positive'),
-  alertThresholds: z.object({
-    warning: z.number().min(0).max(1, 'Warning threshold must be 0-1').default(0.8),
-    critical: z.number().min(0).max(1, 'Critical threshold must be 0-1').default(0.95),
-  }).optional(),
+  alertThresholds: z
+    .object({
+      warning: z
+        .number()
+        .min(0)
+        .max(1, 'Warning threshold must be 0-1')
+        .default(0.8),
+      critical: z
+        .number()
+        .min(0)
+        .max(1, 'Critical threshold must be 0-1')
+        .default(0.95),
+    })
+    .optional(),
 });
 
 const RoutingPinSchema = z.object({
@@ -69,8 +81,11 @@ export interface MutationContext {
 async function safeMutation<TInput, TOutput>(
   schema: z.ZodSchema<TInput>,
   input: unknown,
-  mutationFn: (validInput: TInput, context: MutationContext) => Promise<TOutput>,
-  rollbackFn?: (output: TOutput, context: MutationContext) => Promise<void>
+  mutationFn: (
+    validInput: TInput,
+    context: MutationContext,
+  ) => Promise<TOutput>,
+  rollbackFn?: (output: TOutput, context: MutationContext) => Promise<void>,
 ): Promise<MutationResult<TOutput>> {
   const context: MutationContext = {
     userId: 'current-user', // TODO: Get from auth context
@@ -82,12 +97,12 @@ async function safeMutation<TInput, TOutput>(
   try {
     // Validate input
     const validInput = schema.parse(input);
-    
+
     // Execute mutation
     const result = await mutationFn(validInput, context);
-    
+
     // Create rollback function if provided
-    const rollback = rollbackFn 
+    const rollback = rollbackFn
       ? async () => await rollbackFn(result, context)
       : undefined;
 
@@ -127,7 +142,9 @@ export const MaestroSafeMutations = {
         // Pre-flight checks
         const budgetCheck = await maestroApi.getBudgets();
         if (budgetCheck.remaining < config.budgetCap) {
-          throw new Error(`Insufficient budget: ${budgetCheck.remaining} < ${config.budgetCap}`);
+          throw new Error(
+            `Insufficient budget: ${budgetCheck.remaining} < ${config.budgetCap}`,
+          );
         }
 
         // Create the run
@@ -148,7 +165,7 @@ export const MaestroSafeMutations = {
         if (run.status === 'queued' || run.status === 'running') {
           await maestroApi.cancelRun(run.id);
         }
-      }
+      },
     );
   },
 
@@ -162,7 +179,7 @@ export const MaestroSafeMutations = {
       async (policy: PolicyUpdate, context) => {
         // Get current policy for rollback
         const currentPolicy = await maestroApi.getPolicy(policy.id);
-        
+
         // Update policy
         const updatedPolicy = await maestroApi.updatePolicy(policy.id, {
           ...policy,
@@ -171,18 +188,20 @@ export const MaestroSafeMutations = {
         });
 
         // Store original for rollback
-        (updatedPolicy as { _original: PolicyUpdate })._original = currentPolicy;
-        
+        (updatedPolicy as { _original: PolicyUpdate })._original =
+          currentPolicy;
+
         return updatedPolicy;
       },
       // Rollback function - restore original policy
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       async (updatedPolicy, _context) => {
-        const original = (updatedPolicy as { _original: PolicyUpdate })._original;
+        const original = (updatedPolicy as { _original: PolicyUpdate })
+          ._original;
         if (original) {
           await maestroApi.updatePolicy(updatedPolicy.id, original);
         }
-      }
+      },
     );
   },
 
@@ -197,31 +216,38 @@ export const MaestroSafeMutations = {
       async (budget: BudgetUpdate, _context) => {
         // Get current budget for rollback
         const currentBudget = await maestroApi.getTenantBudget(budget.tenantId);
-        
+
         // Validate business rules
         if (budget.monthlyUsd < currentBudget.spent) {
-          throw new Error('New budget cannot be less than amount already spent');
+          throw new Error(
+            'New budget cannot be less than amount already spent',
+          );
         }
 
         // Update budget
         const updatedBudget = await maestroApi.putTenantBudget(
-          budget.tenantId, 
-          budget.monthlyUsd
+          budget.tenantId,
+          budget.monthlyUsd,
         );
 
         // Store original for rollback
-        (updatedBudget as { _original: BudgetUpdate })._original = currentBudget;
-        
+        (updatedBudget as { _original: BudgetUpdate })._original =
+          currentBudget;
+
         return updatedBudget;
       },
       // Rollback function
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       async (updatedBudget, _context) => {
-        const original = (updatedBudget as { _original: BudgetUpdate })._original;
+        const original = (updatedBudget as { _original: BudgetUpdate })
+          ._original;
         if (original) {
-          await maestroApi.putTenantBudget(original.tenantId, original.monthlyUsd);
+          await maestroApi.putTenantBudget(
+            original.tenantId,
+            original.monthlyUsd,
+          );
         }
-      }
+      },
     );
   },
 
@@ -235,10 +261,10 @@ export const MaestroSafeMutations = {
       async (pin: RoutingPin, context) => {
         // Validate model is available
         const providers = await maestroApi.getProviders();
-        const modelExists = providers.items.some((p: { models: string[] }) => 
-          p.models.includes(pin.model)
+        const modelExists = providers.items.some((p: { models: string[] }) =>
+          p.models.includes(pin.model),
         );
-        
+
         if (!modelExists) {
           throw new Error(`Model not available: ${pin.model}`);
         }
@@ -247,7 +273,8 @@ export const MaestroSafeMutations = {
         const result = await maestroApi.putRoutingPin({
           route: pin.route,
           model: pin.model,
-          note: pin.note || `Pinned by ${context.userId} at ${context.timestamp}`,
+          note:
+            pin.note || `Pinned by ${context.userId} at ${context.timestamp}`,
         });
 
         // Schedule auto-unpin if expiry set
@@ -255,7 +282,7 @@ export const MaestroSafeMutations = {
           const expiryDate = new Date(pin.expiresAt);
           const now = new Date();
           const delay = expiryDate.getTime() - now.getTime();
-          
+
           if (delay > 0) {
             setTimeout(async () => {
               try {
@@ -273,7 +300,7 @@ export const MaestroSafeMutations = {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       async (result, _context) => {
         await maestroApi.deleteRoutingPin(result.route);
-      }
+      },
     );
   },
 
@@ -289,31 +316,32 @@ export const MaestroSafeMutations = {
         // Get current level for rollback
         const current = await maestroApi.getAutonomy();
         const currentLevel = current.data?.level || 0;
-        
+
         // Gradual rollout for safety - limit increases
         if (level > currentLevel + 1) {
           throw new Error(
             `Autonomy level can only be increased by 1 at a time. ` +
-            `Current: ${currentLevel}, Requested: ${level}, Max allowed: ${currentLevel + 1}`
+              `Current: ${currentLevel}, Requested: ${level}, Max allowed: ${currentLevel + 1}`,
           );
         }
 
         // Update autonomy level
         const result = await maestroApi.setAutonomyLevel(level);
-        
+
         // Store original for rollback
         (result as { _originalLevel: number })._originalLevel = currentLevel;
-        
+
         return result;
       },
       // Rollback function
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       async (result, _context) => {
-        const originalLevel = (result as { _originalLevel: number })._originalLevel;
+        const originalLevel = (result as { _originalLevel: number })
+          ._originalLevel;
         if (originalLevel !== undefined) {
           await maestroApi.setAutonomyLevel(originalLevel);
         }
-      }
+      },
     );
   },
 
@@ -332,19 +360,19 @@ export const MaestroSafeMutations = {
       for (const mutation of mutations) {
         const result = await mutation();
         results.push(result);
-        
+
         if (result.rollbackFn) {
           rollbacks.push(result.rollbackFn);
         }
-        
+
         // Stop on first failure
         if (!result.success) {
           break;
         }
       }
 
-      const allSuccess = results.every(r => r.success);
-      
+      const allSuccess = results.every((r) => r.success);
+
       return {
         success: allSuccess,
         results,
@@ -357,7 +385,7 @@ export const MaestroSafeMutations = {
               console.error('Rollback failed:', error);
             }
           }
-        }
+        },
       };
     } catch (
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -375,7 +403,9 @@ export const MaestroSafeMutations = {
       return {
         success: false,
         results,
-        rollbackAll: async () => { /* No-op */ },
+        rollbackAll: async () => {
+          /* No-op */
+        },
       };
     }
   },

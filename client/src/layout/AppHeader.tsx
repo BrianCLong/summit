@@ -38,20 +38,35 @@ export default function AppHeader() {
   const navigate = useNavigate();
   const location = useLocation();
   const { tenant, status } = useAppSelector((s) => s.ui);
-  const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(null);
-  const [notificationsAnchor, setNotificationsAnchor] = useState<null | HTMLElement>(null);
+  const [userMenuAnchor, setUserMenuAnchor] = useState<null | HTMLElement>(
+    null,
+  );
+  const [notificationsAnchor, setNotificationsAnchor] =
+    useState<null | HTMLElement>(null);
 
   const navigationItems = [
-    { path: '/dashboard', label: 'Dashboard', icon: <Dashboard />, color: 'inherit' },
+    {
+      path: '/dashboard',
+      label: 'Dashboard',
+      icon: <Dashboard />,
+      color: 'inherit',
+    },
     { path: '/graph', label: 'Graph', icon: <AccountTree />, color: 'inherit' },
-    { path: '/investigations', label: 'Cases', icon: <Gavel />, color: 'inherit' },
+    {
+      path: '/investigations',
+      label: 'Cases',
+      icon: <Gavel />,
+      color: 'inherit',
+    },
     { path: '/hunts', label: 'Hunts', icon: <Security />, color: 'inherit' },
     { path: '/ioc', label: 'IOCs', icon: <Timeline />, color: 'inherit' },
     { path: '/search', label: 'Search', icon: <Search />, color: 'inherit' },
   ];
 
   const isActivePath = (path: string) => {
-    return location.pathname === path || location.pathname.startsWith(path + '/');
+    return (
+      location.pathname === path || location.pathname.startsWith(path + '/')
+    );
   };
 
   const handleNavigate = (path: string) => {
@@ -88,10 +103,16 @@ export default function AppHeader() {
               startIcon={item.icon}
               onClick={() => handleNavigate(item.path)}
               sx={{
-                color: isActivePath(item.path) ? 'primary.main' : 'text.primary',
-                bgcolor: isActivePath(item.path) ? 'primary.light' : 'transparent',
+                color: isActivePath(item.path)
+                  ? 'primary.main'
+                  : 'text.primary',
+                bgcolor: isActivePath(item.path)
+                  ? 'primary.light'
+                  : 'transparent',
                 '&:hover': {
-                  bgcolor: isActivePath(item.path) ? 'primary.light' : 'action.hover',
+                  bgcolor: isActivePath(item.path)
+                    ? 'primary.light'
+                    : 'action.hover',
                 },
                 borderRadius: 2,
                 px: 2,
@@ -149,7 +170,10 @@ export default function AppHeader() {
           {/* External Tools */}
           <Tooltip title="Grafana Dashboard">
             <IconButton
-              href={import.meta.env.VITE_GRAFANA_URL || 'http://localhost:3000/grafana'}
+              href={
+                import.meta.env.VITE_GRAFANA_URL ||
+                'http://localhost:3000/grafana'
+              }
               target="_blank"
               rel="noreferrer"
               sx={{ color: 'text.primary' }}
@@ -218,7 +242,10 @@ export default function AppHeader() {
           </MenuItem>
           <Divider />
           <MenuItem onClick={() => setNotificationsAnchor(null)}>
-            <ListItemText primary="View All Notifications" sx={{ textAlign: 'center' }} />
+            <ListItemText
+              primary="View All Notifications"
+              sx={{ textAlign: 'center' }}
+            />
           </MenuItem>
         </Menu>
 

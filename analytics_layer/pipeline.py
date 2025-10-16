@@ -1,10 +1,11 @@
 """Data fusion pipeline that combines external, internal, and world event data."""
+
 from __future__ import annotations
 
 from collections import defaultdict
+from collections.abc import Iterable, Sequence
 from datetime import datetime
 from statistics import mean
-from typing import Iterable, List, Sequence
 
 from .data_models import (
     ExternalMeasurement,
@@ -34,7 +35,9 @@ class DataFusionPipeline:
         domain = self._resolve_domain(external_measurements, internal_signals, event_triggers)
         timestamp = self._latest_timestamp(external_measurements, internal_signals, event_triggers)
 
-        fused_features = self._aggregate_features(external_measurements, internal_signals, event_triggers)
+        fused_features = self._aggregate_features(
+            external_measurements, internal_signals, event_triggers
+        )
 
         influence_score = self._normalize(
             fused_features["external_reach"] * 0.4
@@ -43,9 +46,15 @@ class DataFusionPipeline:
             + (1 - fused_features["internal_platform_health"]) * 0.2
         )
 
-        anomaly_score = min(1.0, fused_features["internal_suspicious_activity"] * 0.6 + fused_features["event_pressure"] * 0.4)
+        anomaly_score = min(
+            1.0,
+            fused_features["internal_suspicious_activity"] * 0.6
+            + fused_features["event_pressure"] * 0.4,
+        )
 
-        behavior_shift = max(0.0, fused_features["behavioral_entropy"] - fused_features["baseline_entropy"])
+        behavior_shift = max(
+            0.0, fused_features["behavioral_entropy"] - fused_features["baseline_entropy"]
+        )
 
         confidence = self._compute_confidence(fused_features)
 
@@ -83,7 +92,7 @@ class DataFusionPipeline:
         internal_signals: Sequence[InternalSignal],
         event_triggers: Sequence[WorldEventTrigger],
     ) -> datetime:
-        timestamps: List[datetime] = []
+        timestamps: list[datetime] = []
         for collection in (external_measurements, internal_signals, event_triggers):
             timestamps.extend(item.timestamp for item in collection)
         return max(timestamps)
@@ -97,18 +106,24 @@ class DataFusionPipeline:
         features = defaultdict(float)
 
         if external_measurements:
-            features["external_reach"] = self._bounded_mean((m.reach for m in external_measurements), 0.0, 1.0)
+            features["external_reach"] = self._bounded_mean(
+                (m.reach for m in external_measurements), 0.0, 1.0
+            )
             features["external_amplification"] = self._bounded_mean(
                 (m.amplification for m in external_measurements), 0.0, 1.0
             )
-            features["external_sentiment"] = self._bounded_mean((m.sentiment for m in external_measurements), -1.0, 1.0)
+            features["external_sentiment"] = self._bounded_mean(
+                (m.sentiment for m in external_measurements), -1.0, 1.0
+            )
         else:
             features["external_reach"] = 0.0
             features["external_amplification"] = 0.0
             features["external_sentiment"] = 0.0
 
         if internal_signals:
-            features["internal_user_growth"] = self._bounded_mean((s.user_growth for s in internal_signals), 0.0, 1.0)
+            features["internal_user_growth"] = self._bounded_mean(
+                (s.user_growth for s in internal_signals), 0.0, 1.0
+            )
             features["internal_suspicious_activity"] = self._bounded_mean(
                 (s.suspicious_activity for s in internal_signals), 0.0, 1.0
             )
@@ -135,11 +150,15 @@ class DataFusionPipeline:
             + (1 - features["external_sentiment"]) * 0.2,
         )
         features["baseline_entropy"] = 0.35
-        features["sample_size"] = len(external_measurements) + len(internal_signals) + len(event_triggers)
+        features["sample_size"] = (
+            len(external_measurements) + len(internal_signals) + len(event_triggers)
+        )
         return dict(features)
 
     def _normalize(self, value: float) -> float:
-        normalized = (value - self._influence_floor) / (self._influence_ceiling - self._influence_floor or 1)
+        normalized = (value - self._influence_floor) / (
+            self._influence_ceiling - self._influence_floor or 1
+        )
         return max(0.0, min(1.0, normalized))
 
     @staticmethod

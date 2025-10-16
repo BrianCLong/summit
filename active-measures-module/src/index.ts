@@ -9,7 +9,9 @@ const server = new ApolloServer({
   schema,
   resolvers,
   context: ({ req }) => ({ driver: neo4jDriver, user: (req as any).user }),
-  plugins: [auditMiddleware],  // Logs all ops
+  plugins: [auditMiddleware], // Logs all ops
 });
 
-server.listen({ port: 4000 }).then(({ url }) => console.log(`Active Measures at ${url}`));
+server
+  .listen({ port: 4000 })
+  .then(({ url }) => console.log(`Active Measures at ${url}`));

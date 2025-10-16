@@ -395,7 +395,8 @@ export class AuditEngine {
 
   constructor(config: AuditConfig, signingKey?: string) {
     this.config = config;
-    this.signingKey = signingKey || process.env.AUDIT_SIGNING_KEY || 'default-key';
+    this.signingKey =
+      signingKey || process.env.AUDIT_SIGNING_KEY || 'default-key';
 
     // Initialize genesis hash
     if (config.enableHashChains && this.hashChain.length === 0) {
@@ -463,7 +464,9 @@ export class AuditEngine {
    * Query audit entries with advanced filtering
    */
   async query(query: AuditQuery): Promise<AuditQueryResult> {
-    const filteredEntries = this.auditStore.filter((entry) => this.matchesQuery(entry, query));
+    const filteredEntries = this.auditStore.filter((entry) =>
+      this.matchesQuery(entry, query),
+    );
 
     // Sort results
     if (query.sortBy) {
@@ -627,7 +630,9 @@ export class AuditEngine {
     archivedCount: number;
     archiveLocation: string;
   }> {
-    const entriesToArchive = this.auditStore.filter((entry) => entry.timestamp < beforeDate);
+    const entriesToArchive = this.auditStore.filter(
+      (entry) => entry.timestamp < beforeDate,
+    );
 
     // Export to archive format
     const archiveData = await this.exportLogs(
@@ -642,7 +647,9 @@ export class AuditEngine {
     const archiveLocation = `audit-archive-${beforeDate.toISOString().split('T')[0]}.json.enc`;
 
     // Remove archived entries from active store
-    this.auditStore = this.auditStore.filter((entry) => entry.timestamp >= beforeDate);
+    this.auditStore = this.auditStore.filter(
+      (entry) => entry.timestamp >= beforeDate,
+    );
 
     // Log the archival operation
     await this.logEntry(
@@ -668,7 +675,8 @@ export class AuditEngine {
         size: archiveData.length,
       },
       {
-        businessJustification: 'Automated audit log archival for retention compliance',
+        businessJustification:
+          'Automated audit log archival for retention compliance',
         urgencyLevel: UrgencyLevel.LOW,
         riskLevel: RiskLevel.MINIMAL,
         complianceFramework: ['SOX', 'GDPR', 'NIST'],
@@ -708,20 +716,32 @@ export class AuditEngine {
   }
 
   private generateGenesisHash(): string {
-    return crypto.createHash('sha256').update('ACTIVE_MEASURES_AUDIT_GENESIS').digest('hex');
+    return crypto
+      .createHash('sha256')
+      .update('ACTIVE_MEASURES_AUDIT_GENESIS')
+      .digest('hex');
   }
 
   private getLastHash(): string {
-    return this.hashChain[this.hashChain.length - 1] || this.generateGenesisHash();
+    return (
+      this.hashChain[this.hashChain.length - 1] || this.generateGenesisHash()
+    );
   }
 
   private calculateEntryHash(entry: AuditEntry): string {
     const entryData = {
       ...entry,
-      integrity: { ...entry.integrity, hash: undefined, digitalSignature: undefined },
+      integrity: {
+        ...entry.integrity,
+        hash: undefined,
+        digitalSignature: undefined,
+      },
     };
 
-    return crypto.createHash('sha256').update(JSON.stringify(entryData)).digest('hex');
+    return crypto
+      .createHash('sha256')
+      .update(JSON.stringify(entryData))
+      .digest('hex');
   }
 
   private signEntry(entry: AuditEntry): string {
@@ -744,14 +764,19 @@ export class AuditEngine {
         integrity: { ...entry.integrity, digitalSignature: undefined },
       };
 
-      const decoded = jwt.verify(entry.integrity.digitalSignature, this.signingKey) as any;
+      const decoded = jwt.verify(
+        entry.integrity.digitalSignature,
+        this.signingKey,
+      ) as any;
       return JSON.stringify(decoded) === JSON.stringify(entryData);
     } catch {
       return false;
     }
   }
 
-  private determineConfidentiality(classification: ClassificationLevel): ConfidentialityLevel {
+  private determineConfidentiality(
+    classification: ClassificationLevel,
+  ): ConfidentialityLevel {
     const mapping = {
       [ClassificationLevel.UNCLASSIFIED]: ConfidentialityLevel.PUBLIC,
       [ClassificationLevel.CONFIDENTIAL]: ConfidentialityLevel.CONFIDENTIAL,
@@ -764,7 +789,9 @@ export class AuditEngine {
     return mapping[classification] || ConfidentialityLevel.INTERNAL;
   }
 
-  private async generateIntegrityData(entry: Partial<AuditEntry>): Promise<IntegrityData> {
+  private async generateIntegrityData(
+    entry: Partial<AuditEntry>,
+  ): Promise<IntegrityData> {
     return {
       hash: '',
       previousHash: '',
@@ -801,7 +828,10 @@ export class AuditEngine {
 
   private async checkForViolations(entry: AuditEntry): Promise<void> {
     // Check for suspicious patterns
-    if (entry.action === AuditAction.LOGIN && entry.outcome.result === OutcomeResult.FAILURE) {
+    if (
+      entry.action === AuditAction.LOGIN &&
+      entry.outcome.result === OutcomeResult.FAILURE
+    ) {
       // Multiple failed login attempts
       const recentFailures = this.auditStore.filter(
         (e) =>
@@ -855,16 +885,28 @@ export class AuditEngine {
   private matchesQuery(entry: AuditEntry, query: AuditQuery): boolean {
     if (query.actorId && entry.actor.id !== query.actorId) return false;
     if (query.action && entry.action !== query.action) return false;
-    if (query.resourceType && entry.resource.type !== query.resourceType) return false;
-    if (query.classification && entry.resource.classification !== query.classification)
+    if (query.resourceType && entry.resource.type !== query.resourceType)
       return false;
-    if (query.operationId && entry.context.operationId !== query.operationId) return false;
-    if (query.riskLevel && entry.context.riskLevel !== query.riskLevel) return false;
-    if (query.complianceStatus && entry.outcome.complianceStatus !== query.complianceStatus)
+    if (
+      query.classification &&
+      entry.resource.classification !== query.classification
+    )
+      return false;
+    if (query.operationId && entry.context.operationId !== query.operationId)
+      return false;
+    if (query.riskLevel && entry.context.riskLevel !== query.riskLevel)
+      return false;
+    if (
+      query.complianceStatus &&
+      entry.outcome.complianceStatus !== query.complianceStatus
+    )
       return false;
 
     if (query.timeRange) {
-      if (entry.timestamp < query.timeRange.start || entry.timestamp > query.timeRange.end) {
+      if (
+        entry.timestamp < query.timeRange.start ||
+        entry.timestamp > query.timeRange.end
+      ) {
         return false;
       }
     }
@@ -903,7 +945,9 @@ export class AuditEngine {
     };
   }
 
-  private generateTimeDistribution(entries: AuditEntry[]): Array<{ time: Date; count: number }> {
+  private generateTimeDistribution(
+    entries: AuditEntry[],
+  ): Array<{ time: Date; count: number }> {
     const hourlyBuckets = new Map<string, number>();
 
     entries.forEach((entry) => {
@@ -921,23 +965,33 @@ export class AuditEngine {
 
   private generateSummary(entries: AuditEntry[]): AuditSummary {
     const uniqueActors = new Set(entries.map((e) => e.actor.id)).size;
-    const uniqueOperations = new Set(entries.map((e) => e.context.operationId).filter(Boolean))
-      .size;
+    const uniqueOperations = new Set(
+      entries.map((e) => e.context.operationId).filter(Boolean),
+    ).size;
 
-    const successCount = entries.filter((e) => e.outcome.result === OutcomeResult.SUCCESS).length;
-    const errorCount = entries.filter((e) => e.outcome.result === OutcomeResult.ERROR).length;
+    const successCount = entries.filter(
+      (e) => e.outcome.result === OutcomeResult.SUCCESS,
+    ).length;
+    const errorCount = entries.filter(
+      (e) => e.outcome.result === OutcomeResult.ERROR,
+    ).length;
 
     const securityViolations = entries.filter(
       (e) =>
-        e.action === AuditAction.SECURITY_VIOLATION || e.action === AuditAction.INTRUSION_ATTEMPT,
+        e.action === AuditAction.SECURITY_VIOLATION ||
+        e.action === AuditAction.INTRUSION_ATTEMPT,
     ).length;
 
     const complianceViolations = entries.filter(
       (e) => e.outcome.complianceStatus === ComplianceStatus.NON_COMPLIANT,
     ).length;
 
-    const totalDuration = entries.reduce((sum, e) => sum + e.outcome.duration, 0);
-    const averageResponseTime = entries.length > 0 ? totalDuration / entries.length : 0;
+    const totalDuration = entries.reduce(
+      (sum, e) => sum + e.outcome.duration,
+      0,
+    );
+    const averageResponseTime =
+      entries.length > 0 ? totalDuration / entries.length : 0;
 
     return {
       totalEntries: entries.length,
@@ -951,12 +1005,16 @@ export class AuditEngine {
     };
   }
 
-  private async detectViolations(entries: AuditEntry[]): Promise<SecurityViolation[]> {
+  private async detectViolations(
+    entries: AuditEntry[],
+  ): Promise<SecurityViolation[]> {
     const violations: SecurityViolation[] = [];
 
     // Detect multiple failed logins
     const failedLogins = entries.filter(
-      (e) => e.action === AuditAction.LOGIN && e.outcome.result === OutcomeResult.FAILURE,
+      (e) =>
+        e.action === AuditAction.LOGIN &&
+        e.outcome.result === OutcomeResult.FAILURE,
     );
 
     const userFailures = new Map<string, AuditEntry[]>();
@@ -1037,7 +1095,15 @@ export class AuditEngine {
   // Export format converters
 
   private convertToCSV(entries: AuditEntry[]): string {
-    const headers = ['ID', 'Timestamp', 'Actor', 'Action', 'Resource', 'Outcome', 'Duration'];
+    const headers = [
+      'ID',
+      'Timestamp',
+      'Actor',
+      'Action',
+      'Resource',
+      'Outcome',
+      'Duration',
+    ];
 
     const rows = entries.map((entry) => [
       entry.id,
@@ -1112,13 +1178,15 @@ export class AuditEngine {
   } {
     return {
       totalEntries: this.auditStore.length,
-      oldestEntry: this.auditStore.length > 0 ? this.auditStore[0].timestamp : undefined,
+      oldestEntry:
+        this.auditStore.length > 0 ? this.auditStore[0].timestamp : undefined,
       newestEntry:
         this.auditStore.length > 0
           ? this.auditStore[this.auditStore.length - 1].timestamp
           : undefined,
       integrityStatus:
-        this.config.enableHashChains && this.hashChain.length === this.auditStore.length + 1,
+        this.config.enableHashChains &&
+        this.hashChain.length === this.auditStore.length + 1,
     };
   }
 }

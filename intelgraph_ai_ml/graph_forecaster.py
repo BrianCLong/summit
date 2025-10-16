@@ -5,13 +5,14 @@ neural network (e.g. TGAT or DySAT) for predicting future edges in a
 Neo4j graph.  The implementation here is intentionally simplified and
 serves as a placeholder for a production model.
 """
+
 from __future__ import annotations
 
+import hashlib
+import json
 from dataclasses import dataclass
 from datetime import datetime, timedelta
-from typing import List, Dict, Any
-import json
-import hashlib
+from typing import Any
 
 try:
     import torch
@@ -33,7 +34,7 @@ class PredictedEdge:
     timestamp: datetime
     confidence: float
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
             "source": self.source,
             "target": self.target,
@@ -61,7 +62,7 @@ class GraphForecaster:
 
     # ------------------------------------------------------------------
     # Neo4j utilities
-    def _fetch_recent_interactions(self, entity_id: str, past_days: int) -> List[Dict[str, Any]]:
+    def _fetch_recent_interactions(self, entity_id: str, past_days: int) -> list[dict[str, Any]]:
         """Fetch recent edges for the given entity."""
         if self._driver is None:
             return []
@@ -75,7 +76,7 @@ class GraphForecaster:
             return [record.data() for record in records]
 
     # ------------------------------------------------------------------
-    def predict(self, entity_id: str, past_days: int, future_days: int) -> List[PredictedEdge]:
+    def predict(self, entity_id: str, past_days: int, future_days: int) -> list[PredictedEdge]:
         """Predict future edges for ``entity_id``.
 
         The current implementation is a heuristic: it assumes that any
@@ -84,7 +85,7 @@ class GraphForecaster:
         """
 
         interactions = self._fetch_recent_interactions(entity_id, past_days)
-        predicted: List[PredictedEdge] = []
+        predicted: list[PredictedEdge] = []
         future_ts = datetime.utcnow() + timedelta(days=future_days)
         for item in interactions:
             predicted.append(
@@ -101,11 +102,14 @@ class GraphForecaster:
     @staticmethod
     def cache_key(entity_id: str, past_days: int, future_days: int) -> str:
         """Create a stable cache key for Redis."""
-        raw = json.dumps({
-            "entity_id": entity_id,
-            "past_days": past_days,
-            "future_days": future_days,
-        }, sort_keys=True)
+        raw = json.dumps(
+            {
+                "entity_id": entity_id,
+                "past_days": past_days,
+                "future_days": future_days,
+            },
+            sort_keys=True,
+        )
         return hashlib.sha256(raw.encode("utf-8")).hexdigest()
 
 

@@ -1,226 +1,234 @@
 // Performance monitoring and optimization utilities
 import React from 'react';
 const DEFAULT_BUDGETS = {
-    lcp: { target: 2500, warning: 4000 },
-    fid: { target: 100, warning: 300 },
-    cls: { target: 0.1, warning: 0.25 },
-    fcp: { target: 1800, warning: 3000 },
-    bundleSize: { target: 250000, warning: 500000 },
-    routeChange: { target: 250, warning: 1000 },
+  lcp: { target: 2500, warning: 4000 },
+  fid: { target: 100, warning: 300 },
+  cls: { target: 0.1, warning: 0.25 },
+  fcp: { target: 1800, warning: 3000 },
+  bundleSize: { target: 250000, warning: 500000 },
+  routeChange: { target: 250, warning: 1000 },
 };
 export class PerformanceMonitor {
-    constructor(budgets = {}) {
-        this.metrics = {};
-        this.observers = [];
-        this.budgets = { ...DEFAULT_BUDGETS, ...budgets };
-        this.setupObservers();
-    }
-    setupObservers() {
-        if (typeof window === 'undefined')
-            return;
-        // Core Web Vitals
-        this.observeWebVitals();
-        // Navigation timing
-        this.observeNavigationTiming();
-        // Resource timing
-        this.observeResourceTiming();
-    }
-    observeWebVitals() {
-        // Largest Contentful Paint
-        this.createObserver('largest-contentful-paint', (entries) => {
-            const lcp = entries[entries.length - 1];
-            this.recordMetric('lcp', lcp.startTime);
-            this.checkBudget('lcp', lcp.startTime);
-        });
-        // First Input Delay
-        this.createObserver('first-input', (entries) => {
-            const fid = entries[0];
-            this.recordMetric('fid', fid.processingStart - fid.startTime);
-            this.checkBudget('fid', fid.processingStart - fid.startTime);
-        });
-        // Cumulative Layout Shift
-        this.createObserver('layout-shift', (entries) => {
-            const cls = entries.reduce((sum, entry) => {
-                if (!entry.hadRecentInput) {
-                    sum += entry.value;
-                }
-                return sum;
-            }, 0);
-            this.recordMetric('cls', cls);
-            this.checkBudget('cls', cls);
-        });
-    }
-    observeNavigationTiming() {
-        window.addEventListener('load', () => {
-            const navigation = performance.getEntriesByType('navigation')[0];
-            if (navigation) {
-                // First Contentful Paint
-                const paintEntries = performance.getEntriesByType('paint');
-                const fcp = paintEntries.find((entry) => entry.name === 'first-contentful-paint');
-                if (fcp) {
-                    this.recordMetric('fcp', fcp.startTime);
-                    this.checkBudget('fcp', fcp.startTime);
-                }
-                // Time to First Byte
-                const ttfb = navigation.responseStart - navigation.requestStart;
-                this.recordMetric('ttfb', ttfb);
-            }
-        });
-    }
-    observeResourceTiming() {
-        this.createObserver('resource', (entries) => {
-            entries.forEach((entry) => {
-                const resource = entry;
-                if (resource.name.includes('/api/')) {
-                    const apiPath = new URL(resource.name).pathname;
-                    this.recordApiResponse(apiPath, resource.responseEnd - resource.responseStart);
-                }
-            });
-        });
-    }
-    createObserver(type, callback) {
-        try {
-            const observer = new PerformanceObserver((list) => {
-                callback(list.getEntries());
-            });
-            observer.observe({ type, buffered: true });
-            this.observers.push(observer);
+  constructor(budgets = {}) {
+    this.metrics = {};
+    this.observers = [];
+    this.budgets = { ...DEFAULT_BUDGETS, ...budgets };
+    this.setupObservers();
+  }
+  setupObservers() {
+    if (typeof window === 'undefined') return;
+    // Core Web Vitals
+    this.observeWebVitals();
+    // Navigation timing
+    this.observeNavigationTiming();
+    // Resource timing
+    this.observeResourceTiming();
+  }
+  observeWebVitals() {
+    // Largest Contentful Paint
+    this.createObserver('largest-contentful-paint', (entries) => {
+      const lcp = entries[entries.length - 1];
+      this.recordMetric('lcp', lcp.startTime);
+      this.checkBudget('lcp', lcp.startTime);
+    });
+    // First Input Delay
+    this.createObserver('first-input', (entries) => {
+      const fid = entries[0];
+      this.recordMetric('fid', fid.processingStart - fid.startTime);
+      this.checkBudget('fid', fid.processingStart - fid.startTime);
+    });
+    // Cumulative Layout Shift
+    this.createObserver('layout-shift', (entries) => {
+      const cls = entries.reduce((sum, entry) => {
+        if (!entry.hadRecentInput) {
+          sum += entry.value;
         }
-        catch (error) {
-            console.warn(`Failed to create ${type} observer:`, error);
+        return sum;
+      }, 0);
+      this.recordMetric('cls', cls);
+      this.checkBudget('cls', cls);
+    });
+  }
+  observeNavigationTiming() {
+    window.addEventListener('load', () => {
+      const navigation = performance.getEntriesByType('navigation')[0];
+      if (navigation) {
+        // First Contentful Paint
+        const paintEntries = performance.getEntriesByType('paint');
+        const fcp = paintEntries.find(
+          (entry) => entry.name === 'first-contentful-paint',
+        );
+        if (fcp) {
+          this.recordMetric('fcp', fcp.startTime);
+          this.checkBudget('fcp', fcp.startTime);
         }
-    }
-    recordMetric(key, value) {
-        this.metrics[key] = value;
-    }
-    recordApiResponse(path, duration) {
-        if (!this.metrics.apiResponseTime) {
-            this.metrics.apiResponseTime = {};
+        // Time to First Byte
+        const ttfb = navigation.responseStart - navigation.requestStart;
+        this.recordMetric('ttfb', ttfb);
+      }
+    });
+  }
+  observeResourceTiming() {
+    this.createObserver('resource', (entries) => {
+      entries.forEach((entry) => {
+        const resource = entry;
+        if (resource.name.includes('/api/')) {
+          const apiPath = new URL(resource.name).pathname;
+          this.recordApiResponse(
+            apiPath,
+            resource.responseEnd - resource.responseStart,
+          );
         }
-        this.metrics.apiResponseTime[path] = duration;
+      });
+    });
+  }
+  createObserver(type, callback) {
+    try {
+      const observer = new PerformanceObserver((list) => {
+        callback(list.getEntries());
+      });
+      observer.observe({ type, buffered: true });
+      this.observers.push(observer);
+    } catch (error) {
+      console.warn(`Failed to create ${type} observer:`, error);
     }
-    checkBudget(metric, value) {
-        const budget = this.budgets[metric];
-        if (budget && value > budget.warning) {
-            console.warn(`Performance budget violation: ${metric} ${value.toFixed(2)}ms > ${budget.warning}ms`);
-            this.onViolation?.(metric, value, budget.warning);
-        }
+  }
+  recordMetric(key, value) {
+    this.metrics[key] = value;
+  }
+  recordApiResponse(path, duration) {
+    if (!this.metrics.apiResponseTime) {
+      this.metrics.apiResponseTime = {};
     }
-    measureRouteChange(routeName, fn) {
-        const start = performance.now();
-        return fn().finally(() => {
-            const duration = performance.now() - start;
-            if (!this.metrics.renderTime) {
-                this.metrics.renderTime = {};
-            }
-            this.metrics.renderTime[routeName] = duration;
-            this.recordMetric('routeChangeTime', duration);
-            this.checkBudget('routeChange', duration);
-        });
+    this.metrics.apiResponseTime[path] = duration;
+  }
+  checkBudget(metric, value) {
+    const budget = this.budgets[metric];
+    if (budget && value > budget.warning) {
+      console.warn(
+        `Performance budget violation: ${metric} ${value.toFixed(2)}ms > ${budget.warning}ms`,
+      );
+      this.onViolation?.(metric, value, budget.warning);
     }
-    onBudgetViolation(callback) {
-        this.onViolation = callback;
+  }
+  measureRouteChange(routeName, fn) {
+    const start = performance.now();
+    return fn().finally(() => {
+      const duration = performance.now() - start;
+      if (!this.metrics.renderTime) {
+        this.metrics.renderTime = {};
+      }
+      this.metrics.renderTime[routeName] = duration;
+      this.recordMetric('routeChangeTime', duration);
+      this.checkBudget('routeChange', duration);
+    });
+  }
+  onBudgetViolation(callback) {
+    this.onViolation = callback;
+  }
+  getMetrics() {
+    return { ...this.metrics };
+  }
+  getBudgetStatus() {
+    const results = [];
+    Object.entries(this.budgets).forEach(([metric, budget]) => {
+      const value = this.metrics[metric];
+      if (value !== undefined) {
+        let status = 'good';
+        if (value > budget.warning) status = 'poor';
+        else if (value > budget.target) status = 'warning';
+        results.push({ metric, value, budget: budget.target, status });
+      }
+    });
+    return results;
+  }
+  generateReport() {
+    const status = this.getBudgetStatus();
+    const violations = status.filter((s) => s.status !== 'good');
+    let report = '# Performance Report\n\n';
+    report += `Generated: ${new Date().toISOString()}\n\n`;
+    if (violations.length === 0) {
+      report += '✅ All performance budgets are within target ranges.\n\n';
+    } else {
+      report += `⚠️ ${violations.length} performance budget violations detected:\n\n`;
+      violations.forEach((v) => {
+        report += `- **${v.metric}**: ${v.value.toFixed(2)}ms (budget: ${v.budget}ms) - ${v.status}\n`;
+      });
+      report += '\n';
     }
-    getMetrics() {
-        return { ...this.metrics };
-    }
-    getBudgetStatus() {
-        const results = [];
-        Object.entries(this.budgets).forEach(([metric, budget]) => {
-            const value = this.metrics[metric];
-            if (value !== undefined) {
-                let status = 'good';
-                if (value > budget.warning)
-                    status = 'poor';
-                else if (value > budget.target)
-                    status = 'warning';
-                results.push({ metric, value, budget: budget.target, status });
-            }
-        });
-        return results;
-    }
-    generateReport() {
-        const status = this.getBudgetStatus();
-        const violations = status.filter((s) => s.status !== 'good');
-        let report = '# Performance Report\n\n';
-        report += `Generated: ${new Date().toISOString()}\n\n`;
-        if (violations.length === 0) {
-            report += '✅ All performance budgets are within target ranges.\n\n';
-        }
-        else {
-            report += `⚠️ ${violations.length} performance budget violations detected:\n\n`;
-            violations.forEach((v) => {
-                report += `- **${v.metric}**: ${v.value.toFixed(2)}ms (budget: ${v.budget}ms) - ${v.status}\n`;
-            });
-            report += '\n';
-        }
-        report += '## All Metrics\n\n';
-        status.forEach((s) => {
-            const icon = s.status === 'good' ? '✅' : s.status === 'warning' ? '⚠️' : '❌';
-            report += `${icon} **${s.metric}**: ${s.value.toFixed(2)}ms (budget: ${s.budget}ms)\n`;
-        });
-        return report;
-    }
-    destroy() {
-        this.observers.forEach((observer) => observer.disconnect());
-        this.observers = [];
-    }
+    report += '## All Metrics\n\n';
+    status.forEach((s) => {
+      const icon =
+        s.status === 'good' ? '✅' : s.status === 'warning' ? '⚠️' : '❌';
+      report += `${icon} **${s.metric}**: ${s.value.toFixed(2)}ms (budget: ${s.budget}ms)\n`;
+    });
+    return report;
+  }
+  destroy() {
+    this.observers.forEach((observer) => observer.disconnect());
+    this.observers = [];
+  }
 }
 // React hook for performance monitoring
 export const usePerformanceMonitor = (budgets) => {
-    const [monitor] = React.useState(() => new PerformanceMonitor(budgets));
-    const [metrics, setMetrics] = React.useState({});
-    const [violations, setViolations] = React.useState([]);
-    React.useEffect(() => {
-        monitor.onBudgetViolation((metric, value, budget) => {
-            setViolations((prev) => [...prev.slice(-4), { metric, value, budget }]); // Keep last 5 violations
-        });
-        // Update metrics periodically
-        const interval = setInterval(() => {
-            setMetrics(monitor.getMetrics());
-        }, 1000);
-        return () => {
-            clearInterval(interval);
-            monitor.destroy();
-        };
-    }, [monitor]);
-    return {
-        metrics,
-        violations,
-        budgetStatus: monitor.getBudgetStatus(),
-        measureRouteChange: monitor.measureRouteChange.bind(monitor),
-        generateReport: monitor.generateReport.bind(monitor),
+  const [monitor] = React.useState(() => new PerformanceMonitor(budgets));
+  const [metrics, setMetrics] = React.useState({});
+  const [violations, setViolations] = React.useState([]);
+  React.useEffect(() => {
+    monitor.onBudgetViolation((metric, value, budget) => {
+      setViolations((prev) => [...prev.slice(-4), { metric, value, budget }]); // Keep last 5 violations
+    });
+    // Update metrics periodically
+    const interval = setInterval(() => {
+      setMetrics(monitor.getMetrics());
+    }, 1000);
+    return () => {
+      clearInterval(interval);
+      monitor.destroy();
     };
+  }, [monitor]);
+  return {
+    metrics,
+    violations,
+    budgetStatus: monitor.getBudgetStatus(),
+    measureRouteChange: monitor.measureRouteChange.bind(monitor),
+    generateReport: monitor.generateReport.bind(monitor),
+  };
 };
 // Lazy loading utilities
 export const createLazyComponent = (importFn, fallback) => {
-    const LazyComponent = React.lazy(importFn);
-    return (props) => React.createElement(React.Suspense, {
+  const LazyComponent = React.lazy(importFn);
+  return (props) =>
+    React.createElement(
+      React.Suspense,
+      {
         fallback: fallback
-            ? React.createElement(fallback)
-            : React.createElement('div', null, 'Loading...'),
-    }, React.createElement(LazyComponent, props));
+          ? React.createElement(fallback)
+          : React.createElement('div', null, 'Loading...'),
+      },
+      React.createElement(LazyComponent, props),
+    );
 };
 // Bundle splitting utility
 export const preloadRoute = (routePath) => {
-    if (typeof window !== 'undefined') {
-        const link = document.createElement('link');
-        link.rel = 'prefetch';
-        link.href = routePath;
-        document.head.appendChild(link);
-    }
+  if (typeof window !== 'undefined') {
+    const link = document.createElement('link');
+    link.rel = 'prefetch';
+    link.href = routePath;
+    document.head.appendChild(link);
+  }
 };
 // Image optimization helpers
 export const createOptimizedImageSrc = (src, width, quality = 75) => {
-    // In production, this would integrate with an image optimization service
-    return `${src}?w=${width}&q=${quality}`;
+  // In production, this would integrate with an image optimization service
+  return `${src}?w=${width}&q=${quality}`;
 };
 export const useImagePreload = (src) => {
-    const [loaded, setLoaded] = React.useState(false);
-    React.useEffect(() => {
-        const img = new Image();
-        img.onload = () => setLoaded(true);
-        img.src = src;
-    }, [src]);
-    return loaded;
+  const [loaded, setLoaded] = React.useState(false);
+  React.useEffect(() => {
+    const img = new Image();
+    img.onload = () => setLoaded(true);
+    img.src = src;
+  }, [src]);
+  return loaded;
 };

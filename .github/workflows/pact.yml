@@ -11,4 +11,3 @@ jobs:
       - run: npx jest tests/contract/pact/policyPack.pact.test.ts || true
       - uses: actions/upload-artifact@v4
         with: { name: pact-pacts, path: pact/pacts }
-

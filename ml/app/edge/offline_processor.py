@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import io
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
 import numpy as np
-from PIL import Image
 import torch
+from PIL import Image
 from torchvision import transforms
 
 
@@ -27,7 +27,7 @@ class OfflineProcessor:
         self._img_tf = transforms.ToTensor()
 
     # ------------------------------------------------------------------
-    def process_image(self, data: bytes) -> Dict[str, Any]:
+    def process_image(self, data: bytes) -> dict[str, Any]:
         """Classify a single image given raw byte input."""
         img = Image.open(io.BytesIO(data)).convert("RGB")
         tensor = self._img_tf(img).unsqueeze(0)
@@ -37,7 +37,7 @@ class OfflineProcessor:
         return {"modality": "image", "prediction": prediction}
 
     # ------------------------------------------------------------------
-    def process_audio(self, waveform: np.ndarray) -> Dict[str, Any]:
+    def process_audio(self, waveform: np.ndarray) -> dict[str, Any]:
         """Classify an audio waveform array."""
         tensor = torch.tensor(waveform, dtype=torch.float32).unsqueeze(0)
         with torch.inference_mode():
@@ -46,7 +46,7 @@ class OfflineProcessor:
         return {"modality": "audio", "prediction": prediction}
 
     # ------------------------------------------------------------------
-    def process_text(self, text: str) -> Dict[str, Any]:
+    def process_text(self, text: str) -> dict[str, Any]:
         """Classify text by encoding characters as numeric features."""
         max_len = 16
         encoded = [ord(c) / 255.0 for c in text[:max_len]]

@@ -19,31 +19,31 @@ apiGateway:
     targetCPUUtilizationPercentage: 60
   resources:
     requests:
-      memory: "512Mi"
-      cpu: "500m"
+      memory: '512Mi'
+      cpu: '500m'
     limits:
-      memory: "1Gi"
-      cpu: "1000m"
+      memory: '1Gi'
+      cpu: '1000m'
 
 graphXai:
   replicas: 3
   resources:
     requests:
-      memory: "1Gi"
-      cpu: "1000m"
+      memory: '1Gi'
+      cpu: '1000m'
     limits:
-      memory: "4Gi"
-      cpu: "2000m"
+      memory: '4Gi'
+      cpu: '2000m'
 
 provLedger:
   replicas: 3
   resources:
     requests:
-      memory: "512Mi"
-      cpu: "500m"
+      memory: '512Mi'
+      cpu: '500m'
     limits:
-      memory: "1Gi"
-      cpu: "1000m"
+      memory: '1Gi'
+      cpu: '1000m'
 
 feedProcessor:
   replicas: 5
@@ -53,11 +53,11 @@ web:
     type: LoadBalancer
   ingress:
     enabled: true
-    className: "nginx"
+    className: 'nginx'
     annotations:
-      cert-manager.io/cluster-issuer: "letsencrypt-prod"
-      nginx.ingress.kubernetes.io/ssl-redirect: "true"
-      nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+      cert-manager.io/cluster-issuer: 'letsencrypt-prod'
+      nginx.ingress.kubernetes.io/ssl-redirect: 'true'
+      nginx.ingress.kubernetes.io/force-ssl-redirect: 'true'
     hosts:
       - host: intelgraph.com
         paths:
@@ -91,14 +91,14 @@ neo4j:
   persistence:
     enabled: true
     size: 100Gi
-    storageClass: "fast-ssd"
+    storageClass: 'fast-ssd'
   resources:
     requests:
-      memory: "4Gi"
-      cpu: "2000m"
+      memory: '4Gi'
+      cpu: '2000m'
     limits:
-      memory: "16Gi"
-      cpu: "8000m"
+      memory: '16Gi'
+      cpu: '8000m'
 
 postgresql:
   architecture: replication
@@ -106,14 +106,14 @@ postgresql:
     persistence:
       enabled: true
       size: 100Gi
-      storageClass: "fast-ssd"
+      storageClass: 'fast-ssd'
     resources:
       requests:
-        memory: "1Gi"
-        cpu: "1000m"
+        memory: '1Gi'
+        cpu: '1000m'
       limits:
-        memory: "4Gi"
-        cpu: "2000m"
+        memory: '4Gi'
+        cpu: '2000m'
   readReplicas:
     replicaCount: 2
 
@@ -125,11 +125,11 @@ redis:
       size: 20Gi
     resources:
       requests:
-        memory: "1Gi"
-        cpu: "500m"
+        memory: '1Gi'
+        cpu: '500m'
       limits:
-        memory: "4Gi"
-        cpu: "1000m"
+        memory: '4Gi'
+        cpu: '1000m'
   replica:
     replicaCount: 2
 
@@ -138,10 +138,10 @@ observability:
   enabled: true
   prometheus:
     server:
-      retention: "30d"
+      retention: '30d'
       persistentVolume:
         size: 50Gi
-        storageClass: "fast-ssd"
+        storageClass: 'fast-ssd'
   grafana:
     persistence:
       enabled: true
@@ -163,7 +163,7 @@ security:
 
 # Node affinity for production workloads
 nodeSelector:
-  node-type: "production"
+  node-type: 'production'
 
 affinity:
   podAntiAffinity:
@@ -174,5 +174,5 @@ affinity:
             matchExpressions:
               - key: app.kubernetes.io/name
                 operator: In
-                values: ["ig-platform"]
+                values: ['ig-platform']
           topologyKey: kubernetes.io/hostname

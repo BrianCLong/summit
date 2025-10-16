@@ -3,5 +3,5 @@ exceptions:
     package: some-lib@1.2.3
     severity: HIGH
     expires: 2025-10-01
-    reason: "No fixed version; sandboxed usage"
-    approver: "security@intelgraph"
+    reason: 'No fixed version; sandboxed usage'
+    approver: 'security@intelgraph'

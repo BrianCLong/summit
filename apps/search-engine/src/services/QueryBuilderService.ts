@@ -12,17 +12,56 @@ export class QueryBuilderService {
 
   private initializeSynonyms(): void {
     this.synonyms.set('person', ['individual', 'human', 'people', 'personnel']);
-    this.synonyms.set('organization', ['company', 'corp', 'enterprise', 'business', 'org']);
-    this.synonyms.set('location', ['place', 'address', 'geo', 'position', 'site']);
-    this.synonyms.set('event', ['incident', 'occurrence', 'happening', 'activity']);
-    this.synonyms.set('threat', ['danger', 'risk', 'vulnerability', 'attack', 'malware']);
-    this.synonyms.set('document', ['file', 'report', 'paper', 'record', 'publication']);
+    this.synonyms.set('organization', [
+      'company',
+      'corp',
+      'enterprise',
+      'business',
+      'org',
+    ]);
+    this.synonyms.set('location', [
+      'place',
+      'address',
+      'geo',
+      'position',
+      'site',
+    ]);
+    this.synonyms.set('event', [
+      'incident',
+      'occurrence',
+      'happening',
+      'activity',
+    ]);
+    this.synonyms.set('threat', [
+      'danger',
+      'risk',
+      'vulnerability',
+      'attack',
+      'malware',
+    ]);
+    this.synonyms.set('document', [
+      'file',
+      'report',
+      'paper',
+      'record',
+      'publication',
+    ]);
   }
 
   private initializeFieldMappings(): void {
     this.fieldMappings.set('name', ['title', 'label', 'identifier', 'alias']);
-    this.fieldMappings.set('description', ['content', 'summary', 'details', 'notes']);
-    this.fieldMappings.set('date', ['timestamp', 'created', 'modified', 'updated']);
+    this.fieldMappings.set('description', [
+      'content',
+      'summary',
+      'details',
+      'notes',
+    ]);
+    this.fieldMappings.set('date', [
+      'timestamp',
+      'created',
+      'modified',
+      'updated',
+    ]);
     this.fieldMappings.set('type', ['category', 'classification', 'kind']);
     this.fieldMappings.set('source', ['origin', 'provider', 'system', 'feed']);
   }
@@ -126,10 +165,21 @@ export class QueryBuilderService {
       'after',
     ]);
     const operatorTerms = new Set(['and', 'or', 'not', 'near', 'within']);
-    const modifierTerms = new Set(['similar', 'like', 'related', 'associated', 'connected']);
+    const modifierTerms = new Set([
+      'similar',
+      'like',
+      'related',
+      'associated',
+      'connected',
+    ]);
 
     tokens.forEach((token) => {
-      if (stopWords.has(token) && token !== 'and' && token !== 'or' && token !== 'not') {
+      if (
+        stopWords.has(token) &&
+        token !== 'and' &&
+        token !== 'or' &&
+        token !== 'not'
+      ) {
         return;
       }
 
@@ -153,14 +203,25 @@ export class QueryBuilderService {
     originalQuery: string,
     processed: any,
   ): 'fulltext' | 'semantic' | 'hybrid' | 'fuzzy' {
-    const semanticIndicators = ['similar', 'like', 'related', 'associated', 'meaning', 'concept'];
+    const semanticIndicators = [
+      'similar',
+      'like',
+      'related',
+      'associated',
+      'meaning',
+      'concept',
+    ];
     const fuzzyIndicators = ['approximate', 'fuzzy', 'close', 'near'];
 
-    if (semanticIndicators.some((indicator) => originalQuery.includes(indicator))) {
+    if (
+      semanticIndicators.some((indicator) => originalQuery.includes(indicator))
+    ) {
       return 'semantic';
     }
 
-    if (fuzzyIndicators.some((indicator) => originalQuery.includes(indicator))) {
+    if (
+      fuzzyIndicators.some((indicator) => originalQuery.includes(indicator))
+    ) {
       return 'fuzzy';
     }
 
@@ -202,22 +263,44 @@ export class QueryBuilderService {
     dateExpressions.forEach((expr) => {
       switch (expr) {
         case 'today':
-          from = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-          to = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1).toISOString();
+          from = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate(),
+          ).toISOString();
+          to = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate() + 1,
+          ).toISOString();
           break;
         case 'yesterday':
-          from = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1).toISOString();
-          to = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+          from = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate() - 1,
+          ).toISOString();
+          to = new Date(
+            now.getFullYear(),
+            now.getMonth(),
+            now.getDate(),
+          ).toISOString();
           break;
         case 'week':
         case 'recent':
-          from = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+          from = new Date(
+            now.getTime() - 7 * 24 * 60 * 60 * 1000,
+          ).toISOString();
           break;
         case 'month':
-          from = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+          from = new Date(
+            now.getTime() - 30 * 24 * 60 * 60 * 1000,
+          ).toISOString();
           break;
         case 'year':
-          from = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000).toISOString();
+          from = new Date(
+            now.getTime() - 365 * 24 * 60 * 60 * 1000,
+          ).toISOString();
           break;
       }
     });
@@ -263,17 +346,27 @@ export class QueryBuilderService {
       case 'bool':
         return {
           bool: {
-            ...(qb.must && { must: qb.must.map((q) => this.convertQueryBuilderToElastic(q)) }),
+            ...(qb.must && {
+              must: qb.must.map((q) => this.convertQueryBuilderToElastic(q)),
+            }),
             ...(qb.should && {
-              should: qb.should.map((q) => this.convertQueryBuilderToElastic(q)),
+              should: qb.should.map((q) =>
+                this.convertQueryBuilderToElastic(q),
+              ),
             }),
             ...(qb.must_not && {
-              must_not: qb.must_not.map((q) => this.convertQueryBuilderToElastic(q)),
+              must_not: qb.must_not.map((q) =>
+                this.convertQueryBuilderToElastic(q),
+              ),
             }),
             ...(qb.filter && {
-              filter: qb.filter.map((q) => this.convertQueryBuilderToElastic(q)),
+              filter: qb.filter.map((q) =>
+                this.convertQueryBuilderToElastic(q),
+              ),
             }),
-            ...(qb.minimum_should_match && { minimum_should_match: qb.minimum_should_match }),
+            ...(qb.minimum_should_match && {
+              minimum_should_match: qb.minimum_should_match,
+            }),
           },
         };
 
@@ -418,7 +511,8 @@ export class QueryBuilderService {
   parseFilterExpression(expression: string): SearchFilters {
     const filters: SearchFilters = {};
 
-    const dateRangeRegex = /date\s*:\s*(\d{4}-\d{2}-\d{2})\s*to\s*(\d{4}-\d{2}-\d{2})/i;
+    const dateRangeRegex =
+      /date\s*:\s*(\d{4}-\d{2}-\d{2})\s*to\s*(\d{4}-\d{2}-\d{2})/i;
     const dateMatch = expression.match(dateRangeRegex);
     if (dateMatch) {
       filters.dateRange = {
@@ -463,10 +557,13 @@ export class QueryBuilderService {
       'threat-intelligence':
         'type:threat AND (malware OR vulnerability OR attack) AND date:{{date_range}}',
       'entity-relationships': 'entity:"{{entity_name}}" AND related:true',
-      'case-documents': 'type:document AND case:"{{case_id}}" AND date:{{date_range}}',
-      'recent-events': 'type:event AND date:last_{{days}}_days ORDER BY date DESC',
+      'case-documents':
+        'type:document AND case:"{{case_id}}" AND date:{{date_range}}',
+      'recent-events':
+        'type:event AND date:last_{{days}}_days ORDER BY date DESC',
       'high-confidence': 'confidence:0.8_to_1.0 AND verified:true',
-      geospatial: 'location:within_{{distance}}_of_{{coordinates}} AND type:{{entity_type}}',
+      geospatial:
+        'location:within_{{distance}}_of_{{coordinates}} AND type:{{entity_type}}',
     };
   }
 }

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
-from typing import Callable, Dict, Iterable, List
 
 import numpy as np
 
@@ -18,11 +18,11 @@ from .models import LogisticStudent, LogisticTeacher
 class TaintScreenReport:
     """Human-readable report summarising the taint screen."""
 
-    allowed_ids: List[str]
-    rejected: Dict[str, str]
-    policy_metadata: List[Dict[str, str]]
+    allowed_ids: list[str]
+    rejected: dict[str, str]
+    policy_metadata: list[dict[str, str]]
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         return {
             "allowed_ids": list(self.allowed_ids),
             "rejected": dict(self.rejected),
@@ -34,11 +34,11 @@ class TaintScreenReport:
 class TeacherLogitsCache:
     """Cache of teacher logits along with exclusion proofs."""
 
-    logits: Dict[str, float]
+    logits: dict[str, float]
     temperature: float
     proof: ProofOfExclusion
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         return {
             "logits": dict(self.logits),
             "temperature": float(self.temperature),
@@ -54,7 +54,7 @@ class DistillationArtifacts:
     logits_cache: TeacherLogitsCache
     student_model: LogisticStudent
     manifest: AttestedTrainingManifest
-    training_summary: Dict[str, float]
+    training_summary: dict[str, float]
     accuracy_drop: float
     teacher_accuracy: float
     student_accuracy: float
@@ -66,8 +66,8 @@ class PCKDPipeline:
     def __init__(
         self,
         policy_filters: Iterable[PolicyFilter],
-        trainer: Callable[..., Dict[str, float]] = knowledge_distillation,
-        trainer_kwargs: Dict[str, float] | None = None,
+        trainer: Callable[..., dict[str, float]] = knowledge_distillation,
+        trainer_kwargs: dict[str, float] | None = None,
         documented_accuracy_bound: float = 0.05,
     ) -> None:
         self.policy_filters = list(policy_filters)
@@ -107,8 +107,13 @@ class PCKDPipeline:
         )
 
         logits_cache = TeacherLogitsCache(
-            logits={ex.example_id: float(logit) for ex, logit in zip(screen_result.allowed, teacher_logits)},
-            temperature=float(self.trainer_kwargs.get("temperature", training_summary.get("temperature", 1.0))),
+            logits={
+                ex.example_id: float(logit)
+                for ex, logit in zip(screen_result.allowed, teacher_logits, strict=False)
+            },
+            temperature=float(
+                self.trainer_kwargs.get("temperature", training_summary.get("temperature", 1.0))
+            ),
             proof=proof,
         )
 
@@ -147,7 +152,7 @@ class PCKDPipeline:
             student_accuracy=student_accuracy,
         )
 
-    def _screen_dataset(self, dataset: Dataset) -> "_ScreenResultWithDigest":
+    def _screen_dataset(self, dataset: Dataset) -> _ScreenResultWithDigest:
         result = taint_screen(dataset, self.policy_filters)
         rejection_digest = compute_rejection_digest(result.rejection_reasons)
         return _ScreenResultWithDigest(
@@ -165,13 +170,13 @@ def _accuracy(predictions: np.ndarray, labels: np.ndarray) -> float:
 
 @dataclass
 class _ScreenResultWithDigest:
-    allowed: List[Example]
-    rejected: List[Example]
-    rejection_reasons: Dict[str, str]
+    allowed: list[Example]
+    rejected: list[Example]
+    rejection_reasons: dict[str, str]
     rejection_digest: str
 
-    def allowed_ids(self) -> List[str]:
+    def allowed_ids(self) -> list[str]:
         return [example.example_id for example in self.allowed]
 
-    def rejected_ids(self) -> List[str]:
+    def rejected_ids(self) -> list[str]:
         return [example.example_id for example in self.rejected]

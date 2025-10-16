@@ -116,4 +116,3 @@ spec:
   args:
     - name: target
       value: https://maestro.intelgraph.io/health
-

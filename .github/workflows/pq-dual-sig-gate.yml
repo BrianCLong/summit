@@ -2,9 +2,9 @@ name: Post-Quantum Dual Signature Gate
 
 on:
   push:
-    branches: [ main, develop, staging ]
+    branches: [main, develop, staging]
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   workflow_dispatch:
     inputs:
       force_verification:

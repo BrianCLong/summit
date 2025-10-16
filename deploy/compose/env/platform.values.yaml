@@ -12,8 +12,8 @@ budgets:
   alert_threshold_pct: 80
 
 alerts:
-  error_budget_channel: "slack://#error-budget"
-  finops_channel: "slack://#finops"
+  error_budget_channel: 'slack://#error-budget'
+  finops_channel: 'slack://#finops'
   burn_alert_recipients:
     - sre@topicality.co
     - platform@topicality.co
@@ -64,8 +64,8 @@ networking:
 
 observability:
   sampling:
-    production: 0.1  # 10% sampling
-    staging: 0.5     # 50% sampling
+    production: 0.1 # 10% sampling
+    staging: 0.5 # 50% sampling
   otlp_endpoints:
     traces: monitoring.svc.cluster.local:4317
     metrics: monitoring.svc.cluster.local:4317
@@ -79,7 +79,7 @@ security:
   vulnerability_scanning: enabled
 
 freeze_windows:
-  - description: "Tuesday maintenance window"
-    schedule: "0 20 * * TUE"  # 8PM UTC Tuesdays
-    duration: "3h"
-    override_label: "override-freeze"
+  - description: 'Tuesday maintenance window'
+    schedule: '0 20 * * TUE' # 8PM UTC Tuesdays
+    duration: '3h'
+    override_label: 'override-freeze'

@@ -5,7 +5,9 @@ import { AuthProvider, useAuth } from '../AuthContext';
 
 // Mock the API calls
 jest.mock('../../api/auth', () => ({
-  initiateLogin: jest.fn(() => Promise.resolve({ authorizeUrl: 'http://mock-auth.com/authorize' })),
+  initiateLogin: jest.fn(() =>
+    Promise.resolve({ authorizeUrl: 'http://mock-auth.com/authorize' }),
+  ),
   exchangeCodeForTokens: jest.fn(() =>
     Promise.resolve({
       idToken: 'mock-id-token',
@@ -61,7 +63,9 @@ const TestComponent: React.FC = () => {
   const auth = useAuth();
   return (
     <div>
-      <span data-testid="isAuthenticated">{auth.isAuthenticated ? 'true' : 'false'}</span>
+      <span data-testid="isAuthenticated">
+        {auth.isAuthenticated ? 'true' : 'false'}
+      </span>
       <span data-testid="loading">{auth.loading ? 'true' : 'false'}</span>
       <span data-testid="user-email">{auth.user?.email}</span>
       <span data-testid="user-tenant">{auth.user?.tenant}</span>
@@ -71,9 +75,15 @@ const TestComponent: React.FC = () => {
       <button onClick={() => auth.login('auth0')}>Login</button>
       <button onClick={auth.logout}>Logout</button>
       <button onClick={auth.refreshToken}>Refresh Token</button>
-      <button onClick={() => auth.switchTenant('tenantB')}>Switch Tenant</button>
-      <span data-testid="has-viewer-role">{auth.hasRole('viewer') ? 'true' : 'false'}</span>
-      <span data-testid="has-admin-role">{auth.hasRole('admin') ? 'true' : 'false'}</span>
+      <button onClick={() => auth.switchTenant('tenantB')}>
+        Switch Tenant
+      </button>
+      <span data-testid="has-viewer-role">
+        {auth.hasRole('viewer') ? 'true' : 'false'}
+      </span>
+      <span data-testid="has-admin-role">
+        {auth.hasRole('admin') ? 'true' : 'false'}
+      </span>
       <span data-testid="has-tenantA-access">
         {auth.hasTenantAccess('tenantA') ? 'true' : 'false'}
       </span>
@@ -114,8 +124,12 @@ describe('AuthProvider', () => {
     await waitFor(() => {
       expect(screen.getByTestId('loading')).toHaveTextContent('false');
       expect(screen.getByTestId('isAuthenticated')).toHaveTextContent('true');
-      expect(screen.getByTestId('user-email')).toHaveTextContent('test@example.com');
-      expect(screen.getByTestId('access-token')).toHaveTextContent('mock-access-token');
+      expect(screen.getByTestId('user-email')).toHaveTextContent(
+        'test@example.com',
+      );
+      expect(screen.getByTestId('access-token')).toHaveTextContent(
+        'mock-access-token',
+      );
     });
   });
 
@@ -183,7 +197,9 @@ describe('AuthProvider', () => {
     });
 
     const initialAccessToken = getByTestId('access-token').textContent;
-    const initialExpiresAt = parseInt(getByTestId('expires-at').textContent || '0');
+    const initialExpiresAt = parseInt(
+      getByTestId('expires-at').textContent || '0',
+    );
 
     // Advance timers to just before refresh (expiresAt - 60s - jitter)
     const timeToAdvance = initialExpiresAt - Date.now() - 60 * 1000 - 1000; // Subtracting 1s for jitter buffer
@@ -193,7 +209,9 @@ describe('AuthProvider', () => {
 
     await waitFor(
       () => {
-        expect(getByTestId('access-token')).not.toHaveTextContent(initialAccessToken);
+        expect(getByTestId('access-token')).not.toHaveTextContent(
+          initialAccessToken,
+        );
         expect(getByTestId('id-token')).not.toHaveTextContent('mock-id-token');
       },
       { timeout: 5000 },

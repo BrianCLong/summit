@@ -41,7 +41,7 @@ sources:
       Authorization: ${TOPICALITY_API_KEY}
       Content-Type: application/json
     params:
-      since: "{{checkpoint}}"
+      since: '{{checkpoint}}'
       limit: 1000
     checkpoint_field: timestamp
     rate_limiting:

@@ -77,7 +77,8 @@ export const createDefaultMissionPresets = (): MissionPreset[] => [
   {
     id: 'stability-check',
     name: 'Stability & Guardrail Check',
-    description: 'Validates guardrails, syncs policies, and updates operations status.',
+    description:
+      'Validates guardrails, syncs policies, and updates operations status.',
     buildTask: () => ({
       id: createTaskId('stability-check'),
       name: 'Stability Guardrail Review',
@@ -120,7 +121,10 @@ export const createDefaultMissionPresets = (): MissionPreset[] => [
         {
           moduleId: 'intelgraph',
           action: 'publish-findings',
-          payload: { audience: 'executive', summary: 'Launch trajectory healthy' },
+          payload: {
+            audience: 'executive',
+            summary: 'Launch trajectory healthy',
+          },
         },
         {
           moduleId: 'company-os',
@@ -138,7 +142,8 @@ export const createDefaultMissionPresets = (): MissionPreset[] => [
   {
     id: 'rapid-response',
     name: 'Rapid Response',
-    description: 'Routes incidents, elevates response, and coordinates maestro recovery.',
+    description:
+      'Routes incidents, elevates response, and coordinates maestro recovery.',
     buildTask: () => ({
       id: createTaskId('rapid-response'),
       name: 'Rapid Response Simulation',
@@ -170,4 +175,3 @@ export const createDefaultMissionPresets = (): MissionPreset[] => [
     }),
   },
 ];
-

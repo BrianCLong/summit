@@ -18,7 +18,7 @@ const Header = styled.header`
   background-color: #2c3e50;
   color: white;
   padding: 1rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 `;
 
 const Title = styled.h1`
@@ -44,21 +44,51 @@ const Footer = styled.footer`
 const Navigation = () => {
   return (
     <nav style={{ marginBottom: '1rem' }}>
-      <ul style={{ 
-        display: 'flex', 
-        listStyle: 'none', 
-        padding: 0, 
-        margin: 0,
-        backgroundColor: '#3498db',
-        borderRadius: '4px'
-      }}>
-        <li><a href="/" style={navLinkStyle}>Dashboard</a></li>
-        <li><a href="/scenarios" style={navLinkStyle}>Scenarios</a></li>
-        <li><a href="/exercises" style={navLinkStyle}>Exercises</a></li>
-        <li><a href="/validation" style={navLinkStyle}>Validation</a></li>
-        <li><a href="/training" style={navLinkStyle}>Training</a></li>
-        <li><a href="/evolution" style={navLinkStyle}>Evolution</a></li>
-        <li><a href="/reports" style={navLinkStyle}>Reports</a></li>
+      <ul
+        style={{
+          display: 'flex',
+          listStyle: 'none',
+          padding: 0,
+          margin: 0,
+          backgroundColor: '#3498db',
+          borderRadius: '4px',
+        }}
+      >
+        <li>
+          <a href="/" style={navLinkStyle}>
+            Dashboard
+          </a>
+        </li>
+        <li>
+          <a href="/scenarios" style={navLinkStyle}>
+            Scenarios
+          </a>
+        </li>
+        <li>
+          <a href="/exercises" style={navLinkStyle}>
+            Exercises
+          </a>
+        </li>
+        <li>
+          <a href="/validation" style={navLinkStyle}>
+            Validation
+          </a>
+        </li>
+        <li>
+          <a href="/training" style={navLinkStyle}>
+            Training
+          </a>
+        </li>
+        <li>
+          <a href="/evolution" style={navLinkStyle}>
+            Evolution
+          </a>
+        </li>
+        <li>
+          <a href="/reports" style={navLinkStyle}>
+            Reports
+          </a>
+        </li>
       </ul>
     </nav>
   );
@@ -70,7 +100,7 @@ const navLinkStyle = {
   color: 'white',
   textDecoration: 'none',
   fontWeight: '500',
-  transition: 'background-color 0.2s'
+  transition: 'background-color 0.2s',
 };
 
 // App component
@@ -80,16 +110,16 @@ const App = () => {
       <Header>
         <Title>🛡️ Adversarial Misinformation Defense Platform</Title>
       </Header>
-      
+
       <Main>
         <Navigation />
         <Outlet />
       </Main>
-      
+
       <Footer>
         <p>Adversarial Misinformation Defense Platform v1.0.0</p>
       </Footer>
-      
+
       <ToastContainer />
     </AppContainer>
   );

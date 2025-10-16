@@ -88,7 +88,9 @@ export default function SLODetail() {
         history: historyData,
       });
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load SLO details');
+      setError(
+        err instanceof Error ? err.message : 'Failed to load SLO details',
+      );
     } finally {
       setLoading(false);
     }
@@ -143,7 +145,9 @@ export default function SLODetail() {
     return (
       <div className="p-6">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-          <h2 className="text-lg font-semibold text-red-800">Error Loading SLO</h2>
+          <h2 className="text-lg font-semibold text-red-800">
+            Error Loading SLO
+          </h2>
           <p className="text-red-600">{error || 'SLO not found'}</p>
         </div>
       </div>
@@ -186,46 +190,67 @@ export default function SLODetail() {
           {/* SLO Status Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-sm font-medium text-gray-500">Current SLI</div>
+              <div className="text-sm font-medium text-gray-500">
+                Current SLI
+              </div>
               <div className="text-3xl font-bold text-gray-900 mt-2">
                 {formatPercentage(slo.status.currentSLI)}
               </div>
               <div className="text-sm text-gray-600 mt-1">
                 Target: {formatPercentage(slo.objective)}
               </div>
-              <div className={`text-sm mt-1 ${
-                slo.status.currentSLI >= slo.objective ? 'text-green-600' : 'text-red-600'
-              }`}>
-                {slo.status.currentSLI >= slo.objective ? 'Meeting SLO' : 'Below Target'}
+              <div
+                className={`text-sm mt-1 ${
+                  slo.status.currentSLI >= slo.objective
+                    ? 'text-green-600'
+                    : 'text-red-600'
+                }`}
+              >
+                {slo.status.currentSLI >= slo.objective
+                  ? 'Meeting SLO'
+                  : 'Below Target'}
               </div>
             </div>
 
             <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-sm font-medium text-gray-500">Error Budget</div>
+              <div className="text-sm font-medium text-gray-500">
+                Error Budget
+              </div>
               <div className="text-3xl font-bold text-gray-900 mt-2">
-                {formatPercentage(slo.status.errorBudget.remaining / slo.status.errorBudget.total)}
+                {formatPercentage(
+                  slo.status.errorBudget.remaining /
+                    slo.status.errorBudget.total,
+                )}
               </div>
               <div className="w-full bg-gray-200 rounded-full h-2 mt-3">
                 <div
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    getErrorBudgetColor(slo.status.errorBudget.consumedPercentage)
-                  }`}
-                  style={{ width: `${slo.status.errorBudget.consumedPercentage}%` }}
+                  className={`h-2 rounded-full transition-all duration-300 ${getErrorBudgetColor(
+                    slo.status.errorBudget.consumedPercentage,
+                  )}`}
+                  style={{
+                    width: `${slo.status.errorBudget.consumedPercentage}%`,
+                  }}
                 />
               </div>
               <div className="text-sm text-gray-600 mt-1">
-                {formatPercentage(slo.status.errorBudget.consumedPercentage)} consumed
+                {formatPercentage(slo.status.errorBudget.consumedPercentage)}{' '}
+                consumed
               </div>
             </div>
 
             <div className="bg-white rounded-lg shadow p-6">
               <div className="text-sm font-medium text-gray-500">Burn Rate</div>
-              <div className={`text-3xl font-bold mt-2 ${getBurnRateColor(slo.status.errorBudget.burnRate)}`}>
+              <div
+                className={`text-3xl font-bold mt-2 ${getBurnRateColor(slo.status.errorBudget.burnRate)}`}
+              >
                 {slo.status.errorBudget.burnRate.toFixed(1)}x
               </div>
               {slo.status.errorBudget.exhaustionDate && (
                 <div className="text-sm text-red-600 mt-1">
-                  Exhaustion: {new Date(slo.status.errorBudget.exhaustionDate).toLocaleDateString()}
+                  Exhaustion:{' '}
+                  {new Date(
+                    slo.status.errorBudget.exhaustionDate,
+                  ).toLocaleDateString()}
                 </div>
               )}
             </div>
@@ -234,7 +259,9 @@ export default function SLODetail() {
           {/* Burn History Chart */}
           <div className="bg-white rounded-lg shadow">
             <div className="px-6 py-4 border-b">
-              <h2 className="text-lg font-semibold">SLI & Error Budget History</h2>
+              <h2 className="text-lg font-semibold">
+                SLI & Error Budget History
+              </h2>
             </div>
             <div className="p-6">
               {/* Simple chart representation - in a real app, you'd use a charting library */}
@@ -250,12 +277,16 @@ export default function SLODetail() {
                     <div className="text-gray-600">
                       {new Date(point.timestamp).toLocaleTimeString()}
                     </div>
-                    <div className={point.sli >= slo.objective ? 'text-green-600' : 'text-red-600'}>
+                    <div
+                      className={
+                        point.sli >= slo.objective
+                          ? 'text-green-600'
+                          : 'text-red-600'
+                      }
+                    >
                       {formatPercentage(point.sli)}
                     </div>
-                    <div>
-                      {formatPercentage(point.errorBudgetConsumed)}
-                    </div>
+                    <div>{formatPercentage(point.errorBudgetConsumed)}</div>
                     <div className={getBurnRateColor(point.burnRate)}>
                       {point.burnRate.toFixed(1)}x
                     </div>
@@ -274,11 +305,17 @@ export default function SLODetail() {
               <div className="p-6">
                 <div className="space-y-4">
                   {slo.incidents.map((incident) => (
-                    <div key={incident.id} className="flex items-center justify-between p-3 bg-gray-50 rounded">
+                    <div
+                      key={incident.id}
+                      className="flex items-center justify-between p-3 bg-gray-50 rounded"
+                    >
                       <div>
-                        <h3 className="font-medium text-gray-900">{incident.title}</h3>
+                        <h3 className="font-medium text-gray-900">
+                          {incident.title}
+                        </h3>
                         <div className="text-sm text-gray-500">
-                          Started: {new Date(incident.startedAt).toLocaleString()}
+                          Started:{' '}
+                          {new Date(incident.startedAt).toLocaleString()}
                         </div>
                       </div>
                       <div className="text-right">
@@ -313,17 +350,26 @@ export default function SLODetail() {
                     <div className="flex-1">
                       <div className="flex items-center gap-2">
                         <h4 className="text-sm font-medium">{rule.name}</h4>
-                        <span className={`text-xs px-2 py-1 rounded ${
-                          rule.enabled ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                        }`}>
+                        <span
+                          className={`text-xs px-2 py-1 rounded ${
+                            rule.enabled
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}
+                        >
                           {rule.enabled ? 'Active' : 'Disabled'}
                         </span>
-                        <span className={`text-xs px-2 py-1 rounded ${
-                          rule.severity === 'critical' ? 'bg-red-100 text-red-800' :
-                          rule.severity === 'high' ? 'bg-orange-100 text-orange-800' :
-                          rule.severity === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                          'bg-blue-100 text-blue-800'
-                        }`}>
+                        <span
+                          className={`text-xs px-2 py-1 rounded ${
+                            rule.severity === 'critical'
+                              ? 'bg-red-100 text-red-800'
+                              : rule.severity === 'high'
+                                ? 'bg-orange-100 text-orange-800'
+                                : rule.severity === 'medium'
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : 'bg-blue-100 text-blue-800'
+                          }`}
+                        >
                           {rule.severity}
                         </span>
                       </div>
@@ -357,17 +403,25 @@ export default function SLODetail() {
             </div>
             <div className="p-4 space-y-3">
               <div>
-                <div className="text-sm font-medium text-gray-700">SLI Query</div>
+                <div className="text-sm font-medium text-gray-700">
+                  SLI Query
+                </div>
                 <div className="mt-1 p-2 bg-gray-50 rounded text-xs font-mono">
                   {slo.sli.query}
                 </div>
               </div>
               <div>
-                <div className="text-sm font-medium text-gray-700">Objective</div>
-                <div className="text-sm text-gray-600">{formatPercentage(slo.objective)}</div>
+                <div className="text-sm font-medium text-gray-700">
+                  Objective
+                </div>
+                <div className="text-sm text-gray-600">
+                  {formatPercentage(slo.objective)}
+                </div>
               </div>
               <div>
-                <div className="text-sm font-medium text-gray-700">Time Window</div>
+                <div className="text-sm font-medium text-gray-700">
+                  Time Window
+                </div>
                 <div className="text-sm text-gray-600">{slo.window}</div>
               </div>
             </div>
@@ -392,45 +446,72 @@ export default function SLODetail() {
             >
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Name</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Name
+                  </label>
                   <input
                     type="text"
                     className="mt-1 block w-full rounded border border-gray-300 px-3 py-2"
                     value={editingAlert.name}
-                    onChange={(e) => setEditingAlert({ ...editingAlert, name: e.target.value })}
+                    onChange={(e) =>
+                      setEditingAlert({ ...editingAlert, name: e.target.value })
+                    }
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Condition</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Condition
+                  </label>
                   <select
                     className="mt-1 block w-full rounded border border-gray-300 px-3 py-2"
                     value={editingAlert.condition}
-                    onChange={(e) => setEditingAlert({ ...editingAlert, condition: e.target.value })}
+                    onChange={(e) =>
+                      setEditingAlert({
+                        ...editingAlert,
+                        condition: e.target.value,
+                      })
+                    }
                   >
                     <option value="burn_rate_gt">Burn rate greater than</option>
-                    <option value="error_budget_lt">Error budget less than</option>
+                    <option value="error_budget_lt">
+                      Error budget less than
+                    </option>
                     <option value="sli_lt">SLI less than</option>
                   </select>
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Threshold</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Threshold
+                  </label>
                   <input
                     type="number"
                     step="0.01"
                     className="mt-1 block w-full rounded border border-gray-300 px-3 py-2"
                     value={editingAlert.threshold}
-                    onChange={(e) => setEditingAlert({ ...editingAlert, threshold: parseFloat(e.target.value) })}
+                    onChange={(e) =>
+                      setEditingAlert({
+                        ...editingAlert,
+                        threshold: parseFloat(e.target.value),
+                      })
+                    }
                   />
                 </div>
-                
+
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">Severity</label>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Severity
+                  </label>
                   <select
                     className="mt-1 block w-full rounded border border-gray-300 px-3 py-2"
                     value={editingAlert.severity}
-                    onChange={(e) => setEditingAlert({ ...editingAlert, severity: e.target.value as any })}
+                    onChange={(e) =>
+                      setEditingAlert({
+                        ...editingAlert,
+                        severity: e.target.value as any,
+                      })
+                    }
                   >
                     <option value="low">Low</option>
                     <option value="medium">Medium</option>
@@ -438,21 +519,29 @@ export default function SLODetail() {
                     <option value="critical">Critical</option>
                   </select>
                 </div>
-                
+
                 <div className="flex items-center">
                   <input
                     type="checkbox"
                     id="enabled"
                     className="rounded border-gray-300"
                     checked={editingAlert.enabled}
-                    onChange={(e) => setEditingAlert({ ...editingAlert, enabled: e.target.checked })}
+                    onChange={(e) =>
+                      setEditingAlert({
+                        ...editingAlert,
+                        enabled: e.target.checked,
+                      })
+                    }
                   />
-                  <label htmlFor="enabled" className="ml-2 text-sm text-gray-700">
+                  <label
+                    htmlFor="enabled"
+                    className="ml-2 text-sm text-gray-700"
+                  >
                     Enable this alert rule
                   </label>
                 </div>
               </div>
-              
+
               <div className="mt-6 flex gap-3">
                 <button
                   type="submit"

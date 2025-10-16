@@ -112,7 +112,8 @@ prometheus:
                   - default
                   - maestro
           relabel_configs:
-            - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+            - source_labels:
+                [__meta_kubernetes_pod_label_app_kubernetes_io_name]
               action: keep
               regex: maestro
             - source_labels: [__meta_kubernetes_pod_container_port_name]
@@ -161,7 +162,8 @@ prometheus:
                 names:
                   - ingress-nginx
           relabel_configs:
-            - source_labels: [__meta_kubernetes_pod_label_app_kubernetes_io_name]
+            - source_labels:
+                [__meta_kubernetes_pod_label_app_kubernetes_io_name]
               action: keep
               regex: ingress-nginx
             - source_labels: [__meta_kubernetes_pod_container_port_number]

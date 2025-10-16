@@ -1,4 +1,3 @@
-
 """Utilities for invoking chaos engineering hooks.
 
 The original stubs only printed a message which made it impossible to reuse the
@@ -15,9 +14,9 @@ import shlex
 import shutil
 import subprocess
 import time
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -31,12 +30,12 @@ class HookExecutionResult:
     """Structured result for all hook invocations."""
 
     hook: str
-    command: List[str]
+    command: list[str]
     success: bool
     stdout: str
     stderr: str
     duration_seconds: float
-    metadata: Dict[str, str] = field(default_factory=dict)
+    metadata: dict[str, str] = field(default_factory=dict)
 
 
 def _sleep(delay_seconds: int) -> None:
@@ -46,13 +45,13 @@ def _sleep(delay_seconds: int) -> None:
 
 
 def _run_command(
-    command: List[str],
+    command: list[str],
     *,
     hook_name: str,
     dry_run: bool,
     timeout: int = 120,
-    input_data: Optional[str] = None,
-    env: Optional[Dict[str, str]] = None,
+    input_data: str | None = None,
+    env: dict[str, str] | None = None,
 ) -> HookExecutionResult:
     """Run a shell command, supporting dry-run execution."""
 
@@ -112,7 +111,7 @@ def inject_pod_kill_hook(
     *,
     namespace: str = "default",
     delay_seconds: int = 0,
-    kubeconfig: Optional[Path] = None,
+    kubeconfig: Path | None = None,
     dry_run: bool = False,
 ) -> HookExecutionResult:
     """Delete a pod immediately to simulate an abrupt crash."""
@@ -151,7 +150,7 @@ def inject_broker_kill_hook(
     namespace: str = "default",
     statefulset: str = "broker",
     delay_seconds: int = 0,
-    kubeconfig: Optional[Path] = None,
+    kubeconfig: Path | None = None,
     dry_run: bool = False,
 ) -> HookExecutionResult:
     """Kill a broker pod (Kafka/Pulsar) by deleting the underlying replica."""
@@ -194,7 +193,7 @@ def inject_network_partition(
     namespace: str = "default",
     duration: str = "5m",
     loss_percentage: int = 100,
-    kubeconfig: Optional[Path] = None,
+    kubeconfig: Path | None = None,
     dry_run: bool = False,
 ) -> HookExecutionResult:
     """Apply a chaos-mesh style NetworkChaos manifest for the provided services."""
@@ -259,7 +258,7 @@ def inject_latency_injection(
     namespace: str = "default",
     delay: str = "2s",
     duration: str = "5m",
-    kubeconfig: Optional[Path] = None,
+    kubeconfig: Path | None = None,
     dry_run: bool = False,
 ) -> HookExecutionResult:
     """Introduce deterministic latency to service traffic."""
@@ -308,7 +307,7 @@ def inject_traffic_spike(
     endpoint: str,
     multiplier: int,
     duration_seconds: int,
-    base_url: Optional[str] = None,
+    base_url: str | None = None,
     dry_run: bool = False,
 ) -> HookExecutionResult:
     """Generate synthetic load against a HTTP endpoint using ``hey``."""
@@ -334,7 +333,9 @@ def inject_traffic_spike(
         hook_name="traffic_spike",
         dry_run=dry_run,
     )
-    result.metadata.update({"service": service, "endpoint": endpoint, "multiplier": str(multiplier)})
+    result.metadata.update(
+        {"service": service, "endpoint": endpoint, "multiplier": str(multiplier)}
+    )
     return result
 
 
@@ -345,7 +346,7 @@ def inject_io_stress(
     read_percentage: int,
     write_percentage: int,
     duration_seconds: int,
-    kubeconfig: Optional[Path] = None,
+    kubeconfig: Path | None = None,
     dry_run: bool = False,
 ) -> HookExecutionResult:
     """Stress disks for a service using ``stress-ng`` inside the pod."""
@@ -393,10 +394,10 @@ def trigger_chaos_drill(
     drill_type: str,
     target: str,
     *,
-    suite_path: Optional[Path] = None,
+    suite_path: Path | None = None,
     namespace: str = "default",
     dry_run: bool = False,
-) -> Dict[str, object]:
+) -> dict[str, object]:
     """Invoke the structured chaos runner for a specific drill target."""
 
     from non_functional_targets.chaos_runner import ChaosRunner  # Lazy import to avoid cycles

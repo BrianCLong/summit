@@ -51,7 +51,9 @@ export function ExportCaseDialog({ caseId, open, onClose }: Props) {
           </button>
           <button onClick={onClose}>Close</button>
         </div>
-        {error ? <p style={{ color: 'crimson' }}>Error: {(error as any)?.message}</p> : null}
+        {error ? (
+          <p style={{ color: 'crimson' }}>Error: {(error as any)?.message}</p>
+        ) : null}
         {blockReason ? (
           <div
             style={{
@@ -63,7 +65,10 @@ export function ExportCaseDialog({ caseId, open, onClose }: Props) {
           >
             <strong>Blocked by Policy:</strong>
             <pre style={{ whiteSpace: 'pre-wrap' }}>{blockReason}</pre>
-            <small>Contact the dataset owner or follow the appeal path documented in policy.</small>
+            <small>
+              Contact the dataset owner or follow the appeal path documented in
+              policy.
+            </small>
           </div>
         ) : null}
         {manifest ? (
@@ -100,8 +105,8 @@ export function ExportCaseDialog({ caseId, open, onClose }: Props) {
               </p>
             ) : (
               <small>
-                Note: a downloadable bundle URL may be populated by a background worker in a later
-                step.
+                Note: a downloadable bundle URL may be populated by a background
+                worker in a later step.
               </small>
             )}
           </div>

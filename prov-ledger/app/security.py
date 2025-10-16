@@ -1,7 +1,7 @@
+from collections.abc import Callable
 from functools import wraps
-from typing import Callable
 
-from fastapi import Depends, Header, HTTPException
+from fastapi import Header, HTTPException
 
 from .config import settings
 

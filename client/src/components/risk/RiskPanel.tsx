@@ -6,7 +6,7 @@ export default function RiskPanel({ result }: { result: RiskResult }) {
     <div>
       <h3>Risk {result.band}</h3>
       <ul>
-        {result.contributions.map(c => (
+        {result.contributions.map((c) => (
           <li key={c.feature}>
             {c.feature}: {c.delta.toFixed(2)}
           </li>

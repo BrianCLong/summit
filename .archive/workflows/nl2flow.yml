@@ -4,7 +4,7 @@ permissions:
   contents: read
 on:
   pull_request:
-    paths: ["runbooks/*.md"]
+    paths: ['runbooks/*.md']
 jobs:
   compile:
     runs-on: ubuntu-latest

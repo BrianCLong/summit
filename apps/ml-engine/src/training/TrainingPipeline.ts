@@ -54,14 +54,20 @@ export class TrainingPipeline {
   private async ensureModelsDirectory(): Promise<void> {
     try {
       await fs.mkdir(this.modelsDir, { recursive: true });
-      await fs.mkdir(path.join(this.modelsDir, 'entity-resolution'), { recursive: true });
-      await fs.mkdir(path.join(this.modelsDir, 'training-data'), { recursive: true });
+      await fs.mkdir(path.join(this.modelsDir, 'entity-resolution'), {
+        recursive: true,
+      });
+      await fs.mkdir(path.join(this.modelsDir, 'training-data'), {
+        recursive: true,
+      });
     } catch (error) {
       logger.error('Failed to create models directory:', error);
     }
   }
 
-  async collectTrainingData(minExamples: number = 100): Promise<TrainingExample[]> {
+  async collectTrainingData(
+    minExamples: number = 100,
+  ): Promise<TrainingExample[]> {
     const query = `
       SELECT 
         er.entity1_id,
@@ -95,7 +101,9 @@ export class TrainingPipeline {
       logger.info(`Collected ${examples.length} training examples`);
 
       if (examples.length < minExamples) {
-        logger.warn(`Only ${examples.length} examples available, minimum required: ${minExamples}`);
+        logger.warn(
+          `Only ${examples.length} examples available, minimum required: ${minExamples}`,
+        );
       }
 
       return examples;
@@ -105,13 +113,22 @@ export class TrainingPipeline {
     }
   }
 
-  async generateFeatures(examples: TrainingExample[]): Promise<TrainingExample[]> {
+  async generateFeatures(
+    examples: TrainingExample[],
+  ): Promise<TrainingExample[]> {
     logger.info('Generating features for training examples');
 
     // Feature extraction using Python script
-    const pythonScript = path.join(config.ml.python.scriptPath, 'feature_extraction.py');
+    const pythonScript = path.join(
+      config.ml.python.scriptPath,
+      'feature_extraction.py',
+    );
     const inputFile = path.join(this.modelsDir, 'training-data', 'input.json');
-    const outputFile = path.join(this.modelsDir, 'training-data', 'features.json');
+    const outputFile = path.join(
+      this.modelsDir,
+      'training-data',
+      'features.json',
+    );
 
     try {
       // Write examples to input file
@@ -141,7 +158,11 @@ export class TrainingPipeline {
 
     const modelId = `er-${modelType}-${Date.now()}`;
     const versionString = '1.0.0';
-    const modelPath = path.join(this.modelsDir, 'entity-resolution', `${modelId}.pkl`);
+    const modelPath = path.join(
+      this.modelsDir,
+      'entity-resolution',
+      `${modelId}.pkl`,
+    );
 
     const startTime = Date.now();
 
@@ -164,12 +185,23 @@ export class TrainingPipeline {
         outputPath: modelPath,
       };
 
-      const trainingFile = path.join(this.modelsDir, 'training-data', `training-${modelId}.json`);
+      const trainingFile = path.join(
+        this.modelsDir,
+        'training-data',
+        `training-${modelId}.json`,
+      );
       await fs.writeFile(trainingFile, JSON.stringify(trainingData, null, 2));
 
       // Train model using Python script
-      const pythonScript = path.join(config.ml.python.scriptPath, 'train_model.py');
-      const metricsFile = path.join(this.modelsDir, 'training-data', `metrics-${modelId}.json`);
+      const pythonScript = path.join(
+        config.ml.python.scriptPath,
+        'train_model.py',
+      );
+      const metricsFile = path.join(
+        this.modelsDir,
+        'training-data',
+        `metrics-${modelId}.json`,
+      );
 
       await this.runPythonScript(pythonScript, [trainingFile, metricsFile]);
 
@@ -212,8 +244,13 @@ export class TrainingPipeline {
     }
   }
 
-  async evaluateModel(modelId: string, testExamples: TrainingExample[]): Promise<TrainingMetrics> {
-    logger.info(`Evaluating model ${modelId} with ${testExamples.length} test examples`);
+  async evaluateModel(
+    modelId: string,
+    testExamples: TrainingExample[],
+  ): Promise<TrainingMetrics> {
+    logger.info(
+      `Evaluating model ${modelId} with ${testExamples.length} test examples`,
+    );
 
     try {
       const modelVersion = await this.getModelVersion(modelId);
@@ -226,7 +263,11 @@ export class TrainingPipeline {
         modelPath: modelVersion.modelPath,
       };
 
-      const testFile = path.join(this.modelsDir, 'training-data', `test-${modelId}.json`);
+      const testFile = path.join(
+        this.modelsDir,
+        'training-data',
+        `test-${modelId}.json`,
+      );
       const metricsFile = path.join(
         this.modelsDir,
         'training-data',
@@ -236,7 +277,10 @@ export class TrainingPipeline {
       await fs.writeFile(testFile, JSON.stringify(testData, null, 2));
 
       // Evaluate using Python script
-      const pythonScript = path.join(config.ml.python.scriptPath, 'evaluate_model.py');
+      const pythonScript = path.join(
+        config.ml.python.scriptPath,
+        'evaluate_model.py',
+      );
       await this.runPythonScript(pythonScript, [testFile, metricsFile]);
 
       // Read evaluation metrics
@@ -251,11 +295,18 @@ export class TrainingPipeline {
     }
   }
 
-  private async runPythonScript(scriptPath: string, args: string[]): Promise<void> {
+  private async runPythonScript(
+    scriptPath: string,
+    args: string[],
+  ): Promise<void> {
     return new Promise((resolve, reject) => {
-      const pythonProcess = spawn(config.ml.python.pythonExecutable, [scriptPath, ...args], {
-        stdio: ['ignore', 'pipe', 'pipe'],
-      });
+      const pythonProcess = spawn(
+        config.ml.python.pythonExecutable,
+        [scriptPath, ...args],
+        {
+          stdio: ['ignore', 'pipe', 'pipe'],
+        },
+      );
 
       let stdout = '';
       let stderr = '';
@@ -332,21 +383,29 @@ export class TrainingPipeline {
     };
   }
 
-  private async shouldActivateModel(modelVersion: ModelVersion): Promise<boolean> {
+  private async shouldActivateModel(
+    modelVersion: ModelVersion,
+  ): Promise<boolean> {
     // Get current active model metrics
     const activeModel = await this.getActiveModel(modelVersion.modelType);
 
     if (!activeModel) {
       // No active model, activate if meets minimum criteria
-      return modelVersion.metrics.f1Score >= 0.7 && modelVersion.metrics.accuracy >= 0.75;
+      return (
+        modelVersion.metrics.f1Score >= 0.7 &&
+        modelVersion.metrics.accuracy >= 0.75
+      );
     }
 
     // Compare with active model
-    const improvement = modelVersion.metrics.f1Score - activeModel.metrics.f1Score;
+    const improvement =
+      modelVersion.metrics.f1Score - activeModel.metrics.f1Score;
     return improvement >= 0.02; // 2% improvement threshold
   }
 
-  private async getActiveModel(modelType: string): Promise<ModelVersion | null> {
+  private async getActiveModel(
+    modelType: string,
+  ): Promise<ModelVersion | null> {
     const query = `
       SELECT * FROM ml_model_versions 
       WHERE model_type = $1 AND is_active = true
@@ -390,11 +449,16 @@ export class TrainingPipeline {
       );
 
       // Activate new model
-      await client.query('UPDATE ml_model_versions SET is_active = true WHERE id = $1', [modelId]);
+      await client.query(
+        'UPDATE ml_model_versions SET is_active = true WHERE id = $1',
+        [modelId],
+      );
 
       await client.query('COMMIT');
 
-      logger.info(`Activated model ${modelId} for type ${modelVersion.modelType}`);
+      logger.info(
+        `Activated model ${modelId} for type ${modelVersion.modelType}`,
+      );
     } catch (error) {
       await client.query('ROLLBACK');
       logger.error('Error activating model:', error);
@@ -404,7 +468,10 @@ export class TrainingPipeline {
     }
   }
 
-  async getModelHistory(modelType?: string, limit: number = 10): Promise<ModelVersion[]> {
+  async getModelHistory(
+    modelType?: string,
+    limit: number = 10,
+  ): Promise<ModelVersion[]> {
     let query = `
       SELECT * FROM ml_model_versions 
     `;

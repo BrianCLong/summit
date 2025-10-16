@@ -8,15 +8,15 @@ metadata:
     app.kubernetes.io/component: backup
     app.kubernetes.io/part-of: intelgraph
 spec:
-  schedule: "0 4 * * 0"  # Weekly on Sunday at 4 AM UTC
-  timeZone: "UTC"
+  schedule: '0 4 * * 0' # Weekly on Sunday at 4 AM UTC
+  timeZone: 'UTC'
   successfulJobsHistoryLimit: 4
   failedJobsHistoryLimit: 2
   concurrencyPolicy: Forbid
   startingDeadlineSeconds: 600
   jobTemplate:
     spec:
-      activeDeadlineSeconds: 14400  # 4 hour timeout for full validation
+      activeDeadlineSeconds: 14400 # 4 hour timeout for full validation
       backoffLimit: 1
       template:
         metadata:
@@ -32,312 +32,312 @@ spec:
             fsGroup: 65532
           serviceAccountName: backup-validation
           containers:
-          - name: backup-validator
-            image: ghcr.io/brianlong/intelgraph/backup-tools:latest
-            imagePullPolicy: IfNotPresent
-            command:
-            - /bin/bash
-            - -c
-            - |
-              set -euo pipefail
-              
-              VALIDATION_NAME="backup-validation-$(date +%Y%m%d-%H%M%S)"
-              VALIDATION_DIR="/validations/${VALIDATION_NAME}"
-              VALIDATION_LOG="${VALIDATION_DIR}/validation.log"
-              
-              echo "Starting backup validation: ${VALIDATION_NAME}"
-              
-              # Create validation directory
-              mkdir -p "${VALIDATION_DIR}"
-              
-              # Initialize validation report
-              cat > "${VALIDATION_DIR}/validation-report.json" << EOF
-              {
-                "validation_name": "${VALIDATION_NAME}",
-                "start_time": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
-                "status": "in_progress",
-                "tests": {}
-              }
-              EOF
-              
-              # Function to log with timestamp
-              log() {
-                echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) $1" | tee -a "${VALIDATION_LOG}"
-              }
-              
-              # Function to update validation report
-              update_report() {
-                local test_name="$1"
-                local status="$2"
-                local details="$3"
-                
-                jq --arg test "$test_name" --arg status "$status" --arg details "$details" \
-                  '.tests[$test] = {"status": $status, "details": $details, "timestamp": now | strftime("%Y-%m-%dT%H:%M:%SZ")}' \
-                  "${VALIDATION_DIR}/validation-report.json" > "${VALIDATION_DIR}/validation-report.tmp" && \
-                  mv "${VALIDATION_DIR}/validation-report.tmp" "${VALIDATION_DIR}/validation-report.json"
-              }
-              
-              # Test 1: Validate backup availability and integrity
-              log "Testing backup availability..."
-              
-              # Check if recent backups exist
-              RECENT_NEO4J=$(aws s3 ls "s3://${BACKUP_BUCKET}/neo4j/" --recursive | tail -1 | awk '{print $4}')
-              RECENT_POSTGRES=$(aws s3 ls "s3://${BACKUP_BUCKET}/postgres/" --recursive | tail -1 | awk '{print $4}')
-              RECENT_REDIS=$(aws s3 ls "s3://${BACKUP_BUCKET}/redis/" --recursive | tail -1 | awk '{print $4}')
-              
-              if [[ -n "$RECENT_NEO4J" && -n "$RECENT_POSTGRES" && -n "$RECENT_REDIS" ]]; then
-                update_report "backup_availability" "passed" "All recent backups found: Neo4j: $RECENT_NEO4J, PostgreSQL: $RECENT_POSTGRES, Redis: $RECENT_REDIS"
-                log "✅ Backup availability test passed"
-              else
-                update_report "backup_availability" "failed" "Missing recent backups"
-                log "❌ Backup availability test failed"
-              fi
-              
-              # Test 2: Download and verify backup integrity
-              log "Testing backup integrity..."
-              
-              mkdir -p "${VALIDATION_DIR}/downloads"
-              
-              # Download latest Neo4j backup
-              if [[ -n "$RECENT_NEO4J" ]]; then
-                aws s3 cp "s3://${BACKUP_BUCKET}/${RECENT_NEO4J}" "${VALIDATION_DIR}/downloads/neo4j-backup.tar.gz"
-                if tar -tzf "${VALIDATION_DIR}/downloads/neo4j-backup.tar.gz" >/dev/null 2>&1; then
-                  update_report "neo4j_integrity" "passed" "Neo4j backup archive is valid"
-                  log "✅ Neo4j backup integrity test passed"
-                else
-                  update_report "neo4j_integrity" "failed" "Neo4j backup archive is corrupted"
-                  log "❌ Neo4j backup integrity test failed"
-                fi
-              fi
-              
-              # Download latest PostgreSQL backup
-              if [[ -n "$RECENT_POSTGRES" ]]; then
-                aws s3 cp "s3://${BACKUP_BUCKET}/${RECENT_POSTGRES}" "${VALIDATION_DIR}/downloads/postgres-backup.tar.gz"
-                if tar -tzf "${VALIDATION_DIR}/downloads/postgres-backup.tar.gz" >/dev/null 2>&1; then
-                  update_report "postgres_integrity" "passed" "PostgreSQL backup archive is valid"
-                  log "✅ PostgreSQL backup integrity test passed"
-                else
-                  update_report "postgres_integrity" "failed" "PostgreSQL backup archive is corrupted"
-                  log "❌ PostgreSQL backup integrity test failed"
-                fi
-              fi
-              
-              # Test 3: Cross-region replication verification
-              log "Testing cross-region replication..."
-              
-              DR_NEO4J=$(aws s3 ls "s3://${DR_BACKUP_BUCKET}/neo4j/" --recursive --region ${DR_AWS_REGION} | tail -1 | awk '{print $4}' || echo "")
-              DR_POSTGRES=$(aws s3 ls "s3://${DR_BACKUP_BUCKET}/postgres/" --recursive --region ${DR_AWS_REGION} | tail -1 | awk '{print $4}' || echo "")
-              
-              if [[ -n "$DR_NEO4J" && -n "$DR_POSTGRES" ]]; then
-                update_report "cross_region_replication" "passed" "DR backups found in secondary region"
-                log "✅ Cross-region replication test passed"
-              else
-                update_report "cross_region_replication" "failed" "Missing DR backups in secondary region"
-                log "❌ Cross-region replication test failed"
-              fi
-              
-              # Test 4: Backup metadata validation
-              log "Testing backup metadata..."
-              
-              # Extract and validate backup manifests
-              tar -xzf "${VALIDATION_DIR}/downloads/neo4j-backup.tar.gz" -C "${VALIDATION_DIR}/downloads/" || true
-              tar -xzf "${VALIDATION_DIR}/downloads/postgres-backup.tar.gz" -C "${VALIDATION_DIR}/downloads/" || true
-              
-              # Find manifest files
-              NEO4J_MANIFEST=$(find "${VALIDATION_DIR}/downloads" -name "*backup-manifest.json" -path "*/neo4j*" | head -1)
-              POSTGRES_MANIFEST=$(find "${VALIDATION_DIR}/downloads" -name "*backup-manifest.json" -path "*/postgres*" | head -1)
-              
-              MANIFEST_VALID=true
-              
-              if [[ -f "$NEO4J_MANIFEST" ]]; then
-                if jq empty "$NEO4J_MANIFEST" 2>/dev/null; then
-                  log "✅ Neo4j manifest is valid JSON"
-                else
-                  MANIFEST_VALID=false
-                  log "❌ Neo4j manifest is invalid JSON"
-                fi
-              else
-                MANIFEST_VALID=false
-                log "❌ Neo4j manifest not found"
-              fi
-              
-              if [[ -f "$POSTGRES_MANIFEST" ]]; then
-                if jq empty "$POSTGRES_MANIFEST" 2>/dev/null; then
-                  log "✅ PostgreSQL manifest is valid JSON"
-                else
-                  MANIFEST_VALID=false
-                  log "❌ PostgreSQL manifest is invalid JSON"
-                fi
-              else
-                MANIFEST_VALID=false
-                log "❌ PostgreSQL manifest not found"
-              fi
-              
-              if $MANIFEST_VALID; then
-                update_report "metadata_validation" "passed" "All backup manifests are valid"
-              else
-                update_report "metadata_validation" "failed" "Some backup manifests are missing or invalid"
-              fi
-              
-              # Test 5: Restore simulation (limited scope for safety)
-              log "Testing restore simulation..."
-              
-              # This is a simplified restore test - in production you'd restore to a test environment
-              if [[ -f "$POSTGRES_MANIFEST" ]]; then
-                BACKUP_SIZE=$(jq -r '.backup_size_bytes' "$POSTGRES_MANIFEST" 2>/dev/null || echo "0")
-                BACKUP_TYPE=$(jq -r '.backup_type' "$POSTGRES_MANIFEST" 2>/dev/null || echo "unknown")
-                
-                if [[ "$BACKUP_SIZE" -gt "1000" && "$BACKUP_TYPE" == "full" ]]; then
-                  update_report "restore_simulation" "passed" "Backup appears restorable (size: $BACKUP_SIZE bytes, type: $BACKUP_TYPE)"
-                  log "✅ Restore simulation test passed"
-                else
-                  update_report "restore_simulation" "failed" "Backup may not be restorable"
-                  log "❌ Restore simulation test failed"
-                fi
-              else
-                update_report "restore_simulation" "failed" "Cannot simulate restore without manifest"
-                log "❌ Restore simulation test failed"
-              fi
-              
-              # Test 6: Encryption verification
-              log "Testing backup encryption..."
-              
-              # Check S3 encryption metadata
-              NEO4J_ENCRYPTION=$(aws s3api head-object --bucket ${BACKUP_BUCKET} --key "${RECENT_NEO4J#s3://${BACKUP_BUCKET}/}" --query 'ServerSideEncryption' --output text 2>/dev/null || echo "None")
-              POSTGRES_ENCRYPTION=$(aws s3api head-object --bucket ${BACKUP_BUCKET} --key "${RECENT_POSTGRES#s3://${BACKUP_BUCKET}/}" --query 'ServerSideEncryption' --output text 2>/dev/null || echo "None")
-              
-              if [[ "$NEO4J_ENCRYPTION" == "AES256" && "$POSTGRES_ENCRYPTION" == "AES256" ]]; then
-                update_report "encryption_verification" "passed" "All backups are encrypted with AES256"
-                log "✅ Encryption verification test passed"
-              else
-                update_report "encryption_verification" "failed" "Some backups are not properly encrypted"
-                log "❌ Encryption verification test failed"
-              fi
-              
-              # Test 7: Retention policy compliance
-              log "Testing retention policy compliance..."
-              
-              # Count backups older than retention period
-              OLD_BACKUPS=$(aws s3 ls "s3://${BACKUP_BUCKET}/" --recursive | awk '{if($1 < "'$(date -d "30 days ago" +%Y-%m-%d)'") print $4}' | wc -l)
-              
-              if [[ "$OLD_BACKUPS" -eq "0" ]]; then
-                update_report "retention_compliance" "passed" "No backups older than retention period found"
-                log "✅ Retention policy compliance test passed"
-              else
-                update_report "retention_compliance" "warning" "Found $OLD_BACKUPS backups older than retention period"
-                log "⚠️ Retention policy compliance test warning: $OLD_BACKUPS old backups"
-              fi
-              
-              # Finalize validation report
-              OVERALL_STATUS="passed"
-              FAILED_TESTS=$(jq -r '.tests | to_entries[] | select(.value.status == "failed") | .key' "${VALIDATION_DIR}/validation-report.json" | wc -l)
-              
-              if [[ "$FAILED_TESTS" -gt "0" ]]; then
-                OVERALL_STATUS="failed"
-              fi
-              
-              jq --arg status "$OVERALL_STATUS" --arg end_time "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
-                '. + {"status": $status, "end_time": $end_time, "failed_tests": '${FAILED_TESTS}'}' \
-                "${VALIDATION_DIR}/validation-report.json" > "${VALIDATION_DIR}/validation-report.tmp" && \
-                mv "${VALIDATION_DIR}/validation-report.tmp" "${VALIDATION_DIR}/validation-report.json"
-              
-              # Upload validation results
-              log "Uploading validation results..."
-              aws s3 cp "${VALIDATION_DIR}/validation-report.json" \
-                "s3://${BACKUP_BUCKET}/validation/$(date +%Y/%m/%d)/${VALIDATION_NAME}-report.json" \
-                --server-side-encryption AES256
-              
-              aws s3 cp "${VALIDATION_LOG}" \
-                "s3://${BACKUP_BUCKET}/validation/$(date +%Y/%m/%d)/${VALIDATION_NAME}.log" \
-                --server-side-encryption AES256
-              
-              # Send notification
-              if [[ "$OVERALL_STATUS" == "passed" ]]; then
-                EMOJI="✅"
-                COLOR="good"
-              else
-                EMOJI="❌"
-                COLOR="danger"
-              fi
-              
-              curl -X POST "${SLACK_WEBHOOK_URL}" \
-                -H 'Content-Type: application/json' \
-                -d "{
-                  \"text\": \"${EMOJI} Backup Validation Report: ${VALIDATION_NAME}\",
-                  \"attachments\": [{
-                    \"color\": \"${COLOR}\",
-                    \"fields\": [
-                      {\"title\": \"Status\", \"value\": \"${OVERALL_STATUS}\", \"short\": true},
-                      {\"title\": \"Failed Tests\", \"value\": \"${FAILED_TESTS}\", \"short\": true},
-                      {\"title\": \"Report\", \"value\": \"s3://${BACKUP_BUCKET}/validation/$(date +%Y/%m/%d)/${VALIDATION_NAME}-report.json\", \"short\": false}
-                    ]
-                  }]
-                }" || true
-              
-              log "Backup validation completed: ${OVERALL_STATUS} (${FAILED_TESTS} failed tests)"
-              
-              # Exit with error code if validation failed
-              if [[ "$OVERALL_STATUS" == "failed" ]]; then
-                exit 1
-              fi
-              
-            env:
-            - name: BACKUP_BUCKET
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: backup-bucket
-            - name: DR_BACKUP_BUCKET
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: dr-backup-bucket
-            - name: AWS_REGION
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: aws-region
-            - name: DR_AWS_REGION
-              valueFrom:
-                configMapKeyRef:
-                  name: backup-config
-                  key: dr-aws-region
-            - name: SLACK_WEBHOOK_URL
-              valueFrom:
-                secretKeyRef:
-                  name: backup-secrets
-                  key: slack-webhook-url
-            - name: AWS_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: backup-secrets
-                  key: aws-access-key-id
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: backup-secrets
-                  key: aws-secret-access-key
-            resources:
-              requests:
-                memory: "1Gi"
-                cpu: "500m"
-              limits:
-                memory: "4Gi"
-                cpu: "2000m"
-            volumeMounts:
-            - name: validation-storage
-              mountPath: /validations
+            - name: backup-validator
+              image: ghcr.io/brianlong/intelgraph/backup-tools:latest
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -euo pipefail
+
+                  VALIDATION_NAME="backup-validation-$(date +%Y%m%d-%H%M%S)"
+                  VALIDATION_DIR="/validations/${VALIDATION_NAME}"
+                  VALIDATION_LOG="${VALIDATION_DIR}/validation.log"
+
+                  echo "Starting backup validation: ${VALIDATION_NAME}"
+
+                  # Create validation directory
+                  mkdir -p "${VALIDATION_DIR}"
+
+                  # Initialize validation report
+                  cat > "${VALIDATION_DIR}/validation-report.json" << EOF
+                  {
+                    "validation_name": "${VALIDATION_NAME}",
+                    "start_time": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+                    "status": "in_progress",
+                    "tests": {}
+                  }
+                  EOF
+
+                  # Function to log with timestamp
+                  log() {
+                    echo "$(date -u +%Y-%m-%dT%H:%M:%SZ) $1" | tee -a "${VALIDATION_LOG}"
+                  }
+
+                  # Function to update validation report
+                  update_report() {
+                    local test_name="$1"
+                    local status="$2"
+                    local details="$3"
+                    
+                    jq --arg test "$test_name" --arg status "$status" --arg details "$details" \
+                      '.tests[$test] = {"status": $status, "details": $details, "timestamp": now | strftime("%Y-%m-%dT%H:%M:%SZ")}' \
+                      "${VALIDATION_DIR}/validation-report.json" > "${VALIDATION_DIR}/validation-report.tmp" && \
+                      mv "${VALIDATION_DIR}/validation-report.tmp" "${VALIDATION_DIR}/validation-report.json"
+                  }
+
+                  # Test 1: Validate backup availability and integrity
+                  log "Testing backup availability..."
+
+                  # Check if recent backups exist
+                  RECENT_NEO4J=$(aws s3 ls "s3://${BACKUP_BUCKET}/neo4j/" --recursive | tail -1 | awk '{print $4}')
+                  RECENT_POSTGRES=$(aws s3 ls "s3://${BACKUP_BUCKET}/postgres/" --recursive | tail -1 | awk '{print $4}')
+                  RECENT_REDIS=$(aws s3 ls "s3://${BACKUP_BUCKET}/redis/" --recursive | tail -1 | awk '{print $4}')
+
+                  if [[ -n "$RECENT_NEO4J" && -n "$RECENT_POSTGRES" && -n "$RECENT_REDIS" ]]; then
+                    update_report "backup_availability" "passed" "All recent backups found: Neo4j: $RECENT_NEO4J, PostgreSQL: $RECENT_POSTGRES, Redis: $RECENT_REDIS"
+                    log "✅ Backup availability test passed"
+                  else
+                    update_report "backup_availability" "failed" "Missing recent backups"
+                    log "❌ Backup availability test failed"
+                  fi
+
+                  # Test 2: Download and verify backup integrity
+                  log "Testing backup integrity..."
+
+                  mkdir -p "${VALIDATION_DIR}/downloads"
+
+                  # Download latest Neo4j backup
+                  if [[ -n "$RECENT_NEO4J" ]]; then
+                    aws s3 cp "s3://${BACKUP_BUCKET}/${RECENT_NEO4J}" "${VALIDATION_DIR}/downloads/neo4j-backup.tar.gz"
+                    if tar -tzf "${VALIDATION_DIR}/downloads/neo4j-backup.tar.gz" >/dev/null 2>&1; then
+                      update_report "neo4j_integrity" "passed" "Neo4j backup archive is valid"
+                      log "✅ Neo4j backup integrity test passed"
+                    else
+                      update_report "neo4j_integrity" "failed" "Neo4j backup archive is corrupted"
+                      log "❌ Neo4j backup integrity test failed"
+                    fi
+                  fi
+
+                  # Download latest PostgreSQL backup
+                  if [[ -n "$RECENT_POSTGRES" ]]; then
+                    aws s3 cp "s3://${BACKUP_BUCKET}/${RECENT_POSTGRES}" "${VALIDATION_DIR}/downloads/postgres-backup.tar.gz"
+                    if tar -tzf "${VALIDATION_DIR}/downloads/postgres-backup.tar.gz" >/dev/null 2>&1; then
+                      update_report "postgres_integrity" "passed" "PostgreSQL backup archive is valid"
+                      log "✅ PostgreSQL backup integrity test passed"
+                    else
+                      update_report "postgres_integrity" "failed" "PostgreSQL backup archive is corrupted"
+                      log "❌ PostgreSQL backup integrity test failed"
+                    fi
+                  fi
+
+                  # Test 3: Cross-region replication verification
+                  log "Testing cross-region replication..."
+
+                  DR_NEO4J=$(aws s3 ls "s3://${DR_BACKUP_BUCKET}/neo4j/" --recursive --region ${DR_AWS_REGION} | tail -1 | awk '{print $4}' || echo "")
+                  DR_POSTGRES=$(aws s3 ls "s3://${DR_BACKUP_BUCKET}/postgres/" --recursive --region ${DR_AWS_REGION} | tail -1 | awk '{print $4}' || echo "")
+
+                  if [[ -n "$DR_NEO4J" && -n "$DR_POSTGRES" ]]; then
+                    update_report "cross_region_replication" "passed" "DR backups found in secondary region"
+                    log "✅ Cross-region replication test passed"
+                  else
+                    update_report "cross_region_replication" "failed" "Missing DR backups in secondary region"
+                    log "❌ Cross-region replication test failed"
+                  fi
+
+                  # Test 4: Backup metadata validation
+                  log "Testing backup metadata..."
+
+                  # Extract and validate backup manifests
+                  tar -xzf "${VALIDATION_DIR}/downloads/neo4j-backup.tar.gz" -C "${VALIDATION_DIR}/downloads/" || true
+                  tar -xzf "${VALIDATION_DIR}/downloads/postgres-backup.tar.gz" -C "${VALIDATION_DIR}/downloads/" || true
+
+                  # Find manifest files
+                  NEO4J_MANIFEST=$(find "${VALIDATION_DIR}/downloads" -name "*backup-manifest.json" -path "*/neo4j*" | head -1)
+                  POSTGRES_MANIFEST=$(find "${VALIDATION_DIR}/downloads" -name "*backup-manifest.json" -path "*/postgres*" | head -1)
+
+                  MANIFEST_VALID=true
+
+                  if [[ -f "$NEO4J_MANIFEST" ]]; then
+                    if jq empty "$NEO4J_MANIFEST" 2>/dev/null; then
+                      log "✅ Neo4j manifest is valid JSON"
+                    else
+                      MANIFEST_VALID=false
+                      log "❌ Neo4j manifest is invalid JSON"
+                    fi
+                  else
+                    MANIFEST_VALID=false
+                    log "❌ Neo4j manifest not found"
+                  fi
+
+                  if [[ -f "$POSTGRES_MANIFEST" ]]; then
+                    if jq empty "$POSTGRES_MANIFEST" 2>/dev/null; then
+                      log "✅ PostgreSQL manifest is valid JSON"
+                    else
+                      MANIFEST_VALID=false
+                      log "❌ PostgreSQL manifest is invalid JSON"
+                    fi
+                  else
+                    MANIFEST_VALID=false
+                    log "❌ PostgreSQL manifest not found"
+                  fi
+
+                  if $MANIFEST_VALID; then
+                    update_report "metadata_validation" "passed" "All backup manifests are valid"
+                  else
+                    update_report "metadata_validation" "failed" "Some backup manifests are missing or invalid"
+                  fi
+
+                  # Test 5: Restore simulation (limited scope for safety)
+                  log "Testing restore simulation..."
+
+                  # This is a simplified restore test - in production you'd restore to a test environment
+                  if [[ -f "$POSTGRES_MANIFEST" ]]; then
+                    BACKUP_SIZE=$(jq -r '.backup_size_bytes' "$POSTGRES_MANIFEST" 2>/dev/null || echo "0")
+                    BACKUP_TYPE=$(jq -r '.backup_type' "$POSTGRES_MANIFEST" 2>/dev/null || echo "unknown")
+                    
+                    if [[ "$BACKUP_SIZE" -gt "1000" && "$BACKUP_TYPE" == "full" ]]; then
+                      update_report "restore_simulation" "passed" "Backup appears restorable (size: $BACKUP_SIZE bytes, type: $BACKUP_TYPE)"
+                      log "✅ Restore simulation test passed"
+                    else
+                      update_report "restore_simulation" "failed" "Backup may not be restorable"
+                      log "❌ Restore simulation test failed"
+                    fi
+                  else
+                    update_report "restore_simulation" "failed" "Cannot simulate restore without manifest"
+                    log "❌ Restore simulation test failed"
+                  fi
+
+                  # Test 6: Encryption verification
+                  log "Testing backup encryption..."
+
+                  # Check S3 encryption metadata
+                  NEO4J_ENCRYPTION=$(aws s3api head-object --bucket ${BACKUP_BUCKET} --key "${RECENT_NEO4J#s3://${BACKUP_BUCKET}/}" --query 'ServerSideEncryption' --output text 2>/dev/null || echo "None")
+                  POSTGRES_ENCRYPTION=$(aws s3api head-object --bucket ${BACKUP_BUCKET} --key "${RECENT_POSTGRES#s3://${BACKUP_BUCKET}/}" --query 'ServerSideEncryption' --output text 2>/dev/null || echo "None")
+
+                  if [[ "$NEO4J_ENCRYPTION" == "AES256" && "$POSTGRES_ENCRYPTION" == "AES256" ]]; then
+                    update_report "encryption_verification" "passed" "All backups are encrypted with AES256"
+                    log "✅ Encryption verification test passed"
+                  else
+                    update_report "encryption_verification" "failed" "Some backups are not properly encrypted"
+                    log "❌ Encryption verification test failed"
+                  fi
+
+                  # Test 7: Retention policy compliance
+                  log "Testing retention policy compliance..."
+
+                  # Count backups older than retention period
+                  OLD_BACKUPS=$(aws s3 ls "s3://${BACKUP_BUCKET}/" --recursive | awk '{if($1 < "'$(date -d "30 days ago" +%Y-%m-%d)'") print $4}' | wc -l)
+
+                  if [[ "$OLD_BACKUPS" -eq "0" ]]; then
+                    update_report "retention_compliance" "passed" "No backups older than retention period found"
+                    log "✅ Retention policy compliance test passed"
+                  else
+                    update_report "retention_compliance" "warning" "Found $OLD_BACKUPS backups older than retention period"
+                    log "⚠️ Retention policy compliance test warning: $OLD_BACKUPS old backups"
+                  fi
+
+                  # Finalize validation report
+                  OVERALL_STATUS="passed"
+                  FAILED_TESTS=$(jq -r '.tests | to_entries[] | select(.value.status == "failed") | .key' "${VALIDATION_DIR}/validation-report.json" | wc -l)
+
+                  if [[ "$FAILED_TESTS" -gt "0" ]]; then
+                    OVERALL_STATUS="failed"
+                  fi
+
+                  jq --arg status "$OVERALL_STATUS" --arg end_time "$(date -u +%Y-%m-%dT%H:%M:%SZ)" \
+                    '. + {"status": $status, "end_time": $end_time, "failed_tests": '${FAILED_TESTS}'}' \
+                    "${VALIDATION_DIR}/validation-report.json" > "${VALIDATION_DIR}/validation-report.tmp" && \
+                    mv "${VALIDATION_DIR}/validation-report.tmp" "${VALIDATION_DIR}/validation-report.json"
+
+                  # Upload validation results
+                  log "Uploading validation results..."
+                  aws s3 cp "${VALIDATION_DIR}/validation-report.json" \
+                    "s3://${BACKUP_BUCKET}/validation/$(date +%Y/%m/%d)/${VALIDATION_NAME}-report.json" \
+                    --server-side-encryption AES256
+
+                  aws s3 cp "${VALIDATION_LOG}" \
+                    "s3://${BACKUP_BUCKET}/validation/$(date +%Y/%m/%d)/${VALIDATION_NAME}.log" \
+                    --server-side-encryption AES256
+
+                  # Send notification
+                  if [[ "$OVERALL_STATUS" == "passed" ]]; then
+                    EMOJI="✅"
+                    COLOR="good"
+                  else
+                    EMOJI="❌"
+                    COLOR="danger"
+                  fi
+
+                  curl -X POST "${SLACK_WEBHOOK_URL}" \
+                    -H 'Content-Type: application/json' \
+                    -d "{
+                      \"text\": \"${EMOJI} Backup Validation Report: ${VALIDATION_NAME}\",
+                      \"attachments\": [{
+                        \"color\": \"${COLOR}\",
+                        \"fields\": [
+                          {\"title\": \"Status\", \"value\": \"${OVERALL_STATUS}\", \"short\": true},
+                          {\"title\": \"Failed Tests\", \"value\": \"${FAILED_TESTS}\", \"short\": true},
+                          {\"title\": \"Report\", \"value\": \"s3://${BACKUP_BUCKET}/validation/$(date +%Y/%m/%d)/${VALIDATION_NAME}-report.json\", \"short\": false}
+                        ]
+                      }]
+                    }" || true
+
+                  log "Backup validation completed: ${OVERALL_STATUS} (${FAILED_TESTS} failed tests)"
+
+                  # Exit with error code if validation failed
+                  if [[ "$OVERALL_STATUS" == "failed" ]]; then
+                    exit 1
+                  fi
+
+              env:
+                - name: BACKUP_BUCKET
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: backup-bucket
+                - name: DR_BACKUP_BUCKET
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: dr-backup-bucket
+                - name: AWS_REGION
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: aws-region
+                - name: DR_AWS_REGION
+                  valueFrom:
+                    configMapKeyRef:
+                      name: backup-config
+                      key: dr-aws-region
+                - name: SLACK_WEBHOOK_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-secrets
+                      key: slack-webhook-url
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-secrets
+                      key: aws-access-key-id
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: backup-secrets
+                      key: aws-secret-access-key
+              resources:
+                requests:
+                  memory: '1Gi'
+                  cpu: '500m'
+                limits:
+                  memory: '4Gi'
+                  cpu: '2000m'
+              volumeMounts:
+                - name: validation-storage
+                  mountPath: /validations
           volumes:
-          - name: validation-storage
-            emptyDir:
-              sizeLimit: 50Gi
+            - name: validation-storage
+              emptyDir:
+                sizeLimit: 50Gi
           tolerations:
-          - key: "backup-workload"
-            operator: "Equal"
-            value: "true"
-            effect: "NoSchedule"
+            - key: 'backup-workload'
+              operator: 'Equal'
+              value: 'true'
+              effect: 'NoSchedule'
           nodeSelector:
-            node-type: "backup-optimized"
+            node-type: 'backup-optimized'
 ---
 # Restore testing job (manual trigger)
 apiVersion: batch/v1
@@ -358,42 +358,42 @@ spec:
         runAsGroup: 65532
       serviceAccountName: backup-validation
       containers:
-      - name: restore-tester
-        image: ghcr.io/brianlong/intelgraph/backup-tools:latest
-        command:
-        - /bin/bash
-        - -c
-        - |
-          set -euo pipefail
-          
-          RESTORE_TEST_NAME="restore-test-$(date +%Y%m%d-%H%M%S)"
-          TEST_DIR="/restore-tests/${RESTORE_TEST_NAME}"
-          
-          echo "Starting restore test: ${RESTORE_TEST_NAME}"
-          
-          mkdir -p "${TEST_DIR}"
-          
-          # This is a template for manual restore testing
-          # In practice, this would:
-          # 1. Create isolated test environments
-          # 2. Restore backups to test instances
-          # 3. Verify data integrity and completeness
-          # 4. Run application smoke tests
-          # 5. Clean up test resources
-          
-          echo "Restore test template created. Customize for specific restore scenarios."
-          
-        resources:
-          requests:
-            memory: "2Gi"
-            cpu: "1000m"
-          limits:
-            memory: "8Gi"
-            cpu: "4000m"
-        volumeMounts:
-        - name: restore-storage
-          mountPath: /restore-tests
+        - name: restore-tester
+          image: ghcr.io/brianlong/intelgraph/backup-tools:latest
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -euo pipefail
+
+              RESTORE_TEST_NAME="restore-test-$(date +%Y%m%d-%H%M%S)"
+              TEST_DIR="/restore-tests/${RESTORE_TEST_NAME}"
+
+              echo "Starting restore test: ${RESTORE_TEST_NAME}"
+
+              mkdir -p "${TEST_DIR}"
+
+              # This is a template for manual restore testing
+              # In practice, this would:
+              # 1. Create isolated test environments
+              # 2. Restore backups to test instances
+              # 3. Verify data integrity and completeness
+              # 4. Run application smoke tests
+              # 5. Clean up test resources
+
+              echo "Restore test template created. Customize for specific restore scenarios."
+
+          resources:
+            requests:
+              memory: '2Gi'
+              cpu: '1000m'
+            limits:
+              memory: '8Gi'
+              cpu: '4000m'
+          volumeMounts:
+            - name: restore-storage
+              mountPath: /restore-tests
       volumes:
-      - name: restore-storage
-        emptyDir:
-          sizeLimit: 100Gi
+        - name: restore-storage
+          emptyDir:
+            sizeLimit: 100Gi

@@ -8,7 +8,7 @@ services:
       - ./client:/app
       - /app/node_modules
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - NODE_ENV=development
       - VITE_API_URL=http://localhost:4000/graphql
@@ -19,17 +19,17 @@ services:
     networks:
       - intelgraph-dev
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:3000']
       interval: 30s
       timeout: 10s
       retries: 3
     deploy:
       resources:
         limits:
-          cpus: "0.5"
+          cpus: '0.5'
           memory: 512M
         reservations:
-          cpus: "0.25"
+          cpus: '0.25'
           memory: 256M
     cap_drop:
       - ALL
@@ -59,7 +59,7 @@ services:
         condition: service_healthy
       postgres:
         condition: service_healthy
-    command: ["node", "scripts/db_migrate.cjs"]
+    command: ['node', 'scripts/db_migrate.cjs']
     networks:
       - intelgraph-dev
 
@@ -73,8 +73,8 @@ services:
       - ./server:/app
       - /app/node_modules
     ports:
-      - "4000:4000"
-      - "9229:9229" # Debug port
+      - '4000:4000'
+      - '9229:9229' # Debug port
     environment:
       - NODE_ENV=development
       - DEBUG=intelgraph:*
@@ -106,17 +106,17 @@ services:
     networks:
       - intelgraph-dev
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4000/health/ready"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:4000/health/ready']
       interval: 30s
       timeout: 10s
       retries: 3
     deploy:
       resources:
         limits:
-          cpus: "0.5"
+          cpus: '0.5'
           memory: 512M
         reservations:
-          cpus: "0.25"
+          cpus: '0.25'
           memory: 256M
     cap_drop:
       - ALL
@@ -135,15 +135,15 @@ services:
       - neo4j_dev_logs:/logs
       - ./backups/neo4j:/backups
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - '7474:7474'
+      - '7687:7687'
     networks:
       - intelgraph-dev
     healthcheck:
       test:
         [
-          "CMD-SHELL",
-          "wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1",
+          'CMD-SHELL',
+          'wget --no-verbose --tries=1 --spider http://localhost:7474 || exit 1',
         ]
       interval: 30s
       timeout: 10s
@@ -151,10 +151,10 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1.0"
+          cpus: '1.0'
           memory: 512M
         reservations:
-          cpus: "0.5"
+          cpus: '0.5'
           memory: 256M
 
   # PostgreSQL Database
@@ -165,7 +165,7 @@ services:
       POSTGRES_USER: intelgraph
       POSTGRES_PASSWORD: devpassword
     ports:
-      - "5432:5432"
+      - '5432:5432'
     volumes:
       - postgres_dev_data:/var/lib/postgresql/data
       - ./server/db/migrations/postgres:/docker-entrypoint-initdb.d
@@ -173,17 +173,17 @@ services:
     networks:
       - intelgraph-dev
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U $POSTGRES_USER -d $POSTGRES_DB"]
+      test: ['CMD-SHELL', 'pg_isready -U $POSTGRES_USER -d $POSTGRES_DB']
       interval: 10s
       timeout: 5s
       retries: 5
     deploy:
       resources:
         limits:
-          cpus: "1.0"
+          cpus: '1.0'
           memory: 1G
         reservations:
-          cpus: "0.5"
+          cpus: '0.5'
           memory: 512M
 
   # Redis Cache
@@ -193,21 +193,21 @@ services:
     volumes:
       - redis_dev_data:/data
     ports:
-      - "6379:6379"
+      - '6379:6379'
     networks:
       - intelgraph-dev
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "devpassword", "--raw", "INFO"]
+      test: ['CMD', 'redis-cli', '-a', 'devpassword', '--raw', 'INFO']
       interval: 10s
       timeout: 5s
       retries: 5
     deploy:
       resources:
         limits:
-          cpus: "1.0"
+          cpus: '1.0'
           memory: 1G
         reservations:
-          cpus: "0.5"
+          cpus: '0.5'
           memory: 512M
 
   # AI/ML Microservice
@@ -234,21 +234,21 @@ services:
       neo4j:
         condition: service_healthy
     ports:
-      - "8081:8081"
+      - '8081:8081'
     networks:
       - intelgraph-dev
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:8081/health']
       interval: 30s
       timeout: 10s
       retries: 3
     deploy:
       resources:
         limits:
-          cpus: "1.0"
+          cpus: '1.0'
           memory: 1G
         reservations:
-          cpus: "0.5"
+          cpus: '0.5'
           memory: 512M
 
   # ML Worker (Celery)
@@ -258,12 +258,12 @@ services:
       dockerfile: Dockerfile
     command:
       [
-        "celery",
-        "-A",
-        "app.celery_app",
-        "worker",
-        "--loglevel=INFO",
-        "--concurrency=2",
+        'celery',
+        '-A',
+        'app.celery_app',
+        'worker',
+        '--loglevel=INFO',
+        '--concurrency=2',
       ]
     environment:
       - REDIS_URL=redis://:devpassword@redis:6379/0
@@ -286,17 +286,17 @@ services:
     deploy:
       resources:
         limits:
-          cpus: "1.0"
+          cpus: '1.0'
           memory: 1G
         reservations:
-          cpus: "0.5"
+          cpus: '0.5'
           memory: 512M
 
   # Database Administration
   adminer:
     image: adminer:latest
     ports:
-      - "8080:8080"
+      - '8080:8080'
     depends_on:
       postgres:
         condition: service_healthy

@@ -1,6 +1,6 @@
 name: Auto Update PRs (safe)
 on:
-  schedule: [{ cron: "13,43 * * * *" }]  # jittered from :11,:41
+  schedule: [{ cron: '13,43 * * * *' }] # jittered from :11,:41
   workflow_dispatch: {}
 
 concurrency:

@@ -15,10 +15,16 @@ interface HelpSystemProps {
   initialTopic?: string;
 }
 
-const HelpSystem: React.FC<HelpSystemProps> = ({ isVisible, onClose, initialTopic }) => {
+const HelpSystem: React.FC<HelpSystemProps> = ({
+  isVisible,
+  onClose,
+  initialTopic,
+}) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('all');
-  const [activeTopic, setActiveTopic] = useState<string | null>(initialTopic || null);
+  const [activeTopic, setActiveTopic] = useState<string | null>(
+    initialTopic || null,
+  );
 
   const helpTopics: HelpTopic[] = [
     {
@@ -416,11 +422,14 @@ const HelpSystem: React.FC<HelpSystemProps> = ({ isVisible, onClose, initialTopi
   ];
 
   const filteredTopics = helpTopics.filter((topic) => {
-    const matchesCategory = selectedCategory === 'all' || topic.category === selectedCategory;
+    const matchesCategory =
+      selectedCategory === 'all' || topic.category === selectedCategory;
     const matchesSearch =
       !searchQuery ||
       topic.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      topic.keywords.some((keyword) => keyword.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      topic.keywords.some((keyword) =>
+        keyword.toLowerCase().includes(searchQuery.toLowerCase()),
+      ) ||
       topic.content.toLowerCase().includes(searchQuery.toLowerCase());
 
     return matchesCategory && matchesSearch;
@@ -443,7 +452,10 @@ const HelpSystem: React.FC<HelpSystemProps> = ({ isVisible, onClose, initialTopi
           <div className="p-4 border-b">
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-xl font-semibold">Help & Documentation</h2>
-              <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+              <button
+                onClick={onClose}
+                className="text-gray-400 hover:text-gray-600"
+              >
                 ✕
               </button>
             </div>
@@ -492,7 +504,9 @@ const HelpSystem: React.FC<HelpSystemProps> = ({ isVisible, onClose, initialTopi
                 `}
               >
                 <div className="font-medium text-gray-900">{topic.title}</div>
-                <div className="text-sm text-gray-500 capitalize mt-1">{topic.category}</div>
+                <div className="text-sm text-gray-500 capitalize mt-1">
+                  {topic.category}
+                </div>
               </button>
             ))}
           </div>
@@ -511,28 +525,33 @@ const HelpSystem: React.FC<HelpSystemProps> = ({ isVisible, onClose, initialTopi
                     <div
                       className="prose max-w-none"
                       dangerouslySetInnerHTML={{
-                        __html: DOMPurify.sanitize(topic.content
-                          .split('\n')
-                          .map((line) => line.trim())
-                          .join('\n')
-                          .replace(/^# (.*)/gm, '<h1 class="text-3xl font-bold mb-4">$1</h1>')
-                          .replace(
-                            /^## (.*)/gm,
-                            '<h2 class="text-2xl font-semibold mb-3 mt-6">$1</h2>',
-                          )
-                          .replace(
-                            /^### (.*)/gm,
-                            '<h3 class="text-xl font-medium mb-2 mt-4">$1</h3>',
-                          )
-                          .replace(/^\- (.*)/gm, '<li>$1</li>')
-                          .replace(/^(\d+)\. (.*)/gm, '<li>$1. $1</li>')
-                          .replace(
-                            /`([^`]+)`/g,
-                            '<code class="bg-gray-100 px-1 py-0.5 rounded text-sm">$1</code>',
-                          )
-                          .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                          .replace(/\n\n/g, '</p><p>')
-                          .replace(/^(.*)$/gm, '<p>$1</p>')),
+                        __html: DOMPurify.sanitize(
+                          topic.content
+                            .split('\n')
+                            .map((line) => line.trim())
+                            .join('\n')
+                            .replace(
+                              /^# (.*)/gm,
+                              '<h1 class="text-3xl font-bold mb-4">$1</h1>',
+                            )
+                            .replace(
+                              /^## (.*)/gm,
+                              '<h2 class="text-2xl font-semibold mb-3 mt-6">$1</h2>',
+                            )
+                            .replace(
+                              /^### (.*)/gm,
+                              '<h3 class="text-xl font-medium mb-2 mt-4">$1</h3>',
+                            )
+                            .replace(/^\- (.*)/gm, '<li>$1</li>')
+                            .replace(/^(\d+)\. (.*)/gm, '<li>$1. $1</li>')
+                            .replace(
+                              /`([^`]+)`/g,
+                              '<code class="bg-gray-100 px-1 py-0.5 rounded text-sm">$1</code>',
+                            )
+                            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                            .replace(/\n\n/g, '</p><p>')
+                            .replace(/^(.*)$/gm, '<p>$1</p>'),
+                        ),
                       }}
                     />
                   </div>
@@ -543,8 +562,12 @@ const HelpSystem: React.FC<HelpSystemProps> = ({ isVisible, onClose, initialTopi
             <div className="flex-1 flex items-center justify-center text-gray-500">
               <div className="text-center">
                 <div className="text-4xl mb-4">📚</div>
-                <div className="text-lg">Select a help topic to get started</div>
-                <div className="text-sm mt-2">Use the search or browse categories on the left</div>
+                <div className="text-lg">
+                  Select a help topic to get started
+                </div>
+                <div className="text-sm mt-2">
+                  Use the search or browse categories on the left
+                </div>
               </div>
             </div>
           )}
@@ -574,7 +597,12 @@ export const useHelpSystem = () => {
     showHelp,
     hideHelp,
     HelpComponent: (props: Partial<HelpSystemProps>) => (
-      <HelpSystem isVisible={isVisible} onClose={hideHelp} initialTopic={initialTopic} {...props} />
+      <HelpSystem
+        isVisible={isVisible}
+        onClose={hideHelp}
+        initialTopic={initialTopic}
+        {...props}
+      />
     ),
   };
 };

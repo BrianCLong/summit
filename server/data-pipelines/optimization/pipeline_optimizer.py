@@ -5,9 +5,12 @@ from __future__ import annotations
 import threading
 import time
 from collections import defaultdict, deque
+from collections.abc import Callable, Iterable, MutableMapping, Sequence
 from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 from dataclasses import dataclass, field
-from typing import Any, Callable, Deque, Dict, Iterable, List, MutableMapping, Optional, Sequence, Set
+from typing import (
+    Any,
+)
 
 from .batching import AdaptiveBatcher, BatchPlan
 from .monitoring import PipelineMonitor
@@ -26,12 +29,12 @@ class RetryPolicy:
 @dataclass
 class PipelineTask:
     name: str
-    func: Callable[["PipelineExecutionContext"], Any]
+    func: Callable[[PipelineExecutionContext], Any]
     dependencies: Sequence[str] = field(default_factory=list)
     criticality: str = "medium"
     metadata: MutableMapping[str, Any] = field(default_factory=dict)
-    retry_policy: Optional[RetryPolicy] = None
-    circuit_breaker: Optional[CircuitBreaker] = None
+    retry_policy: RetryPolicy | None = None
+    circuit_breaker: CircuitBreaker | None = None
 
 
 @dataclass(frozen=True)
@@ -41,15 +44,15 @@ class TaskResult:
     latency_ms: float
     attempts: int
     output: Any = None
-    error: Optional[str] = None
+    error: str | None = None
 
 
 @dataclass(frozen=True)
 class PipelineAnalysis:
-    stages: List[List[str]]
+    stages: list[list[str]]
     max_parallelism: int
     critical_path_length: int
-    critical_tasks: List[str]
+    critical_tasks: list[str]
 
 
 class PipelineExecutionContext:
@@ -60,7 +63,7 @@ class PipelineExecutionContext:
         *,
         batcher: AdaptiveBatcher,
         monitor: PipelineMonitor,
-        shared_state: Optional[MutableMapping[str, Any]] = None,
+        shared_state: MutableMapping[str, Any] | None = None,
     ) -> None:
         self.batcher = batcher
         self.monitor = monitor
@@ -74,7 +77,7 @@ class PipelineExecutionContext:
     def plan_batch(self, pending_records: int) -> BatchPlan:
         plan = self.batcher.suggest_batch_plan(pending_records)
         with self._lock:
-            plans: List[BatchPlan] = self.shared_state.setdefault("batch_plans", [])  # type: ignore[assignment]
+            plans: list[BatchPlan] = self.shared_state.setdefault("batch_plans", [])  # type: ignore[assignment]
             plans.append(plan)
         return plan
 
@@ -93,11 +96,11 @@ class PipelineOptimizer:
         tasks: Iterable[PipelineTask],
         *,
         max_workers: int = 4,
-        batcher: Optional[AdaptiveBatcher] = None,
-        monitor: Optional[PipelineMonitor] = None,
+        batcher: AdaptiveBatcher | None = None,
+        monitor: PipelineMonitor | None = None,
         continue_on_failure: bool = False,
     ) -> None:
-        self._tasks: Dict[str, PipelineTask] = {task.name: task for task in tasks}
+        self._tasks: dict[str, PipelineTask] = {task.name: task for task in tasks}
         if not self._tasks:
             raise ValueError("At least one task is required")
         self._max_workers = max(1, max_workers)
@@ -107,19 +110,19 @@ class PipelineOptimizer:
         self._lock = threading.Lock()
 
     def analyze(self) -> PipelineAnalysis:
-        in_degree: Dict[str, int] = {name: 0 for name in self._tasks}
-        adjacency: Dict[str, List[str]] = defaultdict(list)
+        in_degree: dict[str, int] = {name: 0 for name in self._tasks}
+        adjacency: dict[str, list[str]] = defaultdict(list)
         for task in self._tasks.values():
             for dep in task.dependencies:
                 if dep not in self._tasks:
                     raise ValueError(f"Unknown dependency '{dep}' referenced by task '{task.name}'")
                 in_degree[task.name] += 1
                 adjacency[dep].append(task.name)
-        layers: List[List[str]] = []
-        queue: Deque[str] = deque([name for name, degree in in_degree.items() if degree == 0])
+        layers: list[list[str]] = []
+        queue: deque[str] = deque([name for name, degree in in_degree.items() if degree == 0])
         while queue:
             level_size = len(queue)
-            layer: List[str] = []
+            layer: list[str] = []
             for _ in range(level_size):
                 node = queue.popleft()
                 layer.append(node)
@@ -149,12 +152,14 @@ class PipelineOptimizer:
             critical_tasks=critical_tasks,
         )
 
-    def execute(self, *, shared_state: Optional[MutableMapping[str, Any]] = None) -> Dict[str, TaskResult]:
+    def execute(
+        self, *, shared_state: MutableMapping[str, Any] | None = None
+    ) -> dict[str, TaskResult]:
         """Execute the pipeline and return structured task results."""
 
         self.analyze()  # Validate topology before executing
         dependency_map = self._dependency_counts()
-        in_degree: Dict[str, int] = {name: len(deps) for name, deps in dependency_map.items()}
+        in_degree: dict[str, int] = {name: len(deps) for name, deps in dependency_map.items()}
         ready_queue = PriorityJobQueue()
         for name, deps in dependency_map.items():
             if not deps:
@@ -170,10 +175,10 @@ class PipelineOptimizer:
             monitor=self._monitor,
             shared_state=shared_state,
         )
-        results: Dict[str, TaskResult] = {}
+        results: dict[str, TaskResult] = {}
         dependents = self._reverse_dependencies()
         with ThreadPoolExecutor(max_workers=self._max_workers) as executor:
-            running: Dict[Future[TaskResult], PipelineTask] = {}
+            running: dict[Future[TaskResult], PipelineTask] = {}
 
             def schedule_ready() -> None:
                 while ready_queue and len(running) < self._max_workers:
@@ -192,7 +197,9 @@ class PipelineOptimizer:
                     if result.status != "success" and not self._continue_on_failure:
                         for pending in running:
                             pending.cancel()
-                        raise RuntimeError(f"Pipeline halted due to failure in task '{task.name}': {result.error}")
+                        raise RuntimeError(
+                            f"Pipeline halted due to failure in task '{task.name}': {result.error}"
+                        )
                     for dependent in dependents.get(task.name, []):
                         in_degree[dependent] -= 1
                         if in_degree[dependent] == 0:
@@ -207,14 +214,14 @@ class PipelineOptimizer:
                 schedule_ready()
         return results
 
-    def _dependency_counts(self) -> Dict[str, Set[str]]:
-        counts: Dict[str, Set[str]] = {name: set() for name in self._tasks}
+    def _dependency_counts(self) -> dict[str, set[str]]:
+        counts: dict[str, set[str]] = {name: set() for name in self._tasks}
         for task in self._tasks.values():
             counts[task.name] = set(task.dependencies)
         return counts
 
-    def _reverse_dependencies(self) -> Dict[str, List[str]]:
-        dependents: Dict[str, List[str]] = defaultdict(list)
+    def _reverse_dependencies(self) -> dict[str, list[str]]:
+        dependents: dict[str, list[str]] = defaultdict(list)
         for task in self._tasks.values():
             for dep in task.dependencies:
                 dependents[dep].append(task.name)
@@ -253,7 +260,9 @@ class PipelineOptimizer:
             if task.circuit_breaker:
                 task.circuit_breaker.record_failure()
             latency_ms = (time.perf_counter() - start) * 1000
-            self._monitor.record_task_end(latency_ms, success=False, retried=retried, criticality=task.criticality)
+            self._monitor.record_task_end(
+                latency_ms, success=False, retried=retried, criticality=task.criticality
+            )
             return TaskResult(
                 name=task.name,
                 status="failed",
@@ -263,7 +272,9 @@ class PipelineOptimizer:
             )
         else:
             latency_ms = (time.perf_counter() - start) * 1000
-            self._monitor.record_task_end(latency_ms, success=True, retried=retried, criticality=task.criticality)
+            self._monitor.record_task_end(
+                latency_ms, success=True, retried=retried, criticality=task.criticality
+            )
             return TaskResult(
                 name=task.name,
                 status="success",
@@ -277,6 +288,8 @@ class PipelineOptimizer:
     def shutdown(self) -> None:  # pragma: no cover - maintained for API compatibility
         """Compatibility shim: executors are cleaned up per execution."""
         return None
+
+
 _CRITICALITY_RANK = {
     "blocker": 0,
     "critical": 1,
@@ -285,4 +298,3 @@ _CRITICALITY_RANK = {
     "low": 4,
     "deferred": 5,
 }
-

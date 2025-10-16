@@ -2,8 +2,8 @@
 """Upload detector artifacts to cloud object storage providers."""
 from __future__ import annotations
 
-import sys
 import os
+import sys
 from pathlib import Path
 
 import yaml
@@ -53,7 +53,9 @@ def resolve_uploader(cfg: dict):
         prefix = upload_cfg.get("s3", {}).get("prefix", "")
 
         def uploader(path: Path, blob_name: str) -> None:
-            client.upload_file(str(path), bucket, prefix + blob_name, ExtraArgs={"ChecksumAlgorithm": "SHA256"})
+            client.upload_file(
+                str(path), bucket, prefix + blob_name, ExtraArgs={"ChecksumAlgorithm": "SHA256"}
+            )
 
         return uploader
 

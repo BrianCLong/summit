@@ -1,5 +1,5 @@
-import React from "react";
-import Box from "@mui/material/Box";
+import React from 'react';
+import Box from '@mui/material/Box';
 
 export default function ExplainabilityOverlay({
   open = false,
@@ -11,10 +11,10 @@ export default function ExplainabilityOverlay({
   return (
     <Box
       sx={{
-        position: "absolute",
+        position: 'absolute',
         inset: 0,
         backgroundColor: `rgba(255, 215, 0, ${opacity})`,
-        pointerEvents: "none",
+        pointerEvents: 'none',
       }}
     >
       {children}

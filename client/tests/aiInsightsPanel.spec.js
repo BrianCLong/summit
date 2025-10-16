@@ -10,11 +10,15 @@ test.describe('AI Insights Panel', () => {
   test('should open and close the AI Insights Panel', async ({ page }) => {
     // Click the AI Tools button to open the panel
     await page.getByRole('button', { name: 'AI Tools' }).click();
-    await expect(page.getByRole('heading', { name: 'AI Insights Panel' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'AI Insights Panel' }),
+    ).toBeVisible();
 
     // Click the Close button to close the panel
     await page.getByRole('button', { name: 'Close' }).click();
-    await expect(page.getByRole('heading', { name: 'AI Insights Panel' })).not.toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'AI Insights Panel' }),
+    ).not.toBeVisible();
   });
 
   test('should toggle highlighting', async ({ page }) => {
@@ -27,7 +31,9 @@ test.describe('AI Insights Panel', () => {
     await expect(highlightSwitch).not.toBeChecked();
   });
 
-  test('should select insight type and show relevant filter', async ({ page }) => {
+  test('should select insight type and show relevant filter', async ({
+    page,
+  }) => {
     await page.getByRole('button', { name: 'AI Tools' }).click();
 
     // Select Community Detection
@@ -57,9 +63,16 @@ test.describe('AI Insights Panel', () => {
     const sliderBoundingBox = await slider.boundingBox();
     if (sliderBoundingBox) {
       // Drag the slider to a new position (e.g., filter for communities 0-50)
-      await page.mouse.move(sliderBoundingBox.x + sliderBoundingBox.width / 2, sliderBoundingBox.y + sliderBoundingBox.height / 2);
+      await page.mouse.move(
+        sliderBoundingBox.x + sliderBoundingBox.width / 2,
+        sliderBoundingBox.y + sliderBoundingBox.height / 2,
+      );
       await page.mouse.down();
-      await page.mouse.move(sliderBoundingBox.x + sliderBoundingBox.width * 0.25, sliderBoundingBox.y + sliderBoundingBox.height / 2, { steps: 5 });
+      await page.mouse.move(
+        sliderBoundingBox.x + sliderBoundingBox.width * 0.25,
+        sliderBoundingBox.y + sliderBoundingBox.height / 2,
+        { steps: 5 },
+      );
       await page.mouse.up();
     }
 
@@ -72,7 +85,7 @@ test.describe('AI Insights Panel', () => {
     await page.getByRole('button', { name: 'AI Tools' }).click();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByRole('button', { name: 'Export CSV' }).click()
+      page.getByRole('button', { name: 'Export CSV' }).click(),
     ]);
     expect(download.suggestedFilename()).toMatch(/graph-export-\d+\.csv/);
   });
@@ -81,7 +94,7 @@ test.describe('AI Insights Panel', () => {
     await page.getByRole('button', { name: 'AI Tools' }).click();
     const [download] = await Promise.all([
       page.waitForEvent('download'),
-      page.getByRole('button', { name: 'Export JSON' }).click()
+      page.getByRole('button', { name: 'Export JSON' }).click(),
     ]);
     expect(download.suggestedFilename()).toMatch(/graph-export-\d+\.json/);
   });

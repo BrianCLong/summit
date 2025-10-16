@@ -6,16 +6,16 @@ import pytest
 sys.path.append(str(Path(__file__).resolve().parent.parent))
 
 from blowback_risk_controller import (  # noqa: E402
-    BlowbackRiskController,
     BlowbackPath,
-    Provocation,
+    BlowbackRiskController,
     CoolingPlay,
-    IntegrityFriction,
     Indicator,
-    MessengerProfile,
-    TimebandAction,
+    IntegrityFriction,
     MeasurementPlan,
+    MessengerProfile,
+    Provocation,
     RiskScoreConfig,
+    TimebandAction,
     ValidationError,
 )
 

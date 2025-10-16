@@ -6,7 +6,6 @@ import json
 import os
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict
 
 import pandas as pd
 from fastapi import FastAPI, HTTPException
@@ -77,15 +76,15 @@ def _normalise_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 def _write_evidence_bundle(
     manifest: ProvenanceManifest,
     export_dir: Path,
-) -> Dict[str, str]:
+) -> dict[str, str]:
     export_dir.mkdir(parents=True, exist_ok=True)
     manifest_payload = json.loads(manifest.json(by_alias=True))
     manifest_json = json.dumps(manifest_payload, indent=2)
-    manifest_path = export_dir / 'manifest.json'
+    manifest_path = export_dir / "manifest.json"
     manifest_path.write_text(manifest_json)
 
-    signature_path = export_dir / 'manifest.sig'
-    signing_key_b64 = os.getenv('PROVENANCE_SIGNING_KEY')
+    signature_path = export_dir / "manifest.sig"
+    signing_key_b64 = os.getenv("PROVENANCE_SIGNING_KEY")
     if signing_key_b64:
         signing_key = SigningKey(base64.b64decode(signing_key_b64))
         canonical_manifest = json.dumps(
@@ -93,38 +92,38 @@ def _write_evidence_bundle(
             sort_keys=True,
             separators=(",", ":"),
         )
-        signature = signing_key.sign(canonical_manifest.encode('utf-8')).signature
+        signature = signing_key.sign(canonical_manifest.encode("utf-8")).signature
         signature_path.write_text(
             json.dumps(
                 {
-                    'algorithm': 'ed25519',
-                    'signature': base64.b64encode(signature).decode('ascii'),
-                    'keyId': os.getenv('PROVENANCE_SIGNING_KEY_ID', 'default'),
+                    "algorithm": "ed25519",
+                    "signature": base64.b64encode(signature).decode("ascii"),
+                    "keyId": os.getenv("PROVENANCE_SIGNING_KEY_ID", "default"),
                 },
                 indent=2,
             )
         )
 
-        public_key_path = export_dir / 'public.key'
+        public_key_path = export_dir / "public.key"
         public_key_path.write_text(
-            base64.b64encode(signing_key.verify_key.encode()).decode('ascii')
+            base64.b64encode(signing_key.verify_key.encode()).decode("ascii")
         )
 
-    hashes_path = export_dir / 'hashes.json'
+    hashes_path = export_dir / "hashes.json"
     hashes_path.write_text(
         json.dumps(
             {
-                'artifactId': manifest.artifact_id,
-                'steps': {step.id: step.output_hash for step in manifest.steps},
+                "artifactId": manifest.artifact_id,
+                "steps": {step.id: step.output_hash for step in manifest.steps},
             },
             indent=2,
         )
     )
 
     return {
-        'manifest': str(manifest_path),
-        'signature': str(signature_path if signature_path.exists() else ''),
-        'hashes': str(hashes_path),
+        "manifest": str(manifest_path),
+        "signature": str(signature_path if signature_path.exists() else ""),
+        "hashes": str(hashes_path),
     }
 
 

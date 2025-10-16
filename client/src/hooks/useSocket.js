@@ -22,7 +22,7 @@ export const useSocket = (namespace = '/', options = {}) => {
       reconnectionAttempts: 5,
       timeout: 20000,
       forceNew: true,
-      ...options
+      ...options,
     });
 
     // Connection event handlers
@@ -62,7 +62,9 @@ export const useSocket = (namespace = '/', options = {}) => {
     // Development mode: handle authentication errors gracefully
     newSocket.on('connect_error', (err) => {
       if (err.message === 'Unauthorized') {
-        console.warn('🔐 Socket authentication failed - using development mode');
+        console.warn(
+          '🔐 Socket authentication failed - using development mode',
+        );
         // In development, we might want to continue without authentication
         // or implement a different authentication strategy
       }
@@ -123,9 +125,8 @@ export const useSocket = (namespace = '/', options = {}) => {
     error,
     emit,
     on,
-    off
+    off,
   };
 };
 
 export default useSocket;
-

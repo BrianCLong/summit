@@ -15,7 +15,10 @@ export const config = {
       user: process.env.POSTGRES_USER || 'intelgraph',
       password: process.env.POSTGRES_PASSWORD || 'password',
       database: process.env.POSTGRES_DB || 'intelgraph',
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      ssl:
+        process.env.NODE_ENV === 'production'
+          ? { rejectUnauthorized: false }
+          : false,
     },
 
     neo4j: {
@@ -34,8 +37,12 @@ export const config = {
 
   analytics: {
     maxQueryTimeout: parseInt(process.env.MAX_QUERY_TIMEOUT || '300000'), // 5 minutes
-    maxNodesPerAnalysis: parseInt(process.env.MAX_NODES_PER_ANALYSIS || '10000'),
-    maxEdgesPerAnalysis: parseInt(process.env.MAX_EDGES_PER_ANALYSIS || '50000'),
+    maxNodesPerAnalysis: parseInt(
+      process.env.MAX_NODES_PER_ANALYSIS || '10000',
+    ),
+    maxEdgesPerAnalysis: parseInt(
+      process.env.MAX_EDGES_PER_ANALYSIS || '50000',
+    ),
     cacheEnabled: process.env.CACHE_ENABLED !== 'false',
     defaultCacheTTL: parseInt(process.env.DEFAULT_CACHE_TTL || '3600'), // 1 hour
     enableAdvancedAlgorithms: process.env.ENABLE_ADVANCED_ALGORITHMS === 'true',
@@ -45,7 +52,8 @@ export const config = {
     maxNodesPerVisualization: parseInt(process.env.MAX_NODES_PER_VIZ || '1000'),
     maxEdgesPerVisualization: parseInt(process.env.MAX_EDGES_PER_VIZ || '2000'),
     defaultLayout: process.env.DEFAULT_LAYOUT || 'force',
-    enableLayoutOptimization: process.env.ENABLE_LAYOUT_OPTIMIZATION !== 'false',
+    enableLayoutOptimization:
+      process.env.ENABLE_LAYOUT_OPTIMIZATION !== 'false',
     imageExportEnabled: process.env.IMAGE_EXPORT_ENABLED === 'true',
     svgExportEnabled: process.env.SVG_EXPORT_ENABLED !== 'false',
   },
@@ -74,7 +82,9 @@ export const config = {
     enableTemporal: process.env.ENABLE_TEMPORAL_ANOMALIES === 'true',
     thresholds: {
       degreeOutlier: parseFloat(process.env.DEGREE_OUTLIER_THRESHOLD || '3.0'),
-      clusteringAnomaly: parseFloat(process.env.CLUSTERING_ANOMALY_THRESHOLD || '0.1'),
+      clusteringAnomaly: parseFloat(
+        process.env.CLUSTERING_ANOMALY_THRESHOLD || '0.1',
+      ),
       temporalSpike: parseFloat(process.env.TEMPORAL_SPIKE_THRESHOLD || '2.0'),
     },
   },

@@ -181,7 +181,7 @@ spec:
             severity: warning
             component: chaos-engineering
           annotations:
-            summary: "Chaos experiment failed"
+            summary: 'Chaos experiment failed'
             description: |
               Chaos experiment {{ $labels.experiment }} failed in namespace {{ $labels.namespace }}.
 
@@ -204,7 +204,7 @@ spec:
             severity: critical
             component: chaos-engineering
           annotations:
-            summary: "System not recovering after chaos experiment"
+            summary: 'System not recovering after chaos experiment'
             description: |
               The system availability is still degraded 5 minutes after chaos experiment ended.
 
@@ -232,7 +232,7 @@ spec:
             severity: high
             component: chaos-engineering
           annotations:
-            summary: "Chaos experiment causing excessive performance impact"
+            summary: 'Chaos experiment causing excessive performance impact'
             description: |
               Performance degradation during chaos experiment exceeds acceptable thresholds.
 
@@ -257,7 +257,7 @@ spec:
             severity: high
             component: chaos-engineering
           annotations:
-            summary: "High error rate during chaos experiment"
+            summary: 'High error rate during chaos experiment'
             description: |
               Error rate has exceeded 10% during chaos experiment execution.
 
@@ -296,7 +296,7 @@ metadata:
   name: chaos-resilience-report
   namespace: intelgraph-staging
 spec:
-  schedule: "0 8 * * 1"  # Weekly on Monday at 8 AM UTC
+  schedule: '0 8 * * 1' # Weekly on Monday at 8 AM UTC
   jobTemplate:
     spec:
       template:

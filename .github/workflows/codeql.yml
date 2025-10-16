@@ -2,9 +2,9 @@ name: CodeQL (auto language matrix)
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   schedule:
     - cron: '17 19 * * 6'
 

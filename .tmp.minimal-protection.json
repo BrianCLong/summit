@@ -1,10 +1,7 @@
 {
   "required_status_checks": {
     "strict": false,
-    "checks": [
-      {"context": "ci"},
-      {"context": "policy-ci"}
-    ]
+    "checks": [{ "context": "ci" }, { "context": "policy-ci" }]
   },
   "enforce_admins": true,
   "required_pull_request_reviews": {

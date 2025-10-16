@@ -1,4 +1,5 @@
 """Ethics gate to prevent persuasion and targeting requests."""
+
 from __future__ import annotations
 
 import re

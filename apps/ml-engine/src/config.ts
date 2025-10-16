@@ -15,7 +15,10 @@ export const config = {
       user: process.env.POSTGRES_USER || 'intelgraph',
       password: process.env.POSTGRES_PASSWORD || 'password',
       database: process.env.POSTGRES_DB || 'intelgraph',
-      ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+      ssl:
+        process.env.NODE_ENV === 'production'
+          ? { rejectUnauthorized: false }
+          : false,
     },
 
     neo4j: {
@@ -32,7 +35,8 @@ export const config = {
     },
 
     models: {
-      defaultSentenceModel: process.env.DEFAULT_SENTENCE_MODEL || 'all-MiniLM-L6-v2',
+      defaultSentenceModel:
+        process.env.DEFAULT_SENTENCE_MODEL || 'all-MiniLM-L6-v2',
       cacheDir: process.env.MODEL_CACHE_DIR || './models',
       maxCacheSize: parseInt(process.env.MAX_CACHE_SIZE || '1000000000'), // 1GB
     },
@@ -40,7 +44,9 @@ export const config = {
     entityResolution: {
       defaultThreshold: parseFloat(process.env.DEFAULT_ER_THRESHOLD || '0.8'),
       maxBatchSize: parseInt(process.env.MAX_BATCH_SIZE || '1000'),
-      trainingDataRetentionDays: parseInt(process.env.TRAINING_DATA_RETENTION_DAYS || '30'),
+      trainingDataRetentionDays: parseInt(
+        process.env.TRAINING_DATA_RETENTION_DAYS || '30',
+      ),
     },
   },
 

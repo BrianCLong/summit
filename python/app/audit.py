@@ -2,8 +2,9 @@ import json
 import os
 import time
 import uuid
+from collections.abc import Callable
 from pathlib import Path
-from typing import Callable, Any
+from typing import Any
 
 import redis
 from fastapi import Request
@@ -16,7 +17,8 @@ def track_audit(action: str, target: str) -> Callable:
     def decorator(func: Callable) -> Callable:
         async def wrapper(*args: Any, **kwargs: Any) -> Any:
             return await func(*args, **kwargs)
-        setattr(wrapper, "__audit__", {"action": action, "target": target})
+
+        wrapper.__audit__ = {"action": action, "target": target}
         return wrapper
 
     return decorator

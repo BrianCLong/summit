@@ -25,34 +25,34 @@ const router = createBrowserRouter([
     children: [
       {
         index: true,
-        element: <Dashboard />
+        element: <Dashboard />,
       },
       {
         path: 'scenarios',
-        element: <ScenarioBuilder />
+        element: <ScenarioBuilder />,
       },
       {
         path: 'exercises',
-        element: <ExerciseRunner />
+        element: <ExerciseRunner />,
       },
       {
         path: 'validation',
-        element: <ValidationSuite />
+        element: <ValidationSuite />,
       },
       {
         path: 'training',
-        element: <TrainingCenter />
+        element: <TrainingCenter />,
       },
       {
         path: 'evolution',
-        element: <TacticEvolver />
+        element: <TacticEvolver />,
       },
       {
         path: 'reports',
-        element: <Reports />
-      }
-    ]
-  }
+        element: <Reports />,
+      },
+    ],
+  },
 ]);
 
 // Render application
@@ -61,5 +61,5 @@ root.render(
   <React.StrictMode>
     <RouterProvider router={router} />
     <ToastContainer />
-  </React.StrictMode>
+  </React.StrictMode>,
 );

@@ -1,9 +1,10 @@
 """Generates policies for the policy-fuzzer."""
 
-import random
 import os
-import yaml
+import random
 from datetime import datetime, timedelta
+
+import yaml
 from policy_parser import parse_policy_definition
 
 POLICY_TEMPLATES_DIR = "policy-fuzzer/policy_templates"
@@ -18,22 +19,36 @@ NETWORK_CONDITIONS = ["secure", "unsecure", "vpn"]
 DATA_CLASSIFICATIONS = ["sensitive_data", "public_data", "user_data"]
 PURPOSES = ["investigation", "threat-intel", "marketing", "analytics"]
 
-POLICY_POOL = [] # Global pool of policies for mutation
+POLICY_POOL = []  # Global pool of policies for mutation
+
 
 def load_policy_templates():
     templates = []
     for filename in os.listdir(POLICY_TEMPLATES_DIR):
         if filename.endswith(".yaml"):
             filepath = os.path.join(POLICY_TEMPLATES_DIR, filename)
-            with open(filepath, 'r') as f:
+            with open(filepath) as f:
                 templates.append(yaml.safe_load(f))
     return templates
 
+
 LOADED_POLICY_TEMPLATES = load_policy_templates()
+
 
 def _generate_random_condition():
     """Generates a random simple condition."""
-    field = random.choice(["consent", "geo", "license", "retention", "user_role", "network_condition", "data", "purpose"])
+    field = random.choice(
+        [
+            "consent",
+            "geo",
+            "license",
+            "retention",
+            "user_role",
+            "network_condition",
+            "data",
+            "purpose",
+        ]
+    )
     if field == "consent":
         return {"consent": random.choice(CONSENT_TYPES)}
     elif field == "geo":
@@ -52,6 +67,7 @@ def _generate_random_condition():
         return {"purpose": random.choice(PURPOSES)}
     return {}
 
+
 def mutate_policy(policy_definition):
     """Applies a random mutation to a policy definition."""
     mutated_policy = deepcopy(policy_definition)
@@ -59,7 +75,9 @@ def mutate_policy(policy_definition):
 
     if not rules:
         # If no rules, add one
-        rules.append({"effect": random.choice(["allow", "deny"]), "condition": _generate_random_condition()})
+        rules.append(
+            {"effect": random.choice(["allow", "deny"]), "condition": _generate_random_condition()}
+        )
         mutated_policy["rules"] = rules
         return mutated_policy
 
@@ -67,9 +85,13 @@ def mutate_policy(policy_definition):
 
     if mutation_type == "change_effect":
         rule_to_mutate = random.choice(rules)
-        rule_to_mutate["effect"] = "deny" if rule_to_mutate.get("effect", "allow") == "allow" else "allow"
+        rule_to_mutate["effect"] = (
+            "deny" if rule_to_mutate.get("effect", "allow") == "allow" else "allow"
+        )
     elif mutation_type == "add_rule":
-        rules.append({"effect": random.choice(["allow", "deny"]), "condition": _generate_random_condition()})
+        rules.append(
+            {"effect": random.choice(["allow", "deny"]), "condition": _generate_random_condition()}
+        )
     elif mutation_type == "remove_rule":
         if len(rules) > 1:
             rules.remove(random.choice(rules))
@@ -80,19 +102,22 @@ def mutate_policy(policy_definition):
             if isinstance(rule_to_mutate["condition"], dict):
                 key_to_modify = random.choice(list(rule_to_mutate["condition"].keys()))
                 if key_to_modify not in ["AND", "OR", "NOT"]:
-                    rule_to_mutate["condition"][key_to_modify] = _generate_random_condition()[key_to_modify]
+                    rule_to_mutate["condition"][key_to_modify] = _generate_random_condition()[
+                        key_to_modify
+                    ]
 
     mutated_policy["rules"] = rules
     return mutated_policy
+
 
 def generate_policy():
     """Generates a policy by randomly selecting and combining policy templates, or by mutating an existing policy."""
     global POLICY_POOL
 
     if not LOADED_POLICY_TEMPLATES:
-        return {} # No templates available
+        return {}  # No templates available
 
-    if POLICY_POOL and random.random() < 0.5: # 50% chance to mutate an existing policy
+    if POLICY_POOL and random.random() < 0.5:  # 50% chance to mutate an existing policy
         policy_definition = random.choice(POLICY_POOL)
         generated_policy_definition = mutate_policy(policy_definition)
     else:
@@ -105,8 +130,10 @@ def generate_policy():
             for rule in template.get("rules", []):
                 modified_rule = rule.copy()
                 # Randomly change effect
-                if random.random() < 0.2: # 20% chance to flip effect
-                    modified_rule["effect"] = "deny" if modified_rule.get("effect", "allow") == "allow" else "allow"
+                if random.random() < 0.2:  # 20% chance to flip effect
+                    modified_rule["effect"] = (
+                        "deny" if modified_rule.get("effect", "allow") == "allow" else "allow"
+                    )
 
                 # Dynamically generate values for conditions
                 if "condition" in modified_rule:
@@ -123,7 +150,7 @@ def generate_policy():
 
     # Add the newly generated/mutated policy to the pool
     POLICY_POOL.append(generated_policy_definition)
-    if len(POLICY_POOL) > 100: # Keep pool size manageable
+    if len(POLICY_POOL) > 100:  # Keep pool size manageable
         POLICY_POOL.pop(0)
 
     parsed_definition = parse_policy_definition(yaml.dump(generated_policy_definition))
@@ -135,7 +162,8 @@ def generate_policy():
             if "effect" in rule:
                 policy_data["effect"] = rule["effect"]
         return policy_data
-    return {} # Return an empty policy if parsing fails
+    return {}  # Return an empty policy if parsing fails
+
 
 def _randomize_conditions(conditions):
     """Recursively randomizes values within policy conditions."""
@@ -165,9 +193,10 @@ def _randomize_conditions(conditions):
                 random_date = datetime.now() + timedelta(days=random.randint(-365, 365))
                 new_conditions[key] = random_date.isoformat()
             else:
-                new_conditions[key] = value # Keep original value if not randomized
+                new_conditions[key] = value  # Keep original value if not randomized
         return new_conditions
     return conditions
+
 
 def _extract_policy_data_from_conditions(conditions):
     """Recursively extracts simple key-value pairs from conditions for the policy data."""

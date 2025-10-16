@@ -1,22 +1,26 @@
-from typing import Any, Dict, Optional, TypedDict
+from typing import Any, TypedDict
 
 Json = Any
+
 
 class PolicyContext(TypedDict):
     purpose: str
     authority: str
     license: str
 
+
 class RunContext:
-    def __init__(self,
-                 run_id: str = "local",
-                 workflow_ref: str = "local",
-                 namespace: str = "dev",
-                 correlation: Optional[Dict[str, str]] = None,
-                 logger: Optional[Any] = None,
-                 secrets=None,
-                 emit=None,
-                 policy: Optional[PolicyContext] = None):
+    def __init__(
+        self,
+        run_id: str = "local",
+        workflow_ref: str = "local",
+        namespace: str = "dev",
+        correlation: dict[str, str] | None = None,
+        logger: Any | None = None,
+        secrets=None,
+        emit=None,
+        policy: PolicyContext | None = None,
+    ):
         self.run_id = run_id
         self.workflow_ref = workflow_ref
         self.namespace = namespace

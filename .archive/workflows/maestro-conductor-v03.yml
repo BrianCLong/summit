@@ -3,12 +3,12 @@ name: maestro-conductor-v03
 permissions:
   contents: read
 on:
-  pull_request: 
+  pull_request:
     types: [opened, synchronize, reopened]
-  push: 
+  push:
     branches: [main, feature/maestro-v0.3-orchestrate]
-  
-concurrency: 
+
+concurrency:
   group: maestro-v03-${{ github.ref }}
   cancel-in-progress: true
 
@@ -34,11 +34,11 @@ jobs:
           else
             BASE="origin/${{ github.base_ref || 'main' }}"
           fi
-          
+
           git fetch origin ${{ github.base_ref || 'main' }}:refs/remotes/origin/${{ github.base_ref || 'main' }} || true
-          
+
           FILES=$(git diff --name-only $BASE...HEAD || echo "")
-          
+
           python3 - <<'PY'
           import json, os
           files = os.getenv('FILES', '').splitlines()
@@ -52,14 +52,14 @@ jobs:
             'prompts': any(f.startswith('prompts/') for f in files),
             'collectors': any(f.startswith('services/') for f in files)
           }
-          
+
           matrix = [k for k, v in touched.items() if v]
           should_build = any(touched[k] for k in ['server', 'client', 'activities', 'docker', 'collectors'])
-          
+
           print(f"Files changed: {len(files)}")
           print(f"Areas touched: {matrix}")
           print(f"Should build: {should_build}")
-          
+
           with open(os.environ['GITHUB_OUTPUT'], 'a') as f:
             f.write(f"matrix={json.dumps(matrix)}\n")
             f.write(f"should-build={str(should_build).lower()}\n")
@@ -72,7 +72,7 @@ jobs:
     strategy:
       matrix:
         area: ${{ fromJson(needs.detect-changes.outputs.matrix) }}
-    
+
     services:
       neo4j:
         image: neo4j:5
@@ -87,7 +87,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-          
+
       postgres:
         image: postgres:16
         ports:
@@ -100,7 +100,7 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-          
+
       redis:
         image: redis:7
         ports:
@@ -115,45 +115,45 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          
+
       - name: Setup Node.js with cache
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'pnpm'
-          
+
       - name: Install dependencies
         run: |
           pnpm install --frozen-lockfile
           pip install -r requirements.txt || echo "No requirements.txt found"
-          
+
       - name: Typecheck
         if: contains(fromJson('["server", "client", "activities", "collectors"]'), matrix.area)
         run: |
           pnpm run typecheck || echo "No typecheck script"
-          
+
       - name: Lint
         if: contains(fromJson('["server", "client", "activities", "collectors"]'), matrix.area)
         run: |
           pnpm run lint || echo "No lint script"
-          
+
       - name: Test prompts registry
         if: matrix.area == 'prompts'
         run: |
           pnpm run test:prompts || echo "Prompt tests not configured yet"
-          
+
       - name: Unit tests
         if: contains(fromJson('["server", "client", "activities", "collectors"]'), matrix.area)
         env:
           NEO4J_URI: bolt://localhost:7687
-          NEO4J_USER: neo4j  
+          NEO4J_USER: neo4j
           NEO4J_PASSWORD: test
           POSTGRES_URI: postgresql://postgres:test@localhost:5432/intelgraph_test
           REDIS_URL: redis://localhost:6379
         run: |
           pnpm test -- --ci --reporters=default --reporters=jest-junit || echo "No test script"
           pytest -q || echo "No pytest found"
-          
+
       - name: Integration tests
         if: matrix.area == 'server'
         env:
@@ -164,14 +164,14 @@ jobs:
           REDIS_URL: redis://localhost:6379
         run: |
           pnpm run test:integration || echo "No integration tests"
-          
+
       - name: Agent orchestration tests
         if: matrix.area == 'server'
         env:
           REDIS_URL: redis://localhost:6379
         run: |
           pnpm run test:orchestrator || echo "Orchestrator tests not ready"
-          
+
       - name: Upload test results
         uses: actions/upload-artifact@v4
         if: always()
@@ -188,10 +188,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
-        
+
       - name: Build with cache
         uses: docker/build-push-action@v6
         with:
@@ -203,19 +203,19 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
           outputs: type=docker,dest=/tmp/maestro-v03-image.tar
-          
+
       - name: Generate SBOM with Syft
         run: |
           curl -sSfL https://raw.githubusercontent.com/anchore/syft/main/install.sh | sh -s -- -b . v1.0.1
           ./syft packages docker-archive:/tmp/maestro-v03-image.tar -o json > sbom.json
           ./syft packages docker-archive:/tmp/maestro-v03-image.tar -o spdx-json > sbom.spdx.json
-          
-      - name: Security scan with Grype  
+
+      - name: Security scan with Grype
         run: |
           curl -sSfL https://raw.githubusercontent.com/anchore/grype/main/install.sh | sh -s -- -b . v1.0.0
           ./grype docker-archive:/tmp/maestro-v03-image.tar --fail-on=high --output json > security-scan.json || true
           ./grype docker-archive:/tmp/maestro-v03-image.tar --fail-on=critical
-          
+
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -230,18 +230,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        
+
       - name: CodeQL Analysis
         uses: github/codeql-action/init@v3
         with:
           languages: javascript, python
-          
+
       - name: Autobuild
         uses: github/codeql-action/autobuild@v3
-        
+
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
-        
+
       - name: Dependency vulnerability scan
         run: |
           npm audit --audit-level=high
@@ -254,7 +254,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        
+
       - name: Generate provenance manifest
         run: |
           cat > maestro-v03-provenance.json <<EOF
@@ -295,7 +295,7 @@ jobs:
             ]
           }
           EOF
-          
+
       - name: Upload provenance
         uses: actions/upload-artifact@v4
         with:

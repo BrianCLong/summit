@@ -3,7 +3,7 @@ on:
   pull_request:
   workflow_dispatch:
   schedule:
-    - cron: '31 4 * * 1'  # weekly, jittered from :00
+    - cron: '31 4 * * 1' # weekly, jittered from :00
 
 concurrency:
   group: k6-perf-${{ github.ref }}

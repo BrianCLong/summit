@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Optional, Sequence
 
 
 class Severity(str, Enum):
@@ -35,7 +35,7 @@ class PolicyFinding:
     description: str
     severity: Severity
     impacted_assets: Sequence[str] = field(default_factory=list)
-    remediation: Optional[str] = None
+    remediation: str | None = None
     evidences: Sequence[str] = field(default_factory=list)
     references: Sequence[str] = field(default_factory=list)
 
@@ -45,8 +45,8 @@ class PolicyEvaluationResult:
     """Summary of running a policy adapter against provided material."""
 
     adapter: str
-    findings: List[PolicyFinding] = field(default_factory=list)
-    metrics: Dict[str, float] = field(default_factory=dict)
+    findings: list[PolicyFinding] = field(default_factory=list)
+    metrics: dict[str, float] = field(default_factory=dict)
     coverage: float = 0.0
 
 
@@ -64,7 +64,7 @@ class RegulatoryRequirement:
 class MultiFactorScore:
     """Composite scoring for economic, risk, and legal dimensions."""
 
-    scores: Dict[ImpactDimension, float]
+    scores: dict[ImpactDimension, float]
     rationale: str
 
 
@@ -74,7 +74,7 @@ class AutoPatchAction:
 
     id: str
     description: str
-    changes: Dict[str, str]
+    changes: dict[str, str]
     applies_to: Sequence[str]
     estimated_savings: float
     estimated_risk_reduction: float
@@ -97,15 +97,15 @@ class ComplianceRunReport:
 
     started_at: datetime
     finished_at: datetime
-    evaluations: List[PolicyEvaluationResult]
-    auto_patches: List[AutoPatchAction]
-    human_reviews: List[HumanReviewItem]
+    evaluations: list[PolicyEvaluationResult]
+    auto_patches: list[AutoPatchAction]
+    human_reviews: list[HumanReviewItem]
     multi_factor_score: MultiFactorScore
-    regulatory_alignment: Dict[str, List[RegulatoryRequirement]]
+    regulatory_alignment: dict[str, list[RegulatoryRequirement]]
     tested_artifacts: Sequence[str]
-    validation_results: Dict[str, Dict[str, float]]
+    validation_results: dict[str, dict[str, float]]
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         """Serialize the report to a JSON-serializable dictionary."""
 
         return {

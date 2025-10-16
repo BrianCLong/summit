@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
-from typing import Dict, Iterable
+from collections.abc import Iterable
 
 from .data import Example, TaintScreenResult
 
@@ -21,7 +21,7 @@ class PolicyFilter(ABC):
         """Return True if the example can be used for training."""
 
     @abstractmethod
-    def describe(self) -> Dict[str, str]:
+    def describe(self) -> dict[str, str]:
         """Return metadata for attestations."""
 
 
@@ -37,7 +37,7 @@ class MetadataPolicyFilter(PolicyFilter):
         value = example.metadata.get(self.key)
         return value not in self.disallowed_values
 
-    def describe(self) -> Dict[str, str]:
+    def describe(self) -> dict[str, str]:
         return {
             "type": "metadata-exclusion",
             "key": self.key,
@@ -50,7 +50,7 @@ def taint_screen(dataset: Iterable[Example], filters: Iterable[PolicyFilter]) ->
 
     allowed = []
     rejected = []
-    rejection_reasons: Dict[str, str] = {}
+    rejection_reasons: dict[str, str] = {}
 
     for example in dataset:
         for policy in filters:
@@ -61,4 +61,6 @@ def taint_screen(dataset: Iterable[Example], filters: Iterable[PolicyFilter]) ->
         else:
             allowed.append(example)
 
-    return TaintScreenResult(allowed=allowed, rejected=rejected, rejection_reasons=rejection_reasons)
+    return TaintScreenResult(
+        allowed=allowed, rejected=rejected, rejection_reasons=rejection_reasons
+    )

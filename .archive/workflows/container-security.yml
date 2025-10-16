@@ -360,7 +360,14 @@ jobs:
   notify:
     name: Security Notifications
     runs-on: ubuntu-latest
-    needs: [dependency-scan, container-scan, sign-image, runtime-security, policy-validation]
+    needs:
+      [
+        dependency-scan,
+        container-scan,
+        sign-image,
+        runtime-security,
+        policy-validation,
+      ]
     if: always()
 
     steps:

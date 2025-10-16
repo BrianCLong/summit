@@ -67,7 +67,9 @@ describe('useHoldToTalk', () => {
   });
 
   it('cleans up event listeners on unmount', () => {
-    const { result, unmount } = renderHook(() => useHoldToTalk(onStartMock, onEndMock));
+    const { result, unmount } = renderHook(() =>
+      useHoldToTalk(onStartMock, onEndMock),
+    );
     result.current.current = buttonElement;
 
     act(() => {

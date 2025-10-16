@@ -20,7 +20,10 @@ export default function SidePanel() {
           </ListItem>
           <Divider />
           <ListItem>
-            <ListItemText primary="Actions" secondary="Expand neighbors, Tag, Risk" />
+            <ListItemText
+              primary="Actions"
+              secondary="Expand neighbors, Tag, Risk"
+            />
           </ListItem>
         </List>
       </CardContent>

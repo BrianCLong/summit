@@ -10,11 +10,11 @@ Tri-objective optimization (latency·cost·carbon) under SLO + residency constra
 import json
 import random
 import time
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
-from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
 from enum import Enum
+from pathlib import Path
+from typing import Any
 
 
 class OptimizationMode(Enum):
@@ -27,6 +27,7 @@ class OptimizationMode(Enum):
 @dataclass
 class ModelProvider:
     """Model provider configuration"""
+
     provider_id: str
     model_name: str
     region: str
@@ -40,29 +41,32 @@ class ModelProvider:
 @dataclass
 class SchedulingRequest:
     """Request for optimal model/provider/region scheduling"""
+
     request_id: str
     tenant_id: str
-    model_requirements: Dict[str, Any]
-    residency_constraints: List[str]
-    slo_requirements: Dict[str, float]
+    model_requirements: dict[str, Any]
+    residency_constraints: list[str]
+    slo_requirements: dict[str, float]
     timestamp: str
 
 
 @dataclass
 class SchedulingDecision:
     """Optimal scheduling decision with counterfactuals"""
+
     request_id: str
     chosen_provider: ModelProvider
     optimization_mode: OptimizationMode
     lcc_score: float  # Latency-Cost-Carbon composite
     decision_rationale: str
-    counterfactuals: List[Dict[str, Any]]
+    counterfactuals: list[dict[str, Any]]
     timestamp: str
 
 
 @dataclass
 class GreenOpsMetrics:
     """GreenOps optimization metrics"""
+
     cost_reduction_percent: float
     latency_improvement_percent: float
     carbon_reduction_percent: float
@@ -78,7 +82,7 @@ class LCCScorer:
         self.mode = mode
         self.weights = self._get_weights(mode)
 
-    def _get_weights(self, mode: OptimizationMode) -> Dict[str, float]:
+    def _get_weights(self, mode: OptimizationMode) -> dict[str, float]:
         """Get optimization weights based on mode"""
         if mode == OptimizationMode.COST_FIRST:
             return {"latency": 0.2, "cost": 0.6, "carbon": 0.2}
@@ -94,7 +98,7 @@ class LCCScorer:
         provider: ModelProvider,
         baseline_latency: float,
         baseline_cost: float,
-        baseline_carbon: float
+        baseline_carbon: float,
     ) -> float:
         """Score provider using LCC composite metric"""
         # Normalize metrics (lower is better for all)
@@ -104,9 +108,9 @@ class LCCScorer:
 
         # Weighted composite score
         composite = (
-            self.weights["latency"] * latency_score +
-            self.weights["cost"] * cost_score +
-            self.weights["carbon"] * carbon_score
+            self.weights["latency"] * latency_score
+            + self.weights["cost"] * cost_score
+            + self.weights["carbon"] * carbon_score
         )
 
         return composite
@@ -123,16 +127,16 @@ class GreenOpsOptimizer:
         self.providers = self._initialize_providers()
 
         # Optimization tracking
-        self.decisions: List[SchedulingDecision] = []
+        self.decisions: list[SchedulingDecision] = []
         self.baseline_metrics = {
             "latency_ms": 200.0,
             "cost_per_1k": 0.002,  # $2/million tokens
-            "carbon_kg_per_1k": 0.0001  # 0.1g CO2 per 1k tokens
+            "carbon_kg_per_1k": 0.0001,  # 0.1g CO2 per 1k tokens
         }
 
         self.scorer = LCCScorer(OptimizationMode.BALANCED)
 
-    def _initialize_providers(self) -> List[ModelProvider]:
+    def _initialize_providers(self) -> list[ModelProvider]:
         """Initialize model providers with realistic metrics"""
         return [
             # OpenAI providers
@@ -144,7 +148,7 @@ class GreenOpsOptimizer:
                 p99_latency_ms=180,
                 carbon_kg_per_1k_tokens=0.00008,
                 availability_sla=0.999,
-                max_rps=1000
+                max_rps=1000,
             ),
             ModelProvider(
                 provider_id="openai-eu-west",
@@ -154,9 +158,8 @@ class GreenOpsOptimizer:
                 p99_latency_ms=220,
                 carbon_kg_per_1k_tokens=0.00006,  # Greener EU grid
                 availability_sla=0.998,
-                max_rps=800
+                max_rps=800,
             ),
-
             # Anthropic providers
             ModelProvider(
                 provider_id="anthropic-us-west",
@@ -166,9 +169,8 @@ class GreenOpsOptimizer:
                 p99_latency_ms=160,
                 carbon_kg_per_1k_tokens=0.00009,
                 availability_sla=0.9995,
-                max_rps=1200
+                max_rps=1200,
             ),
-
             # Local/edge providers
             ModelProvider(
                 provider_id="local-edge-us",
@@ -178,9 +180,8 @@ class GreenOpsOptimizer:
                 p99_latency_ms=140,  # Lower latency
                 carbon_kg_per_1k_tokens=0.00012,  # Higher carbon
                 availability_sla=0.995,
-                max_rps=500
+                max_rps=500,
             ),
-
             # Green providers
             ModelProvider(
                 provider_id="green-nordic",
@@ -190,15 +191,13 @@ class GreenOpsOptimizer:
                 p99_latency_ms=250,
                 carbon_kg_per_1k_tokens=0.00003,  # Very low carbon
                 availability_sla=0.997,
-                max_rps=600
-            )
+                max_rps=600,
+            ),
         ]
 
     def _filter_by_constraints(
-        self,
-        providers: List[ModelProvider],
-        request: SchedulingRequest
-    ) -> List[ModelProvider]:
+        self, providers: list[ModelProvider], request: SchedulingRequest
+    ) -> list[ModelProvider]:
         """Filter providers by residency and SLO constraints"""
         filtered = []
 
@@ -223,10 +222,8 @@ class GreenOpsOptimizer:
         return filtered
 
     def _generate_counterfactuals(
-        self,
-        chosen_provider: ModelProvider,
-        all_candidates: List[ModelProvider]
-    ) -> List[Dict[str, Any]]:
+        self, chosen_provider: ModelProvider, all_candidates: list[ModelProvider]
+    ) -> list[dict[str, Any]]:
         """Generate counterfactual analysis for decision transparency"""
         counterfactuals = []
 
@@ -237,11 +234,17 @@ class GreenOpsOptimizer:
             counterfactual = {
                 "provider_id": provider.provider_id,
                 "latency_delta_ms": provider.p99_latency_ms - chosen_provider.p99_latency_ms,
-                "cost_delta_percent": ((provider.cost_per_1k_tokens - chosen_provider.cost_per_1k_tokens)
-                                     / chosen_provider.cost_per_1k_tokens) * 100,
-                "carbon_delta_percent": ((provider.carbon_kg_per_1k_tokens - chosen_provider.carbon_kg_per_1k_tokens)
-                                       / chosen_provider.carbon_kg_per_1k_tokens) * 100,
-                "reason_not_chosen": self._explain_rejection(provider, chosen_provider)
+                "cost_delta_percent": (
+                    (provider.cost_per_1k_tokens - chosen_provider.cost_per_1k_tokens)
+                    / chosen_provider.cost_per_1k_tokens
+                )
+                * 100,
+                "carbon_delta_percent": (
+                    (provider.carbon_kg_per_1k_tokens - chosen_provider.carbon_kg_per_1k_tokens)
+                    / chosen_provider.carbon_kg_per_1k_tokens
+                )
+                * 100,
+                "reason_not_chosen": self._explain_rejection(provider, chosen_provider),
             }
             counterfactuals.append(counterfactual)
 
@@ -281,7 +284,7 @@ class GreenOpsOptimizer:
                 provider,
                 self.baseline_metrics["latency_ms"],
                 self.baseline_metrics["cost_per_1k"],
-                self.baseline_metrics["carbon_kg_per_1k"]
+                self.baseline_metrics["carbon_kg_per_1k"],
             )
 
             if score > best_score:
@@ -307,7 +310,7 @@ class GreenOpsOptimizer:
             lcc_score=best_score,
             decision_rationale=rationale,
             counterfactuals=counterfactuals,
-            timestamp=datetime.now(timezone.utc).isoformat()
+            timestamp=datetime.now(timezone.utc).isoformat(),
         )
 
         # Track decision
@@ -333,18 +336,24 @@ class GreenOpsOptimizer:
         avg_carbon = total_carbon / len(self.decisions)
 
         # Calculate improvements vs baseline
-        latency_improvement = ((self.baseline_metrics["latency_ms"] - avg_latency)
-                              / self.baseline_metrics["latency_ms"]) * 100
+        latency_improvement = (
+            (self.baseline_metrics["latency_ms"] - avg_latency)
+            / self.baseline_metrics["latency_ms"]
+        ) * 100
 
-        cost_reduction = ((self.baseline_metrics["cost_per_1k"] - avg_cost)
-                         / self.baseline_metrics["cost_per_1k"]) * 100
+        cost_reduction = (
+            (self.baseline_metrics["cost_per_1k"] - avg_cost) / self.baseline_metrics["cost_per_1k"]
+        ) * 100
 
-        carbon_reduction = ((self.baseline_metrics["carbon_kg_per_1k"] - avg_carbon)
-                           / self.baseline_metrics["carbon_kg_per_1k"]) * 100
+        carbon_reduction = (
+            (self.baseline_metrics["carbon_kg_per_1k"] - avg_carbon)
+            / self.baseline_metrics["carbon_kg_per_1k"]
+        ) * 100
 
         # Check SLO violations (simulated)
-        slo_violations = sum(1 for d in self.decisions
-                           if d.chosen_provider.p99_latency_ms > 300)  # 300ms SLO
+        slo_violations = sum(
+            1 for d in self.decisions if d.chosen_provider.p99_latency_ms > 300
+        )  # 300ms SLO
 
         return GreenOpsMetrics(
             cost_reduction_percent=cost_reduction,
@@ -352,7 +361,7 @@ class GreenOpsOptimizer:
             carbon_reduction_percent=carbon_reduction,
             slo_violations=slo_violations,
             total_decisions=len(self.decisions),
-            optimization_overhead_ms=5.2  # Average optimization time
+            optimization_overhead_ms=5.2,  # Average optimization time
         )
 
     async def save_decision_log(self):
@@ -360,14 +369,14 @@ class GreenOpsOptimizer:
         decisions_file = self.evidence_dir / "scheduling-decisions.json"
         decisions_data = [asdict(d) for d in self.decisions]
 
-        with open(decisions_file, 'w') as f:
+        with open(decisions_file, "w") as f:
             json.dump(decisions_data, f, indent=2)
 
         # Save metrics
         metrics = self.calculate_improvement_metrics()
         metrics_file = self.evidence_dir / "optimization-metrics.json"
 
-        with open(metrics_file, 'w') as f:
+        with open(metrics_file, "w") as f:
             json.dump(asdict(metrics), f, indent=2)
 
 
@@ -387,9 +396,8 @@ async def main():
             model_requirements={"model_class": "gpt-4o", "context_length": 8192},
             residency_constraints=["us-east-1", "us-west-2"],
             slo_requirements={"max_latency_ms": 400, "min_availability": 0.995},
-            timestamp=datetime.now(timezone.utc).isoformat()
+            timestamp=datetime.now(timezone.utc).isoformat(),
         ),
-
         # Latency-critical workload
         SchedulingRequest(
             request_id="latency-critical-001",
@@ -397,9 +405,8 @@ async def main():
             model_requirements={"model_class": "claude-3-5-sonnet", "context_length": 4096},
             residency_constraints=["us-west-2"],
             slo_requirements={"max_latency_ms": 200, "min_availability": 0.999},
-            timestamp=datetime.now(timezone.utc).isoformat()
+            timestamp=datetime.now(timezone.utc).isoformat(),
         ),
-
         # Carbon-conscious workload
         SchedulingRequest(
             request_id="green-workload-001",
@@ -407,8 +414,8 @@ async def main():
             model_requirements={"model_class": "gpt-4o", "context_length": 4096},
             residency_constraints=["eu-west-1", "eu-north-1"],
             slo_requirements={"max_latency_ms": 300, "min_availability": 0.997},
-            timestamp=datetime.now(timezone.utc).isoformat()
-        )
+            timestamp=datetime.now(timezone.utc).isoformat(),
+        ),
     ]
 
     # Process optimization requests
@@ -423,19 +430,24 @@ async def main():
             request_id=f"batch-{i:03d}",
             tenant_id=random.choice(["TENANT_A", "TENANT_B", "TENANT_C"]),
             model_requirements={"model_class": "gpt-4o"},
-            residency_constraints=random.choice([
-                ["us-east-1"], ["eu-west-1"], ["us-west-2"],
-                ["us-east-1", "us-west-2"], ["eu-west-1", "eu-north-1"]
-            ]),
+            residency_constraints=random.choice(
+                [
+                    ["us-east-1"],
+                    ["eu-west-1"],
+                    ["us-west-2"],
+                    ["us-east-1", "us-west-2"],
+                    ["eu-west-1", "eu-north-1"],
+                ]
+            ),
             slo_requirements={"max_latency_ms": random.randint(200, 400)},
-            timestamp=datetime.now(timezone.utc).isoformat()
+            timestamp=datetime.now(timezone.utc).isoformat(),
         )
 
         await optimizer.optimize_scheduling(request)
 
     # Calculate and display metrics
     metrics = optimizer.calculate_improvement_metrics()
-    print(f"\n📊 GreenOps Optimization Results:")
+    print("\n📊 GreenOps Optimization Results:")
     print(f"   Cost reduction: {metrics.cost_reduction_percent:+.1f}%")
     print(f"   Latency improvement: {metrics.latency_improvement_percent:+.1f}%")
     print(f"   Carbon reduction: {metrics.carbon_reduction_percent:+.1f}%")
@@ -447,15 +459,16 @@ async def main():
     # Check success criteria
     success_criteria = [
         metrics.cost_reduction_percent >= 10,
-        metrics.latency_improvement_percent >= 8 or metrics.carbon_reduction_percent >= 5
+        metrics.latency_improvement_percent >= 8 or metrics.carbon_reduction_percent >= 5,
     ]
 
     if all(success_criteria):
-        print(f"\n✅ GreenOps success criteria met!")
+        print("\n✅ GreenOps success criteria met!")
     else:
-        print(f"\n⚠️ GreenOps success criteria not fully met")
+        print("\n⚠️ GreenOps success criteria not fully met")
 
 
 if __name__ == "__main__":
     import asyncio
+
     asyncio.run(main())

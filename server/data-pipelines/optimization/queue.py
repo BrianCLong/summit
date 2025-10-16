@@ -3,12 +3,11 @@
 from __future__ import annotations
 
 import itertools
+from collections.abc import Iterable, Iterator
 from dataclasses import dataclass
 from heapq import heappop, heappush
-from typing import Dict, Iterable, Iterator, List, Optional, Tuple
 
-
-_CRITICALITY_TO_PRIORITY: Dict[str, int] = {
+_CRITICALITY_TO_PRIORITY: dict[str, int] = {
     "blocker": 0,
     "critical": 1,
     "high": 2,
@@ -23,14 +22,14 @@ class QueuedJob:
     name: str
     criticality: str
     payload: object
-    priority_override: Optional[int] = None
+    priority_override: int | None = None
 
 
 class PriorityJobQueue:
     """Priority queue where lower numeric priority is dequeued first."""
 
     def __init__(self) -> None:
-        self._heap: List[Tuple[int, int, QueuedJob]] = []
+        self._heap: list[tuple[int, int, QueuedJob]] = []
         self._counter = itertools.count()
 
     @staticmethod

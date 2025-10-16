@@ -6,62 +6,62 @@ branch_protection:
   main:
     # Basic protection
     required_status_checks:
-      strict: true  # Require branches to be up to date before merging
+      strict: true # Require branches to be up to date before merging
       checks:
-        - "setup"
-        - "lint-and-typecheck"
-        - "unit-integration-tests"
-        - "security-gates"
-        - "build-and-attestation"
-        - "merge-readiness"
+        - 'setup'
+        - 'lint-and-typecheck'
+        - 'unit-integration-tests'
+        - 'security-gates'
+        - 'build-and-attestation'
+        - 'merge-readiness'
         # Optional but recommended
-        - "schema-api-validation"  # Only when schema changes detected
+        - 'schema-api-validation' # Only when schema changes detected
 
     # Code review requirements
     required_pull_request_reviews:
       required_approving_review_count: 2
       dismiss_stale_reviews: true
       require_code_owner_reviews: true
-      require_last_push_approval: false  # Allow author's final updates
+      require_last_push_approval: false # Allow author's final updates
       bypass_pull_request_allowances:
         users: []
-        teams: ["platform-admins"]
+        teams: ['platform-admins']
 
     # Additional restrictions
     restrictions:
       users: []
-      teams: ["platform-leads", "security-team"]
+      teams: ['platform-leads', 'security-team']
       apps: []
 
     # Advanced settings
-    enforce_admins: false  # Allow admins to bypass in emergencies
+    enforce_admins: false # Allow admins to bypass in emergencies
     allow_force_pushes: false
     allow_deletions: false
     require_signed_commits: true
-    require_linear_history: false  # Allow merge commits for clarity
+    require_linear_history: false # Allow merge commits for clarity
     require_conversation_resolution: true
 
     # Merge queue configuration
     merge_queue:
       enabled: true
       required_status_checks:
-        - "CI - Comprehensive Gates / merge-readiness"
-      merge_method: "merge"  # Preserve full history
+        - 'CI - Comprehensive Gates / merge-readiness'
+      merge_method: 'merge' # Preserve full history
       min_entries_to_merge: 1
       max_entries_to_merge: 10
-      merge_commit_title: "AUTO_MERGE_TITLE"
-      merge_commit_message: "AUTO_MERGE_BODY"
+      merge_commit_title: 'AUTO_MERGE_TITLE'
+      merge_commit_message: 'AUTO_MERGE_BODY'
 
 # Ruleset configuration for advanced protection
 rulesets:
-  - name: "GREEN TRAIN Protection"
-    target: "branch"
-    source_type: "Repository"
-    source: "default_branch"
-    enforcement: "active"
+  - name: 'GREEN TRAIN Protection'
+    target: 'branch'
+    source_type: 'Repository'
+    source: 'default_branch'
+    enforcement: 'active'
 
     rules:
-      - type: "pull_request"
+      - type: 'pull_request'
         parameters:
           required_approving_review_count: 2
           dismiss_stale_reviews_on_push: true
@@ -69,36 +69,36 @@ rulesets:
           require_last_push_approval: false
           required_review_thread_resolution: true
 
-      - type: "required_status_checks"
+      - type: 'required_status_checks'
         parameters:
           strict_required_status_checks_policy: true
           required_status_checks:
-            - context: "CI - Comprehensive Gates / setup"
+            - context: 'CI - Comprehensive Gates / setup'
               integration_id: 15368
-            - context: "CI - Comprehensive Gates / lint-and-typecheck"
+            - context: 'CI - Comprehensive Gates / lint-and-typecheck'
               integration_id: 15368
-            - context: "CI - Comprehensive Gates / unit-integration-tests"
+            - context: 'CI - Comprehensive Gates / unit-integration-tests'
               integration_id: 15368
-            - context: "CI - Comprehensive Gates / security-gates"
+            - context: 'CI - Comprehensive Gates / security-gates'
               integration_id: 15368
-            - context: "CI - Comprehensive Gates / build-and-attestation"
+            - context: 'CI - Comprehensive Gates / build-and-attestation'
               integration_id: 15368
-            - context: "CI - Comprehensive Gates / merge-readiness"
+            - context: 'CI - Comprehensive Gates / merge-readiness'
               integration_id: 15368
 
-      - type: "required_signatures"
+      - type: 'required_signatures'
         parameters: {}
 
-      - type: "non_fast_forward"
+      - type: 'non_fast_forward'
         parameters: {}
 
 # Deployment configuration for protection rules
 deployment:
-  method: "github_api"  # or "terraform" for IaC
+  method: 'github_api' # or "terraform" for IaC
 
   # GitHub CLI commands to apply these rules
   cli_commands:
-    - name: "Enable branch protection"
+    - name: 'Enable branch protection'
       command: |
         gh api repos/:owner/:repo/branches/main/protection \
           --method PUT \
@@ -107,7 +107,7 @@ deployment:
           --field enforce_admins=false \
           --field restrictions=null
 
-    - name: "Enable merge queue"
+    - name: 'Enable merge queue'
       command: |
         gh api repos/:owner/:repo/merge-queue \
           --method PATCH \
@@ -119,16 +119,16 @@ deployment:
 environments:
   production:
     additional_required_checks:
-      - "deployment-approval"
-      - "security-scan-clean"
+      - 'deployment-approval'
+      - 'security-scan-clean'
 
   staging:
     bypass_users:
-      - "staging-deploy-bot"
+      - 'staging-deploy-bot'
 
 # Emergency procedures
 emergency_access:
   # When critical hotfixes are needed
-  emergency_teams: ["platform-admins", "security-incident-response"]
-  temporary_bypass_duration: "2 hours"
-  required_documentation: "incident ticket and post-mortem plan"
+  emergency_teams: ['platform-admins', 'security-incident-response']
+  temporary_bypass_duration: '2 hours'
+  required_documentation: 'incident ticket and post-mortem plan'

@@ -11,23 +11,31 @@ ATTACK_GRAMMARS = {
             "US.*",
             "EU|CA",
             "(US|CA)",
-            "[^E]U", # Matches anything ending in U but not starting with E
+            "[^E]U",  # Matches anything ending in U but not starting with E
         ],
         "retention_period": [
-            "[0-9]+d", # e.g., 30d
-            "[0-9]+m", # e.g., 12m
-        ]
+            "[0-9]+d",  # e.g., 30d
+            "[0-9]+m",  # e.g., 12m
+        ],
     },
     "time_window_boundary_hops": [
-        {"offset": -1, "unit": "day"}, # One day before start
+        {"offset": -1, "unit": "day"},  # One day before start
         {"offset": 1, "unit": "day"},  # One day after end
-        {"offset": 0, "unit": "hour"}, # Same day, different hour
-        {"offset": -1, "unit": "week"}, # One week before start
+        {"offset": 0, "unit": "hour"},  # Same day, different hour
+        {"offset": -1, "unit": "week"},  # One week before start
         {"offset": 1, "unit": "week"},  # One week after end
-        {"offset": -1, "unit": "month"}, # One month before start
+        {"offset": -1, "unit": "month"},  # One month before start
         {"offset": 1, "unit": "month"},  # One month after end
-        {"offset": 0, "unit": "day", "timezone_shift": "-05:00"}, # Same day, different timezone (e.g., EST)
-        {"offset": 0, "unit": "day", "timezone_shift": "+01:00"}, # Same day, different timezone (e.g., CET)
+        {
+            "offset": 0,
+            "unit": "day",
+            "timezone_shift": "-05:00",
+        },  # Same day, different timezone (e.g., EST)
+        {
+            "offset": 0,
+            "unit": "day",
+            "timezone_shift": "+01:00",
+        },  # Same day, different timezone (e.g., CET)
     ],
     "field_aliasing": {
         "location": ["loc", "region", "country"],

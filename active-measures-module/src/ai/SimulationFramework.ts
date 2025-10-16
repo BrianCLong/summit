@@ -15,7 +15,11 @@ import { Matrix } from 'ml-matrix';
 import { v4 as uuidv4 } from 'uuid';
 import { Logger } from 'winston';
 import { EventEmitter } from 'events';
-import { OceanProfile, ActorCapability, OperationalTier } from '../core/ActiveMeasuresEngine';
+import {
+  OceanProfile,
+  ActorCapability,
+  OperationalTier,
+} from '../core/ActiveMeasuresEngine';
 
 // Culture Simulation Types
 interface CulturalDimension {
@@ -181,7 +185,9 @@ export class SimulationFramework extends EventEmitter {
     this.multiverseScenarios = new Map();
 
     this.initializeAIModels(config.modelPath);
-    this.logger.info('SimulationFramework initialized with military-grade AI capabilities');
+    this.logger.info(
+      'SimulationFramework initialized with military-grade AI capabilities',
+    );
   }
 
   /**
@@ -397,7 +403,10 @@ export class SimulationFramework extends EventEmitter {
     const behaviors = this.generateBehaviors(culturalProfile, oceanProfile);
 
     // Identify vulnerabilities and resistances
-    const vulnerabilities = this.identifyVulnerabilities(oceanProfile, culturalProfile);
+    const vulnerabilities = this.identifyVulnerabilities(
+      oceanProfile,
+      culturalProfile,
+    );
     const resistances = this.identifyResistances(oceanProfile, culturalProfile);
 
     return {
@@ -474,7 +483,10 @@ export class SimulationFramework extends EventEmitter {
 
     // Analyze results
     const results = this.analyzeSimulationResults(timeline);
-    const effectiveness = this.calculateEffectiveness(results, scenario.objectives);
+    const effectiveness = this.calculateEffectiveness(
+      results,
+      scenario.objectives,
+    );
     const sideEffects = this.identifySideEffects(timeline);
     const deceptionSignatures = await this.detectDeceptionSignatures(timeline);
 
@@ -523,7 +535,11 @@ export class SimulationFramework extends EventEmitter {
     });
 
     for (let i = 0; i < variationCount; i++) {
-      const variation = await this.createScenarioVariation(baseScenario, variationStrength, i);
+      const variation = await this.createScenarioVariation(
+        baseScenario,
+        variationStrength,
+        i,
+      );
       scenarios.push(variation);
 
       // Identify key divergence points
@@ -532,7 +548,8 @@ export class SimulationFramework extends EventEmitter {
     }
 
     // Analyze convergence patterns
-    const convergenceAnalysis = await this.analyzeScenarioConvergence(scenarios);
+    const convergenceAnalysis =
+      await this.analyzeScenarioConvergence(scenarios);
 
     this.multiverseScenarios.set(multiverseId, scenarios);
 
@@ -561,13 +578,19 @@ export class SimulationFramework extends EventEmitter {
     const targetProfile = await this.extractOceanProfile(dataPoints);
 
     // Determine cultural context
-    const culturalContext = await this.inferCulturalContext(dataPoints, contextualFactors);
+    const culturalContext = await this.inferCulturalContext(
+      dataPoints,
+      contextualFactors,
+    );
 
     // Analyze decision patterns
     const decisionPatterns = await this.analyzeDecisionPatterns(dataPoints);
 
     // Identify cognitive biases
-    const biases = await this.identifyCognitiveBiases(dataPoints, targetProfile);
+    const biases = await this.identifyCognitiveBiases(
+      dataPoints,
+      targetProfile,
+    );
 
     // Find psychological triggers
     const triggers = await this.identifyPsychologicalTriggers(
@@ -600,14 +623,18 @@ export class SimulationFramework extends EventEmitter {
   /**
    * Detect deception signatures in simulation data
    */
-  public async detectDeceptionSignatures(simulationData: any[]): Promise<DeceptionSignature[]> {
+  public async detectDeceptionSignatures(
+    simulationData: any[],
+  ): Promise<DeceptionSignature[]> {
     const signatures: DeceptionSignature[] = [];
 
     for (const dataPoint of simulationData) {
       const features = this.extractDeceptionFeatures(dataPoint);
       const tensorFeatures = tf.tensor2d([features]);
 
-      const prediction = this.deceptionDetector.predict(tensorFeatures) as tf.Tensor;
+      const prediction = this.deceptionDetector.predict(
+        tensorFeatures,
+      ) as tf.Tensor;
       const probabilities = await prediction.data();
 
       // Check for deception indicators
@@ -617,7 +644,10 @@ export class SimulationFramework extends EventEmitter {
       if (confidence > 0.7) {
         // High confidence threshold
         const deceptionType = this.getDeceptionType(maxProbIndex);
-        const indicators = this.extractDeceptionIndicators(dataPoint, deceptionType);
+        const indicators = this.extractDeceptionIndicators(
+          dataPoint,
+          deceptionType,
+        );
         const countermeasures = this.generateCountermeasures(deceptionType);
 
         signatures.push({
@@ -661,7 +691,10 @@ export class SimulationFramework extends EventEmitter {
     );
 
     // Apply transformation
-    const newOntology = this.applyOntologyTransformation(currentOntology, shiftVector);
+    const newOntology = this.applyOntologyTransformation(
+      currentOntology,
+      shiftVector,
+    );
 
     // Measure adaptation effectiveness
     const adaptationMetrics = this.measureAdaptationEffectiveness(
@@ -679,7 +712,9 @@ export class SimulationFramework extends EventEmitter {
 
   // Private helper methods
 
-  private generateBaseCulturalProfile(environment: SimulationEnvironment): CulturalDimension {
+  private generateBaseCulturalProfile(
+    environment: SimulationEnvironment,
+  ): CulturalDimension {
     // Generate cultural profile based on environment characteristics
     const political = environment.political;
     const social = environment.social;
@@ -693,11 +728,15 @@ export class SimulationFramework extends EventEmitter {
       longTermOrientation: economic.gdpPerCapita > 25000 ? 0.7 : 0.4,
       indulgenceRestraint: social.socialCohesion * 0.6 + 0.2,
       contextuality: social.ethnicDiversity > 0.5 ? 0.7 : 0.3,
-      temporalOrientation: environment.technological.internetPenetration > 0.7 ? 0.3 : 0.7,
+      temporalOrientation:
+        environment.technological.internetPenetration > 0.7 ? 0.3 : 0.7,
     };
   }
 
-  private addCulturalVariation(base: CulturalDimension, diversity: number): CulturalDimension {
+  private addCulturalVariation(
+    base: CulturalDimension,
+    diversity: number,
+  ): CulturalDimension {
     const variation = diversity * 0.3; // Maximum 30% variation
 
     return {
@@ -707,23 +746,38 @@ export class SimulationFramework extends EventEmitter {
       ),
       individualismCollectivism: Math.max(
         0,
-        Math.min(1, base.individualismCollectivism + (Math.random() - 0.5) * variation),
+        Math.min(
+          1,
+          base.individualismCollectivism + (Math.random() - 0.5) * variation,
+        ),
       ),
       masculinityFemininity: Math.max(
         0,
-        Math.min(1, base.masculinityFemininity + (Math.random() - 0.5) * variation),
+        Math.min(
+          1,
+          base.masculinityFemininity + (Math.random() - 0.5) * variation,
+        ),
       ),
       uncertaintyAvoidance: Math.max(
         0,
-        Math.min(1, base.uncertaintyAvoidance + (Math.random() - 0.5) * variation),
+        Math.min(
+          1,
+          base.uncertaintyAvoidance + (Math.random() - 0.5) * variation,
+        ),
       ),
       longTermOrientation: Math.max(
         0,
-        Math.min(1, base.longTermOrientation + (Math.random() - 0.5) * variation),
+        Math.min(
+          1,
+          base.longTermOrientation + (Math.random() - 0.5) * variation,
+        ),
       ),
       indulgenceRestraint: Math.max(
         0,
-        Math.min(1, base.indulgenceRestraint + (Math.random() - 0.5) * variation),
+        Math.min(
+          1,
+          base.indulgenceRestraint + (Math.random() - 0.5) * variation,
+        ),
       ),
       contextuality: Math.max(
         0,
@@ -731,7 +785,10 @@ export class SimulationFramework extends EventEmitter {
       ),
       temporalOrientation: Math.max(
         0,
-        Math.min(1, base.temporalOrientation + (Math.random() - 0.5) * variation),
+        Math.min(
+          1,
+          base.temporalOrientation + (Math.random() - 0.5) * variation,
+        ),
       ),
     };
   }
@@ -752,23 +809,37 @@ export class SimulationFramework extends EventEmitter {
     culture: CulturalDimension,
   ): 'LEADER' | 'INFLUENCER' | 'FOLLOWER' | 'REBEL' | 'BRIDGE' {
     const leadershipScore =
-      ocean.extraversion * 0.4 + ocean.conscientiousness * 0.3 + (1 - ocean.neuroticism) * 0.3;
+      ocean.extraversion * 0.4 +
+      ocean.conscientiousness * 0.3 +
+      (1 - ocean.neuroticism) * 0.3;
     const rebelScore =
-      ocean.openness * 0.5 + (1 - ocean.agreeableness) * 0.3 + ocean.neuroticism * 0.2;
-    const bridgeScore = ocean.agreeableness * 0.4 + ocean.openness * 0.3 + ocean.extraversion * 0.3;
+      ocean.openness * 0.5 +
+      (1 - ocean.agreeableness) * 0.3 +
+      ocean.neuroticism * 0.2;
+    const bridgeScore =
+      ocean.agreeableness * 0.4 +
+      ocean.openness * 0.3 +
+      ocean.extraversion * 0.3;
 
     if (leadershipScore > 0.7 && culture.powerDistance > 0.5) return 'LEADER';
-    if (rebelScore > 0.6 && culture.individualismCollectivism > 0.6) return 'REBEL';
+    if (rebelScore > 0.6 && culture.individualismCollectivism > 0.6)
+      return 'REBEL';
     if (bridgeScore > 0.7) return 'BRIDGE';
     if (ocean.extraversion > 0.6) return 'INFLUENCER';
     return 'FOLLOWER';
   }
 
-  private generateBeliefs(culture: CulturalDimension, ocean: OceanProfile): Map<string, number> {
+  private generateBeliefs(
+    culture: CulturalDimension,
+    ocean: OceanProfile,
+  ): Map<string, number> {
     const beliefs = new Map<string, number>();
 
     // Generate beliefs based on cultural and personality factors
-    beliefs.set('authority_respect', culture.powerDistance * 0.7 + ocean.conscientiousness * 0.3);
+    beliefs.set(
+      'authority_respect',
+      culture.powerDistance * 0.7 + ocean.conscientiousness * 0.3,
+    );
     beliefs.set(
       'individual_freedom',
       culture.individualismCollectivism * 0.8 + ocean.openness * 0.2,
@@ -789,10 +860,16 @@ export class SimulationFramework extends EventEmitter {
     return beliefs;
   }
 
-  private generateBehaviors(culture: CulturalDimension, ocean: OceanProfile): Map<string, number> {
+  private generateBehaviors(
+    culture: CulturalDimension,
+    ocean: OceanProfile,
+  ): Map<string, number> {
     const behaviors = new Map<string, number>();
 
-    behaviors.set('social_sharing', ocean.extraversion * 0.6 + culture.indulgenceRestraint * 0.4);
+    behaviors.set(
+      'social_sharing',
+      ocean.extraversion * 0.6 + culture.indulgenceRestraint * 0.4,
+    );
     behaviors.set(
       'rule_following',
       ocean.conscientiousness * 0.7 + culture.uncertaintyAvoidance * 0.3,
@@ -807,35 +884,50 @@ export class SimulationFramework extends EventEmitter {
       'confrontation_avoidance',
       ocean.agreeableness * 0.6 + culture.contextuality * 0.4,
     );
-    behaviors.set('information_seeking', ocean.openness * 0.8 + ocean.conscientiousness * 0.2);
+    behaviors.set(
+      'information_seeking',
+      ocean.openness * 0.8 + ocean.conscientiousness * 0.2,
+    );
 
     return behaviors;
   }
 
-  private identifyVulnerabilities(ocean: OceanProfile, culture: CulturalDimension): string[] {
+  private identifyVulnerabilities(
+    ocean: OceanProfile,
+    culture: CulturalDimension,
+  ): string[] {
     const vulnerabilities: string[] = [];
 
     if (ocean.neuroticism > 0.6) vulnerabilities.push('anxiety_manipulation');
     if (ocean.openness > 0.7) vulnerabilities.push('novelty_exploitation');
-    if (culture.uncertaintyAvoidance > 0.7) vulnerabilities.push('fear_uncertainty');
-    if (culture.powerDistance > 0.6) vulnerabilities.push('authority_deception');
+    if (culture.uncertaintyAvoidance > 0.7)
+      vulnerabilities.push('fear_uncertainty');
+    if (culture.powerDistance > 0.6)
+      vulnerabilities.push('authority_deception');
     if (ocean.agreeableness > 0.7) vulnerabilities.push('social_pressure');
 
     return vulnerabilities;
   }
 
-  private identifyResistances(ocean: OceanProfile, culture: CulturalDimension): string[] {
+  private identifyResistances(
+    ocean: OceanProfile,
+    culture: CulturalDimension,
+  ): string[] {
     const resistances: string[] = [];
 
     if (ocean.conscientiousness > 0.7) resistances.push('systematic_analysis');
-    if (culture.longTermOrientation > 0.6) resistances.push('patience_persistence');
+    if (culture.longTermOrientation > 0.6)
+      resistances.push('patience_persistence');
     if (ocean.openness > 0.7) resistances.push('perspective_flexibility');
-    if (culture.individualismCollectivism > 0.7) resistances.push('independent_thinking');
+    if (culture.individualismCollectivism > 0.7)
+      resistances.push('independent_thinking');
 
     return resistances;
   }
 
-  private async establishSocialNetworks(agents: CulturalAgent[]): Promise<void> {
+  private async establishSocialNetworks(
+    agents: CulturalAgent[],
+  ): Promise<void> {
     // Create social networks based on cultural similarity and personality compatibility
     for (let i = 0; i < agents.length; i++) {
       for (let j = i + 1; j < agents.length; j++) {
@@ -849,7 +941,8 @@ export class SimulationFramework extends EventEmitter {
           agents[j].oceanProfile,
         );
 
-        const relationshipStrength = (similarity + personalityCompatibility) / 2;
+        const relationshipStrength =
+          (similarity + personalityCompatibility) / 2;
 
         if (relationshipStrength > 0.3) {
           // Threshold for relationship formation
@@ -863,7 +956,10 @@ export class SimulationFramework extends EventEmitter {
     this.calculateNetworkPositions(agents);
   }
 
-  private calculateCulturalSimilarity(c1: CulturalDimension, c2: CulturalDimension): number {
+  private calculateCulturalSimilarity(
+    c1: CulturalDimension,
+    c2: CulturalDimension,
+  ): number {
     const dimensions = [
       'powerDistance',
       'individualismCollectivism',
@@ -885,7 +981,10 @@ export class SimulationFramework extends EventEmitter {
     return 1 - totalDifference / dimensions.length;
   }
 
-  private calculatePersonalityCompatibility(o1: OceanProfile, o2: OceanProfile): number {
+  private calculatePersonalityCompatibility(
+    o1: OceanProfile,
+    o2: OceanProfile,
+  ): number {
     // Simple compatibility based on complementary traits
     const extraversionMatch = 1 - Math.abs(o1.extraversion - o2.extraversion);
     const agreeablenessMatch = Math.min(o1.agreeableness, o2.agreeableness);
@@ -902,14 +1001,23 @@ export class SimulationFramework extends EventEmitter {
       agent.networkPosition.centrality = connections / totalPossible;
 
       // Simplified clustering coefficient
-      agent.networkPosition.clustering = this.calculateClustering(agent, agents);
+      agent.networkPosition.clustering = this.calculateClustering(
+        agent,
+        agents,
+      );
 
       // Simplified betweenness centrality
-      agent.networkPosition.betweenness = this.calculateBetweenness(agent, agents);
+      agent.networkPosition.betweenness = this.calculateBetweenness(
+        agent,
+        agents,
+      );
     });
   }
 
-  private calculateClustering(agent: CulturalAgent, allAgents: CulturalAgent[]): number {
+  private calculateClustering(
+    agent: CulturalAgent,
+    allAgents: CulturalAgent[],
+  ): number {
     // Simplified clustering coefficient calculation
     const neighbors = Array.from(agent.relationships.keys());
     if (neighbors.length < 2) return 0;
@@ -923,7 +1031,11 @@ export class SimulationFramework extends EventEmitter {
         const neighbor1 = allAgents.find((a) => a.id === neighbors[i]);
         const neighbor2 = allAgents.find((a) => a.id === neighbors[j]);
 
-        if (neighbor1 && neighbor2 && neighbor1.relationships.has(neighbors[j])) {
+        if (
+          neighbor1 &&
+          neighbor2 &&
+          neighbor1.relationships.has(neighbors[j])
+        ) {
           triangles++;
         }
       }
@@ -932,7 +1044,10 @@ export class SimulationFramework extends EventEmitter {
     return possibleTriangles > 0 ? triangles / possibleTriangles : 0;
   }
 
-  private calculateBetweenness(agent: CulturalAgent, allAgents: CulturalAgent[]): number {
+  private calculateBetweenness(
+    agent: CulturalAgent,
+    allAgents: CulturalAgent[],
+  ): number {
     // Simplified betweenness centrality
     // In a full implementation, this would use shortest path algorithms
     return agent.relationships.size / (allAgents.length - 1);
@@ -1017,9 +1132,12 @@ export class SimulationFramework extends EventEmitter {
 
     agents.forEach((agent) => {
       centroid.powerDistance += agent.culturalProfile.powerDistance;
-      centroid.individualismCollectivism += agent.culturalProfile.individualismCollectivism;
-      centroid.masculinityFemininity += agent.culturalProfile.masculinityFemininity;
-      centroid.uncertaintyAvoidance += agent.culturalProfile.uncertaintyAvoidance;
+      centroid.individualismCollectivism +=
+        agent.culturalProfile.individualismCollectivism;
+      centroid.masculinityFemininity +=
+        agent.culturalProfile.masculinityFemininity;
+      centroid.uncertaintyAvoidance +=
+        agent.culturalProfile.uncertaintyAvoidance;
       centroid.longTermOrientation += agent.culturalProfile.longTermOrientation;
       centroid.indulgenceRestraint += agent.culturalProfile.indulgenceRestraint;
       centroid.contextuality += agent.culturalProfile.contextuality;
@@ -1039,7 +1157,10 @@ export class SimulationFramework extends EventEmitter {
     return centroid;
   }
 
-  private calculateClusterCohesion(agentIds: string[], allAgents: CulturalAgent[]): number {
+  private calculateClusterCohesion(
+    agentIds: string[],
+    allAgents: CulturalAgent[],
+  ): number {
     const agents = agentIds
       .map((id) => allAgents.find((a) => a.id === id))
       .filter(Boolean) as CulturalAgent[];
@@ -1126,7 +1247,11 @@ export class SimulationFramework extends EventEmitter {
 
     // Apply each measure to relevant agents
     for (const measure of activeMeasures) {
-      const measureEffect = await this.applyMeasureToAgents(simulation, measure, weaponizationDial);
+      const measureEffect = await this.applyMeasureToAgents(
+        simulation,
+        measure,
+        weaponizationDial,
+      );
 
       effects.influenced.push(...measureEffect.influenced);
       effects.resistant.push(...measureEffect.resistant);
@@ -1160,7 +1285,11 @@ export class SimulationFramework extends EventEmitter {
       if (!agent) continue;
 
       // Calculate measure effectiveness for this agent
-      const effectiveness = this.calculateMeasureEffectiveness(agent, measure, weaponizationDial);
+      const effectiveness = this.calculateMeasureEffectiveness(
+        agent,
+        measure,
+        weaponizationDial,
+      );
 
       if (effectiveness > 0.5) {
         effects.influenced.push({
@@ -1170,7 +1299,11 @@ export class SimulationFramework extends EventEmitter {
         });
 
         // Apply belief changes
-        const beliefChange = this.applyBeliefChange(agent, measure, effectiveness);
+        const beliefChange = this.applyBeliefChange(
+          agent,
+          measure,
+          effectiveness,
+        );
         effects.beliefChanges.push(beliefChange);
       } else {
         effects.resistant.push({
@@ -1210,7 +1343,9 @@ export class SimulationFramework extends EventEmitter {
     if (hasVulnerability) effectiveness += 0.3;
 
     // Check resistances
-    const hasResistance = agent.resistances.some((resist) => measure.category === resist);
+    const hasResistance = agent.resistances.some(
+      (resist) => measure.category === resist,
+    );
     if (hasResistance) effectiveness -= 0.2;
 
     // Factor in weaponization dial settings
@@ -1219,7 +1354,11 @@ export class SimulationFramework extends EventEmitter {
     return Math.max(0, Math.min(1, effectiveness));
   }
 
-  private applyBeliefChange(agent: CulturalAgent, measure: any, effectiveness: number): any {
+  private applyBeliefChange(
+    agent: CulturalAgent,
+    measure: any,
+    effectiveness: number,
+  ): any {
     // Apply changes to agent beliefs based on measure effectiveness
     const changes: any = {
       agentId: agent.id,
@@ -1243,11 +1382,16 @@ export class SimulationFramework extends EventEmitter {
     return changes;
   }
 
-  private async updateAgentStates(simulation: any, effects: any): Promise<void> {
+  private async updateAgentStates(
+    simulation: any,
+    effects: any,
+  ): Promise<void> {
     // Update agent states based on measure effects and social influence
     for (const [agentId, agent] of this.culturalAgents) {
       // Update based on direct measure effects
-      const directEffect = effects.influenced.find((e: any) => e.agentId === agentId);
+      const directEffect = effects.influenced.find(
+        (e: any) => e.agentId === agentId,
+      );
       if (directEffect) {
         // Agent state already updated in applyBeliefChange
       }
@@ -1271,7 +1415,8 @@ export class SimulationFramework extends EventEmitter {
       neighbor.beliefs.forEach((neighborBeliefValue, belief) => {
         const currentValue = agent.beliefs.get(belief) || 0.5;
         const influence = relationshipStrength * 0.05; // Small influence per step
-        const newValue = currentValue + (neighborBeliefValue - currentValue) * influence;
+        const newValue =
+          currentValue + (neighborBeliefValue - currentValue) * influence;
         agent.beliefs.set(belief, Math.max(0, Math.min(1, newValue)));
       });
     }
@@ -1291,8 +1436,14 @@ export class SimulationFramework extends EventEmitter {
     }
 
     // Clamp values
-    environment.social.socialCohesion = Math.max(0, Math.min(1, environment.social.socialCohesion));
-    environment.political.stability = Math.max(0, Math.min(1, environment.political.stability));
+    environment.social.socialCohesion = Math.max(
+      0,
+      Math.min(1, environment.social.socialCohesion),
+    );
+    environment.political.stability = Math.max(
+      0,
+      Math.min(1, environment.political.stability),
+    );
   }
 
   private calculateStepMetrics(simulation: any): any {
@@ -1360,7 +1511,10 @@ export class SimulationFramework extends EventEmitter {
 
   private calculateAverageResistance(agents: CulturalAgent[]): number {
     // Calculate average resistance based on agent resistances
-    const totalResistances = agents.reduce((sum, agent) => sum + agent.resistances.length, 0);
+    const totalResistances = agents.reduce(
+      (sum, agent) => sum + agent.resistances.length,
+      0,
+    );
     return totalResistances / agents.length;
   }
 
@@ -1389,12 +1543,16 @@ export class SimulationFramework extends EventEmitter {
       finalState: finalMetrics,
       initialState: initialMetrics,
       changes: {
-        beliefEntropyChange: finalMetrics.beliefEntropy - initialMetrics.beliefEntropy,
+        beliefEntropyChange:
+          finalMetrics.beliefEntropy - initialMetrics.beliefEntropy,
         fragmentationChange:
-          finalMetrics.networkFragmentation - initialMetrics.networkFragmentation,
+          finalMetrics.networkFragmentation -
+          initialMetrics.networkFragmentation,
         stabilityChange:
-          finalMetrics.environmentalStability - initialMetrics.environmentalStability,
-        cohesionChange: finalMetrics.socialCohesion - initialMetrics.socialCohesion,
+          finalMetrics.environmentalStability -
+          initialMetrics.environmentalStability,
+        cohesionChange:
+          finalMetrics.socialCohesion - initialMetrics.socialCohesion,
       },
       trends: this.analyzeTrends(timeline),
     };
@@ -1414,7 +1572,9 @@ export class SimulationFramework extends EventEmitter {
     ];
 
     metrics.forEach((metric) => {
-      const values = timeline.map((step) => step.metrics[metric]).filter((v) => v !== undefined);
+      const values = timeline
+        .map((step) => step.metrics[metric])
+        .filter((v) => v !== undefined);
       if (values.length < 2) return;
 
       // Calculate linear trend (simplified)
@@ -1422,7 +1582,8 @@ export class SimulationFramework extends EventEmitter {
       const secondHalf = values.slice(Math.floor(values.length / 2));
 
       const firstAvg = firstHalf.reduce((a, b) => a + b, 0) / firstHalf.length;
-      const secondAvg = secondHalf.reduce((a, b) => a + b, 0) / secondHalf.length;
+      const secondAvg =
+        secondHalf.reduce((a, b) => a + b, 0) / secondHalf.length;
 
       trends[metric] = {
         direction: secondAvg > firstAvg ? 'increasing' : 'decreasing',
@@ -1438,7 +1599,9 @@ export class SimulationFramework extends EventEmitter {
     if (values.length < 2) return 0;
 
     const mean = values.reduce((a, b) => a + b, 0) / values.length;
-    const variance = values.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / values.length;
+    const variance =
+      values.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) /
+      values.length;
 
     return Math.sqrt(variance);
   }
@@ -1509,26 +1672,33 @@ export class SimulationFramework extends EventEmitter {
       sideEffects.push({
         type: 'ESCALATION_RISK',
         severity: escalationPattern.severity,
-        description: 'Operation shows signs of escalating beyond intended scope',
+        description:
+          'Operation shows signs of escalating beyond intended scope',
       });
     }
 
     return sideEffects;
   }
 
-  private detectEscalationPattern(timeline: any[]): { detected: boolean; severity: number } {
+  private detectEscalationPattern(timeline: any[]): {
+    detected: boolean;
+    severity: number;
+  } {
     // Detect escalation patterns in the timeline
     if (timeline.length < 3) return { detected: false, severity: 0 };
 
     // Check for accelerating instability
-    const stabilityValues = timeline.map((step) => step.metrics.environmentalStability);
+    const stabilityValues = timeline.map(
+      (step) => step.metrics.environmentalStability,
+    );
     const recentDecline = stabilityValues
       .slice(-3)
       .every((val, idx, arr) => idx === 0 || val < arr[idx - 1]);
 
     if (recentDecline) {
       const declineRate =
-        stabilityValues[stabilityValues.length - 3] - stabilityValues[stabilityValues.length - 1];
+        stabilityValues[stabilityValues.length - 3] -
+        stabilityValues[stabilityValues.length - 1];
       return { detected: true, severity: Math.min(1, declineRate * 2) };
     }
 
@@ -1552,53 +1722,79 @@ export class SimulationFramework extends EventEmitter {
 
     // Apply variations to initial conditions
     variation.initialConditions = new Map(baseScenario.initialConditions);
-    this.applyInitialConditionVariations(variation.initialConditions, variationStrength);
+    this.applyInitialConditionVariations(
+      variation.initialConditions,
+      variationStrength,
+    );
 
     // Apply variations to stressors
     variation.stressors = baseScenario.stressors.map((stressor) => ({
       ...stressor,
       intensity: Math.max(
         0,
-        Math.min(1, stressor.intensity + (Math.random() - 0.5) * variationStrength),
+        Math.min(
+          1,
+          stressor.intensity + (Math.random() - 0.5) * variationStrength,
+        ),
       ),
       timing: Math.max(
         0,
-        stressor.timing + (Math.random() - 0.5) * variationStrength * 0.2 * baseScenario.timeframe,
+        stressor.timing +
+          (Math.random() - 0.5) *
+            variationStrength *
+            0.2 *
+            baseScenario.timeframe,
       ),
     }));
 
     return variation;
   }
 
-  private applyEnvironmentVariations(environment: SimulationEnvironment, strength: number): void {
+  private applyEnvironmentVariations(
+    environment: SimulationEnvironment,
+    strength: number,
+  ): void {
     // Apply variations to environment parameters
     const variation = strength * 0.2; // Max 20% variation
 
     environment.political.stability = Math.max(
       0,
-      Math.min(1, environment.political.stability + (Math.random() - 0.5) * variation),
+      Math.min(
+        1,
+        environment.political.stability + (Math.random() - 0.5) * variation,
+      ),
     );
 
     environment.social.socialCohesion = Math.max(
       0,
-      Math.min(1, environment.social.socialCohesion + (Math.random() - 0.5) * variation),
+      Math.min(
+        1,
+        environment.social.socialCohesion + (Math.random() - 0.5) * variation,
+      ),
     );
 
     environment.economic.inequality = Math.max(
       0,
-      Math.min(1, environment.economic.inequality + (Math.random() - 0.5) * variation),
+      Math.min(
+        1,
+        environment.economic.inequality + (Math.random() - 0.5) * variation,
+      ),
     );
 
     environment.technological.internetPenetration = Math.max(
       0,
       Math.min(
         1,
-        environment.technological.internetPenetration + (Math.random() - 0.5) * variation,
+        environment.technological.internetPenetration +
+          (Math.random() - 0.5) * variation,
       ),
     );
   }
 
-  private applyInitialConditionVariations(conditions: Map<string, any>, strength: number): void {
+  private applyInitialConditionVariations(
+    conditions: Map<string, any>,
+    strength: number,
+  ): void {
     // Apply variations to initial conditions
     conditions.forEach((value, key) => {
       if (typeof value === 'number') {
@@ -1608,20 +1804,26 @@ export class SimulationFramework extends EventEmitter {
     });
   }
 
-  private identifyDivergencePoints(base: Scenario, variation: Scenario): string[] {
+  private identifyDivergencePoints(
+    base: Scenario,
+    variation: Scenario,
+  ): string[] {
     const divergences: string[] = [];
 
     // Check for significant differences
     if (
-      Math.abs(base.environment.political.stability - variation.environment.political.stability) >
-      0.1
+      Math.abs(
+        base.environment.political.stability -
+          variation.environment.political.stability,
+      ) > 0.1
     ) {
       divergences.push('political_stability');
     }
 
     if (
       Math.abs(
-        base.environment.social.socialCohesion - variation.environment.social.socialCohesion,
+        base.environment.social.socialCohesion -
+          variation.environment.social.socialCohesion,
       ) > 0.1
     ) {
       divergences.push('social_cohesion');
@@ -1630,7 +1832,10 @@ export class SimulationFramework extends EventEmitter {
     // Check stressor differences
     const stressorDifferences = base.stressors.filter((stressor, index) => {
       const varStressor = variation.stressors[index];
-      return varStressor && Math.abs(stressor.intensity - varStressor.intensity) > 0.15;
+      return (
+        varStressor &&
+        Math.abs(stressor.intensity - varStressor.intensity) > 0.15
+      );
     });
 
     if (stressorDifferences.length > 0) {
@@ -1640,7 +1845,9 @@ export class SimulationFramework extends EventEmitter {
     return divergences;
   }
 
-  private async analyzeScenarioConvergence(scenarios: Scenario[]): Promise<any> {
+  private async analyzeScenarioConvergence(
+    scenarios: Scenario[],
+  ): Promise<any> {
     // Analyze how different scenarios converge or diverge
     const convergenceAnalysis = {
       clusteredOutcomes: [],
@@ -1654,7 +1861,8 @@ export class SimulationFramework extends EventEmitter {
     convergenceAnalysis.clusteredOutcomes = outcomeGroups;
 
     // Identify key divergence factors
-    convergenceAnalysis.divergenceFactors = this.identifyDivergenceFactors(scenarios);
+    convergenceAnalysis.divergenceFactors =
+      this.identifyDivergenceFactors(scenarios);
 
     return convergenceAnalysis;
   }
@@ -1671,7 +1879,10 @@ export class SimulationFramework extends EventEmitter {
       let assignedGroup = false;
       for (const group of groups) {
         const groupSignature = group.signature;
-        const similarity = this.calculateSignatureSimilarity(outcomeSignature, groupSignature);
+        const similarity = this.calculateSignatureSimilarity(
+          outcomeSignature,
+          groupSignature,
+        );
 
         if (similarity > 1 - groupThreshold) {
           group.scenarios.push(scenario.id);
@@ -1699,7 +1910,8 @@ export class SimulationFramework extends EventEmitter {
       scenario.environment.social.socialCohesion,
       scenario.environment.economic.inequality,
       scenario.environment.technological.internetPenetration,
-      scenario.stressors.reduce((sum, s) => sum + s.intensity, 0) / scenario.stressors.length,
+      scenario.stressors.reduce((sum, s) => sum + s.intensity, 0) /
+        scenario.stressors.length,
     ];
   }
 
@@ -1736,7 +1948,9 @@ export class SimulationFramework extends EventEmitter {
 
   private calculateVariance(values: number[]): number {
     const mean = values.reduce((a, b) => a + b, 0) / values.length;
-    const variance = values.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / values.length;
+    const variance =
+      values.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) /
+      values.length;
     return variance;
   }
 
@@ -1781,7 +1995,9 @@ export class SimulationFramework extends EventEmitter {
     };
   }
 
-  private async analyzeDecisionPatterns(dataPoints: any[]): Promise<Map<string, number>> {
+  private async analyzeDecisionPatterns(
+    dataPoints: any[],
+  ): Promise<Map<string, number>> {
     // Analyze decision-making patterns from behavioral data
     const patterns = new Map<string, number>();
 
@@ -1820,7 +2036,8 @@ export class SimulationFramework extends EventEmitter {
 
     if (profile.neuroticism > 0.6) triggers.push('fear_uncertainty');
     if (culture.powerDistance > 0.6) triggers.push('authority_appeal');
-    if (culture.individualismCollectivism < 0.4) triggers.push('group_belonging');
+    if (culture.individualismCollectivism < 0.4)
+      triggers.push('group_belonging');
     if (profile.openness > 0.7) triggers.push('novelty_curiosity');
     if (culture.uncertaintyAvoidance > 0.6) triggers.push('security_stability');
 
@@ -1897,24 +2114,40 @@ export class SimulationFramework extends EventEmitter {
   private getDeceptionType(
     index: number,
   ): 'NARRATIVE' | 'TECHNICAL' | 'SOCIAL' | 'TEMPORAL' | 'LOGICAL' {
-    const types: ('NARRATIVE' | 'TECHNICAL' | 'SOCIAL' | 'TEMPORAL' | 'LOGICAL')[] = [
-      'NARRATIVE',
-      'TECHNICAL',
-      'SOCIAL',
-      'TEMPORAL',
-      'LOGICAL',
-    ];
+    const types: (
+      | 'NARRATIVE'
+      | 'TECHNICAL'
+      | 'SOCIAL'
+      | 'TEMPORAL'
+      | 'LOGICAL'
+    )[] = ['NARRATIVE', 'TECHNICAL', 'SOCIAL', 'TEMPORAL', 'LOGICAL'];
     return types[index] || 'NARRATIVE';
   }
 
   private extractDeceptionIndicators(dataPoint: any, type: string): string[] {
     // Extract specific indicators based on deception type
     const indicators: Record<string, string[]> = {
-      NARRATIVE: ['inconsistent_timeline', 'contradictory_details', 'emotional_manipulation'],
-      TECHNICAL: ['metadata_manipulation', 'digital_artifacts', 'technical_impossibilities'],
+      NARRATIVE: [
+        'inconsistent_timeline',
+        'contradictory_details',
+        'emotional_manipulation',
+      ],
+      TECHNICAL: [
+        'metadata_manipulation',
+        'digital_artifacts',
+        'technical_impossibilities',
+      ],
       SOCIAL: ['social_proof_fabrication', 'astroturfing', 'fake_endorsements'],
-      TEMPORAL: ['timing_anomalies', 'sequence_violations', 'temporal_contradictions'],
-      LOGICAL: ['logical_fallacies', 'causal_violations', 'inconsistent_reasoning'],
+      TEMPORAL: [
+        'timing_anomalies',
+        'sequence_violations',
+        'temporal_contradictions',
+      ],
+      LOGICAL: [
+        'logical_fallacies',
+        'causal_violations',
+        'inconsistent_reasoning',
+      ],
     };
 
     return indicators[type] || [];
@@ -1924,9 +2157,21 @@ export class SimulationFramework extends EventEmitter {
     // Generate countermeasures for different deception types
     const countermeasures: Record<string, string[]> = {
       NARRATIVE: ['fact_checking', 'source_verification', 'timeline_analysis'],
-      TECHNICAL: ['metadata_analysis', 'digital_forensics', 'technical_validation'],
-      SOCIAL: ['network_analysis', 'bot_detection', 'authentication_verification'],
-      TEMPORAL: ['chronological_verification', 'sequence_analysis', 'temporal_correlation'],
+      TECHNICAL: [
+        'metadata_analysis',
+        'digital_forensics',
+        'technical_validation',
+      ],
+      SOCIAL: [
+        'network_analysis',
+        'bot_detection',
+        'authentication_verification',
+      ],
+      TEMPORAL: [
+        'chronological_verification',
+        'sequence_analysis',
+        'temporal_correlation',
+      ],
       LOGICAL: ['logical_analysis', 'argument_mapping', 'consistency_checking'],
     };
 
@@ -1952,7 +2197,10 @@ export class SimulationFramework extends EventEmitter {
     return shiftVector;
   }
 
-  private applyOntologyTransformation(ontology: any, shiftVector: number[]): any {
+  private applyOntologyTransformation(
+    ontology: any,
+    shiftVector: number[],
+  ): any {
     // Apply the shift vector to transform the ontology
     const newOntology = { ...ontology };
 

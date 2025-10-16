@@ -41,9 +41,13 @@ export async function expectLastAssistantMessageToContain(
 ) {
   await waitFor(
     () => {
-      const log = document.querySelector('[data-testid="message-log"]') as HTMLElement;
+      const log = document.querySelector(
+        '[data-testid="message-log"]',
+      ) as HTMLElement;
       if (!log) throw new Error('message-log not found');
-      const articles = Array.from(log.querySelectorAll('article[aria-label="assistant"]'));
+      const articles = Array.from(
+        log.querySelectorAll('article[aria-label="assistant"]'),
+      );
       if (articles.length === 0) throw new Error('No assistant messages found');
       const last = articles[articles.length - 1] as HTMLElement;
       if (!last) throw new Error('Last assistant message is null');
@@ -55,7 +59,9 @@ export async function expectLastAssistantMessageToContain(
 
       const text = normalizeText(last.textContent || '');
       if (!isMatch(text)) {
-        throw new Error(`Expected last assistant message to match pattern. Got: "${text}"`);
+        throw new Error(
+          `Expected last assistant message to match pattern. Got: "${text}"`,
+        );
       }
     },
     { timeout },

@@ -1,25 +1,25 @@
-
-import unittest
 import os
 import sys
+import unittest
 
 # Add the project root to sys.path to allow absolute imports
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../'))
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../"))
 sys.path.insert(0, project_root)
 
-from ops.observability import init_otel_tracing, record_prom_metric, get_slo_dashboard_url
-from ops.cost_guard import apply_query_budget, kill_slow_query, get_archive_tier_cost_estimate
-from ops.chaos_hooks import inject_pod_kill_hook, inject_broker_kill_hook, trigger_chaos_drill
 from ops.admin_studio_api import (
-    toggle_feature_flag,
+    _FEATURE_FLAGS,
+    get_connector_health,
     get_feature_flag_state,
     get_schema_registry_status,
-    get_connector_health,
-    trigger_job_retry,
-    trigger_job_backfill,
     search_audit_logs,
-    _FEATURE_FLAGS
+    toggle_feature_flag,
+    trigger_job_backfill,
+    trigger_job_retry,
 )
+from ops.chaos_hooks import inject_broker_kill_hook, inject_pod_kill_hook, trigger_chaos_drill
+from ops.cost_guard import apply_query_budget, get_archive_tier_cost_estimate, kill_slow_query
+from ops.observability import get_slo_dashboard_url, init_otel_tracing, record_prom_metric
+
 
 class TestOpsStubs(unittest.TestCase):
 
@@ -69,5 +69,6 @@ class TestOpsStubs(unittest.TestCase):
         logs = search_audit_logs("user_login")
         self.assertIsInstance(logs, list)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

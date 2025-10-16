@@ -20,7 +20,7 @@ export const fetchGraphData = createAsyncThunk(
     } finally {
       dispatch(graphSlice.actions.setLoading(false));
     }
-  }
+  },
 );
 
 const graphSlice = createSlice({
@@ -42,14 +42,16 @@ const graphSlice = createSlice({
     },
     clusters: [], // New state for managing clusters
     searchTerm: '', // New state for search term
-    nodeTypeColors: JSON.parse(localStorage.getItem('graphNodeTypeColors')) || { // New state for customizable node colors
+    nodeTypeColors: JSON.parse(localStorage.getItem('graphNodeTypeColors')) || {
+      // New state for customizable node colors
       person: '#FF5733',
       organization: '#33FF57',
       location: '#3357FF',
       event: '#FF33FF',
       generic: '#888888',
     },
-    graphStats: { // New state for graph statistics
+    graphStats: {
+      // New state for graph statistics
       numNodes: 0,
       numEdges: 0,
       density: 0,
@@ -81,11 +83,15 @@ const graphSlice = createSlice({
       state.edges = action.payload.edges;
       // Basic clustering logic: group nodes by type
       if (state.featureToggles.nodeClustering) {
-        const nodeTypes = [...new Set(action.payload.nodes.map(node => node.data.type))];
-        state.clusters = nodeTypes.map(type => ({
+        const nodeTypes = [
+          ...new Set(action.payload.nodes.map((node) => node.data.type)),
+        ];
+        state.clusters = nodeTypes.map((type) => ({
           id: `cluster_${type}`,
           type: type,
-          nodes: action.payload.nodes.filter(node => node.data.type === type).map(node => node.data.id),
+          nodes: action.payload.nodes
+            .filter((node) => node.data.type === type)
+            .map((node) => node.data.id),
           isExpanded: true, // Start expanded
         }));
       } else {
@@ -94,7 +100,8 @@ const graphSlice = createSlice({
       // Update graph stats
       const numNodes = state.nodes.length;
       const numEdges = state.edges.length;
-      const density = numNodes > 1 ? (2 * numEdges) / (numNodes * (numNodes - 1)) : 0;
+      const density =
+        numNodes > 1 ? (2 * numEdges) / (numNodes * (numNodes - 1)) : 0;
       state.graphStats = { numNodes, numEdges, density: density.toFixed(2) };
       state.errorMessage = null; // Clear error on successful data set
     },
@@ -110,7 +117,9 @@ const graphSlice = createSlice({
       state.historyPointer++;
     },
     removeCluster: (state, action) => {
-      state.clusters = state.clusters.filter(cluster => cluster.id !== action.payload);
+      state.clusters = state.clusters.filter(
+        (cluster) => cluster.id !== action.payload,
+      );
       // Push current state to history
       state.history = state.history.slice(0, state.historyPointer + 1);
       state.history.push({
@@ -121,7 +130,7 @@ const graphSlice = createSlice({
       state.historyPointer++;
     },
     toggleClusterExpansion: (state, action) => {
-      const cluster = state.clusters.find(c => c.id === action.payload);
+      const cluster = state.clusters.find((c) => c.id === action.payload);
       if (cluster) {
         cluster.isExpanded = !cluster.isExpanded;
       }
@@ -146,7 +155,8 @@ const graphSlice = createSlice({
       // Update graph stats
       const numNodes = state.nodes.length;
       const numEdges = state.edges.length;
-      const density = numNodes > 1 ? (2 * numEdges) / (numNodes * (numNodes - 1)) : 0;
+      const density =
+        numNodes > 1 ? (2 * numEdges) / (numNodes * (numNodes - 1)) : 0;
       state.graphStats = { numNodes, numEdges, density: density.toFixed(2) };
       // Push current state to history
       state.history = state.history.slice(0, state.historyPointer + 1);
@@ -162,7 +172,8 @@ const graphSlice = createSlice({
       // Update graph stats
       const numNodes = state.nodes.length;
       const numEdges = state.edges.length;
-      const density = numNodes > 1 ? (2 * numEdges) / (numNodes * (numNodes - 1)) : 0;
+      const density =
+        numNodes > 1 ? (2 * numEdges) / (numNodes * (numNodes - 1)) : 0;
       state.graphStats = { numNodes, numEdges, density: density.toFixed(2) };
       // Push current state to history
       state.history = state.history.slice(0, state.historyPointer + 1);
@@ -174,7 +185,9 @@ const graphSlice = createSlice({
       state.historyPointer++;
     },
     updateNode: (state, action) => {
-      const index = state.nodes.findIndex(node => node.id === action.payload.id);
+      const index = state.nodes.findIndex(
+        (node) => node.id === action.payload.id,
+      );
       if (index !== -1) {
         state.nodes[index] = { ...state.nodes[index], ...action.payload };
       }
@@ -188,16 +201,22 @@ const graphSlice = createSlice({
       state.historyPointer++;
     },
     deleteNode: (state, action) => {
-      state.nodes = state.nodes.filter(node => node.id !== action.payload);
-      state.edges = state.edges.filter(edge => edge.source !== action.payload && edge.target !== action.payload);
-      state.selectedNodes = state.selectedNodes.filter(id => id !== action.payload);
+      state.nodes = state.nodes.filter((node) => node.id !== action.payload);
+      state.edges = state.edges.filter(
+        (edge) =>
+          edge.source !== action.payload && edge.target !== action.payload,
+      );
+      state.selectedNodes = state.selectedNodes.filter(
+        (id) => id !== action.payload,
+      );
       if (state.selectedNode === action.payload) {
         state.selectedNode = null;
       }
       // Update graph stats
       const numNodes = state.nodes.length;
       const numEdges = state.edges.length;
-      const density = numNodes > 1 ? (2 * numEdges) / (numNodes * (numNodes - 1)) : 0;
+      const density =
+        numNodes > 1 ? (2 * numEdges) / (numNodes * (numNodes - 1)) : 0;
       state.graphStats = { numNodes, numEdges, density: density.toFixed(2) };
       // Push current state to history
       state.history = state.history.slice(0, state.historyPointer + 1);
@@ -209,15 +228,18 @@ const graphSlice = createSlice({
       state.historyPointer++;
     },
     deleteEdge: (state, action) => {
-      state.edges = state.edges.filter(edge => edge.id !== action.payload);
-      state.selectedEdges = state.selectedEdges.filter(id => id !== action.payload);
+      state.edges = state.edges.filter((edge) => edge.id !== action.payload);
+      state.selectedEdges = state.selectedEdges.filter(
+        (id) => id !== action.payload,
+      );
       if (state.selectedEdge === action.payload) {
         state.selectedEdge = null;
       }
       // Update graph stats
       const numNodes = state.nodes.length;
       const numEdges = state.edges.length;
-      const density = numNodes > 1 ? (2 * numEdges) / (numNodes * (numNodes - 1)) : 0;
+      const density =
+        numNodes > 1 ? (2 * numEdges) / (numNodes * (numNodes - 1)) : 0;
       state.graphStats = { numNodes, numEdges, density: density.toFixed(2) };
       // Push current state to history
       state.history = state.history.slice(0, state.historyPointer + 1);
@@ -262,7 +284,8 @@ const graphSlice = createSlice({
         // Recalculate stats for the restored state
         const numNodes = state.nodes.length;
         const numEdges = state.edges.length;
-        const density = numNodes > 1 ? (2 * numEdges) / (numNodes * (numNodes - 1)) : 0;
+        const density =
+          numNodes > 1 ? (2 * numEdges) / (numNodes * (numNodes - 1)) : 0;
         state.graphStats = { numNodes, numEdges, density: density.toFixed(2) };
       }
     },
@@ -276,17 +299,22 @@ const graphSlice = createSlice({
         // Recalculate stats for the restored state
         const numNodes = state.nodes.length;
         const numEdges = state.edges.length;
-        const density = numNodes > 1 ? (2 * numEdges) / (numNodes * (numNodes - 1)) : 0;
+        const density =
+          numNodes > 1 ? (2 * numEdges) / (numNodes * (numNodes - 1)) : 0;
         state.graphStats = { numNodes, numEdges, density: density.toFixed(2) };
       }
     },
     removeNode: (state, action) => {
-      state.nodes = state.nodes.filter(node => node.id !== action.payload);
-      state.edges = state.edges.filter(edge => edge.source !== action.payload && edge.target !== action.payload);
+      state.nodes = state.nodes.filter((node) => node.id !== action.payload);
+      state.edges = state.edges.filter(
+        (edge) =>
+          edge.source !== action.payload && edge.target !== action.payload,
+      );
       // Update graph stats
       const numNodes = state.nodes.length;
       const numEdges = state.edges.length;
-      const density = numNodes > 1 ? (2 * numEdges) / (numNodes * (numNodes - 1)) : 0;
+      const density =
+        numNodes > 1 ? (2 * numEdges) / (numNodes * (numNodes - 1)) : 0;
       state.graphStats = { numNodes, numEdges, density: density.toFixed(2) };
       // Push current state to history
       state.history = state.history.slice(0, state.historyPointer + 1);
@@ -298,11 +326,12 @@ const graphSlice = createSlice({
       state.historyPointer++;
     },
     removeEdge: (state, action) => {
-      state.edges = state.edges.filter(edge => edge.id !== action.payload);
+      state.edges = state.edges.filter((edge) => edge.id !== action.payload);
       // Update graph stats
       const numNodes = state.nodes.length;
       const numEdges = state.edges.length;
-      const density = numNodes > 1 ? (2 * numEdges) / (numNodes * (numNodes - 1)) : 0;
+      const density =
+        numNodes > 1 ? (2 * numEdges) / (numNodes * (numNodes - 1)) : 0;
       state.graphStats = { numNodes, numEdges, density: density.toFixed(2) };
       // Push current state to history
       state.history = state.history.slice(0, state.historyPointer + 1);

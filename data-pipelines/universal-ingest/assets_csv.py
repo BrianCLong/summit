@@ -13,15 +13,14 @@ import hashlib
 import json
 import uuid
 from pathlib import Path
-from typing import Dict, List
 
 
-def _digest(data: Dict) -> str:
+def _digest(data: dict) -> str:
     """Create a stable SHA256 digest for a record."""
     return hashlib.sha256(json.dumps(data, sort_keys=True).encode("utf-8")).hexdigest()
 
 
-def load_assets_csv(path: Path, org: str) -> Dict[str, List[Dict]]:
+def load_assets_csv(path: Path, org: str) -> dict[str, list[dict]]:
     """Parse an asset inventory CSV file into graph structures.
 
     Parameters
@@ -31,8 +30,8 @@ def load_assets_csv(path: Path, org: str) -> Dict[str, List[Dict]]:
     org: str
         Owning organisation name.
     """
-    nodes: List[Dict] = []
-    edges: List[Dict] = []
+    nodes: list[dict] = []
+    edges: list[dict] = []
 
     org_id = f"org:{org}"
     org_node = {"id": org_id, "type": "Org", "name": org}

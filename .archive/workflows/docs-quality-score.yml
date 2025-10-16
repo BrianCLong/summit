@@ -4,7 +4,7 @@ permissions:
   contents: read
 on:
   pull_request:
-    paths: ['docs/**','scripts/docs/score-pages.js']
+    paths: ['docs/**', 'scripts/docs/score-pages.js']
   schedule: [{ cron: '0 5 * * 1' }]
 jobs:
   score:

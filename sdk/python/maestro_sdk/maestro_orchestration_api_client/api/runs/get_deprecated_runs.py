@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from typing import Any, Optional, Union
+from typing import Any
 
 import httpx
 
@@ -18,7 +18,9 @@ def _get_kwargs() -> dict[str, Any]:
     return _kwargs
 
 
-def _parse_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Optional[list["Run"]]:
+def _parse_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> list["Run"] | None:
     if response.status_code == 200:
         response_200 = []
         _response_200 = response.json()
@@ -35,7 +37,9 @@ def _parse_response(*, client: Union[AuthenticatedClient, Client], response: htt
         return None
 
 
-def _build_response(*, client: Union[AuthenticatedClient, Client], response: httpx.Response) -> Response[list["Run"]]:
+def _build_response(
+    *, client: AuthenticatedClient | Client, response: httpx.Response
+) -> Response[list["Run"]]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -46,7 +50,7 @@ def _build_response(*, client: Union[AuthenticatedClient, Client], response: htt
 
 def sync_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
 ) -> Response[list["Run"]]:
     """Get a list of deprecated runs (DEPRECATED)
 
@@ -71,8 +75,8 @@ def sync_detailed(
 
 def sync(
     *,
-    client: Union[AuthenticatedClient, Client],
-) -> Optional[list["Run"]]:
+    client: AuthenticatedClient | Client,
+) -> list["Run"] | None:
     """Get a list of deprecated runs (DEPRECATED)
 
      This endpoint is deprecated and will be removed in future versions. Please use /runs instead.
@@ -92,7 +96,7 @@ def sync(
 
 async def asyncio_detailed(
     *,
-    client: Union[AuthenticatedClient, Client],
+    client: AuthenticatedClient | Client,
 ) -> Response[list["Run"]]:
     """Get a list of deprecated runs (DEPRECATED)
 
@@ -115,8 +119,8 @@ async def asyncio_detailed(
 
 async def asyncio(
     *,
-    client: Union[AuthenticatedClient, Client],
-) -> Optional[list["Run"]]:
+    client: AuthenticatedClient | Client,
+) -> list["Run"] | None:
     """Get a list of deprecated runs (DEPRECATED)
 
      This endpoint is deprecated and will be removed in future versions. Please use /runs instead.

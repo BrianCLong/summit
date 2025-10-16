@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Literal
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -10,14 +10,14 @@ class Source(BaseModel):
     id: int
     kind: str
     name: str
-    config: Dict[str, Any] = Field(default_factory=dict)
+    config: dict[str, Any] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 class SourceCreate(BaseModel):
     kind: str
     name: str
-    config: Dict[str, Any] = Field(default_factory=dict)
+    config: dict[str, Any] = Field(default_factory=dict)
 
 
 class Pipeline(BaseModel):
@@ -37,10 +37,10 @@ class Run(BaseModel):
     pipeline_id: int
     status: str
     started_at: datetime = Field(default_factory=datetime.utcnow)
-    finished_at: Optional[datetime] = None
-    stats: Dict[str, Any] = Field(default_factory=dict)
-    provenance: Optional['ProvenanceManifest'] = None
-    evidence_path: Optional[str] = None
+    finished_at: datetime | None = None
+    stats: dict[str, Any] = Field(default_factory=dict)
+    provenance: ProvenanceManifest | None = None
+    evidence_path: str | None = None
 
 
 class RunCreate(BaseModel):
@@ -49,21 +49,21 @@ class RunCreate(BaseModel):
 
 class ProvenanceStep(BaseModel):
     id: str
-    type: Literal['ingest', 'transform', 'policy-check', 'export']
+    type: Literal["ingest", "transform", "policy-check", "export"]
     tool: str
-    params: Dict[str, Any] = Field(default_factory=dict)
-    input_hash: str = Field(alias='inputHash')
-    output_hash: str = Field(alias='outputHash')
+    params: dict[str, Any] = Field(default_factory=dict)
+    input_hash: str = Field(alias="inputHash")
+    output_hash: str = Field(alias="outputHash")
     timestamp: datetime = Field(default_factory=datetime.utcnow)
-    note: Optional[str] = None
+    note: str | None = None
 
     class Config:
         allow_population_by_field_name = True
 
 
 class ProvenanceManifest(BaseModel):
-    artifact_id: str = Field(alias='artifactId')
-    steps: List[ProvenanceStep] = Field(default_factory=list)
+    artifact_id: str = Field(alias="artifactId")
+    steps: list[ProvenanceStep] = Field(default_factory=list)
 
     class Config:
         allow_population_by_field_name = True

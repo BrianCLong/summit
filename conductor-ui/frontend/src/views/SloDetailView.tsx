@@ -1,4 +1,3 @@
-
 // conductor-ui/frontend/src/views/SloDetailView.tsx
 import React from 'react';
 
@@ -7,7 +6,9 @@ export const SloDetailView = () => {
   return (
     <div>
       <h1>SLO Detail</h1>
-      <p>SLO burn history and alert rule configuration will be displayed here.</p>
+      <p>
+        SLO burn history and alert rule configuration will be displayed here.
+      </p>
     </div>
   );
 };

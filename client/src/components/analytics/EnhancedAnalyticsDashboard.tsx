@@ -133,11 +133,9 @@ const generateMetrics = (): MetricData[] => [
   },
 ];
 
-export const EnhancedAnalyticsDashboard: React.FC<EnhancedAnalyticsDashboardProps> = ({
-  onExport,
-  onConfigChange,
-  realTimeEnabled = true,
-}) => {
+export const EnhancedAnalyticsDashboard: React.FC<
+  EnhancedAnalyticsDashboardProps
+> = ({ onExport, onConfigChange, realTimeEnabled = true }) => {
   const [config, setConfig] = useState<AnalyticsConfig>({
     timeRange: '24h',
     refreshInterval: 60,
@@ -226,7 +224,12 @@ export const EnhancedAnalyticsDashboard: React.FC<EnhancedAnalyticsDashboardProp
       <Card elevation={2} sx={{ height: '120px', cursor: 'pointer' }}>
         <CardContent>
           <Box
-            sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              mb: 1,
+            }}
           >
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
               {getCategoryIcon(metric.category)}
@@ -243,7 +246,10 @@ export const EnhancedAnalyticsDashboard: React.FC<EnhancedAnalyticsDashboardProp
 
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             {getTrendIcon(metric.trend, metric.change)}
-            <Typography variant="body2" color={metric.change > 0 ? 'success.main' : 'error.main'}>
+            <Typography
+              variant="body2"
+              color={metric.change > 0 ? 'success.main' : 'error.main'}
+            >
               {metric.change > 0 ? '+' : ''}
               {metric.change.toFixed(1)}%
             </Typography>
@@ -256,7 +262,14 @@ export const EnhancedAnalyticsDashboard: React.FC<EnhancedAnalyticsDashboardProp
   return (
     <Box sx={{ p: 3, maxWidth: '100%', overflow: 'hidden' }}>
       {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 3 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          mb: 3,
+        }}
+      >
         <Box>
           <Typography variant="h4" sx={{ fontWeight: 600, mb: 1 }}>
             Analytics Dashboard
@@ -272,7 +285,9 @@ export const EnhancedAnalyticsDashboard: React.FC<EnhancedAnalyticsDashboardProp
             <Select
               value={config.timeRange}
               label="Time Range"
-              onChange={(e) => handleConfigChange({ timeRange: e.target.value as any })}
+              onChange={(e) =>
+                handleConfigChange({ timeRange: e.target.value as any })
+              }
             >
               <MenuItem value="1h">Last Hour</MenuItem>
               <MenuItem value="24h">Last 24 Hours</MenuItem>
@@ -285,7 +300,9 @@ export const EnhancedAnalyticsDashboard: React.FC<EnhancedAnalyticsDashboardProp
             control={
               <Switch
                 checked={config.showRealTime}
-                onChange={(e) => handleConfigChange({ showRealTime: e.target.checked })}
+                onChange={(e) =>
+                  handleConfigChange({ showRealTime: e.target.checked })
+                }
                 size="small"
               />
             }
@@ -320,13 +337,21 @@ export const EnhancedAnalyticsDashboard: React.FC<EnhancedAnalyticsDashboardProp
         <Alert severity="info" sx={{ mb: 2 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography variant="body2">Real-time monitoring active</Typography>
-            <Chip label={`Updates every ${config.refreshInterval}s`} size="small" color="info" />
+            <Chip
+              label={`Updates every ${config.refreshInterval}s`}
+              size="small"
+              color="info"
+            />
           </Box>
         </Alert>
       )}
 
       {/* Tabs */}
-      <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)} sx={{ mb: 3 }}>
+      <Tabs
+        value={activeTab}
+        onChange={(_, newValue) => setActiveTab(newValue)}
+        sx={{ mb: 3 }}
+      >
         <Tab icon={<BarChart />} label="Overview" iconPosition="start" />
         <Tab icon={<TrendingUp />} label="Performance" iconPosition="start" />
         <Tab icon={<Users />} label="Usage" iconPosition="start" />
@@ -351,7 +376,8 @@ export const EnhancedAnalyticsDashboard: React.FC<EnhancedAnalyticsDashboardProp
 
       {activeTab !== 0 && (
         <Alert severity="info">
-          {['Performance', 'Usage', 'Security'][activeTab - 1]} analytics view coming soon...
+          {['Performance', 'Usage', 'Security'][activeTab - 1]} analytics view
+          coming soon...
         </Alert>
       )}
     </Box>

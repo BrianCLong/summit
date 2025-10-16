@@ -15,7 +15,9 @@ type VerificationState = 'pending' | 'success' | 'failure'
 
 export default function Audit() {
   const artifacts = useMemo(() => SAMPLE_ARTIFACTS, [])
-  const [verifications, setVerifications] = useState<Record<string, VerificationState>>({})
+  const [verifications, setVerifications] = useState<
+    Record<string, VerificationState>
+  >({})
 
   const handleVerifyChain = async (artifactId: string) => {
     const artifact = artifacts.find(item => item.id === artifactId)
@@ -30,10 +32,13 @@ export default function Audit() {
           if (!payload) return false
           const outputHash = await sha256Hex(payload.output)
           return outputHash === step.outputHash
-        }),
+        })
       )
       const allValid = stepsValid.every(Boolean)
-      setVerifications(prev => ({ ...prev, [artifactId]: allValid ? 'success' : 'failure' }))
+      setVerifications(prev => ({
+        ...prev,
+        [artifactId]: allValid ? 'success' : 'failure',
+      }))
     } catch (error) {
       console.error('verification failed', error)
       setVerifications(prev => ({ ...prev, [artifactId]: 'failure' }))
@@ -55,19 +60,34 @@ export default function Audit() {
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+              >
                 Artifact
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+              >
                 Steps
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+              >
                 Last Export
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500"
+              >
                 Verification
               </th>
-              <th scope="col" className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500">
+              <th
+                scope="col"
+                className="px-6 py-3 text-right text-xs font-medium uppercase tracking-wider text-gray-500"
+              >
                 Actions
               </th>
             </tr>
@@ -86,7 +106,10 @@ export default function Audit() {
                   <td className="px-6 py-4">
                     <div className="flex flex-col space-y-1 text-xs text-gray-600">
                       {artifact.manifest.steps.map(step => (
-                        <div key={step.id} className="flex items-center space-x-2">
+                        <div
+                          key={step.id}
+                          className="flex items-center space-x-2"
+                        >
                           <span className="font-semibold text-gray-700">
                             {formatStepType(step.type)}
                           </span>
@@ -116,7 +139,9 @@ export default function Audit() {
                         Verifying…
                       </span>
                     ) : (
-                      <span className="text-xs text-gray-500">Not verified</span>
+                      <span className="text-xs text-gray-500">
+                        Not verified
+                      </span>
                     )}
                   </td>
                   <td className="px-6 py-4 text-right">

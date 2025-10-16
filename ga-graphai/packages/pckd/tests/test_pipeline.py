@@ -37,7 +37,9 @@ def test_pipeline_generates_attested_artifacts():
     dataset = build_fixture_dataset()
     teacher = LogisticTeacher.from_weights((4.0, 4.0), bias=-3.0)
     student = LogisticStudent.initialize(n_features=2, seed=42)
-    policy = MetadataPolicyFilter("restricted-sources", key="source", disallowed_values={"restricted"})
+    policy = MetadataPolicyFilter(
+        "restricted-sources", key="source", disallowed_values={"restricted"}
+    )
     pipeline = PCKDPipeline(
         policy_filters=[policy],
         trainer_kwargs={"temperature": 1.2, "alpha": 0.6, "learning_rate": 0.25, "epochs": 220},

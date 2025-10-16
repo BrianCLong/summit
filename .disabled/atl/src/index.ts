@@ -1,7 +1,12 @@
 import { Fingerprint } from '@intelgraph/afl-store/src/types';
 import { Tariff } from '@intelgraph/gateway-tariff/src/index';
 
-export type Outcome = { accepted: number; disputed: number; retracted: number; beliefDecay: number; };
+export type Outcome = {
+  accepted: number;
+  disputed: number;
+  retracted: number;
+  beliefDecay: number;
+};
 
 export interface HistoricalData {
   fp: Fingerprint;
@@ -25,7 +30,7 @@ export function trainATL(_historical: HistoricalData[]): ATLModel {
     },
     train: (_data: HistoricalData[]) => {
       // console.log(`Model trained with ${data.length} samples.`);
-    }
+    },
   };
 }
 
@@ -34,6 +39,6 @@ export function inferTariff(model: ATLModel, fp: Fingerprint): Tariff {
   return {
     minProofLevel: score > 0.7 ? 'strict' : 'standard',
     rateLimit: Math.max(1, Math.floor(10 - score * 5)),
-    throttleMs: Math.floor(score * 5000)
+    throttleMs: Math.floor(score * 5000),
   };
 }

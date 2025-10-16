@@ -33,7 +33,11 @@ export default function ComplianceBoard() {
     <div className="p-4 rounded-2xl shadow">
       <div className="flex gap-2 mb-2">
         <h3 className="text-lg font-semibold">Compliance Controls</h3>
-        <input id="ctrlFilter" className="border rounded px-2 py-1" placeholder="filter…" />
+        <input
+          id="ctrlFilter"
+          className="border rounded px-2 py-1"
+          placeholder="filter…"
+        />
       </div>
       <table className="w-full text-sm">
         <thead>
@@ -60,4 +64,3 @@ export default function ComplianceBoard() {
     </div>
   );
 }
-

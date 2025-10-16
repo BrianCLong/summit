@@ -51,7 +51,8 @@ global.cancelAnimationFrame = jest.fn((id) => clearTimeout(id));
 
 beforeAll(() => {
   HTMLCanvasElement.prototype.getContext = mockCanvas.getContext;
-  HTMLCanvasElement.prototype.getBoundingClientRect = mockCanvas.getBoundingClientRect;
+  HTMLCanvasElement.prototype.getBoundingClientRect =
+    mockCanvas.getBoundingClientRect;
   Object.defineProperty(HTMLCanvasElement.prototype, 'width', {
     get: () => mockCanvas.width,
     set: (value) => {
@@ -96,7 +97,12 @@ describe('InteractiveGraphCanvas', () => {
   });
 
   it('renders performance metrics when enabled', () => {
-    render(<InteractiveGraphCanvas {...defaultProps} showPerformanceMetrics={true} />);
+    render(
+      <InteractiveGraphCanvas
+        {...defaultProps}
+        showPerformanceMetrics={true}
+      />,
+    );
 
     expect(screen.getByTestId('performance-metrics')).toBeInTheDocument();
     expect(screen.getByText(/FPS:/)).toBeInTheDocument();
@@ -105,7 +111,12 @@ describe('InteractiveGraphCanvas', () => {
   });
 
   it('does not render performance metrics when disabled', () => {
-    render(<InteractiveGraphCanvas {...defaultProps} showPerformanceMetrics={false} />);
+    render(
+      <InteractiveGraphCanvas
+        {...defaultProps}
+        showPerformanceMetrics={false}
+      />,
+    );
 
     expect(screen.queryByTestId('performance-metrics')).not.toBeInTheDocument();
   });
@@ -133,9 +144,16 @@ describe('InteractiveGraphCanvas', () => {
 
   it('toggles performance metrics display', async () => {
     const user = userEvent.setup();
-    render(<InteractiveGraphCanvas {...defaultProps} showPerformanceMetrics={false} />);
+    render(
+      <InteractiveGraphCanvas
+        {...defaultProps}
+        showPerformanceMetrics={false}
+      />,
+    );
 
-    const metricsCheckbox = screen.getByRole('checkbox', { name: /performance/i });
+    const metricsCheckbox = screen.getByRole('checkbox', {
+      name: /performance/i,
+    });
     expect(metricsCheckbox).not.toBeChecked();
 
     await user.click(metricsCheckbox);
@@ -145,7 +163,9 @@ describe('InteractiveGraphCanvas', () => {
 
   it('handles canvas mouse events', async () => {
     const onNodeSelect = jest.fn();
-    render(<InteractiveGraphCanvas {...defaultProps} onNodeSelect={onNodeSelect} />);
+    render(
+      <InteractiveGraphCanvas {...defaultProps} onNodeSelect={onNodeSelect} />,
+    );
 
     const canvas = screen.getByTestId('graph-canvas');
 
@@ -195,7 +215,9 @@ describe('InteractiveGraphCanvas', () => {
   });
 
   it('renders with custom investigation ID', () => {
-    render(<InteractiveGraphCanvas {...defaultProps} investigationId="inv-123" />);
+    render(
+      <InteractiveGraphCanvas {...defaultProps} investigationId="inv-123" />,
+    );
 
     const canvas = screen.getByTestId('graph-canvas');
     expect(canvas).toBeInTheDocument();
@@ -206,7 +228,8 @@ describe('InteractiveGraphCanvas', () => {
 
     // Simulate resize
     act(() => {
-      const resizeCallback = (global.ResizeObserver as jest.Mock).mock.calls[0][0];
+      const resizeCallback = (global.ResizeObserver as jest.Mock).mock
+        .calls[0][0];
       resizeCallback([
         {
           contentRect: { width: 1000, height: 800 },
@@ -231,7 +254,9 @@ describe('InteractiveGraphCanvas', () => {
 
   it('handles node selection callback', async () => {
     const onNodeSelect = jest.fn();
-    render(<InteractiveGraphCanvas {...defaultProps} onNodeSelect={onNodeSelect} />);
+    render(
+      <InteractiveGraphCanvas {...defaultProps} onNodeSelect={onNodeSelect} />,
+    );
 
     const canvas = screen.getByTestId('graph-canvas');
 
@@ -245,7 +270,9 @@ describe('InteractiveGraphCanvas', () => {
 
   it('handles edge selection callback', async () => {
     const onEdgeSelect = jest.fn();
-    render(<InteractiveGraphCanvas {...defaultProps} onEdgeSelect={onEdgeSelect} />);
+    render(
+      <InteractiveGraphCanvas {...defaultProps} onEdgeSelect={onEdgeSelect} />,
+    );
 
     const canvas = screen.getByTestId('graph-canvas');
 
@@ -258,7 +285,9 @@ describe('InteractiveGraphCanvas', () => {
   });
 
   it('applies custom className', () => {
-    render(<InteractiveGraphCanvas {...defaultProps} className="custom-class" />);
+    render(
+      <InteractiveGraphCanvas {...defaultProps} className="custom-class" />,
+    );
 
     const container = screen.getByTestId('graph-canvas').parentElement;
     expect(container).toHaveClass('custom-class');
@@ -285,7 +314,12 @@ describe('InteractiveGraphCanvas', () => {
   });
 
   it('maintains performance metrics accuracy', async () => {
-    render(<InteractiveGraphCanvas {...defaultProps} showPerformanceMetrics={true} />);
+    render(
+      <InteractiveGraphCanvas
+        {...defaultProps}
+        showPerformanceMetrics={true}
+      />,
+    );
 
     const performanceMetrics = screen.getByTestId('performance-metrics');
     expect(performanceMetrics).toBeInTheDocument();
@@ -304,7 +338,8 @@ describe('InteractiveGraphCanvas', () => {
 
     // Simulate animation frame callback
     act(() => {
-      const animationCallback = (global.requestAnimationFrame as jest.Mock).mock.calls[0][0];
+      const animationCallback = (global.requestAnimationFrame as jest.Mock).mock
+        .calls[0][0];
       animationCallback();
     });
 

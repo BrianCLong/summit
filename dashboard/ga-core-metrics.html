@@ -337,13 +337,17 @@
         <div class="criteria-grid">
           <div class="criteria-item passed">
             <h4>✅ ER Explainability</h4>
-            <p>Merge decisions show features, scores, and human overrides with full audit trail</p>
+            <p>
+              Merge decisions show features, scores, and human overrides with
+              full audit trail
+            </p>
           </div>
 
           <div class="criteria-item warning">
             <h4>⚠️ Hypothesis Rigor</h4>
             <p>
-              Most briefs show competing hypotheses, some missing residual unknowns documentation
+              Most briefs show competing hypotheses, some missing residual
+              unknowns documentation
             </p>
           </div>
 
@@ -362,8 +366,8 @@
       <div class="go-no-go-decision">
         <div class="decision-badge warning">Conditional Go</div>
         <p>
-          GA Core ready pending ER precision improvements (87.3% → 90%) and hypothesis documentation
-          cleanup
+          GA Core ready pending ER precision improvements (87.3% → 90%) and
+          hypothesis documentation cleanup
         </p>
       </div>
 
@@ -372,14 +376,24 @@
 
     <script>
       // Set timestamp
-      document.getElementById('timestamp').textContent = new Date().toLocaleString();
+      document.getElementById('timestamp').textContent =
+        new Date().toLocaleString();
 
       // ER Performance Chart
       const erCtx = document.getElementById('erChart').getContext('2d');
       new Chart(erCtx, {
         type: 'line',
         data: {
-          labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4', 'Week 5', 'Week 6', 'Week 7', 'Week 8'],
+          labels: [
+            'Week 1',
+            'Week 2',
+            'Week 3',
+            'Week 4',
+            'Week 5',
+            'Week 6',
+            'Week 7',
+            'Week 8',
+          ],
           datasets: [
             {
               label: 'Precision@10 (%)',
@@ -415,7 +429,11 @@
       new Chart(ragCtx, {
         type: 'bar',
         data: {
-          labels: ['Citation Hit-Rate', 'Hallucination Rate', 'Source Accuracy'],
+          labels: [
+            'Citation Hit-Rate',
+            'Hallucination Rate',
+            'Source Accuracy',
+          ],
           datasets: [
             {
               label: 'Current (%)',

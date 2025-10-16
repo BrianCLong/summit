@@ -1,7 +1,10 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp';
 import type { Transport } from '@modelcontextprotocol/sdk/shared/transport';
 import type { RequestHandlerExtra } from '@modelcontextprotocol/sdk/shared/protocol';
-import type { ServerNotification, ServerRequest } from '@modelcontextprotocol/sdk/types';
+import type {
+  ServerNotification,
+  ServerRequest,
+} from '@modelcontextprotocol/sdk/types';
 import { stdioServerTransport } from './transports/stdio.js';
 import { httpServer, type HttpServerConfig } from './transports/http.js';
 import { verifyJwt, type TenantContext, type JwtClaims } from './auth.js';
@@ -14,7 +17,7 @@ import {
   type ToolDefinition,
   type ResourceDefinition,
   type PromptDefinition,
-  type HandlerContext
+  type HandlerContext,
 } from './registry.js';
 
 type Registries = {
@@ -58,7 +61,9 @@ const getAuthorizationHeader = (headers?: unknown): string | undefined => {
           return value;
         }
         if (Array.isArray(value)) {
-          const strValue = value.find((item): item is string => typeof item === 'string');
+          const strValue = value.find(
+            (item): item is string => typeof item === 'string',
+          );
           if (strValue) {
             return strValue;
           }
@@ -79,7 +84,7 @@ const extractBearer = (value?: string | null): string | undefined => {
 };
 
 const resolveToken = (
-  extra: RequestHandlerExtra<ServerRequest, ServerNotification>
+  extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
 ): string | undefined => {
   if (extra.authInfo?.token) {
     return extra.authInfo.token;
@@ -88,50 +93,54 @@ const resolveToken = (
   if (headerValue) {
     return extractBearer(headerValue);
   }
-  const metaAuth = (extra._meta as { authorization?: string } | undefined)?.authorization;
+  const metaAuth = (extra._meta as { authorization?: string } | undefined)
+    ?.authorization;
   return extractBearer(metaAuth);
 };
 
 const buildHealthTool = (name: string, version: string): ToolDefinition => ({
   name: 'health.check',
   config: {
-    description: 'Returns ok and build info'
+    description: 'Returns ok and build info',
   },
   handler: async () => ({
     content: [
       {
         type: 'text',
-        text: JSON.stringify({ ok: true, server: name, version })
-      }
-    ]
-  })
+        text: JSON.stringify({ ok: true, server: name, version }),
+      },
+    ],
+  }),
 });
 
-export async function createMcpServer(options: McpCoreOptions): Promise<McpServerInstance> {
+export async function createMcpServer(
+  options: McpCoreOptions,
+): Promise<McpServerInstance> {
   const log = createLogger(options.serverName);
 
   const mcp = new McpServer(
     {
       name: options.serverName,
-      version: options.version
+      version: options.version,
     },
     {
       capabilities: {
         tools: {},
         prompts: {},
-        resources: {}
-      }
-    }
+        resources: {},
+      },
+    },
   );
 
   const toolRegistry = options.registries?.tools ?? new ToolRegistry();
-  const resourceRegistry = options.registries?.resources ?? new ResourceRegistry();
+  const resourceRegistry =
+    options.registries?.resources ?? new ResourceRegistry();
   const promptRegistry = options.registries?.prompts ?? new PromptRegistry();
 
   toolRegistry.register(buildHealthTool(options.serverName, options.version));
 
   const resolveTenant = async (
-    extra: RequestHandlerExtra<ServerRequest, ServerNotification>
+    extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
   ): Promise<TenantContext> => {
     if (!options.jwksUrl) {
       return { ...defaultTenant };
@@ -157,12 +166,12 @@ export async function createMcpServer(options: McpCoreOptions): Promise<McpServe
     return {
       tenantId: typeof claims.tid === 'string' ? claims.tid : 'unknown',
       roles,
-      subject: typeof claims.sub === 'string' ? claims.sub : undefined
+      subject: typeof claims.sub === 'string' ? claims.sub : undefined,
     };
   };
 
   const buildContext = async (
-    extra: RequestHandlerExtra<ServerRequest, ServerNotification>
+    extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
   ): Promise<HandlerContext> => {
     const tenant = await resolveTenant(extra).catch((error) => {
       log.error(`Authorization failed: ${(error as Error).message}`);
@@ -172,39 +181,63 @@ export async function createMcpServer(options: McpCoreOptions): Promise<McpServe
   };
 
   const registerTool = (definition: ToolDefinition) => {
-    mcp.registerTool(definition.name, definition.config ?? {}, async (args, extra) => {
-      const context = await buildContext(extra);
-      await enforcePolicy(definition.policy, context.tenant, args);
-      return definition.handler(args, context);
-    });
+    mcp.registerTool(
+      definition.name,
+      definition.config ?? {},
+      async (args, extra) => {
+        const context = await buildContext(extra);
+        await enforcePolicy(definition.policy, context.tenant, args);
+        return definition.handler(args, context);
+      },
+    );
   };
 
   const registerResource = (definition: ResourceDefinition) => {
     const metadata = definition.metadata ?? {};
     if (typeof definition.uri === 'string') {
-      mcp.registerResource(definition.name, definition.uri, metadata, async (uri, extra) => {
-        const context = await buildContext(extra);
-        await enforcePolicy(definition.policy, context.tenant, uri);
-        return definition.read(uri, context);
-      });
+      mcp.registerResource(
+        definition.name,
+        definition.uri,
+        metadata,
+        async (uri, extra) => {
+          const context = await buildContext(extra);
+          await enforcePolicy(definition.policy, context.tenant, uri);
+          return definition.read(uri, context);
+        },
+      );
     } else {
-      mcp.registerResource(definition.name, definition.uri, metadata, async (uri, variables, extra) => {
-        const context = await buildContext(extra);
-        await enforcePolicy(definition.policy, context.tenant, { uri, variables });
-        return definition.read(uri, context, variables);
-      });
+      mcp.registerResource(
+        definition.name,
+        definition.uri,
+        metadata,
+        async (uri, variables, extra) => {
+          const context = await buildContext(extra);
+          await enforcePolicy(definition.policy, context.tenant, {
+            uri,
+            variables,
+          });
+          return definition.read(uri, context, variables);
+        },
+      );
     }
   };
 
   const registerPrompt = (definition: PromptDefinition) => {
-    mcp.registerPrompt(definition.name, definition.config ?? {}, async (
-      args: unknown,
-      extra: RequestHandlerExtra<ServerRequest, ServerNotification>
-    ) => {
-      const context = await buildContext(extra);
-      await enforcePolicy(definition.policy, context.tenant, args);
-      return definition.handler(args as Record<string, unknown> | undefined, context);
-    });
+    mcp.registerPrompt(
+      definition.name,
+      definition.config ?? {},
+      async (
+        args: unknown,
+        extra: RequestHandlerExtra<ServerRequest, ServerNotification>,
+      ) => {
+        const context = await buildContext(extra);
+        await enforcePolicy(definition.policy, context.tenant, args);
+        return definition.handler(
+          args as Record<string, unknown> | undefined,
+          context,
+        );
+      },
+    );
   };
 
   toolRegistry.list().forEach(registerTool);
@@ -235,10 +268,10 @@ export async function createMcpServer(options: McpCoreOptions): Promise<McpServe
               resolve();
             }
           });
-        })
+        }),
     );
     log.info(
-      `MCP HTTP server listening on ${options.http.host ?? '0.0.0.0'}:${options.http.port}`
+      `MCP HTTP server listening on ${options.http.host ?? '0.0.0.0'}:${options.http.port}`,
     );
   }
 

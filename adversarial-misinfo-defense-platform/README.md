@@ -69,6 +69,7 @@ print(results)
 ## Components
 
 ### Detection Modules
+
 - `text_detector.py`: Advanced NLP techniques for text misinformation
 - `image_detector.py`: Computer vision for image manipulation detection
 - `audio_detector.py`: Acoustic analysis for audio deepfake detection
@@ -77,11 +78,13 @@ print(results)
 - `deepfake_detector.py`: Comprehensive deepfake identification
 
 ### Training & Evolution
+
 - `adversarial_training.py`: GAN-based adversarial sample generation
 - `tactic_evolution.py`: Autonomous tactic evolution system
 - `red_blue_team.py`: Red/Blue team exercise management
 
 ### Validation
+
 - `validation_suite.py`: Comprehensive benchmarking suite
 - `VALIDATION_REPORT.md`: Detailed validation results
 

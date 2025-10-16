@@ -3,7 +3,7 @@
 # perform work, and report status.
 
 import time
-import os
+
 
 def main():
     print("Maestro Worker started. Waiting for tasks...")
@@ -13,6 +13,7 @@ def main():
     while True:
         print("Worker is alive and waiting...")
         time.sleep(10)
+
 
 if __name__ == "__main__":
     main()

@@ -10,7 +10,7 @@ metadata:
     component: neo4j-backup
     version: v24.3.0
 spec:
-  schedule: "2,7,12,17,22,27,32,37,42,47,52,57 * * * *"  # Every 5 minutes, offset by 2 from PG
+  schedule: '2,7,12,17,22,27,32,37,42,47,52,57 * * * *' # Every 5 minutes, offset by 2 from PG
   concurrencyPolicy: Forbid
   failedJobsHistoryLimit: 3
   successfulJobsHistoryLimit: 10
@@ -24,174 +24,174 @@ spec:
         spec:
           restartPolicy: Never
           containers:
-          - name: neo4j-backup
-            image: neo4j:5.15-enterprise
-            env:
-            - name: NEO4J_URI
-              value: "bolt://maestro-neo4j:7687"
-            - name: NEO4J_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  name: maestro-neo4j-secret
-                  key: username
-            - name: NEO4J_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  name: maestro-neo4j-secret
-                  key: password
-            - name: AWS_ACCESS_KEY_ID
-              valueFrom:
-                secretKeyRef:
-                  name: maestro-backup-secret
-                  key: aws_access_key_id
-            - name: AWS_SECRET_ACCESS_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: maestro-backup-secret
-                  key: aws_secret_access_key
-            - name: AWS_DEFAULT_REGION
-              value: "us-east-1"
-            - name: S3_BUCKET
-              value: "maestro-backups-primary"
-            - name: BACKUP_RETENTION_DAYS
-              value: "30"
-            command:
-            - /bin/bash
-            - -c
-            - |
-              set -euo pipefail
-              
-              # Install AWS CLI and required tools
-              apt-get update && apt-get install -y awscli curl jq gzip
-              
-              # Generate timestamp
-              TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-              REGION=${CURRENT_REGION:-us-east-1}
-              BACKUP_DIR="/tmp/neo4j_backup_${TIMESTAMP}"
-              BACKUP_FILE="neo4j_backup_${REGION}_${TIMESTAMP}.tar.gz"
-              
-              echo "Starting Neo4j backup at $(date)"
-              echo "Backup file: ${BACKUP_FILE}"
-              
-              # Create backup directory
-              mkdir -p "${BACKUP_DIR}"
-              
-              # Perform online backup using neo4j-admin
-              neo4j-admin database backup \
-                --to-path="${BACKUP_DIR}" \
-                --database=maestro \
-                --verbose
-              
-              # Export graph data as Cypher statements for point-in-time consistency
-              cypher-shell -u "${NEO4J_USERNAME}" -p "${NEO4J_PASSWORD}" \
-                --address "${NEO4J_URI}" \
-                --format verbose \
-                "CALL apoc.export.cypher.all('${BACKUP_DIR}/cypher_export.cypher', {format: 'cypher-shell', useOptimizations: {type: 'UNWIND_BATCH', unwindBatchSize: 20}})
-                 YIELD file, batches, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done
-                 RETURN file, batches, source, format, nodes, relationships, properties, time" || true
-              
-              # Get database statistics for manifest
-              STATS=$(cypher-shell -u "${NEO4J_USERNAME}" -p "${NEO4J_PASSWORD}" \
-                --address "${NEO4J_URI}" \
-                --format plain \
-                "CALL db.stats.retrieve('GRAPH COUNTS') YIELD section, data
-                 WITH section, data
-                 UNWIND data as item
-                 RETURN section + '.' + item.label as metric, item.value as count" | jq -R -s -c 'split("\n") | map(select(length > 0 and . != "metric,count")) | map(split(",")) | map({metric: .[0], count: (.[1] | tonumber)}) | from_entries')
-              
-              # Create transaction log backup
-              cp -r /var/lib/neo4j/data/transactions "${BACKUP_DIR}/transactions_backup/" || true
-              
-              # Compress the entire backup
-              tar -czf "/tmp/${BACKUP_FILE}" -C /tmp "neo4j_backup_${TIMESTAMP}"
-              
-              # Calculate checksum
-              BACKUP_SHA256=$(sha256sum "/tmp/${BACKUP_FILE}" | cut -d' ' -f1)
-              
-              # Upload to S3 with region-specific path
-              aws s3 cp "/tmp/${BACKUP_FILE}" "s3://${S3_BUCKET}/neo4j/${REGION}/backups/${BACKUP_FILE}"
-              
-              # Create manifest for restore procedures
-              cat > "/tmp/neo4j_manifest_${TIMESTAMP}.json" << EOF
-              {
-                "timestamp": "${TIMESTAMP}",
-                "region": "${REGION}",
-                "type": "neo4j",
-                "files": {
-                  "backup": "${BACKUP_FILE}"
-                },
-                "metadata": {
-                  "neo4j_version": "$(neo4j --version | head -n1)",
-                  "database_name": "maestro",
-                  "backup_method": "neo4j-admin+cypher-export",
-                  "retention_days": ${BACKUP_RETENTION_DAYS},
-                  "statistics": ${STATS}
-                },
-                "checksums": {
-                  "backup_sha256": "${BACKUP_SHA256}"
-                },
-                "restore_notes": {
-                  "procedure": "Use neo4j-admin database restore command",
-                  "requirements": "Neo4j 5.15+ Enterprise",
-                  "estimated_restore_time": "5-30 minutes depending on graph size"
-                }
-              }
-              EOF
-              
-              aws s3 cp "/tmp/neo4j_manifest_${TIMESTAMP}.json" \
-                "s3://${S3_BUCKET}/neo4j/${REGION}/manifests/neo4j_manifest_${TIMESTAMP}.json"
-              
-              # Update latest backup pointer
-              echo "${TIMESTAMP}" | aws s3 cp - "s3://${S3_BUCKET}/neo4j/${REGION}/LATEST"
-              
-              # Cleanup old backups based on retention
-              aws s3 ls "s3://${S3_BUCKET}/neo4j/${REGION}/backups/" | \
-                awk '{print $4}' | sort | head -n -${BACKUP_RETENTION_DAYS} | \
-                while read backup; do
-                  if [ -n "$backup" ]; then
-                    echo "Deleting old backup: $backup"
-                    aws s3 rm "s3://${S3_BUCKET}/neo4j/${REGION}/backups/${backup}"
-                  fi
-                done
-              
-              # Cleanup old manifests
-              aws s3 ls "s3://${S3_BUCKET}/neo4j/${REGION}/manifests/" | \
-                awk '{print $4}' | sort | head -n -${BACKUP_RETENTION_DAYS} | \
-                while read manifest; do
-                  if [ -n "$manifest" ]; then
-                    aws s3 rm "s3://${S3_BUCKET}/neo4j/${REGION}/manifests/${manifest}"
-                  fi
-                done
-              
-              # Cleanup temporary files
-              rm -rf "${BACKUP_DIR}"
-              rm -f "/tmp/${BACKUP_FILE}"
-              
-              echo "Neo4j backup completed successfully at $(date)"
-              echo "Files uploaded:"
-              echo "  - s3://${S3_BUCKET}/neo4j/${REGION}/backups/${BACKUP_FILE}"
-              echo "  - s3://${S3_BUCKET}/neo4j/${REGION}/manifests/neo4j_manifest_${TIMESTAMP}.json"
-            
-            resources:
-              requests:
-                memory: "1Gi"
-                cpu: "500m"
-              limits:
-                memory: "4Gi"
-                cpu: "2000m"
-            
-            volumeMounts:
-            - name: backup-temp
-              mountPath: /tmp
-            - name: neo4j-data
-              mountPath: /var/lib/neo4j/data
-              readOnly: true
-          
+            - name: neo4j-backup
+              image: neo4j:5.15-enterprise
+              env:
+                - name: NEO4J_URI
+                  value: 'bolt://maestro-neo4j:7687'
+                - name: NEO4J_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: maestro-neo4j-secret
+                      key: username
+                - name: NEO4J_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: maestro-neo4j-secret
+                      key: password
+                - name: AWS_ACCESS_KEY_ID
+                  valueFrom:
+                    secretKeyRef:
+                      name: maestro-backup-secret
+                      key: aws_access_key_id
+                - name: AWS_SECRET_ACCESS_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: maestro-backup-secret
+                      key: aws_secret_access_key
+                - name: AWS_DEFAULT_REGION
+                  value: 'us-east-1'
+                - name: S3_BUCKET
+                  value: 'maestro-backups-primary'
+                - name: BACKUP_RETENTION_DAYS
+                  value: '30'
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -euo pipefail
+
+                  # Install AWS CLI and required tools
+                  apt-get update && apt-get install -y awscli curl jq gzip
+
+                  # Generate timestamp
+                  TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+                  REGION=${CURRENT_REGION:-us-east-1}
+                  BACKUP_DIR="/tmp/neo4j_backup_${TIMESTAMP}"
+                  BACKUP_FILE="neo4j_backup_${REGION}_${TIMESTAMP}.tar.gz"
+
+                  echo "Starting Neo4j backup at $(date)"
+                  echo "Backup file: ${BACKUP_FILE}"
+
+                  # Create backup directory
+                  mkdir -p "${BACKUP_DIR}"
+
+                  # Perform online backup using neo4j-admin
+                  neo4j-admin database backup \
+                    --to-path="${BACKUP_DIR}" \
+                    --database=maestro \
+                    --verbose
+
+                  # Export graph data as Cypher statements for point-in-time consistency
+                  cypher-shell -u "${NEO4J_USERNAME}" -p "${NEO4J_PASSWORD}" \
+                    --address "${NEO4J_URI}" \
+                    --format verbose \
+                    "CALL apoc.export.cypher.all('${BACKUP_DIR}/cypher_export.cypher', {format: 'cypher-shell', useOptimizations: {type: 'UNWIND_BATCH', unwindBatchSize: 20}})
+                     YIELD file, batches, source, format, nodes, relationships, properties, time, rows, batchSize, batches, done
+                     RETURN file, batches, source, format, nodes, relationships, properties, time" || true
+
+                  # Get database statistics for manifest
+                  STATS=$(cypher-shell -u "${NEO4J_USERNAME}" -p "${NEO4J_PASSWORD}" \
+                    --address "${NEO4J_URI}" \
+                    --format plain \
+                    "CALL db.stats.retrieve('GRAPH COUNTS') YIELD section, data
+                     WITH section, data
+                     UNWIND data as item
+                     RETURN section + '.' + item.label as metric, item.value as count" | jq -R -s -c 'split("\n") | map(select(length > 0 and . != "metric,count")) | map(split(",")) | map({metric: .[0], count: (.[1] | tonumber)}) | from_entries')
+
+                  # Create transaction log backup
+                  cp -r /var/lib/neo4j/data/transactions "${BACKUP_DIR}/transactions_backup/" || true
+
+                  # Compress the entire backup
+                  tar -czf "/tmp/${BACKUP_FILE}" -C /tmp "neo4j_backup_${TIMESTAMP}"
+
+                  # Calculate checksum
+                  BACKUP_SHA256=$(sha256sum "/tmp/${BACKUP_FILE}" | cut -d' ' -f1)
+
+                  # Upload to S3 with region-specific path
+                  aws s3 cp "/tmp/${BACKUP_FILE}" "s3://${S3_BUCKET}/neo4j/${REGION}/backups/${BACKUP_FILE}"
+
+                  # Create manifest for restore procedures
+                  cat > "/tmp/neo4j_manifest_${TIMESTAMP}.json" << EOF
+                  {
+                    "timestamp": "${TIMESTAMP}",
+                    "region": "${REGION}",
+                    "type": "neo4j",
+                    "files": {
+                      "backup": "${BACKUP_FILE}"
+                    },
+                    "metadata": {
+                      "neo4j_version": "$(neo4j --version | head -n1)",
+                      "database_name": "maestro",
+                      "backup_method": "neo4j-admin+cypher-export",
+                      "retention_days": ${BACKUP_RETENTION_DAYS},
+                      "statistics": ${STATS}
+                    },
+                    "checksums": {
+                      "backup_sha256": "${BACKUP_SHA256}"
+                    },
+                    "restore_notes": {
+                      "procedure": "Use neo4j-admin database restore command",
+                      "requirements": "Neo4j 5.15+ Enterprise",
+                      "estimated_restore_time": "5-30 minutes depending on graph size"
+                    }
+                  }
+                  EOF
+
+                  aws s3 cp "/tmp/neo4j_manifest_${TIMESTAMP}.json" \
+                    "s3://${S3_BUCKET}/neo4j/${REGION}/manifests/neo4j_manifest_${TIMESTAMP}.json"
+
+                  # Update latest backup pointer
+                  echo "${TIMESTAMP}" | aws s3 cp - "s3://${S3_BUCKET}/neo4j/${REGION}/LATEST"
+
+                  # Cleanup old backups based on retention
+                  aws s3 ls "s3://${S3_BUCKET}/neo4j/${REGION}/backups/" | \
+                    awk '{print $4}' | sort | head -n -${BACKUP_RETENTION_DAYS} | \
+                    while read backup; do
+                      if [ -n "$backup" ]; then
+                        echo "Deleting old backup: $backup"
+                        aws s3 rm "s3://${S3_BUCKET}/neo4j/${REGION}/backups/${backup}"
+                      fi
+                    done
+
+                  # Cleanup old manifests
+                  aws s3 ls "s3://${S3_BUCKET}/neo4j/${REGION}/manifests/" | \
+                    awk '{print $4}' | sort | head -n -${BACKUP_RETENTION_DAYS} | \
+                    while read manifest; do
+                      if [ -n "$manifest" ]; then
+                        aws s3 rm "s3://${S3_BUCKET}/neo4j/${REGION}/manifests/${manifest}"
+                      fi
+                    done
+
+                  # Cleanup temporary files
+                  rm -rf "${BACKUP_DIR}"
+                  rm -f "/tmp/${BACKUP_FILE}"
+
+                  echo "Neo4j backup completed successfully at $(date)"
+                  echo "Files uploaded:"
+                  echo "  - s3://${S3_BUCKET}/neo4j/${REGION}/backups/${BACKUP_FILE}"
+                  echo "  - s3://${S3_BUCKET}/neo4j/${REGION}/manifests/neo4j_manifest_${TIMESTAMP}.json"
+
+              resources:
+                requests:
+                  memory: '1Gi'
+                  cpu: '500m'
+                limits:
+                  memory: '4Gi'
+                  cpu: '2000m'
+
+              volumeMounts:
+                - name: backup-temp
+                  mountPath: /tmp
+                - name: neo4j-data
+                  mountPath: /var/lib/neo4j/data
+                  readOnly: true
+
           volumes:
-          - name: backup-temp
-            emptyDir:
-              sizeLimit: 20Gi
-          - name: neo4j-data
-            persistentVolumeClaim:
-              claimName: maestro-neo4j-data
-              readOnly: true
+            - name: backup-temp
+              emptyDir:
+                sizeLimit: 20Gi
+            - name: neo4j-data
+              persistentVolumeClaim:
+                claimName: maestro-neo4j-data
+                readOnly: true

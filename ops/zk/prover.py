@@ -8,15 +8,16 @@ revealing sensitive edges. <250ms p95 verification at 100 RPS.
 """
 
 import asyncio
+import base64
 import hashlib
 import json
 import time
 import uuid
-from dataclasses import dataclass, asdict
+from dataclasses import asdict, dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Dict, List, Optional, Any, Tuple
-import base64
+from typing import Any
+
 
 # Simulated zk-SNARK primitives (in production: use arkworks/circom)
 class ZKCircuit:
@@ -25,16 +26,18 @@ class ZKCircuit:
     def __init__(self, circuit_id: str):
         self.circuit_id = circuit_id
         self.proving_key = f"pk-{circuit_id}-{hashlib.sha256(circuit_id.encode()).hexdigest()[:16]}"
-        self.verifying_key = f"vk-{circuit_id}-{hashlib.sha256(circuit_id.encode()).hexdigest()[:16]}"
+        self.verifying_key = (
+            f"vk-{circuit_id}-{hashlib.sha256(circuit_id.encode()).hexdigest()[:16]}"
+        )
 
-    def prove(self, public_inputs: Dict[str, Any], private_witness: Dict[str, Any]) -> str:
+    def prove(self, public_inputs: dict[str, Any], private_witness: dict[str, Any]) -> str:
         """Generate zk-SNARK proof (simulated)"""
         # In production: actual zk-SNARK proof generation
         proof_data = {
             "circuit": self.circuit_id,
             "public": public_inputs,
             "proving_key_hash": hashlib.sha256(self.proving_key.encode()).hexdigest()[:16],
-            "timestamp": int(time.time() * 1000)
+            "timestamp": int(time.time() * 1000),
         }
 
         # Simulate proof computation time
@@ -43,7 +46,7 @@ class ZKCircuit:
         proof_bytes = json.dumps(proof_data, sort_keys=True).encode()
         return base64.b64encode(proof_bytes).decode()
 
-    def verify(self, proof: str, public_inputs: Dict[str, Any]) -> bool:
+    def verify(self, proof: str, public_inputs: dict[str, Any]) -> bool:
         """Verify zk-SNARK proof (simulated)"""
         try:
             proof_bytes = base64.b64decode(proof.encode())
@@ -51,9 +54,9 @@ class ZKCircuit:
 
             # Basic validation
             return (
-                proof_data["circuit"] == self.circuit_id and
-                proof_data["public"] == public_inputs and
-                "proving_key_hash" in proof_data
+                proof_data["circuit"] == self.circuit_id
+                and proof_data["public"] == public_inputs
+                and "proving_key_hash" in proof_data
             )
         except:
             return False
@@ -62,6 +65,7 @@ class ZKCircuit:
 @dataclass
 class ProvenanceNode:
     """Node in provenance DAG"""
+
     node_id: str
     node_type: str  # "input", "tool", "llm", "output"
     tenant_id: str
@@ -73,6 +77,7 @@ class ProvenanceNode:
 @dataclass
 class ProvenanceEdge:
     """Edge in provenance DAG (potentially sensitive)"""
+
     from_node: str
     to_node: str
     edge_type: str
@@ -82,11 +87,12 @@ class ProvenanceEdge:
 @dataclass
 class ZKProvenanceProof:
     """Zero-knowledge proof of provenance compliance"""
+
     proof_id: str
     dag_hash: str
     policy_hash: str
     zk_proof: str
-    public_inputs: Dict[str, Any]
+    public_inputs: dict[str, Any]
     timestamp: str
     verifier_version: str
 
@@ -103,62 +109,65 @@ class ZKProvenanceProver:
             "residency_compliance": ZKCircuit("residency"),
             "persisted_only": ZKCircuit("persisted"),
             "tenant_isolation": ZKCircuit("isolation"),
-            "tool_allowlist": ZKCircuit("tools")
+            "tool_allowlist": ZKCircuit("tools"),
         }
 
-        self.proof_metrics: List[float] = []
+        self.proof_metrics: list[float] = []
 
-    def _hash_dag(self, nodes: List[ProvenanceNode], edges: List[ProvenanceEdge]) -> str:
+    def _hash_dag(self, nodes: list[ProvenanceNode], edges: list[ProvenanceEdge]) -> str:
         """Compute deterministic hash of DAG structure"""
         dag_data = {
             "nodes": sorted([asdict(n) for n in nodes], key=lambda x: x["node_id"]),
-            "edges": sorted([asdict(e) for e in edges], key=lambda x: (x["from_node"], x["to_node"]))
+            "edges": sorted(
+                [asdict(e) for e in edges], key=lambda x: (x["from_node"], x["to_node"])
+            ),
         }
-        canonical = json.dumps(dag_data, sort_keys=True, separators=(',', ':'))
+        canonical = json.dumps(dag_data, sort_keys=True, separators=(",", ":"))
         return hashlib.sha256(canonical.encode()).hexdigest()
 
-    def _extract_public_inputs(self, nodes: List[ProvenanceNode], policy_type: str) -> Dict[str, Any]:
+    def _extract_public_inputs(
+        self, nodes: list[ProvenanceNode], policy_type: str
+    ) -> dict[str, Any]:
         """Extract public inputs for specific policy verification"""
         if policy_type == "residency_compliance":
             return {
                 "tenant_zones": list(set(n.residency_zone for n in nodes)),
                 "node_count": len(nodes),
-                "tenant_count": len(set(n.tenant_id for n in nodes))
+                "tenant_count": len(set(n.tenant_id for n in nodes)),
             }
         elif policy_type == "persisted_only":
             return {
                 "total_nodes": len(nodes),
                 "persisted_nodes": sum(1 for n in nodes if n.is_persisted),
-                "policy_hash": nodes[0].policy_hash if nodes else ""
+                "policy_hash": nodes[0].policy_hash if nodes else "",
             }
         elif policy_type == "tenant_isolation":
             return {
                 "tenant_ids": sorted(list(set(n.tenant_id for n in nodes))),
-                "isolation_verified": True
+                "isolation_verified": True,
             }
         elif policy_type == "tool_allowlist":
             tool_nodes = [n for n in nodes if n.node_type == "tool"]
             return {
                 "tools_used": sorted(list(set(n.node_id for n in tool_nodes))),
-                "tool_count": len(tool_nodes)
+                "tool_count": len(tool_nodes),
             }
 
         return {}
 
-    def _create_private_witness(self, nodes: List[ProvenanceNode], edges: List[ProvenanceEdge]) -> Dict[str, Any]:
+    def _create_private_witness(
+        self, nodes: list[ProvenanceNode], edges: list[ProvenanceEdge]
+    ) -> dict[str, Any]:
         """Create private witness (sensitive DAG details)"""
         return {
             "sensitive_edges": [asdict(e) for e in edges if e.is_sensitive],
             "node_details": [asdict(n) for n in nodes],
-            "full_topology": [(e.from_node, e.to_node) for e in edges]
+            "full_topology": [(e.from_node, e.to_node) for e in edges],
         }
 
     async def prove_compliance(
-        self,
-        nodes: List[ProvenanceNode],
-        edges: List[ProvenanceEdge],
-        policy_types: List[str]
-    ) -> List[ZKProvenanceProof]:
+        self, nodes: list[ProvenanceNode], edges: list[ProvenanceEdge], policy_types: list[str]
+    ) -> list[ZKProvenanceProof]:
         """Generate zk-proofs for multiple policy compliance checks"""
         start_time = time.time()
         proofs = []
@@ -183,7 +192,7 @@ class ZKProvenanceProver:
                 zk_proof=zk_proof,
                 public_inputs=public_inputs,
                 timestamp=datetime.now(timezone.utc).isoformat(),
-                verifier_version="v0.3.7"
+                verifier_version="v0.3.7",
             )
 
             proofs.append(proof)
@@ -222,7 +231,7 @@ class ZKProvenanceProver:
             print(f"Verification error: {e}")
             return False
 
-    def get_performance_metrics(self) -> Dict[str, float]:
+    def get_performance_metrics(self) -> dict[str, float]:
         """Get zk-proof performance metrics"""
         if not self.proof_metrics:
             return {"p95_ms": 0, "p50_ms": 0, "count": 0}
@@ -235,13 +244,13 @@ class ZKProvenanceProver:
             "p50_ms": sorted_metrics[int(count * 0.50)] if count > 0 else 0,
             "p99_ms": sorted_metrics[int(count * 0.99)] if count > 0 else 0,
             "count": count,
-            "sla_met": sorted_metrics[int(count * 0.95)] <= 250 if count > 0 else False
+            "sla_met": sorted_metrics[int(count * 0.95)] <= 250 if count > 0 else False,
         }
 
     async def save_proof(self, proof: ZKProvenanceProof):
         """Save proof to evidence directory"""
         proof_file = self.evidence_dir / f"proof-{proof.proof_id}.json"
-        with open(proof_file, 'w') as f:
+        with open(proof_file, "w") as f:
             json.dump(asdict(proof), f, indent=2)
 
 
@@ -255,21 +264,22 @@ async def main():
         ProvenanceNode("input-1", "input", "TENANT_001", "us-east-1", True, "policy-123"),
         ProvenanceNode("llm-1", "llm", "TENANT_001", "us-east-1", True, "policy-123"),
         ProvenanceNode("tool-1", "tool", "TENANT_001", "us-east-1", True, "policy-123"),
-        ProvenanceNode("output-1", "output", "TENANT_001", "us-east-1", True, "policy-123")
+        ProvenanceNode("output-1", "output", "TENANT_001", "us-east-1", True, "policy-123"),
     ]
 
     edges = [
         ProvenanceEdge("input-1", "llm-1", "data_flow"),
         ProvenanceEdge("llm-1", "tool-1", "tool_call", is_sensitive=True),
-        ProvenanceEdge("tool-1", "output-1", "result")
+        ProvenanceEdge("tool-1", "output-1", "result"),
     ]
 
     print("🔍 Generating zk-proofs for provenance compliance...")
 
     # Generate proofs for all policy types
     proofs = await prover.prove_compliance(
-        nodes, edges,
-        ["residency_compliance", "persisted_only", "tenant_isolation", "tool_allowlist"]
+        nodes,
+        edges,
+        ["residency_compliance", "persisted_only", "tenant_isolation", "tool_allowlist"],
     )
 
     print(f"✅ Generated {len(proofs)} zk-proofs")
@@ -283,7 +293,7 @@ async def main():
 
     # Show performance metrics
     metrics = prover.get_performance_metrics()
-    print(f"\n📊 Performance metrics:")
+    print("\n📊 Performance metrics:")
     print(f"   P95: {metrics['p95_ms']:.1f}ms")
     print(f"   P50: {metrics['p50_ms']:.1f}ms")
     print(f"   SLA met (≤250ms): {metrics['sla_met']}")

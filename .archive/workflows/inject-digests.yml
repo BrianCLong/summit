@@ -2,7 +2,7 @@ name: inject-digests-into-charts
 on:
   workflow_dispatch:
   workflow_run:
-    workflows: ["build-publish-sign"]
+    workflows: ['build-publish-sign']
     types: [completed]
 permissions:
   contents: write
@@ -23,7 +23,7 @@ jobs:
       - name: Create release PR
         uses: peter-evans/create-pull-request@v6
         with:
-          title: "chore(charts): pin image digests from latest build"
-          commit-message: "pin image digests"
+          title: 'chore(charts): pin image digests from latest build'
+          commit-message: 'pin image digests'
           branch: chore/pin-digests
-          body: "Automated digest pin from evidence bundle."
+          body: 'Automated digest pin from evidence bundle.'

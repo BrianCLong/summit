@@ -16,7 +16,9 @@ function loadYaml(file: string) {
 
 describe('Workflow manifest schema', () => {
   it('validates example manifest', () => {
-    const manifest = loadYaml('../examples/workflows/ingest-enrich-handoff.yaml');
+    const manifest = loadYaml(
+      '../examples/workflows/ingest-enrich-handoff.yaml',
+    );
     const validate = ajv.compile(schema);
     const ok = validate(manifest);
     if (!ok) {

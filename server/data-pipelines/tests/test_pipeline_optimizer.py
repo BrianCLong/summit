@@ -5,7 +5,9 @@ from pathlib import Path
 from threading import Event
 
 OPTIMIZATION_DIR = Path(__file__).resolve().parents[1] / "optimization"
-spec = importlib.util.spec_from_file_location("pipeline_optimization", OPTIMIZATION_DIR / "__init__.py")
+spec = importlib.util.spec_from_file_location(
+    "pipeline_optimization", OPTIMIZATION_DIR / "__init__.py"
+)
 optimization = importlib.util.module_from_spec(spec)
 sys.modules["pipeline_optimization"] = optimization
 assert spec.loader is not None

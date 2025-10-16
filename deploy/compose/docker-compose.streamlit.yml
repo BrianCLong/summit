@@ -5,8 +5,8 @@ services:
     environment:
       - NEO4J_AUTH=neo4j/testpassword
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - '7474:7474'
+      - '7687:7687'
   streamlit:
     image: python:3.11-slim
     working_dir: /work
@@ -16,7 +16,7 @@ services:
     depends_on:
       - neo4j
     ports:
-      - "8501:8501"
+      - '8501:8501'
   nlp-debug:
     image: python:3.11-slim
     working_dir: /work
@@ -24,4 +24,4 @@ services:
       - ./python:/work
     command: bash -lc "pip install -e .[dev] && streamlit run apps/nlp_debug_app/app.py --server.port 8502 --server.address 0.0.0.0"
     ports:
-      - "8502:8502"
+      - '8502:8502'

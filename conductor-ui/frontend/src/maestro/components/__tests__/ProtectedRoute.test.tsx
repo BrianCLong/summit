@@ -81,7 +81,12 @@ describe('ProtectedRoute', () => {
 
   it('renders protected content when authenticated and no roles/tenant required', () => {
     mockUseAuth.mockReturnValue({
-      user: { id: '1', email: 'test@example.com', roles: [], tenant: 'default' },
+      user: {
+        id: '1',
+        email: 'test@example.com',
+        roles: [],
+        tenant: 'default',
+      },
       isAuthenticated: true,
       loading: false,
       accessToken: 'abc',
@@ -109,7 +114,12 @@ describe('ProtectedRoute', () => {
 
   it('renders 403 for role-denied access', () => {
     mockUseAuth.mockReturnValue({
-      user: { id: '1', email: 'test@example.com', roles: ['viewer'], tenant: 'default' },
+      user: {
+        id: '1',
+        email: 'test@example.com',
+        roles: ['viewer'],
+        tenant: 'default',
+      },
       isAuthenticated: true,
       loading: false,
       accessToken: 'abc',
@@ -133,14 +143,21 @@ describe('ProtectedRoute', () => {
 
     expect(screen.getByText('Access Denied')).toBeInTheDocument();
     expect(
-      screen.getByText(/You don't have the required role\(s\) to access this resource./i),
+      screen.getByText(
+        /You don't have the required role\(s\) to access this resource./i,
+      ),
     ).toBeInTheDocument();
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
   });
 
   it('renders fallback component for role-denied access if provided', () => {
     mockUseAuth.mockReturnValue({
-      user: { id: '1', email: 'test@example.com', roles: ['viewer'], tenant: 'default' },
+      user: {
+        id: '1',
+        email: 'test@example.com',
+        roles: ['viewer'],
+        tenant: 'default',
+      },
       isAuthenticated: true,
       loading: false,
       accessToken: 'abc',
@@ -197,7 +214,9 @@ describe('ProtectedRoute', () => {
     );
 
     expect(screen.getByText('Tenant Access Required')).toBeInTheDocument();
-    expect(screen.getByText(/You don't have access to tenant/i)).toBeInTheDocument();
+    expect(
+      screen.getByText(/You don't have access to tenant/i),
+    ).toBeInTheDocument();
     expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
   });
 
@@ -232,12 +251,19 @@ describe('ProtectedRoute', () => {
     );
 
     expect(screen.getByText('403 Forbidden')).toBeInTheDocument();
-    expect(screen.queryByText('Tenant Access Required')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Tenant Access Required'),
+    ).not.toBeInTheDocument();
   });
 
   it('renders protected content when authenticated and authorized by role', () => {
     mockUseAuth.mockReturnValue({
-      user: { id: '1', email: 'test@example.com', roles: ['admin'], tenant: 'default' },
+      user: {
+        id: '1',
+        email: 'test@example.com',
+        roles: ['admin'],
+        tenant: 'default',
+      },
       isAuthenticated: true,
       loading: false,
       accessToken: 'abc',

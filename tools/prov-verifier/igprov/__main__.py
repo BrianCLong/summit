@@ -8,7 +8,12 @@ Verifies a disclosure/export bundle by:
 3) Optionally verifying a Merkle root if present (sorted by path).
 Exit code 0 on success; non-zero on any mismatch.
 """
-import argparse, json, hashlib, sys, os
+import argparse
+import hashlib
+import json
+import os
+import sys
+
 
 def sha256_file(path):
     h = hashlib.sha256()
@@ -17,16 +22,18 @@ def sha256_file(path):
             h.update(chunk)
     return h.hexdigest()
 
+
 def merkle_root(leaves):
     cur = sorted(leaves)
     while len(cur) > 1:
         nxt = []
         for i in range(0, len(cur), 2):
             a = cur[i]
-            b = cur[i+1] if i+1 < len(cur) else cur[i]
+            b = cur[i + 1] if i + 1 < len(cur) else cur[i]
             nxt.append(hashlib.sha256((a + b).encode("utf-8")).hexdigest())
         cur = nxt
     return cur[0] if cur else None
+
 
 def main():
     ap = argparse.ArgumentParser()
@@ -35,7 +42,7 @@ def main():
 
     manifest_path = os.path.join(args.bundle_dir, "manifest.json")
     try:
-        manifest = json.load(open(manifest_path, "r"))
+        manifest = json.load(open(manifest_path))
     except Exception as e:
         print(f"[ERR] load manifest: {e}", file=sys.stderr)
         return 2
@@ -54,15 +61,18 @@ def main():
     if "merkleRoot" in manifest:
         root = merkle_root(leaves)
         if root != manifest["merkleRoot"].lower():
-            mismatches.append(f"merkle root mismatch expected={manifest['merkleRoot']} actual={root}")
+            mismatches.append(
+                f"merkle root mismatch expected={manifest['merkleRoot']} actual={root}"
+            )
 
     if mismatches:
-        print("[FAIL] verification errors:"); [print(" -", m) for m in mismatches]
+        print("[FAIL] verification errors:")
+        [print(" -", m) for m in mismatches]
         return 1
 
     print("[OK] bundle verified; transforms:", len(manifest.get("transforms", [])))
     return 0
 
+
 if __name__ == "__main__":
     sys.exit(main())
-

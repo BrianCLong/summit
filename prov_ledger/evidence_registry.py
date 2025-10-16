@@ -1,13 +1,13 @@
-
 # prov-ledger/evidence_registry.py
 
 import json
-from typing import Dict, Any
+from typing import Any
 
 # In-memory store for evidence (for demonstration purposes)
-_EVIDENCE_STORE: Dict[str, Dict[str, Any]] = {}
+_EVIDENCE_STORE: dict[str, dict[str, Any]] = {}
 
-def register_evidence(evidence_data: Dict[str, Any]) -> str:
+
+def register_evidence(evidence_data: dict[str, Any]) -> str:
     """
     Registers evidence and returns a unique evidence ID.
     Simulates storing evidence in an in-memory dictionary.
@@ -18,14 +18,16 @@ def register_evidence(evidence_data: Dict[str, Any]) -> str:
     _EVIDENCE_STORE[evidence_id] = evidence_data
     return evidence_id
 
-def get_evidence(evidence_id: str) -> Dict[str, Any]:
+
+def get_evidence(evidence_id: str) -> dict[str, Any]:
     """
     Retrieves evidence by ID from the in-memory store.
     """
     print(f"Retrieving evidence: {evidence_id}")
     return _EVIDENCE_STORE.get(evidence_id, {})
 
-def generate_signed_hash(data: Dict[str, Any]) -> str:
+
+def generate_signed_hash(data: dict[str, Any]) -> str:
     """
     Stub for generating a cryptographically signed hash of data.
     """

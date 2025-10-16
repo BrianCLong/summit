@@ -1,11 +1,15 @@
 import { test, expect } from '@playwright/test';
 
-test('EnhancedAIAssistant handles streaming, voice, and idle/export states', async ({ page }) => {
+test('EnhancedAIAssistant handles streaming, voice, and idle/export states', async ({
+  page,
+}) => {
   // 1. Navigate to the page
   await page.goto('http://localhost:3000/debug-client.html');
 
   // Wait for the assistant input to be visible
-  const assistantInput = page.getByRole('textbox', { name: /assistant-input/i });
+  const assistantInput = page.getByRole('textbox', {
+    name: /assistant-input/i,
+  });
   await expect(assistantInput).toBeVisible();
 
   // --- Scenario 1: Streaming render and text normalization ---
@@ -39,12 +43,16 @@ test('EnhancedAIAssistant handles streaming, voice, and idle/export states', asy
   await expect(messageLog).toContainText(streamingResponse);
 
   // --- Scenario 2: Confirm idle transition ---
-  const assistantStatus = page.getByRole('status', { name: /assistant-status/i });
+  const assistantStatus = page.getByRole('status', {
+    name: /assistant-status/i,
+  });
   await expect(assistantStatus).toContainText(/Online/); // Assuming 'Online' is the idle state
 
   // --- Scenario 3: Trigger voice via a test toggle (UI only) ---
   // Assuming there's a microphone button to toggle voice input
-  const micButton = page.getByRole('button', { name: /start voice|stop voice/i });
+  const micButton = page.getByRole('button', {
+    name: /start voice|stop voice/i,
+  });
   await expect(micButton).toBeVisible();
   await micButton.click(); // Start listening
 

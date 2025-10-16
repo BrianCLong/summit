@@ -15,13 +15,13 @@ golden_io_tests:
   - test_sdn_parsing.py
   - test_entity_mapping.py
 rate_limit:
-  requests_per_hour: 24  # Once per hour max
+  requests_per_hour: 24 # Once per hour max
   burst_limit: 1
 pii_flags:
-  - names: "Contains individual names on sanctions lists"
-  - addresses: "Contains address information"
-  - dates_of_birth: "Contains birth dates for sanctioned individuals"
-retention_policy: "7-years"  # Regulatory requirement
+  - names: 'Contains individual names on sanctions lists'
+  - addresses: 'Contains address information'
+  - dates_of_birth: 'Contains birth dates for sanctioned individuals'
+retention_policy: '7-years' # Regulatory requirement
 compliance_notes: |
   This connector processes OFAC sanctions data which is:
   - Public domain information from US Treasury
@@ -29,18 +29,18 @@ compliance_notes: |
   - Must be retained for compliance purposes
   - Updates required for legal compliance
 export_restrictions:
-  - "Cannot be exported to sanctioned countries"
-  - "Must maintain audit trail of access"
+  - 'Cannot be exported to sanctioned countries'
+  - 'Must maintain audit trail of access'
 dependencies:
   - python>=3.8
   - requests>=2.25.0
   - pandas>=1.3.0
   - lxml>=4.6.0
 configuration:
-  sdn_list_url: "https://www.treasury.gov/ofac/downloads/sdn.csv"
-  alt_names_url: "https://www.treasury.gov/ofac/downloads/alt.csv"
-  addresses_url: "https://www.treasury.gov/ofac/downloads/add.csv"
-  consolidated_url: "https://www.treasury.gov/ofac/downloads/consolidated/cons_prim.csv"
+  sdn_list_url: 'https://www.treasury.gov/ofac/downloads/sdn.csv'
+  alt_names_url: 'https://www.treasury.gov/ofac/downloads/alt.csv'
+  addresses_url: 'https://www.treasury.gov/ofac/downloads/add.csv'
+  consolidated_url: 'https://www.treasury.gov/ofac/downloads/consolidated/cons_prim.csv'
   verify_ssl: true
   timeout_seconds: 30
   backup_retention_days: 30

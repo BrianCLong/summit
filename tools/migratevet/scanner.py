@@ -2,40 +2,46 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable, List
 
 from . import postgres_rules
 from .models import FileContext, Issue, Statement
 
-
 SUPPORTED_DIALECTS = {"postgres"}
 
 
-def scan_directory(root: Path, dialect: str) -> List[Issue]:
+def scan_directory(root: Path, dialect: str) -> list[Issue]:
     """Scan all SQL files under ``root`` for the given dialect."""
     if dialect not in SUPPORTED_DIALECTS:
-        raise ValueError(f"Unsupported dialect '{dialect}'. Supported dialects: {sorted(SUPPORTED_DIALECTS)}")
+        raise ValueError(
+            f"Unsupported dialect '{dialect}'. Supported dialects: {sorted(SUPPORTED_DIALECTS)}"
+        )
 
-    issues: List[Issue] = []
+    issues: list[Issue] = []
     for path in sorted(root.rglob("*.sql")):
         issues.extend(scan_file(path, dialect))
     return issues
 
 
-def scan_file(path: Path, dialect: str) -> List[Issue]:
+def scan_file(path: Path, dialect: str) -> list[Issue]:
     """Scan an individual SQL file."""
     text = path.read_text(encoding="utf-8")
     sanitized = _strip_sql_comments(text)
     statements = list(_extract_statements(sanitized))
-    context = FileContext(path=path, source_text=text, sanitized_text=sanitized, line_offsets=_compute_line_offsets(text))
+    context = FileContext(
+        path=path,
+        source_text=text,
+        sanitized_text=sanitized,
+        line_offsets=_compute_line_offsets(text),
+    )
 
     if dialect == "postgres":
         return postgres_rules.evaluate(statements, context)
     raise ValueError(f"Unsupported dialect '{dialect}'")
 
 
-def _compute_line_offsets(text: str) -> List[int]:
+def _compute_line_offsets(text: str) -> list[int]:
     offsets = [0]
     for idx, char in enumerate(text):
         if char == "\n":
@@ -45,7 +51,7 @@ def _compute_line_offsets(text: str) -> List[int]:
 
 def _strip_sql_comments(text: str) -> str:
     """Return ``text`` with SQL comments replaced by spaces, preserving length."""
-    result: List[str] = []
+    result: list[str] = []
     length = len(text)
     i = 0
     in_single = False

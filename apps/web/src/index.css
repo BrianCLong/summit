@@ -64,7 +64,7 @@
 }
 
 .intel-grid {
-  background-image: 
+  background-image:
     linear-gradient(rgba(6, 182, 212, 0.1) 1px, transparent 1px),
     linear-gradient(90deg, rgba(6, 182, 212, 0.1) 1px, transparent 1px);
   background-size: 20px 20px;
@@ -82,7 +82,11 @@
 
 /* Graph canvas styles */
 .graph-canvas {
-  background: radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.1) 0%, transparent 50%);
+  background: radial-gradient(
+    circle at 50% 50%,
+    rgba(6, 182, 212, 0.1) 0%,
+    transparent 50%
+  );
 }
 
 /* Loading animations */
@@ -94,7 +98,8 @@
   0% {
     transform: scale(0.33);
   }
-  40%, 50% {
+  40%,
+  50% {
     opacity: 1;
   }
   100% {

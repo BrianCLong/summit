@@ -6,4 +6,3 @@ export async function loadPolicyPack(url: string) {
   // For sidecar: POST /v1/policies with tar; for embedded: point to `dir/opa`
   return { dir };
 }
-

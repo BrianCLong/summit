@@ -17,53 +17,53 @@ services:
       - AI_ENABLE_GPU=true
       - AI_MAX_CONCURRENT_JOBS=5
       - AI_BATCH_SIZE=32
-      
+
       # OCR Configuration
       - OCR_DEFAULT_ENGINE=tesseract
       - OCR_LANGUAGES=eng,deu,fra,spa,chi_sim
       - OCR_CONFIDENCE_THRESHOLD=0.6
       - OCR_ENHANCE_IMAGE=true
-      
+
       # Object Detection Configuration
       - OBJECT_DETECTION_MODEL=yolov8n.pt
       - OBJECT_DETECTION_CONFIDENCE=0.5
       - OBJECT_DETECTION_NMS_THRESHOLD=0.4
       - OBJECT_DETECTION_MAX_DETECTIONS=100
-      
+
       # Face Detection Configuration
       - FACE_DETECTION_MODEL=mtcnn
       - FACE_DETECTION_MIN_SIZE=20
       - FACE_DETECTION_CONFIDENCE=0.7
       - FACE_DETECTION_EXTRACT_FEATURES=true
-      
+
       # Speech Recognition Configuration
       - SPEECH_MODEL=whisper-base
       - SPEECH_LANGUAGES=en,de,fr,es,auto
       - SPEECH_ENABLE_DIARIZATION=false
       - SPEECH_ENHANCE_AUDIO=true
       - SPEECH_WORD_TIMESTAMPS=true
-      
+
       # Text Analysis Configuration
       - TEXT_ANALYSIS_MODEL=en_core_web_lg
       - TEXT_ANALYSIS_EXTRACT_ENTITIES=true
       - TEXT_ANALYSIS_SENTIMENT=true
       - TEXT_ANALYSIS_TOPICS=false
       - TEXT_ANALYSIS_LANGUAGE_DETECTION=true
-      
+
       # Embedding Configuration
       - EMBEDDING_MODEL=all-MiniLM-L6-v2
       - EMBEDDING_NORMALIZE=true
       - EMBEDDING_POOLING=mean
       - EMBEDDING_DIMENSION=384
-      
+
       # Vector Search Configuration
       - VECTOR_SIMILARITY_THRESHOLD=0.7
       - VECTOR_TOP_K=10
       - VECTOR_ENABLE_CLUSTERING=true
-      
+
       # NLTK Data
       - NLTK_DATA=/app/models/nltk
-      
+
       # Database connections (using host network for simplicity)
       - NEO4J_URI=bolt://host.docker.internal:7687
       - NEO4J_USERNAME=neo4j
@@ -76,7 +76,7 @@ services:
       - REDIS_HOST=host.docker.internal
       - REDIS_PORT=6379
       - REDIS_PASSWORD=devpassword
-    
+
     volumes:
       # Persistent model storage
       - ai_models:/app/models
@@ -87,10 +87,10 @@ services:
       - ./server/logs:/app/logs
       # Source code for development
       - ./server/src/ai:/app/src/ai
-    
+
     ports:
-      - "8000:8000"  # AI service port
-    
+      - '8000:8000' # AI service port
+
     # GPU support (uncomment if you have NVIDIA GPU)
     # deploy:
     #   resources:
@@ -99,16 +99,16 @@ services:
     #         - driver: nvidia
     #           count: 1
     #           capabilities: [gpu]
-    
+
     networks:
       - intelgraph-network
-    
+
     # Add extra hosts for Docker Desktop on macOS/Windows
     extra_hosts:
-      - "host.docker.internal:host-gateway"
-    
+      - 'host.docker.internal:host-gateway'
+
     healthcheck:
-      test: ["/app/healthcheck.sh"]
+      test: ['/app/healthcheck.sh']
       interval: 30s
       timeout: 30s
       retries: 3
@@ -125,7 +125,7 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=4000
-      
+
       # Database Configuration
       - NEO4J_URI=bolt://neo4j:7687
       - NEO4J_USERNAME=neo4j
@@ -138,34 +138,34 @@ services:
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_PASSWORD=devpassword
-      
+
       # AI Configuration (using AI container)
       - AI_SERVICE_URL=http://intelgraph-ai:8000
-      - AI_ENABLE_GPU=false  # GPU handled by AI container
+      - AI_ENABLE_GPU=false # GPU handled by AI container
       - AI_MAX_CONCURRENT_JOBS=5
-      
+
       # Security
       - JWT_SECRET=change_this_in_production_jwt_secret_key_12345
       - JWT_REFRESH_SECRET=change_this_in_production_refresh_secret_67890
-    
+
     volumes:
       - ./server/uploads:/app/uploads
       - ./server/logs:/app/logs
-    
+
     ports:
-      - "4000:4000"
-    
+      - '4000:4000'
+
     depends_on:
       - postgres
       - redis
       - neo4j
       - intelgraph-ai
-    
+
     networks:
       - intelgraph-network
-    
+
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:4000/health"]
+      test: ['CMD', 'curl', '-f', 'http://localhost:4000/health']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -183,11 +183,11 @@ services:
       - postgres_data_ai:/var/lib/postgresql/data
       - ./server/migrations:/docker-entrypoint-initdb.d
     ports:
-      - "5432:5432"
+      - '5432:5432'
     networks:
       - intelgraph-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U intelgraph -d intelgraph"]
+      test: ['CMD-SHELL', 'pg_isready -U intelgraph -d intelgraph']
       interval: 10s
       timeout: 5s
       retries: 5
@@ -200,11 +200,11 @@ services:
     volumes:
       - redis_data_ai:/data
     ports:
-      - "6379:6379"
+      - '6379:6379'
     networks:
       - intelgraph-network
     healthcheck:
-      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      test: ['CMD', 'redis-cli', '--raw', 'incr', 'ping']
       interval: 10s
       timeout: 3s
       retries: 5
@@ -224,12 +224,13 @@ services:
       - neo4j_logs_ai:/logs
       - neo4j_import_ai:/var/lib/neo4j/import
     ports:
-      - "7474:7474"  # HTTP
-      - "7687:7687"  # Bolt
+      - '7474:7474' # HTTP
+      - '7687:7687' # Bolt
     networks:
       - intelgraph-network
     healthcheck:
-      test: ["CMD", "cypher-shell", "-u", "neo4j", "-p", "devpassword", "RETURN 1"]
+      test:
+        ['CMD', 'cypher-shell', '-u', 'neo4j', '-p', 'devpassword', 'RETURN 1']
       interval: 30s
       timeout: 10s
       retries: 5
@@ -239,7 +240,7 @@ services:
     container_name: intelgraph-cognitive-targeting-engine
     restart: unless-stopped
     ports:
-      - "8005:8000"
+      - '8005:8000'
     networks:
       - intelgraph-network
 
@@ -249,7 +250,7 @@ volumes:
     driver: local
   ai_cache:
     driver: local
-  
+
   # Database volumes
   postgres_data_ai:
     driver: local

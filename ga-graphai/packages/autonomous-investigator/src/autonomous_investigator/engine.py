@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
 from itertools import combinations
 from statistics import mean, pstdev
-from typing import Iterable, List
 
 import networkx as nx
 
@@ -53,7 +53,7 @@ class InvestigatorEngine:
             assurance_score=assurance,
         )
 
-    def _build_signal_graph(self, signals: List[Signal]) -> nx.Graph:
+    def _build_signal_graph(self, signals: list[Signal]) -> nx.Graph:
         graph = nx.Graph()
         for signal in signals:
             graph.add_node(
@@ -77,11 +77,11 @@ class InvestigatorEngine:
 
     def _derive_hypotheses(
         self,
-        signals: List[Signal],
-        objectives: List[Objective],
+        signals: list[Signal],
+        objectives: list[Objective],
         graph: nx.Graph,
         risk_appetite: float,
-    ) -> List[Hypothesis]:
+    ) -> list[Hypothesis]:
         if not signals:
             return []
         centrality = nx.pagerank(graph, weight="weight") if graph.number_of_nodes() > 0 else {}
@@ -92,14 +92,20 @@ class InvestigatorEngine:
         )
         divergence = self._divergence_index(graph)
         objective_pressure = mean(obj.priority for obj in objectives) if objectives else 1.0
-        hypotheses: List[Hypothesis] = []
+        hypotheses: list[Hypothesis] = []
         for signal in signals:
             base_probability = 0.55 * signal.confidence + 0.45 * signal.severity
-            network_synergy = centrality.get(signal.id, 1.0 / len(signals)) + betweenness.get(signal.id, 0.0)
-            probability = min(0.99, base_probability * (1 + self.coefficients.synergy_bias * network_synergy))
+            network_synergy = centrality.get(signal.id, 1.0 / len(signals)) + betweenness.get(
+                signal.id, 0.0
+            )
+            probability = min(
+                0.99, base_probability * (1 + self.coefficients.synergy_bias * network_synergy)
+            )
             novelty = self._novelty_score(signal, graph, divergence)
             expected_impact = probability * (objective_pressure + risk_appetite)
-            counterfactual_penalty = max(0.05, divergence.get(signal.id, 0.1)) * self.coefficients.counterfactual_bias
+            counterfactual_penalty = (
+                max(0.05, divergence.get(signal.id, 0.1)) * self.coefficients.counterfactual_bias
+            )
             hypotheses.append(
                 Hypothesis(
                     id=f"hypothesis-{signal.id}",
@@ -114,7 +120,9 @@ class InvestigatorEngine:
         hypotheses.sort(key=lambda hyp: hyp.expected_impact, reverse=True)
         return hypotheses
 
-    def _novelty_score(self, signal: Signal, graph: nx.Graph, divergence: dict[str, float]) -> float:
+    def _novelty_score(
+        self, signal: Signal, graph: nx.Graph, divergence: dict[str, float]
+    ) -> float:
         neighbor_types = {
             graph.nodes[neighbor]["signal_type"]
             for neighbor in graph.neighbors(signal.id)
@@ -135,7 +143,7 @@ class InvestigatorEngine:
                 divergence[node] = 0.25
         return divergence
 
-    def _summarize_hypothesis(self, signal: Signal, objectives: List[Objective]) -> str:
+    def _summarize_hypothesis(self, signal: Signal, objectives: list[Objective]) -> str:
         objective = objectives[0].description if objectives else "the mission directive"
         return (
             f"{signal.description} prioritizes the {signal.signal_type} surface "
@@ -145,12 +153,12 @@ class InvestigatorEngine:
     def _compose_tasks(
         self,
         case_id: str,
-        hypotheses: List[Hypothesis],
+        hypotheses: list[Hypothesis],
         resources: Iterable[str],
-        objectives: List[Objective],
-    ) -> List[Task]:
+        objectives: list[Objective],
+    ) -> list[Task]:
         selected = hypotheses[:3]
-        plan_tasks: List[Task] = []
+        plan_tasks: list[Task] = []
         for index, hypothesis in enumerate(selected, start=1):
             plan_tasks.append(
                 Task(
@@ -201,7 +209,9 @@ class InvestigatorEngine:
         plan_tasks.append(mission_task)
         return plan_tasks
 
-    def _enumerate_differentiators(self, graph: nx.Graph, hypotheses: List[Hypothesis]) -> List[str]:
+    def _enumerate_differentiators(
+        self, graph: nx.Graph, hypotheses: list[Hypothesis]
+    ) -> list[str]:
         graph_tension = self._graph_tension(graph)
         leading_prob = hypotheses[0].probability if hypotheses else 0.0
         return [
@@ -216,18 +226,16 @@ class InvestigatorEngine:
         weights = [data.get("weight", 0.1) for _, _, data in graph.edges(data=True)]
         return pstdev(weights) if len(weights) > 1 else weights[0]
 
-    def _build_counterfactuals(self, hypotheses: List[Hypothesis]) -> List[str]:
+    def _build_counterfactuals(self, hypotheses: list[Hypothesis]) -> list[str]:
         branches = []
         for hypothesis in hypotheses[:3]:
             branches.append(
-                (
-                    f"If {hypothesis.id} fails, redirect swarm to latent-signal ensemble with penalty "
-                    f"{hypothesis.counterfactual_penalty:.2f}."
-                )
+                f"If {hypothesis.id} fails, redirect swarm to latent-signal ensemble with penalty "
+                f"{hypothesis.counterfactual_penalty:.2f}."
             )
         return branches or ["Establish default counterfactual monitoring cadence."]
 
-    def _compute_assurance(self, hypotheses: List[Hypothesis], counterfactuals: List[str]) -> float:
+    def _compute_assurance(self, hypotheses: list[Hypothesis], counterfactuals: list[str]) -> float:
         if not hypotheses:
             return self.coefficients.assurance_floor
         mean_probability = mean(hypothesis.probability for hypothesis in hypotheses[:3])

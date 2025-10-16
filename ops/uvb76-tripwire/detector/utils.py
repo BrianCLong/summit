@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import hashlib
+from collections.abc import Iterable
 from pathlib import Path
-from typing import Iterable, Tuple
 
 import numpy as np
 import soundfile as sf
@@ -20,7 +20,9 @@ except ImportError as exc:  # pragma: no cover - optional dependency guard
     raise SystemExit("matplotlib is required for spectrogram generation") from exc
 
 
-def bandpass(sig: np.ndarray, fs: int, low: int = 300, high: int = 3000, order: int = 4) -> np.ndarray:
+def bandpass(
+    sig: np.ndarray, fs: int, low: int = 300, high: int = 3000, order: int = 4
+) -> np.ndarray:
     nyq = fs / 2.0
     if low <= 0 or high >= nyq:
         return sig
@@ -35,7 +37,9 @@ def rms_db(frame: np.ndarray) -> float:
 
 def detect_speech(sig: np.ndarray, fs: int, frame_ms: int, floor_db: float, min_sec: float) -> bool:
     frame = max(int(fs * frame_ms / 1000), 1)
-    frames: Iterable[np.ndarray] = (sig[idx : idx + frame] for idx in range(0, len(sig) - frame + 1, frame))
+    frames: Iterable[np.ndarray] = (
+        sig[idx : idx + frame] for idx in range(0, len(sig) - frame + 1, frame)
+    )
     db_levels = np.array([rms_db(chunk) for chunk in frames])
     if db_levels.size == 0:
         return False
@@ -53,7 +57,7 @@ def detect_marker(
     expected_rate: int,
     tolerance_pct: int,
     snr_trigger_db: float,
-) -> Tuple[bool, float]:
+) -> tuple[bool, float]:
     freq, time_idx, zxx = stft(sig, fs=fs, nperseg=1024, noverlap=768)
     if time_idx.size < 2:
         return False, 0.0
@@ -70,7 +74,7 @@ def detect_marker(
     return within_bounds, rate
 
 
-def detect_burst(sig: np.ndarray, fs: int, floor_db: float = -55.0) -> Tuple[bool, float]:
+def detect_burst(sig: np.ndarray, fs: int, floor_db: float = -55.0) -> tuple[bool, float]:
     frame = max(int(fs * 0.01), 1)
     hop = frame
     frames = [sig[idx : idx + frame] for idx in range(0, len(sig) - frame + 1, hop)]
@@ -119,7 +123,7 @@ def load_config(path: Path) -> dict:
         return yaml.safe_load(handle)
 
 
-def load_audio(path: Path) -> Tuple[np.ndarray, int]:
+def load_audio(path: Path) -> tuple[np.ndarray, int]:
     audio, fs = sf.read(str(path))
     if audio.ndim > 1:
         audio = audio.mean(axis=1)

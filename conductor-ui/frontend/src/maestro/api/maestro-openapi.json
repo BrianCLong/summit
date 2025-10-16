@@ -46,15 +46,24 @@
           "pipelineId": { "type": "string" },
           "commit": { "type": "string" },
           "env": { "type": "string" },
-          "status": { "type": "string", "enum": ["queued", "running", "succeeded", "failed", "cancelled"] },
+          "status": {
+            "type": "string",
+            "enum": ["queued", "running", "succeeded", "failed", "cancelled"]
+          },
           "startedAt": { "type": "string", "format": "date-time" },
           "endedAt": { "type": "string", "format": "date-time" },
           "durationMs": { "type": "integer" },
           "cost": { "type": "object" },
           "inputs": { "type": "object" },
           "outputs": { "type": "object" },
-          "artifacts": { "type": "array", "items": { "$ref": "#/components/schemas/Artifact" } },
-          "attestations": { "type": "array", "items": { "$ref": "#/components/schemas/Attestation" } },
+          "artifacts": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Artifact" }
+          },
+          "attestations": {
+            "type": "array",
+            "items": { "$ref": "#/components/schemas/Attestation" }
+          },
           "alerts": { "type": "array", "items": { "type": "string" } },
           "traceId": { "type": "string" }
         }
@@ -96,7 +105,10 @@
         "type": "object",
         "properties": {
           "id": { "type": "string" },
-          "type": { "type": "string", "enum": ["OPA", "Kyverno", "Gatekeeper"] },
+          "type": {
+            "type": "string",
+            "enum": ["OPA", "Kyverno", "Gatekeeper"]
+          },
           "source": { "type": "string" },
           "version": { "type": "string" },
           "result": { "type": "string" },
@@ -146,8 +158,14 @@
             "type": "object",
             "properties": {
               "sbom": { "type": "object" },
-              "attestations": { "type": "array", "items": { "$ref": "#/components/schemas/Attestation" } },
-              "policyProofs": { "type": "array", "items": { "type": "object" } },
+              "attestations": {
+                "type": "array",
+                "items": { "$ref": "#/components/schemas/Attestation" }
+              },
+              "policyProofs": {
+                "type": "array",
+                "items": { "type": "object" }
+              },
               "sloSnapshot": { "type": "object" },
               "rolloutSnapshot": { "type": "object" }
             }
@@ -206,7 +224,11 @@
           { "name": "pipeline", "in": "query", "schema": { "type": "string" } },
           { "name": "env", "in": "query", "schema": { "type": "string" } },
           { "name": "q", "in": "query", "schema": { "type": "string" } },
-          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 50 } },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 50 }
+          },
           { "name": "cursor", "in": "query", "schema": { "type": "string" } }
         ],
         "responses": {
@@ -217,7 +239,10 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "items": { "type": "array", "items": { "$ref": "#/components/schemas/Run" } },
+                    "items": {
+                      "type": "array",
+                      "items": { "$ref": "#/components/schemas/Run" }
+                    },
                     "nextCursor": { "type": "string" }
                   }
                 }
@@ -231,7 +256,12 @@
       "get": {
         "summary": "Get run detail",
         "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
         ],
         "responses": {
           "200": {
@@ -249,7 +279,12 @@
       "post": {
         "summary": "Execute run action",
         "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
         ],
         "requestBody": {
           "content": {
@@ -257,7 +292,10 @@
               "schema": {
                 "type": "object",
                 "properties": {
-                  "action": { "type": "string", "enum": ["promote", "pause", "resume", "rerun", "rollback"] },
+                  "action": {
+                    "type": "string",
+                    "enum": ["promote", "pause", "resume", "rerun", "rollback"]
+                  },
                   "reason": { "type": "string" }
                 }
               }
@@ -273,10 +311,23 @@
       "get": {
         "summary": "Get run logs (streaming or static)",
         "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          },
           { "name": "step", "in": "query", "schema": { "type": "string" } },
-          { "name": "since", "in": "query", "schema": { "type": "string", "format": "date-time" } },
-          { "name": "stream", "in": "query", "schema": { "type": "boolean", "default": false } }
+          {
+            "name": "since",
+            "in": "query",
+            "schema": { "type": "string", "format": "date-time" }
+          },
+          {
+            "name": "stream",
+            "in": "query",
+            "schema": { "type": "boolean", "default": false }
+          }
         ],
         "responses": {
           "200": {
@@ -293,7 +344,12 @@
       "get": {
         "summary": "Get run DAG",
         "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
         ],
         "responses": {
           "200": {
@@ -348,7 +404,12 @@
       "post": {
         "summary": "Simulate pipeline changes",
         "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
         ],
         "requestBody": {
           "content": {
@@ -372,7 +433,10 @@
                   "type": "object",
                   "properties": {
                     "diff": { "type": "object" },
-                    "violations": { "type": "array", "items": { "type": "object" } }
+                    "violations": {
+                      "type": "array",
+                      "items": { "type": "object" }
+                    }
                   }
                 }
               }
@@ -395,7 +459,12 @@
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "candidates": { "type": "array", "items": { "$ref": "#/components/schemas/RoutingCandidate" } }
+                    "candidates": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/RoutingCandidate"
+                      }
+                    }
                   }
                 }
               }
@@ -477,7 +546,12 @@
       "post": {
         "summary": "Freeze budget spending",
         "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
         ],
         "responses": {
           "200": { "description": "Budget frozen" }
@@ -516,7 +590,12 @@
       "post": {
         "summary": "Instantiate recipe as pipeline",
         "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
         ],
         "requestBody": {
           "content": {
@@ -540,7 +619,12 @@
       "post": {
         "summary": "Generate witness bundle for run",
         "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
         ],
         "responses": {
           "200": {
@@ -585,7 +669,12 @@
       "post": {
         "summary": "Acknowledge alert",
         "parameters": [
-          { "name": "id", "in": "path", "required": true, "schema": { "type": "string" } }
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": { "type": "string" }
+          }
         ],
         "requestBody": {
           "content": {
@@ -609,8 +698,16 @@
       "get": {
         "summary": "Get audit log",
         "parameters": [
-          { "name": "since", "in": "query", "schema": { "type": "string", "format": "date-time" } },
-          { "name": "limit", "in": "query", "schema": { "type": "integer", "default": 100 } }
+          {
+            "name": "since",
+            "in": "query",
+            "schema": { "type": "string", "format": "date-time" }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": { "type": "integer", "default": 100 }
+          }
         ],
         "responses": {
           "200": {

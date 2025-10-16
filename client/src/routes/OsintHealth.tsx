@@ -106,7 +106,9 @@ export default function OsintHealth() {
                 <Button
                   size="small"
                   variant="outlined"
-                  onClick={() => handleAddToCaseClick('OSINT_HEALTH_LOG', h.sourceId)}
+                  onClick={() =>
+                    handleAddToCaseClick('OSINT_HEALTH_LOG', h.sourceId)
+                  }
                 >
                   Add to Case
                 </Button>
@@ -115,7 +117,11 @@ export default function OsintHealth() {
           ))}
         </tbody>
       </table>
-      <Drawer anchor="right" open={!!logsOpen} onClose={() => setLogsOpen(null)}>
+      <Drawer
+        anchor="right"
+        open={!!logsOpen}
+        onClose={() => setLogsOpen(null)}
+      >
         <div style={{ width: 360, padding: 16 }}>
           <h3 style={{ marginTop: 0 }}>Last 10 Runs</h3>
           <List dense>

@@ -2,7 +2,7 @@ name: Model Catalog Staleness Check
 
 on:
   schedule:
-    - cron: '21 08 * * 1'  # Mondays 08:21 UTC
+    - cron: '21 08 * * 1' # Mondays 08:21 UTC
   workflow_dispatch:
 
 jobs:
@@ -77,4 +77,3 @@ jobs:
               });
               core.info(`Created issue #${created.data.number}`);
             }
-

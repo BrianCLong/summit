@@ -6,24 +6,24 @@ export const options = {
   vus: 50,
   duration: '5m',
   thresholds: {
-    'http_req_duration': ['p(95)<100'],  // p95 must be under 100ms (pre-storage SLO)
-    'http_req_failed': ['rate<0.001'],   // 99.9% availability
-    'checks': ['rate>0.99'],             // 99% of checks must pass
-    'http_reqs': ['rate>1000']           // ≥ 1,000 requests/second throughput
-  }
+    http_req_duration: ['p(95)<100'], // p95 must be under 100ms (pre-storage SLO)
+    http_req_failed: ['rate<0.001'], // 99.9% availability
+    checks: ['rate>0.99'], // 99% of checks must pass
+    http_reqs: ['rate>1000'], // ≥ 1,000 requests/second throughput
+  },
 };
 
 const BASE_URL = __ENV.GRAPHQL_URL || 'http://localhost:4000';
 const JWT_TOKEN = __ENV.JWT || 'test-token';
 
-export default function() {
+export default function () {
   const tenantId = `tenant-${Math.floor(Math.random() * 100)}`;
   const idempotencyKey = `idem-${Date.now()}-${Math.random().toString(36).substring(7)}`;
-  
+
   // Generate batch of signals
   const signals = [];
   const batchSize = Math.floor(Math.random() * 20) + 1; // 1-20 signals per request
-  
+
   for (let i = 0; i < batchSize; i++) {
     signals.push({
       tenantId: tenantId,
@@ -32,83 +32,104 @@ export default function() {
       weight: Math.random(),
       source: 'k6-load-test',
       ts: new Date().toISOString(),
-      purpose: ['investigation', 'benchmarking', 'monitoring'][Math.floor(Math.random() * 3)],
+      purpose: ['investigation', 'benchmarking', 'monitoring'][
+        Math.floor(Math.random() * 3)
+      ],
       metadata: {
         test: 'load-test',
-        batch: i
-      }
+        batch: i,
+      },
     });
   }
 
   const payload = {
     signals: signals,
-    batch: true
+    batch: true,
   };
 
   const params = {
     headers: {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${JWT_TOKEN}`,
+      Authorization: `Bearer ${JWT_TOKEN}`,
       'x-tenant-id': tenantId,
       'x-idempotency-key': idempotencyKey,
-      'User-Agent': 'k6-ingest-test/24.2.0'
+      'User-Agent': 'k6-ingest-test/24.2.0',
     },
-    tags: { 
+    tags: {
       operation: 'ingest',
-      batch_size: batchSize
-    }
+      batch_size: batchSize,
+    },
   };
 
-  const response = http.post(`${BASE_URL}/ingest/stream`, JSON.stringify(payload), params);
+  const response = http.post(
+    `${BASE_URL}/ingest/stream`,
+    JSON.stringify(payload),
+    params,
+  );
 
   // Validate response
   check(response, {
     'status is 202': (r) => r.status === 202,
     'response has accepted field': (r) => r.json().accepted !== undefined,
     'no server errors': (r) => r.json().error === undefined,
-    'signals accepted': (r) => r.json().accepted > 0
+    'signals accepted': (r) => r.json().accepted > 0,
   });
 
   // Test idempotency - retry with same key should return idempotent response
-  if (Math.random() < 0.1) { // 10% of requests test idempotency
-    const retryResponse = http.post(`${BASE_URL}/ingest/stream`, JSON.stringify(payload), params);
-    
+  if (Math.random() < 0.1) {
+    // 10% of requests test idempotency
+    const retryResponse = http.post(
+      `${BASE_URL}/ingest/stream`,
+      JSON.stringify(payload),
+      params,
+    );
+
     check(retryResponse, {
       'idempotent request handled': (r) => r.status === 202,
-      'idempotent flag set': (r) => r.json().idempotent === true || r.json().accepted >= 0
+      'idempotent flag set': (r) =>
+        r.json().idempotent === true || r.json().accepted >= 0,
     });
   }
 
   // Test backpressure handling occasionally
-  if (Math.random() < 0.05) { // 5% of requests are large batches
+  if (Math.random() < 0.05) {
+    // 5% of requests are large batches
     const largeBatch = {
-      signals: Array(100).fill().map((_, i) => ({
-        tenantId: tenantId,
-        type: `burst-${i}`,
-        value: Math.random(),
-        source: 'k6-burst-test',
-        ts: new Date().toISOString(),
-        purpose: 'investigation'
-      }))
+      signals: Array(100)
+        .fill()
+        .map((_, i) => ({
+          tenantId: tenantId,
+          type: `burst-${i}`,
+          value: Math.random(),
+          source: 'k6-burst-test',
+          ts: new Date().toISOString(),
+          purpose: 'investigation',
+        })),
     };
 
     const burstParams = {
       ...params,
       headers: {
         ...params.headers,
-        'x-idempotency-key': `burst-${Date.now()}-${Math.random().toString(36)}`
+        'x-idempotency-key': `burst-${Date.now()}-${Math.random().toString(36)}`,
       },
-      tags: { 
+      tags: {
         operation: 'ingest_burst',
-        batch_size: 100
-      }
+        batch_size: 100,
+      },
     };
 
-    const burstResponse = http.post(`${BASE_URL}/ingest/stream`, JSON.stringify(largeBatch), burstParams);
-    
+    const burstResponse = http.post(
+      `${BASE_URL}/ingest/stream`,
+      JSON.stringify(largeBatch),
+      burstParams,
+    );
+
     check(burstResponse, {
-      'burst handled or backpressure applied': (r) => r.status === 202 || r.status === 429,
-      'backpressure has retry-after': (r) => r.status !== 429 || r.headers['retry-after'] !== undefined
+      'burst handled or backpressure applied': (r) =>
+        r.status === 202 || r.status === 429,
+      'backpressure has retry-after': (r) =>
+        r.status !== 429 || r.headers['retry-after'] !== undefined,
     });
   }
 
@@ -119,7 +140,7 @@ export default function() {
 export function handleSummary(data) {
   return {
     'ingest-load-test-summary.json': JSON.stringify(data, null, 2),
-    'ingest-load-test-summary.html': htmlReport(data)
+    'ingest-load-test-summary.html': htmlReport(data),
   };
 }
 
@@ -127,8 +148,8 @@ function htmlReport(data) {
   const passed = data.metrics.checks.values.passes;
   const failed = data.metrics.checks.values.fails;
   const total = passed + failed;
-  const passRate = (passed / total * 100).toFixed(2);
-  
+  const passRate = ((passed / total) * 100).toFixed(2);
+
   const avgDuration = data.metrics.http_req_duration.values.avg.toFixed(2);
   const p95Duration = data.metrics.http_req_duration.values['p(95)'].toFixed(2);
   const requestRate = data.metrics.http_reqs.values.rate.toFixed(2);

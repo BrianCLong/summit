@@ -10,7 +10,13 @@ interface AlertRow {
 }
 
 const sample: AlertRow[] = [
-  { id: '1', entity: 'Entity 1', reason: 'matched name', severity: 5, status: 'OPEN' },
+  {
+    id: '1',
+    entity: 'Entity 1',
+    reason: 'matched name',
+    severity: 5,
+    status: 'OPEN',
+  },
 ];
 
 export default function AlertsPage() {

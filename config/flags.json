@@ -1,4 +1,7 @@
 [
-  { "key":"feature.remoteExecV2", "enabled": true,
-    "rules": [ { "if":"residency==='EU'", "then": false } ] }
+  {
+    "key": "feature.remoteExecV2",
+    "enabled": true,
+    "rules": [{ "if": "residency==='EU'", "then": false }]
+  }
 ]

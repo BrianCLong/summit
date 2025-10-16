@@ -15,7 +15,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   tenant,
   fallback: FallbackComponent,
 }) => {
-  const { isAuthenticated, loading, user, hasRole, hasTenantAccess } = useAuth();
+  const { isAuthenticated, loading, user, hasRole, hasTenantAccess } =
+    useAuth();
 
   // Show loading state
   if (loading) {
@@ -47,13 +48,17 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
             <div className="bg-red-100 rounded-full h-16 w-16 flex items-center justify-center mx-auto mb-4">
               <span className="text-red-600 text-2xl">⚠️</span>
             </div>
-            <h2 className="text-2xl font-bold text-slate-900 mb-2">Access Denied</h2>
+            <h2 className="text-2xl font-bold text-slate-900 mb-2">
+              Access Denied
+            </h2>
             <p className="text-slate-600 mb-4">
               You don't have the required role(s) to access this resource.
             </p>
             <p className="text-sm text-slate-500">
               Required roles:{' '}
-              <code className="bg-slate-100 px-1 py-0.5 rounded text-sm">{roles.join(', ')}</code>
+              <code className="bg-slate-100 px-1 py-0.5 rounded text-sm">
+                {roles.join(', ')}
+              </code>
               <br />
               Your current roles: {user.roles.join(', ') || 'None'}
             </p>
@@ -74,10 +79,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           <div className="bg-yellow-100 rounded-full h-16 w-16 flex items-center justify-center mx-auto mb-4">
             <span className="text-yellow-600 text-2xl">🏢</span>
           </div>
-          <h2 className="text-2xl font-bold text-slate-900 mb-2">Tenant Access Required</h2>
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">
+            Tenant Access Required
+          </h2>
           <p className="text-slate-600 mb-4">
             You don't have access to tenant{' '}
-            <code className="bg-slate-100 px-1 py-0.5 rounded text-sm">{tenant}</code>.
+            <code className="bg-slate-100 px-1 py-0.5 rounded text-sm">
+              {tenant}
+            </code>
+            .
           </p>
           <p className="text-sm text-slate-500">
             Your available tenants: {user.tenants?.join(', ') || 'None'}

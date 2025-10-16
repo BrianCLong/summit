@@ -6,7 +6,7 @@ body:
     attributes: { label: Severity (SEV0–SEV3) }
   - type: textarea
     id: impact
-    attributes: { label: Impact, description: "Users, duration, scope" }
+    attributes: { label: Impact, description: 'Users, duration, scope' }
   - type: textarea
     id: timeline
     attributes: { label: Timeline of events }

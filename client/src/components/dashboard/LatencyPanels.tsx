@@ -1,7 +1,14 @@
 import React from 'react';
 import { useAppSelector } from '../../store/index.ts';
 import { Card, CardContent, Stack, Typography, Skeleton } from '@mui/material';
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
+import {
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+} from 'recharts';
 import { useSafeQuery } from '../../hooks/useSafeQuery';
 
 export default function LatencyPanels() {
@@ -11,7 +18,9 @@ export default function LatencyPanels() {
     mock: { valueMs: 120.4 },
     deps: [tenant, status, operation],
   });
-  const { data: trend, loading: loadingTrend } = useSafeQuery<{ ts: number; ms: number }[]>({
+  const { data: trend, loading: loadingTrend } = useSafeQuery<
+    { ts: number; ms: number }[]
+  >({
     queryKey: `p95_trend_${tenant}_${status}`,
     mock: Array.from({ length: 20 }).map((_, i) => ({
       ts: Date.now() - (20 - i) * 60000,
@@ -45,9 +54,14 @@ export default function LatencyPanels() {
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={trend} aria-label="p95 trend">
-                  <XAxis dataKey="ts" tickFormatter={(v) => new Date(v).toLocaleTimeString()} />
+                  <XAxis
+                    dataKey="ts"
+                    tickFormatter={(v) => new Date(v).toLocaleTimeString()}
+                  />
                   <YAxis unit=" ms" />
-                  <Tooltip labelFormatter={(v) => new Date(Number(v)).toLocaleString()} />
+                  <Tooltip
+                    labelFormatter={(v) => new Date(Number(v)).toLocaleString()}
+                  />
                   <Line
                     type="monotone"
                     dataKey="ms"

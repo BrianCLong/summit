@@ -5,9 +5,19 @@ import { useSafeQuery } from '../../hooks/useSafeQuery';
 
 export default function IOCDetail() {
   const { id } = useParams();
-  const { data } = useSafeQuery<{ id: string; type: string; value: string; lastSeen: string }>({
+  const { data } = useSafeQuery<{
+    id: string;
+    type: string;
+    value: string;
+    lastSeen: string;
+  }>({
     queryKey: `ioc_${id}`,
-    mock: { id: id || 'ioc1', type: 'ip', value: '1.2.3.4', lastSeen: new Date().toISOString() },
+    mock: {
+      id: id || 'ioc1',
+      type: 'ip',
+      value: '1.2.3.4',
+      lastSeen: new Date().toISOString(),
+    },
     deps: [id],
   });
   return (

@@ -160,7 +160,7 @@
       "permissions": ["dashboards:read", "datasources:read"]
     },
     "maestro-admin": {
-      "name": "maestro-admin", 
+      "name": "maestro-admin",
       "role": "Admin",
       "permissions": ["dashboards:write", "datasources:write", "users:read"]
     }

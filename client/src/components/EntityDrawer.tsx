@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from 'react';
 import {
   Box,
   Button,
@@ -8,10 +8,10 @@ import {
   Stack,
   TextField,
   Typography,
-} from "@mui/material";
-import { gql, useMutation, useQuery, useSubscription } from "@apollo/client";
-import EditIcon from "@mui/icons-material/Edit";
-import CloseIcon from "@mui/icons-material/Close";
+} from '@mui/material';
+import { gql, useMutation, useQuery, useSubscription } from '@apollo/client';
+import EditIcon from '@mui/icons-material/Edit';
+import CloseIcon from '@mui/icons-material/Close';
 
 const GET_ENTITY = gql`
   query GetEntity($id: ID!) {
@@ -88,16 +88,16 @@ function DiffRow({
       </Typography>
       <Typography
         variant="caption"
-        color={changed ? "error.main" : "text.secondary"}
-        sx={{ textDecoration: changed ? "line-through" : "none" }}
+        color={changed ? 'error.main' : 'text.secondary'}
+        sx={{ textDecoration: changed ? 'line-through' : 'none' }}
       >
-        {oldValue || "<empty>"}
+        {oldValue || '<empty>'}
       </Typography>
       <Typography
         variant="caption"
-        color={changed ? "success.main" : "text.secondary"}
+        color={changed ? 'success.main' : 'text.secondary'}
       >
-        {newValue || "<empty>"}
+        {newValue || '<empty>'}
       </Typography>
     </Box>
   );
@@ -118,16 +118,16 @@ export default function EntityDrawer({
   const [entity, setEntity] = useState<Entity | null>(null);
   const [prevEntity, setPrevEntity] = useState<Entity | null>(null);
   const [editMode, setEditMode] = useState(false);
-  const [formValues, setFormValues] = useState({ label: "", description: "" });
+  const [formValues, setFormValues] = useState({ label: '', description: '' });
   const [tags, setTags] = useState<string[]>([]);
-  const [newTag, setNewTag] = useState("");
+  const [newTag, setNewTag] = useState('');
 
   useEffect(() => {
     if (data?.entity) {
       setEntity(data.entity);
       setFormValues({
         label: data.entity.label,
-        description: data.entity.description || "",
+        description: data.entity.description || '',
       });
       setTags(data.entity.properties?.tags || []);
     }
@@ -140,7 +140,7 @@ export default function EntityDrawer({
       setEntity(updated);
       setFormValues({
         label: updated.label,
-        description: updated.description || "",
+        description: updated.description || '',
       });
       setTags(updated.properties?.tags || []);
     }
@@ -166,7 +166,7 @@ export default function EntityDrawer({
     const t = newTag.trim();
     if (t && !tags.includes(t)) {
       setTags([...tags, t]);
-      setNewTag("");
+      setNewTag('');
     }
   };
 
@@ -184,13 +184,13 @@ export default function EntityDrawer({
       />
       <DiffRow
         label="Description"
-        oldValue={prevEntity.description || ""}
-        newValue={entity?.description || ""}
+        oldValue={prevEntity.description || ''}
+        newValue={entity?.description || ''}
       />
       <DiffRow
         label="Tags"
-        oldValue={(prevEntity.properties?.tags || []).join(", ")}
-        newValue={tags.join(", ")}
+        oldValue={(prevEntity.properties?.tags || []).join(', ')}
+        newValue={tags.join(', ')}
       />
     </Box>
   );
@@ -200,7 +200,7 @@ export default function EntityDrawer({
       anchor="right"
       open={open}
       onClose={onClose}
-      sx={{ "& .MuiDrawer-paper": { width: 400, p: 2 } }}
+      sx={{ '& .MuiDrawer-paper': { width: 400, p: 2 } }}
     >
       <Box
         display="flex"
@@ -269,7 +269,7 @@ export default function EntityDrawer({
                 value={newTag}
                 onChange={(e) => setNewTag(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter") {
+                  if (e.key === 'Enter') {
                     e.preventDefault();
                     handleTagAdd();
                   }
@@ -282,7 +282,7 @@ export default function EntityDrawer({
           <Button
             variant="contained"
             onClick={handleSave}
-            sx={{ alignSelf: "flex-start" }}
+            sx={{ alignSelf: 'flex-start' }}
           >
             Save
           </Button>

@@ -3,3 +3,12 @@ build/
 node_modules/
 coverage/
 .playwright/
+.venv/
+venv/
+**/generated/**
+v4/archive/**
+**/.next/**
+**/.cache/**
+**/.vite/**
+tools/testing/flaky-detector.ts
+**/v24_modules/**

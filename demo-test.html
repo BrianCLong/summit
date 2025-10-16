@@ -1,159 +1,275 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
+  <head>
     <title>IntelGraph Platform Live Demo ✅</title>
     <style>
-        body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
-        .container { background: white; padding: 40px; border-radius: 8px; max-width: 1000px; margin: 0 auto; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .status { color: #28a745; font-size: 28px; font-weight: bold; text-align: center; margin: 20px 0; }
-        .section { margin: 30px 0; padding: 25px; border-left: 4px solid #007bff; background: #f8f9fa; }
-        .service { display: inline-block; margin: 8px; padding: 12px 16px; background: #28a745; color: white; border-radius: 6px; font-weight: bold; }
-        .feature { margin: 15px 0; padding: 15px; background: #e8f5e8; border-radius: 8px; border-left: 4px solid #28a745; }
-        .command { background: #2d3748; color: #e2e8f0; padding: 20px; border-radius: 8px; margin: 15px 0; font-family: monospace; overflow-x: auto; }
-        .achievement { color: #28a745; font-weight: bold; }
-        .demo-ready { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 12px; text-align: center; margin: 30px 0; }
-        ul { list-style: none; padding: 0; }
-        li { margin: 8px 0; padding: 8px; background: #e8f5e8; border-radius: 4px; }
-        li::before { content: "✅ "; }
-        .test-results { background: #d4edda; border: 1px solid #c3e6cb; padding: 20px; border-radius: 8px; margin: 20px 0; }
-        .live-status { animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+      body {
+        font-family: Arial, sans-serif;
+        margin: 40px;
+        background: #f5f5f5;
+      }
+      .container {
+        background: white;
+        padding: 40px;
+        border-radius: 8px;
+        max-width: 1000px;
+        margin: 0 auto;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      }
+      .status {
+        color: #28a745;
+        font-size: 28px;
+        font-weight: bold;
+        text-align: center;
+        margin: 20px 0;
+      }
+      .section {
+        margin: 30px 0;
+        padding: 25px;
+        border-left: 4px solid #007bff;
+        background: #f8f9fa;
+      }
+      .service {
+        display: inline-block;
+        margin: 8px;
+        padding: 12px 16px;
+        background: #28a745;
+        color: white;
+        border-radius: 6px;
+        font-weight: bold;
+      }
+      .feature {
+        margin: 15px 0;
+        padding: 15px;
+        background: #e8f5e8;
+        border-radius: 8px;
+        border-left: 4px solid #28a745;
+      }
+      .command {
+        background: #2d3748;
+        color: #e2e8f0;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 15px 0;
+        font-family: monospace;
+        overflow-x: auto;
+      }
+      .achievement {
+        color: #28a745;
+        font-weight: bold;
+      }
+      .demo-ready {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 12px;
+        text-align: center;
+        margin: 30px 0;
+      }
+      ul {
+        list-style: none;
+        padding: 0;
+      }
+      li {
+        margin: 8px 0;
+        padding: 8px;
+        background: #e8f5e8;
+        border-radius: 4px;
+      }
+      li::before {
+        content: '✅ ';
+      }
+      .test-results {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        padding: 20px;
+        border-radius: 8px;
+        margin: 20px 0;
+      }
+      .live-status {
+        animation: pulse 2s infinite;
+      }
+      @keyframes pulse {
+        0% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.7;
+        }
+        100% {
+          opacity: 1;
+        }
+      }
     </style>
-</head>
-<body>
+  </head>
+  <body>
     <div class="container">
-        <div class="demo-ready">
-            <h1>🚀 IntelGraph Platform - LIVE DEMONSTRATION</h1>
-            <div class="status live-status">✅ ALL SYSTEMS OPERATIONAL</div>
-            <p style="font-size: 20px; margin: 20px 0;">Production-Ready Intelligence Analysis Platform</p>
+      <div class="demo-ready">
+        <h1>🚀 IntelGraph Platform - LIVE DEMONSTRATION</h1>
+        <div class="status live-status">✅ ALL SYSTEMS OPERATIONAL</div>
+        <p style="font-size: 20px; margin: 20px 0">
+          Production-Ready Intelligence Analysis Platform
+        </p>
+      </div>
+
+      <div class="section">
+        <h2>🔥 LIVE SYSTEM STATUS</h2>
+        <div class="test-results">
+          <h3>Real-Time Infrastructure Tests - PASSING ✅</h3>
+          <div class="feature">
+            <strong>Neo4j Graph Database:</strong>
+            <span class="service">HEALTHY</span>
+            <code>HTTP/1.1 200 OK - localhost:7474</code>
+          </div>
+          <div class="feature">
+            <strong>PostgreSQL Database:</strong>
+            <span class="service">CONNECTED</span>
+            <code>PostgreSQL Connected - localhost:5432</code>
+          </div>
+          <div class="feature">
+            <strong>Redis Cache:</strong>
+            <span class="service">RESPONDING</span>
+            <code>PONG - localhost:6379</code>
+          </div>
         </div>
-        
-        <div class="section">
-            <h2>🔥 LIVE SYSTEM STATUS</h2>
-            <div class="test-results">
-                <h3>Real-Time Infrastructure Tests - PASSING ✅</h3>
-                <div class="feature">
-                    <strong>Neo4j Graph Database:</strong> 
-                    <span class="service">HEALTHY</span>
-                    <code>HTTP/1.1 200 OK - localhost:7474</code>
-                </div>
-                <div class="feature">
-                    <strong>PostgreSQL Database:</strong> 
-                    <span class="service">CONNECTED</span>
-                    <code>PostgreSQL Connected - localhost:5432</code>
-                </div>
-                <div class="feature">
-                    <strong>Redis Cache:</strong> 
-                    <span class="service">RESPONDING</span>
-                    <code>PONG - localhost:6379</code>
-                </div>
-            </div>
+      </div>
+
+      <div class="section">
+        <h2>🎯 Production Features ACTIVE</h2>
+        <div class="feature">
+          <strong>✅ Enterprise Security:</strong> JWT authentication, CORS
+          protection, rate limiting, PBAC/OPA policies
         </div>
-
-        <div class="section">
-            <h2>🎯 Production Features ACTIVE</h2>
-            <div class="feature">
-                <strong>✅ Enterprise Security:</strong> JWT authentication, CORS protection, rate limiting, PBAC/OPA policies
-            </div>
-            <div class="feature">
-                <strong>✅ Scalable Architecture:</strong> Minimal hardware deployment + optional AI/Kafka services via Docker profiles
-            </div>
-            <div class="feature">
-                <strong>✅ Database Migrations:</strong> Orchestrated Postgres + Neo4j schema management with error handling
-            </div>
-            <div class="feature">
-                <strong>✅ GraphQL API:</strong> Cleaned resolvers (800+ duplicate lines removed), TypeScript + ESM modules
-            </div>
-            <div class="feature">
-                <strong>✅ Kubernetes Ready:</strong> Helm charts aligned with Docker Compose environment
-            </div>
+        <div class="feature">
+          <strong>✅ Scalable Architecture:</strong> Minimal hardware deployment
+          + optional AI/Kafka services via Docker profiles
         </div>
+        <div class="feature">
+          <strong>✅ Database Migrations:</strong> Orchestrated Postgres + Neo4j
+          schema management with error handling
+        </div>
+        <div class="feature">
+          <strong>✅ GraphQL API:</strong> Cleaned resolvers (800+ duplicate
+          lines removed), TypeScript + ESM modules
+        </div>
+        <div class="feature">
+          <strong>✅ Kubernetes Ready:</strong> Helm charts aligned with Docker
+          Compose environment
+        </div>
+      </div>
 
-        <div class="section">
-            <h2>🚀 Deployment Commands - READY TO USE</h2>
-            
-            <h3>Development & Testing</h3>
-            <div class="command">
-# Quick start - minimal hardware requirements
-make bootstrap && make up
+      <div class="section">
+        <h2>🚀 Deployment Commands - READY TO USE</h2>
 
-# Verify core services are healthy  
-curl http://localhost:7474  # Neo4j browser
-docker exec postgres psql -U intelgraph -d intelgraph -c "SELECT 1;"
-docker exec redis redis-cli ping
-            </div>
-
-            <h3>Production Deployment</h3>
-            <div class="command">
-# Production with enterprise security
-NODE_ENV=production \
-JWT_SECRET="your-production-jwt-secret-32-chars-minimum" \
-JWT_REFRESH_SECRET="your-production-refresh-secret-different" \
-ALLOWED_ORIGINS="https://your-domain.com" \
-make up
-            </div>
-
-            <h3>Kubernetes Production</h3>
-            <div class="command">
-# Deploy to Kubernetes with Helm
-helm upgrade --install intelgraph ./helm/intelgraph \
-  --namespace intelgraph --create-namespace \
-  --set env.NODE_ENV=production \
-  --set-string secrets.jwt.secret="your-jwt-secret" \
-  --set-string secrets.jwt.refreshSecret="your-refresh-secret"
-
-# Verify deployment
-helm test intelgraph -n intelgraph
-kubectl get pods -n intelgraph
-            </div>
+        <h3>Development & Testing</h3>
+        <div class="command">
+          # Quick start - minimal hardware requirements make bootstrap && make
+          up # Verify core services are healthy curl http://localhost:7474 #
+          Neo4j browser docker exec postgres psql -U intelgraph -d intelgraph -c
+          "SELECT 1;" docker exec redis redis-cli ping
         </div>
 
-        <div class="section">
-            <h2>📊 All 10 Critical Tasks COMPLETED</h2>
-            <ul>
-                <li><strong>Repo sync & build sanity check:</strong> Docker infrastructure operational</li>
-                <li><strong>Fixed P0: GraphQL resolver merge artifacts:</strong> 800+ duplicate lines removed</li>
-                <li><strong>Fixed P0: Standardized GraphQL modules:</strong> TypeScript + ESM unified</li>
-                <li><strong>Fixed P0: GraphQL schema/codegen:</strong> Build pipeline working</li>
-                <li><strong>Fixed database migration ordering:</strong> Postgres + Neo4j orchestration</li>
-                <li><strong>Golden-path E2E tests:</strong> Investigation → Entities → Relationships → Copilot → Results</li>
-                <li><strong>AI/Kafka optional by default:</strong> Docker Compose profiles implemented</li>
-                <li><strong>Production security policies:</strong> Enterprise-grade authentication & authorization</li>
-                <li><strong>Helm values aligned:</strong> Kubernetes deployment ready</li>
-                <li><strong>Documentation updated:</strong> Concrete deployment commands provided</li>
-            </ul>
+        <h3>Production Deployment</h3>
+        <div class="command">
+          # Production with enterprise security NODE_ENV=production \
+          JWT_SECRET="your-production-jwt-secret-32-chars-minimum" \
+          JWT_REFRESH_SECRET="your-production-refresh-secret-different" \
+          ALLOWED_ORIGINS="https://your-domain.com" \ make up
         </div>
 
-        <div class="demo-ready">
-            <h2>🏆 DEMONSTRATION COMPLETE</h2>
-            <p style="font-size: 24px; margin: 20px 0;">
-                <strong>IntelGraph Platform is Production-Ready!</strong>
-            </p>
-            <p style="font-size: 18px;">
-                ✅ Core infrastructure running and healthy<br>
-                ✅ All critical P0 blockers resolved<br>
-                ✅ Enterprise security implemented<br>
-                ✅ Scalable deployment architecture<br>
-                ✅ Ready for immediate deployment
-            </p>
-            
-            <div style="margin-top: 30px; padding: 20px; background: rgba(255,255,255,0.1); border-radius: 8px;">
-                <h3>🎯 Golden Path Workflow Active:</h3>
-                <p style="font-size: 16px; margin: 10px 0;">
-                    Investigation → Entities → Relationships → Copilot → Results
-                </p>
-            </div>
+        <h3>Kubernetes Production</h3>
+        <div class="command">
+          # Deploy to Kubernetes with Helm helm upgrade --install intelgraph
+          ./helm/intelgraph \ --namespace intelgraph --create-namespace \ --set
+          env.NODE_ENV=production \ --set-string
+          secrets.jwt.secret="your-jwt-secret" \ --set-string
+          secrets.jwt.refreshSecret="your-refresh-secret" # Verify deployment
+          helm test intelgraph -n intelgraph kubectl get pods -n intelgraph
         </div>
+      </div>
+
+      <div class="section">
+        <h2>📊 All 10 Critical Tasks COMPLETED</h2>
+        <ul>
+          <li>
+            <strong>Repo sync & build sanity check:</strong> Docker
+            infrastructure operational
+          </li>
+          <li>
+            <strong>Fixed P0: GraphQL resolver merge artifacts:</strong> 800+
+            duplicate lines removed
+          </li>
+          <li>
+            <strong>Fixed P0: Standardized GraphQL modules:</strong> TypeScript
+            + ESM unified
+          </li>
+          <li>
+            <strong>Fixed P0: GraphQL schema/codegen:</strong> Build pipeline
+            working
+          </li>
+          <li>
+            <strong>Fixed database migration ordering:</strong> Postgres + Neo4j
+            orchestration
+          </li>
+          <li>
+            <strong>Golden-path E2E tests:</strong> Investigation → Entities →
+            Relationships → Copilot → Results
+          </li>
+          <li>
+            <strong>AI/Kafka optional by default:</strong> Docker Compose
+            profiles implemented
+          </li>
+          <li>
+            <strong>Production security policies:</strong> Enterprise-grade
+            authentication & authorization
+          </li>
+          <li>
+            <strong>Helm values aligned:</strong> Kubernetes deployment ready
+          </li>
+          <li>
+            <strong>Documentation updated:</strong> Concrete deployment commands
+            provided
+          </li>
+        </ul>
+      </div>
+
+      <div class="demo-ready">
+        <h2>🏆 DEMONSTRATION COMPLETE</h2>
+        <p style="font-size: 24px; margin: 20px 0">
+          <strong>IntelGraph Platform is Production-Ready!</strong>
+        </p>
+        <p style="font-size: 18px">
+          ✅ Core infrastructure running and healthy<br />
+          ✅ All critical P0 blockers resolved<br />
+          ✅ Enterprise security implemented<br />
+          ✅ Scalable deployment architecture<br />
+          ✅ Ready for immediate deployment
+        </p>
+
+        <div
+          style="
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+          "
+        >
+          <h3>🎯 Golden Path Workflow Active:</h3>
+          <p style="font-size: 16px; margin: 10px 0">
+            Investigation → Entities → Relationships → Copilot → Results
+          </p>
+        </div>
+      </div>
     </div>
 
     <script>
-        // Auto-refresh status indicators
-        setInterval(() => {
-            const statusElements = document.querySelectorAll('.live-status');
-            statusElements.forEach(el => {
-                el.style.opacity = el.style.opacity === '0.7' ? '1' : '0.7';
-            });
-        }, 1000);
+      // Auto-refresh status indicators
+      setInterval(() => {
+        const statusElements = document.querySelectorAll('.live-status');
+        statusElements.forEach((el) => {
+          el.style.opacity = el.style.opacity === '0.7' ? '1' : '0.7';
+        });
+      }, 1000);
     </script>
-</body>
+  </body>
 </html>

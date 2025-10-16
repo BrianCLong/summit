@@ -43,23 +43,23 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          
+
           # Priority 1: Check for .nvmrc
           if [[ -f .nvmrc ]]; then
             v=$(tr -d 'v' < .nvmrc | xargs)
             echo "✅ Detected from .nvmrc: $v"
-          
+
           # Priority 2: Check for package.json engines.node
           elif command -v jq >/dev/null 2>&1 && jq -e '.engines.node' package.json >/dev/null 2>&1; then
             v=$(jq -r '.engines.node' package.json | sed 's/[^0-9.]*//' | sed 's/\.x$//' | xargs)
             echo "✅ Detected from package.json engines: $v"
-          
+
           # Priority 3: Fallback to Node 20 (LTS)
           else
             v=20
             echo "⚠️  No .nvmrc or engines.node found, using fallback: Node $v"
           fi
-          
+
           echo "version=$v" >> "$GITHUB_OUTPUT"
           echo "🚀 Will use Node.js version: $v"
 

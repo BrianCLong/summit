@@ -46,9 +46,7 @@ export function useRbac(
 
 function getRolePermissions(role: string): Permission[] {
   const rolePermissions: Record<string, Permission[]> = {
-    admin: [
-      { resource: '*', action: '*', effect: 'allow' },
-    ],
+    admin: [{ resource: '*', action: '*', effect: 'allow' }],
     analyst: [
       { resource: 'investigations', action: 'read', effect: 'allow' },
       { resource: 'investigations', action: 'write', effect: 'allow' },

@@ -28,7 +28,10 @@ export default function AgentEditDialog({
       aria-labelledby="agent-edit-title"
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
     >
-      <div ref={root} className="w-[min(720px,95vw)] rounded-2xl bg-white p-4 shadow-xl">
+      <div
+        ref={root}
+        className="w-[min(720px,95vw)] rounded-2xl bg-white p-4 shadow-xl"
+      >
         <h2 id="agent-edit-title" className="text-lg font-semibold">
           Edit & approve step
         </h2>
@@ -43,7 +46,9 @@ export default function AgentEditDialog({
             />
           </div>
           <div>
-            <div className="mb-1 text-sm text-gray-600">Diff (before → after)</div>
+            <div className="mb-1 text-sm text-gray-600">
+              Diff (before → after)
+            </div>
             <DiffView before={original} after={draft} />
           </div>
         </div>

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable, Tuple
 
 import numpy as np
 
@@ -33,7 +33,7 @@ class LogisticTeacher(LogisticModel):
     """Teacher with fixed parameters."""
 
     @classmethod
-    def from_weights(cls, weights: Iterable[float], bias: float) -> "LogisticTeacher":
+    def from_weights(cls, weights: Iterable[float], bias: float) -> LogisticTeacher:
         return cls(weights=np.asarray(list(weights), dtype=np.float64), bias=float(bias))
 
 
@@ -41,7 +41,7 @@ class LogisticStudent(LogisticModel):
     """Student model with gradient updates."""
 
     @classmethod
-    def initialize(cls, n_features: int, seed: int | None = None) -> "LogisticStudent":
+    def initialize(cls, n_features: int, seed: int | None = None) -> LogisticStudent:
         rng = np.random.default_rng(seed)
         weights = rng.normal(scale=0.1, size=n_features)
         bias = float(rng.normal(scale=0.1))
@@ -52,7 +52,7 @@ class LogisticStudent(LogisticModel):
         features: np.ndarray,
         targets: np.ndarray,
         learning_rate: float,
-    ) -> Tuple[float, float]:
+    ) -> tuple[float, float]:
         probs = self.predict_proba(features)
         gradient = probs - targets
         grad_w = features.T @ gradient / features.shape[0]

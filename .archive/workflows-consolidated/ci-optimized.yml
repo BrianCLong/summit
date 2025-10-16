@@ -336,7 +336,14 @@ jobs:
   quality-gate:
     name: ✅ Quality Gate Summary
     needs:
-      [detect-changes, security-suite, test-backend, test-frontend, test-python, integration-tests]
+      [
+        detect-changes,
+        security-suite,
+        test-backend,
+        test-frontend,
+        test-python,
+        integration-tests,
+      ]
     if: always()
     runs-on: ubuntu-latest
 

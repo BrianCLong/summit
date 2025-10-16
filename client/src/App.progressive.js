@@ -1,11 +1,21 @@
 import React, { useEffect, useMemo } from 'react';
 import { Provider } from 'react-redux';
-import { ThemeProvider, CssBaseline, Container, Box, Card, CardContent, Typography, Button, Grid } from '@mui/material';
+import {
+  ThemeProvider,
+  CssBaseline,
+  Container,
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Button,
+  Grid,
+} from '@mui/material';
 import { getIntelGraphTheme } from './theme/intelgraphTheme';
 import { store } from './store';
 import { useSelector } from 'react-redux';
 
-// Simple Dashboard with MUI components  
+// Simple Dashboard with MUI components
 function Dashboard() {
   return (
     <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
@@ -50,7 +60,9 @@ function Dashboard() {
               <Typography variant="h5" component="h2" gutterBottom>
                 🎯 Platform Features
               </Typography>
-              <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}>
+              <Box
+                sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 1 }}
+              >
                 <div>• Graph Analytics</div>
                 <div>• AI Copilot</div>
                 <div>• Collaboration</div>
@@ -95,8 +107,10 @@ function Dashboard() {
                 🔧 Debug Information
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Started: {new Date().toLocaleString()}<br/>
-                URL: {window.location.href}<br/>
+                Started: {new Date().toLocaleString()}
+                <br />
+                URL: {window.location.href}
+                <br />
                 Build: Progressive v1.0
               </Typography>
             </CardContent>
@@ -111,7 +125,7 @@ function Dashboard() {
 function ThemedAppShell({ children }) {
   const mode = useSelector((state) => state.ui?.theme || 'light');
   const theme = useMemo(() => getIntelGraphTheme(mode), [mode]);
-  
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />

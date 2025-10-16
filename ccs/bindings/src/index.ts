@@ -49,7 +49,9 @@ function stratify(plan: StratificationPlan, participant: Participant): string {
     .map((key) => {
       const value = participant.attributes?.[key];
       if (value === undefined) {
-        throw new Error(`participant ${participant.id} missing attribute ${key}`);
+        throw new Error(
+          `participant ${participant.id} missing attribute ${key}`,
+        );
       }
       return `${key}=${value}`;
     })
@@ -71,7 +73,12 @@ function decodeHex(input: string): Uint8Array {
   return out;
 }
 
-function verifyProof(publicKey: string, message: Uint8Array, proof: string, randomness: string): void {
+function verifyProof(
+  publicKey: string,
+  message: Uint8Array,
+  proof: string,
+  randomness: string,
+): void {
   const key = Uint8Array.from(Buffer.from(publicKey, 'base64'));
   if (key.length !== nacl.sign.publicKeyLength) {
     throw new Error('invalid public key size');
@@ -80,13 +87,18 @@ function verifyProof(publicKey: string, message: Uint8Array, proof: string, rand
   if (!nacl.sign.detached.verify(message, proofBytes, key)) {
     throw new Error('invalid proof');
   }
-  const digest = createHash('sha256').update(Buffer.from(proofBytes)).digest('hex');
+  const digest = createHash('sha256')
+    .update(Buffer.from(proofBytes))
+    .digest('hex');
   if (digest !== randomness) {
     throw new Error('randomness mismatch');
   }
 }
 
-export function verifyCertificate(participants: Participant[], certificate: SamplingCertificate): void {
+export function verifyCertificate(
+  participants: Participant[],
+  certificate: SamplingCertificate,
+): void {
   const plan = certificate.plan;
   if (!plan?.keys?.length) {
     throw new Error('invalid stratification plan');
@@ -121,7 +133,12 @@ export function verifyCertificate(participants: Participant[], certificate: Samp
       continue;
     }
     const bucket = buckets.get(entry.stratum) ?? [];
-    bucket.push({ id: entry.id, stratum: entry.stratum, randomness: entry.randomness, proof: entry.proof });
+    bucket.push({
+      id: entry.id,
+      stratum: entry.stratum,
+      randomness: entry.randomness,
+      proof: entry.proof,
+    });
     buckets.set(entry.stratum, bucket);
   }
 
@@ -159,7 +176,11 @@ export function verifyCertificate(participants: Participant[], certificate: Samp
   for (let i = 0; i < derived.length; i += 1) {
     const expected = derived[i];
     const actual = certificate.cohort[i];
-    if (expected.id !== actual.id || expected.stratum !== actual.stratum || expected.randomness !== actual.randomness) {
+    if (
+      expected.id !== actual.id ||
+      expected.stratum !== actual.stratum ||
+      expected.randomness !== actual.randomness
+    ) {
       throw new Error(`cohort mismatch at index ${i}`);
     }
   }

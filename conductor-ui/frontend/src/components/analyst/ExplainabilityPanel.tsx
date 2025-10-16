@@ -16,7 +16,7 @@ interface ExplainabilityPanelProps {
 
 export const ExplainabilityPanel: React.FC<ExplainabilityPanelProps> = ({
   policyOutcome,
-  queryContext
+  queryContext,
 }) => {
   const [expanded, setExpanded] = useState(false);
   const [explanation, setExplanation] = useState<string | null>(null);
@@ -35,8 +35,8 @@ export const ExplainabilityPanel: React.FC<ExplainabilityPanelProps> = ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           outcome,
-          context: queryContext
-        })
+          context: queryContext,
+        }),
       });
 
       const result = await response.json();
@@ -66,15 +66,25 @@ export const ExplainabilityPanel: React.FC<ExplainabilityPanelProps> = ({
         </button>
       </div>
 
-      <Alert className={isBlocked ? 'border-red-500 bg-red-50' : 'border-green-500 bg-green-50'}>
+      <Alert
+        className={
+          isBlocked
+            ? 'border-red-500 bg-red-50'
+            : 'border-green-500 bg-green-50'
+        }
+      >
         <AlertDescription>
           <div className="space-y-2">
             <div className="font-medium">{policyOutcome.reason}</div>
 
             {isBlocked && policyOutcome.remediation && (
               <div className="mt-2 p-2 bg-amber-50 border border-amber-200 rounded">
-                <div className="font-semibold text-amber-800">How to proceed:</div>
-                <div className="text-sm text-amber-700">{policyOutcome.remediation}</div>
+                <div className="font-semibold text-amber-800">
+                  How to proceed:
+                </div>
+                <div className="text-sm text-amber-700">
+                  {policyOutcome.remediation}
+                </div>
               </div>
             )}
           </div>
@@ -84,16 +94,25 @@ export const ExplainabilityPanel: React.FC<ExplainabilityPanelProps> = ({
       {expanded && (
         <div className="mt-4 space-y-3">
           <div className="bg-gray-50 p-3 rounded">
-            <h4 className="font-semibold text-sm text-gray-700 mb-2">Rule Details</h4>
+            <h4 className="font-semibold text-sm text-gray-700 mb-2">
+              Rule Details
+            </h4>
             <div className="text-sm">
-              <div><strong>Rule ID:</strong> {policyOutcome.rule_id}</div>
-              <div><strong>Decision:</strong> {policyOutcome.decision.toUpperCase()}</div>
+              <div>
+                <strong>Rule ID:</strong> {policyOutcome.rule_id}
+              </div>
+              <div>
+                <strong>Decision:</strong>{' '}
+                {policyOutcome.decision.toUpperCase()}
+              </div>
             </div>
           </div>
 
           {policyOutcome.evidence && policyOutcome.evidence.length > 0 && (
             <div className="bg-gray-50 p-3 rounded">
-              <h4 className="font-semibold text-sm text-gray-700 mb-2">Evidence</h4>
+              <h4 className="font-semibold text-sm text-gray-700 mb-2">
+                Evidence
+              </h4>
               <ul className="text-sm list-disc list-inside space-y-1">
                 {policyOutcome.evidence.map((item, index) => (
                   <li key={index}>{item}</li>
@@ -104,7 +123,9 @@ export const ExplainabilityPanel: React.FC<ExplainabilityPanelProps> = ({
 
           {explanation && (
             <div className="bg-blue-50 p-3 rounded border border-blue-200">
-              <h4 className="font-semibold text-sm text-blue-800 mb-2">AI Explanation</h4>
+              <h4 className="font-semibold text-sm text-blue-800 mb-2">
+                AI Explanation
+              </h4>
               <div className="text-sm text-blue-700">{explanation}</div>
             </div>
           )}

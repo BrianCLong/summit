@@ -51,7 +51,10 @@ const slice = createSlice({
       state.sectionOrder.push(id);
       state.sections[id] = { id, title: action.payload, cardIds: [] };
     },
-    addCard(state, action: PayloadAction<{ sectionId: string; card: CodexCard }>) {
+    addCard(
+      state,
+      action: PayloadAction<{ sectionId: string; card: CodexCard }>,
+    ) {
       const { sectionId, card } = action.payload;
       state.cards[card.id] = card;
       state.sections[sectionId]?.cardIds.push(card.id);
@@ -71,7 +74,11 @@ const slice = createSlice({
     },
     setRedaction(
       state,
-      action: PayloadAction<{ cardId: string; fields: string[]; reason: string }>,
+      action: PayloadAction<{
+        cardId: string;
+        fields: string[];
+        reason: string;
+      }>,
     ) {
       const { cardId, fields, reason } = action.payload;
       const card = state.cards[cardId];

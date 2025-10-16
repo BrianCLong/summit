@@ -1,11 +1,11 @@
 /* eslint-disable indent */
-import React, { useEffect, useRef } from "react";
-import cytoscape, { ElementDefinition } from "cytoscape";
-import $ from "jquery";
-import { useDispatch, useSelector } from "react-redux";
-import { addNode, addEdge } from "../store/graphSlice";
-import { RootState } from "../store/types";
-import { io, Socket } from "socket.io-client";
+import React, { useEffect, useRef } from 'react';
+import cytoscape, { ElementDefinition } from 'cytoscape';
+import $ from 'jquery';
+import { useDispatch, useSelector } from 'react-redux';
+import { addNode, addEdge } from '../store/graphSlice';
+import { RootState } from '../store/types';
+import { io, Socket } from 'socket.io-client';
 
 /**
  * GraphCanvas mounts a Cytoscape instance and wires up
@@ -25,12 +25,12 @@ const GraphCanvas: React.FC = () => {
     const cy = cytoscape({
       container: containerRef.current,
       elements: [...graph.nodes, ...graph.edges] as ElementDefinition[],
-      style: [{ selector: "node", style: { label: "data(id)" } }],
-      layout: { name: "grid" },
+      style: [{ selector: 'node', style: { label: 'data(id)' } }],
+      layout: { name: 'grid' },
     });
 
     // jQuery wrapper for simple drag feedback
-    $(cy.container()).on("mouseup", "node", (evt) => {
+    $(cy.container()).on('mouseup', 'node', (evt) => {
       const n = evt.target;
       dispatch(
         addNode({
@@ -41,10 +41,10 @@ const GraphCanvas: React.FC = () => {
     });
 
     socketRef.current = io();
-    socketRef.current.on("graph:add-node", (n: ElementDefinition) =>
+    socketRef.current.on('graph:add-node', (n: ElementDefinition) =>
       dispatch(addNode(n)),
     );
-    socketRef.current.on("graph:add-edge", (e: ElementDefinition) =>
+    socketRef.current.on('graph:add-edge', (e: ElementDefinition) =>
       dispatch(addEdge(e)),
     );
 
@@ -54,7 +54,7 @@ const GraphCanvas: React.FC = () => {
     };
   }, [dispatch, graph.nodes, graph.edges]);
 
-  return <div ref={containerRef} style={{ width: "100%", height: "100%" }} />;
+  return <div ref={containerRef} style={{ width: '100%', height: '100%' }} />;
 };
 
 export default GraphCanvas;

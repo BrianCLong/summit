@@ -3,4 +3,3 @@ export async function syncScimUsers() {
   // Pull users/groups, map to roles/ABAC labels, and persist to DB.
   return { ok: true } as const;
 }
-

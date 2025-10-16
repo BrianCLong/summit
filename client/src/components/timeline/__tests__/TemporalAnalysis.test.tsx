@@ -59,7 +59,9 @@ describe('TemporalAnalysis', () => {
     const user = userEvent.setup();
     render(<TemporalAnalysis {...defaultProps} showClusters={true} />);
 
-    const clustersCheckbox = screen.getByRole('checkbox', { name: /clusters/i });
+    const clustersCheckbox = screen.getByRole('checkbox', {
+      name: /clusters/i,
+    });
     expect(clustersCheckbox).toBeChecked();
 
     await user.click(clustersCheckbox);
@@ -70,7 +72,9 @@ describe('TemporalAnalysis', () => {
     const user = userEvent.setup();
     render(<TemporalAnalysis {...defaultProps} showAnomalies={true} />);
 
-    const anomaliesCheckbox = screen.getByRole('checkbox', { name: /anomalies/i });
+    const anomaliesCheckbox = screen.getByRole('checkbox', {
+      name: /anomalies/i,
+    });
     expect(anomaliesCheckbox).toBeChecked();
 
     await user.click(anomaliesCheckbox);
@@ -118,7 +122,9 @@ describe('TemporalAnalysis', () => {
 
   it('calls event selection callback', () => {
     const onEventSelect = jest.fn();
-    render(<TemporalAnalysis {...defaultProps} onEventSelect={onEventSelect} />);
+    render(
+      <TemporalAnalysis {...defaultProps} onEventSelect={onEventSelect} />,
+    );
 
     const timelineViz = screen.getByTestId('timeline-visualization');
     fireEvent.click(timelineViz, { clientX: 300, clientY: 150 });
@@ -130,7 +136,12 @@ describe('TemporalAnalysis', () => {
   it('calls time range change callback', async () => {
     const onTimeRangeChange = jest.fn();
     const user = userEvent.setup();
-    render(<TemporalAnalysis {...defaultProps} onTimeRangeChange={onTimeRangeChange} />);
+    render(
+      <TemporalAnalysis
+        {...defaultProps}
+        onTimeRangeChange={onTimeRangeChange}
+      />,
+    );
 
     const timeRangeSelect = screen.getByDisplayValue('7d');
     await user.selectOptions(timeRangeSelect, '1d');
@@ -177,9 +188,13 @@ describe('TemporalAnalysis', () => {
   });
 
   it('applies custom className', () => {
-    render(<TemporalAnalysis {...defaultProps} className="custom-temporal-class" />);
+    render(
+      <TemporalAnalysis {...defaultProps} className="custom-temporal-class" />,
+    );
 
-    const container = screen.getByTestId('timeline-visualization').parentElement;
+    const container = screen.getByTestId(
+      'timeline-visualization',
+    ).parentElement;
     expect(container).toHaveClass('custom-temporal-class');
   });
 

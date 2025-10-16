@@ -8,14 +8,14 @@ used as the schema fields.
 """
 
 import csv
+from collections.abc import Iterator
 from pathlib import Path
-from typing import Dict, Iterator, List
 
 from .base import BaseSource
 
 
 class FileSource(BaseSource):
-    def discover(self) -> List[Dict[str, str]]:
+    def discover(self) -> list[dict[str, str]]:
         path = Path(self.config["path"]).expanduser().resolve()
         if not path.exists():
             raise FileNotFoundError(path)
@@ -27,12 +27,12 @@ class FileSource(BaseSource):
             }
         ]
 
-    def _infer_schema(self, path: Path) -> Dict[str, str]:
+    def _infer_schema(self, path: Path) -> dict[str, str]:
         with path.open("r", newline="") as f:
             reader = csv.DictReader(f)
             return {name: "string" for name in reader.fieldnames or []}
 
-    def read_full(self, stream: Dict[str, str]) -> Iterator[Dict[str, str]]:
+    def read_full(self, stream: dict[str, str]) -> Iterator[dict[str, str]]:
         path = Path(stream["path"])
         with path.open("r", newline="") as f:
             reader = csv.DictReader(f)

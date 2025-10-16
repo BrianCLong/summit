@@ -5,7 +5,6 @@ from __future__ import annotations
 import hashlib
 import json
 from dataclasses import dataclass
-from typing import Dict, List
 
 from .data import Dataset, Example, compute_rejection_digest
 from .filters import PolicyFilter
@@ -16,9 +15,9 @@ class ProofOfExclusion:
     """Proof that disallowed examples were excluded."""
 
     rejection_digest: str
-    excluded_ids: List[str]
+    excluded_ids: list[str]
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         return {
             "rejection_digest": self.rejection_digest,
             "excluded_ids": list(self.excluded_ids),
@@ -32,14 +31,14 @@ class AttestedTrainingManifest:
     dataset_digest: str
     allowed_digest: str
     rejection_digest: str
-    policy_metadata: List[Dict[str, str]]
+    policy_metadata: list[dict[str, str]]
     teacher_digest: str
     student_digest: str
     trainer: str
-    hyperparameters: Dict[str, float]
+    hyperparameters: dict[str, float]
     max_accuracy_drop: float
 
-    def to_dict(self) -> Dict[str, object]:
+    def to_dict(self) -> dict[str, object]:
         return {
             "dataset_digest": self.dataset_digest,
             "allowed_digest": self.allowed_digest,
@@ -53,22 +52,22 @@ class AttestedTrainingManifest:
         }
 
 
-def digest_model_parameters(weights: List[float], bias: float) -> str:
-    raw = json.dumps({"weights": weights, "bias": bias}, separators=(",", ":"), sort_keys=True).encode(
-        "utf-8"
-    )
+def digest_model_parameters(weights: list[float], bias: float) -> str:
+    raw = json.dumps(
+        {"weights": weights, "bias": bias}, separators=(",", ":"), sort_keys=True
+    ).encode("utf-8")
     return hashlib.sha256(raw).hexdigest()
 
 
 def build_manifest(
     dataset: Dataset,
-    allowed_examples: List[Example],
-    rejected_reasons: Dict[str, str],
-    policy_filters: List[PolicyFilter],
-    teacher_params: Dict[str, List[float] | float],
-    student_params: Dict[str, List[float] | float],
+    allowed_examples: list[Example],
+    rejected_reasons: dict[str, str],
+    policy_filters: list[PolicyFilter],
+    teacher_params: dict[str, list[float] | float],
+    student_params: dict[str, list[float] | float],
     trainer: str,
-    hyperparameters: Dict[str, float],
+    hyperparameters: dict[str, float],
     max_accuracy_drop: float,
 ) -> AttestedTrainingManifest:
     policy_metadata = [policy.describe() for policy in policy_filters]

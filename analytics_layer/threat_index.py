@@ -1,9 +1,9 @@
 """Real-time threat index calculator."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Deque, Dict, List, Tuple
 
 from .data_models import FusedSnapshot
 from .metrics import MetricBreakdown
@@ -14,7 +14,7 @@ class ThreatIndexState:
     timestamp: datetime
     value: float
     confidence: float
-    components: Dict[str, float]
+    components: dict[str, float]
 
 
 class RealTimeThreatIndexCalculator:
@@ -37,7 +37,7 @@ class RealTimeThreatIndexCalculator:
             "event_pressure": event_weight,
         }
         self._decay = decay
-        self._history: List[ThreatIndexState] = []
+        self._history: list[ThreatIndexState] = []
 
     def update(self, snapshot: FusedSnapshot, metrics: MetricBreakdown) -> ThreatIndexState:
         raw_components = self._weighted_components(metrics)
@@ -53,7 +53,7 @@ class RealTimeThreatIndexCalculator:
         self._history.append(state)
         return state
 
-    def _weighted_components(self, metrics: MetricBreakdown) -> Dict[str, float]:
+    def _weighted_components(self, metrics: MetricBreakdown) -> dict[str, float]:
         breakdown = metrics.as_dict()
         weighted = {
             key: max(-1.0, min(1.0, breakdown[key])) * weight
@@ -75,10 +75,10 @@ class RealTimeThreatIndexCalculator:
         return max(0.1, min(1.0, base_confidence + smoothing_bonus))
 
     @property
-    def history(self) -> List[ThreatIndexState]:
+    def history(self) -> list[ThreatIndexState]:
         return self._history
 
-    def summary(self) -> Dict[str, float]:
+    def summary(self) -> dict[str, float]:
         if not self._history:
             return {"current_value": 0.0, "confidence": 0.0}
         current = self._history[-1]

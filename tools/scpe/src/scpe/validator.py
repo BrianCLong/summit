@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any
 
 from .config import load_config, resolve_path
 from .errors import ConfigError, VerificationError
@@ -27,7 +27,7 @@ class Validator:
         self.config_path = config_path.resolve()
         self.config = load_config(self.config_path)
 
-    def run(self) -> Dict[str, Any]:
+    def run(self) -> dict[str, Any]:
         artifacts, checks = self._validate_artifacts()
         sbom_result = validate_sbom(
             self.config.get("sbom", {}),
@@ -51,14 +51,14 @@ class Validator:
             "checks": checks,
         }
 
-    def _validate_artifacts(self) -> Tuple[List[Dict[str, Any]], List[Dict[str, Any]]]:
+    def _validate_artifacts(self) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
         artifacts_spec = self.config.get("artifacts", [])
         if not artifacts_spec:
             raise ConfigError("Configuration must provide at least one artifact entry")
 
         coverage = {key: False for key in REQUIRED_TYPES}
-        results: List[Dict[str, Any]] = []
-        checks: List[Dict[str, Any]] = []
+        results: list[dict[str, Any]] = []
+        checks: list[dict[str, Any]] = []
 
         for artifact in artifacts_spec:
             result, check = self._validate_single_artifact(artifact)
@@ -77,7 +77,9 @@ class Validator:
 
         return results, checks
 
-    def _validate_single_artifact(self, artifact: Dict[str, Any]) -> Tuple[Dict[str, Any], Dict[str, Any]]:
+    def _validate_single_artifact(
+        self, artifact: dict[str, Any]
+    ) -> tuple[dict[str, Any], dict[str, Any]]:
         name = artifact.get("name")
         if not name:
             raise ConfigError("Each artifact must have a 'name'")
@@ -139,7 +141,9 @@ class Validator:
                 "type": artifact_type,
                 "digest": actual_digest,
                 "signature_type": signature_spec.get("type"),
-                "slsa_level": provenance.get("slsa_level") if isinstance(provenance, dict) else None,
+                "slsa_level": (
+                    provenance.get("slsa_level") if isinstance(provenance, dict) else None
+                ),
             },
         }
 
@@ -153,9 +157,7 @@ class Validator:
         required_fields = ["builder_id", "source_uri", "slsa_level", "materials"]
         missing = [field for field in required_fields if field not in provenance]
         if missing:
-            raise ConfigError(
-                f"Artifact '{name}' provenance missing fields: {', '.join(missing)}"
-            )
+            raise ConfigError(f"Artifact '{name}' provenance missing fields: {', '.join(missing)}")
 
         slsa_level = provenance.get("slsa_level")
         if not isinstance(slsa_level, int) or slsa_level < 3:
@@ -171,9 +173,7 @@ class Validator:
             )
         for material in materials:
             if not isinstance(material, dict) or "uri" not in material or "digest" not in material:
-                raise ConfigError(
-                    f"Artifact '{name}' materials must define 'uri' and 'digest'"
-                )
+                raise ConfigError(f"Artifact '{name}' materials must define 'uri' and 'digest'")
 
     @staticmethod
     def _validate_training_manifest(path: Path) -> None:

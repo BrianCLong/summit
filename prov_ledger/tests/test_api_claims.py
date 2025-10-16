@@ -1,6 +1,3 @@
-from fixtures import client
-
-
 def test_extraction_and_normalization(client):
     resp = client.post(
         "/claims/extract",

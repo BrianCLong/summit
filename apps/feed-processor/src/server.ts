@@ -76,7 +76,10 @@ async function initializeServices() {
     // Neo4j connection
     neo4jDriver = neo4j.driver(
       config.database.neo4j.uri,
-      neo4j.auth.basic(config.database.neo4j.user, config.database.neo4j.password),
+      neo4j.auth.basic(
+        config.database.neo4j.user,
+        config.database.neo4j.password,
+      ),
     );
 
     // Test Neo4j connection
@@ -99,12 +102,18 @@ async function initializeServices() {
     logger.info('Redis connected successfully');
 
     // Initialize services
-    feedProcessorService = new FeedProcessorService(pgPool, neo4jDriver, redisClient);
+    feedProcessorService = new FeedProcessorService(
+      pgPool,
+      neo4jDriver,
+      redisClient,
+    );
     enrichmentService = new EnrichmentService(pgPool, redisClient);
 
     // Set up event listeners
     feedProcessorService.on('feed.poll.completed', (data) => {
-      logger.info(`Feed poll completed: ${data.sourceId}, ${data.itemCount} items`);
+      logger.info(
+        `Feed poll completed: ${data.sourceId}, ${data.itemCount} items`,
+      );
     });
 
     feedProcessorService.on('feed.poll.error', (data) => {
@@ -112,7 +121,9 @@ async function initializeServices() {
     });
 
     feedProcessorService.on('item.processed', (data) => {
-      logger.debug(`Item processed: ${data.itemId} in ${data.processingTime}ms`);
+      logger.debug(
+        `Item processed: ${data.itemId} in ${data.processingTime}ms`,
+      );
     });
 
     logger.info('Feed processor services initialized successfully');
@@ -126,15 +137,22 @@ async function initializeServices() {
 app.use('/api', authenticate);
 
 // Feed Sources Management
-app.post('/api/feed-sources', authorize(['user', 'admin']), async (req, res) => {
-  try {
-    const feedSource = await feedProcessorService.createFeedSource(req.body, req.user.id);
-    res.status(201).json(feedSource);
-  } catch (error) {
-    logger.error('Error creating feed source:', error);
-    res.status(500).json({ error: 'Failed to create feed source' });
-  }
-});
+app.post(
+  '/api/feed-sources',
+  authorize(['user', 'admin']),
+  async (req, res) => {
+    try {
+      const feedSource = await feedProcessorService.createFeedSource(
+        req.body,
+        req.user.id,
+      );
+      res.status(201).json(feedSource);
+    } catch (error) {
+      logger.error('Error creating feed source:', error);
+      res.status(500).json({ error: 'Failed to create feed source' });
+    }
+  },
+);
 
 app.get('/api/feed-sources', authorize(['user', 'admin']), async (req, res) => {
   try {
@@ -178,30 +196,38 @@ app.get('/api/feed-sources', authorize(['user', 'admin']), async (req, res) => {
   }
 });
 
-app.get('/api/feed-sources/:id', authorize(['user', 'admin']), async (req, res) => {
-  try {
-    const source = await feedProcessorService.getFeedSource(req.params.id);
+app.get(
+  '/api/feed-sources/:id',
+  authorize(['user', 'admin']),
+  async (req, res) => {
+    try {
+      const source = await feedProcessorService.getFeedSource(req.params.id);
 
-    if (!source) {
-      return res.status(404).json({ error: 'Feed source not found' });
+      if (!source) {
+        return res.status(404).json({ error: 'Feed source not found' });
+      }
+
+      res.json(source);
+    } catch (error) {
+      logger.error('Error getting feed source:', error);
+      res.status(500).json({ error: 'Failed to get feed source' });
     }
+  },
+);
 
-    res.json(source);
-  } catch (error) {
-    logger.error('Error getting feed source:', error);
-    res.status(500).json({ error: 'Failed to get feed source' });
-  }
-});
-
-app.put('/api/feed-sources/:id', authorize(['user', 'admin']), async (req, res) => {
-  try {
-    // Update feed source implementation would go here
-    res.status(501).json({ error: 'Update feed source not implemented yet' });
-  } catch (error) {
-    logger.error('Error updating feed source:', error);
-    res.status(500).json({ error: 'Failed to update feed source' });
-  }
-});
+app.put(
+  '/api/feed-sources/:id',
+  authorize(['user', 'admin']),
+  async (req, res) => {
+    try {
+      // Update feed source implementation would go here
+      res.status(501).json({ error: 'Update feed source not implemented yet' });
+    } catch (error) {
+      logger.error('Error updating feed source:', error);
+      res.status(500).json({ error: 'Failed to update feed source' });
+    }
+  },
+);
 
 app.delete('/api/feed-sources/:id', authorize(['admin']), async (req, res) => {
   try {
@@ -214,56 +240,80 @@ app.delete('/api/feed-sources/:id', authorize(['admin']), async (req, res) => {
 });
 
 // Feed Source Control
-app.post('/api/feed-sources/:id/start', authorize(['user', 'admin']), async (req, res) => {
-  try {
-    const source = await feedProcessorService.getFeedSource(req.params.id);
+app.post(
+  '/api/feed-sources/:id/start',
+  authorize(['user', 'admin']),
+  async (req, res) => {
+    try {
+      const source = await feedProcessorService.getFeedSource(req.params.id);
 
-    if (!source) {
-      return res.status(404).json({ error: 'Feed source not found' });
+      if (!source) {
+        return res.status(404).json({ error: 'Feed source not found' });
+      }
+
+      await feedProcessorService.startPolling(source);
+      res.json({ message: 'Feed source started successfully' });
+    } catch (error) {
+      logger.error('Error starting feed source:', error);
+      res.status(500).json({ error: 'Failed to start feed source' });
     }
+  },
+);
 
-    await feedProcessorService.startPolling(source);
-    res.json({ message: 'Feed source started successfully' });
-  } catch (error) {
-    logger.error('Error starting feed source:', error);
-    res.status(500).json({ error: 'Failed to start feed source' });
-  }
-});
+app.post(
+  '/api/feed-sources/:id/stop',
+  authorize(['user', 'admin']),
+  async (req, res) => {
+    try {
+      await feedProcessorService.stopPolling(req.params.id);
+      res.json({ message: 'Feed source stopped successfully' });
+    } catch (error) {
+      logger.error('Error stopping feed source:', error);
+      res.status(500).json({ error: 'Failed to stop feed source' });
+    }
+  },
+);
 
-app.post('/api/feed-sources/:id/stop', authorize(['user', 'admin']), async (req, res) => {
-  try {
-    await feedProcessorService.stopPolling(req.params.id);
-    res.json({ message: 'Feed source stopped successfully' });
-  } catch (error) {
-    logger.error('Error stopping feed source:', error);
-    res.status(500).json({ error: 'Failed to stop feed source' });
-  }
-});
+app.post(
+  '/api/feed-sources/:id/pause',
+  authorize(['user', 'admin']),
+  async (req, res) => {
+    try {
+      await feedProcessorService.pauseSource(req.params.id);
+      res.json({ message: 'Feed source paused successfully' });
+    } catch (error) {
+      logger.error('Error pausing feed source:', error);
+      res.status(500).json({ error: 'Failed to pause feed source' });
+    }
+  },
+);
 
-app.post('/api/feed-sources/:id/pause', authorize(['user', 'admin']), async (req, res) => {
-  try {
-    await feedProcessorService.pauseSource(req.params.id);
-    res.json({ message: 'Feed source paused successfully' });
-  } catch (error) {
-    logger.error('Error pausing feed source:', error);
-    res.status(500).json({ error: 'Failed to pause feed source' });
-  }
-});
-
-app.post('/api/feed-sources/:id/resume', authorize(['user', 'admin']), async (req, res) => {
-  try {
-    await feedProcessorService.resumeSource(req.params.id);
-    res.json({ message: 'Feed source resumed successfully' });
-  } catch (error) {
-    logger.error('Error resuming feed source:', error);
-    res.status(500).json({ error: 'Failed to resume feed source' });
-  }
-});
+app.post(
+  '/api/feed-sources/:id/resume',
+  authorize(['user', 'admin']),
+  async (req, res) => {
+    try {
+      await feedProcessorService.resumeSource(req.params.id);
+      res.json({ message: 'Feed source resumed successfully' });
+    } catch (error) {
+      logger.error('Error resuming feed source:', error);
+      res.status(500).json({ error: 'Failed to resume feed source' });
+    }
+  },
+);
 
 // Feed Items
 app.get('/api/feed-items', authorize(['user', 'admin']), async (req, res) => {
   try {
-    const { page = '1', limit = '50', sourceId, status, search, startDate, endDate } = req.query;
+    const {
+      page = '1',
+      limit = '50',
+      sourceId,
+      status,
+      search,
+      startDate,
+      endDate,
+    } = req.query;
 
     const whereConditions = ['1=1'];
     const params = [];
@@ -282,7 +332,9 @@ app.get('/api/feed-items', authorize(['user', 'admin']), async (req, res) => {
     }
 
     if (search) {
-      whereConditions.push(`(title ILIKE $${paramIndex} OR description ILIKE $${paramIndex})`);
+      whereConditions.push(
+        `(title ILIKE $${paramIndex} OR description ILIKE $${paramIndex})`,
+      );
       params.push(`%${search}%`);
       paramIndex++;
     }
@@ -360,9 +412,12 @@ app.get('/api/feed-items', authorize(['user', 'admin']), async (req, res) => {
   }
 });
 
-app.get('/api/feed-items/:id', authorize(['user', 'admin']), async (req, res) => {
-  try {
-    const query = `
+app.get(
+  '/api/feed-items/:id',
+  authorize(['user', 'admin']),
+  async (req, res) => {
+    try {
+      const query = `
       SELECT 
         fi.*,
         fs.name as source_name,
@@ -372,76 +427,80 @@ app.get('/api/feed-items/:id', authorize(['user', 'admin']), async (req, res) =>
       WHERE fi.id = $1
     `;
 
-    const result = await pgPool.query(query, [req.params.id]);
+      const result = await pgPool.query(query, [req.params.id]);
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Feed item not found' });
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'Feed item not found' });
+      }
+
+      const row = result.rows[0];
+      const item = {
+        id: row.id,
+        sourceId: row.source_id,
+        sourceName: row.source_name,
+        sourceType: row.source_type,
+        originalId: row.original_id,
+        title: row.title,
+        description: row.description,
+        content: row.content,
+        publishedAt: row.published_at,
+        url: row.url,
+        author: row.author,
+        category: row.category,
+        tags: row.tags || [],
+        rawData: row.raw_data || {},
+        processedData: row.processed_data || {},
+        processingStatus: row.processing_status,
+        processedAt: row.processed_at,
+      };
+
+      res.json(item);
+    } catch (error) {
+      logger.error('Error getting feed item:', error);
+      res.status(500).json({ error: 'Failed to get feed item' });
     }
-
-    const row = result.rows[0];
-    const item = {
-      id: row.id,
-      sourceId: row.source_id,
-      sourceName: row.source_name,
-      sourceType: row.source_type,
-      originalId: row.original_id,
-      title: row.title,
-      description: row.description,
-      content: row.content,
-      publishedAt: row.published_at,
-      url: row.url,
-      author: row.author,
-      category: row.category,
-      tags: row.tags || [],
-      rawData: row.raw_data || {},
-      processedData: row.processed_data || {},
-      processingStatus: row.processing_status,
-      processedAt: row.processed_at,
-    };
-
-    res.json(item);
-  } catch (error) {
-    logger.error('Error getting feed item:', error);
-    res.status(500).json({ error: 'Failed to get feed item' });
-  }
-});
+  },
+);
 
 // Manual enrichment
-app.post('/api/feed-items/:id/enrich', authorize(['user', 'admin']), async (req, res) => {
-  try {
-    const itemQuery = `
+app.post(
+  '/api/feed-items/:id/enrich',
+  authorize(['user', 'admin']),
+  async (req, res) => {
+    try {
+      const itemQuery = `
       SELECT * FROM feed_items WHERE id = $1
     `;
 
-    const result = await pgPool.query(itemQuery, [req.params.id]);
+      const result = await pgPool.query(itemQuery, [req.params.id]);
 
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Feed item not found' });
-    }
+      if (result.rows.length === 0) {
+        return res.status(404).json({ error: 'Feed item not found' });
+      }
 
-    const row = result.rows[0];
-    const item = {
-      id: row.id,
-      sourceId: row.source_id,
-      originalId: row.original_id,
-      title: row.title,
-      description: row.description,
-      content: row.content,
-      publishedAt: row.published_at,
-      url: row.url,
-      author: row.author,
-      category: row.category,
-      tags: row.tags || [],
-      rawData: row.raw_data || {},
-      processedData: row.processed_data || {},
-      processingStatus: row.processing_status,
-      processedAt: row.processed_at,
-    };
+      const row = result.rows[0];
+      const item = {
+        id: row.id,
+        sourceId: row.source_id,
+        originalId: row.original_id,
+        title: row.title,
+        description: row.description,
+        content: row.content,
+        publishedAt: row.published_at,
+        url: row.url,
+        author: row.author,
+        category: row.category,
+        tags: row.tags || [],
+        rawData: row.raw_data || {},
+        processedData: row.processed_data || {},
+        processingStatus: row.processing_status,
+        processedAt: row.processed_at,
+      };
 
-    const enrichedItem = await enrichmentService.enrichItem(item);
+      const enrichedItem = await enrichmentService.enrichItem(item);
 
-    // Update the item with enriched data
-    const updateQuery = `
+      // Update the item with enriched data
+      const updateQuery = `
       UPDATE feed_items 
       SET 
         processed_data = $1,
@@ -450,14 +509,18 @@ app.post('/api/feed-items/:id/enrich', authorize(['user', 'admin']), async (req,
       WHERE id = $2
     `;
 
-    await pgPool.query(updateQuery, [JSON.stringify(enrichedItem.processedData), req.params.id]);
+      await pgPool.query(updateQuery, [
+        JSON.stringify(enrichedItem.processedData),
+        req.params.id,
+      ]);
 
-    res.json(enrichedItem);
-  } catch (error) {
-    logger.error('Error enriching feed item:', error);
-    res.status(500).json({ error: 'Failed to enrich feed item' });
-  }
-});
+      res.json(enrichedItem);
+    } catch (error) {
+      logger.error('Error enriching feed item:', error);
+      res.status(500).json({ error: 'Failed to enrich feed item' });
+    }
+  },
+);
 
 // Feed Statistics
 app.get('/api/feed-stats', authorize(['user', 'admin']), async (req, res) => {
@@ -494,7 +557,8 @@ app.get('/api/feed-stats', authorize(['user', 'admin']), async (req, res) => {
         processingRate:
           aggregate.total_items > 0
             ? (
-                (parseInt(aggregate.processed_items) / parseInt(aggregate.total_items)) *
+                (parseInt(aggregate.processed_items) /
+                  parseInt(aggregate.total_items)) *
                 100
               ).toFixed(2)
             : '0',
@@ -507,15 +571,19 @@ app.get('/api/feed-stats', authorize(['user', 'admin']), async (req, res) => {
 });
 
 // Enrichment provider stats
-app.get('/api/enrichment/stats', authorize(['user', 'admin']), async (req, res) => {
-  try {
-    const stats = await enrichmentService.getProviderStats();
-    res.json({ providers: stats });
-  } catch (error) {
-    logger.error('Error getting enrichment stats:', error);
-    res.status(500).json({ error: 'Failed to get enrichment stats' });
-  }
-});
+app.get(
+  '/api/enrichment/stats',
+  authorize(['user', 'admin']),
+  async (req, res) => {
+    try {
+      const stats = await enrichmentService.getProviderStats();
+      res.json({ providers: stats });
+    } catch (error) {
+      logger.error('Error getting enrichment stats:', error);
+      res.status(500).json({ error: 'Failed to get enrichment stats' });
+    }
+  },
+);
 
 // Feed Source Templates
 app.get('/api/feed-templates', authorize(['user', 'admin']), (req, res) => {
@@ -610,66 +678,89 @@ app.get('/api/feed-templates', authorize(['user', 'admin']), (req, res) => {
 });
 
 // Real-time feed updates
-app.get('/api/feed-updates/stream', authorize(['user', 'admin']), (req, res) => {
-  res.writeHead(200, {
-    'Content-Type': 'text/event-stream',
-    'Cache-Control': 'no-cache',
-    Connection: 'keep-alive',
-    'Access-Control-Allow-Origin': '*',
-  });
+app.get(
+  '/api/feed-updates/stream',
+  authorize(['user', 'admin']),
+  (req, res) => {
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+      'Access-Control-Allow-Origin': '*',
+    });
 
-  // Send initial connection
-  res.write('data: {"type": "connected", "timestamp": "' + new Date().toISOString() + '"}\n\n');
-
-  // Set up event listeners
-  const onItemProcessed = (data: any) => {
+    // Send initial connection
     res.write(
-      'data: ' +
-        JSON.stringify({
-          type: 'item.processed',
-          data,
-          timestamp: new Date().toISOString(),
-        }) +
-        '\n\n',
+      'data: {"type": "connected", "timestamp": "' +
+        new Date().toISOString() +
+        '"}\n\n',
     );
-  };
 
-  const onPollCompleted = (data: any) => {
-    res.write(
-      'data: ' +
-        JSON.stringify({
-          type: 'poll.completed',
-          data,
-          timestamp: new Date().toISOString(),
-        }) +
-        '\n\n',
-    );
-  };
+    // Set up event listeners
+    const onItemProcessed = (data: any) => {
+      res.write(
+        'data: ' +
+          JSON.stringify({
+            type: 'item.processed',
+            data,
+            timestamp: new Date().toISOString(),
+          }) +
+          '\n\n',
+      );
+    };
 
-  feedProcessorService.on('item.processed', onItemProcessed);
-  feedProcessorService.on('feed.poll.completed', onPollCompleted);
+    const onPollCompleted = (data: any) => {
+      res.write(
+        'data: ' +
+          JSON.stringify({
+            type: 'poll.completed',
+            data,
+            timestamp: new Date().toISOString(),
+          }) +
+          '\n\n',
+      );
+    };
 
-  // Heartbeat
-  const heartbeat = setInterval(() => {
-    res.write('data: {"type": "heartbeat", "timestamp": "' + new Date().toISOString() + '"}\n\n');
-  }, 30000);
+    feedProcessorService.on('item.processed', onItemProcessed);
+    feedProcessorService.on('feed.poll.completed', onPollCompleted);
 
-  // Clean up on client disconnect
-  req.on('close', () => {
-    clearInterval(heartbeat);
-    feedProcessorService.removeListener('item.processed', onItemProcessed);
-    feedProcessorService.removeListener('feed.poll.completed', onPollCompleted);
-  });
-});
+    // Heartbeat
+    const heartbeat = setInterval(() => {
+      res.write(
+        'data: {"type": "heartbeat", "timestamp": "' +
+          new Date().toISOString() +
+          '"}\n\n',
+      );
+    }, 30000);
+
+    // Clean up on client disconnect
+    req.on('close', () => {
+      clearInterval(heartbeat);
+      feedProcessorService.removeListener('item.processed', onItemProcessed);
+      feedProcessorService.removeListener(
+        'feed.poll.completed',
+        onPollCompleted,
+      );
+    });
+  },
+);
 
 // Error handling middleware
-app.use((error: Error, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  logger.error('Unhandled error:', error);
-  res.status(500).json({
-    error: 'Internal server error',
-    message: process.env.NODE_ENV === 'development' ? error.message : undefined,
-  });
-});
+app.use(
+  (
+    error: Error,
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ) => {
+    logger.error('Unhandled error:', error);
+    res.status(500).json({
+      error: 'Internal server error',
+      message:
+        process.env.NODE_ENV === 'development' ? error.message : undefined,
+    });
+  },
+);
 
 // 404 handler
 app.use('*', (req, res) => {

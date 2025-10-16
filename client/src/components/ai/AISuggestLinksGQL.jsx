@@ -1,7 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useQuery, useSubscription } from '@apollo/client';
 import { SUGGEST_LINKS, AI_SUGGESTIONS_SUB } from '../../graphql/ai.gql.js';
-import { Box, CircularProgress, List, ListItem, ListItemText, Typography } from '@mui/material';
+import {
+  Box,
+  CircularProgress,
+  List,
+  ListItem,
+  ListItemText,
+  Typography,
+} from '@mui/material';
 
 export default function AISuggestLinksGQL({ entityId, limit = 5 }) {
   const [items, setItems] = useState([]);
@@ -29,7 +36,11 @@ export default function AISuggestLinksGQL({ entityId, limit = 5 }) {
   }, [subData]);
 
   if (!entityId) {
-    return <Typography color="text.secondary">Select an entity to see AI suggestions.</Typography>;
+    return (
+      <Typography color="text.secondary">
+        Select an entity to see AI suggestions.
+      </Typography>
+    );
   }
   if (loading && items.length === 0) return <CircularProgress size={20} />;
   if (error) return <Typography color="error">{error.message}</Typography>;
@@ -42,7 +53,10 @@ export default function AISuggestLinksGQL({ entityId, limit = 5 }) {
         <List dense>
           {items.map((s, idx) => (
             <ListItem key={`${s.to}-${idx}`}>
-              <ListItemText primary={`${s.from} → ${s.to}`} secondary={`score: ${s.score.toFixed(3)}${s.reason ? ` — ${s.reason}` : ''}`} />
+              <ListItemText
+                primary={`${s.from} → ${s.to}`}
+                secondary={`score: ${s.score.toFixed(3)}${s.reason ? ` — ${s.reason}` : ''}`}
+              />
             </ListItem>
           ))}
         </List>

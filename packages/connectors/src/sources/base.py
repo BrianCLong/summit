@@ -7,19 +7,19 @@ methods: ``discover`` which inspects available streams and ``read_full`` which
 returns an iterator of records.  Incremental/CDC is omitted for brevity.
 """
 
-from typing import Dict, Iterable, Iterator, List
+from collections.abc import Iterator
 
 
 class BaseSource:
     """Base class for sources."""
 
-    def __init__(self, config: Dict[str, str]) -> None:
+    def __init__(self, config: dict[str, str]) -> None:
         self.config = config
 
-    def discover(self) -> List[Dict[str, str]]:
+    def discover(self) -> list[dict[str, str]]:
         """Return a list of stream definitions."""
         raise NotImplementedError
 
-    def read_full(self, stream: Dict[str, str]) -> Iterator[Dict[str, str]]:
+    def read_full(self, stream: dict[str, str]) -> Iterator[dict[str, str]]:
         """Yield dictionaries for each record in the stream."""
         raise NotImplementedError

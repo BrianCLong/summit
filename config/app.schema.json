@@ -1,1 +1,13 @@
-{ "name": "IntelGraph Config", "type": "object", "required": ["limits"], "properties": { "limits": { "type": "object", "properties": { "maxResults": { "type": "integer", "minimum": 1, "maximum": 1000 }}}}}
+{
+  "name": "IntelGraph Config",
+  "type": "object",
+  "required": ["limits"],
+  "properties": {
+    "limits": {
+      "type": "object",
+      "properties": {
+        "maxResults": { "type": "integer", "minimum": 1, "maximum": 1000 }
+      }
+    }
+  }
+}

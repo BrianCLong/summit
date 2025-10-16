@@ -7,17 +7,33 @@ servers:
 paths:
   /pipelines:
     get: { summary: List pipelines, responses: { '200': { description: OK } } }
-    post: { summary: Create pipeline, responses: { '201': { description: Created } } }
+    post:
+      {
+        summary: Create pipeline,
+        responses: { '201': { description: Created } },
+      }
   /pipelines/hints:
-    post: { summary: Policy hints for pipeline spec, responses: { '200': { description: OK } } }
+    post:
+      {
+        summary: Policy hints for pipeline spec,
+        responses: { '200': { description: OK } },
+      }
   /pipelines/copilot/suggest:
     post:
-      { summary: Suggest a pipeline DAG from a prompt, responses: { '200': { description: OK } } }
+      {
+        summary: Suggest a pipeline DAG from a prompt,
+        responses: { '200': { description: OK } },
+      }
   /pipelines/{id}:
     get:
       {
         summary: Get pipeline,
-        responses: { '200': { description: OK }, '404': { description: Not Found } },
+        responses:
+          { '200': { description: OK }, '404': { description: Not Found } },
       }
     put: { summary: Update pipeline, responses: { '200': { description: OK } } }
-    delete: { summary: Delete pipeline, responses: { '204': { description: No Content } } }
+    delete:
+      {
+        summary: Delete pipeline,
+        responses: { '204': { description: No Content } },
+      }

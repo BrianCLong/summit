@@ -95,7 +95,11 @@ export function createBuildPlane(): BaseModule {
       summary:
         'Handles artifact assembly, validation, and secure distribution pipelines.',
       kind: 'build-system',
-      capabilities: ['prepare-artifacts', 'validate-supply-chain', 'promote-build'],
+      capabilities: [
+        'prepare-artifacts',
+        'validate-supply-chain',
+        'promote-build',
+      ],
       serviceLevelObjectives: {
         availability: 0.998,
         latencyMs: 180,
@@ -164,7 +168,8 @@ export function createBuildPlatform(): BaseModule {
     {
       id: 'build-platform',
       displayName: 'Build Platform',
-      summary: 'Provides end-to-end CI/CD orchestration with governance controls.',
+      summary:
+        'Provides end-to-end CI/CD orchestration with governance controls.',
       kind: 'platform',
       capabilities: ['plan-release', 'enforce-guardrails', 'verify-deployment'],
       serviceLevelObjectives: {
@@ -234,9 +239,14 @@ export function createCompanyOS(): BaseModule {
     {
       id: 'company-os',
       displayName: 'CompanyOS',
-      summary: 'Unifies governance, telemetry, and workforce enablement systems.',
+      summary:
+        'Unifies governance, telemetry, and workforce enablement systems.',
       kind: 'operating-system',
-      capabilities: ['provision-workspace', 'synchronize-policies', 'broadcast-update'],
+      capabilities: [
+        'provision-workspace',
+        'synchronize-policies',
+        'broadcast-update',
+      ],
       serviceLevelObjectives: {
         availability: 0.999,
         latencyMs: 140,
@@ -304,7 +314,8 @@ export function createSwitchboard(): BaseModule {
     {
       id: 'switchboard',
       displayName: 'Switchboard',
-      summary: 'Provides cross-surface signal routing and incident triage automation.',
+      summary:
+        'Provides cross-surface signal routing and incident triage automation.',
       kind: 'switchboard',
       capabilities: ['route-signal', 'elevate-incident', 'sync-webhooks'],
       serviceLevelObjectives: {
@@ -350,7 +361,10 @@ export function createSwitchboard(): BaseModule {
       },
       'sync-webhooks': async ({ action }) => {
         await simulate(20);
-        const integrations = action.payload?.integrations ?? ['slack', 'pagerduty'];
+        const integrations = action.payload?.integrations ?? [
+          'slack',
+          'pagerduty',
+        ];
         return {
           message: `Webhooks synchronized (${integrations.join(', ')})`,
           output: {
@@ -374,7 +388,8 @@ export function createIntelGraph(): BaseModule {
     {
       id: 'intelgraph',
       displayName: 'IntelGraph',
-      summary: 'Graph intelligence fabric powering investigations and insights.',
+      summary:
+        'Graph intelligence fabric powering investigations and insights.',
       kind: 'analysis',
       capabilities: ['analyze-graph', 'enrich-entities', 'publish-findings'],
       serviceLevelObjectives: {

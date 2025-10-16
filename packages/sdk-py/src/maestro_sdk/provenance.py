@@ -5,15 +5,16 @@ from __future__ import annotations
 import base64
 import hashlib
 import json
+from collections.abc import Mapping
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any, Dict, List, Literal, Mapping, Optional
+from typing import Any, Literal
 
 from nacl.exceptions import BadSignatureError
 from nacl.signing import SigningKey, VerifyKey
 
-ProvenanceStepType = Literal['ingest', 'transform', 'policy-check', 'export']
+ProvenanceStepType = Literal["ingest", "transform", "policy-check", "export"]
 
 
 def _hash_bytes(value: bytes) -> str:
@@ -25,7 +26,7 @@ def _timestamp() -> str:
 
 
 def _canonical_json(payload: Any) -> str:
-    return json.dumps(payload, sort_keys=True, separators=(',', ':'))
+    return json.dumps(payload, sort_keys=True, separators=(",", ":"))
 
 
 @dataclass
@@ -33,11 +34,11 @@ class ProvenanceStep:
     id: str
     type: ProvenanceStepType
     tool: str
-    params: Dict[str, Any]
+    params: dict[str, Any]
     input_hash: str
     output_hash: str
     timestamp: str = field(default_factory=_timestamp)
-    note: Optional[str] = None
+    note: str | None = None
 
     @classmethod
     def from_materials(
@@ -46,11 +47,11 @@ class ProvenanceStep:
         id: str,
         type: ProvenanceStepType,
         tool: str,
-        params: Dict[str, Any],
+        params: dict[str, Any],
         input_material: bytes,
         output_material: bytes,
-        note: Optional[str] = None,
-    ) -> 'ProvenanceStep':
+        note: str | None = None,
+    ) -> ProvenanceStep:
         return cls(
             id=id,
             type=type,
@@ -65,24 +66,24 @@ class ProvenanceStep:
 @dataclass
 class ProvenanceManifest:
     artifact_id: str
-    steps: List[ProvenanceStep] = field(default_factory=list)
+    steps: list[ProvenanceStep] = field(default_factory=list)
 
     def add_step(self, step: ProvenanceStep) -> None:
         self.steps.append(step)
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         return {
-            'artifactId': self.artifact_id,
-            'steps': [
+            "artifactId": self.artifact_id,
+            "steps": [
                 {
-                    'id': step.id,
-                    'type': step.type,
-                    'tool': step.tool,
-                    'params': step.params,
-                    'inputHash': step.input_hash,
-                    'outputHash': step.output_hash,
-                    'timestamp': step.timestamp,
-                    **({'note': step.note} if step.note else {}),
+                    "id": step.id,
+                    "type": step.type,
+                    "tool": step.tool,
+                    "params": step.params,
+                    "inputHash": step.input_hash,
+                    "outputHash": step.output_hash,
+                    "timestamp": step.timestamp,
+                    **({"note": step.note} if step.note else {}),
                 }
                 for step in self.steps
             ],
@@ -92,37 +93,42 @@ class ProvenanceManifest:
         return json.dumps(self.to_dict(), indent=2)
 
     @classmethod
-    def from_dict(cls, payload: Mapping[str, Any]) -> 'ProvenanceManifest':
-        artifact_id = payload['artifactId']
-        steps_payload = payload.get('steps', [])
-        steps: List[ProvenanceStep] = []
+    def from_dict(cls, payload: Mapping[str, Any]) -> ProvenanceManifest:
+        artifact_id = payload["artifactId"]
+        steps_payload = payload.get("steps", [])
+        steps: list[ProvenanceStep] = []
         for raw in steps_payload:
             steps.append(
                 ProvenanceStep(
-                    id=raw['id'],
-                    type=raw['type'],
-                    tool=raw['tool'],
-                    params=dict(raw.get('params', {})),
-                    input_hash=raw['inputHash'],
-                    output_hash=raw['outputHash'],
-                    timestamp=raw.get('timestamp', _timestamp()),
-                    note=raw.get('note'),
+                    id=raw["id"],
+                    type=raw["type"],
+                    tool=raw["tool"],
+                    params=dict(raw.get("params", {})),
+                    input_hash=raw["inputHash"],
+                    output_hash=raw["outputHash"],
+                    timestamp=raw.get("timestamp", _timestamp()),
+                    note=raw.get("note"),
                 )
             )
         return cls(artifact_id=artifact_id, steps=steps)
 
     def canonical_bytes(self) -> bytes:
-        return _canonical_json(self.to_dict()).encode('utf-8')
+        return _canonical_json(self.to_dict()).encode("utf-8")
 
 
 @dataclass
 class ManifestSignature:
     algorithm: str
     signature: str
-    key_id: Optional[str] = None
+    key_id: str | None = None
 
 
-def sign_manifest(manifest: ProvenanceManifest, signing_key: str | bytes | SigningKey, *, key_id: str | None = None) -> ManifestSignature:
+def sign_manifest(
+    manifest: ProvenanceManifest,
+    signing_key: str | bytes | SigningKey,
+    *,
+    key_id: str | None = None,
+) -> ManifestSignature:
     if isinstance(signing_key, SigningKey):
         key = signing_key
     else:
@@ -130,14 +136,16 @@ def sign_manifest(manifest: ProvenanceManifest, signing_key: str | bytes | Signi
         key = SigningKey(key_bytes)
     signature = key.sign(manifest.canonical_bytes()).signature
     return ManifestSignature(
-        algorithm='ed25519',
-        signature=base64.b64encode(signature).decode('ascii'),
+        algorithm="ed25519",
+        signature=base64.b64encode(signature).decode("ascii"),
         key_id=key_id,
     )
 
 
-def verify_signature(manifest: ProvenanceManifest, signature: ManifestSignature, public_key: str | bytes | VerifyKey) -> bool:
-    if signature.algorithm != 'ed25519':
+def verify_signature(
+    manifest: ProvenanceManifest, signature: ManifestSignature, public_key: str | bytes | VerifyKey
+) -> bool:
+    if signature.algorithm != "ed25519":
         return False
     verify_key: VerifyKey
     if isinstance(public_key, VerifyKey):
@@ -168,32 +176,32 @@ def write_evidence_bundle(
     *,
     signing_key: str | bytes | SigningKey | None = None,
     key_id: str | None = None,
-) -> Dict[str, Path]:
+) -> dict[str, Path]:
     directory.mkdir(parents=True, exist_ok=True)
-    manifest_path = directory / 'manifest.json'
+    manifest_path = directory / "manifest.json"
     manifest_path.write_text(manifest.to_json())
 
-    signature_path: Optional[Path] = None
+    signature_path: Path | None = None
     if signing_key is not None:
         signature = sign_manifest(manifest, signing_key, key_id=key_id)
-        signature_path = directory / 'manifest.sig'
+        signature_path = directory / "manifest.sig"
         signature_path.write_text(json.dumps(signature.__dict__, indent=2))
 
-    hashes_path = directory / 'hashes.json'
+    hashes_path = directory / "hashes.json"
     hashes_path.write_text(
         json.dumps(
             {
-                'artifactId': manifest.artifact_id,
-                'steps': {step.id: step.output_hash for step in manifest.steps},
+                "artifactId": manifest.artifact_id,
+                "steps": {step.id: step.output_hash for step in manifest.steps},
             },
             indent=2,
         )
     )
 
     return {
-        'manifest': manifest_path,
-        'signature': signature_path or directory / 'manifest.sig',
-        'hashes': hashes_path,
+        "manifest": manifest_path,
+        "signature": signature_path or directory / "manifest.sig",
+        "hashes": hashes_path,
     }
 
 
@@ -204,15 +212,15 @@ def load_manifest(path: Path) -> ProvenanceManifest:
 def load_signature(path: Path) -> ManifestSignature:
     payload = json.loads(path.read_text())
     return ManifestSignature(
-        algorithm=payload['algorithm'],
-        signature=payload['signature'],
-        key_id=payload.get('keyId') or payload.get('key_id'),
+        algorithm=payload["algorithm"],
+        signature=payload["signature"],
+        key_id=payload.get("keyId") or payload.get("key_id"),
     )
 
 
 def verify_bundle(directory: Path, public_key_material: str | bytes | VerifyKey) -> bool:
-    manifest_path = directory / 'manifest.json'
-    signature_path = directory / 'manifest.sig'
+    manifest_path = directory / "manifest.json"
+    signature_path = directory / "manifest.sig"
     manifest = load_manifest(manifest_path)
     if not signature_path.exists():
         return False

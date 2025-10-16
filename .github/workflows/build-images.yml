@@ -7,7 +7,7 @@ concurrency:
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
     paths:
       - 'Dockerfile*'
       - '**/Dockerfile*'
@@ -167,7 +167,7 @@ jobs:
 
       - name: Cosign sign (keyless)
         env:
-          COSIGN_EXPERIMENTAL: "1"
+          COSIGN_EXPERIMENTAL: '1'
         run: cosign sign ghcr.io/${{ env.IMAGE_NAME }}/${{ matrix.component.name }}:${{ github.sha }}
 
       - name: Verify image signature

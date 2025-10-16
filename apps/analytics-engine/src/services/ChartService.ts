@@ -26,7 +26,12 @@ export interface ChartDataset {
 }
 
 export interface ChartQuery {
-  type: 'time-series' | 'categorical' | 'comparison' | 'distribution' | 'relationship';
+  type:
+    | 'time-series'
+    | 'categorical'
+    | 'comparison'
+    | 'distribution'
+    | 'relationship';
   dataSource: 'postgres' | 'neo4j';
   query: string;
   parameters?: Record<string, any>;
@@ -112,7 +117,10 @@ export class ChartService {
     }
   }
 
-  private transformDataForChart(rawData: any[], chartQuery: ChartQuery): ChartData {
+  private transformDataForChart(
+    rawData: any[],
+    chartQuery: ChartQuery,
+  ): ChartData {
     switch (chartQuery.type) {
       case 'time-series':
         return this.transformTimeSeriesData(rawData, chartQuery);
@@ -129,12 +137,18 @@ export class ChartService {
     }
   }
 
-  private transformTimeSeriesData(rawData: any[], chartQuery: ChartQuery): ChartData {
+  private transformTimeSeriesData(
+    rawData: any[],
+    chartQuery: ChartQuery,
+  ): ChartData {
     const timeField = chartQuery.timeField || 'date';
     const valueField = chartQuery.aggregateBy || 'value';
 
     // Sort by time
-    rawData.sort((a, b) => new Date(a[timeField]).getTime() - new Date(b[timeField]).getTime());
+    rawData.sort(
+      (a, b) =>
+        new Date(a[timeField]).getTime() - new Date(b[timeField]).getTime(),
+    );
 
     const labels = rawData.map((row) => {
       const date = new Date(row[timeField]);
@@ -175,7 +189,10 @@ export class ChartService {
     };
   }
 
-  private transformCategoricalData(rawData: any[], chartQuery: ChartQuery): ChartData {
+  private transformCategoricalData(
+    rawData: any[],
+    chartQuery: ChartQuery,
+  ): ChartData {
     const labelField = (chartQuery.groupBy as string) || 'category';
     const valueField = chartQuery.aggregateBy || 'count';
 
@@ -204,19 +221,27 @@ export class ChartService {
           label: chartQuery.aggregateFunction || 'Count',
           data,
           backgroundColor: colors.slice(0, data.length),
-          borderColor: colors.slice(0, data.length).map((color) => this.darkenColor(color, 0.2)),
+          borderColor: colors
+            .slice(0, data.length)
+            .map((color) => this.darkenColor(color, 0.2)),
           borderWidth: 1,
         },
       ],
       metadata: {
-        total: Object.values(grouped).reduce((sum, val) => sum + Number(val), 0),
+        total: Object.values(grouped).reduce(
+          (sum, val) => sum + Number(val),
+          0,
+        ),
         aggregation: chartQuery.aggregateFunction,
         generatedAt: new Date(),
       },
     };
   }
 
-  private transformComparisonData(rawData: any[], chartQuery: ChartQuery): ChartData {
+  private transformComparisonData(
+    rawData: any[],
+    chartQuery: ChartQuery,
+  ): ChartData {
     const groupFields = Array.isArray(chartQuery.groupBy)
       ? chartQuery.groupBy
       : [chartQuery.groupBy || 'category'];
@@ -264,7 +289,9 @@ export class ChartService {
       datasets,
       metadata: {
         total: Object.values(nested).reduce(
-          (sum, group) => sum + Object.values(group).reduce((groupSum, val) => groupSum + val, 0),
+          (sum, group) =>
+            sum +
+            Object.values(group).reduce((groupSum, val) => groupSum + val, 0),
           0,
         ),
         aggregation: chartQuery.aggregateFunction,
@@ -273,9 +300,14 @@ export class ChartService {
     };
   }
 
-  private transformDistributionData(rawData: any[], chartQuery: ChartQuery): ChartData {
+  private transformDistributionData(
+    rawData: any[],
+    chartQuery: ChartQuery,
+  ): ChartData {
     const valueField = chartQuery.aggregateBy || 'value';
-    const values = rawData.map((row) => Number(row[valueField])).filter((v) => !isNaN(v));
+    const values = rawData
+      .map((row) => Number(row[valueField]))
+      .filter((v) => !isNaN(v));
 
     if (values.length === 0) {
       return {
@@ -299,11 +331,16 @@ export class ChartService {
 
     // Fill bins
     for (const value of values) {
-      const binIndex = Math.min(binCount - 1, Math.floor((value - min) / binWidth));
+      const binIndex = Math.min(
+        binCount - 1,
+        Math.floor((value - min) / binWidth),
+      );
       bins[binIndex].count++;
     }
 
-    const labels = bins.map((bin) => `${bin.start.toFixed(1)}-${bin.end.toFixed(1)}`);
+    const labels = bins.map(
+      (bin) => `${bin.start.toFixed(1)}-${bin.end.toFixed(1)}`,
+    );
     const data = bins.map((bin) => bin.count);
 
     const colors = this.getColorScheme(chartQuery.colorScheme || 'blues');
@@ -327,8 +364,13 @@ export class ChartService {
     };
   }
 
-  private transformRelationshipData(rawData: any[], chartQuery: ChartQuery): ChartData {
-    const xField = Array.isArray(chartQuery.groupBy) ? chartQuery.groupBy[0] : 'x';
+  private transformRelationshipData(
+    rawData: any[],
+    chartQuery: ChartQuery,
+  ): ChartData {
+    const xField = Array.isArray(chartQuery.groupBy)
+      ? chartQuery.groupBy[0]
+      : 'x';
     const yField = chartQuery.aggregateBy || 'y';
 
     const data = rawData.map((row) => ({
@@ -385,7 +427,8 @@ export class ChartService {
           result[key] = values.reduce((sum, val) => sum + val, 0);
           break;
         case 'avg':
-          result[key] = values.reduce((sum, val) => sum + val, 0) / values.length;
+          result[key] =
+            values.reduce((sum, val) => sum + val, 0) / values.length;
           break;
         case 'count':
           result[key] = values.length;
@@ -408,7 +451,10 @@ export class ChartService {
     switch (interval) {
       case 'hour':
         return (
-          date.toLocaleDateString() + ' ' + date.getHours().toString().padStart(2, '0') + ':00'
+          date.toLocaleDateString() +
+          ' ' +
+          date.getHours().toString().padStart(2, '0') +
+          ':00'
         );
       case 'day':
         return date.toLocaleDateString();
@@ -417,7 +463,10 @@ export class ChartService {
         weekStart.setDate(date.getDate() - date.getDay());
         return `Week of ${weekStart.toLocaleDateString()}`;
       case 'month':
-        return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+        return date.toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+        });
       case 'year':
         return date.getFullYear().toString();
       default:
@@ -443,7 +492,10 @@ export class ChartService {
   }
 
   // Predefined chart queries for common use cases
-  async getEntityGrowthChart(timeRange: { start: Date; end: Date }): Promise<ChartData> {
+  async getEntityGrowthChart(timeRange: {
+    start: Date;
+    end: Date;
+  }): Promise<ChartData> {
     const query: ChartQuery = {
       type: 'time-series',
       dataSource: 'postgres',
@@ -553,8 +605,19 @@ export class ChartService {
     return {
       data: heatmapData,
       labels: {
-        hours: Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0') + ':00'),
-        days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+        hours: Array.from(
+          { length: 24 },
+          (_, i) => i.toString().padStart(2, '0') + ':00',
+        ),
+        days: [
+          'Sunday',
+          'Monday',
+          'Tuesday',
+          'Wednesday',
+          'Thursday',
+          'Friday',
+          'Saturday',
+        ],
       },
       metadata: {
         days,

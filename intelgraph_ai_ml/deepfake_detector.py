@@ -11,7 +11,6 @@ import hashlib
 import mimetypes
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional
 
 
 @dataclass
@@ -43,7 +42,7 @@ class DeepfakeDetector:
         }
 
     # Public API ---------------------------------------------------------
-    def detect(self, path: str, media_type: Optional[str] = None) -> DeepfakeResult:
+    def detect(self, path: str, media_type: str | None = None) -> DeepfakeResult:
         """Run deepfake analysis on the supplied media path.
 
         Parameters

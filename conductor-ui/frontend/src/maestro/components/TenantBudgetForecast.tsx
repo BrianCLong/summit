@@ -19,16 +19,30 @@ export default function TenantBudgetForecast({ tenant }: { tenant: string }) {
   }, [tenant, alpha, hours]);
 
   const statusCls =
-    f?.risk === 'BREACH' ? 'bg-red-600' : f?.risk === 'WARN' ? 'bg-amber-500' : 'bg-emerald-600';
+    f?.risk === 'BREACH'
+      ? 'bg-red-600'
+      : f?.risk === 'WARN'
+        ? 'bg-amber-500'
+        : 'bg-emerald-600';
 
   return (
-    <section className="space-y-3 rounded-2xl border p-4" aria-label="Budget forecast">
+    <section
+      className="space-y-3 rounded-2xl border p-4"
+      aria-label="Budget forecast"
+    >
       <div className="flex flex-wrap items-center gap-3 text-sm">
-        <div className={`rounded px-2 py-1 text-white ${statusCls}`}>{f?.risk || '—'}</div>
+        <div className={`rounded px-2 py-1 text-white ${statusCls}`}>
+          {f?.risk || '—'}
+        </div>
         <div>
           Projected month:{' '}
-          <span className="font-semibold">${f?.projectedMonthUsd?.toFixed?.(2) ?? '—'}</span> vs
-          budget <span className="font-semibold">${f?.budgetUsd?.toFixed?.(2) ?? '—'}</span>
+          <span className="font-semibold">
+            ${f?.projectedMonthUsd?.toFixed?.(2) ?? '—'}
+          </span>{' '}
+          vs budget{' '}
+          <span className="font-semibold">
+            ${f?.budgetUsd?.toFixed?.(2) ?? '—'}
+          </span>
         </div>
         <label className="flex items-center gap-2">
           Alpha
@@ -39,7 +53,9 @@ export default function TenantBudgetForecast({ tenant }: { tenant: string }) {
             max={0.9}
             className="w-20 rounded border px-2 py-1"
             value={alpha}
-            onChange={(e) => setAlpha(Math.min(0.9, Math.max(0.1, Number(e.target.value))))}
+            onChange={(e) =>
+              setAlpha(Math.min(0.9, Math.max(0.1, Number(e.target.value))))
+            }
           />
         </label>
         <label className="flex items-center gap-2">
@@ -63,7 +79,10 @@ export default function TenantBudgetForecast({ tenant }: { tenant: string }) {
             onChange={(e) => setBudget(Number(e.target.value))}
           />
         </label>
-        <button className="rounded border px-3 py-2" onClick={() => refresh(budget)}>
+        <button
+          className="rounded border px-3 py-2"
+          onClick={() => refresh(budget)}
+        >
           Recalculate
         </button>
         <button
@@ -76,7 +95,9 @@ export default function TenantBudgetForecast({ tenant }: { tenant: string }) {
           Save budget
         </button>
       </div>
-      <div className="text-xs text-slate-600">Hourly average (rough): {f?.hourlyAvg ?? '—'}</div>
+      <div className="text-xs text-slate-600">
+        Hourly average (rough): {f?.hourlyAvg ?? '—'}
+      </div>
     </section>
   );
 }

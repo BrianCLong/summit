@@ -38,4 +38,3 @@ env:
     value: staging
   - name: ALLOW_UNSIGNED_POLICY
     value: 'false'
-

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import cytoscape from 'cytoscape';
@@ -7,17 +6,34 @@ import dagre from 'cytoscape-dagre';
 import cola from 'cytoscape-cola'; // Import cola
 import qtip from 'cytoscape-qtip'; // Import qtip
 import contextMenus from 'cytoscape-context-menus'; // Import context menus
-import { Box, Button, Typography, Switch, FormControlLabel, TextField, MenuItem, CircularProgress, Snackbar, Alert, Select, Slider, InputLabel, OutlinedInput, Checkbox, ListItemText } from '@mui/material';
+import {
+  Box,
+  Button,
+  Typography,
+  Switch,
+  FormControlLabel,
+  TextField,
+  MenuItem,
+  CircularProgress,
+  Snackbar,
+  Alert,
+  Select,
+  Slider,
+  InputLabel,
+  OutlinedInput,
+  Checkbox,
+  ListItemText,
+} from '@mui/material';
 import $ from 'jquery'; // Import jQuery
 import { debounce } from 'lodash'; // Import debounce
 import RbacSidePanel from './RbacSidePanel';
 
-import { 
-  setSelectedNode, 
-  setSelectedEdge, 
-  setLayout, 
-  toggleFeature, 
-  toggleClusterExpansion, 
+import {
+  setSelectedNode,
+  setSelectedEdge,
+  setLayout,
+  toggleFeature,
+  toggleClusterExpansion,
   setSearchTerm, // New import for search
   addNode, // New import for editing
   addEdge, // New import for editing
@@ -58,9 +74,9 @@ const GraphVisualization = () => {
             selector: 'node',
             style: {
               'background-color': 'data(typeColors)', // Use data(typeColors) for dynamic coloring
-              'label': 'data(id)',
+              label: 'data(id)',
               'text-valign': 'center',
-              'color': 'white',
+              color: 'white',
               'text-outline-width': 2,
               'text-outline-color': '#333',
             },
@@ -68,12 +84,12 @@ const GraphVisualization = () => {
           {
             selector: 'edge',
             style: {
-              'width': 3,
+              width: 3,
               'line-color': '#ccc',
               'target-arrow-color': '#ccc',
               'target-arrow-shape': 'triangle',
               'curve-style': 'bezier',
-              'opacity': 'data(confidence)', // Opacity based on confidence
+              opacity: 'data(confidence)', // Opacity based on confidence
             },
           },
           {
@@ -101,17 +117,17 @@ const GraphVisualization = () => {
               'line-color': '#ADD8E6', // Light blue for highlighted edges
               'target-arrow-color': '#ADD8E6',
               'source-arrow-color': '#ADD8E6',
-              'width': 5,
+              width: 5,
             },
           },
           {
             selector: 'node.cy-expand-collapse-collapsed-node',
             style: {
               'background-color': '#888',
-              'shape': 'roundrectangle',
-              'label': 'data(id)',
+              shape: 'roundrectangle',
+              label: 'data(id)',
               'text-valign': 'center',
-              'color': 'white',
+              color: 'white',
               'text-outline-width': 2,
               'text-outline-color': '#555',
             },
@@ -127,7 +143,7 @@ const GraphVisualization = () => {
             style: {
               'line-color': '#FF0000', // Red for path edges
               'target-arrow-color': '#FF0000',
-              'width': 5,
+              width: 5,
             },
           },
         ],
@@ -178,7 +194,7 @@ const GraphVisualization = () => {
 
       // Add qTip tooltips
       cy.elements().qtip({
-        content: function(){
+        content: function () {
           let content = '';
           if (this.isNode()) {
             content = `<strong>Node: ${this.id()}</strong><br/>`;
@@ -201,12 +217,12 @@ const GraphVisualization = () => {
         },
         position: {
           my: 'top center',
-          at: 'bottom center'
+          at: 'bottom center',
         },
         style: {
           classes: 'qtip-bootstrap',
-          tip: { width: 16, height: 8 }
-        }
+          tip: { width: 16, height: 8 },
+        },
       });
 
       // Initialize context menus
@@ -219,9 +235,17 @@ const GraphVisualization = () => {
             selector: 'core', // Applies to graph background
             onClickFunction: (evt) => {
               const newNodeId = `node_${Date.now()}`;
-              dispatch(addNode({ data: { id: newNodeId, label: `New Node ${newNodeId.substring(newNodeId.length - 4)}`, type: 'generic' } }));
+              dispatch(
+                addNode({
+                  data: {
+                    id: newNodeId,
+                    label: `New Node ${newNodeId.substring(newNodeId.length - 4)}`,
+                    type: 'generic',
+                  },
+                }),
+              );
             },
-            has  : 'core', // Show only on core
+            has: 'core', // Show only on core
           },
           {
             id: 'delete-selected',
@@ -268,7 +292,7 @@ const GraphVisualization = () => {
             },
             has: 'node',
           },
-        ]
+        ],
       });
 
       cyRef.current = cy;
@@ -290,37 +314,76 @@ const GraphVisualization = () => {
     if (!cy) return;
 
     // --- Incremental Update Logic ---
-    const currentNodes = graphData.nodes.filter(node => 
-      (graphData.searchTerm === '' || 
-      node.data.id.toLowerCase().includes(graphData.searchTerm.toLowerCase()) ||
-      (node.data.label && node.data.label.toLowerCase().includes(graphData.searchTerm.toLowerCase())))
-      && (graphData.nodeTypeFilter.length === 0 || graphData.nodeTypeFilter.includes(node.data.type))
+    const currentNodes = graphData.nodes.filter(
+      (node) =>
+        (graphData.searchTerm === '' ||
+          node.data.id
+            .toLowerCase()
+            .includes(graphData.searchTerm.toLowerCase()) ||
+          (node.data.label &&
+            node.data.label
+              .toLowerCase()
+              .includes(graphData.searchTerm.toLowerCase()))) &&
+        (graphData.nodeTypeFilter.length === 0 ||
+          graphData.nodeTypeFilter.includes(node.data.type)),
     );
-    const currentEdges = graphData.edges.filter(edge => 
-      (graphData.searchTerm === '' || 
-      edge.data.id.toLowerCase().includes(graphData.searchTerm.toLowerCase()) ||
-      (edge.data.label && edge.data.label.toLowerCase().includes(graphData.searchTerm.toLowerCase())) ||
-      currentNodes.some(node => node.data.id === edge.data.source) ||
-      currentNodes.some(node => node.data.id === edge.data.target))
-      && (edge.data.confidence === undefined || edge.data.confidence >= graphData.minConfidenceFilter)
+    const currentEdges = graphData.edges.filter(
+      (edge) =>
+        (graphData.searchTerm === '' ||
+          edge.data.id
+            .toLowerCase()
+            .includes(graphData.searchTerm.toLowerCase()) ||
+          (edge.data.label &&
+            edge.data.label
+              .toLowerCase()
+              .includes(graphData.searchTerm.toLowerCase())) ||
+          currentNodes.some((node) => node.data.id === edge.data.source) ||
+          currentNodes.some((node) => node.data.id === edge.data.target)) &&
+        (edge.data.confidence === undefined ||
+          edge.data.confidence >= graphData.minConfidenceFilter),
     );
     const prevNodes = prevNodesRef.current;
     const prevEdges = prevEdgesRef.current;
 
-    const addedNodes = currentNodes.filter(node => !prevNodes.some(pNode => pNode.data.id === node.data.id));
-    const removedNodes = prevNodes.filter(node => !currentNodes.some(cNode => cNode.data.id === node.data.id));
-    const addedEdges = currentEdges.filter(edge => !prevEdges.some(pEdge => pEdge.data.id === edge.data.id));
-    const removedEdges = prevEdges.filter(edge => !currentNodes.some(cNode => cNode.data.id === edge.data.source) && !currentNodes.some(cNode => cNode.data.id === edge.data.target) && !currentEdges.some(cEdge => cEdge.data.id === edge.data.id));
+    const addedNodes = currentNodes.filter(
+      (node) => !prevNodes.some((pNode) => pNode.data.id === node.data.id),
+    );
+    const removedNodes = prevNodes.filter(
+      (node) => !currentNodes.some((cNode) => cNode.data.id === node.data.id),
+    );
+    const addedEdges = currentEdges.filter(
+      (edge) => !prevEdges.some((pEdge) => pEdge.data.id === edge.data.id),
+    );
+    const removedEdges = prevEdges.filter(
+      (edge) =>
+        !currentNodes.some((cNode) => cNode.data.id === edge.data.source) &&
+        !currentNodes.some((cNode) => cNode.data.id === edge.data.target) &&
+        !currentEdges.some((cEdge) => cEdge.data.id === edge.data.id),
+    );
 
-    if (graphData.featureToggles.incrementalLayout && (addedNodes.length > 0 || removedNodes.length > 0 || addedEdges.length > 0 || removedEdges.length > 0)) {
+    if (
+      graphData.featureToggles.incrementalLayout &&
+      (addedNodes.length > 0 ||
+        removedNodes.length > 0 ||
+        addedEdges.length > 0 ||
+        removedEdges.length > 0)
+    ) {
       // Remove elements
-      removedNodes.forEach(node => cy.remove(cy.$('#' + node.data.id)));
-      removedEdges.forEach(edge => cy.remove(cy.$('#' + edge.data.id)));
+      removedNodes.forEach((node) => cy.remove(cy.$('#' + node.data.id)));
+      removedEdges.forEach((edge) => cy.remove(cy.$('#' + edge.data.id)));
 
       // Add elements
       const elementsToAdd = [];
-      addedNodes.forEach(node => elementsToAdd.push({ ...node, data: { ...node.data, typeColors: graphData.nodeTypeColors[node.data.type] || '#666' } }));
-      addedEdges.forEach(edge => elementsToAdd.push(edge));
+      addedNodes.forEach((node) =>
+        elementsToAdd.push({
+          ...node,
+          data: {
+            ...node.data,
+            typeColors: graphData.nodeTypeColors[node.data.type] || '#666',
+          },
+        }),
+      );
+      addedEdges.forEach((edge) => elementsToAdd.push(edge));
 
       if (elementsToAdd.length > 0) {
         cy.add(elementsToAdd);
@@ -334,34 +397,67 @@ const GraphVisualization = () => {
           animationDuration: 500,
         }).run();
       }
-    } else if (!graphData.featureToggles.incrementalLayout || (addedNodes.length === 0 && removedNodes.length === 0 && addedEdges.length === 0 && removedEdges.length === 0)) {
+    } else if (
+      !graphData.featureToggles.incrementalLayout ||
+      (addedNodes.length === 0 &&
+        removedNodes.length === 0 &&
+        addedEdges.length === 0 &&
+        removedEdges.length === 0)
+    ) {
       // Full re-render if incremental layout is off or no changes detected
       // Prepare elements for Cytoscape.js, considering clustering
       let elementsToRender = [];
       if (graphData.featureToggles.nodeClustering) {
         // Add cluster parent nodes
-        const clusterParentNodes = graphData.clusters.map(cluster => ({
-          data: { id: cluster.id, label: `Cluster (${cluster.type})`, typeColors: '#888' },
+        const clusterParentNodes = graphData.clusters.map((cluster) => ({
+          data: {
+            id: cluster.id,
+            label: `Cluster (${cluster.type})`,
+            typeColors: '#888',
+          },
         }));
         elementsToRender.push(...clusterParentNodes);
 
         // Add actual nodes, assigning parents if clustered and expanded
-        graphData.nodes.forEach(node => {
-          const cluster = graphData.clusters.find(c => c.nodes.includes(node.data.id));
+        graphData.nodes.forEach((node) => {
+          const cluster = graphData.clusters.find((c) =>
+            c.nodes.includes(node.data.id),
+          );
           if (cluster && cluster.isExpanded) {
-            elementsToRender.push({ ...node, data: { ...node.data, parent: cluster.id, typeColors: graphData.nodeTypeColors[node.data.type] || '#666' } });
+            elementsToRender.push({
+              ...node,
+              data: {
+                ...node.data,
+                parent: cluster.id,
+                typeColors: graphData.nodeTypeColors[node.data.type] || '#666',
+              },
+            });
           } else if (!cluster) {
-            elementsToRender.push({ ...node, data: { ...node.data, typeColors: graphData.nodeTypeColors[node.data.type] || '#666' } });
+            elementsToRender.push({
+              ...node,
+              data: {
+                ...node.data,
+                typeColors: graphData.nodeTypeColors[node.data.type] || '#666',
+              },
+            });
           }
         });
 
         // Add edges, ensuring they connect to parent if both ends are in a collapsed cluster
-        graphData.edges.forEach(edge => {
-          const sourceNode = graphData.nodes.find(n => n.data.id === edge.data.source);
-          const targetNode = graphData.nodes.find(n => n.data.id === edge.data.target);
+        graphData.edges.forEach((edge) => {
+          const sourceNode = graphData.nodes.find(
+            (n) => n.data.id === edge.data.source,
+          );
+          const targetNode = graphData.nodes.find(
+            (n) => n.data.id === edge.data.target,
+          );
 
-          const sourceCluster = graphData.clusters.find(c => c.nodes.includes(sourceNode.data.id));
-          const targetCluster = graphData.clusters.find(c => c.nodes.includes(targetNode.data.id));
+          const sourceCluster = graphData.clusters.find((c) =>
+            c.nodes.includes(sourceNode.data.id),
+          );
+          const targetCluster = graphData.clusters.find((c) =>
+            c.nodes.includes(targetNode.data.id),
+          );
 
           let newSource = edge.data.source;
           let newTarget = edge.data.target;
@@ -375,21 +471,37 @@ const GraphVisualization = () => {
 
           // Only add edge if source and target are not the same (e.g., both in same collapsed cluster)
           if (newSource !== newTarget) {
-            elementsToRender.push({ ...edge, data: { ...edge.data, source: newSource, target: newTarget } });
+            elementsToRender.push({
+              ...edge,
+              data: { ...edge.data, source: newSource, target: newTarget },
+            });
           }
         });
-
       } else {
-        elementsToRender = graphData.nodes.map(node => ({ ...node, data: { ...node.data, typeColors: graphData.nodeTypeColors[node.data.type] || '#666' } })).concat(graphData.edges);
+        elementsToRender = graphData.nodes
+          .map((node) => ({
+            ...node,
+            data: {
+              ...node.data,
+              typeColors: graphData.nodeTypeColors[node.data.type] || '#666',
+            },
+          }))
+          .concat(graphData.edges);
       }
       cy.json({ elements: elementsToRender });
     }
 
     // Hide/show nodes based on cluster expansion state
-    graphData.nodes.forEach(node => {
+    graphData.nodes.forEach((node) => {
       const cyNode = cy.$('#' + node.data.id);
-      const cluster = graphData.clusters.find(c => c.nodes.includes(node.data.id));
-      if (cluster && !cluster.isExpanded && graphData.featureToggles.nodeClustering) {
+      const cluster = graphData.clusters.find((c) =>
+        c.nodes.includes(node.data.id),
+      );
+      if (
+        cluster &&
+        !cluster.isExpanded &&
+        graphData.featureToggles.nodeClustering
+      ) {
         cyNode.hide();
       } else {
         cyNode.show();
@@ -397,7 +509,13 @@ const GraphVisualization = () => {
     });
 
     // Re-run layout if not incremental or if layout changed
-    if (!graphData.featureToggles.incrementalLayout || prevNodes.length === 0 || prevEdges.length === 0 || graphData.layout !== prevNodesRef.current.layout || graphData.layoutOptions !== prevNodesRef.current.layoutOptions) {
+    if (
+      !graphData.featureToggles.incrementalLayout ||
+      prevNodes.length === 0 ||
+      prevEdges.length === 0 ||
+      graphData.layout !== prevNodesRef.current.layout ||
+      graphData.layoutOptions !== prevNodesRef.current.layoutOptions
+    ) {
       cy.layout({
         name: graphData.layout,
         ...graphData.layoutOptions,
@@ -417,15 +535,32 @@ const GraphVisualization = () => {
 
     // Highlight found path
     cy.elements().removeClass('path-node path-edge');
-    graphData.foundPath.forEach(id => {
+    graphData.foundPath.forEach((id) => {
       cy.$('#' + id).addClass('path-node path-edge');
     });
 
     // Update refs for next render
     prevNodesRef.current = currentNodes;
     prevEdgesRef.current = currentEdges;
-
-  }, [graphData.nodes, graphData.edges, graphData.layout, graphData.layoutOptions, graphData.selectedNode, graphData.selectedEdge, graphData.featureToggles.smoothTransitions, graphData.featureToggles.edgeHighlighting, graphData.featureToggles.nodeClustering, graphData.featureToggles.incrementalLayout, graphData.clusters, graphData.nodeTypeColors, graphData.foundPath, graphData.searchTerm, graphData.nodeTypeFilter, graphData.minConfidenceFilter, dispatch]);
+  }, [
+    graphData.nodes,
+    graphData.edges,
+    graphData.layout,
+    graphData.layoutOptions,
+    graphData.selectedNode,
+    graphData.selectedEdge,
+    graphData.featureToggles.smoothTransitions,
+    graphData.featureToggles.edgeHighlighting,
+    graphData.featureToggles.nodeClustering,
+    graphData.featureToggles.incrementalLayout,
+    graphData.clusters,
+    graphData.nodeTypeColors,
+    graphData.foundPath,
+    graphData.searchTerm,
+    graphData.nodeTypeFilter,
+    graphData.minConfidenceFilter,
+    dispatch,
+  ]);
 
   const handleLayoutChange = (layoutName, options = {}) => {
     dispatch(setLayout({ name: layoutName, options }));
@@ -442,7 +577,15 @@ const GraphVisualization = () => {
 
   const handleAddNode = () => {
     const newNodeId = `node_${Date.now()}`;
-    dispatch(addNode({ data: { id: newNodeId, label: `New Node ${newNodeId.substring(newNodeId.length - 4)}`, type: 'generic' } }));
+    dispatch(
+      addNode({
+        data: {
+          id: newNodeId,
+          label: `New Node ${newNodeId.substring(newNodeId.length - 4)}`,
+          type: 'generic',
+        },
+      }),
+    );
   };
 
   const handleDeleteSelected = () => {
@@ -477,7 +620,12 @@ const GraphVisualization = () => {
   };
 
   const handleFindPath = () => {
-    if (!cyRef.current || !graphData.pathSourceNode || !graphData.pathTargetNode) return;
+    if (
+      !cyRef.current ||
+      !graphData.pathSourceNode ||
+      !graphData.pathTargetNode
+    )
+      return;
 
     const cy = cyRef.current;
     const sourceNode = cy.$('#' + graphData.pathSourceNode);
@@ -491,7 +639,7 @@ const GraphVisualization = () => {
     const bfs = cy.elements().bfs({
       roots: sourceNode,
       // directed: true, // Uncomment if graph is directed
-      visit: function(v, e, u, i, depth){
+      visit: function (v, e, u, i, depth) {
         // console.log('visit ' + v.id());
       },
       // tear: function(v, e, u, i, depth){
@@ -502,10 +650,13 @@ const GraphVisualization = () => {
       // },
     });
 
-    const pathToTarget = bfs.path.filter('node').intersection(targetNode).pathFrom(sourceNode);
+    const pathToTarget = bfs.path
+      .filter('node')
+      .intersection(targetNode)
+      .pathFrom(sourceNode);
 
     if (pathToTarget.length > 0) {
-      dispatch(setFoundPath(pathToTarget.map(ele => ele.id())));
+      dispatch(setFoundPath(pathToTarget.map((ele) => ele.id())));
     } else {
       dispatch(setFoundPath([]));
     }
@@ -536,7 +687,12 @@ const GraphVisualization = () => {
         try {
           const importedData = JSON.parse(e.target.result);
           if (importedData.nodes && importedData.edges) {
-            dispatch(setGraphData({ nodes: importedData.nodes, edges: importedData.edges }));
+            dispatch(
+              setGraphData({
+                nodes: importedData.nodes,
+                edges: importedData.edges,
+              }),
+            );
           } else {
             dispatch(setErrorMessage('Invalid graph data format.'));
           }
@@ -553,10 +709,30 @@ const GraphVisualization = () => {
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
       <Box sx={{ p: 2, borderBottom: '1px solid #eee' }}>
         <Typography variant="h6">IntelGraph Visualization</Typography>
-        <Button onClick={() => handleLayoutChange('cose-bilkent')} variant="contained" sx={{ mr: 1 }}>Cose Bilkent Layout</Button>
-        <Button onClick={() => handleLayoutChange('dagre')} variant="contained" sx={{ mr: 1 }}>Dagre Layout</Button>
-        <Button onClick={() => handleLayoutChange('cola')} variant="contained" sx={{ mr: 1 }}>Cola Layout</Button>
-        <Button onClick={animateMessageBox} variant="contained" sx={{ mr: 1 }}>Toggle Message Box (jQuery)</Button>
+        <Button
+          onClick={() => handleLayoutChange('cose-bilkent')}
+          variant="contained"
+          sx={{ mr: 1 }}
+        >
+          Cose Bilkent Layout
+        </Button>
+        <Button
+          onClick={() => handleLayoutChange('dagre')}
+          variant="contained"
+          sx={{ mr: 1 }}
+        >
+          Dagre Layout
+        </Button>
+        <Button
+          onClick={() => handleLayoutChange('cola')}
+          variant="contained"
+          sx={{ mr: 1 }}
+        >
+          Cola Layout
+        </Button>
+        <Button onClick={animateMessageBox} variant="contained" sx={{ mr: 1 }}>
+          Toggle Message Box (jQuery)
+        </Button>
         <FormControlLabel
           control={
             <Switch
@@ -575,11 +751,32 @@ const GraphVisualization = () => {
           onChange={(e) => dispatch(setSearchTerm(e.target.value))}
           sx={{ ml: 2, width: '200px' }}
         />
-        <Button onClick={handleAddNode} variant="contained" sx={{ ml: 2 }}>Add Node</Button>
-        <Button onClick={handleDeleteSelected} variant="contained" color="error" sx={{ ml: 1 }} disabled={!graphData.selectedNode && !graphData.selectedEdge}>Delete Selected</Button>
-        <Button onClick={handleZoomToFit} variant="contained" sx={{ ml: 1 }}>Zoom to Fit</Button>
-        <Button onClick={handleZoomToSelection} variant="contained" sx={{ ml: 1 }} disabled={!graphData.selectedNode && !graphData.selectedEdge}>Zoom to Selection</Button>
-        <Button onClick={handleExportGraph} variant="contained" sx={{ ml: 1 }}>Export Graph</Button>
+        <Button onClick={handleAddNode} variant="contained" sx={{ ml: 2 }}>
+          Add Node
+        </Button>
+        <Button
+          onClick={handleDeleteSelected}
+          variant="contained"
+          color="error"
+          sx={{ ml: 1 }}
+          disabled={!graphData.selectedNode && !graphData.selectedEdge}
+        >
+          Delete Selected
+        </Button>
+        <Button onClick={handleZoomToFit} variant="contained" sx={{ ml: 1 }}>
+          Zoom to Fit
+        </Button>
+        <Button
+          onClick={handleZoomToSelection}
+          variant="contained"
+          sx={{ ml: 1 }}
+          disabled={!graphData.selectedNode && !graphData.selectedEdge}
+        >
+          Zoom to Selection
+        </Button>
+        <Button onClick={handleExportGraph} variant="contained" sx={{ ml: 1 }}>
+          Export Graph
+        </Button>
         <input
           accept=".json"
           style={{ display: 'none' }}
@@ -605,7 +802,9 @@ const GraphVisualization = () => {
                 name={key}
               />
             }
-            label={key.replace(/([A-Z])/g, ' $1').replace(/^./, (str) => str.toUpperCase())}
+            label={key
+              .replace(/([A-Z])/g, ' $1')
+              .replace(/^./, (str) => str.toUpperCase())}
           />
         ))}
       </Box>
@@ -617,16 +816,24 @@ const GraphVisualization = () => {
             <input
               type="color"
               value={color}
-              onChange={(e) => dispatch(setNodeTypeColor({ type, color: e.target.value }))}
+              onChange={(e) =>
+                dispatch(setNodeTypeColor({ type, color: e.target.value }))
+              }
             />
           </Box>
         ))}
       </Box>
       <Box sx={{ p: 2, borderBottom: '1px solid #eee' }}>
         <Typography variant="subtitle1">Graph Statistics:</Typography>
-        <Typography variant="body2">Nodes: {graphData.graphStats.numNodes}</Typography>
-        <Typography variant="body2">Edges: {graphData.graphStats.numEdges}</Typography>
-        <Typography variant="body2">Density: {graphData.graphStats.density}</Typography>
+        <Typography variant="body2">
+          Nodes: {graphData.graphStats.numNodes}
+        </Typography>
+        <Typography variant="body2">
+          Edges: {graphData.graphStats.numEdges}
+        </Typography>
+        <Typography variant="body2">
+          Density: {graphData.graphStats.density}
+        </Typography>
       </Box>
       <Box sx={{ p: 2, borderBottom: '1px solid #eee' }}>
         <Typography variant="subtitle1">Pathfinding:</Typography>
@@ -658,13 +865,24 @@ const GraphVisualization = () => {
             </MenuItem>
           ))}
         </TextField>
-        <Button onClick={handleFindPath} variant="contained" sx={{ mr: 1 }} disabled={!graphData.pathSourceNode || !graphData.pathTargetNode}>Find Path</Button>
+        <Button
+          onClick={handleFindPath}
+          variant="contained"
+          sx={{ mr: 1 }}
+          disabled={!graphData.pathSourceNode || !graphData.pathTargetNode}
+        >
+          Find Path
+        </Button>
         {graphData.foundPath.length > 0 && (
-          <Typography variant="body2">Path Found: {graphData.foundPath.join(' -> ')}</Typography>
+          <Typography variant="body2">
+            Path Found: {graphData.foundPath.join(' -> ')}
+          </Typography>
         )}
-        {graphData.foundPath.length === 0 && graphData.pathSourceNode && graphData.pathTargetNode && (
-          <Typography variant="body2">No Path Found</Typography>
-        )}
+        {graphData.foundPath.length === 0 &&
+          graphData.pathSourceNode &&
+          graphData.pathTargetNode && (
+            <Typography variant="body2">No Path Found</Typography>
+          )}
       </Box>
       <Box sx={{ p: 2, borderBottom: '1px solid #eee' }}>
         <Typography variant="subtitle1">Filters:</Typography>
@@ -679,15 +897,21 @@ const GraphVisualization = () => {
             input={<OutlinedInput label="Node Type" />}
             renderValue={(selected) => selected.join(', ')}
           >
-            {[...new Set(graphData.nodes.map(node => node.data.type))].map((type) => (
-              <MenuItem key={type} value={type}>
-                <Checkbox checked={graphData.nodeTypeFilter.indexOf(type) > -1} />
-                <ListItemText primary={type} />
-              </MenuItem>
-            ))}
+            {[...new Set(graphData.nodes.map((node) => node.data.type))].map(
+              (type) => (
+                <MenuItem key={type} value={type}>
+                  <Checkbox
+                    checked={graphData.nodeTypeFilter.indexOf(type) > -1}
+                  />
+                  <ListItemText primary={type} />
+                </MenuItem>
+              ),
+            )}
           </Select>
         </FormControl>
-        <Typography variant="body2" gutterBottom>Min Confidence: {graphData.minConfidenceFilter.toFixed(2)}</Typography>
+        <Typography variant="body2" gutterBottom>
+          Min Confidence: {graphData.minConfidenceFilter.toFixed(2)}
+        </Typography>
         <Slider
           value={graphData.minConfidenceFilter}
           onChange={(e, newValue) => dispatch(setMinConfidenceFilter(newValue))}
@@ -701,12 +925,17 @@ const GraphVisualization = () => {
       </Box>
       {graphData.selectedNode && (
         <Box sx={{ p: 2, borderBottom: '1px solid #eee' }}>
-          <Typography variant="subtitle1">Edit Node: {graphData.selectedNode}</Typography>
+          <Typography variant="subtitle1">
+            Edit Node: {graphData.selectedNode}
+          </Typography>
           <TextField
             label="Node Label"
             variant="outlined"
             size="small"
-            value={graphData.nodes.find(n => n.data.id === graphData.selectedNode)?.data.label || ''}
+            value={
+              graphData.nodes.find((n) => n.data.id === graphData.selectedNode)
+                ?.data.label || ''
+            }
             onChange={(e) => handleUpdateNodeLabel(e.target.value)}
             sx={{ width: '200px' }}
           />
@@ -717,21 +946,36 @@ const GraphVisualization = () => {
           <Typography variant="subtitle1">Properties:</Typography>
           {graphData.selectedNode && (
             <Box>
-              {Object.entries(graphData.nodes.find(n => n.data.id === graphData.selectedNode)?.data || {}).map(([key, value]) => (
-                <Typography key={key} variant="body2"><strong>{key}:</strong> {JSON.stringify(value)}</Typography>
+              {Object.entries(
+                graphData.nodes.find(
+                  (n) => n.data.id === graphData.selectedNode,
+                )?.data || {},
+              ).map(([key, value]) => (
+                <Typography key={key} variant="body2">
+                  <strong>{key}:</strong> {JSON.stringify(value)}
+                </Typography>
               ))}
             </Box>
           )}
           {graphData.selectedEdge && (
             <Box>
-              {Object.entries(graphData.edges.find(e => e.data.id === graphData.selectedEdge)?.data || {}).map(([key, value]) => (
-                <Typography key={key} variant="body2"><strong>{key}:</strong> {JSON.stringify(value)}</Typography>
+              {Object.entries(
+                graphData.edges.find(
+                  (e) => e.data.id === graphData.selectedEdge,
+                )?.data || {},
+              ).map(([key, value]) => (
+                <Typography key={key} variant="body2">
+                  <strong>{key}:</strong> {JSON.stringify(value)}
+                </Typography>
               ))}
             </Box>
           )}
         </Box>
       )}
-      <Box id="message-box" sx={{ p: 2, bgcolor: 'info.light', display: 'none' }}>
+      <Box
+        id="message-box"
+        sx={{ p: 2, bgcolor: 'info.light', display: 'none' }}
+      >
         <Typography>This is a message box animated with jQuery!</Typography>
       </Box>
       <Box sx={{ display: 'flex', flexGrow: 1 }}>
@@ -739,21 +983,37 @@ const GraphVisualization = () => {
         <RbacSidePanel />
       </Box>
       <Box sx={{ p: 2, borderTop: '1px solid #eee' }}>
-        <Typography>Selected Node: {graphData.selectedNode || 'None'}</Typography>
-        <Typography>Selected Edge: {graphData.selectedEdge || 'None'}</Typography>
+        <Typography>
+          Selected Node: {graphData.selectedNode || 'None'}
+        </Typography>
+        <Typography>
+          Selected Edge: {graphData.selectedEdge || 'None'}
+        </Typography>
       </Box>
       {graphData.isLoading && (
-        <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', zIndex: 9999 }}>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            zIndex: 9999,
+          }}
+        >
           <CircularProgress />
         </Box>
       )}
-      <Snackbar 
+      <Snackbar
         open={!!graphData.errorMessage}
         autoHideDuration={6000}
         onClose={() => dispatch(setErrorMessage(null))}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert onClose={() => dispatch(setErrorMessage(null))} severity="error" sx={{ width: '100%' }}>
+        <Alert
+          onClose={() => dispatch(setErrorMessage(null))}
+          severity="error"
+          sx={{ width: '100%' }}
+        >
           {graphData.errorMessage}
         </Alert>
       </Snackbar>

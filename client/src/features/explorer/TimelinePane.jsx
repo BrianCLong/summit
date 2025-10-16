@@ -5,7 +5,9 @@ import { explorerData } from './data';
 const TimelinePane = () => {
   const { state, dispatch } = useExplorer();
   const { selected, timeRange, activePane } = state;
-  const visible = explorerData.filter((d) => d.year >= timeRange[0] && d.year <= timeRange[1]);
+  const visible = explorerData.filter(
+    (d) => d.year >= timeRange[0] && d.year <= timeRange[1],
+  );
 
   useEffect(() => {
     if (activePane !== 'timeline') return;
@@ -42,7 +44,10 @@ const TimelinePane = () => {
           max="2022"
           value={timeRange[0]}
           onChange={(e) =>
-            dispatch({ type: 'time', range: [Number(e.target.value), timeRange[1]] })
+            dispatch({
+              type: 'time',
+              range: [Number(e.target.value), timeRange[1]],
+            })
           }
         />
         <label htmlFor="end">End {timeRange[1]}</label>
@@ -53,7 +58,10 @@ const TimelinePane = () => {
           max="2022"
           value={timeRange[1]}
           onChange={(e) =>
-            dispatch({ type: 'time', range: [timeRange[0], Number(e.target.value)] })
+            dispatch({
+              type: 'time',
+              range: [timeRange[0], Number(e.target.value)],
+            })
           }
         />
       </div>

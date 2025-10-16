@@ -2,10 +2,10 @@ name: Operational Verification Checklist
 
 on:
   schedule:
-    - cron: '0 6 * * *'  # Daily at 6 AM UTC
+    - cron: '0 6 * * *' # Daily at 6 AM UTC
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [main]
 
 env:
   FORCE_COLOR: 3
@@ -279,7 +279,16 @@ jobs:
   operational-summary:
     name: Operational Summary
     runs-on: ubuntu-latest
-    needs: [infrastructure-health, security-posture, performance-baseline, ci-cd-health, feature-flag-health, monitoring-observability, compliance-audit]
+    needs:
+      [
+        infrastructure-health,
+        security-posture,
+        performance-baseline,
+        ci-cd-health,
+        feature-flag-health,
+        monitoring-observability,
+        compliance-audit,
+      ]
     if: always()
     steps:
       - name: Generate operational report

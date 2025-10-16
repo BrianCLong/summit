@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import time
+from collections.abc import Iterable, Sequence
 from dataclasses import dataclass
-from typing import Dict, Iterable, Sequence
 
 from .pipeline_optimizer import PipelineOptimizer, PipelineTask
 
@@ -52,15 +52,17 @@ class BenchmarkSuite:
         )
 
     @classmethod
-    def build_default_suite(cls) -> "BenchmarkSuite":
+    def build_default_suite(cls) -> BenchmarkSuite:
         durations = [0.008, 0.006, 0.005, 0.007, 0.004, 0.009]
 
         def make_task(name: str, duration: float, dependencies: Iterable[str]) -> PipelineTask:
-            def _task(_: object) -> Dict[str, float]:
+            def _task(_: object) -> dict[str, float]:
                 time.sleep(duration)
                 return {"duration": duration}
 
-            return PipelineTask(name=name, func=_task, dependencies=list(dependencies), criticality="high")
+            return PipelineTask(
+                name=name, func=_task, dependencies=list(dependencies), criticality="high"
+            )
 
         tasks = [
             make_task("extract", durations[0], []),

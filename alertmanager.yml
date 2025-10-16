@@ -15,7 +15,7 @@ route:
   group_interval: 30s
   repeat_interval: 1h
   receiver: 'default'
-  
+
   routes:
     # Critical alerts - immediate notification
     - matchers:
@@ -32,7 +32,7 @@ route:
       receiver: 'budget-team'
       continue: false
 
-    # Rollback/compensation alerts  
+    # Rollback/compensation alerts
     - matchers:
         - alertname =~ "Rollback.*|Compensation.*"
       receiver: 'engineering-team'
@@ -115,14 +115,14 @@ receivers:
         body: |
           {{ range .Alerts }}
           A budget-related issue has been detected:
-          
+
           Alert: {{ .Annotations.summary }}
           Description: {{ .Annotations.description }}
           Tenant: {{ .Labels.tenant }}
           Severity: {{ .Labels.severity }}
-          
+
           Please review tenant spending and budget allocations.
-          
+
           Runbook: {{ .Annotations.runbook_url }}
           {{ end }}
     slack_configs:

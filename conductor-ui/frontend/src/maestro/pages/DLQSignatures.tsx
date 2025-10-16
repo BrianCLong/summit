@@ -1,9 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../api';
-import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip } from 'recharts';
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from 'recharts';
 
 export default function DLQSignatures() {
-  const { getDLQSignatures, getDLQSignatureTimeSeries, getDLQPolicy, putDLQPolicy } = api();
+  const {
+    getDLQSignatures,
+    getDLQSignatureTimeSeries,
+    getDLQPolicy,
+    putDLQPolicy,
+  } = api();
   const [rows, setRows] = useState<any[]>([]);
   const [sel, setSel] = useState<string | null>(null);
   const [series, setSeries] = useState<any[]>([]);
@@ -12,7 +24,8 @@ export default function DLQSignatures() {
     getDLQSignatures().then((r) => setRows(r.signatures || []));
   }, []);
   useEffect(() => {
-    if (sel) getDLQSignatureTimeSeries(sel).then((r) => setSeries(r.points || []));
+    if (sel)
+      getDLQSignatureTimeSeries(sel).then((r) => setSeries(r.points || []));
   }, [sel]);
 
   async function allowSignature(sig: string) {
@@ -56,7 +69,10 @@ export default function DLQSignatures() {
                 {r.sig}
               </td>
               <td>
-                <button className="mr-2 text-blue-600 underline" onClick={() => setSel(r.sig)}>
+                <button
+                  className="mr-2 text-blue-600 underline"
+                  onClick={() => setSel(r.sig)}
+                >
                   Trend
                 </button>
                 <button
@@ -65,7 +81,10 @@ export default function DLQSignatures() {
                 >
                   Allow auto-replay
                 </button>
-                <button className="text-red-600 underline" onClick={() => removeSignature(r.sig)}>
+                <button
+                  className="text-red-600 underline"
+                  onClick={() => removeSignature(r.sig)}
+                >
                   Remove
                 </button>
               </td>

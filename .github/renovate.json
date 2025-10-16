@@ -77,9 +77,7 @@
     },
     {
       "description": "Group OpenTelemetry updates",
-      "matchPackagePatterns": [
-        "^@opentelemetry/"
-      ],
+      "matchPackagePatterns": ["^@opentelemetry/"],
       "groupName": "OpenTelemetry",
       "automerge": false,
       "addLabels": ["otel-v2-compat"]
@@ -101,9 +99,7 @@
     },
     {
       "description": "GitHub Actions updates",
-      "matchFileNames": [
-        ".github/workflows/**"
-      ],
+      "matchFileNames": [".github/workflows/**"],
       "addLabels": ["github-actions"],
       "automerge": true,
       "automergeType": "pr"

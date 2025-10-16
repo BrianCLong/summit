@@ -17,7 +17,11 @@ env:
   - name: BASE_URL
     valueFrom: { secretKeyRef: { name: maestro-secrets, key: BASE_URL } }
   - name: OTEL_EXPORTER_OTLP_ENDPOINT
-    valueFrom: { secretKeyRef: { name: maestro-secrets, key: OTEL_EXPORTER_OTLP_ENDPOINT } }
+    valueFrom:
+      {
+        secretKeyRef:
+          { name: maestro-secrets, key: OTEL_EXPORTER_OTLP_ENDPOINT },
+      }
 
 service:
   type: ClusterIP

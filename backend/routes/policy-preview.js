@@ -20,12 +20,12 @@ router.post('/export/policy-check', async (req, res) => {
           action: 'export',
           resource: {
             format,
-            includeProvenance
+            includeProvenance,
           },
           stepUpToken,
-          timestamp: new Date().toISOString()
-        }
-      })
+          timestamp: new Date().toISOString(),
+        },
+      }),
     });
 
     const opaResult = await opaResponse.json();
@@ -35,9 +35,9 @@ router.post('/export/policy-check', async (req, res) => {
         outcome: {
           decision: 'allow',
           reason: 'Export allowed by policy',
-          rule_id: 'export.allow'
+          rule_id: 'export.allow',
         },
-        requiresStepUp: false
+        requiresStepUp: false,
       });
     } else {
       const requiresStepUp = opaResult.result?.stepup_required || false;
@@ -50,9 +50,9 @@ router.post('/export/policy-check', async (req, res) => {
           evidence: opaResult.result?.evidence || [],
           remediation: requiresStepUp
             ? 'Complete step-up authentication to proceed with this export'
-            : 'Contact your administrator for export permissions'
+            : 'Contact your administrator for export permissions',
         },
-        requiresStepUp
+        requiresStepUp,
       });
     }
   } catch (error) {
@@ -61,9 +61,9 @@ router.post('/export/policy-check', async (req, res) => {
       outcome: {
         decision: 'deny',
         reason: 'Error evaluating policy: ' + error.message,
-        rule_id: 'error'
+        rule_id: 'error',
       },
-      requiresStepUp: false
+      requiresStepUp: false,
     });
   }
 });
@@ -83,9 +83,9 @@ router.post('/preview-export', async (req, res) => {
           action,
           query,
           stepUpToken,
-          timestamp: new Date().toISOString()
-        }
-      })
+          timestamp: new Date().toISOString(),
+        },
+      }),
     });
 
     const opaResult = await opaResponse.json();
@@ -94,14 +94,14 @@ router.post('/preview-export', async (req, res) => {
       allowed: opaResult.result?.allow || false,
       reason: opaResult.result?.reason || 'Policy evaluation result',
       requiredStepUp: opaResult.result?.stepup_required || false,
-      dlpViolations: opaResult.result?.dlp_violations || []
+      dlpViolations: opaResult.result?.dlp_violations || [],
     });
   } catch (error) {
     console.error('Preview policy error:', error);
     res.status(500).json({
       allowed: false,
       reason: 'Error previewing policy: ' + error.message,
-      requiredStepUp: false
+      requiredStepUp: false,
     });
   }
 });
@@ -136,7 +136,7 @@ router.post('/explain', async (req, res) => {
   } catch (error) {
     console.error('Explanation error:', error);
     res.status(500).json({
-      explanation: 'Unable to generate explanation: ' + error.message
+      explanation: 'Unable to generate explanation: ' + error.message,
     });
   }
 });

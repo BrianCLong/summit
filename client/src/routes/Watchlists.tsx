@@ -74,7 +74,10 @@ export default function Watchlists() {
           <h3>Alerts</h3>
           <ul>
             {(alerts?.alerts || []).map((a: any) => (
-              <li key={a.id} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <li
+                key={a.id}
+                style={{ display: 'flex', gap: 8, alignItems: 'center' }}
+              >
                 <span>
                   {a.status} • {a.docHash} • {a.createdAt}
                 </span>
@@ -115,7 +118,9 @@ export default function Watchlists() {
             variant="contained"
             onClick={async () => {
               if (!caseId || !pendingAlert) return;
-              await addItem({ variables: { caseId, kind: 'ALERT', refId: pendingAlert.id } });
+              await addItem({
+                variables: { caseId, kind: 'ALERT', refId: pendingAlert.id },
+              });
               setCaseOpen(false);
               setCaseId('');
               setPendingAlert(null);

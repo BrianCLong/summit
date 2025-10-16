@@ -31,7 +31,13 @@ interface EvidenceItem {
   };
   chainOfCustody: Array<{
     timestamp: Date;
-    action: 'acquired' | 'transferred' | 'analyzed' | 'copied' | 'verified' | 'archived';
+    action:
+      | 'acquired'
+      | 'transferred'
+      | 'analyzed'
+      | 'copied'
+      | 'verified'
+      | 'archived';
     person: string;
     details: string;
     location: string;
@@ -81,7 +87,12 @@ interface ForensicCase {
   description: string;
   status: 'active' | 'on_hold' | 'completed' | 'archived' | 'closed';
   priority: 'low' | 'medium' | 'high' | 'critical';
-  category: 'criminal' | 'civil' | 'corporate' | 'compliance' | 'incident_response';
+  category:
+    | 'criminal'
+    | 'civil'
+    | 'corporate'
+    | 'compliance'
+    | 'incident_response';
   investigator: string;
   legalTeam: string[];
   createdDate: Date;
@@ -109,7 +120,12 @@ interface ForensicCase {
   };
   reports: Array<{
     id: string;
-    type: 'preliminary' | 'technical' | 'executive' | 'legal' | 'expert_testimony';
+    type:
+      | 'preliminary'
+      | 'technical'
+      | 'executive'
+      | 'legal'
+      | 'expert_testimony';
     status: 'draft' | 'review' | 'approved' | 'submitted';
     createdDate: Date;
     author: string;
@@ -187,7 +203,9 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
   const [analysisTasks, setAnalysisTasks] = useState<any[]>([]);
   const [selectedCase, setSelectedCase] = useState<ForensicCase | null>(null);
-  const [selectedEvidence, setSelectedEvidence] = useState<EvidenceItem | null>(null);
+  const [selectedEvidence, setSelectedEvidence] = useState<EvidenceItem | null>(
+    null,
+  );
   const [availableTools, setAvailableTools] = useState<AnalysisTool[]>([]);
   const [isAnalysisRunning, setIsAnalysisRunning] = useState(false);
   const [timelineFilter, setTimelineFilter] = useState<string>('all');
@@ -207,7 +225,8 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
         id: 'case-001',
         caseNumber: 'FC-2024-001',
         title: 'Corporate Data Breach Investigation',
-        description: 'Investigation of suspected data exfiltration by insider threat',
+        description:
+          'Investigation of suspected data exfiltration by insider threat',
         status: 'active',
         priority: 'critical',
         category: 'corporate',
@@ -222,7 +241,10 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
           jurisdictions: ['United States', 'European Union'],
           privacyLaws: ['GDPR', 'CCPA'],
           dataRetentionDays: 2555, // 7 years
-          admissibilityStandards: ['Federal Rules of Evidence', 'Daubert Standard'],
+          admissibilityStandards: [
+            'Federal Rules of Evidence',
+            'Daubert Standard',
+          ],
         },
         reports: [],
       },
@@ -230,7 +252,8 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
         id: 'case-002',
         caseNumber: 'FC-2024-002',
         title: 'Malware Analysis - APT Campaign',
-        description: 'Analysis of sophisticated malware used in targeted attack',
+        description:
+          'Analysis of sophisticated malware used in targeted attack',
         status: 'active',
         priority: 'high',
         category: 'incident_response',
@@ -252,7 +275,8 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
         id: 'case-003',
         caseNumber: 'FC-2024-003',
         title: 'Mobile Device Forensics - Fraud Case',
-        description: 'Forensic examination of mobile devices in financial fraud investigation',
+        description:
+          'Forensic examination of mobile devices in financial fraud investigation',
         status: 'completed',
         priority: 'medium',
         category: 'criminal',
@@ -266,7 +290,10 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
           jurisdictions: ['United States'],
           privacyLaws: ['Fourth Amendment'],
           dataRetentionDays: 3650, // 10 years
-          admissibilityStandards: ['Federal Rules of Evidence', 'Scientific Evidence Standards'],
+          admissibilityStandards: [
+            'Federal Rules of Evidence',
+            'Scientific Evidence Standards',
+          ],
         },
         reports: [
           {
@@ -308,16 +335,20 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
       type: evidenceTypes[Math.floor(Math.random() * evidenceTypes.length)],
       size: Math.floor(Math.random() * 1000000000) + 100000000, // 100MB - 1GB
       hash: {
-        md5: Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join(''),
-        sha1: Array.from({ length: 40 }, () => Math.floor(Math.random() * 16).toString(16)).join(
-          '',
-        ),
-        sha256: Array.from({ length: 64 }, () => Math.floor(Math.random() * 16).toString(16)).join(
-          '',
-        ),
+        md5: Array.from({ length: 32 }, () =>
+          Math.floor(Math.random() * 16).toString(16),
+        ).join(''),
+        sha1: Array.from({ length: 40 }, () =>
+          Math.floor(Math.random() * 16).toString(16),
+        ).join(''),
+        sha256: Array.from({ length: 64 }, () =>
+          Math.floor(Math.random() * 16).toString(16),
+        ).join(''),
       },
       metadata: {
-        acquisitionDate: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
+        acquisitionDate: new Date(
+          Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000,
+        ),
         acquisitionTool: ['EnCase', 'FTK Imager', 'dd', 'X-Ways', 'Cellebrite'][
           Math.floor(Math.random() * 5)
         ],
@@ -330,7 +361,9 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
       },
       chainOfCustody: [
         {
-          timestamp: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
+          timestamp: new Date(
+            Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000,
+          ),
           action: 'acquired',
           person: 'Digital Forensic Examiner',
           details: 'Evidence acquired using write-blocking hardware',
@@ -375,7 +408,9 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
 
     const mockEvents: TimelineEvent[] = Array.from({ length: 100 }, (_, i) => ({
       id: `event-${String(i + 1).padStart(3, '0')}`,
-      timestamp: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000),
+      timestamp: new Date(
+        Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000,
+      ),
       type: eventTypes[Math.floor(Math.random() * eventTypes.length)],
       source: `Evidence-${Math.floor(Math.random() * 7) + 1}`,
       description: `Timeline event ${i + 1} - ${eventTypes[Math.floor(Math.random() * eventTypes.length)].replace('_', ' ')}`,
@@ -386,12 +421,16 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
         process: `process${Math.floor(Math.random() * 10) + 1}.exe`,
         path: `/Users/user${Math.floor(Math.random() * 5) + 1}/Documents/file${Math.floor(Math.random() * 100) + 1}.txt`,
       },
-      relevance: ['high', 'medium', 'low'][Math.floor(Math.random() * 3)] as any,
+      relevance: ['high', 'medium', 'low'][
+        Math.floor(Math.random() * 3)
+      ] as any,
       flagged: Math.random() > 0.7,
       notes: [],
     }));
 
-    setTimelineEvents(mockEvents.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()));
+    setTimelineEvents(
+      mockEvents.sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime()),
+    );
   };
 
   const generateAvailableTools = () => {
@@ -402,7 +441,12 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
         category: 'disk_analysis',
         description: 'Open source digital forensics platform',
         supportedFormats: ['E01', 'DD', 'VMDK', 'VHD'],
-        features: ['Timeline Analysis', 'Keyword Search', 'Hash Analysis', 'Registry Analysis'],
+        features: [
+          'Timeline Analysis',
+          'Keyword Search',
+          'Hash Analysis',
+          'Registry Analysis',
+        ],
         licenseType: 'open_source',
         version: '4.19.3',
         lastUpdated: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
@@ -557,8 +601,10 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
 
   const filteredEvidenceItems = evidenceItems.filter((item) => {
     if (evidenceFilter === 'all') return true;
-    if (evidenceFilter === 'pending_analysis') return item.analysis.status === 'pending';
-    if (evidenceFilter === 'in_analysis') return item.analysis.status === 'in_progress';
+    if (evidenceFilter === 'pending_analysis')
+      return item.analysis.status === 'pending';
+    if (evidenceFilter === 'in_analysis')
+      return item.analysis.status === 'in_progress';
     return item.type === evidenceFilter;
   });
 
@@ -572,7 +618,9 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
             {selectedCase && (
               <div className="text-sm">
                 <span className="text-gray-600">Case:</span>
-                <span className="ml-2 font-medium">{selectedCase.caseNumber}</span>
+                <span className="ml-2 font-medium">
+                  {selectedCase.caseNumber}
+                </span>
               </div>
             )}
             <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">
@@ -604,7 +652,8 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
             onClick={() => setActiveView('analysis')}
             className={`px-4 py-2 rounded-md ${activeView === 'analysis' ? 'bg-blue-100 text-blue-700' : 'text-gray-600 hover:bg-gray-100'}`}
           >
-            🔬 Analysis ({analysisTasks.filter((t) => t.status === 'in_progress').length})
+            🔬 Analysis (
+            {analysisTasks.filter((t) => t.status === 'in_progress').length})
           </button>
           <button
             onClick={() => setActiveView('reports')}
@@ -629,8 +678,12 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
             <div className="bg-white rounded-lg border p-6">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h3 className="text-xl font-bold mb-2">{selectedCase.title}</h3>
-                  <p className="text-gray-600 mb-4">{selectedCase.description}</p>
+                  <h3 className="text-xl font-bold mb-2">
+                    {selectedCase.title}
+                  </h3>
+                  <p className="text-gray-600 mb-4">
+                    {selectedCase.description}
+                  </p>
                 </div>
                 <div className="flex flex-col items-end gap-2">
                   <span
@@ -663,7 +716,9 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
                 </div>
                 <div>
                   <span className="text-gray-600">Created:</span>
-                  <div className="font-medium">{selectedCase.createdDate.toLocaleDateString()}</div>
+                  <div className="font-medium">
+                    {selectedCase.createdDate.toLocaleDateString()}
+                  </div>
                 </div>
               </div>
 
@@ -680,15 +735,22 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
           {/* Quick Stats */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="bg-white rounded-lg border p-4">
-              <div className="text-2xl font-bold text-blue-600">{evidenceItems.length}</div>
+              <div className="text-2xl font-bold text-blue-600">
+                {evidenceItems.length}
+              </div>
               <div className="text-sm text-gray-600">Evidence Items</div>
               <div className="text-xs text-gray-500 mt-1">
-                {evidenceItems.filter((e) => e.analysis.status === 'pending').length} pending
-                analysis
+                {
+                  evidenceItems.filter((e) => e.analysis.status === 'pending')
+                    .length
+                }{' '}
+                pending analysis
               </div>
             </div>
             <div className="bg-white rounded-lg border p-4">
-              <div className="text-2xl font-bold text-green-600">{timelineEvents.length}</div>
+              <div className="text-2xl font-bold text-green-600">
+                {timelineEvents.length}
+              </div>
               <div className="text-sm text-gray-600">Timeline Events</div>
               <div className="text-xs text-gray-500 mt-1">
                 {timelineEvents.filter((e) => e.flagged).length} flagged events
@@ -700,11 +762,14 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
               </div>
               <div className="text-sm text-gray-600">Active Analysis</div>
               <div className="text-xs text-gray-500 mt-1">
-                {analysisTasks.filter((t) => t.status === 'pending').length} queued
+                {analysisTasks.filter((t) => t.status === 'pending').length}{' '}
+                queued
               </div>
             </div>
             <div className="bg-white rounded-lg border p-4">
-              <div className="text-2xl font-bold text-purple-600">{cases.length}</div>
+              <div className="text-2xl font-bold text-purple-600">
+                {cases.length}
+              </div>
               <div className="text-sm text-gray-600">Total Cases</div>
               <div className="text-xs text-gray-500 mt-1">
                 {cases.filter((c) => c.status === 'active').length} active
@@ -729,7 +794,9 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
                       </div>
                     </div>
                     <div className="text-right">
-                      <span className={`px-2 py-1 text-xs rounded ${getStatusColor(task.status)}`}>
+                      <span
+                        className={`px-2 py-1 text-xs rounded ${getStatusColor(task.status)}`}
+                      >
                         {task.status.replace('_', ' ')}
                       </span>
                       {task.status === 'in_progress' && (
@@ -752,7 +819,9 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
                 {evidenceItems.slice(0, 5).map((evidence) => (
                   <div key={evidence.id} className="p-3 border rounded-lg">
                     <div className="flex justify-between items-start mb-1">
-                      <span className="font-medium text-sm">{evidence.name}</span>
+                      <span className="font-medium text-sm">
+                        {evidence.name}
+                      </span>
                       <span className="text-xs text-gray-500">
                         {evidence.chainOfCustody[
                           evidence.chainOfCustody.length - 1
@@ -761,8 +830,17 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
                     </div>
                     <div className="text-xs text-gray-600">
                       Last action:{' '}
-                      {evidence.chainOfCustody[evidence.chainOfCustody.length - 1]?.action} by{' '}
-                      {evidence.chainOfCustody[evidence.chainOfCustody.length - 1]?.person}
+                      {
+                        evidence.chainOfCustody[
+                          evidence.chainOfCustody.length - 1
+                        ]?.action
+                      }{' '}
+                      by{' '}
+                      {
+                        evidence.chainOfCustody[
+                          evidence.chainOfCustody.length - 1
+                        ]?.person
+                      }
                     </div>
                   </div>
                 ))}
@@ -804,7 +882,8 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
                   <div>
                     <h4 className="font-semibold text-lg">{evidence.name}</h4>
                     <p className="text-sm text-gray-600 capitalize">
-                      {evidence.type.replace('_', ' ')} • {formatFileSize(evidence.size)}
+                      {evidence.type.replace('_', ' ')} •{' '}
+                      {formatFileSize(evidence.size)}
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-2">
@@ -830,21 +909,29 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
                   </div>
                   <div>
                     <span className="text-gray-600">Tool:</span>
-                    <div className="font-medium">{evidence.metadata.acquisitionTool}</div>
+                    <div className="font-medium">
+                      {evidence.metadata.acquisitionTool}
+                    </div>
                   </div>
                   <div>
                     <span className="text-gray-600">Examiner:</span>
-                    <div className="font-medium">{evidence.metadata.examiner}</div>
+                    <div className="font-medium">
+                      {evidence.metadata.examiner}
+                    </div>
                   </div>
                   <div>
                     <span className="text-gray-600">Case:</span>
-                    <div className="font-medium">{evidence.metadata.caseNumber}</div>
+                    <div className="font-medium">
+                      {evidence.metadata.caseNumber}
+                    </div>
                   </div>
                 </div>
 
                 <div className="text-xs">
                   <span className="text-gray-600">SHA256:</span>
-                  <span className="ml-2 font-mono">{evidence.hash.sha256.substring(0, 32)}...</span>
+                  <span className="ml-2 font-mono">
+                    {evidence.hash.sha256.substring(0, 32)}...
+                  </span>
                 </div>
 
                 {evidence.analysis.findings.length > 0 && (
@@ -905,32 +992,42 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
                       {event.type.replace('_', ' ').toUpperCase()}
                     </span>
                   </div>
-                  <div className="text-sm text-gray-500">{event.timestamp.toLocaleString()}</div>
+                  <div className="text-sm text-gray-500">
+                    {event.timestamp.toLocaleString()}
+                  </div>
                 </div>
 
                 <p className="text-sm mb-2">{event.description}</p>
 
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs text-gray-600">
                   <div>
-                    <span>Source:</span> <span className="font-medium">{event.source}</span>
+                    <span>Source:</span>{' '}
+                    <span className="font-medium">{event.source}</span>
                   </div>
                   <div>
                     <span>Confidence:</span>{' '}
-                    <span className="font-medium">{event.confidence.toFixed(1)}%</span>
+                    <span className="font-medium">
+                      {event.confidence.toFixed(1)}%
+                    </span>
                   </div>
                   <div>
-                    <span>Artifact:</span> <span className="font-medium">{event.artifact}</span>
+                    <span>Artifact:</span>{' '}
+                    <span className="font-medium">{event.artifact}</span>
                   </div>
                   {event.metadata.user && (
                     <div>
-                      <span>User:</span> <span className="font-medium">{event.metadata.user}</span>
+                      <span>User:</span>{' '}
+                      <span className="font-medium">{event.metadata.user}</span>
                     </div>
                   )}
                 </div>
 
                 {event.metadata.path && (
                   <div className="mt-2 text-xs text-gray-600">
-                    <span>Path:</span> <span className="font-mono ml-1">{event.metadata.path}</span>
+                    <span>Path:</span>{' '}
+                    <span className="font-mono ml-1">
+                      {event.metadata.path}
+                    </span>
                   </div>
                 )}
               </div>
@@ -955,7 +1052,9 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
                         {task.tool} on {task.evidence}
                       </p>
                     </div>
-                    <span className={`px-2 py-1 text-xs rounded ${getStatusColor(task.status)}`}>
+                    <span
+                      className={`px-2 py-1 text-xs rounded ${getStatusColor(task.status)}`}
+                    >
                       {task.status.replace('_', ' ').toUpperCase()}
                     </span>
                   </div>
@@ -1013,7 +1112,9 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
                   <h4 className="font-semibold">{tool.name}</h4>
                   <span
                     className={`px-2 py-1 text-xs rounded ${
-                      tool.isInstalled ? 'text-green-700 bg-green-100' : 'text-gray-700 bg-gray-100'
+                      tool.isInstalled
+                        ? 'text-green-700 bg-green-100'
+                        : 'text-gray-700 bg-gray-100'
                     }`}
                   >
                     {tool.isInstalled ? 'INSTALLED' : 'NOT INSTALLED'}
@@ -1024,7 +1125,9 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
 
                 <div className="mb-3">
                   <span className="text-xs text-gray-500">Category:</span>
-                  <span className="ml-2 text-sm capitalize">{tool.category.replace('_', ' ')}</span>
+                  <span className="ml-2 text-sm capitalize">
+                    {tool.category.replace('_', ' ')}
+                  </span>
                 </div>
 
                 <div className="mb-3">
@@ -1040,10 +1143,15 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
                 </div>
 
                 <div className="mb-4">
-                  <span className="text-xs text-gray-500 block mb-1">Supported Formats:</span>
+                  <span className="text-xs text-gray-500 block mb-1">
+                    Supported Formats:
+                  </span>
                   <div className="flex flex-wrap gap-1">
                     {tool.supportedFormats.map((format) => (
-                      <span key={format} className="px-2 py-1 bg-gray-100 text-xs rounded">
+                      <span
+                        key={format}
+                        className="px-2 py-1 bg-gray-100 text-xs rounded"
+                      >
                         {format}
                       </span>
                     ))}
@@ -1085,10 +1193,13 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
                 >
                   <h4 className="font-medium mb-2">{reportType}</h4>
                   <p className="text-sm text-gray-600 mb-3">
-                    Generate a comprehensive {reportType.toLowerCase()} for the current case
+                    Generate a comprehensive {reportType.toLowerCase()} for the
+                    current case
                   </p>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-500">Auto-generated</span>
+                    <span className="text-xs text-gray-500">
+                      Auto-generated
+                    </span>
                     <span className="text-blue-600 text-sm">Generate →</span>
                   </div>
                 </button>
@@ -1107,17 +1218,26 @@ const DigitalForensicsWorkbench: React.FC<DigitalForensicsWorkbenchProps> = ({
                       {report.type.replace('_', ' ').toUpperCase()}
                     </div>
                     <div className="text-xs text-gray-600">
-                      {report.author} • {report.createdDate.toLocaleDateString()}
+                      {report.author} •{' '}
+                      {report.createdDate.toLocaleDateString()}
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className={`px-2 py-1 text-xs rounded ${getStatusColor(report.status)}`}>
+                    <span
+                      className={`px-2 py-1 text-xs rounded ${getStatusColor(report.status)}`}
+                    >
                       {report.status.toUpperCase()}
                     </span>
-                    <button className="text-blue-600 text-sm hover:underline">View</button>
+                    <button className="text-blue-600 text-sm hover:underline">
+                      View
+                    </button>
                   </div>
                 </div>
-              )) || <p className="text-gray-500 text-sm">No reports generated yet</p>}
+              )) || (
+                <p className="text-gray-500 text-sm">
+                  No reports generated yet
+                </p>
+              )}
             </div>
           </div>
         </div>

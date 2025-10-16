@@ -11,14 +11,17 @@ export type HttpServerConfig = {
 
 export async function httpServer(
   server: McpServer,
-  config: HttpServerConfig
+  config: HttpServerConfig,
 ): Promise<http.Server> {
   const basePath = config.basePath ?? '/mcp';
   const messagePath = `${basePath}/messages`;
   let activeTransport: SSEServerTransport | null = null;
 
   const nodeServer = http.createServer(async (req, res) => {
-    const requestUrl = new URL(req.url ?? '/', `http://${req.headers.host ?? 'localhost'}`);
+    const requestUrl = new URL(
+      req.url ?? '/',
+      `http://${req.headers.host ?? 'localhost'}`,
+    );
 
     if (req.method === 'GET' && requestUrl.pathname === basePath) {
       if (activeTransport) {
@@ -49,7 +52,11 @@ export async function httpServer(
 
     if (req.method === 'POST' && requestUrl.pathname === messagePath) {
       const sessionId = requestUrl.searchParams.get('sessionId');
-      if (!sessionId || !activeTransport || activeTransport.sessionId !== sessionId) {
+      if (
+        !sessionId ||
+        !activeTransport ||
+        activeTransport.sessionId !== sessionId
+      ) {
         res.statusCode = 404;
         res.end('Session not found');
         return;

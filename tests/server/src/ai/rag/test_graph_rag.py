@@ -1,13 +1,13 @@
-
-import unittest
 import os
 import sys
+import unittest
 
 # Add the project root to sys.path to allow absolute imports
-project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../../'))
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../../"))
 sys.path.insert(0, project_root)
 
-from server.src.ai.rag.graph_rag import query_graph_with_rag, block_publish_if_citations_missing
+from server.src.ai.rag.graph_rag import block_publish_if_citations_missing, query_graph_with_rag
+
 
 class TestGraphRagStubs(unittest.TestCase):
 
@@ -42,5 +42,6 @@ class TestGraphRagStubs(unittest.TestCase):
         content = {"answer": "Some answer", "citations": ["citation1"]}
         self.assertFalse(block_publish_if_citations_missing(content))
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

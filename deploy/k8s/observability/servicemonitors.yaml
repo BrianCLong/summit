@@ -5,7 +5,7 @@ metadata:
   namespace: observability
   labels: { release: kube-prometheus-stack }
 spec:
-  namespaceSelector: { matchNames: ["companyos-core"] }
+  namespaceSelector: { matchNames: ['companyos-core'] }
   selector: { matchLabels: { app: api } }
   endpoints:
     - port: http
@@ -19,7 +19,7 @@ metadata:
   namespace: observability
   labels: { release: kube-prometheus-stack }
 spec:
-  namespaceSelector: { matchNames: ["companyos-core"] }
+  namespaceSelector: { matchNames: ['companyos-core'] }
   selector: { matchLabels: { app: workers } }
   endpoints:
     - port: http
@@ -48,7 +48,7 @@ metadata:
   namespace: observability
   labels: { release: kube-prometheus-stack }
 spec:
-  namespaceSelector: { matchNames: ["companyos-media"] }
+  namespaceSelector: { matchNames: ['companyos-media'] }
   selector: { matchLabels: { app: asr-bridge } }
   endpoints:
     - port: http

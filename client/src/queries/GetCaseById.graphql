@@ -1,3 +1,8 @@
 query GetCaseById($id: ID!) {
-  caseById(id: $id) { id title createdAt status }
+  caseById(id: $id) {
+    id
+    title
+    createdAt
+    status
+  }
 }

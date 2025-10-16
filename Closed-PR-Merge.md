@@ -8,33 +8,29 @@ We’ll run a focused 7-day sprint to **intelligently merge the most recent clos
 
 ## What I reviewed (inputs)
 
-* **Council Wishbooks**: end-state capabilities, governance, ops targets, acceptance patterns. These drive our quality gates (provenance, policy-by-default, audit, SLOs) and inform what *must not* regress while merging. &#x20;
-* **Repo (BrianCLong/summit)**: active IntelGraph codebase with 800+ closed PRs; 5 open currently. Recent closed/merged PRs include infra and dependency upgrades plus consolidation attempts:
-
-  * **#1280** “feat(ga): CI/ops hardening (conflict-free from ga-core)” → *merged Sep 18, 2025*. ([GitHub][1])
-  * **#1279** “feat(ga): artifacts pack for v1.0.0” → *closed Sep 18 (not merged)*. ([GitHub][1])
-  * **#1278/#1277** Sprint 25 Day-1 deliverables → *merged Sep 19*. ([GitHub][1])
-  * **#1266/#1267** CI finalization + Codepacks IV-X → *merged Sep 16–17*. ([GitHub][1])
-  * **#1261/#1260/#1259** consolidation attempts (express\@5/eslint\@9, rebrand, “merge conflict-free branches and PRs into main”) → *closed without merge Sep 19*. ([GitHub][1])
-  * Notable dep bumps merged: **vite\@7**, **react-leaflet\@5**, **lru-cache\@11**, **ts-jest\@29.4.2**. ([GitHub][1])
+- **Council Wishbooks**: end-state capabilities, governance, ops targets, acceptance patterns. These drive our quality gates (provenance, policy-by-default, audit, SLOs) and inform what _must not_ regress while merging. &#x20;
+- **Repo (BrianCLong/summit)**: active IntelGraph codebase with 800+ closed PRs; 5 open currently. Recent closed/merged PRs include infra and dependency upgrades plus consolidation attempts:
+  - **#1280** “feat(ga): CI/ops hardening (conflict-free from ga-core)” → _merged Sep 18, 2025_. ([GitHub][1])
+  - **#1279** “feat(ga): artifacts pack for v1.0.0” → _closed Sep 18 (not merged)_. ([GitHub][1])
+  - **#1278/#1277** Sprint 25 Day-1 deliverables → _merged Sep 19_. ([GitHub][1])
+  - **#1266/#1267** CI finalization + Codepacks IV-X → _merged Sep 16–17_. ([GitHub][1])
+  - **#1261/#1260/#1259** consolidation attempts (express\@5/eslint\@9, rebrand, “merge conflict-free branches and PRs into main”) → _closed without merge Sep 19_. ([GitHub][1])
+  - Notable dep bumps merged: **vite\@7**, **react-leaflet\@5**, **lru-cache\@11**, **ts-jest\@29.4.2**. ([GitHub][1])
 
 ---
 
 ## Highest-priority merge targets (why these first)
 
 1. **Consolidation & CI Hardening**
-
-   * \#1280 (merged) sets the CI/ops baseline; we must **stack** subsequent merges atop it to avoid re-breaking pipelines. ([GitHub][1])
-   * Re-hydrate closed-but-valuable PRs: **#1279 artifacts pack**, **#1261 express5/eslint9**, **#1260 rebrand**, **#1259 conflict-free mega** — these likely failed due to timing/drift; we’ll cherry-pick their diffs into the sprint consolidation branch. ([GitHub][1])
+   - \#1280 (merged) sets the CI/ops baseline; we must **stack** subsequent merges atop it to avoid re-breaking pipelines. ([GitHub][1])
+   - Re-hydrate closed-but-valuable PRs: **#1279 artifacts pack**, **#1261 express5/eslint9**, **#1260 rebrand**, **#1259 conflict-free mega** — these likely failed due to timing/drift; we’ll cherry-pick their diffs into the sprint consolidation branch. ([GitHub][1])
 
 2. **Breaking Upgrades that affect runtime & DX**
-
-   * **express\@5** (routing/handler changes, error middlewares) + **eslint\@9** ruleset shifts → fix surface area across `server`. ([GitHub][1])
-   * **vite\@7** + **react-leaflet\@5** (Leaflet context changes) + **OTel SDK jumps** → ensure build/telemetry remain green. ([GitHub][1])
+   - **express\@5** (routing/handler changes, error middlewares) + **eslint\@9** ruleset shifts → fix surface area across `server`. ([GitHub][1])
+   - **vite\@7** + **react-leaflet\@5** (Leaflet context changes) + **OTel SDK jumps** → ensure build/telemetry remain green. ([GitHub][1])
 
 3. **Governance/Provenance non-negotiables** (from Wishbooks)
-
-   * Preserve **Provenance & Claim Ledger**, **ABAC/OPA**, **audit immutability**, and **export manifests**; anything that touches data flows must ship with **policy-by-default** and **verifiable lineage**. &#x20;
+   - Preserve **Provenance & Claim Ledger**, **ABAC/OPA**, **audit immutability**, and **export manifests**; anything that touches data flows must ship with **policy-by-default** and **verifiable lineage**. &#x20;
 
 ---
 
@@ -48,43 +44,42 @@ Produce **one** “consolidated, policy-clean, CI-green” PR to `main` that int
 
 #### A) Consolidation Branch & Deterministic Cherry-pick (Day 1–2)
 
-* Create: `feature/merge-closed-prs-s25`.
-* For each PR below, **fetch PR ref**, compute `git range-diff` vs `HEAD@main`, cherry-pick in dependency-safe order; open small stack PRs into the consolidation branch; keep one **tracking issue** with checkboxes and links. Targets:
+- Create: `feature/merge-closed-prs-s25`.
+- For each PR below, **fetch PR ref**, compute `git range-diff` vs `HEAD@main`, cherry-pick in dependency-safe order; open small stack PRs into the consolidation branch; keep one **tracking issue** with checkboxes and links. Targets:
+  - **#1279** artifacts pack v1.0.0 → reinstate packaging & publish steps gated by SBOM/provenance. ([GitHub][1])
+  - **#1261** server deps (express5/eslint9) → adapt middleware, error handling, and tests. ([GitHub][1])
+  - **#1260** rebrand: rename impacts in docs/UI, ensure **provenance manifesto** not broken. ([GitHub][1])
+  - **#1259** conflict-free merge bundle: mine for commits not already in `main`; cherry-pick survivors. ([GitHub][1])
 
-  * **#1279** artifacts pack v1.0.0 → reinstate packaging & publish steps gated by SBOM/provenance. ([GitHub][1])
-  * **#1261** server deps (express5/eslint9) → adapt middleware, error handling, and tests. ([GitHub][1])
-  * **#1260** rebrand: rename impacts in docs/UI, ensure **provenance manifesto** not broken. ([GitHub][1])
-  * **#1259** conflict-free merge bundle: mine for commits not already in `main`; cherry-pick survivors. ([GitHub][1])
-* Keep **#1280** as base (already merged). ([GitHub][1])
+- Keep **#1280** as base (already merged). ([GitHub][1])
 
 #### B) Breakage Remediation & Test Upgrades (Day 2–4)
 
-* **Express 5**: update route signatures, async error propagation, finalize `app.use((err,req,res,next)=>{...})` ordering; tighten schema validation; refresh **Supertest/Jest** suites. (Impacts: `server/*`, `openapi/*`.)
-* **ESLint 9**: adopt flat config; align TS parser/plugins; add suppressions only with JSDoc rationale.
-* **Vite 7 / React-Leaflet 5**: adjust map initialization/context; re-verify **tri-pane map** interactions (Wishbook I-Frontend experience).&#x20;
-* **OpenTelemetry jumps**: keep resource/service.name stable; verify traces/metrics dashboards (Grafana Release Health per #1086 linkage). ([GitHub][2])
+- **Express 5**: update route signatures, async error propagation, finalize `app.use((err,req,res,next)=>{...})` ordering; tighten schema validation; refresh **Supertest/Jest** suites. (Impacts: `server/*`, `openapi/*`.)
+- **ESLint 9**: adopt flat config; align TS parser/plugins; add suppressions only with JSDoc rationale.
+- **Vite 7 / React-Leaflet 5**: adjust map initialization/context; re-verify **tri-pane map** interactions (Wishbook I-Frontend experience).&#x20;
+- **OpenTelemetry jumps**: keep resource/service.name stable; verify traces/metrics dashboards (Grafana Release Health per #1086 linkage). ([GitHub][2])
 
 #### C) Governance & Provenance Gates (Day 3–5)
 
 Map to Wishbook acceptance patterns:
 
-* **Policy-by-Default**: OPA policies must block unsafe exports; add **simulation tests** for policy changes (Wishbook F/G).&#x20;
-* **Provenance Integrity**: ensure artifacts pack (#1279) embeds **hash manifests** and **transform chains**; verify external verifier script passes.&#x20;
-* **Audit Completeness**: CI enforces “who/what/why/when” for migration scripts; ensure legal basis tags preserved on entities/edges.&#x20;
+- **Policy-by-Default**: OPA policies must block unsafe exports; add **simulation tests** for policy changes (Wishbook F/G).&#x20;
+- **Provenance Integrity**: ensure artifacts pack (#1279) embeds **hash manifests** and **transform chains**; verify external verifier script passes.&#x20;
+- **Audit Completeness**: CI enforces “who/what/why/when” for migration scripts; ensure legal basis tags preserved on entities/edges.&#x20;
 
 #### D) CI/CD & Observability (Day 4–6)
 
-* Re-run **Codepacks IV-X** & finalization kit (#1266/#1267) after cherry-picks; freeze versions. ([GitHub][1])
-* Ensure **playwright smoke pack** + **contract tests** pass; seed **GraphQL N-1/N-2 schema baselines** so future breaking field changes get caught (see #1085). ([GitHub][2])
-* Publish **SBOMs**, sign artifacts, and push **SLO dashboards** for p95 query and ingest. (Targets from Wishbook Non-Functional/Observability.)&#x20;
+- Re-run **Codepacks IV-X** & finalization kit (#1266/#1267) after cherry-picks; freeze versions. ([GitHub][1])
+- Ensure **playwright smoke pack** + **contract tests** pass; seed **GraphQL N-1/N-2 schema baselines** so future breaking field changes get caught (see #1085). ([GitHub][2])
+- Publish **SBOMs**, sign artifacts, and push **SLO dashboards** for p95 query and ingest. (Targets from Wishbook Non-Functional/Observability.)&#x20;
 
 #### E) Release PR & Rollback (Day 7)
 
-* Open **“merge/all-closed-PRs-s25”** → `main` with:
-
-  * **Checklist** (governance/ops/XAI), **diff stats**, **range-diff transcript**, **security notes**.
-  * **Disclosure bundle**: provenance manifest + hashes.&#x20;
-  * **Rollback plan**: tag pre-merge, one-click revert script, and data migration down-paths.
+- Open **“merge/all-closed-PRs-s25”** → `main` with:
+  - **Checklist** (governance/ops/XAI), **diff stats**, **range-diff transcript**, **security notes**.
+  - **Disclosure bundle**: provenance manifest + hashes.&#x20;
+  - **Rollback plan**: tag pre-merge, one-click revert script, and data migration down-paths.
 
 ---
 
@@ -104,19 +99,19 @@ Map to Wishbook acceptance patterns:
 
 ## Guardrails & acceptance (derived from Wishbooks)
 
-* **Policy-by-Default**: blocked attempts show human-readable reason & appeal path; we keep unit tests that assert policy messages.&#x20;
-* **Provenance Integrity**: export bundles include **hash manifests**; verifier passes; CI fails otherwise.&#x20;
-* **SLOs**: p95 graph query < 1.5s; ingest E2E < 5m for 10k docs; prove with dashboards post-merge.&#x20;
-* **Audit & Ethics**: immutable audit entries and reason-for-access prompts remain intact in all changed flows.&#x20;
+- **Policy-by-Default**: blocked attempts show human-readable reason & appeal path; we keep unit tests that assert policy messages.&#x20;
+- **Provenance Integrity**: export bundles include **hash manifests**; verifier passes; CI fails otherwise.&#x20;
+- **SLOs**: p95 graph query < 1.5s; ingest E2E < 5m for 10k docs; prove with dashboards post-merge.&#x20;
+- **Audit & Ethics**: immutable audit entries and reason-for-access prompts remain intact in all changed flows.&#x20;
 
 ---
 
 ## Risks & mitigations
 
-* **Express 5 breakages** (route/error semantics): *Mitigation*: targeted refactors, Supertest coverage, canary in staging. ([GitHub][1])
-* **Vite 7 & React-Leaflet 5** (build & map context changes): *Mitigation*: e2e map interactions in tri-pane; perf check TTFI. ([GitHub][1])
-* **OTel version drift** (0.203–0.205+): *Mitigation*: lock deps, validate traces; update Grafana/alerts. ([GitHub][1])
-* **Policy/License regressions**: *Mitigation*: license/TOS engine tests at export; provenance checks in CI.&#x20;
+- **Express 5 breakages** (route/error semantics): _Mitigation_: targeted refactors, Supertest coverage, canary in staging. ([GitHub][1])
+- **Vite 7 & React-Leaflet 5** (build & map context changes): _Mitigation_: e2e map interactions in tri-pane; perf check TTFI. ([GitHub][1])
+- **OTel version drift** (0.203–0.205+): _Mitigation_: lock deps, validate traces; update Grafana/alerts. ([GitHub][1])
+- **Policy/License regressions**: _Mitigation_: license/TOS engine tests at export; provenance checks in CI.&#x20;
 
 ---
 
@@ -130,14 +125,14 @@ Map to Wishbook acceptance patterns:
 
 ## Suggested commit/branch choreography
 
-* Branch: `feature/merge-closed-prs-s25`
-* Stacks:
+- Branch: `feature/merge-closed-prs-s25`
+- Stacks:
+  - `stack/express5-eslint9` → server + lint refactors
+  - `stack/artifacts-pack-v1` → packaging + signing + manifest verifier
+  - `stack/client-vite7-leaflet5` → UI build + map fixes
+  - `stack/rebrand-docs` → docs/site + provenance references
 
-  * `stack/express5-eslint9` → server + lint refactors
-  * `stack/artifacts-pack-v1` → packaging + signing + manifest verifier
-  * `stack/client-vite7-leaflet5` → UI build + map fixes
-  * `stack/rebrand-docs` → docs/site + provenance references
-* Final: `release/s25-closed-merge` → PR to `main` with **blocked-on** checks: SBOM, Playwright, contract tests, policy simulation.
+- Final: `release/s25-closed-merge` → PR to `main` with **blocked-on** checks: SBOM, Playwright, contract tests, policy simulation.
 
 ---
 
@@ -158,10 +153,10 @@ This sprint explicitly protects the **Provenance > Prediction** ethos, **Compart
 3. Any constraints on **Express 5** adoption timing (e.g., must keep a compatibility shim for one release)? ([GitHub][1])
 4. Are there additional **closed PRs** you specifically want prioritized beyond the four listed? If yes, list numbers and I’ll fold them into the stack. ([GitHub][1])
 
-*References: GitHub PR state & titles as of Sep 18–19, 2025; Council Wishbooks for acceptance/guardrails.* ([GitHub][1]) &#x20;
+_References: GitHub PR state & titles as of Sep 18–19, 2025; Council Wishbooks for acceptance/guardrails._ ([GitHub][1]) &#x20;
 
-[1]: https://github.com/BrianCLong/summit/pulls?q=is%3Apr+is%3Aclosed "Pull requests · BrianCLong/summit · GitHub"
-[2]: https://github.com/BrianCLong/summit/pulls "Pull requests · BrianCLong/summit · GitHub"
+[1]: https://github.com/BrianCLong/summit/pulls?q=is%3Apr+is%3Aclosed 'Pull requests · BrianCLong/summit · GitHub'
+[2]: https://github.com/BrianCLong/summit/pulls 'Pull requests · BrianCLong/summit · GitHub'
 
 Awesome — moving straight into execution. Here’s the **ready-to-run sprint kit** to intelligently merge those closed PRs, remediate breaking changes, and ship the consolidated release PR.
 
@@ -234,7 +229,7 @@ git push -u origin ${CONSOLIDATION_BRANCH}
 
 # 2) Open stacked PRs into the consolidation branch
 
-We’ll keep changes reviewable by opening **stacked PRs** *into* `feature/merge-closed-prs-s25`, not `main` yet.
+We’ll keep changes reviewable by opening **stacked PRs** _into_ `feature/merge-closed-prs-s25`, not `main` yet.
 
 ```bash
 # Each stack is a small, focused PR targeting the consolidation branch
@@ -283,37 +278,40 @@ gh pr create --repo $REPO --base $CONSOLIDATION_BRANCH --head stack/rebrand-docs
 `server/app.ts`
 
 ```ts
-import express, { Request, Response, NextFunction } from "express";
-import helmet from "helmet";
-import cors from "cors";
+import express, { Request, Response, NextFunction } from 'express';
+import helmet from 'helmet';
+import cors from 'cors';
 
 export const createApp = () => {
   const app = express();
 
   app.use(helmet());
   app.use(cors({ origin: true, credentials: true }));
-  app.use(express.json({ limit: "2mb" }));
+  app.use(express.json({ limit: '2mb' }));
 
   // Routes
-  app.get("/healthz", async (_req: Request, res: Response) => {
+  app.get('/healthz', async (_req: Request, res: Response) => {
     return res.status(200).json({ ok: true });
   });
 
-  app.post("/api/entities", async (req: Request, res: Response) => {
+  app.post('/api/entities', async (req: Request, res: Response) => {
     const { type, props } = req.body ?? {};
-    if (!type) throw new Error("Entity type is required");
+    if (!type) throw new Error('Entity type is required');
     // … create entity …
-    return res.status(201).json({ id: "ent_123", type, props });
+    return res.status(201).json({ id: 'ent_123', type, props });
   });
 
   // 404 (must come after routes)
-  app.use((_req, res) => res.status(404).json({ error: "Not Found" }));
+  app.use((_req, res) => res.status(404).json({ error: 'Not Found' }));
 
   // Error handler — final middleware
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.statusCode || 500;
-    const code = err.code || "INTERNAL_ERROR";
-    const message = process.env.NODE_ENV === "production" ? "Internal error" : (err.message || String(err));
+    const code = err.code || 'INTERNAL_ERROR';
+    const message =
+      process.env.NODE_ENV === 'production'
+        ? 'Internal error'
+        : err.message || String(err);
     // structured error for audit consistency
     res.status(status).json({ error: { code, message } });
   });
@@ -325,8 +323,8 @@ export const createApp = () => {
 `server/index.ts`
 
 ```ts
-import { createServer } from "http";
-import { createApp } from "./app";
+import { createServer } from 'http';
+import { createApp } from './app';
 
 const port = Number(process.env.PORT || 8080);
 const app = createApp();
@@ -334,7 +332,7 @@ const httpServer = createServer(app);
 
 httpServer.listen(port, () => {
   // structured boot log
-  console.log(JSON.stringify({ msg: "server_listening", port }));
+  console.log(JSON.stringify({ msg: 'server_listening', port }));
 });
 ```
 
@@ -343,26 +341,26 @@ httpServer.listen(port, () => {
 `server/__tests__/app.spec.ts`
 
 ```ts
-import request from "supertest";
-import { createApp } from "../app";
+import request from 'supertest';
+import { createApp } from '../app';
 
-describe("Express5 app", () => {
+describe('Express5 app', () => {
   const app = createApp();
 
-  it("GET /healthz → 200", async () => {
-    const res = await request(app).get("/healthz");
+  it('GET /healthz → 200', async () => {
+    const res = await request(app).get('/healthz');
     expect(res.status).toBe(200);
     expect(res.body.ok).toBe(true);
   });
 
-  it("POST /api/entities without type → 500 structured error", async () => {
-    const res = await request(app).post("/api/entities").send({ props: {} });
+  it('POST /api/entities without type → 500 structured error', async () => {
+    const res = await request(app).post('/api/entities').send({ props: {} });
     expect(res.status).toBe(500);
-    expect(res.body.error.code).toBe("INTERNAL_ERROR");
+    expect(res.body.error.code).toBe('INTERNAL_ERROR');
   });
 
-  it("GET /nope → 404", async () => {
-    const res = await request(app).get("/nope");
+  it('GET /nope → 404', async () => {
+    const res = await request(app).get('/nope');
     expect(res.status).toBe(404);
   });
 });
@@ -376,24 +374,27 @@ Remove `.eslintrc.*` and add `eslint.config.mjs`:
 
 ```js
 // eslint.config.mjs
-import js from "@eslint/js";
-import ts from "typescript-eslint";
-import globals from "globals";
+import js from '@eslint/js';
+import ts from 'typescript-eslint';
+import globals from 'globals';
 
 export default [
-  { ignores: ["dist/**", "coverage/**", "**/*.generated.*"] },
+  { ignores: ['dist/**', 'coverage/**', '**/*.generated.*'] },
   js.configs.recommended,
   ...ts.configs.recommended,
   {
     languageOptions: {
       ecmaVersion: 2023,
       globals: { ...globals.node, ...globals.browser },
-      parserOptions: { project: ["tsconfig.json"] },
+      parserOptions: { project: ['tsconfig.json'] },
     },
     rules: {
-      "no-console": ["warn", { allow: ["warn", "error"] }],
-      "no-implicit-coercion": "error",
-      "@typescript-eslint/consistent-type-imports": ["error", { fixStyle: "inline-type-imports" }],
+      'no-console': ['warn', { allow: ['warn', 'error'] }],
+      'no-implicit-coercion': 'error',
+      '@typescript-eslint/consistent-type-imports': [
+        'error',
+        { fixStyle: 'inline-type-imports' },
+      ],
     },
   },
 ];
@@ -425,13 +426,13 @@ Update `package.json` scripts:
 `vite.config.ts`
 
 ```ts
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
   server: { port: 5173, strictPort: true },
-  build: { sourcemap: true, target: "es2020" }
+  build: { sourcemap: true, target: 'es2020' },
 });
 ```
 
@@ -440,16 +441,16 @@ export default defineConfig({
 `client/src/map/IntelGraphMap.tsx`
 
 ```tsx
-import { MapContainer, TileLayer } from "react-leaflet";
-import "leaflet/dist/leaflet.css";
+import { MapContainer, TileLayer } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 
 export default function IntelGraphMap() {
   return (
-    <div data-testid="map-root" style={{ width: "100%", height: "100%" }}>
+    <div data-testid="map-root" style={{ width: '100%', height: '100%' }}>
       <MapContainer center={[37.7749, -122.4194]} zoom={12} preferCanvas>
         <TileLayer
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; OpenStreetMap'
+          attribution="&copy; OpenStreetMap"
         />
         {/* layers / markers go here */}
       </MapContainer>
@@ -463,31 +464,36 @@ export default function IntelGraphMap() {
 `e2e/map.spec.ts`
 
 ```ts
-import { test, expect } from "@playwright/test";
+import { test, expect } from '@playwright/test';
 
-test.describe("Map", () => {
-  test("renders and loads tiles", async ({ page }) => {
-    await page.goto("/");
+test.describe('Map', () => {
+  test('renders and loads tiles', async ({ page }) => {
+    await page.goto('/');
 
-    const mapRoot = page.getByTestId("map-root");
+    const mapRoot = page.getByTestId('map-root');
     await expect(mapRoot).toBeVisible();
 
     // Wait until Leaflet signals _loaded (React-Leaflet v5 exposes the container element)
-    await page.waitForFunction(() => {
-      const el = document.querySelector(".leaflet-container");
-      if (!el) return false;
-      const anyWin = window as any;
-      // find the Leaflet map from DOM (Leaflet attaches _leaflet_id to container)
-      const hasMap = !!(el as any)._leaflet_id;
-      // heuristically wait until at least one tile img is complete
-      const tiles = Array.from(document.querySelectorAll(".leaflet-tile"));
-      const ready = tiles.some((img: any) => img.complete && img.naturalWidth > 0);
-      return hasMap && ready;
-    }, { timeout: 15000 });
+    await page.waitForFunction(
+      () => {
+        const el = document.querySelector('.leaflet-container');
+        if (!el) return false;
+        const anyWin = window as any;
+        // find the Leaflet map from DOM (Leaflet attaches _leaflet_id to container)
+        const hasMap = !!(el as any)._leaflet_id;
+        // heuristically wait until at least one tile img is complete
+        const tiles = Array.from(document.querySelectorAll('.leaflet-tile'));
+        const ready = tiles.some(
+          (img: any) => img.complete && img.naturalWidth > 0,
+        );
+        return hasMap && ready;
+      },
+      { timeout: 15000 },
+    );
 
     // simple interaction sanity: move map by keyboard pan (if enabled)
-    await page.keyboard.press("ArrowRight");
-    await expect(page.locator(".leaflet-pane")).toBeVisible();
+    await page.keyboard.press('ArrowRight');
+    await expect(page.locator('.leaflet-pane')).toBeVisible();
   });
 });
 ```
@@ -502,9 +508,9 @@ test.describe("Map", () => {
 name: ci
 on:
   pull_request:
-    branches: [ main, feature/merge-closed-prs-s25 ]
+    branches: [main, feature/merge-closed-prs-s25]
   push:
-    branches: [ feature/merge-closed-prs-s25, stack/** ]
+    branches: [feature/merge-closed-prs-s25, stack/**]
 jobs:
   build_test:
     runs-on: ubuntu-22.04
@@ -572,29 +578,36 @@ jobs:
 
 ```js
 #!/usr/bin/env node
-const fs = require("fs");
-const crypto = require("crypto");
+const fs = require('fs');
+const crypto = require('crypto');
 
 function sha256(path) {
   const buf = fs.readFileSync(path);
-  return crypto.createHash("sha256").update(buf).digest("hex");
+  return crypto.createHash('sha256').update(buf).digest('hex');
 }
 
 const files = [
-  "package.json",
-  "pnpm-lock.yaml",
-  "dist/server/index.js",
-  "dist/client/assets/index.js"
-].filter(f => fs.existsSync(f));
+  'package.json',
+  'pnpm-lock.yaml',
+  'dist/server/index.js',
+  'dist/client/assets/index.js',
+].filter((f) => fs.existsSync(f));
 
 const manifest = {
-  schema: "intelgraph.provenance/v1",
+  schema: 'intelgraph.provenance/v1',
   createdAt: new Date().toISOString(),
   git: {
-    commit: process.env.GITHUB_SHA || require("child_process").execSync("git rev-parse HEAD").toString().trim(),
-    branch: process.env.GITHUB_REF_NAME || require("child_process").execSync("git rev-parse --abbrev-ref HEAD").toString().trim()
+    commit:
+      process.env.GITHUB_SHA ||
+      require('child_process').execSync('git rev-parse HEAD').toString().trim(),
+    branch:
+      process.env.GITHUB_REF_NAME ||
+      require('child_process')
+        .execSync('git rev-parse --abbrev-ref HEAD')
+        .toString()
+        .trim(),
   },
-  artifacts: files.map(f => ({ path: f, sha256: sha256(f) }))
+  artifacts: files.map((f) => ({ path: f, sha256: sha256(f) })),
 };
 
 process.stdout.write(JSON.stringify(manifest, null, 2));
@@ -604,11 +617,11 @@ process.stdout.write(JSON.stringify(manifest, null, 2));
 
 ```js
 #!/usr/bin/env node
-const fs = require("fs");
-const crypto = require("crypto");
+const fs = require('fs');
+const crypto = require('crypto');
 
-const path = process.argv[2] || "provenance.json";
-const p = JSON.parse(fs.readFileSync(path, "utf8"));
+const path = process.argv[2] || 'provenance.json';
+const p = JSON.parse(fs.readFileSync(path, 'utf8'));
 let ok = true;
 
 for (const a of p.artifacts) {
@@ -617,7 +630,10 @@ for (const a of p.artifacts) {
     ok = false;
     continue;
   }
-  const h = crypto.createHash("sha256").update(fs.readFileSync(a.path)).digest("hex");
+  const h = crypto
+    .createHash('sha256')
+    .update(fs.readFileSync(a.path))
+    .digest('hex');
   if (h !== a.sha256) {
     console.error(`Hash mismatch for ${a.path}. expected=${a.sha256} got=${h}`);
     ok = false;
@@ -625,10 +641,10 @@ for (const a of p.artifacts) {
 }
 
 if (!ok) {
-  console.error("Provenance verification FAILED");
+  console.error('Provenance verification FAILED');
   process.exit(1);
 }
-console.log("Provenance verification OK");
+console.log('Provenance verification OK');
 ```
 
 ---
@@ -655,21 +671,25 @@ gh pr create \
 # S25 Consolidated Merge
 
 ## Summary
+
 - Recovers closed-but-desired PRs (#1279, #1261, #1260, #1259) via cherry-pick with provenance.
 - Keeps CI/ops hardening baseline (from #1280) stable.
 - Upgrades: Express 5, ESLint 9 (flat), Vite 7, React-Leaflet 5.
 - Adds SBOM + provenance manifest + verifier in CI.
 
 ## Evidence
+
 - Range-diff transcript: `.merge-evidence/rangediff-YYYY-MM-DD.txt`
 - CI: unit, contract, Playwright all green
 - Artifacts: `sbom.json` (signed), `provenance.json` (verified)
 
 ## Risk & Mitigation
+
 - Express 5 breaks → central error handler; tests covering async errors
 - Client build/map changes → E2E stabilized with tile-load waits
 
 ## Checklist
+
 - [ ] SBOM generated and signed
 - [ ] Provenance verified
 - [ ] Policy-by-default simulations pass (OPA)
@@ -679,6 +699,7 @@ gh pr create \
 - [ ] Rollback plan attached
 
 ## Rollback
+
 - Tag before merge: `vS25-pre-merge`
 - Script: `./ops/rollback/rollback-to-tag.sh vS25-pre-merge`
 ```
@@ -705,16 +726,18 @@ gh pr create --title "revert: rollback to $TAG" --body "Emergency rollback to $T
 `contracts/graphql/__tests__/schema.contract.ts`
 
 ```ts
-import fs from "node:fs";
-import { buildSchema, printSchema } from "graphql";
-import { makeExecutableSchema } from "@graphql-tools/schema";
-import typeDefs from "../../schema.graphql";
+import fs from 'node:fs';
+import { buildSchema, printSchema } from 'graphql';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import typeDefs from '../../schema.graphql';
 
-test("GraphQL schema contract (N-1, N-2)", () => {
+test('GraphQL schema contract (N-1, N-2)', () => {
   const current = printSchema(makeExecutableSchema({ typeDefs }));
-  const baselines = ["schema.N-1.graphql", "schema.N-2.graphql"].filter(f => fs.existsSync(f));
+  const baselines = ['schema.N-1.graphql', 'schema.N-2.graphql'].filter((f) =>
+    fs.existsSync(f),
+  );
   for (const b of baselines) {
-    const baseline = fs.readFileSync(`contracts/graphql/${b}`, "utf8");
+    const baseline = fs.readFileSync(`contracts/graphql/${b}`, 'utf8');
     expect(current).toBe(baseline);
   }
 });
@@ -757,8 +780,8 @@ test("GraphQL schema contract (N-1, N-2)", () => {
 
 ## Quick questions (optional)
 
-* Should we block the release PR on **OPA policy simulation** explicitly in CI (hard fail), or allow warn-only?
-* Do you want the **rollback PR** pre-created (draft) alongside the release PR for audit readiness?
+- Should we block the release PR on **OPA policy simulation** explicitly in CI (hard fail), or allow warn-only?
+- Do you want the **rollback PR** pre-created (draft) alongside the release PR for audit readiness?
 
 Locked and loaded. Here’s the **single-command, idempotent sprint driver** you asked for. Drop these files in the repo root and you can run everything with:
 
@@ -1110,16 +1133,18 @@ main "$@"
 `contracts/graphql/__tests__/schema.contract.ts`
 
 ```ts
-import fs from "node:fs";
-import { makeExecutableSchema } from "@graphql-tools/schema";
-import { printSchema } from "graphql";
-import typeDefs from "../../schema.graphql";
+import fs from 'node:fs';
+import { makeExecutableSchema } from '@graphql-tools/schema';
+import { printSchema } from 'graphql';
+import typeDefs from '../../schema.graphql';
 
-test("GraphQL schema contract (N-1, N-2)", () => {
+test('GraphQL schema contract (N-1, N-2)', () => {
   const current = printSchema(makeExecutableSchema({ typeDefs }));
-  const baselines = ["schema.N-1.graphql", "schema.N-2.graphql"].filter(f => fs.existsSync(`contracts/graphql/${f}`));
+  const baselines = ['schema.N-1.graphql', 'schema.N-2.graphql'].filter((f) =>
+    fs.existsSync(`contracts/graphql/${f}`),
+  );
   for (const b of baselines) {
-    const baseline = fs.readFileSync(`contracts/graphql/${b}`, "utf8");
+    const baseline = fs.readFileSync(`contracts/graphql/${b}`, 'utf8');
     expect(current).toBe(baseline);
   }
 });
@@ -1133,7 +1158,7 @@ test("GraphQL schema contract (N-1, N-2)", () => {
 name: policy-simulation
 on:
   pull_request:
-    branches: [ main, feature/merge-closed-prs-s25 ]
+    branches: [main, feature/merge-closed-prs-s25]
 jobs:
   opa:
     runs-on: ubuntu-22.04
@@ -1182,21 +1207,20 @@ jobs:
 
 # 5) What this gives you
 
-* **One command** (`make merge-s25`) to do the whole dance.
-* **Idempotency**:
+- **One command** (`make merge-s25`) to do the whole dance.
+- **Idempotency**:
+  - Re-runs safely: checks existing branches and open PRs, skips already-picked commits, persists progress in `./.merge-evidence/state.json`.
+  - `make merge-s25.resume` continues after you fix any conflicts.
 
-  * Re-runs safely: checks existing branches and open PRs, skips already-picked commits, persists progress in `./.merge-evidence/state.json`.
-  * `make merge-s25.resume` continues after you fix any conflicts.
-* **Auditability**:
+- **Auditability**:
+  - Range-diff transcript under `.merge-evidence/`.
+  - SBOM + provenance hash manifest generated and verified locally and in CI.
 
-  * Range-diff transcript under `.merge-evidence/`.
-  * SBOM + provenance hash manifest generated and verified locally and in CI.
-* **Governance baked in**:
+- **Governance baked in**:
+  - GraphQL contract guard and OPA sim hard-fail workflow.
 
-  * GraphQL contract guard and OPA sim hard-fail workflow.
-* **Release automation**:
-
-  * Auto-opens the final PR from consolidation → `main` with a complete template.
+- **Release automation**:
+  - Auto-opens the final PR from consolidation → `main` with a complete template.
 
 ---
 
@@ -1214,8 +1238,8 @@ jobs:
 
 ## Quick questions (optional)
 
-* Do you want the **policy-simulation** job to **block** merges on `stack/**` as well, or only the final release PR?
-* Should we auto-sign SBOM via **cosign keyless** in CI (I can add the two lines if yes), or keep it unsigned for now?
+- Do you want the **policy-simulation** job to **block** merges on `stack/**` as well, or only the final release PR?
+- Should we auto-sign SBOM via **cosign keyless** in CI (I can add the two lines if yes), or keep it unsigned for now?
 
 Got it—here’s the **conflict-resolution playbook** you can use while landing the Express 5 migration and the closed-PR cherry-picks. It’s focused, copy-pasteable, and tuned to the exact hotspots you’ll hit.
 
@@ -1239,15 +1263,15 @@ Got it—here’s the **conflict-resolution playbook** you can use while landing
 
 Merge shows both variants:
 
-* Old: wrapped `try/catch(next)`.
-* New (Express 5): “just `throw`” with centralized error middleware.
+- Old: wrapped `try/catch(next)`.
+- New (Express 5): “just `throw`” with centralized error middleware.
 
 ### Fix (Before → After)
 
 **Before (old Express 4 style)**
 
 ```ts
-router.post("/api/entities", async (req, res, next) => {
+router.post('/api/entities', async (req, res, next) => {
   try {
     const entity = await svc.create(req.body);
     return res.status(201).json(entity);
@@ -1260,7 +1284,7 @@ router.post("/api/entities", async (req, res, next) => {
 **After (Express 5)**
 
 ```ts
-router.post("/api/entities", async (req, res) => {
+router.post('/api/entities', async (req, res) => {
   const entity = await svc.create(req.body); // thrown errors bubble to the error handler
   return res.status(201).json(entity);
 });
@@ -1278,10 +1302,10 @@ Closed PRs may use quick `sendStatus(400)` while the migration branch uses struc
 
 ### Rule of thumb
 
-* **Use** `res.status(code).json({...})` when:
+- **Use** `res.status(code).json({...})` when:
+  - You need an error **body** (auditability, provenance, client UX).
 
-  * You need an error **body** (auditability, provenance, client UX).
-* **Use** `sendStatus(code)` only for pure status pings (e.g., `204` after idempotent ops).
+- **Use** `sendStatus(code)` only for pure status pings (e.g., `204` after idempotent ops).
 
 **Bad**
 
@@ -1292,7 +1316,9 @@ return res.sendStatus(400);
 **Good**
 
 ```ts
-return res.status(400).json({ error: { code: "BAD_REQUEST", message: "Missing 'type'" } });
+return res
+  .status(400)
+  .json({ error: { code: 'BAD_REQUEST', message: "Missing 'type'" } });
 ```
 
 ---
@@ -1306,16 +1332,19 @@ You see two error handlers (one at router level, one global) in conflicting hunk
 ### Canonical order (must be last)
 
 ```ts
-app.use("/api", apiRouter);
+app.use('/api', apiRouter);
 
 // 404 after all routes
-app.use((_req, res) => res.status(404).json({ error: "Not Found" }));
+app.use((_req, res) => res.status(404).json({ error: 'Not Found' }));
 
 // Single, final error handler
 app.use((err, _req, res, _next) => {
   const status = err.statusCode || 500;
-  const code = err.code || "INTERNAL_ERROR";
-  const msg = process.env.NODE_ENV === "production" ? "Internal error" : (err.message || String(err));
+  const code = err.code || 'INTERNAL_ERROR';
+  const msg =
+    process.env.NODE_ENV === 'production'
+      ? 'Internal error'
+      : err.message || String(err);
   res.status(status).json({ error: { code, message: msg } });
 });
 ```
@@ -1332,8 +1361,8 @@ Legacy code uses `next()` to jump to the next middleware after sending a respons
 
 ### Fix
 
-* After `res.status(...).json(...)` or `res.end()`, **return** immediately.
-* Do **not** call `next()` after a response is sent.
+- After `res.status(...).json(...)` or `res.end()`, **return** immediately.
+- Do **not** call `next()` after a response is sent.
 
 ```ts
 // Bad
@@ -1360,17 +1389,24 @@ Transform validators into **throwing** middlewares (they can be sync functions t
 function validateCreate(req: Request) {
   const ok = schema.validate(req.body);
   if (!ok) {
-    const err: any = new Error("Invalid payload");
+    const err: any = new Error('Invalid payload');
     err.statusCode = 400;
-    err.code = "BAD_REQUEST";
+    err.code = 'BAD_REQUEST';
     throw err;
   }
 }
 
-router.post("/api/entities", (req, _res, next) => { validateCreate(req); next(); }, async (req, res) => {
-  const entity = await svc.create(req.body);
-  return res.status(201).json(entity);
-});
+router.post(
+  '/api/entities',
+  (req, _res, next) => {
+    validateCreate(req);
+    next();
+  },
+  async (req, res) => {
+    const entity = await svc.create(req.body);
+    return res.status(201).json(entity);
+  },
+);
 ```
 
 Or fold validation into the handler and throw directly.
@@ -1385,15 +1421,15 @@ Handlers mixing `res.download`, `res.sendFile`, or `res.write` with async/await 
 
 ### Fix
 
-* Wrap streams with `pipeline`/promises; **don’t** call `next(err)`—**reject** instead and let the error handler respond.
-* Ensure exactly **one** response path.
+- Wrap streams with `pipeline`/promises; **don’t** call `next(err)`—**reject** instead and let the error handler respond.
+- Ensure exactly **one** response path.
 
 ```ts
-import { pipeline } from "node:stream/promises";
+import { pipeline } from 'node:stream/promises';
 
-router.get("/export/:id", async (req, res) => {
+router.get('/export/:id', async (req, res) => {
   const stream = await svc.exportStream(req.params.id);
-  res.setHeader("Content-Type", "application/octet-stream");
+  res.setHeader('Content-Type', 'application/octet-stream');
   await pipeline(stream, res); // errors here bubble to global error handler
 });
 ```
@@ -1404,9 +1440,9 @@ router.get("/export/:id", async (req, res) => {
 
 ### Symptoms & fixes
 
-* **Unhandled rejections**: tests must `await` requests; remove manual `done(err)`.
-* **404 assertions**: now JSON-structured; update to `expect(res.body).toMatchObject({ error: "Not Found" })`.
-* **Error cases**: expect consistent `{ error: { code, message } }` bodies, not HTML error pages.
+- **Unhandled rejections**: tests must `await` requests; remove manual `done(err)`.
+- **404 assertions**: now JSON-structured; update to `expect(res.body).toMatchObject({ error: "Not Found" })`.
+- **Error cases**: expect consistent `{ error: { code, message } }` bodies, not HTML error pages.
 
 ---
 
@@ -1473,15 +1509,15 @@ git rev-list --reverse --no-merges --cherry-pick --right-only tmp/pr-XXXX...${BA
 
 ## 11) Checklist (run before final release PR)
 
-* [ ] `git log --oneline --cherry ${BASE}...${CONSOLIDATION}` shows only the intended commits.
-* [ ] No commits with message `"(cherry picked from commit"` appear twice with different SHAs.
-* [ ] `git range-diff ${BASE}...${CONSOLIDATION}` reviewed; unexpected drops or duplicate diffs resolved.
-* [ ] All conflict “mergefix(express5)” commits squashed or documented.
-* [ ] App boots locally and **Supertest/Playwright** pass.
-* [ ] Error handler present exactly once, after 404 middleware.
-* [ ] No `next(err)` inside `async` handlers.
-* [ ] `sendStatus()` only where bodies are unnecessary.
-* [ ] Provenance & SBOM artifacts generated and verified.
+- [ ] `git log --oneline --cherry ${BASE}...${CONSOLIDATION}` shows only the intended commits.
+- [ ] No commits with message `"(cherry picked from commit"` appear twice with different SHAs.
+- [ ] `git range-diff ${BASE}...${CONSOLIDATION}` reviewed; unexpected drops or duplicate diffs resolved.
+- [ ] All conflict “mergefix(express5)” commits squashed or documented.
+- [ ] App boots locally and **Supertest/Playwright** pass.
+- [ ] Error handler present exactly once, after 404 middleware.
+- [ ] No `next(err)` inside `async` handlers.
+- [ ] `sendStatus()` only where bodies are unnecessary.
+- [ ] Provenance & SBOM artifacts generated and verified.
 
 ---
 
@@ -1535,29 +1571,40 @@ Sweet — here’s the “next slab” of drop-in artifacts to make the merge sm
 # Express 5 Merge: Conflict-Resolution Cookbook
 
 ## Golden Rules
-1) One global error handler (last); no router-level error handlers.
-2) In async handlers: **throw**; never `next(err)`.
-3) Use `res.status(x).json(...)` when you want bodies; reserve `sendStatus()` for bodyless pings.
-4) Order: routes → 404 → error handler.
-5) Return after responding (avoid “headers already sent”).
+
+1. One global error handler (last); no router-level error handlers.
+2. In async handlers: **throw**; never `next(err)`.
+3. Use `res.status(x).json(...)` when you want bodies; reserve `sendStatus()` for bodyless pings.
+4. Order: routes → 404 → error handler.
+5. Return after responding (avoid “headers already sent”).
 
 ## Patterns
+
 ### A) Async handler error
+
 **Before**
+
 ```ts
 router.post("/api/x", async (req,res,next)=>{try{...}catch(e){next(e)}})
+```
 ````
 
 **After**
 
 ```ts
-router.post("/api/x", async (req,res)=>{ const r=await svc.create(req.body); return res.status(201).json(r); })
+router.post('/api/x', async (req, res) => {
+  const r = await svc.create(req.body);
+  return res.status(201).json(r);
+});
 ```
 
 ### B) Structured errors
 
 ```ts
-throw Object.assign(new Error("Missing 'type'"), { statusCode: 400, code: "BAD_REQUEST" })
+throw Object.assign(new Error("Missing 'type'"), {
+  statusCode: 400,
+  code: 'BAD_REQUEST',
+});
 ```
 
 Global error handler maps `{ statusCode, code }` → JSON.
@@ -1565,29 +1612,41 @@ Global error handler maps `{ statusCode, code }` → JSON.
 ### C) 404 + Error order
 
 ```ts
-app.use((_req,res)=>res.status(404).json({error:"Not Found"}))
-app.use((err,_req,res,_next)=>{ const s=err.statusCode||500; const c=err.code||"INTERNAL_ERROR"; const m=process.env.NODE_ENV==="production"?"Internal error":(err.message||String(err)); res.status(s).json({error:{code:c,message:m}}); })
+app.use((_req, res) => res.status(404).json({ error: 'Not Found' }));
+app.use((err, _req, res, _next) => {
+  const s = err.statusCode || 500;
+  const c = err.code || 'INTERNAL_ERROR';
+  const m =
+    process.env.NODE_ENV === 'production'
+      ? 'Internal error'
+      : err.message || String(err);
+  res.status(s).json({ error: { code: c, message: m } });
+});
 ```
 
 ### D) Streaming
 
 ```ts
-import { pipeline } from "node:stream/promises";
-router.get("/export/:id", async (req,res)=>{ const s=await svc.exportStream(req.params.id); res.setHeader("Content-Type","application/octet-stream"); await pipeline(s,res); })
+import { pipeline } from 'node:stream/promises';
+router.get('/export/:id', async (req, res) => {
+  const s = await svc.exportStream(req.params.id);
+  res.setHeader('Content-Type', 'application/octet-stream');
+  await pipeline(s, res);
+});
 ```
 
 ### E) Tests
 
-* Use Supertest async/await; expect structured errors.
-* Update 404 assertions to JSON.
+- Use Supertest async/await; expect structured errors.
+- Update 404 assertions to JSON.
 
 ## Checklists
 
-* [ ] No `next(err)` inside async handlers
-* [ ] Exactly one error handler (global, last)
-* [ ] 404 precedes error handler
-* [ ] `sendStatus()` only when bodyless
-* [ ] All routes `return` after sending responses
+- [ ] No `next(err)` inside async handlers
+- [ ] Exactly one error handler (global, last)
+- [ ] 404 precedes error handler
+- [ ] `sendStatus()` only when bodyless
+- [ ] All routes `return` after sending responses
 
 ````
 
@@ -1626,10 +1685,11 @@ router.get("/export/:id", async (req,res)=>{ const s=await svc.exportStream(req.
 
 ```md
 ---
-name: "Release Checklist (S25)"
+name: 'Release Checklist (S25)'
 about: Gate for consolidated merge
 labels: release
 ---
+
 - [ ] Range-diff reviewed
 - [ ] Duplicate cherry-picks ruled out (`git log --oneline --cherry`)
 - [ ] SBOM + provenance uploaded
@@ -1686,12 +1746,12 @@ indent_size = 2
 `playwright.config.ts` (excerpt)
 
 ```ts
-import { defineConfig } from "@playwright/test";
+import { defineConfig } from '@playwright/test';
 export default defineConfig({
   retries: process.env.CI ? 2 : 0,
   timeout: 30_000,
   expect: { timeout: 10_000 },
-  use: { actionTimeout: 15_000, navigationTimeout: 15_000 }
+  use: { actionTimeout: 15_000, navigationTimeout: 15_000 },
 });
 ```
 
@@ -1716,7 +1776,7 @@ policy-sim:
 name: required-gates
 on:
   pull_request:
-    branches: [ main, feature/merge-closed-prs-s25 ]
+    branches: [main, feature/merge-closed-prs-s25]
 jobs:
   gates:
     runs-on: ubuntu-22.04
@@ -1785,6 +1845,7 @@ dupescans:
 
 ```md
 **Mergefix review macro**
+
 - [ ] Async handlers never call `next(err)`
 - [ ] Routes → 404 → error handler
 - [ ] Structured error shape `{ error: { code, message } }` consistent
@@ -1826,8 +1887,8 @@ fi
 
 ## Quick questions (optional)
 
-* Do you want the **required-gates** workflow to run on `stack/**` branches, or only PRs targeting `feature/merge-closed-prs-s25` and `main`?
-* Should we make **husky** a hard dependency (pre-commit hook), or keep it optional to avoid friction on contributor machines?
+- Do you want the **required-gates** workflow to run on `stack/**` branches, or only PRs targeting `feature/merge-closed-prs-s25` and `main`?
+- Should we make **husky** a hard dependency (pre-commit hook), or keep it optional to avoid friction on contributor machines?
 
 Alright—here are the **drop-in artifacts** you asked for: a compact CONTRIBUTING section tailored to **mergefix/Express5** and a **CODEOWNERS** tweak that auto-requests reviews from `@intelgraph-core` and `@intelgraph-ci`.
 
@@ -1841,11 +1902,13 @@ Alright—here are the **drop-in artifacts** you asked for: a compact CONTRIBUTI
 This section defines **coding rules, commit conventions, and the minimal gate** for any PR that touches the Express 5 migration or related merge conflict work. Use it for PRs labeled `mergefix`.
 
 ### Coding Rules (must)
+
 1. **One global error handler** at the end of the middleware chain. No router-level error handlers.
 2. **Async handlers `throw`**; never call `next(err)` from an `async` function.
 3. **Structured errors** only:
    ```json
    { "error": { "code": "BAD_REQUEST", "message": "Human-readable text" } }
+   ```
 ````
 
 4. **Order**: routes → 404 → error handler.
@@ -1858,10 +1921,10 @@ This section defines **coding rules, commit conventions, and the minimal gate** 
 
 Use the `mergefix` type + scope:
 
-* `mergefix(express5): centralize error handler`
-* `mergefix(router): drop next(err) in async handlers`
-* `mergefix(build): adjust Vite 7 config`
-* `mergefix(tests): update Supertest for JSON errors`
+- `mergefix(express5): centralize error handler`
+- `mergefix(router): drop next(err) in async handlers`
+- `mergefix(build): adjust Vite 7 config`
+- `mergefix(tests): update Supertest for JSON errors`
 
 If a commit is a pure conflict resolution, prefer the prefix `mergefix(express5):` and keep the diff tightly scoped.
 
@@ -1890,14 +1953,15 @@ make ci-check contracts policy-sim
 
 ### Conflict-Resolution Tips
 
-* Enable `git rerere` once:
+- Enable `git rerere` once:
 
   ```bash
   git config --global rerere.enabled true
   git config --global rerere.autoUpdate true
   git config --global rerere.log true
   ```
-* Detect duplicates before opening your PR:
+
+- Detect duplicates before opening your PR:
 
   ```bash
   git log --oneline --cherry origin/main...HEAD
@@ -1905,12 +1969,12 @@ make ci-check contracts policy-sim
 
 ### PR Checklist
 
-* [ ] No `next(err)` in async handlers
-* [ ] Single global error handler (after 404)
-* [ ] JSON error shape consistent
-* [ ] Tests updated for Express 5 semantics
-* [ ] Contracts + policy sim pass
-* [ ] SBOM + provenance generated and verified
+- [ ] No `next(err)` in async handlers
+- [ ] Single global error handler (after 404)
+- [ ] JSON error shape consistent
+- [ ] Tests updated for Express 5 semantics
+- [ ] Contracts + policy sim pass
+- [ ] SBOM + provenance generated and verified
 
 ````
 
@@ -1945,12 +2009,12 @@ If you want PRs touching these paths to get the `mergefix` label automatically, 
 mergefix:
   - changed-files:
       - any-glob-to-any-file:
-          - "server/**"
-          - "policies/**"
-          - "contracts/graphql/**"
-          - "docs/merge/**"
-          - "scripts/merge_s25.sh"
-          - ".github/workflows/**"
+          - 'server/**'
+          - 'policies/**'
+          - 'contracts/graphql/**'
+          - 'docs/merge/**'
+          - 'scripts/merge_s25.sh'
+          - '.github/workflows/**'
 ```
 
 And enable the official **Pull Request Labeler** action:
@@ -1981,4 +2045,3 @@ jobs:
 
 1. Are `@intelgraph-core` and `@intelgraph-ci` the exact GitHub team handles in your org, or should I use different slugs?
 2. Do you also want `CODEOWNERS` to include `client/**` for the Vite/Leaflet changes, or keep it server/governance-focused?
-

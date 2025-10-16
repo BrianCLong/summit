@@ -18,9 +18,15 @@ import {
   Layers,
   Clock,
   MapPin,
-  Network
+  Network,
 } from 'lucide-react'
-import type { Entity, Relationship, TimelineEvent, GeospatialEvent, GraphLayout } from '@/types'
+import type {
+  Entity,
+  Relationship,
+  TimelineEvent,
+  GeospatialEvent,
+  GraphLayout,
+} from '@/types'
 
 // Types for provenance data
 interface ProvenanceInfo {
@@ -77,18 +83,20 @@ export function TriPaneAnalysisView({
   onEntitySelect,
   onTimeRangeChange,
   onExport,
-  className
+  className,
 }: TriPaneAnalysisViewProps) {
   const [viewportSync, setViewportSync] = useState<ViewportSync>({
     timeline: {},
     map: {},
-    graph: {}
+    graph: {},
   })
 
   const [timeFilter, setTimeFilter] = useState<TimeRange | null>(null)
   const [showProvenance, setShowProvenance] = useState(true)
   const [graphLayout] = useState<GraphLayout>({ type: 'force' })
-  const [provenanceData, setProvenanceData] = useState<Map<string, ProvenanceInfo>>(new Map())
+  const [provenanceData, setProvenanceData] = useState<
+    Map<string, ProvenanceInfo>
+  >(new Map())
 
   // Mock provenance data - in real app this would come from the prov-ledger service
   useEffect(() => {
@@ -102,12 +110,14 @@ export function TriPaneAnalysisView({
             id: `transform-${entity.id}`,
             operation: 'Entity Resolution',
             timestamp: new Date(Date.now() - Math.random() * 86400000),
-            confidence: 0.85 + Math.random() * 0.15
-          }
+            confidence: 0.85 + Math.random() * 0.15,
+          },
         ],
-        license: ['MIT', 'Apache-2.0', 'GPL-3.0'][Math.floor(Math.random() * 3)],
+        license: ['MIT', 'Apache-2.0', 'GPL-3.0'][
+          Math.floor(Math.random() * 3)
+        ],
         lastSeen: new Date(Date.now() - Math.random() * 3600000),
-        confidence: entity.confidence
+        confidence: entity.confidence,
       })
     })
     setProvenanceData(mockProvenance)
@@ -120,7 +130,7 @@ export function TriPaneAnalysisView({
         entities,
         relationships,
         timelineEvents,
-        geospatialEvents
+        geospatialEvents,
       }
     }
 
@@ -137,137 +147,171 @@ export function TriPaneAnalysisView({
     // Filter entities that appear in the filtered events
     const relevantEntityIds = new Set([
       ...filteredTimelineEvents.map(e => e.entityId).filter(Boolean),
-      ...filteredGeospatialEvents.map(e => e.entityId).filter(Boolean)
+      ...filteredGeospatialEvents.map(e => e.entityId).filter(Boolean),
     ])
 
-    const filteredEntities = entities.filter(entity =>
-      relevantEntityIds.has(entity.id) ||
-      (entity.lastSeen && new Date(entity.lastSeen) >= timeFilter.start && new Date(entity.lastSeen) <= timeFilter.end)
+    const filteredEntities = entities.filter(
+      entity =>
+        relevantEntityIds.has(entity.id) ||
+        (entity.lastSeen &&
+          new Date(entity.lastSeen) >= timeFilter.start &&
+          new Date(entity.lastSeen) <= timeFilter.end)
     )
 
     const filteredEntityIds = new Set(filteredEntities.map(e => e.id))
-    const filteredRelationships = relationships.filter(rel =>
-      filteredEntityIds.has(rel.sourceId) && filteredEntityIds.has(rel.targetId)
+    const filteredRelationships = relationships.filter(
+      rel =>
+        filteredEntityIds.has(rel.sourceId) &&
+        filteredEntityIds.has(rel.targetId)
     )
 
     return {
       entities: filteredEntities,
       relationships: filteredRelationships,
       timelineEvents: filteredTimelineEvents,
-      geospatialEvents: filteredGeospatialEvents
+      geospatialEvents: filteredGeospatialEvents,
     }
   }, [entities, relationships, timelineEvents, geospatialEvents, timeFilter])
 
   // Handle time brushing - synchronize all panes when time range changes
-  const handleTimeRangeChange = useCallback((range: { start: string; end: string }) => {
-    const timeRange = {
-      start: new Date(range.start),
-      end: new Date(range.end)
-    }
+  const handleTimeRangeChange = useCallback(
+    (range: { start: string; end: string }) => {
+      const timeRange = {
+        start: new Date(range.start),
+        end: new Date(range.end),
+      }
 
-    setTimeFilter(timeRange)
-    setViewportSync(prev => ({
-      ...prev,
-      timeline: { ...prev.timeline, timeRange }
-    }))
+      setTimeFilter(timeRange)
+      setViewportSync(prev => ({
+        ...prev,
+        timeline: { ...prev.timeline, timeRange },
+      }))
 
-    onTimeRangeChange?.(timeRange)
-  }, [onTimeRangeChange])
+      onTimeRangeChange?.(timeRange)
+    },
+    [onTimeRangeChange]
+  )
 
   // Handle entity selection - synchronize across all panes
-  const handleEntitySelect = useCallback((entity: Entity) => {
-    setViewportSync(prev => ({
-      ...prev,
-      graph: {
-        ...prev.graph,
-        selectedEntityId: entity.id,
-        focusedEntityIds: [entity.id, ...(relationships
-          .filter(r => r.sourceId === entity.id || r.targetId === entity.id)
-          .map(r => r.sourceId === entity.id ? r.targetId : r.sourceId)
-        )]
-      },
-      timeline: { ...prev.timeline, selectedEventId: undefined },
-      map: { ...prev.map, selectedLocationId: entity.type === 'LOCATION' ? entity.id : undefined }
-    }))
+  const handleEntitySelect = useCallback(
+    (entity: Entity) => {
+      setViewportSync(prev => ({
+        ...prev,
+        graph: {
+          ...prev.graph,
+          selectedEntityId: entity.id,
+          focusedEntityIds: [
+            entity.id,
+            ...relationships
+              .filter(r => r.sourceId === entity.id || r.targetId === entity.id)
+              .map(r => (r.sourceId === entity.id ? r.targetId : r.sourceId)),
+          ],
+        },
+        timeline: { ...prev.timeline, selectedEventId: undefined },
+        map: {
+          ...prev.map,
+          selectedLocationId:
+            entity.type === 'LOCATION' ? entity.id : undefined,
+        },
+      }))
 
-    onEntitySelect?.(entity)
-  }, [relationships, onEntitySelect])
+      onEntitySelect?.(entity)
+    },
+    [relationships, onEntitySelect]
+  )
 
   // Handle timeline event selection
-  const handleTimelineEventSelect = useCallback((event: TimelineEvent) => {
-    if (event.entityId) {
-      const entity = entities.find(e => e.id === event.entityId)
+  const handleTimelineEventSelect = useCallback(
+    (event: TimelineEvent) => {
+      if (event.entityId) {
+        const entity = entities.find(e => e.id === event.entityId)
+        if (entity) {
+          handleEntitySelect(entity)
+        }
+      }
+
+      setViewportSync(prev => ({
+        ...prev,
+        timeline: { ...prev.timeline, selectedEventId: event.id },
+      }))
+    },
+    [entities, handleEntitySelect]
+  )
+
+  // Handle map location selection
+  const handleMapLocationSelect = useCallback(
+    (locationId: string) => {
+      const entity = entities.find(
+        e => e.id === locationId && e.type === 'LOCATION'
+      )
       if (entity) {
         handleEntitySelect(entity)
       }
-    }
-
-    setViewportSync(prev => ({
-      ...prev,
-      timeline: { ...prev.timeline, selectedEventId: event.id }
-    }))
-  }, [entities, handleEntitySelect])
-
-  // Handle map location selection
-  const handleMapLocationSelect = useCallback((locationId: string) => {
-    const entity = entities.find(e => e.id === locationId && e.type === 'LOCATION')
-    if (entity) {
-      handleEntitySelect(entity)
-    }
-  }, [entities, handleEntitySelect])
+    },
+    [entities, handleEntitySelect]
+  )
 
   // Generate provenance tooltip content
-  const getProvenanceTooltip = useCallback((entityId: string) => {
-    const provenance = provenanceData.get(entityId)
-    if (!provenance) return null
+  const getProvenanceTooltip = useCallback(
+    (entityId: string) => {
+      const provenance = provenanceData.get(entityId)
+      if (!provenance) return null
 
-    return (
-      <div className="space-y-2 text-xs">
-        <div>
-          <strong>Source:</strong> {provenance.sourceName}
+      return (
+        <div className="space-y-2 text-xs">
+          <div>
+            <strong>Source:</strong> {provenance.sourceName}
+          </div>
+          <div>
+            <strong>License:</strong>
+            <Badge variant="outline" className="ml-1 text-xs">
+              {provenance.license}
+            </Badge>
+          </div>
+          <div>
+            <strong>Confidence:</strong>{' '}
+            {Math.round(provenance.confidence * 100)}%
+          </div>
+          <div>
+            <strong>Last Seen:</strong> {provenance.lastSeen.toLocaleString()}
+          </div>
+          <div>
+            <strong>Transforms:</strong>
+            {provenance.transforms.map(transform => (
+              <div key={transform.id} className="ml-2 text-muted-foreground">
+                • {transform.operation} (
+                {Math.round(transform.confidence * 100)}%)
+              </div>
+            ))}
+          </div>
         </div>
-        <div>
-          <strong>License:</strong>
-          <Badge variant="outline" className="ml-1 text-xs">
-            {provenance.license}
-          </Badge>
-        </div>
-        <div>
-          <strong>Confidence:</strong> {Math.round(provenance.confidence * 100)}%
-        </div>
-        <div>
-          <strong>Last Seen:</strong> {provenance.lastSeen.toLocaleString()}
-        </div>
-        <div>
-          <strong>Transforms:</strong>
-          {provenance.transforms.map(transform => (
-            <div key={transform.id} className="ml-2 text-muted-foreground">
-              • {transform.operation} ({Math.round(transform.confidence * 100)}%)
-            </div>
-          ))}
-        </div>
-      </div>
-    )
-  }, [provenanceData])
+      )
+    },
+    [provenanceData]
+  )
 
   // Performance optimization: debounced sync updates
-  const [syncDebounceTimeout, setSyncDebounceTimeout] = useState<NodeJS.Timeout | null>(null)
+  const [syncDebounceTimeout, setSyncDebounceTimeout] =
+    useState<NodeJS.Timeout | null>(null)
 
-  const debouncedSync = useCallback((syncUpdate: Partial<ViewportSync>) => {
-    if (syncDebounceTimeout) {
-      clearTimeout(syncDebounceTimeout)
-    }
+  const debouncedSync = useCallback(
+    (syncUpdate: Partial<ViewportSync>) => {
+      if (syncDebounceTimeout) {
+        clearTimeout(syncDebounceTimeout)
+      }
 
-    const timeout = setTimeout(() => {
-      setViewportSync(prev => ({
-        timeline: { ...prev.timeline, ...syncUpdate.timeline },
-        map: { ...prev.map, ...syncUpdate.map },
-        graph: { ...prev.graph, ...syncUpdate.graph }
-      }))
-    }, 120) // 120ms debounce for smooth interaction
+      const timeout = setTimeout(() => {
+        setViewportSync(prev => ({
+          timeline: { ...prev.timeline, ...syncUpdate.timeline },
+          map: { ...prev.map, ...syncUpdate.map },
+          graph: { ...prev.graph, ...syncUpdate.graph },
+        }))
+      }, 120) // 120ms debounce for smooth interaction
 
-    setSyncDebounceTimeout(timeout)
-  }, [syncDebounceTimeout])
+      setSyncDebounceTimeout(timeout)
+    },
+    [syncDebounceTimeout]
+  )
 
   return (
     <div className={`grid grid-cols-12 grid-rows-12 gap-4 h-full ${className}`}>
@@ -301,7 +345,11 @@ export function TriPaneAnalysisView({
             size="sm"
             onClick={() => setShowProvenance(!showProvenance)}
           >
-            {showProvenance ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+            {showProvenance ? (
+              <Eye className="h-4 w-4" />
+            ) : (
+              <EyeOff className="h-4 w-4" />
+            )}
             Provenance
           </Button>
 
@@ -315,11 +363,7 @@ export function TriPaneAnalysisView({
             Reset Filter
           </Button>
 
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onExport}
-          >
+          <Button variant="outline" size="sm" onClick={onExport}>
             <Download className="h-4 w-4" />
             Export
           </Button>
@@ -372,7 +416,7 @@ export function TriPaneAnalysisView({
                 entities={filteredData.entities.map(entity => ({
                   ...entity,
                   // Apply confidence-based opacity when provenance is shown
-                  confidence: showProvenance ? entity.confidence : 1.0
+                  confidence: showProvenance ? entity.confidence : 1.0,
                 }))}
                 relationships={filteredData.relationships}
                 layout={graphLayout}
@@ -382,24 +426,28 @@ export function TriPaneAnalysisView({
               />
 
               {/* Provenance Tooltips Overlay */}
-              {showProvenance && filteredData.entities.map(entity => {
-                const provenance = provenanceData.get(entity.id)
-                if (!provenance) return null
+              {showProvenance &&
+                filteredData.entities.map(entity => {
+                  const provenance = provenanceData.get(entity.id)
+                  if (!provenance) return null
 
-                return (
-                  <Tooltip key={entity.id} content={getProvenanceTooltip(entity.id)}>
-                    <div
-                      className="absolute w-2 h-2 bg-blue-500 rounded-full opacity-75 pointer-events-none"
-                      style={{
-                        // Position would be calculated from graph coordinates
-                        top: '50%',
-                        left: '50%',
-                        transform: 'translate(-50%, -50%)'
-                      }}
-                    />
-                  </Tooltip>
-                )
-              })}
+                  return (
+                    <Tooltip
+                      key={entity.id}
+                      content={getProvenanceTooltip(entity.id)}
+                    >
+                      <div
+                        className="absolute w-2 h-2 bg-blue-500 rounded-full opacity-75 pointer-events-none"
+                        style={{
+                          // Position would be calculated from graph coordinates
+                          top: '50%',
+                          left: '50%',
+                          transform: 'translate(-50%, -50%)',
+                        }}
+                      />
+                    </Tooltip>
+                  )
+                })}
             </div>
           </CardContent>
         </Card>
@@ -419,9 +467,7 @@ export function TriPaneAnalysisView({
               {/* Placeholder for map component */}
               <div className="text-center space-y-2">
                 <Map className="h-12 w-12 mx-auto text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">
-                  Map component
-                </p>
+                <p className="text-sm text-muted-foreground">Map component</p>
                 <p className="text-xs text-muted-foreground">
                   {filteredData.geospatialEvents.length} location events
                 </p>
@@ -440,7 +486,8 @@ export function TriPaneAnalysisView({
       {timeFilter && (
         <div className="fixed bottom-4 right-4 bg-primary text-primary-foreground px-3 py-2 rounded-lg shadow-lg text-sm flex items-center gap-2">
           <Filter className="h-4 w-4" />
-          Time filter active: {timeFilter.start.toLocaleString()} - {timeFilter.end.toLocaleString()}
+          Time filter active: {timeFilter.start.toLocaleString()} -{' '}
+          {timeFilter.end.toLocaleString()}
         </div>
       )}
     </div>

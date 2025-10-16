@@ -9,11 +9,12 @@ explicit uncertainty tracking which downstream reviewers can audit.
 
 from __future__ import annotations
 
+from collections.abc import Iterable
 from math import sqrt
-from typing import Any, Iterable, Tuple
+from typing import Any
 
 
-def _extract_signal(signal: dict[str, Any]) -> Tuple[float, float]:
+def _extract_signal(signal: dict[str, Any]) -> tuple[float, float]:
     """Normalise a model signal into (score, weight).
 
     Scores are clamped to ``[0, 1]``. ``confidence`` (or ``weight``) metadata is
@@ -32,7 +33,7 @@ def _extract_signal(signal: dict[str, Any]) -> Tuple[float, float]:
     return score, weight
 
 
-def _bayesian_fuse(signals: Iterable[Tuple[str, dict[str, Any]]]) -> dict[str, Any]:
+def _bayesian_fuse(signals: Iterable[tuple[str, dict[str, Any]]]) -> dict[str, Any]:
     """Fuse detector signals with a Beta-Bernoulli posterior."""
 
     alpha = 1.0  # prior success pseudo-count
@@ -57,8 +58,10 @@ def _bayesian_fuse(signals: Iterable[Tuple[str, dict[str, Any]]]) -> dict[str, A
 
     total_weight = sum(weights)
     if total_weight:
-        mean = sum(w * s for w, s in zip(weights, scores)) / total_weight
-        variance = sum(w * (s - mean) ** 2 for w, s in zip(weights, scores)) / total_weight
+        mean = sum(w * s for w, s in zip(weights, scores, strict=False)) / total_weight
+        variance = (
+            sum(w * (s - mean) ** 2 for w, s in zip(weights, scores, strict=False)) / total_weight
+        )
         disagreement = sqrt(variance)
     else:
         mean = 0.0
@@ -66,9 +69,9 @@ def _bayesian_fuse(signals: Iterable[Tuple[str, dict[str, Any]]]) -> dict[str, A
 
     posterior_mass = alpha + beta
     posterior_mean = alpha / posterior_mass if posterior_mass else 0.0
-    posterior_var = (alpha * beta) / (
-        posterior_mass**2 * (posterior_mass + 1.0)
-    ) if posterior_mass > 0 else 0.0
+    posterior_var = (
+        (alpha * beta) / (posterior_mass**2 * (posterior_mass + 1.0)) if posterior_mass > 0 else 0.0
+    )
 
     return {
         "posterior_mean": posterior_mean,

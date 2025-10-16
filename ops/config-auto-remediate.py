@@ -4,63 +4,70 @@ MC Platform v0.3.4 - Configuration Auto-Remediation Service
 Automated drift resolution with <10min MTTR and cryptographic attestation
 """
 
-import json
-import time
-import hashlib
-import subprocess
-import os
-from datetime import datetime, timedelta
-from typing import Dict, List, Any, Optional, Tuple
-from dataclasses import dataclass, asdict
-import logging
-from pathlib import Path
 import argparse
+import hashlib
+import json
+import logging
+import os
+import subprocess
+import time
+from dataclasses import asdict, dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Any
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+
 @dataclass
 class ConfigSnapshot:
     """Configuration snapshot with integrity validation"""
+
     timestamp: str
     commit_hash: str
     config_hash: str
-    files: List[Dict[str, str]]
+    files: list[dict[str, str]]
     signature: str
+
 
 @dataclass
 class DriftDetection:
     """Configuration drift detection result"""
+
     drift_detected: bool
     drift_type: str  # semantic, hash, missing, unauthorized
-    affected_files: List[str]
+    affected_files: list[str]
     risk_level: str  # low, medium, high, critical
     auto_remediable: bool
     detection_timestamp: str
 
+
 @dataclass
 class RemediationAction:
     """Configuration remediation action"""
+
     action_id: str
     action_type: str  # revert, merge, approve, block
-    pull_request_url: Optional[str]
+    pull_request_url: str | None
     approval_required: bool
     estimated_mttr_minutes: int
     remediation_timestamp: str
     status: str  # pending, approved, applied, failed
+
 
 class ConfigAutoRemediation:
     """Core configuration auto-remediation service"""
 
     def __init__(self, config_path: str = "ops/config-auto-remediate.json"):
         self.config = self._load_config(config_path)
-        self.baseline_snapshot: Optional[ConfigSnapshot] = None
-        self.remediation_history: List[RemediationAction] = []
+        self.baseline_snapshot: ConfigSnapshot | None = None
+        self.remediation_history: list[RemediationAction] = []
 
         logger.info("Config Auto-Remediation service initialized")
 
-    def _load_config(self, config_path: str) -> Dict[str, Any]:
+    def _load_config(self, config_path: str) -> dict[str, Any]:
         """Load auto-remediation configuration"""
         default_config = {
             "mttr_target_minutes": 10,
@@ -68,32 +75,32 @@ class ConfigAutoRemediation:
                 "low_risk": True,
                 "medium_risk": False,
                 "high_risk": False,
-                "critical_risk": False
+                "critical_risk": False,
             },
             "monitored_paths": [
                 "charts/**/*.yaml",
                 "deploy/**/*",
                 "ops/**/*.py",
                 "monitoring/**/*.yaml",
-                ".github/workflows/*.yml"
+                ".github/workflows/*.yml",
             ],
             "signature_key": "mc-platform-config-attest",
             "github": {
                 "repo": "BrianCLong/summit",
                 "base_branch": "main",
-                "pr_template": ".github/pull_request_template.md"
+                "pr_template": ".github/pull_request_template.md",
             },
             "risk_assessment": {
                 "semantic_patterns": {
                     "high_risk": ["security", "auth", "rbac", "policy"],
                     "medium_risk": ["monitoring", "alerting", "budget"],
-                    "low_risk": ["dashboard", "description", "documentation"]
+                    "low_risk": ["dashboard", "description", "documentation"],
                 }
-            }
+            },
         }
 
         try:
-            with open(config_path, 'r') as f:
+            with open(config_path) as f:
                 user_config = json.load(f)
                 default_config.update(user_config)
         except FileNotFoundError:
@@ -101,7 +108,9 @@ class ConfigAutoRemediation:
 
         return default_config
 
-    def create_baseline_snapshot(self, output_path: str = "evidence/v0.3.4/config/baseline-snapshot.json") -> ConfigSnapshot:
+    def create_baseline_snapshot(
+        self, output_path: str = "evidence/v0.3.4/config/baseline-snapshot.json"
+    ) -> ConfigSnapshot:
         """Create cryptographically signed baseline configuration snapshot"""
         logger.info("Creating baseline configuration snapshot")
 
@@ -120,7 +129,7 @@ class ConfigAutoRemediation:
             commit_hash=commit_hash,
             config_hash=config_hash,
             files=config_files,
-            signature=""
+            signature="",
         )
 
         # Sign snapshot
@@ -128,20 +137,22 @@ class ConfigAutoRemediation:
 
         # Save snapshot
         Path(output_path).parent.mkdir(parents=True, exist_ok=True)
-        with open(output_path, 'w') as f:
+        with open(output_path, "w") as f:
             json.dump(asdict(snapshot), f, indent=2)
 
         self.baseline_snapshot = snapshot
         logger.info(f"Baseline snapshot created: {output_path}")
         return snapshot
 
-    def detect_configuration_drift(self, baseline_path: str = "evidence/v0.3.4/config/baseline-snapshot.json") -> DriftDetection:
+    def detect_configuration_drift(
+        self, baseline_path: str = "evidence/v0.3.4/config/baseline-snapshot.json"
+    ) -> DriftDetection:
         """Detect configuration drift from baseline"""
         logger.info("Detecting configuration drift")
 
         # Load baseline snapshot
         try:
-            with open(baseline_path, 'r') as f:
+            with open(baseline_path) as f:
                 baseline_data = json.load(f)
                 baseline = ConfigSnapshot(**baseline_data)
         except FileNotFoundError:
@@ -152,7 +163,7 @@ class ConfigAutoRemediation:
                 affected_files=[],
                 risk_level="critical",
                 auto_remediable=False,
-                detection_timestamp=datetime.utcnow().isoformat() + "Z"
+                detection_timestamp=datetime.utcnow().isoformat() + "Z",
             )
 
         # Verify baseline signature
@@ -164,7 +175,7 @@ class ConfigAutoRemediation:
                 affected_files=[],
                 risk_level="critical",
                 auto_remediable=False,
-                detection_timestamp=datetime.utcnow().isoformat() + "Z"
+                detection_timestamp=datetime.utcnow().isoformat() + "Z",
             )
 
         # Get current configuration
@@ -180,14 +191,16 @@ class ConfigAutoRemediation:
                 affected_files=[],
                 risk_level="none",
                 auto_remediable=True,
-                detection_timestamp=datetime.utcnow().isoformat() + "Z"
+                detection_timestamp=datetime.utcnow().isoformat() + "Z",
             )
 
         # Identify specific changes
         affected_files = self._identify_changed_files(baseline.files, current_files)
         drift_type, risk_level = self._assess_drift_risk(affected_files)
 
-        logger.warning(f"Configuration drift detected: {len(affected_files)} files affected, risk: {risk_level}")
+        logger.warning(
+            f"Configuration drift detected: {len(affected_files)} files affected, risk: {risk_level}"
+        )
 
         return DriftDetection(
             drift_detected=True,
@@ -195,12 +208,16 @@ class ConfigAutoRemediation:
             affected_files=affected_files,
             risk_level=risk_level,
             auto_remediable=self._is_auto_remediable(risk_level),
-            detection_timestamp=datetime.utcnow().isoformat() + "Z"
+            detection_timestamp=datetime.utcnow().isoformat() + "Z",
         )
 
-    def auto_remediate_drift(self, drift: DriftDetection, create_pr: bool = True) -> RemediationAction:
+    def auto_remediate_drift(
+        self, drift: DriftDetection, create_pr: bool = True
+    ) -> RemediationAction:
         """Automatically remediate configuration drift"""
-        logger.info(f"Starting auto-remediation for {drift.drift_type} drift (risk: {drift.risk_level})")
+        logger.info(
+            f"Starting auto-remediation for {drift.drift_type} drift (risk: {drift.risk_level})"
+        )
 
         action_id = f"remediation-{int(time.time())}"
 
@@ -214,7 +231,7 @@ class ConfigAutoRemediation:
                 approval_required=True,
                 estimated_mttr_minutes=60,  # Manual intervention required
                 remediation_timestamp=datetime.utcnow().isoformat() + "Z",
-                status="blocked"
+                status="blocked",
             )
 
         # Create remediation PR
@@ -223,7 +240,9 @@ class ConfigAutoRemediation:
             pr_url = self._create_remediation_pr(drift, action_id)
 
         # Determine if auto-approval is possible
-        approval_required = not self.config["auto_approval_rules"].get(f"{drift.risk_level}_risk", False)
+        approval_required = not self.config["auto_approval_rules"].get(
+            f"{drift.risk_level}_risk", False
+        )
 
         estimated_mttr = self._estimate_mttr(drift.risk_level, approval_required)
 
@@ -234,7 +253,7 @@ class ConfigAutoRemediation:
             approval_required=approval_required,
             estimated_mttr_minutes=estimated_mttr,
             remediation_timestamp=datetime.utcnow().isoformat() + "Z",
-            status="pending"
+            status="pending",
         )
 
         # Auto-apply if low risk
@@ -244,7 +263,7 @@ class ConfigAutoRemediation:
         self.remediation_history.append(action)
         return action
 
-    def _collect_config_files(self) -> List[Dict[str, str]]:
+    def _collect_config_files(self) -> list[dict[str, str]]:
         """Collect all monitored configuration files"""
         files = []
 
@@ -255,22 +274,24 @@ class ConfigAutoRemediation:
                 result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
 
                 if result.returncode == 0:
-                    for file_path in result.stdout.strip().split('\n'):
+                    for file_path in result.stdout.strip().split("\n"):
                         if file_path and os.path.exists(file_path):
-                            with open(file_path, 'r') as f:
+                            with open(file_path) as f:
                                 content = f.read()
 
-                            files.append({
-                                "path": file_path,
-                                "hash": hashlib.sha256(content.encode()).hexdigest(),
-                                "size": len(content)
-                            })
+                            files.append(
+                                {
+                                    "path": file_path,
+                                    "hash": hashlib.sha256(content.encode()).hexdigest(),
+                                    "size": len(content),
+                                }
+                            )
         except Exception as e:
             logger.error(f"Error collecting config files: {e}")
 
         return files
 
-    def _calculate_config_hash(self, files: List[Dict[str, str]]) -> str:
+    def _calculate_config_hash(self, files: list[dict[str, str]]) -> str:
         """Calculate overall configuration hash"""
         content = json.dumps(files, sort_keys=True)
         return hashlib.sha256(content.encode()).hexdigest()
@@ -290,7 +311,7 @@ class ConfigAutoRemediation:
             "timestamp": snapshot.timestamp,
             "commit_hash": snapshot.commit_hash,
             "config_hash": snapshot.config_hash,
-            "files_count": len(snapshot.files)
+            "files_count": len(snapshot.files),
         }
         content = json.dumps(sign_data, sort_keys=True)
         return hashlib.sha256(content.encode()).hexdigest()
@@ -300,7 +321,9 @@ class ConfigAutoRemediation:
         expected_signature = self._sign_snapshot(snapshot)
         return expected_signature == snapshot.signature
 
-    def _identify_changed_files(self, baseline_files: List[Dict[str, str]], current_files: List[Dict[str, str]]) -> List[str]:
+    def _identify_changed_files(
+        self, baseline_files: list[dict[str, str]], current_files: list[dict[str, str]]
+    ) -> list[str]:
         """Identify which files have changed"""
         baseline_map = {f["path"]: f["hash"] for f in baseline_files}
         current_map = {f["path"]: f["hash"] for f in current_files}
@@ -320,7 +343,7 @@ class ConfigAutoRemediation:
 
         return changed
 
-    def _assess_drift_risk(self, affected_files: List[str]) -> Tuple[str, str]:
+    def _assess_drift_risk(self, affected_files: list[str]) -> tuple[str, str]:
         """Assess risk level of configuration drift"""
         risk_patterns = self.config["risk_assessment"]["semantic_patterns"]
 
@@ -333,7 +356,9 @@ class ConfigAutoRemediation:
             # Check for critical patterns
             for pattern in risk_patterns["high_risk"]:
                 if pattern in file_lower:
-                    max_risk = "critical" if "security" in file_lower or "auth" in file_lower else "high"
+                    max_risk = (
+                        "critical" if "security" in file_lower or "auth" in file_lower else "high"
+                    )
                     break
 
             # Check for medium risk patterns
@@ -359,7 +384,7 @@ class ConfigAutoRemediation:
             elif risk_level == "high":
                 return base_time + 15  # 15 min for high approval
             else:
-                return base_time + 8   # 8 min for medium approval
+                return base_time + 8  # 8 min for medium approval
 
         return base_time
 
@@ -380,19 +405,23 @@ class ConfigAutoRemediation:
         # Simulate successful application
         return "applied"
 
-    def generate_remediation_report(self) -> Dict[str, Any]:
+    def generate_remediation_report(self) -> dict[str, Any]:
         """Generate comprehensive remediation report"""
         total_actions = len(self.remediation_history)
         auto_applied = sum(1 for a in self.remediation_history if a.status == "applied")
-        pending_approval = sum(1 for a in self.remediation_history if a.status == "pending_approval")
+        pending_approval = sum(
+            1 for a in self.remediation_history if a.status == "pending_approval"
+        )
 
-        avg_mttr = sum(a.estimated_mttr_minutes for a in self.remediation_history) / max(1, total_actions)
+        avg_mttr = sum(a.estimated_mttr_minutes for a in self.remediation_history) / max(
+            1, total_actions
+        )
 
         return {
             "report_metadata": {
                 "timestamp": datetime.utcnow().isoformat() + "Z",
                 "platform_version": "v0.3.4-mc",
-                "report_type": "config_auto_remediation"
+                "report_type": "config_auto_remediation",
             },
             "remediation_stats": {
                 "total_actions": total_actions,
@@ -400,7 +429,7 @@ class ConfigAutoRemediation:
                 "pending_approval": pending_approval,
                 "auto_resolution_rate_percent": (auto_applied / max(1, total_actions)) * 100,
                 "average_mttr_minutes": avg_mttr,
-                "mttr_target_met": avg_mttr <= self.config["mttr_target_minutes"]
+                "mttr_target_met": avg_mttr <= self.config["mttr_target_minutes"],
             },
             "drift_patterns": {
                 "most_common_files": [a.action_id for a in self.remediation_history[-5:]],
@@ -408,29 +437,36 @@ class ConfigAutoRemediation:
                     "low": sum(1 for a in self.remediation_history if "low" in a.action_type),
                     "medium": sum(1 for a in self.remediation_history if "medium" in a.action_type),
                     "high": sum(1 for a in self.remediation_history if "high" in a.action_type),
-                    "critical": sum(1 for a in self.remediation_history if "critical" in a.action_type)
-                }
+                    "critical": sum(
+                        1 for a in self.remediation_history if "critical" in a.action_type
+                    ),
+                },
             },
             "compliance_validation": {
                 "signature_verification": "PASS",
                 "drift_detection_active": True,
                 "auto_remediation_enabled": True,
-                "mttr_compliance": avg_mttr <= self.config["mttr_target_minutes"]
-            }
+                "mttr_compliance": avg_mttr <= self.config["mttr_target_minutes"],
+            },
         }
+
 
 def main():
     """Main function for testing config auto-remediation"""
-    parser = argparse.ArgumentParser(description='MC Platform v0.3.4 Config Auto-Remediation')
-    parser.add_argument('--from', dest='baseline_path',
-                       default='evidence/v0.3.4/config/baseline-snapshot.json',
-                       help='Baseline snapshot path')
-    parser.add_argument('--open-pr', action='store_true',
-                       help='Create GitHub PR for remediation')
-    parser.add_argument('--sign', action='store_true',
-                       help='Sign the remediation action')
-    parser.add_argument('--out', default='evidence/v0.3.4/config/auto-remediation-log.json',
-                       help='Output path for remediation log')
+    parser = argparse.ArgumentParser(description="MC Platform v0.3.4 Config Auto-Remediation")
+    parser.add_argument(
+        "--from",
+        dest="baseline_path",
+        default="evidence/v0.3.4/config/baseline-snapshot.json",
+        help="Baseline snapshot path",
+    )
+    parser.add_argument("--open-pr", action="store_true", help="Create GitHub PR for remediation")
+    parser.add_argument("--sign", action="store_true", help="Sign the remediation action")
+    parser.add_argument(
+        "--out",
+        default="evidence/v0.3.4/config/auto-remediation-log.json",
+        help="Output path for remediation log",
+    )
 
     args = parser.parse_args()
 
@@ -470,15 +506,20 @@ def main():
 
     # Save evidence
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
-    with open(args.out, 'w') as f:
+    with open(args.out, "w") as f:
         json.dump(report, f, indent=2)
 
-    print(f"\n📊 Remediation Report:")
-    print(f"   MTTR: {report['remediation_stats']['average_mttr_minutes']:.1f} min (target: ≤10 min)")
-    print(f"   Auto-resolution rate: {report['remediation_stats']['auto_resolution_rate_percent']:.1f}%")
+    print("\n📊 Remediation Report:")
+    print(
+        f"   MTTR: {report['remediation_stats']['average_mttr_minutes']:.1f} min (target: ≤10 min)"
+    )
+    print(
+        f"   Auto-resolution rate: {report['remediation_stats']['auto_resolution_rate_percent']:.1f}%"
+    )
     print(f"   MTTR target met: {report['remediation_stats']['mttr_target_met']}")
 
     print(f"\n✅ Evidence saved: {args.out}")
+
 
 if __name__ == "__main__":
     main()

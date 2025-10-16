@@ -9,7 +9,9 @@ const SERVER_STATUS_QUERY = gql`
 `;
 
 function ServerStatus() {
-  const [healthStatus, setHealthStatus] = useState<'unknown' | 'healthy' | 'error'>('unknown');
+  const [healthStatus, setHealthStatus] = useState<
+    'unknown' | 'healthy' | 'error'
+  >('unknown');
   const { data, loading, error } = useQuery(SERVER_STATUS_QUERY, {
     errorPolicy: 'all',
     fetchPolicy: 'no-cache',
@@ -18,11 +20,19 @@ function ServerStatus() {
   useEffect(() => {
     // Test health endpoint
     fetch('http://localhost:4000/healthz')
-      .then((response) => (response.ok ? setHealthStatus('healthy') : setHealthStatus('error')))
+      .then((response) =>
+        response.ok ? setHealthStatus('healthy') : setHealthStatus('error'),
+      )
       .catch(() => setHealthStatus('error'));
   }, []);
 
-  const graphqlStatus = data ? 'healthy' : error ? 'error' : loading ? 'checking' : 'unknown';
+  const graphqlStatus = data
+    ? 'healthy'
+    : error
+      ? 'error'
+      : loading
+        ? 'checking'
+        : 'unknown';
 
   return (
     <div
@@ -72,7 +82,9 @@ function ServerStatus() {
       </div>
 
       {healthStatus === 'healthy' && graphqlStatus === 'healthy' && (
-        <span style={{ color: '#22c55e', fontSize: '12px' }}>🟢 All systems operational</span>
+        <span style={{ color: '#22c55e', fontSize: '12px' }}>
+          🟢 All systems operational
+        </span>
       )}
     </div>
   );

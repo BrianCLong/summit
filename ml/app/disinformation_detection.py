@@ -10,8 +10,8 @@ fallback is applied for environments without the model.
 
 from __future__ import annotations
 
-from typing import Any, Dict, List, Optional
 import logging
+from typing import Any
 
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
@@ -33,7 +33,7 @@ class CounterNarrativeEngine:
     """Generate neutralizing or reframing strategies."""
 
     @staticmethod
-    def recommend(texts: List[str]) -> Dict[str, str]:
+    def recommend(texts: list[str]) -> dict[str, str]:
         """Return simple counter-narrative guidance.
 
         The strategy is intentionally generic but grounded in
@@ -54,24 +54,24 @@ class DisinformationDetector:
         if _HAS_SBERT:
             self.model = SentenceTransformer(model_name)
             logger.info("Loaded SBERT model %s", model_name)
-            self.vectorizer: Optional[TfidfVectorizer] = None
+            self.vectorizer: TfidfVectorizer | None = None
         else:
             self.model = None
             self.vectorizer = TfidfVectorizer()
             logger.warning("sentence-transformers not available; using TF-IDF fallback")
 
-    def _embed(self, texts: List[str]) -> np.ndarray:
+    def _embed(self, texts: list[str]) -> np.ndarray:
         if _HAS_SBERT:
             return self.model.encode(texts)
         assert self.vectorizer is not None
         return self.vectorizer.fit_transform(texts).toarray()
 
-    def _cluster(self, embeddings: np.ndarray, threshold: float = 0.85) -> List[List[int]]:
+    def _cluster(self, embeddings: np.ndarray, threshold: float = 0.85) -> list[list[int]]:
         """Cluster texts by cosine similarity."""
         sim = cosine_similarity(embeddings)
         n = sim.shape[0]
         visited = set()
-        clusters: List[List[int]] = []
+        clusters: list[list[int]] = []
         for i in range(n):
             if i in visited:
                 continue
@@ -88,7 +88,7 @@ class DisinformationDetector:
             visited.update(cluster)
         return clusters
 
-    def detect(self, items: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def detect(self, items: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Return disinformation assessments for coordinated clusters.
 
         Args:
@@ -104,7 +104,7 @@ class DisinformationDetector:
             return []
 
         sim = cosine_similarity(embeddings)
-        results: List[Dict[str, Any]] = []
+        results: list[dict[str, Any]] = []
         for label, idxs in enumerate(clusters):
             cluster_texts = [items[i]["text"] for i in idxs]
             metas = [items[i].get("metadata", {}) for i in idxs]
@@ -114,7 +114,9 @@ class DisinformationDetector:
             source_score = float(np.mean(bot_scores)) if bot_scores else 0.0
             confidence = min(1.0, (dup_score + source_score) / 2)
             threat_actors = [m.get("threat_actor") for m in metas if m.get("threat_actor")]
-            threat_actor = max(set(threat_actors), key=threat_actors.count) if threat_actors else None
+            threat_actor = (
+                max(set(threat_actors), key=threat_actors.count) if threat_actors else None
+            )
             results.append(
                 {
                     "cluster": label,

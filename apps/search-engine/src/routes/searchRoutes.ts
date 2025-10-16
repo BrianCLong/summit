@@ -258,7 +258,12 @@ router.post('/saved', async (req, res) => {
 router.get('/saved', async (req, res) => {
   try {
     const userId = req.user?.id;
-    const { includePublic = 'false', tags, limit = '50', offset = '0' } = req.query;
+    const {
+      includePublic = 'false',
+      tags,
+      limit = '50',
+      offset = '0',
+    } = req.query;
 
     if (!userId) {
       return res.status(401).json({ error: 'User not authenticated' });
@@ -318,7 +323,11 @@ router.put('/saved/:id', async (req, res) => {
       return res.status(401).json({ error: 'User not authenticated' });
     }
 
-    const updatedSearch = await savedSearchService.updateSavedSearch(id, updates, userId);
+    const updatedSearch = await savedSearchService.updateSavedSearch(
+      id,
+      updates,
+      userId,
+    );
 
     if (!updatedSearch) {
       return res.status(404).json({ error: 'Saved search not found' });
