@@ -22,9 +22,9 @@ export interface ThrottleConfig {
 
 export interface ModelCosts {
   [model: string]: {
-    inputTokenCost: number;   // per 1K tokens
-    outputTokenCost: number;  // per 1K tokens
-    requestCost: number;      // per request
+    inputTokenCost: number; // per 1K tokens
+    outputTokenCost: number; // per 1K tokens
+    requestCost: number; // per request
   };
 }
 
@@ -39,11 +39,18 @@ export interface UsageMetrics {
 export class CostGuardrails extends EventEmitter {
   private budgets = new Map<string, CostBudget>();
   private usage = new Map<string, UsageMetrics[]>();
-  private circuitBreakers = new Map<string, { failures: number; lastFailure: Date; state: 'closed' | 'open' | 'half-open' }>();
+  private circuitBreakers = new Map<
+    string,
+    {
+      failures: number;
+      lastFailure: Date;
+      state: 'closed' | 'open' | 'half-open';
+    }
+  >();
 
   constructor(
     private throttleConfig: ThrottleConfig,
-    private modelCosts: ModelCosts
+    private modelCosts: ModelCosts,
   ) {
     super();
     this.startBudgetResetScheduler();
@@ -59,7 +66,7 @@ export class CostGuardrails extends EventEmitter {
       period,
       limit,
       current: 0,
-      resetTime
+      resetTime,
     });
 
     this.emit('budget_set', { period, limit, resetTime });
@@ -71,26 +78,35 @@ export class CostGuardrails extends EventEmitter {
   async checkRequest(
     model: string,
     estimatedInputTokens: number,
-    estimatedOutputTokens: number = 0
+    estimatedOutputTokens: number = 0,
   ): Promise<{
     allowed: boolean;
     reason?: string;
     estimatedCost: number;
-    budgetStatus: Record<string, { used: number; remaining: number; percentage: number }>;
+    budgetStatus: Record<
+      string,
+      { used: number; remaining: number; percentage: number }
+    >;
   }> {
-    const estimatedCost = this.calculateCost(model, estimatedInputTokens, estimatedOutputTokens);
+    const estimatedCost = this.calculateCost(
+      model,
+      estimatedInputTokens,
+      estimatedOutputTokens,
+    );
     const budgetStatus = this.getBudgetStatus();
 
     // Check circuit breaker
     const circuitBreaker = this.circuitBreakers.get(model);
     if (circuitBreaker?.state === 'open') {
-      const timeSinceFailure = Date.now() - circuitBreaker.lastFailure.getTime();
-      if (timeSinceFailure < 60000) { // 1 minute cooldown
+      const timeSinceFailure =
+        Date.now() - circuitBreaker.lastFailure.getTime();
+      if (timeSinceFailure < 60000) {
+        // 1 minute cooldown
         return {
           allowed: false,
           reason: 'Circuit breaker open - model temporarily unavailable',
           estimatedCost,
-          budgetStatus
+          budgetStatus,
         };
       } else {
         // Transition to half-open
@@ -109,14 +125,14 @@ export class CostGuardrails extends EventEmitter {
           current: budget.current,
           projected: projectedCost,
           limit: budget.limit,
-          model
+          model,
         });
 
         return {
           allowed: false,
           reason: `Hard limit exceeded for ${period} budget`,
           estimatedCost,
-          budgetStatus
+          budgetStatus,
         };
       }
     }
@@ -127,7 +143,7 @@ export class CostGuardrails extends EventEmitter {
       this.emit('soft_limit_warning', {
         estimatedCost,
         budgetStatus,
-        throttleReason: throttleDecision.reason
+        throttleReason: throttleDecision.reason,
       });
 
       // Apply graceful degradation if configured
@@ -136,7 +152,7 @@ export class CostGuardrails extends EventEmitter {
           allowed: true,
           reason: `Throttled - ${throttleDecision.reason}`,
           estimatedCost: estimatedCost * 0.5, // Use cheaper alternatives
-          budgetStatus
+          budgetStatus,
         };
       }
 
@@ -144,14 +160,14 @@ export class CostGuardrails extends EventEmitter {
         allowed: false,
         reason: throttleDecision.reason,
         estimatedCost,
-        budgetStatus
+        budgetStatus,
       };
     }
 
     return {
       allowed: true,
       estimatedCost,
-      budgetStatus
+      budgetStatus,
     };
   }
 
@@ -162,9 +178,13 @@ export class CostGuardrails extends EventEmitter {
     model: string,
     actualInputTokens: number,
     actualOutputTokens: number,
-    success: boolean
+    success: boolean,
   ): void {
-    const actualCost = this.calculateCost(model, actualInputTokens, actualOutputTokens);
+    const actualCost = this.calculateCost(
+      model,
+      actualInputTokens,
+      actualOutputTokens,
+    );
 
     // Update budgets
     for (const budget of this.budgets.values()) {
@@ -177,7 +197,7 @@ export class CostGuardrails extends EventEmitter {
       inputTokens: actualInputTokens,
       outputTokens: actualOutputTokens,
       cost: actualCost,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     if (!this.usage.has(model)) {
@@ -195,21 +215,24 @@ export class CostGuardrails extends EventEmitter {
     this.emit('usage_recorded', {
       model,
       usage,
-      budgetStatus: this.getBudgetStatus()
+      budgetStatus: this.getBudgetStatus(),
     });
   }
 
   /**
    * Get current budget status
    */
-  getBudgetStatus(): Record<string, { used: number; remaining: number; percentage: number }> {
+  getBudgetStatus(): Record<
+    string,
+    { used: number; remaining: number; percentage: number }
+  > {
     const status: Record<string, any> = {};
 
     for (const [period, budget] of this.budgets.entries()) {
       status[period] = {
         used: budget.current,
         remaining: budget.limit - budget.current,
-        percentage: (budget.current / budget.limit) * 100
+        percentage: (budget.current / budget.limit) * 100,
       };
     }
 
@@ -219,7 +242,10 @@ export class CostGuardrails extends EventEmitter {
   /**
    * Get usage statistics
    */
-  getUsageStats(model?: string, hours = 24): {
+  getUsageStats(
+    model?: string,
+    hours = 24,
+  ): {
     totalRequests: number;
     totalCost: number;
     averageCostPerRequest: number;
@@ -227,7 +253,7 @@ export class CostGuardrails extends EventEmitter {
     totalOutputTokens: number;
     costByModel: Record<string, number>;
   } {
-    const cutoff = new Date(Date.now() - (hours * 60 * 60 * 1000));
+    const cutoff = new Date(Date.now() - hours * 60 * 60 * 1000);
     let totalRequests = 0;
     let totalCost = 0;
     let totalInputTokens = 0;
@@ -238,7 +264,7 @@ export class CostGuardrails extends EventEmitter {
 
     for (const modelName of modelsToCheck) {
       const modelUsage = this.usage.get(modelName) || [];
-      const recentUsage = modelUsage.filter(u => u.timestamp > cutoff);
+      const recentUsage = modelUsage.filter((u) => u.timestamp > cutoff);
 
       costByModel[modelName] = 0;
 
@@ -257,7 +283,7 @@ export class CostGuardrails extends EventEmitter {
       averageCostPerRequest: totalRequests > 0 ? totalCost / totalRequests : 0,
       totalInputTokens,
       totalOutputTokens,
-      costByModel
+      costByModel,
     };
   }
 
@@ -284,7 +310,7 @@ export class CostGuardrails extends EventEmitter {
       this.circuitBreakers.set(model, {
         failures: this.throttleConfig.circuitBreakerThreshold + 1,
         lastFailure: new Date(),
-        state: 'open'
+        state: 'open',
       });
     }
 
@@ -300,7 +326,11 @@ export class CostGuardrails extends EventEmitter {
     this.emit('operations_resumed', { timestamp: new Date() });
   }
 
-  private calculateCost(model: string, inputTokens: number, outputTokens: number): number {
+  private calculateCost(
+    model: string,
+    inputTokens: number,
+    outputTokens: number,
+  ): number {
     const costs = this.modelCosts[model];
     if (!costs) {
       console.warn(`No cost data for model: ${model}`);
@@ -314,7 +344,10 @@ export class CostGuardrails extends EventEmitter {
     return inputCost + outputCost + requestCost;
   }
 
-  private shouldThrottle(estimatedCost: number): { throttle: boolean; reason?: string } {
+  private shouldThrottle(estimatedCost: number): {
+    throttle: boolean;
+    reason?: string;
+  } {
     if (!this.throttleConfig.enabled) {
       return { throttle: false };
     }
@@ -327,7 +360,7 @@ export class CostGuardrails extends EventEmitter {
         const percentageUsed = (projectedCost / budget.limit) * 100;
         return {
           throttle: true,
-          reason: `Soft limit exceeded for ${period} budget (${percentageUsed.toFixed(1)}% used)`
+          reason: `Soft limit exceeded for ${period} budget (${percentageUsed.toFixed(1)}% used)`,
         };
       }
     }
@@ -340,7 +373,7 @@ export class CostGuardrails extends EventEmitter {
       this.circuitBreakers.set(model, {
         failures: 0,
         lastFailure: new Date(0),
-        state: 'closed'
+        state: 'closed',
       });
     }
 
@@ -356,12 +389,14 @@ export class CostGuardrails extends EventEmitter {
       circuitBreaker.failures++;
       circuitBreaker.lastFailure = new Date();
 
-      if (circuitBreaker.failures >= this.throttleConfig.circuitBreakerThreshold) {
+      if (
+        circuitBreaker.failures >= this.throttleConfig.circuitBreakerThreshold
+      ) {
         circuitBreaker.state = 'open';
         this.emit('circuit_breaker_opened', {
           model,
           failures: circuitBreaker.failures,
-          timestamp: circuitBreaker.lastFailure
+          timestamp: circuitBreaker.lastFailure,
         });
       }
     }
@@ -372,9 +407,20 @@ export class CostGuardrails extends EventEmitter {
 
     switch (period) {
       case 'minute':
-        return new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes() + 1);
+        return new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+          now.getHours(),
+          now.getMinutes() + 1,
+        );
       case 'hour':
-        return new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours() + 1);
+        return new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate(),
+          now.getHours() + 1,
+        );
       case 'day':
         return new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
       case 'month':
@@ -392,17 +438,20 @@ export class CostGuardrails extends EventEmitter {
         if (now >= budget.resetTime) {
           budget.current = 0;
           budget.resetTime = this.calculateResetTime(period);
-          this.emit('budget_auto_reset', { period, resetTime: budget.resetTime });
+          this.emit('budget_auto_reset', {
+            period,
+            resetTime: budget.resetTime,
+          });
         }
       }
     }, 60000); // Check every minute
   }
 
   private cleanupOldUsage(): void {
-    const cutoff = new Date(Date.now() - (24 * 60 * 60 * 1000)); // 24 hours ago
+    const cutoff = new Date(Date.now() - 24 * 60 * 60 * 1000); // 24 hours ago
 
     for (const [model, usageArray] of this.usage.entries()) {
-      const filteredUsage = usageArray.filter(u => u.timestamp > cutoff);
+      const filteredUsage = usageArray.filter((u) => u.timestamp > cutoff);
       this.usage.set(model, filteredUsage);
     }
   }
@@ -411,27 +460,27 @@ export class CostGuardrails extends EventEmitter {
 // Default model costs (example values)
 export const DEFAULT_MODEL_COSTS: ModelCosts = {
   'gpt-4': {
-    inputTokenCost: 0.03,   // $0.03 per 1K input tokens
-    outputTokenCost: 0.06,  // $0.06 per 1K output tokens
-    requestCost: 0.001      // $0.001 per request
+    inputTokenCost: 0.03, // $0.03 per 1K input tokens
+    outputTokenCost: 0.06, // $0.06 per 1K output tokens
+    requestCost: 0.001, // $0.001 per request
   },
   'gpt-3.5-turbo': {
     inputTokenCost: 0.0015,
     outputTokenCost: 0.002,
-    requestCost: 0.0005
+    requestCost: 0.0005,
   },
   'claude-3-sonnet': {
     inputTokenCost: 0.003,
     outputTokenCost: 0.015,
-    requestCost: 0.001
-  }
+    requestCost: 0.001,
+  },
 };
 
 // Default throttle configuration
 export const DEFAULT_THROTTLE_CONFIG: ThrottleConfig = {
   enabled: true,
-  softLimit: 0.8,  // 80% of budget
+  softLimit: 0.8, // 80% of budget
   hardLimit: 0.95, // 95% of budget
   gracefulDegradation: true,
-  circuitBreakerThreshold: 5 // 5 consecutive failures
+  circuitBreakerThreshold: 5, // 5 consecutive failures
 };

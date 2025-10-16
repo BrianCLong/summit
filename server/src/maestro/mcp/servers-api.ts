@@ -51,16 +51,23 @@ router.use(express.json());
 router.post('/servers', requireAdminMCP, async (req, res) => {
   const parse = ServerSchema.safeParse(req.body || {});
   if (!parse.success) {
-    return res.status(400).json({ error: 'invalid_input', details: parse.error.issues });
+    return res
+      .status(400)
+      .json({ error: 'invalid_input', details: parse.error.issues });
   }
   const { name, url, authToken, scopes, tags, fingerprintSha256 } = parse.data;
   if (!validateUrl(url)) {
-    return res.status(400).json({ error: 'url must be ws:// or wss:// WebSocket endpoint' });
+    return res
+      .status(400)
+      .json({ error: 'url must be ws:// or wss:// WebSocket endpoint' });
   }
   if (!isHostAllowed(url)) {
     return res
       .status(400)
-      .json({ error: 'host_not_allowed', message: 'URL host not in MCP_ALLOWED_HOSTS' });
+      .json({
+        error: 'host_not_allowed',
+        message: 'URL host not in MCP_ALLOWED_HOSTS',
+      });
   }
   try {
     const created = await mcpServersRepo.create({
@@ -75,7 +82,9 @@ router.post('/servers', requireAdminMCP, async (req, res) => {
     const { auth_token, ...safe } = created as any;
     return res.status(201).json({ ...safe });
   } catch (err: any) {
-    if (err?.message?.includes('duplicate key value violates unique constraint')) {
+    if (
+      err?.message?.includes('duplicate key value violates unique constraint')
+    ) {
       return res.status(409).json({ error: 'server name already exists' });
     }
     console.error('Failed to create MCP server:', err);
@@ -112,16 +121,24 @@ router.get('/servers/:id', async (req, res) => {
 router.put('/servers/:id', requireAdminMCP, async (req, res) => {
   const parse = ServerSchema.partial().safeParse(req.body || {});
   if (!parse.success) {
-    return res.status(400).json({ error: 'invalid_input', details: parse.error.issues });
+    return res
+      .status(400)
+      .json({ error: 'invalid_input', details: parse.error.issues });
   }
-  const { name, url, authToken, scopes, tags, fingerprintSha256 } = parse.data as any;
+  const { name, url, authToken, scopes, tags, fingerprintSha256 } =
+    parse.data as any;
   if (url !== undefined && !validateUrl(url)) {
-    return res.status(400).json({ error: 'url must be ws:// or wss:// WebSocket endpoint' });
+    return res
+      .status(400)
+      .json({ error: 'url must be ws:// or wss:// WebSocket endpoint' });
   }
   if (url && !isHostAllowed(url)) {
     return res
       .status(400)
-      .json({ error: 'host_not_allowed', message: 'URL host not in MCP_ALLOWED_HOSTS' });
+      .json({
+        error: 'host_not_allowed',
+        message: 'URL host not in MCP_ALLOWED_HOSTS',
+      });
   }
   try {
     const updated = await mcpServersRepo.update(req.params.id, {
@@ -167,7 +184,9 @@ router.get('/servers/:id/health', async (req, res) => {
 });
 
 // Alias to satisfy contract: GET /mcp/servers/:id/health
-router.get('/health-alias/:id', (_req, res) => res.status(501).json({ error: 'not implemented' }));
+router.get('/health-alias/:id', (_req, res) =>
+  res.status(501).json({ error: 'not implemented' }),
+);
 
 export async function checkMCPHealth(
   url: string,
@@ -195,7 +214,9 @@ export async function checkMCPHealth(
           const anyWs: any = ws as any;
           const cert = anyWs?._socket?.getPeerCertificate?.(true);
           if (cert && cert.fingerprint256) {
-            const fp = String(cert.fingerprint256).replace(/\s+/g, '').toUpperCase();
+            const fp = String(cert.fingerprint256)
+              .replace(/\s+/g, '')
+              .toUpperCase();
             const want = fingerprintSha256.replace(/\s+/g, '').toUpperCase();
             if (fp !== want) {
               clearTimeout(timer);
@@ -211,7 +232,11 @@ export async function checkMCPHealth(
         // proceed anyway
       }
       // Send a simple server/info call per MCP protocol
-      const msg = JSON.stringify({ jsonrpc: '2.0', id: '1', method: 'server/info' });
+      const msg = JSON.stringify({
+        jsonrpc: '2.0',
+        id: '1',
+        method: 'server/info',
+      });
       ws.send(msg);
     });
     ws.on('message', (data) => {
@@ -252,12 +277,19 @@ export async function checkMCPHealth(
 
 export default router;
 // Require admin:mcp permission (or ADMIN role in dev)
-function requireAdminMCP(req: express.Request, res: express.Response, next: express.NextFunction) {
+function requireAdminMCP(
+  req: express.Request,
+  res: express.Response,
+  next: express.NextFunction,
+) {
   const user: any = (req as any).user || {};
   const hasAdminRole = Array.isArray(user.roles)
     ? user.roles.includes('ADMIN')
     : user.role === 'ADMIN' || user.role === 'admin';
-  const hasAdminPerm = Array.isArray(user.permissions) && user.permissions.includes('admin:mcp');
+  const hasAdminPerm =
+    Array.isArray(user.permissions) && user.permissions.includes('admin:mcp');
   if (hasAdminPerm || hasAdminRole) return next();
-  return res.status(403).json({ error: 'forbidden', message: 'admin:mcp required' });
+  return res
+    .status(403)
+    .json({ error: 'forbidden', message: 'admin:mcp required' });
 }

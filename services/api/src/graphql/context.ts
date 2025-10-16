@@ -43,7 +43,8 @@ export async function createContext({
   req: Request;
   res: Response;
 }): Promise<GraphQLContext> {
-  const requestId = (req.headers['x-request-id'] as string) || generateRequestId();
+  const requestId =
+    (req.headers['x-request-id'] as string) || generateRequestId();
   const startTime = Date.now();
 
   // Extract user and tenant from middleware
@@ -71,5 +72,8 @@ export async function createContext({
 }
 
 function generateRequestId(): string {
-  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  return (
+    Math.random().toString(36).substring(2, 15) +
+    Math.random().toString(36).substring(2, 15)
+  );
 }

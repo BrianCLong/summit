@@ -107,7 +107,7 @@ export interface AttestationReport {
   quote: string;
   measurement: {
     mrenclave: string; // Enclave measurement
-    mrsigner: string;  // Signer measurement
+    mrsigner: string; // Signer measurement
     isvprodid: number;
     isvsvn: number;
   };
@@ -137,12 +137,14 @@ export class EnclaveManager extends EventEmitter {
   /**
    * Register enclave configuration
    */
-  async registerConfig(config: Omit<EnclaveConfig, 'id' | 'createdAt' | 'updatedAt'>): Promise<EnclaveConfig> {
+  async registerConfig(
+    config: Omit<EnclaveConfig, 'id' | 'createdAt' | 'updatedAt'>,
+  ): Promise<EnclaveConfig> {
     const fullConfig: EnclaveConfig = {
       ...config,
       id: crypto.randomUUID(),
       createdAt: new Date(),
-      updatedAt: new Date()
+      updatedAt: new Date(),
     };
 
     // Validate configuration
@@ -157,7 +159,10 @@ export class EnclaveManager extends EventEmitter {
   /**
    * Create and initialize enclave instance
    */
-  async createEnclave(configId: string, requestor: string): Promise<EnclaveInstance> {
+  async createEnclave(
+    configId: string,
+    requestor: string,
+  ): Promise<EnclaveInstance> {
     const config = this.configs.get(configId);
     if (!config) {
       throw new Error('Enclave configuration not found');
@@ -172,28 +177,30 @@ export class EnclaveManager extends EventEmitter {
         measurement: '',
         signature: '',
         timestamp: new Date(),
-        verificationStatus: 'pending'
+        verificationStatus: 'pending',
       },
       runtime: {
         startTime: new Date(),
         lastActivity: new Date(),
         computeTimeUsed: 0,
         memoryUsed: 0,
-        storageUsed: 0
+        storageUsed: 0,
       },
       sealed: {
         keys: new Map(),
-        data: new Map()
+        data: new Map(),
       },
       audit: {
         operations: [],
-        accessLog: [{
-          timestamp: new Date(),
-          operation: 'create',
-          requestor,
-          approved: true
-        }]
-      }
+        accessLog: [
+          {
+            timestamp: new Date(),
+            operation: 'create',
+            requestor,
+            approved: true,
+          },
+        ],
+      },
     };
 
     try {
@@ -207,7 +214,8 @@ export class EnclaveManager extends EventEmitter {
         measurement: attestation.measurement.mrenclave,
         signature: attestation.verification.certificateChain[0] || '',
         timestamp: attestation.timestamp,
-        verificationStatus: attestation.verification.status === 'valid' ? 'verified' : 'failed'
+        verificationStatus:
+          attestation.verification.status === 'valid' ? 'verified' : 'failed',
       };
 
       this.attestations.set(instance.id, attestation);
@@ -223,7 +231,6 @@ export class EnclaveManager extends EventEmitter {
       this.emit('enclave_created', instance);
 
       return instance;
-
     } catch (error) {
       instance.status = 'error';
       this.instances.set(instance.id, instance);
@@ -239,7 +246,7 @@ export class EnclaveManager extends EventEmitter {
     functionName: string,
     inputs: Array<{ data: Buffer; encrypted?: boolean }>,
     requestor: string,
-    purpose: string
+    purpose: string,
   ): Promise<SecureComputation> {
     const instance = this.instances.get(enclaveId);
     if (!instance) {
@@ -254,32 +261,33 @@ export class EnclaveManager extends EventEmitter {
       id: crypto.randomUUID(),
       enclaveId,
       function: functionName,
-      inputs: inputs.map(input => ({
+      inputs: inputs.map((input) => ({
         id: crypto.randomUUID(),
         encrypted: input.encrypted || false,
         sealed: false,
-        hash: crypto.createHash('sha256').update(input.data).digest('hex')
+        hash: crypto.createHash('sha256').update(input.data).digest('hex'),
       })),
       outputs: [],
       computation: {
-        startTime: new Date()
+        startTime: new Date(),
       },
       attestation: {
         inputsVerified: false,
         computationAttested: false,
         outputsSealed: false,
-        integrityProof: ''
+        integrityProof: '',
       },
       metadata: {
         requestor,
         purpose,
-        confidentialityLevel: 'HIGH'
-      }
+        confidentialityLevel: 'HIGH',
+      },
     };
 
     try {
       // Verify input integrity
-      computation.attestation.inputsVerified = await this.verifyInputIntegrity(inputs);
+      computation.attestation.inputsVerified =
+        await this.verifyInputIntegrity(inputs);
 
       // Seal inputs in enclave
       const sealedInputs = await this.sealInputsInEnclave(instance, inputs);
@@ -288,30 +296,29 @@ export class EnclaveManager extends EventEmitter {
       const results = await this.performSecureComputation(
         instance,
         functionName,
-        sealedInputs
+        sealedInputs,
       );
 
       // Seal outputs
       const sealedOutputs = await this.sealOutputsInEnclave(instance, results);
-      computation.outputs = sealedOutputs.map(output => ({
+      computation.outputs = sealedOutputs.map((output) => ({
         id: crypto.randomUUID(),
         encrypted: true,
         sealed: true,
-        hash: crypto.createHash('sha256').update(output.data).digest('hex')
+        hash: crypto.createHash('sha256').update(output.data).digest('hex'),
       }));
 
       computation.computation.endTime = new Date();
       computation.computation.duration =
-        computation.computation.endTime.getTime() - computation.computation.startTime.getTime();
+        computation.computation.endTime.getTime() -
+        computation.computation.startTime.getTime();
       computation.computation.exitCode = 0;
 
       // Generate attestation proof
       computation.attestation.computationAttested = true;
       computation.attestation.outputsSealed = true;
-      computation.attestation.integrityProof = await this.generateIntegrityProof(
-        computation,
-        instance
-      );
+      computation.attestation.integrityProof =
+        await this.generateIntegrityProof(computation, instance);
 
       // Update instance runtime
       instance.runtime.lastActivity = new Date();
@@ -324,7 +331,6 @@ export class EnclaveManager extends EventEmitter {
       this.emit('secure_computation_completed', computation);
 
       return computation;
-
     } catch (error) {
       computation.computation.endTime = new Date();
       computation.computation.error = error.message;
@@ -341,7 +347,7 @@ export class EnclaveManager extends EventEmitter {
   async unsealData(
     enclaveId: string,
     sealedDataId: string,
-    requestor: string
+    requestor: string,
   ): Promise<Buffer> {
     const instance = this.instances.get(enclaveId);
     if (!instance) {
@@ -358,7 +364,7 @@ export class EnclaveManager extends EventEmitter {
       timestamp: new Date(),
       operation: `unseal:${sealedDataId}`,
       requestor,
-      approved: true
+      approved: true,
     });
 
     this.instances.set(enclaveId, instance);
@@ -396,7 +402,7 @@ export class EnclaveManager extends EventEmitter {
       timestamp: new Date(),
       operation: 'terminate',
       requestor,
-      approved: true
+      approved: true,
     });
 
     this.instances.set(enclaveId, instance);
@@ -410,7 +416,10 @@ export class EnclaveManager extends EventEmitter {
   /**
    * Verify remote attestation
    */
-  async verifyRemoteAttestation(quote: string, expectedMeasurement?: string): Promise<{
+  async verifyRemoteAttestation(
+    quote: string,
+    expectedMeasurement?: string,
+  ): Promise<{
     valid: boolean;
     report: AttestationReport;
     errors: string[];
@@ -422,7 +431,9 @@ export class EnclaveManager extends EventEmitter {
       const report = await this.parseAttestationQuote(quote);
 
       // Verify certificate chain
-      const certChainValid = await this.verifyCertificateChain(report.verification.certificateChain);
+      const certChainValid = await this.verifyCertificateChain(
+        report.verification.certificateChain,
+      );
       if (!certChainValid) {
         errors.push('Invalid certificate chain');
       }
@@ -434,7 +445,10 @@ export class EnclaveManager extends EventEmitter {
       }
 
       // Verify measurement if provided
-      if (expectedMeasurement && report.measurement.mrenclave !== expectedMeasurement) {
+      if (
+        expectedMeasurement &&
+        report.measurement.mrenclave !== expectedMeasurement
+      ) {
         errors.push('Measurement mismatch');
       }
 
@@ -450,7 +464,6 @@ export class EnclaveManager extends EventEmitter {
       this.attestations.set(report.enclaveId, report);
 
       return { valid, report, errors };
-
     } catch (error) {
       errors.push(`Attestation verification failed: ${error.message}`);
 
@@ -461,19 +474,19 @@ export class EnclaveManager extends EventEmitter {
           mrenclave: '',
           mrsigner: '',
           isvprodid: 0,
-          isvsvn: 0
+          isvsvn: 0,
         },
         tcb: {
           cpusvn: '',
           pcesvn: 0,
-          sgxType: 'unknown'
+          sgxType: 'unknown',
         },
         timestamp: new Date(),
         verification: {
           status: 'invalid',
           certificateChain: [],
-          revocationList: []
-        }
+          revocationList: [],
+        },
       };
 
       return { valid: false, report: failedReport, errors };
@@ -485,7 +498,7 @@ export class EnclaveManager extends EventEmitter {
    */
   getInstances(status?: EnclaveInstance['status']): EnclaveInstance[] {
     const instances = Array.from(this.instances.values());
-    return status ? instances.filter(i => i.status === status) : instances;
+    return status ? instances.filter((i) => i.status === status) : instances;
   }
 
   /**
@@ -495,11 +508,14 @@ export class EnclaveManager extends EventEmitter {
     const computations = Array.from(this.computations.values());
 
     const filtered = enclaveId
-      ? computations.filter(c => c.enclaveId === enclaveId)
+      ? computations.filter((c) => c.enclaveId === enclaveId)
       : computations;
 
     return filtered
-      .sort((a, b) => b.computation.startTime.getTime() - a.computation.startTime.getTime())
+      .sort(
+        (a, b) =>
+          b.computation.startTime.getTime() - a.computation.startTime.getTime(),
+      )
       .slice(0, limit);
   }
 
@@ -527,7 +543,10 @@ export class EnclaveManager extends EventEmitter {
     }
   }
 
-  private async initializeEnclave(instance: EnclaveInstance, config: EnclaveConfig): Promise<void> {
+  private async initializeEnclave(
+    instance: EnclaveInstance,
+    config: EnclaveConfig,
+  ): Promise<void> {
     // Platform-specific initialization
     switch (config.type) {
       case 'sgx':
@@ -544,22 +563,34 @@ export class EnclaveManager extends EventEmitter {
     }
   }
 
-  private async initializeSGXEnclave(instance: EnclaveInstance, config: EnclaveConfig): Promise<void> {
+  private async initializeSGXEnclave(
+    instance: EnclaveInstance,
+    config: EnclaveConfig,
+  ): Promise<void> {
     // SGX-specific initialization
     console.log(`Initializing SGX enclave ${instance.id}`);
   }
 
-  private async initializeSEVEnclave(instance: EnclaveInstance, config: EnclaveConfig): Promise<void> {
+  private async initializeSEVEnclave(
+    instance: EnclaveInstance,
+    config: EnclaveConfig,
+  ): Promise<void> {
     // AMD SEV-specific initialization
     console.log(`Initializing SEV enclave ${instance.id}`);
   }
 
-  private async initializeNitroEnclave(instance: EnclaveInstance, config: EnclaveConfig): Promise<void> {
+  private async initializeNitroEnclave(
+    instance: EnclaveInstance,
+    config: EnclaveConfig,
+  ): Promise<void> {
     // AWS Nitro-specific initialization
     console.log(`Initializing Nitro enclave ${instance.id}`);
   }
 
-  private async generateAttestation(instance: EnclaveInstance, config: EnclaveConfig): Promise<AttestationReport> {
+  private async generateAttestation(
+    instance: EnclaveInstance,
+    config: EnclaveConfig,
+  ): Promise<AttestationReport> {
     // Generate mock attestation
     return {
       enclaveId: instance.id,
@@ -568,53 +599,55 @@ export class EnclaveManager extends EventEmitter {
         mrenclave: crypto.randomBytes(32).toString('hex'),
         mrsigner: crypto.randomBytes(32).toString('hex'),
         isvprodid: 1,
-        isvsvn: 1
+        isvsvn: 1,
       },
       tcb: {
         cpusvn: crypto.randomBytes(16).toString('hex'),
         pcesvn: 1,
-        sgxType: config.type
+        sgxType: config.type,
       },
       timestamp: new Date(),
       verification: {
         status: 'valid',
         certificateChain: [`cert_${crypto.randomBytes(16).toString('hex')}`],
-        revocationList: []
-      }
+        revocationList: [],
+      },
     };
   }
 
-  private async verifyInputIntegrity(inputs: Array<{ data: Buffer }>): Promise<boolean> {
+  private async verifyInputIntegrity(
+    inputs: Array<{ data: Buffer }>,
+  ): Promise<boolean> {
     // Verify input data integrity
-    return inputs.every(input => input.data.length > 0);
+    return inputs.every((input) => input.data.length > 0);
   }
 
   private async sealInputsInEnclave(
     instance: EnclaveInstance,
-    inputs: Array<{ data: Buffer }>
+    inputs: Array<{ data: Buffer }>,
   ): Promise<Array<{ id: string; sealed: Buffer }>> {
-    return inputs.map(input => ({
+    return inputs.map((input) => ({
       id: crypto.randomUUID(),
-      sealed: this.performSeal(instance, input.data)
+      sealed: this.performSeal(instance, input.data),
     }));
   }
 
   private async performSecureComputation(
     instance: EnclaveInstance,
     functionName: string,
-    inputs: Array<{ id: string; sealed: Buffer }>
+    inputs: Array<{ id: string; sealed: Buffer }>,
   ): Promise<Array<{ data: Buffer }>> {
     // Mock secure computation
-    return inputs.map(input => ({
-      data: crypto.randomBytes(input.sealed.length / 2)
+    return inputs.map((input) => ({
+      data: crypto.randomBytes(input.sealed.length / 2),
     }));
   }
 
   private async sealOutputsInEnclave(
     instance: EnclaveInstance,
-    outputs: Array<{ data: Buffer }>
+    outputs: Array<{ data: Buffer }>,
   ): Promise<Array<{ id: string; data: Buffer }>> {
-    return outputs.map(output => {
+    return outputs.map((output) => {
       const id = crypto.randomUUID();
       const sealed = this.performSeal(instance, output.data);
 
@@ -627,14 +660,18 @@ export class EnclaveManager extends EventEmitter {
 
   private performSeal(instance: EnclaveInstance, data: Buffer): Buffer {
     // Mock sealing - in practice, use platform-specific sealing
-    const key = instance.sealed.keys.get('master') || this.generateSealingKey(instance);
+    const key =
+      instance.sealed.keys.get('master') || this.generateSealingKey(instance);
     instance.sealed.keys.set('master', key);
 
     const cipher = crypto.createCipher('aes-256-cbc', key);
     return Buffer.concat([cipher.update(data), cipher.final()]);
   }
 
-  private async performUnseal(instance: EnclaveInstance, sealedData: Buffer): Promise<Buffer> {
+  private async performUnseal(
+    instance: EnclaveInstance,
+    sealedData: Buffer,
+  ): Promise<Buffer> {
     const key = instance.sealed.keys.get('master');
     if (!key) {
       throw new Error('Sealing key not found');
@@ -650,21 +687,23 @@ export class EnclaveManager extends EventEmitter {
 
   private async generateIntegrityProof(
     computation: SecureComputation,
-    instance: EnclaveInstance
+    instance: EnclaveInstance,
   ): Promise<string> {
     const data = JSON.stringify({
       computationId: computation.id,
       enclaveId: instance.id,
-      inputs: computation.inputs.map(i => i.hash),
-      outputs: computation.outputs.map(o => o.hash),
+      inputs: computation.inputs.map((i) => i.hash),
+      outputs: computation.outputs.map((o) => o.hash),
       function: computation.function,
-      timestamp: computation.computation.startTime
+      timestamp: computation.computation.startTime,
     });
 
     return crypto.createHash('sha256').update(data).digest('hex');
   }
 
-  private async parseAttestationQuote(quote: string): Promise<AttestationReport> {
+  private async parseAttestationQuote(
+    quote: string,
+  ): Promise<AttestationReport> {
     // Mock quote parsing
     return {
       enclaveId: crypto.randomUUID(),
@@ -673,19 +712,19 @@ export class EnclaveManager extends EventEmitter {
         mrenclave: crypto.randomBytes(32).toString('hex'),
         mrsigner: crypto.randomBytes(32).toString('hex'),
         isvprodid: 1,
-        isvsvn: 1
+        isvsvn: 1,
       },
       tcb: {
         cpusvn: crypto.randomBytes(16).toString('hex'),
         pcesvn: 1,
-        sgxType: 'sgx'
+        sgxType: 'sgx',
       },
       timestamp: new Date(),
       verification: {
         status: 'valid',
         certificateChain: [],
-        revocationList: []
-      }
+        revocationList: [],
+      },
     };
   }
 
@@ -693,15 +732,22 @@ export class EnclaveManager extends EventEmitter {
     return chain.length > 0;
   }
 
-  private async checkRevocationStatus(report: AttestationReport): Promise<boolean> {
+  private async checkRevocationStatus(
+    report: AttestationReport,
+  ): Promise<boolean> {
     return false; // Not revoked
   }
 
-  private async verifyTCBLevel(tcb: AttestationReport['tcb']): Promise<boolean> {
+  private async verifyTCBLevel(
+    tcb: AttestationReport['tcb'],
+  ): Promise<boolean> {
     return tcb.pcesvn > 0;
   }
 
-  private async cleanupEnclave(instance: EnclaveInstance, config: EnclaveConfig): Promise<void> {
+  private async cleanupEnclave(
+    instance: EnclaveInstance,
+    config: EnclaveConfig,
+  ): Promise<void> {
     // Platform-specific cleanup
     console.log(`Cleaning up enclave ${instance.id}`);
   }

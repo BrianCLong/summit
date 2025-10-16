@@ -11,15 +11,17 @@ const CoherenceQuerySchema = z.object({
   tenantId: z.string().min(1),
   timeRange: z.object({
     start: z.string().datetime(),
-    end: z.string().datetime()
+    end: z.string().datetime(),
   }),
-  filters: z.object({
-    signalTypes: z.array(z.string()).optional(),
-    sources: z.array(z.string()).optional(),
-    minWeight: z.number().optional().default(0.1),
-    minConfidence: z.number().optional().default(0.5)
-  }).optional(),
-  aggregation: z.enum(['hour', 'day', 'week']).optional().default('hour')
+  filters: z
+    .object({
+      signalTypes: z.array(z.string()).optional(),
+      sources: z.array(z.string()).optional(),
+      minWeight: z.number().optional().default(0.1),
+      minConfidence: z.number().optional().default(0.5),
+    })
+    .optional(),
+  aggregation: z.enum(['hour', 'day', 'week']).optional().default('hour'),
 });
 
 export class CoherenceGraphQLResolvers {
@@ -28,13 +30,13 @@ export class CoherenceGraphQLResolvers {
     private redis: RedisService,
     private activityIndex: ActivityFingerprintIndex,
     private narrativeModel: NarrativeImpactModel,
-    private missionVault: MissionVault
+    private missionVault: MissionVault,
   ) {}
 
   async getCoherenceScore(req: Request, res: Response) {
     try {
       const { tenantId } = req.params;
-      
+
       if (!tenantId) {
         return res.status(400).json({ error: 'tenantId is required' });
       }
@@ -42,8 +44,9 @@ export class CoherenceGraphQLResolvers {
       // Get current coherence score from materialized view
       const session = this.neo4j.getSession();
       try {
-        const result = await session.executeRead(async tx => {
-          return await tx.run(`
+        const result = await session.executeRead(async (tx) => {
+          return await tx.run(
+            `
             MATCH (t:Tenant {tenant_id: $tenantId})-[:EMITS]->(s:Signal)
             WITH t, 
                  avg(s.value * s.weight) as weighted_avg,
@@ -63,23 +66,27 @@ export class CoherenceGraphQLResolvers {
                 ELSE 'insufficient'
               END
             } as coherence
-          `, { tenantId });
+          `,
+            { tenantId },
+          );
         });
 
         if (result.records.length === 0) {
-          return res.status(404).json({ 
+          return res.status(404).json({
             error: 'No coherence data found for tenant',
-            tenantId 
+            tenantId,
           });
         }
 
         const coherence = result.records[0].get('coherence');
-        
+
         // Get activity fingerprints
-        const fingerprints = await this.activityIndex.getActivityFingerprints(tenantId);
-        
+        const fingerprints =
+          await this.activityIndex.getActivityFingerprints(tenantId);
+
         // Get narrative impacts
-        const narrativeImpacts = await this.narrativeModel.getNarrativeImpacts(tenantId);
+        const narrativeImpacts =
+          await this.narrativeModel.getNarrativeImpacts(tenantId);
 
         res.json({
           tenantId,
@@ -89,21 +96,22 @@ export class CoherenceGraphQLResolvers {
             signalCount: coherence.signalCount || 0,
             signalTypes: coherence.signalTypes || [],
             lastSignalTime: coherence.lastSignalTime,
-            computedAt: new Date().toISOString()
+            computedAt: new Date().toISOString(),
           },
           intelligence: {
             activityFingerprints: fingerprints.slice(0, 10), // Top 10
             narrativeImpacts: narrativeImpacts.slice(0, 5), // Top 5
-            missionContext: await this.missionVault.getMissionContext(tenantId)
-          }
+            missionContext: await this.missionVault.getMissionContext(tenantId),
+          },
         });
-
       } finally {
         await session.close();
       }
-
     } catch (error) {
-      logger.error('Failed to get coherence score', { error, tenantId: req.params.tenantId });
+      logger.error('Failed to get coherence score', {
+        error,
+        tenantId: req.params.tenantId,
+      });
       res.status(500).json({ error: 'Internal server error' });
     }
   }
@@ -116,11 +124,12 @@ export class CoherenceGraphQLResolvers {
       const session = this.neo4j.getSession();
       try {
         // Build dynamic query based on filters
-        let whereClause = 's.ts >= datetime($startTime) AND s.ts <= datetime($endTime)';
+        let whereClause =
+          's.ts >= datetime($startTime) AND s.ts <= datetime($endTime)';
         const params: any = {
           tenantId,
           startTime: timeRange.start,
-          endTime: timeRange.end
+          endTime: timeRange.end,
         };
 
         if (filters.signalTypes?.length) {
@@ -142,11 +151,12 @@ export class CoherenceGraphQLResolvers {
         const aggregationField = {
           hour: 'datetime({year: s.ts.year, month: s.ts.month, day: s.ts.day, hour: s.ts.hour})',
           day: 'date(s.ts)',
-          week: 'date(s.ts) - duration({days: s.ts.dayOfWeek - 1})'
+          week: 'date(s.ts) - duration({days: s.ts.dayOfWeek - 1})',
         }[aggregation];
 
-        const result = await session.executeRead(async tx => {
-          return await tx.run(`
+        const result = await session.executeRead(async (tx) => {
+          return await tx.run(
+            `
             MATCH (t:Tenant {tenant_id: $tenantId})-[:EMITS]->(s:Signal)
             WHERE ${whereClause}
             WITH ${aggregationField} as timeWindow, s
@@ -160,10 +170,12 @@ export class CoherenceGraphQLResolvers {
               max(s.value) as maxValue,
               stddev(s.value) as valueStddev
             ORDER BY timeWindow
-          `, params);
+          `,
+            params,
+          );
         });
 
-        const signals = result.records.map(record => ({
+        const signals = result.records.map((record) => ({
           timeWindow: record.get('timeWindow'),
           signalCount: record.get('signalCount'),
           avgWeightedValue: record.get('avgWeightedValue') || 0,
@@ -171,12 +183,12 @@ export class CoherenceGraphQLResolvers {
           sources: record.get('sources') || [],
           minValue: record.get('minValue'),
           maxValue: record.get('maxValue'),
-          valueStddev: record.get('valueStddev') || 0
+          valueStddev: record.get('valueStddev') || 0,
         }));
 
         // Calculate trend analysis
         const trend = this.calculateTrend(signals);
-        
+
         // Get anomaly detection results
         const anomalies = await this.detectAnomalies(tenantId, signals);
 
@@ -185,7 +197,7 @@ export class CoherenceGraphQLResolvers {
           query: {
             timeRange,
             filters,
-            aggregation
+            aggregation,
           },
           results: {
             signals,
@@ -194,24 +206,24 @@ export class CoherenceGraphQLResolvers {
             summary: {
               totalWindows: signals.length,
               totalSignals: signals.reduce((sum, s) => sum + s.signalCount, 0),
-              avgCoherenceScore: signals.reduce((sum, s) => sum + s.avgWeightedValue, 0) / signals.length || 0
-            }
+              avgCoherenceScore:
+                signals.reduce((sum, s) => sum + s.avgWeightedValue, 0) /
+                  signals.length || 0,
+            },
           },
           metadata: {
             queryTime: new Date().toISOString(),
-            cacheStatus: 'live' // Could implement caching later
-          }
+            cacheStatus: 'live', // Could implement caching later
+          },
         });
-
       } finally {
         await session.close();
       }
-
     } catch (error) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({
           error: 'Invalid query parameters',
-          details: error.errors
+          details: error.errors,
         });
       }
 
@@ -223,24 +235,20 @@ export class CoherenceGraphQLResolvers {
   async getCoherenceInsights(req: Request, res: Response) {
     try {
       const { tenantId } = req.params;
-      const timeRange = req.query.timeRange as string || '24h';
+      const timeRange = (req.query.timeRange as string) || '24h';
 
       if (!tenantId) {
         return res.status(400).json({ error: 'tenantId is required' });
       }
 
       // Get comprehensive insights from all intelligence modules
-      const [
-        fingerprints,
-        narratives,
-        missionContext,
-        riskAssessment
-      ] = await Promise.all([
-        this.activityIndex.getActivityFingerprints(tenantId),
-        this.narrativeModel.getNarrativeImpacts(tenantId),
-        this.missionVault.getMissionContext(tenantId),
-        this.assessCoherenceRisk(tenantId, timeRange)
-      ]);
+      const [fingerprints, narratives, missionContext, riskAssessment] =
+        await Promise.all([
+          this.activityIndex.getActivityFingerprints(tenantId),
+          this.narrativeModel.getNarrativeImpacts(tenantId),
+          this.missionVault.getMissionContext(tenantId),
+          this.assessCoherenceRisk(tenantId, timeRange),
+        ]);
 
       const insights = {
         tenantId,
@@ -249,25 +257,38 @@ export class CoherenceGraphQLResolvers {
           activityFingerprints: fingerprints,
           narrativeImpacts: narratives,
           missionContext,
-          riskAssessment
+          riskAssessment,
         },
-        recommendations: this.generateRecommendations(fingerprints, narratives, riskAssessment),
+        recommendations: this.generateRecommendations(
+          fingerprints,
+          narratives,
+          riskAssessment,
+        ),
         metadata: {
           generatedAt: new Date().toISOString(),
-          confidenceLevel: this.calculateConfidenceLevel(fingerprints, narratives),
-          dataQuality: await this.assessDataQuality(tenantId)
-        }
+          confidenceLevel: this.calculateConfidenceLevel(
+            fingerprints,
+            narratives,
+          ),
+          dataQuality: await this.assessDataQuality(tenantId),
+        },
       };
 
       res.json(insights);
-
     } catch (error) {
-      logger.error('Failed to get coherence insights', { error, tenantId: req.params.tenantId });
+      logger.error('Failed to get coherence insights', {
+        error,
+        tenantId: req.params.tenantId,
+      });
       res.status(500).json({ error: 'Internal server error' });
     }
   }
 
-  private calculateTrend(signals: any[]): { direction: string; confidence: number; slope: number } {
+  private calculateTrend(signals: any[]): {
+    direction: string;
+    confidence: number;
+    slope: number;
+  } {
     if (signals.length < 2) {
       return { direction: 'insufficient_data', confidence: 0, slope: 0 };
     }
@@ -275,49 +296,70 @@ export class CoherenceGraphQLResolvers {
     // Simple linear regression for trend analysis
     const n = signals.length;
     const xValues = signals.map((_, i) => i);
-    const yValues = signals.map(s => s.avgWeightedValue);
+    const yValues = signals.map((s) => s.avgWeightedValue);
 
     const xMean = xValues.reduce((sum, x) => sum + x, 0) / n;
     const yMean = yValues.reduce((sum, y) => sum + y, 0) / n;
 
-    const numerator = xValues.reduce((sum, x, i) => sum + (x - xMean) * (yValues[i] - yMean), 0);
-    const denominator = xValues.reduce((sum, x) => sum + Math.pow(x - xMean, 2), 0);
+    const numerator = xValues.reduce(
+      (sum, x, i) => sum + (x - xMean) * (yValues[i] - yMean),
+      0,
+    );
+    const denominator = xValues.reduce(
+      (sum, x) => sum + Math.pow(x - xMean, 2),
+      0,
+    );
 
     const slope = denominator === 0 ? 0 : numerator / denominator;
-    const direction = slope > 0.1 ? 'increasing' : slope < -0.1 ? 'decreasing' : 'stable';
+    const direction =
+      slope > 0.1 ? 'increasing' : slope < -0.1 ? 'decreasing' : 'stable';
     const confidence = Math.min(Math.abs(slope) * 10, 1); // Simple confidence metric
 
     return { direction, confidence, slope };
   }
 
-  private async detectAnomalies(tenantId: string, signals: any[]): Promise<any[]> {
+  private async detectAnomalies(
+    tenantId: string,
+    signals: any[],
+  ): Promise<any[]> {
     // Simple statistical anomaly detection
     if (signals.length < 3) return [];
 
-    const values = signals.map(s => s.avgWeightedValue);
+    const values = signals.map((s) => s.avgWeightedValue);
     const mean = values.reduce((sum, v) => sum + v, 0) / values.length;
-    const stddev = Math.sqrt(values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / values.length);
+    const stddev = Math.sqrt(
+      values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / values.length,
+    );
 
     const threshold = 2 * stddev; // 2-sigma threshold
 
-    return signals.filter((signal, i) => {
-      const deviation = Math.abs(signal.avgWeightedValue - mean);
-      return deviation > threshold;
-    }).map((signal, i) => ({
-      timeWindow: signal.timeWindow,
-      value: signal.avgWeightedValue,
-      expectedRange: [mean - threshold, mean + threshold],
-      deviation: Math.abs(signal.avgWeightedValue - mean),
-      severity: Math.abs(signal.avgWeightedValue - mean) > 3 * stddev ? 'high' : 'medium'
-    }));
+    return signals
+      .filter((signal, i) => {
+        const deviation = Math.abs(signal.avgWeightedValue - mean);
+        return deviation > threshold;
+      })
+      .map((signal, i) => ({
+        timeWindow: signal.timeWindow,
+        value: signal.avgWeightedValue,
+        expectedRange: [mean - threshold, mean + threshold],
+        deviation: Math.abs(signal.avgWeightedValue - mean),
+        severity:
+          Math.abs(signal.avgWeightedValue - mean) > 3 * stddev
+            ? 'high'
+            : 'medium',
+      }));
   }
 
-  private async assessCoherenceRisk(tenantId: string, timeRange: string): Promise<any> {
+  private async assessCoherenceRisk(
+    tenantId: string,
+    timeRange: string,
+  ): Promise<any> {
     // Risk assessment based on coherence patterns
     const session = this.neo4j.getSession();
     try {
-      const result = await session.executeRead(async tx => {
-        return await tx.run(`
+      const result = await session.executeRead(async (tx) => {
+        return await tx.run(
+          `
           MATCH (t:Tenant {tenant_id: $tenantId})-[:EMITS]->(s:Signal)
           WHERE s.ts >= datetime() - duration('${timeRange}')
           WITH s
@@ -327,7 +369,9 @@ export class CoherenceGraphQLResolvers {
             stddev(s.value) as valueVariance,
             collect(DISTINCT s.source) as uniqueSources,
             collect(DISTINCT s.type) as uniqueTypes
-        `, { tenantId });
+        `,
+          { tenantId },
+        );
       });
 
       if (result.records.length === 0) {
@@ -365,7 +409,8 @@ export class CoherenceGraphQLResolvers {
         riskScore += 0.4;
       }
 
-      const level = riskScore > 0.7 ? 'high' : riskScore > 0.4 ? 'medium' : 'low';
+      const level =
+        riskScore > 0.7 ? 'high' : riskScore > 0.4 ? 'medium' : 'low';
 
       return {
         level,
@@ -376,45 +421,61 @@ export class CoherenceGraphQLResolvers {
           avgValue,
           valueVariance,
           sourceCount: uniqueSources.length,
-          typeCount: uniqueTypes.length
-        }
+          typeCount: uniqueTypes.length,
+        },
       };
-
     } finally {
       await session.close();
     }
   }
 
-  private generateRecommendations(fingerprints: any[], narratives: any[], riskAssessment: any): string[] {
+  private generateRecommendations(
+    fingerprints: any[],
+    narratives: any[],
+    riskAssessment: any,
+  ): string[] {
     const recommendations = [];
 
     if (riskAssessment.level === 'high') {
-      recommendations.push('Increase signal collection frequency to improve coherence baseline');
-      recommendations.push('Diversify signal sources to reduce single-point-of-failure risk');
+      recommendations.push(
+        'Increase signal collection frequency to improve coherence baseline',
+      );
+      recommendations.push(
+        'Diversify signal sources to reduce single-point-of-failure risk',
+      );
     }
 
     if (fingerprints.length < 5) {
-      recommendations.push('Expand activity monitoring to capture more behavioral patterns');
+      recommendations.push(
+        'Expand activity monitoring to capture more behavioral patterns',
+      );
     }
 
     if (narratives.length === 0) {
-      recommendations.push('Implement narrative tracking to understand information flow impacts');
+      recommendations.push(
+        'Implement narrative tracking to understand information flow impacts',
+      );
     }
 
     if (riskAssessment.factors.includes('high_variance')) {
       recommendations.push('Review signal weighting strategy to reduce noise');
     }
 
-    return recommendations.length > 0 ? recommendations : ['Coherence levels are within normal parameters'];
+    return recommendations.length > 0
+      ? recommendations
+      : ['Coherence levels are within normal parameters'];
   }
 
-  private calculateConfidenceLevel(fingerprints: any[], narratives: any[]): number {
+  private calculateConfidenceLevel(
+    fingerprints: any[],
+    narratives: any[],
+  ): number {
     // Simple confidence calculation based on data availability
     let confidence = 0.5; // Base confidence
 
     if (fingerprints.length > 10) confidence += 0.2;
     if (narratives.length > 5) confidence += 0.2;
-    if (fingerprints.some(fp => fp.confidence > 0.8)) confidence += 0.1;
+    if (fingerprints.some((fp) => fp.confidence > 0.8)) confidence += 0.1;
 
     return Math.min(confidence, 1.0);
   }
@@ -422,8 +483,9 @@ export class CoherenceGraphQLResolvers {
   private async assessDataQuality(tenantId: string): Promise<any> {
     const session = this.neo4j.getSession();
     try {
-      const result = await session.executeRead(async tx => {
-        return await tx.run(`
+      const result = await session.executeRead(async (tx) => {
+        return await tx.run(
+          `
           MATCH (t:Tenant {tenant_id: $tenantId})-[:EMITS]->(s:Signal)
           WITH s
           RETURN 
@@ -431,7 +493,9 @@ export class CoherenceGraphQLResolvers {
             count(CASE WHEN s.provenance_id IS NOT NULL THEN 1 END) as signalsWithProvenance,
             count(CASE WHEN s.weight > 0 THEN 1 END) as signalsWithWeight,
             avg(duration.inSeconds(datetime() - s.ts)) as avgAgeSeconds
-        `, { tenantId });
+        `,
+          { tenantId },
+        );
       });
 
       if (result.records.length === 0) {
@@ -446,23 +510,24 @@ export class CoherenceGraphQLResolvers {
 
       const provenanceRatio = total > 0 ? withProvenance / total : 0;
       const weightRatio = total > 0 ? withWeight / total : 0;
-      const freshnessScore = avgAge < 86400 ? 1 : Math.max(0, 1 - (avgAge - 86400) / 604800); // 1 week decay
+      const freshnessScore =
+        avgAge < 86400 ? 1 : Math.max(0, 1 - (avgAge - 86400) / 604800); // 1 week decay
 
-      const score = (provenanceRatio * 0.4 + weightRatio * 0.3 + freshnessScore * 0.3);
+      const score =
+        provenanceRatio * 0.4 + weightRatio * 0.3 + freshnessScore * 0.3;
 
       return {
         score,
         factors: {
           provenanceCompliance: provenanceRatio,
           weightingCompliance: weightRatio,
-          dataFreshness: freshnessScore
+          dataFreshness: freshnessScore,
         },
         metrics: {
           totalSignals: total,
-          avgAgeHours: avgAge / 3600
-        }
+          avgAgeHours: avgAge / 3600,
+        },
       };
-
     } finally {
       await session.close();
     }

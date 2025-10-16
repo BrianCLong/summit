@@ -18,7 +18,7 @@ test('validates a correct rule', () => {
       'when: {"any":[{"cypher":"RETURN 1"}]}',
       'then: {"create_alert":{"severity":"high","tags":["watchlist"]},"run_playbooks":["PB1"]}',
       '',
-    ].join('\n')
+    ].join('\n'),
   );
   assert.ok(validateRuleFile(tmp).valid);
   cleanup();

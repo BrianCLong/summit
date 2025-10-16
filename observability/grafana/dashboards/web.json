@@ -1,7 +1,15 @@
 {
   "title": "Web — Golden Signals",
   "panels": [
-    { "type": "timeseries", "title": "Error rate (5xx)", "targets": [{ "expr": "job:http_request_error_rate:ratio5m" }] },
-    { "type": "timeseries", "title": "p95 latency", "targets": [{ "expr": "job:http_request_duration_seconds:p95" }] }
+    {
+      "type": "timeseries",
+      "title": "Error rate (5xx)",
+      "targets": [{ "expr": "job:http_request_error_rate:ratio5m" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "p95 latency",
+      "targets": [{ "expr": "job:http_request_duration_seconds:p95" }]
+    }
   ]
 }

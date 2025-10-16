@@ -14,7 +14,13 @@ describe('docling resolvers', () => {
 
   it('calls service for summarizeBuildFailure', async () => {
     (doclingService.summarizeBuildFailure as jest.Mock).mockResolvedValue({
-      summary: { id: 's1', text: 'ok', focus: 'failures', highlights: [], qualitySignals: {} },
+      summary: {
+        id: 's1',
+        text: 'ok',
+        focus: 'failures',
+        highlights: [],
+        qualitySignals: {},
+      },
       fragments: [{ id: 'f1', sha256: 'abc', text: 'fragment', metadata: {} }],
       findings: [],
       policySignals: [],
@@ -35,7 +41,7 @@ describe('docling resolvers', () => {
     );
 
     expect(doclingService.summarizeBuildFailure).toHaveBeenCalledWith(
-      expect.objectContaining({ tenantId: 'tenant-1', retention: 'short' })
+      expect.objectContaining({ tenantId: 'tenant-1', retention: 'short' }),
     );
     expect(result.summary.id).toBe('s1');
   });
@@ -53,7 +59,11 @@ describe('docling resolvers', () => {
       createdAt: new Date(),
     });
 
-    const summary = await doclingResolvers.Query.doclingSummary({}, { requestId: 'req-12345' }, ctx);
+    const summary = await doclingResolvers.Query.doclingSummary(
+      {},
+      { requestId: 'req-12345' },
+      ctx,
+    );
     expect(summary).toEqual({
       id: 'sum-1',
       text: 'summary',

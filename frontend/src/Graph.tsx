@@ -78,8 +78,12 @@ const Graph: React.FC<GraphProps> = ({ elements, neighborhoodMode }) => {
     updateLod();
 
     const runAsyncLayout = () => {
-      workerRef.current = new Worker(new URL('./layoutWorker.ts', import.meta.url));
-      workerRef.current.onmessage = (e: MessageEvent<{ positions: Record<string, Position> }>) => {
+      workerRef.current = new Worker(
+        new URL('./layoutWorker.ts', import.meta.url),
+      );
+      workerRef.current.onmessage = (
+        e: MessageEvent<{ positions: Record<string, Position> }>,
+      ) => {
         const { positions } = e.data;
         cy.startBatch();
         Object.keys(positions).forEach((id) => {

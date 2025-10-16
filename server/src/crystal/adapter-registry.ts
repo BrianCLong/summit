@@ -1,5 +1,9 @@
 import { randomUUID } from 'crypto';
-import type { AssistantMessage, JSONRecord, RichOutputPayload } from './types.js';
+import type {
+  AssistantMessage,
+  JSONRecord,
+  RichOutputPayload,
+} from './types.js';
 import { provenanceLedger } from './provenance-ledger.js';
 
 export interface AssistantAdapter {
@@ -26,7 +30,10 @@ export interface AssistantAdapter {
     content: string;
   }): AsyncGenerator<string, void, unknown>;
   stop(sessionId: string, agentId: string): Promise<void>;
-  summarizeThread(sessionId: string, agentId: string): Promise<RichOutputPayload>;
+  summarizeThread(
+    sessionId: string,
+    agentId: string,
+  ): Promise<RichOutputPayload>;
 }
 
 abstract class BaseAdapter implements AssistantAdapter {
@@ -60,7 +67,11 @@ abstract class BaseAdapter implements AssistantAdapter {
       attachmentIds: options.attachments,
       richOutput: this.maybeGenerateRichOutput(options.content),
     };
-    provenanceLedger.record(this.key, 'assistant-message', response as unknown as JSONRecord);
+    provenanceLedger.record(
+      this.key,
+      'assistant-message',
+      response as unknown as JSONRecord,
+    );
     return response;
   }
 
@@ -79,7 +90,10 @@ abstract class BaseAdapter implements AssistantAdapter {
     provenanceLedger.record(this.key, 'stop', { sessionId, agentId });
   }
 
-  async summarizeThread(sessionId: string, agentId: string): Promise<RichOutputPayload> {
+  async summarizeThread(
+    sessionId: string,
+    agentId: string,
+  ): Promise<RichOutputPayload> {
     const payload: RichOutputPayload = {
       kind: 'markdown',
       title: `Summary for ${agentId}`,
@@ -96,7 +110,9 @@ abstract class BaseAdapter implements AssistantAdapter {
     return `Acknowledged: ${content}`;
   }
 
-  protected maybeGenerateRichOutput(content: string): RichOutputPayload | undefined {
+  protected maybeGenerateRichOutput(
+    content: string,
+  ): RichOutputPayload | undefined {
     if (content.includes('table:')) {
       return {
         kind: 'table',
@@ -106,7 +122,9 @@ abstract class BaseAdapter implements AssistantAdapter {
             .split('table:')[1]
             .split(',')
             .map((entry) => {
-              const [column, value] = entry.split('=').map((part) => part.trim());
+              const [column, value] = entry
+                .split('=')
+                .map((part) => part.trim());
               return { column, value };
             }),
         },

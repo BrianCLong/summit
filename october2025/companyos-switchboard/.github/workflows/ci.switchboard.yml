@@ -2,7 +2,7 @@ name: CI Switchboard
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches: [main]
 jobs:
   build-web:
     runs-on: ubuntu-latest

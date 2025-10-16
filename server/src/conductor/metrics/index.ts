@@ -8,16 +8,29 @@ export interface MetricsRegistry {
   incrementCounter(name: string, labels?: Record<string, string>): void;
 
   // Histograms
-  recordHistogram(name: string, value: number, labels?: Record<string, string>): void;
+  recordHistogram(
+    name: string,
+    value: number,
+    labels?: Record<string, string>,
+  ): void;
 
   // Gauges
   setGauge(name: string, value: number, labels?: Record<string, string>): void;
 }
 
 export class ConductorMetrics {
-  private counters = new Map<string, { value: number; labels: Record<string, string> }>();
-  private histograms = new Map<string, { values: number[]; labels: Record<string, string> }>();
-  private gauges = new Map<string, { value: number; labels: Record<string, string> }>();
+  private counters = new Map<
+    string,
+    { value: number; labels: Record<string, string> }
+  >();
+  private histograms = new Map<
+    string,
+    { values: number[]; labels: Record<string, string> }
+  >();
+  private gauges = new Map<
+    string,
+    { value: number; labels: Record<string, string> }
+  >();
 
   constructor() {
     this.initializeMetrics();
@@ -40,15 +53,27 @@ export class ConductorMetrics {
     ];
 
     experts.forEach((expert) => {
-      this.incrementCounter('conductor_router_decisions_total', { expert, result: 'success' }, 0);
-      this.incrementCounter('conductor_router_decisions_total', { expert, result: 'error' }, 0);
+      this.incrementCounter(
+        'conductor_router_decisions_total',
+        { expert, result: 'success' },
+        0,
+      );
+      this.incrementCounter(
+        'conductor_router_decisions_total',
+        { expert, result: 'error' },
+        0,
+      );
     });
   }
 
   /**
    * Record a routing decision
    */
-  public recordRoutingDecision(expert: ExpertType, latencyMs: number, success: boolean): void {
+  public recordRoutingDecision(
+    expert: ExpertType,
+    latencyMs: number,
+    success: boolean,
+  ): void {
     // Decision counter
     this.incrementCounter('conductor_router_decisions_total', {
       expert,
@@ -132,7 +157,11 @@ export class ConductorMetrics {
     this.counters.set(key, { value: existing.value + amount, labels });
   }
 
-  public recordHistogram(name: string, value: number, labels: Record<string, string> = {}): void {
+  public recordHistogram(
+    name: string,
+    value: number,
+    labels: Record<string, string> = {},
+  ): void {
     const key = this.getMetricKey(name, labels);
     const existing = this.histograms.get(key) || { values: [], labels };
     existing.values.push(value);
@@ -145,7 +174,11 @@ export class ConductorMetrics {
     this.histograms.set(key, existing);
   }
 
-  public setGauge(name: string, value: number, labels: Record<string, string> = {}): void {
+  public setGauge(
+    name: string,
+    value: number,
+    labels: Record<string, string> = {},
+  ): void {
     const key = this.getMetricKey(name, labels);
     this.gauges.set(key, { value, labels });
   }
@@ -189,7 +222,9 @@ export class ConductorMetrics {
       const p99 = sorted[Math.floor(count * 0.99)];
 
       const baseName = key.replace(/\{.*\}/, '');
-      const labels = key.includes('{') ? key.match(/\{([^}]+)\}/)?.[1] || '' : '';
+      const labels = key.includes('{')
+        ? key.match(/\{([^}]+)\}/)?.[1] || ''
+        : '';
       const labelStr = labels ? `{${labels}}` : '';
 
       lines.push(`${baseName}_count${labelStr} ${count}`);
@@ -213,7 +248,10 @@ export class ConductorMetrics {
     const summary = {
       counters: {} as Record<string, number>,
       gauges: {} as Record<string, number>,
-      histograms: {} as Record<string, { count: number; avg: number; p95: number }>,
+      histograms: {} as Record<
+        string,
+        { count: number; avg: number; p95: number }
+      >,
     };
 
     // Summarize counters
@@ -286,13 +324,15 @@ export class HealthChecker {
     const errorRateCheck = this.checkErrorRates();
     checks.push(errorRateCheck);
     if (errorRateCheck.status === 'fail') overallStatus = 'unhealthy';
-    if (errorRateCheck.status === 'warn' && overallStatus === 'healthy') overallStatus = 'degraded';
+    if (errorRateCheck.status === 'warn' && overallStatus === 'healthy')
+      overallStatus = 'degraded';
 
     // Check latencies
     const latencyCheck = this.checkLatencies();
     checks.push(latencyCheck);
     if (latencyCheck.status === 'fail') overallStatus = 'unhealthy';
-    if (latencyCheck.status === 'warn' && overallStatus === 'healthy') overallStatus = 'degraded';
+    if (latencyCheck.status === 'warn' && overallStatus === 'healthy')
+      overallStatus = 'degraded';
 
     return { status: overallStatus, checks };
   }

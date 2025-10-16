@@ -8,16 +8,23 @@ function computeMerkleRoot(leaves: string[]) {
     for (let i = 0; i < level.length; i += 2) {
       const a = level[i];
       const b = level[i + 1] || level[i];
-      next.push(createHash('sha256').update(Buffer.concat([a, b])).digest());
+      next.push(
+        createHash('sha256')
+          .update(Buffer.concat([a, b]))
+          .digest(),
+      );
     }
     level = next;
   }
   return 'sha256:' + level[0].toString('hex');
 }
 
-export async function mergeRemoteProvenance(runId: string, remoteRoot: string, leaves: string[]) {
+export async function mergeRemoteProvenance(
+  runId: string,
+  remoteRoot: string,
+  leaves: string[],
+) {
   const local = computeMerkleRoot(leaves);
   if (local !== remoteRoot) throw new Error('provenance mismatch');
   return { verified: true, root: local, runId };
 }
-

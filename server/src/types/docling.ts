@@ -1,4 +1,10 @@
-export type DocSourceType = 'BUILD_LOG' | 'TEST_REPORT' | 'SBOM' | 'PR_DIFF' | 'COMPLIANCE_DOC' | 'MARKDOWN';
+export type DocSourceType =
+  | 'BUILD_LOG'
+  | 'TEST_REPORT'
+  | 'SBOM'
+  | 'PR_DIFF'
+  | 'COMPLIANCE_DOC'
+  | 'MARKDOWN';
 
 export interface DocFragmentMetadata extends Record<string, unknown> {
   finding?: Partial<DocFinding> & {
@@ -62,11 +68,14 @@ export interface DoclingBaseResponse<T> {
   policySignals: DocPolicySignal[];
 }
 
-export interface DoclingParseResponse extends DoclingBaseResponse<{ fragments: DocFragment[] }> {}
+export interface DoclingParseResponse
+  extends DoclingBaseResponse<{ fragments: DocFragment[] }> {}
 
-export interface DoclingSummarizeResponse extends DoclingBaseResponse<DocSummary> {}
+export interface DoclingSummarizeResponse
+  extends DoclingBaseResponse<DocSummary> {}
 
-export interface DoclingExtractResponse extends DoclingBaseResponse<{ findings: DocFinding[] }> {}
+export interface DoclingExtractResponse
+  extends DoclingBaseResponse<{ findings: DocFinding[] }> {}
 
 export interface SummarizeBuildFailureInput {
   tenantId: string;

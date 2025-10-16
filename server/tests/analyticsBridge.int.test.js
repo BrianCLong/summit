@@ -1,5 +1,9 @@
 let GenericContainer;
-try { ({ GenericContainer } = require('testcontainers')); } catch (_) { /* Intentionally empty */ }
+try {
+  ({ GenericContainer } = require('testcontainers'));
+} catch (_) {
+  /* Intentionally empty */
+}
 const http = require('http');
 const { Server } = require('socket.io');
 const ioClient = require('socket.io-client');
@@ -22,7 +26,7 @@ maybe('AnalyticsBridge Redis → Socket.IO', () => {
     redis = new Redis(redisUrl);
 
     httpServer = http.createServer();
-    io = new Server(httpServer, { cors: { origin: '*'} });
+    io = new Server(httpServer, { cors: { origin: '*' } });
     await new Promise((res) => httpServer.listen(0, res));
     const address = httpServer.address();
     const url = `http://localhost:${address.port}/graph-analytics`;
@@ -60,9 +64,24 @@ maybe('AnalyticsBridge Redis → Socket.IO', () => {
       await redis.xadd(stream, '*', 'event', JSON.stringify(event));
     };
 
-    await add({ job_id: jobId, level: 'PROGRESS', message: 'pagerank:start', payload: {} });
-    await add({ job_id: jobId, level: 'INFO', message: 'pagerank:done', payload: { top: [] } });
-    await add({ job_id: jobId, level: 'INFO', message: 'job:done', payload: {} });
+    await add({
+      job_id: jobId,
+      level: 'PROGRESS',
+      message: 'pagerank:start',
+      payload: {},
+    });
+    await add({
+      job_id: jobId,
+      level: 'INFO',
+      message: 'pagerank:done',
+      payload: { top: [] },
+    });
+    await add({
+      job_id: jobId,
+      level: 'INFO',
+      message: 'job:done',
+      payload: {},
+    });
 
     await new Promise((res) => setTimeout(res, 800));
 

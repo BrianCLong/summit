@@ -1,5 +1,5 @@
-import type { Request, Response, NextFunction } from "express";
-import { logger } from "../utils/logger";
+import type { Request, Response, NextFunction } from 'express';
+import { logger } from '../utils/logger';
 
 export interface PolicyOptions {
   dryRun?: boolean;
@@ -17,14 +17,14 @@ export interface PolicyDenial {
  */
 export function policyGuard({ dryRun = false }: PolicyOptions = {}) {
   return (req: Request, res: Response, next: NextFunction) => {
-    const auth = req.headers["x-authority-id"] as string;
-    const reason = req.headers["x-reason-for-access"] as string;
+    const auth = req.headers['x-authority-id'] as string;
+    const reason = req.headers['x-reason-for-access'] as string;
 
     if (!auth || !reason) {
       const denial: PolicyDenial = {
-        error: "Policy denial",
-        reason: "Missing authority binding or reason-for-access headers",
-        appealPath: "/ombudsman/appeals"
+        error: 'Policy denial',
+        reason: 'Missing authority binding or reason-for-access headers',
+        appealPath: '/ombudsman/appeals',
       };
 
       logger.warn('Policy violation', {
@@ -32,13 +32,16 @@ export function policyGuard({ dryRun = false }: PolicyOptions = {}) {
         method: req.method,
         missingAuth: !auth,
         missingReason: !reason,
-        userAgent: req.headers["user-agent"],
-        ip: req.ip
+        userAgent: req.headers['user-agent'],
+        ip: req.ip,
       });
 
       if (dryRun) {
         // Annotate request with policy warnings
-        (req as any).__policyWarnings = [(req as any).__policyWarnings || [], denial].flat();
+        (req as any).__policyWarnings = [
+          (req as any).__policyWarnings || [],
+          denial,
+        ].flat();
         logger.warn('Policy dry-run: would have blocked request', denial);
         return next();
       }
@@ -53,7 +56,7 @@ export function policyGuard({ dryRun = false }: PolicyOptions = {}) {
     logger.info('Policy check passed', {
       authorityId: auth,
       reasonForAccess: reason,
-      path: req.path
+      path: req.path,
     });
 
     next();

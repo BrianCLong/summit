@@ -171,7 +171,9 @@ export function recordExpertExecution(
       'conductor.execution.latency_ms': latencyMs,
       'conductor.execution.cost_usd': cost,
       'conductor.execution.success': success,
-      'conductor.execution.result_size': result ? JSON.stringify(result).length : 0,
+      'conductor.execution.result_size': result
+        ? JSON.stringify(result).length
+        : 0,
     });
 
     // Add result summary for successful executions
@@ -209,7 +211,12 @@ export function recordMCPOperation(
 
   try {
     // Record metrics
-    conductorMetrics.recordMCPOperation(serverName, toolName, latencyMs, success);
+    conductorMetrics.recordMCPOperation(
+      serverName,
+      toolName,
+      latencyMs,
+      success,
+    );
 
     // Set span attributes
     span.setAttributes({
@@ -363,7 +370,10 @@ export function conductorTracingMiddleware() {
       });
 
       if (res.statusCode >= 400) {
-        span.setStatus({ code: SpanStatusCode.ERROR, message: `HTTP ${res.statusCode}` });
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: `HTTP ${res.statusCode}`,
+        });
       } else {
         span.setStatus({ code: SpanStatusCode.OK });
       }
@@ -388,8 +398,14 @@ export function createConductorGraphQLPlugin() {
           if (requestContext.response.http) {
             const traceContext = getCurrentTraceContext();
             if (traceContext) {
-              requestContext.response.http.headers.set('X-Trace-Id', traceContext.traceId);
-              requestContext.response.http.headers.set('X-Span-Id', traceContext.spanId);
+              requestContext.response.http.headers.set(
+                'X-Trace-Id',
+                traceContext.traceId,
+              );
+              requestContext.response.http.headers.set(
+                'X-Span-Id',
+                traceContext.spanId,
+              );
             }
           }
         },
@@ -397,7 +413,10 @@ export function createConductorGraphQLPlugin() {
         didResolveOperation(requestContext: any) {
           const { operationName } = requestContext.request;
 
-          if (operationName === 'conduct' || operationName === 'previewRouting') {
+          if (
+            operationName === 'conduct' ||
+            operationName === 'previewRouting'
+          ) {
             const span = trace.getActiveSpan();
             if (span) {
               span.setAttributes({
@@ -405,7 +424,8 @@ export function createConductorGraphQLPlugin() {
                 'conductor.graphql.variables_count': Object.keys(
                   requestContext.request.variables || {},
                 ).length,
-                'conductor.user_id': requestContext.contextValue?.user?.id || 'anonymous',
+                'conductor.user_id':
+                  requestContext.contextValue?.user?.id || 'anonymous',
               });
             }
           }
@@ -414,14 +434,18 @@ export function createConductorGraphQLPlugin() {
         didEncounterErrors(requestContext: any) {
           const { operationName } = requestContext.request;
 
-          if (operationName === 'conduct' || operationName === 'previewRouting') {
+          if (
+            operationName === 'conduct' ||
+            operationName === 'previewRouting'
+          ) {
             const span = trace.getActiveSpan();
             if (span) {
               requestContext.errors.forEach((error: any) => {
                 span.recordException(error);
                 span.setAttributes({
                   'conductor.graphql.error': error.message,
-                  'conductor.graphql.error_path': error.path?.join('.') || 'unknown',
+                  'conductor.graphql.error_path':
+                    error.path?.join('.') || 'unknown',
                 });
               });
               span.setStatus({ code: SpanStatusCode.ERROR });

@@ -1,4 +1,4 @@
-```markdown
+````markdown
 ---
 slug: sprint-2025-09-29-bravo-issues
 version: v2025.09.29-b2
@@ -13,6 +13,7 @@ This package creates all sprint artifacts in GitHub: labels, milestones, project
 ---
 
 ## 1) Labels (apply first)
+
 ```yaml
 # .github/labels.yml (use `gh label create -f` or a sync action)
 - name: epic
@@ -52,6 +53,7 @@ This package creates all sprint artifacts in GitHub: labels, milestones, project
   color: FEF2C0
   description: Triage required
 ```
+````
 
 ---
 
@@ -70,6 +72,7 @@ Create a **v2025.09.29 Sprint 24** project (user/org-level). Columns:
 9. **Blocked** (triage weekly)
 
 Automation rules (via action below):
+
 - Add `blocked` label ⇒ move to **Blocked**
 - PR opened & linked ⇒ **In Review**
 - `deploy` + `canary` labels ⇒ **Ready for Canary**
@@ -80,15 +83,18 @@ Automation rules (via action below):
 ## 3) Issue Templates
 
 ### 3.1 Bug Report
+
 ```markdown
 ---
 name: Bug report
 about: Create a report to help us improve
 labels: needs-triage
 ---
+
 ### Summary
 
 ### Repro
+
 1.
 
 ### Expected
@@ -96,28 +102,33 @@ labels: needs-triage
 ### Actual
 
 ### Evidence
+
 - logs:
 - traces:
 - metrics:
 
 ### Impact
+
 - users affected:
 - SLO impact:
 
 ### Mitigation/Workaround
 
 ### Owner & Links
+
 - service:
 - runbook:
 ```
 
 ### 3.2 Tech Debt
+
 ```markdown
 ---
 name: Tech debt
 about: Reliability/maintainability improvement
 labels: arborist
 ---
+
 ### Problem
 
 ### Proposal
@@ -125,30 +136,36 @@ labels: arborist
 ### Risks & Rollback
 
 ### Observability Additions
+
 - metrics:
 - traces:
 - logs:
 ```
 
 ### 3.3 Change Request (Canary Required)
+
 ```markdown
 ---
 name: Change request
 about: Feature/config change that must canary
 labels: deploy, risk
 ---
+
 ### Change Description
 
 ### Canary Plan
+
 - steps: 10→30→60→100
 - guardrails: error-rate, p95
 
 ### Rollback Plan
 
 ### Migration Gate (if schema)
+
 - artifacts: up.sql/down.sql + checksum
 
 ### Verification
+
 - smoke:
 - golden signals:
 ```
@@ -156,6 +173,7 @@ labels: deploy, risk
 ---
 
 ## 4) CODEOWNERS (refresh)
+
 ```txt
 # .github/CODEOWNERS
 /charts/**                  @platform-team
@@ -170,6 +188,7 @@ labels: deploy, risk
 ---
 
 ## 5) Branch Protections (policy)
+
 - Require PR reviews (2 for critical paths), disallow force-push, linear history.
 - Required checks: lint, unit, e2e, sbom, sast/sca, container-scan, helm-lint, infra-plan, migrations-gate.
 - Dismiss stale approvals on update; restrict admin bypass.
@@ -179,6 +198,7 @@ labels: deploy, risk
 ## 6) Workflow Automation
 
 ### 6.1 Move cards on events
+
 ```yaml
 # .github/workflows/project-auto.yml
 name: project-automation
@@ -216,6 +236,7 @@ jobs:
 Map of issues derived from the sprint plan. Each has acceptance, test, and logging/tracing hooks.
 
 ### EPIC-1: Progressive Delivery & Rollback (`epic`, `deploy`)
+
 - **HELM-101** — Canary strategy in `charts/app/values.yaml`
   - AC: traffic 10/30/60/100; guardrails queries present; helm lint passes.
   - Tests: dry-run + unit helm tests.
@@ -225,21 +246,25 @@ Map of issues derived from the sprint plan. Each has acceptance, test, and loggi
   - AC: rollback job flips to previous release on alert labeled `canary-breach`.
 
 ### EPIC-2: Preview Environments (`epic`, `ci/cd`)
+
 - **PREV-201** — Namespace-per-PR workflow; TTL teardown
 - **PREV-202** — Ephemeral Postgres masked fixtures Job
 - **PREV-203** — Public URL `pr-<N>.stage.example.com`
 
 ### EPIC-3: Observability Baseline (`epic`, `observability`)
+
 - **OTEL-301** — `traceparent` propagation gateway→services→DB
 - **OTEL-302** — RED dashboards per service in Grafana
 - **OTEL-303** — Burn-rate alerts 2×/10× (5m/1h)
 
 ### EPIC-4: Security & Compliance (`epic`, `security`)
+
 - **SEC-401** — SBOM attest & upload; block on criticals
 - **SEC-402** — gitleaks pre-commit & CI
 - **SEC-403** — OPA policies: disallow `:latest`, require resources & probes
 
 ### EPIC-5: DR & Resilience (`epic`, `dr-resilience`)
+
 - **DR-501** — Stage failover simulation via Route53
 - **DR-502** — PITR verification with timestamped restore
 
@@ -293,16 +318,19 @@ new_issue "DR-502: PITR verification" dr-resilience
 ---
 
 ## 9) Release Notes Template (attach at cut)
+
 ```markdown
 # Release v2025.09.29-b1
 
 ## Highlights
+
 - Progressive delivery canaries with auto-rollback
 - Observability baseline (OTEL + RED + burn alerts)
 - Security gates (SBOM, gitleaks, OPA)
 - DR drill with RTO/RPO evidence
 
 ## Changes by Area
+
 - CI/CD:
 - Deploy:
 - Observability:
@@ -310,11 +338,13 @@ new_issue "DR-502: PITR verification" dr-resilience
 - DR:
 
 ## Ops Notes
+
 - Feature flags/rollout plan:
 - Backward compatibility:
 - Migration notes:
 
 ## Evidence
+
 - Dashboards:
 - Audit entries:
 - DR timestamps:
@@ -325,27 +355,34 @@ new_issue "DR-502: PITR verification" dr-resilience
 ## 10) Acceptance Checklists (clip into issues)
 
 ### Canary & Rollback
+
 - [ ] Canary values.yaml merged
 - [ ] Metrics queries validated in Prometheus
 - [ ] Rollback job tested on fake breach
 
 ### Preview Environments
+
 - [ ] Namespace created/destroyed on PR open/close
 - [ ] Postgres fixtures loaded automatically
 - [ ] Public URL reachable; auth masked
 
 ### Observability
+
 - [ ] `traceparent` continuity ≥ 80%
 - [ ] p95 < 1.5s for key paths in stage
 - [ ] Burn-rate alerts firing in test
 
 ### Security
+
 - [ ] SBOM uploaded for all images
 - [ ] No CRITICAL vulns at cut
 - [ ] OPA constraints enforced cluster-wide
 
 ### DR
+
 - [ ] Route53 health check swaps
 - [ ] PITR restore validated with checksum
+
 ```
 
+```

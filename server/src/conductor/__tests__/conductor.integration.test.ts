@@ -10,7 +10,13 @@ describe('Conductor Integration', () => {
   let conductor: Conductor;
 
   const testConfig: ConductorConfig = {
-    enabledExperts: ['LLM_LIGHT', 'LLM_HEAVY', 'GRAPH_TOOL', 'RAG_TOOL', 'FILES_TOOL'],
+    enabledExperts: [
+      'LLM_LIGHT',
+      'LLM_HEAVY',
+      'GRAPH_TOOL',
+      'RAG_TOOL',
+      'FILES_TOOL',
+    ],
     defaultTimeoutMs: 5000,
     maxConcurrentTasks: 5,
     auditEnabled: true,
@@ -116,7 +122,9 @@ describe('Conductor Integration', () => {
 
       // Check that output contains expected structure
       expect(result.output).toHaveProperty('records');
-      expect(result.logs).toContain('Routed to GRAPH_TOOL: graph-related keywords detected');
+      expect(result.logs).toContain(
+        'Routed to GRAPH_TOOL: graph-related keywords detected',
+      );
     });
 
     test('executes file search task', async () => {
@@ -226,7 +234,9 @@ describe('Conductor Integration', () => {
       // Try to start one more - should be rejected
       const extraPromise = conductor.conduct(input);
 
-      await expect(extraPromise).rejects.toThrow('Maximum concurrent tasks reached');
+      await expect(extraPromise).rejects.toThrow(
+        'Maximum concurrent tasks reached',
+      );
 
       // Cleanup - let original tasks complete
       await Promise.allSettled(promises);
@@ -333,7 +343,10 @@ describe('Conductor Integration', () => {
       const inputs = [
         { task: 'Run pagerank algorithm', expectedExpert: 'GRAPH_TOOL' },
         { task: 'Calculate community detection', expectedExpert: 'GRAPH_TOOL' },
-        { task: 'Find shortest path between nodes', expectedExpert: 'GRAPH_TOOL' },
+        {
+          task: 'Find shortest path between nodes',
+          expectedExpert: 'GRAPH_TOOL',
+        },
       ];
 
       for (const { task, expectedExpert } of inputs) {

@@ -1,6 +1,6 @@
-const geolib = require("geolib");
-const turf = require("turf");
-const logger = require("../utils/logger");
+const geolib = require('geolib');
+const turf = require('turf');
+const logger = require('../utils/logger');
 
 class GeointService {
   constructor() {
@@ -10,21 +10,21 @@ class GeointService {
   /**
    * Calculate distance between two geographic points
    */
-  calculateDistance(point1, point2, unit = "km") {
+  calculateDistance(point1, point2, unit = 'km') {
     try {
       const distance = geolib.getDistance(point1, point2);
 
       switch (unit) {
-        case "km":
+        case 'km':
           return distance / 1000;
-        case "miles":
+        case 'miles':
           return distance * 0.000621371;
-        case "m":
+        case 'm':
         default:
           return distance;
       }
     } catch (error) {
-      this.logger.error("Error calculating distance:", error);
+      this.logger.error('Error calculating distance:', error);
       throw error;
     }
   }
@@ -38,7 +38,7 @@ class GeointService {
       const polygon = turf.polygon([boundary]);
       return turf.booleanPointInPolygon(pointFeature, polygon);
     } catch (error) {
-      this.logger.error("Error checking point in boundary:", error);
+      this.logger.error('Error checking point in boundary:', error);
       throw error;
     }
   }
@@ -46,14 +46,14 @@ class GeointService {
   /**
    * Find all points within a radius of a center point
    */
-  findPointsWithinRadius(centerPoint, points, radius, unit = "km") {
+  findPointsWithinRadius(centerPoint, points, radius, unit = 'km') {
     try {
       return points.filter((point) => {
         const distance = this.calculateDistance(centerPoint, point, unit);
         return distance <= radius;
       });
     } catch (error) {
-      this.logger.error("Error finding points within radius:", error);
+      this.logger.error('Error finding points within radius:', error);
       throw error;
     }
   }
@@ -65,7 +65,7 @@ class GeointService {
     try {
       return geolib.getBearing(point1, point2);
     } catch (error) {
-      this.logger.error("Error calculating bearing:", error);
+      this.logger.error('Error calculating bearing:', error);
       throw error;
     }
   }
@@ -89,7 +89,7 @@ class GeointService {
 
       return turf.polygon([coordinates]);
     } catch (error) {
-      this.logger.error("Error creating geofence:", error);
+      this.logger.error('Error creating geofence:', error);
       throw error;
     }
   }
@@ -100,7 +100,7 @@ class GeointService {
   analyzeMovementPattern(locationHistory) {
     try {
       if (locationHistory.length < 2) {
-        return { error: "Need at least 2 points for pattern analysis" };
+        return { error: 'Need at least 2 points for pattern analysis' };
       }
 
       let totalDistance = 0;
@@ -112,7 +112,7 @@ class GeointService {
         const prev = locationHistory[i - 1];
         const curr = locationHistory[i];
 
-        const distance = this.calculateDistance(prev, curr, "km");
+        const distance = this.calculateDistance(prev, curr, 'km');
         const bearing = this.calculateBearing(prev, curr);
         const timeDiff = new Date(curr.timestamp) - new Date(prev.timestamp);
         const hours = timeDiff / (1000 * 60 * 60);
@@ -138,7 +138,7 @@ class GeointService {
         bearingVariance: this.calculateVariance(bearings),
       };
     } catch (error) {
-      this.logger.error("Error analyzing movement pattern:", error);
+      this.logger.error('Error analyzing movement pattern:', error);
       throw error;
     }
   }
@@ -165,7 +165,7 @@ class GeointService {
         const t = new Date(curr.timestamp);
         const binIndex = Math.floor((t - start) / msPerBin);
         const key = binIndex.toString();
-        const distKm = this.calculateDistance(prev, curr, "km");
+        const distKm = this.calculateDistance(prev, curr, 'km');
         const dtHrs =
           (new Date(curr.timestamp) - new Date(prev.timestamp)) /
           (1000 * 60 * 60);
@@ -197,7 +197,7 @@ class GeointService {
       });
       return series.sort((a, b) => new Date(a.start) - new Date(b.start));
     } catch (error) {
-      this.logger.error("Error building GEOINT time series:", error);
+      this.logger.error('Error building GEOINT time series:', error);
       return [];
     }
   }
@@ -235,7 +235,7 @@ class GeointService {
 
       return { clusters, noise };
     } catch (error) {
-      this.logger.error("Error detecting activity clusters:", error);
+      this.logger.error('Error detecting activity clusters:', error);
       throw error;
     }
   }
@@ -249,7 +249,7 @@ class GeointService {
 
     for (let i = 0; i < points.length; i++) {
       if (i === pointIndex) continue;
-      const distance = this.calculateDistance(currentPoint, points[i], "km");
+      const distance = this.calculateDistance(currentPoint, points[i], 'km');
       if (distance <= epsilon) {
         neighbors.push(i);
       }
@@ -316,7 +316,7 @@ class GeointService {
       address,
       coordinates: null,
       confidence: 0,
-      error: "Geocoding service not implemented",
+      error: 'Geocoding service not implemented',
     };
   }
 
@@ -332,7 +332,7 @@ class GeointService {
       coordinates: { latitude, longitude },
       address: null,
       confidence: 0,
-      error: "Reverse geocoding service not implemented",
+      error: 'Reverse geocoding service not implemented',
     };
   }
 }

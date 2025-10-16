@@ -4,8 +4,12 @@ import pino from 'pino';
 const logger = pino();
 const redisClient = new Redis(); // Assuming Redis is running and accessible
 
-redisClient.on('connect', () => logger.info('Redis client connected for caching.'));
-redisClient.on('error', (err) => logger.error({ err }, 'Redis caching client error.'));
+redisClient.on('connect', () =>
+  logger.info('Redis client connected for caching.'),
+);
+redisClient.on('error', (err) =>
+  logger.error({ err }, 'Redis caching client error.'),
+);
 
 // Simple metrics for cache
 const metrics = {
@@ -14,14 +18,15 @@ const metrics = {
   cacheEviction: { inc: () => {} }, // Placeholder
 };
 
-export const cached = (key: string, ttl: number, fn: () => Promise<any>) => async () => {
-  const hit = await redisClient.get(key);
-  if (hit) {
-    metrics.cacheHit.inc();
-    return JSON.parse(hit);
-  }
-  const val = await fn();
-  await redisClient.setex(key, ttl, JSON.stringify(val));
-  metrics.cacheMiss.inc();
-  return val;
-};
+export const cached =
+  (key: string, ttl: number, fn: () => Promise<any>) => async () => {
+    const hit = await redisClient.get(key);
+    if (hit) {
+      metrics.cacheHit.inc();
+      return JSON.parse(hit);
+    }
+    const val = await fn();
+    await redisClient.setex(key, ttl, JSON.stringify(val));
+    metrics.cacheMiss.inc();
+    return val;
+  };

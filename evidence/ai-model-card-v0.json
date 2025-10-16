@@ -3,10 +3,7 @@
     "name": "IntelGraph AI Insights MVP-0",
     "version": "0.1.0",
     "type": "Multi-task Neural Network",
-    "frameworks": [
-      "PyTorch",
-      "FastAPI"
-    ],
+    "frameworks": ["PyTorch", "FastAPI"],
     "purpose": "Entity resolution and link scoring for intelligence analysis"
   },
   "intended_use": {
@@ -15,10 +12,7 @@
       "Link prediction",
       "Similarity scoring"
     ],
-    "primary_users": [
-      "Intelligence analysts",
-      "Data scientists"
-    ],
+    "primary_users": ["Intelligence analysts", "Data scientists"],
     "out_of_scope": [
       "Real-time critical decisions",
       "Automated actions without human review"

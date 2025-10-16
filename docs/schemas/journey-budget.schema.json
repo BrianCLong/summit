@@ -11,12 +11,11 @@
         "type": "object",
         "required": ["name", "budgets"],
         "properties": {
-          "name": {"type": "string"},
-          "weight": {"type": "number", "minimum": 0},
-          "budgets": {"$ref": "./perf-budget.schema.json#"}
+          "name": { "type": "string" },
+          "weight": { "type": "number", "minimum": 0 },
+          "budgets": { "$ref": "./perf-budget.schema.json#" }
         }
       }
     }
   }
 }
-

@@ -4,7 +4,10 @@ import { pg } from '../db/pg';
 
 function readRetentionDays(): { riskDays: number; evidenceDays: number } {
   try {
-    const p = path.resolve(process.cwd(), 'contracts/policy-pack/v0/data/retention.json');
+    const p = path.resolve(
+      process.cwd(),
+      'contracts/policy-pack/v0/data/retention.json',
+    );
     const raw = JSON.parse(fs.readFileSync(p, 'utf8'));
     const tiers = raw?.tiers || {};
     const defaults = raw?.defaults || {};
@@ -24,18 +27,28 @@ function readRetentionDays(): { riskDays: number; evidenceDays: number } {
 
 export async function runRetentionOnce() {
   const { riskDays, evidenceDays } = readRetentionDays();
-  await pg.write(`DELETE FROM risk_signals WHERE created_at < now() - ($1 || ' days')::interval`, [String(riskDays)]);
-  await pg.write(`DELETE FROM evidence_bundles WHERE created_at < now() - ($1 || ' days')::interval`, [String(evidenceDays)]);
+  await pg.write(
+    `DELETE FROM risk_signals WHERE created_at < now() - ($1 || ' days')::interval`,
+    [String(riskDays)],
+  );
+  await pg.write(
+    `DELETE FROM evidence_bundles WHERE created_at < now() - ($1 || ' days')::interval`,
+    [String(evidenceDays)],
+  );
 }
 
 let timer: any;
 export function startRetentionWorker() {
   if (process.env.ENABLE_RETENTION_WORKER !== 'true') return;
-  const intervalMs = Number(process.env.RETENTION_WORKER_INTERVAL_MS || 24 * 3600 * 1000);
-  const tick = () => runRetentionOnce().catch((e) => console.warn('retention error', e));
+  const intervalMs = Number(
+    process.env.RETENTION_WORKER_INTERVAL_MS || 24 * 3600 * 1000,
+  );
+  const tick = () =>
+    runRetentionOnce().catch((e) => console.warn('retention error', e));
   timer = setInterval(tick, intervalMs);
   tick();
 }
 
-export function stopRetentionWorker() { if (timer) clearInterval(timer); }
-
+export function stopRetentionWorker() {
+  if (timer) clearInterval(timer);
+}

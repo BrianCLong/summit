@@ -13,17 +13,17 @@ export function makePubSub() {
   }
 
   try {
-    const opts = { 
+    const opts = {
       maxRetriesPerRequest: 3,
       retryDelayOnFailover: 100,
       enableOfflineQueue: false,
       lazyConnect: true,
-      maxmemoryPolicy: 'noeviction'
+      maxmemoryPolicy: 'noeviction',
     };
 
     const publisher = new Redis(url, opts);
     const subscriber = new Redis(url, opts);
-    
+
     // Store reference for health checks
     redisClient = publisher;
 
@@ -39,7 +39,10 @@ export function makePubSub() {
     console.log('Using Redis PubSub for subscriptions');
     return new RedisPubSub({ publisher, subscriber });
   } catch (error) {
-    console.error('Failed to connect to Redis, falling back to in-memory PubSub:', error);
+    console.error(
+      'Failed to connect to Redis, falling back to in-memory PubSub:',
+      error,
+    );
     return new PubSub();
   }
 }
@@ -78,5 +81,5 @@ export const redis = {
       console.error('Redis get failed:', error);
       return null;
     }
-  }
+  },
 };

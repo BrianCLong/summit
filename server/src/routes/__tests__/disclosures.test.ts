@@ -18,8 +18,12 @@ jest.mock('../../metrics/disclosureMetrics.js', () => ({
   },
 }));
 
-const { disclosureExportService } = jest.requireMock('../../disclosure/export-service.js');
-const { disclosureMetrics } = jest.requireMock('../../metrics/disclosureMetrics.js');
+const { disclosureExportService } = jest.requireMock(
+  '../../disclosure/export-service.js',
+);
+const { disclosureMetrics } = jest.requireMock(
+  '../../metrics/disclosureMetrics.js',
+);
 
 import disclosuresRouter from '../disclosures.js';
 
@@ -46,7 +50,11 @@ describe('Disclosures routes', () => {
       const response = await request(app)
         .post('/disclosures/export')
         .set('x-tenant-id', 'tenant-a')
-        .send({ tenantId: 'tenant-a', startTime: '2024-01-01T00:00:00Z', endTime: '2024-01-02T00:00:00Z' });
+        .send({
+          tenantId: 'tenant-a',
+          startTime: '2024-01-01T00:00:00Z',
+          endTime: '2024-01-02T00:00:00Z',
+        });
 
       expect(response.status).toBe(202);
       expect(response.body.job).toEqual(job);
@@ -61,7 +69,11 @@ describe('Disclosures routes', () => {
       const response = await request(app)
         .post('/disclosures/export')
         .set('x-tenant-id', 'tenant-a')
-        .send({ tenantId: 'tenant-b', startTime: '2024-01-01T00:00:00Z', endTime: '2024-01-02T00:00:00Z' });
+        .send({
+          tenantId: 'tenant-b',
+          startTime: '2024-01-01T00:00:00Z',
+          endTime: '2024-01-02T00:00:00Z',
+        });
 
       expect(response.status).toBe(403);
       expect(disclosureExportService.createJob).not.toHaveBeenCalled();
@@ -114,7 +126,10 @@ describe('Disclosures routes', () => {
         artifactStats: {},
       };
 
-      disclosureExportService.getDownload.mockReturnValueOnce({ job, filePath });
+      disclosureExportService.getDownload.mockReturnValueOnce({
+        job,
+        filePath,
+      });
 
       const response = await request(app)
         .get('/disclosures/export/job-1/download')
@@ -135,7 +150,10 @@ describe('Disclosures routes', () => {
         .send({ event: 'view', tenantId: 'tenant-a' });
 
       expect(response.status).toBe(202);
-      expect(disclosureMetrics.uiEvent).toHaveBeenCalledWith('view', 'tenant-a');
+      expect(disclosureMetrics.uiEvent).toHaveBeenCalledWith(
+        'view',
+        'tenant-a',
+      );
     });
   });
 });

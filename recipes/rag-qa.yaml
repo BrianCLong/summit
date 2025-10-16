@@ -1,15 +1,15 @@
-name: "RAG QA"
-description: "Index + retrieve + answer with citations"
+name: 'RAG QA'
+description: 'Index + retrieve + answer with citations'
 inputs:
   - name: query
     type: string
 nodes:
   - id: index
     type: ingest
-    params: { source: "docs/" }
+    params: { source: 'docs/' }
   - id: embed
     type: embed
-    params: { model: "text-embedding-3-large" }
+    params: { model: 'text-embedding-3-large' }
   - id: search
     type: search
     params: { topK: 8 }
@@ -26,4 +26,3 @@ edges:
 policies:
   - type: budget
     capUSD: 0.05
-

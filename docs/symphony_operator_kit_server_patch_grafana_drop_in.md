@@ -30,7 +30,8 @@ app.use(
   cors({
     origin: (origin, cb) => {
       const allow = (
-        process.env.CORS_ORIGINS || 'http://127.0.0.1:5173,http://localhost:5173'
+        process.env.CORS_ORIGINS ||
+        'http://127.0.0.1:5173,http://localhost:5173'
       ).split(',');
       if (!origin || allow.includes(origin)) return cb(null, true);
       return cb(new Error('CORS blocked'));
@@ -115,7 +116,8 @@ export type Policy = {
   _loadedAt?: number;
 };
 
-const POLICY_FILE = process.env.POLICY_FILE || path.resolve('config/router.policy.yml');
+const POLICY_FILE =
+  process.env.POLICY_FILE || path.resolve('config/router.policy.yml');
 let cached: Policy | null = null;
 
 export function loadPolicy(): Policy {
@@ -149,7 +151,11 @@ export function watchPolicy(onChange: (p: Policy) => void) {
 ```ts
 import { Request, Response, NextFunction } from 'express';
 
-export function securityMiddleware(req: Request, res: Response, next: NextFunction) {
+export function securityMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   //
   // Strip Authorization on cross-origin redirects (precaution):
   //
@@ -167,7 +173,9 @@ export function securityMiddleware(req: Request, res: Response, next: NextFuncti
 
 export function cspDirectives() {
   const self = ["'self'"];
-  const scripts = ["'self'"].concat((process.env.CSP_SCRIPT_SRC || '').split(',').filter(Boolean));
+  const scripts = ["'self'"].concat(
+    (process.env.CSP_SCRIPT_SRC || '').split(',').filter(Boolean),
+  );
   const styles = ["'self'", "'unsafe-inline'"]; // Mermaid needs inline styles
   const connects = [
     "'self'",
@@ -364,9 +372,11 @@ planRouter.post('/', async (req, res) => {
 
   const packTokens = Math.min((input?.length || 0) / 4, pol.context_tokens_max); // crude est
   const candidates = pol.allow_models.map((model) => {
-    const lat = recentLatency(model) || (model.startsWith('local/') ? 400 : 1400);
+    const lat =
+      recentLatency(model) || (model.startsWith('local/') ? 400 : 1400);
     const cost =
-      (modelCosts[model]?.prompt || 0) * packTokens + (modelCosts[model]?.completion || 0) * 500;
+      (modelCosts[model]?.prompt || 0) * packTokens +
+      (modelCosts[model]?.completion || 0) * 500;
     const win = windowStatus(model, pol.power_windows);
     const cap = (budgetFraction as any).hashMap?.get?.({ model }) ?? 0; // prom internals not public; treat as 0
     const score =
@@ -435,7 +445,12 @@ execRouter.post('/', async (req, res) => {
     res.json(payload);
   } catch (e: any) {
     errorsTotal.labels('/route/execute', '500').inc();
-    emit({ type: 'error', route: '/route/execute', code: 500, msg: e?.message });
+    emit({
+      type: 'error',
+      route: '/route/execute',
+      code: 500,
+      msg: e?.message,
+    });
     res.status(500).json({ error: 'execution_failed', audit_id });
   }
 });
@@ -456,7 +471,10 @@ let lastIndexedAt = Date.now() - 1000 * 60 * 60 * 25; // pretend stale by 25h
 let corpus = process.env.RAG_CORPUS || 'docs';
 
 ragRouter.get('/status', (_req, res) => {
-  const staleness = Math.max(0, Math.floor((Date.now() - lastIndexedAt) / 1000));
+  const staleness = Math.max(
+    0,
+    Math.floor((Date.now() - lastIndexedAt) / 1000),
+  );
   ragStaleness.labels(corpus).set(staleness);
   emit({ type: 'rag.index.freshness', corpus, staleness_s: staleness });
   res.json({
@@ -470,9 +488,16 @@ ragRouter.get('/status', (_req, res) => {
 ragRouter.post('/reindex', (req, res) => {
   const dry = String(req.query.dry_run || '0') === '1';
   if (dry)
-    return res.json({ estimate_docs: 1200, estimate_tokens: 1.8e6, estimate_duration_s: 420 });
+    return res.json({
+      estimate_docs: 1200,
+      estimate_tokens: 1.8e6,
+      estimate_duration_s: 420,
+    });
   lastIndexedAt = Date.now();
-  res.json({ ok: true, last_indexed_at: new Date(lastIndexedAt).toISOString() });
+  res.json({
+    ok: true,
+    last_indexed_at: new Date(lastIndexedAt).toISOString(),
+  });
 });
 ```
 
@@ -505,7 +530,13 @@ async function gh(path: string, method: string, body?: any) {
 
 ghRouter.post('/issues', async (req, res) => {
   try {
-    const { kind = 'decision', title, body, labels = [], attachments = [] } = req.body || {};
+    const {
+      kind = 'decision',
+      title,
+      body,
+      labels = [],
+      attachments = [],
+    } = req.body || {};
     const issue = await gh('/issues', 'POST', {
       title: `[${kind.toUpperCase()}] ${title}`,
       body,
@@ -564,7 +595,11 @@ export function startScheduler() {
       q.push(job);
       return;
     }
-    emit({ type: 'budget.update', model: job.model, fraction: budgetFrac(job.model) });
+    emit({
+      type: 'budget.update',
+      model: job.model,
+      fraction: budgetFrac(job.model),
+    });
     // dispatch(job) -> your executor
   }, 1000);
 }

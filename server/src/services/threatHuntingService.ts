@@ -287,23 +287,64 @@ export type IOCRelationshipType =
   | 'drops'
   | 'uses';
 
-export type DetectionStatus = 'NEW' | 'INVESTIGATING' | 'CONFIRMED' | 'FALSE_POSITIVE' | 'RESOLVED';
+export type DetectionStatus =
+  | 'NEW'
+  | 'INVESTIGATING'
+  | 'CONFIRMED'
+  | 'FALSE_POSITIVE'
+  | 'RESOLVED';
 
-export type ReputationCategory = 'BENIGN' | 'SUSPICIOUS' | 'MALICIOUS' | 'UNKNOWN';
+export type ReputationCategory =
+  | 'BENIGN'
+  | 'SUSPICIOUS'
+  | 'MALICIOUS'
+  | 'UNKNOWN';
 
-export type SandboxVerdict = 'CLEAN' | 'SUSPICIOUS' | 'MALICIOUS' | 'UNKNOWN' | 'ERROR';
+export type SandboxVerdict =
+  | 'CLEAN'
+  | 'SUSPICIOUS'
+  | 'MALICIOUS'
+  | 'UNKNOWN'
+  | 'ERROR';
 
-export type ReferenceType = 'report' | 'article' | 'blog' | 'advisory' | 'cve' | 'signature';
+export type ReferenceType =
+  | 'report'
+  | 'article'
+  | 'blog'
+  | 'advisory'
+  | 'cve'
+  | 'signature';
 
-export type HuntType = 'PROACTIVE' | 'REACTIVE' | 'RESEARCH' | 'VALIDATION' | 'BASELINE';
+export type HuntType =
+  | 'PROACTIVE'
+  | 'REACTIVE'
+  | 'RESEARCH'
+  | 'VALIDATION'
+  | 'BASELINE';
 
 export type Priority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 
-export type HuntStatus = 'PLANNING' | 'ACTIVE' | 'ON_HOLD' | 'COMPLETED' | 'CANCELLED';
+export type HuntStatus =
+  | 'PLANNING'
+  | 'ACTIVE'
+  | 'ON_HOLD'
+  | 'COMPLETED'
+  | 'CANCELLED';
 
-export type QueryType = 'SPLUNK' | 'ELASTICSEARCH' | 'KUSTO' | 'SQL' | 'CYPHER' | 'SIGMA';
+export type QueryType =
+  | 'SPLUNK'
+  | 'ELASTICSEARCH'
+  | 'KUSTO'
+  | 'SQL'
+  | 'CYPHER'
+  | 'SIGMA';
 
-export type FindingStatus = 'DRAFT' | 'UNDER_REVIEW' | 'CONFIRMED' | 'FALSE_POSITIVE' | 'RESOLVED';
+export type FindingStatus =
+  | 'DRAFT'
+  | 'UNDER_REVIEW'
+  | 'CONFIRMED'
+  | 'FALSE_POSITIVE'
+  | 'RESOLVED';
 
 export type EvidenceType =
   | 'LOG_ENTRY'
@@ -376,7 +417,9 @@ export class ThreatHuntingService extends EventEmitter {
       this.feedSources.set(feed.id, feed);
     });
 
-    console.log(`[THREAT_HUNTING] Initialized ${feeds.length} threat intelligence feeds`);
+    console.log(
+      `[THREAT_HUNTING] Initialized ${feeds.length} threat intelligence feeds`,
+    );
   }
 
   private async initializeSampleIOCs(): Promise<void> {
@@ -417,7 +460,11 @@ export class ThreatHuntingService extends EventEmitter {
           group: 'TA542',
           country: 'RU',
           confidence: 0.8,
-          reasoning: ['Infrastructure patterns', 'TTP overlap', 'Timing analysis'],
+          reasoning: [
+            'Infrastructure patterns',
+            'TTP overlap',
+            'Timing analysis',
+          ],
         },
         metadata: { ports: [80, 443, 8080] },
         createdBy: 'threat-intel-feed',
@@ -509,7 +556,9 @@ export class ThreatHuntingService extends EventEmitter {
       await this.createIOC(iocData, iocData.createdBy);
     }
 
-    console.log(`[THREAT_HUNTING] Initialized ${sampleIOCs.length} sample IOCs`);
+    console.log(
+      `[THREAT_HUNTING] Initialized ${sampleIOCs.length} sample IOCs`,
+    );
   }
 
   /**
@@ -649,7 +698,9 @@ export class ThreatHuntingService extends EventEmitter {
    */
   private async generateSampleDetection(ioc: IOC): Promise<Detection> {
     const detectionId = `det-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    const detectionTime = new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000); // Within last 7 days
+    const detectionTime = new Date(
+      Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000,
+    ); // Within last 7 days
 
     const detection: Detection = {
       id: detectionId,
@@ -680,14 +731,19 @@ export class ThreatHuntingService extends EventEmitter {
       };
     }
 
-    console.log(`[THREAT_HUNTING] Generated detection for IOC ${ioc.value}: ${detection.id}`);
+    console.log(
+      `[THREAT_HUNTING] Generated detection for IOC ${ioc.value}: ${detection.id}`,
+    );
     return detection;
   }
 
   /**
    * Enrich detection with additional context
    */
-  private async enrichDetection(value: string, type: IOCType): Promise<DetectionEnrichment> {
+  private async enrichDetection(
+    value: string,
+    type: IOCType,
+  ): Promise<DetectionEnrichment> {
     const enrichment: DetectionEnrichment = {};
 
     if (type === 'ip') {
@@ -743,9 +799,12 @@ export class ThreatHuntingService extends EventEmitter {
 
     for (let i = 0; i < Math.min(baseCount, 10); i++) {
       samples.push({
-        timestamp: new Date(Date.now() - Math.random() * 24 * 60 * 60 * 1000).toISOString(),
+        timestamp: new Date(
+          Date.now() - Math.random() * 24 * 60 * 60 * 1000,
+        ).toISOString(),
         source_ip: this.generateRandomIP(),
-        event_type: query.queryType === 'SPLUNK' ? 'network_event' : 'security_alert',
+        event_type:
+          query.queryType === 'SPLUNK' ? 'network_event' : 'security_alert',
         details: `Sample result ${i + 1} for query ${query.name}`,
       });
     }
@@ -757,7 +816,12 @@ export class ThreatHuntingService extends EventEmitter {
       enrichment: {
         avgEventsPerHour: Math.floor(baseCount / 24),
         topSources: samples.map((s) => s.source_ip).slice(0, 3),
-        timeDistribution: { morning: 25, afternoon: 35, evening: 25, night: 15 },
+        timeDistribution: {
+          morning: 25,
+          afternoon: 35,
+          evening: 25,
+          night: 15,
+        },
       },
     };
 
@@ -786,11 +850,15 @@ export class ThreatHuntingService extends EventEmitter {
         iocs = iocs.filter((ioc) => ioc.isActive === filters.isActive);
       }
       if (filters.tags && filters.tags.length > 0) {
-        iocs = iocs.filter((ioc) => filters.tags!.some((tag) => ioc.tags.includes(tag)));
+        iocs = iocs.filter((ioc) =>
+          filters.tags!.some((tag) => ioc.tags.includes(tag)),
+        );
       }
     }
 
-    return iocs.sort((a, b) => new Date(b.lastSeen).getTime() - new Date(a.lastSeen).getTime());
+    return iocs.sort(
+      (a, b) => new Date(b.lastSeen).getTime() - new Date(a.lastSeen).getTime(),
+    );
   }
 
   /**
@@ -803,7 +871,10 @@ export class ThreatHuntingService extends EventEmitter {
       hunts = hunts.filter((hunt) => hunt.status === status);
     }
 
-    return hunts.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    return hunts.sort(
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
   }
 
   /**
@@ -817,7 +888,9 @@ export class ThreatHuntingService extends EventEmitter {
     }
 
     return detections.sort(
-      (a, b) => new Date(b.detectionTime).getTime() - new Date(a.detectionTime).getTime(),
+      (a, b) =>
+        new Date(b.detectionTime).getTime() -
+        new Date(a.detectionTime).getTime(),
     );
   }
 
@@ -868,7 +941,9 @@ export class ThreatHuntingService extends EventEmitter {
         byType: iocsByType,
         bySeverity: iocsBySeverity,
         recentlyAdded: iocs.filter(
-          (ioc) => new Date(ioc.createdAt).getTime() > Date.now() - 24 * 60 * 60 * 1000,
+          (ioc) =>
+            new Date(ioc.createdAt).getTime() >
+            Date.now() - 24 * 60 * 60 * 1000,
         ).length,
       },
       hunts: {
@@ -882,12 +957,16 @@ export class ThreatHuntingService extends EventEmitter {
         new: detections.filter((det) => det.status === 'NEW').length,
         byStatus: detectionsByStatus,
         recent24h: detections.filter(
-          (det) => new Date(det.detectionTime).getTime() > Date.now() - 24 * 60 * 60 * 1000,
+          (det) =>
+            new Date(det.detectionTime).getTime() >
+            Date.now() - 24 * 60 * 60 * 1000,
         ).length,
       },
       feeds: {
         total: this.feedSources.size,
-        active: Array.from(this.feedSources.values()).filter((feed) => feed.isActive).length,
+        active: Array.from(this.feedSources.values()).filter(
+          (feed) => feed.isActive,
+        ).length,
         lastUpdate: Math.min(
           ...Array.from(this.feedSources.values()).map((feed) =>
             new Date(feed.lastUpdate).getTime(),
@@ -912,7 +991,9 @@ export class ThreatHuntingService extends EventEmitter {
       return sum + (end - start);
     }, 0);
 
-    return Math.floor(totalDuration / completedHunts.length / (24 * 60 * 60 * 1000)); // Days
+    return Math.floor(
+      totalDuration / completedHunts.length / (24 * 60 * 60 * 1000),
+    ); // Days
   }
 
   private async updateThreatFeeds(): Promise<void> {

@@ -4,8 +4,20 @@ const pg = new Pool({ connectionString: process.env.DATABASE_URL });
 
 async function seed() {
   const rows = [
-    { name: 'edge-paris', region: 'eu-west-1', residency: 'EU', pubkey: process.env.SEED_PARIS_PUBKEY!, bandwidth: 'low' },
-    { name: 'edge-virginia', region: 'us-east-1', residency: 'US', pubkey: process.env.SEED_VIRGINIA_PUBKEY!, bandwidth: 'med' },
+    {
+      name: 'edge-paris',
+      region: 'eu-west-1',
+      residency: 'EU',
+      pubkey: process.env.SEED_PARIS_PUBKEY!,
+      bandwidth: 'low',
+    },
+    {
+      name: 'edge-virginia',
+      region: 'us-east-1',
+      residency: 'US',
+      pubkey: process.env.SEED_VIRGINIA_PUBKEY!,
+      bandwidth: 'med',
+    },
   ];
   for (const r of rows) {
     if (!r.pubkey) throw new Error(`Missing pubkey for ${r.name}`);
@@ -19,5 +31,9 @@ async function seed() {
   console.log('seeded sites:', rows.map((r) => r.name).join(', '));
 }
 
-seed().then(() => process.exit(0)).catch((e) => { console.error(e); process.exit(1); });
-
+seed()
+  .then(() => process.exit(0))
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  });

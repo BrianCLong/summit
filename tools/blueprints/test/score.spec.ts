@@ -1,4 +1,11 @@
+import { execFileSync } from 'child_process';
+
 test("score passes when rules satisfied", ()=>{
-  const out = require('child_process').execSync("node tools/blueprints/score.ts packages/blueprints/node-service.yaml demo || true").toString();
-  expect(out).toContain("{\"score\"");
+  let out;
+  try {
+    out = execFileSync("node", ["tools/blueprints/score.ts", "packages/blueprints/node-service.yaml", "demo"]).toString();
+  } catch (e) {
+    out = e.stdout.toString();
+  }
+  expect(out).toContain('{"score"}');
 });

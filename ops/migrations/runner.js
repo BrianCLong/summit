@@ -13,7 +13,8 @@ function saveState(stateFile, state) {
 }
 
 async function runMigration(plan, options = {}) {
-  const stateFile = options.stateFile || path.join(__dirname, 'migration-state.json');
+  const stateFile =
+    options.stateFile || path.join(__dirname, 'migration-state.json');
   const state = loadState(stateFile);
   for (let i = state.index; i < plan.length; i++) {
     const step = plan[i];
@@ -26,7 +27,8 @@ async function runMigration(plan, options = {}) {
 }
 
 async function rollback(plan, options = {}) {
-  const stateFile = options.stateFile || path.join(__dirname, 'migration-state.json');
+  const stateFile =
+    options.stateFile || path.join(__dirname, 'migration-state.json');
   const state = loadState(stateFile);
   for (let i = state.index - 1; i >= 0; i--) {
     const step = plan[i];

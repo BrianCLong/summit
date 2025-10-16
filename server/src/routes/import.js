@@ -9,21 +9,21 @@
  * - Legacy validation endpoint
  */
 
-const express = require("express");
-const multer = require("multer");
-const path = require("path");
-const fs = require("fs").promises;
-const CSVImportService = require("../services/CSVImportService");
-const STIXImportService = require("../services/STIXImportService");
-const { ensureAuthenticated, requireRole } = require("../middleware/auth");
-const { writeAudit } = require("../utils/audit");
+const express = require('express');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs').promises;
+const CSVImportService = require('../services/CSVImportService');
+const STIXImportService = require('../services/STIXImportService');
+const { ensureAuthenticated, requireRole } = require('../middleware/auth');
+const { writeAudit } = require('../utils/audit');
 
 const router = express.Router();
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: async (req, file, cb) => {
-    const uploadDir = path.join(process.cwd(), "uploads", "imports");
+    const uploadDir = path.join(process.cwd(), 'uploads', 'imports');
     try {
       await fs.mkdir(uploadDir, { recursive: true });
       cb(null, uploadDir);
@@ -32,7 +32,7 @@ const storage = multer.diskStorage({
     }
   },
   filename: (req, file, cb) => {
-    const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
     const filename = `${timestamp}-${file.originalname}`;
     cb(null, filename);
   },
@@ -44,7 +44,7 @@ const upload = multer({
     fileSize: 100 * 1024 * 1024, // 100MB limit
   },
   fileFilter: (req, file, cb) => {
-    const allowedTypes = [".csv", ".json", ".txt", ".parquet"];
+    const allowedTypes = ['.csv', '.json', '.txt', '.parquet'];
     const ext = path.extname(file.originalname).toLowerCase();
 
     if (allowedTypes.includes(ext)) {
@@ -52,7 +52,7 @@ const upload = multer({
     } else {
       cb(
         new Error(
-          `Unsupported file type: ${ext}. Allowed: ${allowedTypes.join(", ")}`,
+          `Unsupported file type: ${ext}. Allowed: ${allowedTypes.join(', ')}`,
         ),
       );
     }
@@ -86,11 +86,11 @@ router.use((req, res, next) => {
 // ==============================================================================
 
 // Validate an import payload and preview the changes without applying
-router.post("/validate", async (req, res) => {
+router.post('/validate', async (req, res) => {
   try {
     const payload = req.body;
-    if (!payload || typeof payload !== "object") {
-      return res.status(400).json({ error: "Invalid payload" });
+    if (!payload || typeof payload !== 'object') {
+      return res.status(400).json({ error: 'Invalid payload' });
     }
 
     // Minimal shape checks (placeholder for schema contracts)
@@ -100,15 +100,15 @@ router.post("/validate", async (req, res) => {
 
     for (const [i, n] of nodes.entries()) {
       if (!n.uuid && !n.id)
-        problems.push({ type: "node", index: i, issue: "missing id/uuid" });
+        problems.push({ type: 'node', index: i, issue: 'missing id/uuid' });
       if (!n.type)
-        problems.push({ type: "node", index: i, issue: "missing type" });
+        problems.push({ type: 'node', index: i, issue: 'missing type' });
     }
     for (const [i, e] of edges.entries()) {
       if (!e.source || !e.target)
-        problems.push({ type: "edge", index: i, issue: "missing endpoints" });
+        problems.push({ type: 'edge', index: i, issue: 'missing endpoints' });
       if (!e.type)
-        problems.push({ type: "edge", index: i, issue: "missing type" });
+        problems.push({ type: 'edge', index: i, issue: 'missing type' });
     }
 
     const summary = {
@@ -122,12 +122,12 @@ router.post("/validate", async (req, res) => {
       userId: req.user?.id,
       actorRole: req.user?.role,
       sessionId: req.sessionId,
-      action: "IMPORT_VALIDATE",
-      resourceType: "Graph",
+      action: 'IMPORT_VALIDATE',
+      resourceType: 'Graph',
       resourceId: null,
       details: { counts: { nodes: nodes.length, edges: edges.length } },
       ip: req.ip,
-      userAgent: req.get("User-Agent"),
+      userAgent: req.get('User-Agent'),
     });
 
     return res.json({ summary });
@@ -143,10 +143,10 @@ router.post("/validate", async (req, res) => {
 /**
  * Upload and analyze CSV file structure
  */
-router.post("/csv/analyze", upload.single("file"), async (req, res) => {
+router.post('/csv/analyze', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: "No file uploaded" });
+      return res.status(400).json({ error: 'No file uploaded' });
     }
 
     const ext = path.extname(req.file.path).toLowerCase();
@@ -154,12 +154,12 @@ router.post("/csv/analyze", upload.single("file"), async (req, res) => {
     let fields = [];
     let rowCount = 0;
 
-    if (ext === ".parquet") {
+    if (ext === '.parquet') {
       let parquet;
       try {
-        parquet = require("parquetjs-lite");
+        parquet = require('parquetjs-lite');
       } catch (err) {
-        return res.status(500).json({ error: "Parquet support not installed" });
+        return res.status(500).json({ error: 'Parquet support not installed' });
       }
       const reader = await parquet.ParquetReader.openFile(req.file.path);
       fields = Object.keys(reader.schema.fields);
@@ -174,14 +174,14 @@ router.post("/csv/analyze", upload.single("file"), async (req, res) => {
       }
       await reader.close();
     } else {
-      const csv = require("csv-parser");
-      const fs = require("fs");
+      const csv = require('csv-parser');
+      const fs = require('fs');
       const fieldSet = new Set();
 
       const stream = fs
         .createReadStream(req.file.path)
         .pipe(csv())
-        .on("data", (row) => {
+        .on('data', (row) => {
           if (rowCount < 100) {
             Object.keys(row).forEach((key) => fieldSet.add(key));
             if (rowCount < 5) sampleRows.push(row);
@@ -190,8 +190,8 @@ router.post("/csv/analyze", upload.single("file"), async (req, res) => {
         });
 
       await new Promise((resolve, reject) => {
-        stream.on("end", resolve);
-        stream.on("error", reject);
+        stream.on('end', resolve);
+        stream.on('error', reject);
       });
 
       fields = Array.from(fieldSet);
@@ -199,8 +199,8 @@ router.post("/csv/analyze", upload.single("file"), async (req, res) => {
 
     await writeAudit({
       userId: req.user?.id,
-      action: "FILE_ANALYZE",
-      resourceType: "Import",
+      action: 'FILE_ANALYZE',
+      resourceType: 'Import',
       details: {
         filename: req.file.originalname,
         fields: fields.length,
@@ -224,14 +224,14 @@ router.post("/csv/analyze", upload.single("file"), async (req, res) => {
 /**
  * Start CSV import job
  */
-router.post("/csv/import", async (req, res) => {
+router.post('/csv/import', async (req, res) => {
   try {
     const { filePath, investigationId, mapping, dedupeKey } = req.body;
 
     if (!filePath || !mapping) {
       return res
         .status(400)
-        .json({ error: "filePath and mapping are required" });
+        .json({ error: 'filePath and mapping are required' });
     }
 
     const job = await req.app.locals.csvImportService.startImport({
@@ -240,13 +240,13 @@ router.post("/csv/import", async (req, res) => {
       mapping,
       dedupeKey,
       userId: req.user.id,
-      tenantId: req.user.tenantId || "default",
+      tenantId: req.user.tenantId || 'default',
     });
 
     await writeAudit({
       userId: req.user?.id,
-      action: "CSV_IMPORT_START",
-      resourceType: "Import",
+      action: 'CSV_IMPORT_START',
+      resourceType: 'Import',
       resourceId: job.id,
       details: { investigationId, entityType: mapping.entityType },
     });
@@ -260,12 +260,12 @@ router.post("/csv/import", async (req, res) => {
 /**
  * Get CSV import job status
  */
-router.get("/csv/:jobId", async (req, res) => {
+router.get('/csv/:jobId', async (req, res) => {
   try {
     const job = await req.app.locals.csvImportService.getJob(req.params.jobId);
 
     if (!job) {
-      return res.status(404).json({ error: "Job not found" });
+      return res.status(404).json({ error: 'Job not found' });
     }
 
     res.json(job);
@@ -277,15 +277,15 @@ router.get("/csv/:jobId", async (req, res) => {
 /**
  * Resume CSV import job
  */
-router.post("/csv/:jobId/resume", async (req, res) => {
+router.post('/csv/:jobId/resume', async (req, res) => {
   try {
     const job = await req.app.locals.csvImportService.resumeImport(
       req.params.jobId,
     );
     await writeAudit({
       userId: req.user?.id,
-      action: "CSV_IMPORT_RESUME",
-      resourceType: "Import",
+      action: 'CSV_IMPORT_RESUME',
+      resourceType: 'Import',
       resourceId: job.id,
       details: { investigationId: job.investigationId },
     });
@@ -302,19 +302,19 @@ router.post("/csv/:jobId/resume", async (req, res) => {
 /**
  * Upload and start STIX bundle import
  */
-router.post("/stix/bundle", upload.single("file"), async (req, res) => {
+router.post('/stix/bundle', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
-      return res.status(400).json({ error: "No file uploaded" });
+      return res.status(400).json({ error: 'No file uploaded' });
     }
 
     const { investigationId } = req.body;
 
     // Validate JSON structure
-    const bundleContent = await fs.readFile(req.file.path, "utf8");
+    const bundleContent = await fs.readFile(req.file.path, 'utf8');
     const bundle = JSON.parse(bundleContent);
 
-    if (bundle.type !== "bundle") {
+    if (bundle.type !== 'bundle') {
       return res
         .status(400)
         .json({ error: 'Invalid STIX bundle: missing type "bundle"' });
@@ -324,13 +324,13 @@ router.post("/stix/bundle", upload.single("file"), async (req, res) => {
       bundlePath: req.file.path,
       investigationId,
       userId: req.user.id,
-      tenantId: req.user.tenantId || "default",
+      tenantId: req.user.tenantId || 'default',
     });
 
     await writeAudit({
       userId: req.user?.id,
-      action: "STIX_BUNDLE_IMPORT_START",
-      resourceType: "Import",
+      action: 'STIX_BUNDLE_IMPORT_START',
+      resourceType: 'Import',
       resourceId: job.id,
       details: { investigationId, objectCount: bundle.objects?.length || 0 },
     });
@@ -338,7 +338,7 @@ router.post("/stix/bundle", upload.single("file"), async (req, res) => {
     res.json(job);
   } catch (error) {
     if (error instanceof SyntaxError) {
-      res.status(400).json({ error: "Invalid JSON format" });
+      res.status(400).json({ error: 'Invalid JSON format' });
     } else {
       res.status(500).json({ error: error.message });
     }
@@ -348,7 +348,7 @@ router.post("/stix/bundle", upload.single("file"), async (req, res) => {
 /**
  * Start TAXII collection import
  */
-router.post("/stix/taxii", async (req, res) => {
+router.post('/stix/taxii', async (req, res) => {
   try {
     const {
       taxiiUrl,
@@ -362,7 +362,7 @@ router.post("/stix/taxii", async (req, res) => {
     if (!taxiiUrl || !collectionId) {
       return res
         .status(400)
-        .json({ error: "taxiiUrl and collectionId are required" });
+        .json({ error: 'taxiiUrl and collectionId are required' });
     }
 
     const job = await req.app.locals.stixImportService.startTaxiiImport({
@@ -373,13 +373,13 @@ router.post("/stix/taxii", async (req, res) => {
       addedAfter,
       limit,
       userId: req.user.id,
-      tenantId: req.user.tenantId || "default",
+      tenantId: req.user.tenantId || 'default',
     });
 
     await writeAudit({
       userId: req.user?.id,
-      action: "TAXII_IMPORT_START",
-      resourceType: "Import",
+      action: 'TAXII_IMPORT_START',
+      resourceType: 'Import',
       resourceId: job.id,
       details: { investigationId, taxiiUrl, collectionId },
     });
@@ -393,12 +393,12 @@ router.post("/stix/taxii", async (req, res) => {
 /**
  * Get STIX import job status
  */
-router.get("/stix/:jobId", async (req, res) => {
+router.get('/stix/:jobId', async (req, res) => {
   try {
     const job = await req.app.locals.stixImportService.getJob(req.params.jobId);
 
     if (!job) {
-      return res.status(404).json({ error: "Job not found" });
+      return res.status(404).json({ error: 'Job not found' });
     }
 
     res.json(job);
@@ -410,15 +410,15 @@ router.get("/stix/:jobId", async (req, res) => {
 /**
  * Resume STIX TAXII import
  */
-router.post("/stix/:jobId/resume", async (req, res) => {
+router.post('/stix/:jobId/resume', async (req, res) => {
   try {
     const job = await req.app.locals.stixImportService.resumeTaxiiImport(
       req.params.jobId,
     );
     await writeAudit({
       userId: req.user?.id,
-      action: "TAXII_IMPORT_RESUME",
-      resourceType: "Import",
+      action: 'TAXII_IMPORT_RESUME',
+      resourceType: 'Import',
       resourceId: job.id,
       details: {
         investigationId: job.investigationId,
@@ -439,7 +439,7 @@ router.post("/stix/:jobId/resume", async (req, res) => {
 /**
  * List all import jobs for an investigation
  */
-router.get("/jobs/:investigationId", async (req, res) => {
+router.get('/jobs/:investigationId', async (req, res) => {
   try {
     const { investigationId } = req.params;
     const { limit = 50 } = req.query;
@@ -456,8 +456,8 @@ router.get("/jobs/:investigationId", async (req, res) => {
 
     // Combine and sort by creation time
     const allJobs = [
-      ...csvJobs.map((job) => ({ ...job, type: "CSV" })),
-      ...stixJobs.map((job) => ({ ...job, type: job.type || "STIX" })),
+      ...csvJobs.map((job) => ({ ...job, type: 'CSV' })),
+      ...stixJobs.map((job) => ({ ...job, type: job.type || 'STIX' })),
     ].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
     res.json(allJobs);
@@ -469,34 +469,34 @@ router.get("/jobs/:investigationId", async (req, res) => {
 /**
  * Get suggested field mappings
  */
-router.post("/mapping/suggest", async (req, res) => {
+router.post('/mapping/suggest', async (req, res) => {
   try {
-    const { fields, entityType = "ENTITY" } = req.body;
+    const { fields, entityType = 'ENTITY' } = req.body;
 
     if (!fields || !Array.isArray(fields)) {
-      return res.status(400).json({ error: "fields array is required" });
+      return res.status(400).json({ error: 'fields array is required' });
     }
 
     const suggestions = {};
 
     // Basic field mapping suggestions
     const mappingRules = {
-      name: ["name", "title", "label", "entity_name", "full_name"],
-      description: ["description", "desc", "summary", "notes", "details"],
-      firstName: ["first_name", "fname", "given_name"],
-      lastName: ["last_name", "lname", "surname", "family_name"],
-      email: ["email", "email_address", "e_mail"],
-      phone: ["phone", "telephone", "phone_number"],
-      industry: ["industry", "sector", "business_type"],
-      website: ["website", "url", "homepage", "web_site"],
-      address: ["address", "street_address", "location"],
-      city: ["city", "town", "municipality"],
-      country: ["country", "nation"],
-      latitude: ["lat", "latitude", "geo_lat"],
-      longitude: ["lon", "lng", "longitude", "geo_lon"],
-      dateCreated: ["created", "date_created", "created_at", "timestamp"],
-      id: ["id", "identifier", "external_id", "ref_id"],
-      type: ["type", "category", "classification"],
+      name: ['name', 'title', 'label', 'entity_name', 'full_name'],
+      description: ['description', 'desc', 'summary', 'notes', 'details'],
+      firstName: ['first_name', 'fname', 'given_name'],
+      lastName: ['last_name', 'lname', 'surname', 'family_name'],
+      email: ['email', 'email_address', 'e_mail'],
+      phone: ['phone', 'telephone', 'phone_number'],
+      industry: ['industry', 'sector', 'business_type'],
+      website: ['website', 'url', 'homepage', 'web_site'],
+      address: ['address', 'street_address', 'location'],
+      city: ['city', 'town', 'municipality'],
+      country: ['country', 'nation'],
+      latitude: ['lat', 'latitude', 'geo_lat'],
+      longitude: ['lon', 'lng', 'longitude', 'geo_lon'],
+      dateCreated: ['created', 'date_created', 'created_at', 'timestamp'],
+      id: ['id', 'identifier', 'external_id', 'ref_id'],
+      type: ['type', 'category', 'classification'],
     };
 
     for (const field of fields) {
@@ -514,9 +514,9 @@ router.post("/mapping/suggest", async (req, res) => {
       entityType,
       suggestions,
       recommendedDedupeKey: suggestions.name
-        ? ["name"]
+        ? ['name']
         : suggestions.id
-          ? ["id"]
+          ? ['id']
           : Object.keys(suggestions).slice(0, 2),
     });
   } catch (error) {
@@ -527,15 +527,15 @@ router.post("/mapping/suggest", async (req, res) => {
 // Error handling middleware
 router.use((error, req, res, next) => {
   if (error instanceof multer.MulterError) {
-    if (error.code === "LIMIT_FILE_SIZE") {
+    if (error.code === 'LIMIT_FILE_SIZE') {
       return res
         .status(400)
-        .json({ error: "File too large. Maximum size is 100MB." });
+        .json({ error: 'File too large. Maximum size is 100MB.' });
     }
   }
 
-  console.error("Import API Error:", error);
-  res.status(500).json({ error: "Internal server error" });
+  console.error('Import API Error:', error);
+  res.status(500).json({ error: 'Internal server error' });
 });
 
 module.exports = router;

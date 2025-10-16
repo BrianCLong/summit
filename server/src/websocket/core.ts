@@ -3,7 +3,10 @@ import { Redis } from 'ioredis';
 import jwt from 'jsonwebtoken';
 import { otelService } from '../middleware/observability/otel-tracing.js';
 import { getPostgresPool } from '../db/postgres.js';
-import { ManagedConnection, WebSocketConnectionPool } from './connectionManager.js';
+import {
+  ManagedConnection,
+  WebSocketConnectionPool,
+} from './connectionManager.js';
 
 interface WebSocketClaims {
   tenantId: string;
@@ -53,8 +56,14 @@ export class WebSocketCore {
     this.connectionPool = new WebSocketConnectionPool({
       maxQueueSize: parseInt(process.env.WS_MAX_QUEUE_SIZE || '500', 10),
       replayBatchSize: parseInt(process.env.WS_REPLAY_BATCH_SIZE || '50', 10),
-      queueFlushInterval: parseInt(process.env.WS_QUEUE_FLUSH_INTERVAL_MS || '1500', 10),
-      rateLimitPerSecond: parseInt(process.env.WS_RATE_LIMIT_PER_SECOND || '40', 10),
+      queueFlushInterval: parseInt(
+        process.env.WS_QUEUE_FLUSH_INTERVAL_MS || '1500',
+        10,
+      ),
+      rateLimitPerSecond: parseInt(
+        process.env.WS_RATE_LIMIT_PER_SECOND || '40',
+        10,
+      ),
       backpressureThreshold: this.MAX_BACKPRESSURE,
       heartbeatTimeout: this.HEARTBEAT_INTERVAL * 2,
       initialRetryDelay: parseInt(process.env.WS_RETRY_DELAY_MS || '1000', 10),
@@ -83,9 +92,12 @@ export class WebSocketCore {
     }
   }
 
-  private async opaAllow(claims: WebSocketClaims, message: WebSocketMessage): Promise<boolean> {
+  private async opaAllow(
+    claims: WebSocketClaims,
+    message: WebSocketMessage,
+  ): Promise<boolean> {
     const span = otelService.createSpan('websocket.opa_check');
-    
+
     try {
       // Basic policy checks for WebSocket operations
       const context = {
@@ -130,7 +142,8 @@ export class WebSocketCore {
         unsubscribe: (ctx: any) => this.policies.subscribe(ctx),
       };
 
-      const allowed = policies[message.type as keyof typeof policies]?.(context) || false;
+      const allowed =
+        policies[message.type as keyof typeof policies]?.(context) || false;
 
       span?.addSpanAttributes({
         'websocket.opa.allowed': allowed,
@@ -170,17 +183,18 @@ export class WebSocketCore {
   private createApp() {
     this.app = uWS.App({
       // SSL configuration if needed
-      ...(process.env.SSL_KEY && process.env.SSL_CERT && {
-        key_file_name: process.env.SSL_KEY,
-        cert_file_name: process.env.SSL_CERT,
-      }),
+      ...(process.env.SSL_KEY &&
+        process.env.SSL_CERT && {
+          key_file_name: process.env.SSL_KEY,
+          cert_file_name: process.env.SSL_CERT,
+        }),
     });
 
     this.app.ws('/*', {
       /* WebSocket upgrade handler */
       upgrade: (res, req, context) => {
         const span = otelService.createSpan('websocket.upgrade');
-        
+
         try {
           const token = req.getHeader('authorization')?.replace('Bearer ', '');
           if (!token) {
@@ -221,7 +235,7 @@ export class WebSocketCore {
             req.getHeader('sec-websocket-key'),
             req.getHeader('sec-websocket-protocol'),
             req.getHeader('sec-websocket-extensions'),
-            context
+            context,
           );
 
           span?.addSpanAttributes({
@@ -241,11 +255,11 @@ export class WebSocketCore {
       message: async (ws: any, message: ArrayBuffer, opCode) => {
         const span = otelService.createSpan('websocket.message');
         const connection = ws as WebSocketConnection;
-        
+
         try {
           const messageStr = Buffer.from(message).toString('utf8');
           const msg: WebSocketMessage = JSON.parse(messageStr);
-          
+
           // Update heartbeat timestamp
           connection.lastHeartbeat = Date.now();
           connection.manager?.updateHeartbeat();
@@ -294,12 +308,16 @@ export class WebSocketCore {
       open: (ws: any) => {
         const connection = ws as WebSocketConnection;
         const connectionId = connection.userId + '@' + connection.tenantId;
-        const manager = this.connectionPool.registerConnection(connectionId, ws, {
-          id: connectionId,
-          tenantId: connection.tenantId,
-          userId: connection.userId,
-          route: connection.meshRoute,
-        });
+        const manager = this.connectionPool.registerConnection(
+          connectionId,
+          ws,
+          {
+            id: connectionId,
+            tenantId: connection.tenantId,
+            userId: connection.userId,
+            route: connection.meshRoute,
+          },
+        );
         connection.manager = manager;
         this.connections.set(connectionId, connection);
 
@@ -329,7 +347,10 @@ export class WebSocketCore {
 
         // Clean up subscriptions
         for (const topic of connection.subscriptions) {
-          this.redis.srem(`${this.TOPIC_PREFIX}${topic}:subscribers`, connectionId);
+          this.redis.srem(
+            `${this.TOPIC_PREFIX}${topic}:subscribers`,
+            connectionId,
+          );
         }
 
         this.connections.delete(connectionId);
@@ -355,16 +376,22 @@ export class WebSocketCore {
     });
   }
 
-  private async handleMessage(connection: WebSocketConnection, msg: WebSocketMessage) {
+  private async handleMessage(
+    connection: WebSocketConnection,
+    msg: WebSocketMessage,
+  ) {
     const connectionId = connection.userId + '@' + connection.tenantId;
-    
+
     switch (msg.type) {
       case 'subscribe':
         if (msg.topics) {
           for (const topic of msg.topics) {
             const tenantTopic = `${connection.tenantId}.${topic}`;
             connection.subscriptions.add(tenantTopic);
-            await this.redis.sadd(`${this.TOPIC_PREFIX}${tenantTopic}:subscribers`, connectionId);
+            await this.redis.sadd(
+              `${this.TOPIC_PREFIX}${tenantTopic}:subscribers`,
+              connectionId,
+            );
           }
 
           const subscribedPayload = {
@@ -383,7 +410,10 @@ export class WebSocketCore {
           for (const topic of msg.topics) {
             const tenantTopic = `${connection.tenantId}.${topic}`;
             connection.subscriptions.delete(tenantTopic);
-            await this.redis.srem(`${this.TOPIC_PREFIX}${tenantTopic}:subscribers`, connectionId);
+            await this.redis.srem(
+              `${this.TOPIC_PREFIX}${tenantTopic}:subscribers`,
+              connectionId,
+            );
           }
 
           const unsubscribedPayload = {
@@ -407,10 +437,10 @@ export class WebSocketCore {
             from: connectionId,
             timestamp: Date.now(),
           };
-          
+
           await this.redis.publish(
             `${this.TOPIC_PREFIX}${tenantTopic}`,
-            JSON.stringify(publishMsg)
+            JSON.stringify(publishMsg),
           );
 
           // Audit the publish event
@@ -436,7 +466,7 @@ export class WebSocketCore {
 
   private setupRedisSubscriptions() {
     const subscriber = this.redis.duplicate();
-    
+
     subscriber.psubscribe(`${this.TOPIC_PREFIX}*`, (err, count) => {
       if (err) {
         console.error('Redis psubscribe error:', err);
@@ -448,7 +478,7 @@ export class WebSocketCore {
     subscriber.on('pmessage', async (pattern, channel, message) => {
       const topic = channel.replace(this.TOPIC_PREFIX, '');
       const subscribers = await this.redis.smembers(`${channel}:subscribers`);
-      
+
       for (const connectionId of subscribers) {
         const connection = this.connections.get(connectionId);
         if (connection && connection.subscriptions.has(topic)) {
@@ -463,7 +493,9 @@ export class WebSocketCore {
 
   private startHeartbeatCheck() {
     setInterval(() => {
-      const closed = this.connectionPool.closeIdleConnections(this.HEARTBEAT_INTERVAL * 2);
+      const closed = this.connectionPool.closeIdleConnections(
+        this.HEARTBEAT_INTERVAL * 2,
+      );
       for (const connectionId of closed) {
         this.connections.delete(connectionId);
         console.log(`Closing stale connection: ${connectionId}`);
@@ -471,13 +503,22 @@ export class WebSocketCore {
     }, this.HEARTBEAT_INTERVAL);
   }
 
-  private async auditWebSocketEvent(connection: WebSocketConnection, action: string, details: any) {
+  private async auditWebSocketEvent(
+    connection: WebSocketConnection,
+    action: string,
+    details: any,
+  ) {
     try {
       const pool = getPostgresPool();
       await pool.query(
         `INSERT INTO websocket_audit (tenant_id, user_id, action, details, created_at)
          VALUES ($1, $2, $3, $4, now())`,
-        [connection.tenantId, connection.userId, action, JSON.stringify(details)]
+        [
+          connection.tenantId,
+          connection.userId,
+          action,
+          JSON.stringify(details),
+        ],
       );
     } catch (error) {
       console.error('WebSocket audit logging failed:', error);
@@ -507,10 +548,10 @@ export class WebSocketCore {
       from: 'system',
       timestamp: Date.now(),
     };
-    
+
     await this.redis.publish(
       `${this.TOPIC_PREFIX}${tenantTopic}`,
-      JSON.stringify(message)
+      JSON.stringify(message),
     );
   }
 
@@ -518,10 +559,13 @@ export class WebSocketCore {
     const poolStats = this.connectionPool.getStats();
     return {
       totalConnections: poolStats.totalConnections,
-      connectionsByTenant: poolStats.connections.reduce((acc, conn) => {
-        acc[conn.tenantId] = (acc[conn.tenantId] || 0) + 1;
-        return acc;
-      }, {} as Record<string, number>),
+      connectionsByTenant: poolStats.connections.reduce(
+        (acc, conn) => {
+          acc[conn.tenantId] = (acc[conn.tenantId] || 0) + 1;
+          return acc;
+        },
+        {} as Record<string, number>,
+      ),
       states: poolStats.byState,
       details: poolStats.connections,
     };

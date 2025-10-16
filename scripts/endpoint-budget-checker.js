@@ -13,7 +13,8 @@ const https = require('https');
 // Configuration
 const config = {
   prometheusUrl: process.env.PROMETHEUS_URL || 'http://localhost:9090',
-  budgetConfigFile: process.env.BUDGET_CONFIG_FILE || 'performance-budgets.json',
+  budgetConfigFile:
+    process.env.BUDGET_CONFIG_FILE || 'performance-budgets.json',
   baselineHours: parseInt(process.env.BASELINE_HOURS) || 24,
   currentWindowMinutes: parseInt(process.env.CURRENT_WINDOW_MINUTES) || 15,
   failOnBudgetBreach: process.env.FAIL_ON_BUDGET_BREACH !== 'false',
@@ -44,12 +45,16 @@ class EndpointBudgetChecker {
     console.log('📋 Loading performance budgets...');
 
     try {
-      const budgetData = await fs.readFile(this.config.budgetConfigFile, 'utf8');
+      const budgetData = await fs.readFile(
+        this.config.budgetConfigFile,
+        'utf8',
+      );
       this.budgets = JSON.parse(budgetData);
 
-      console.log(`✅ Loaded budgets for ${Object.keys(this.budgets.endpoints).length} endpoints`);
+      console.log(
+        `✅ Loaded budgets for ${Object.keys(this.budgets.endpoints).length} endpoints`,
+      );
       return this.budgets;
-
     } catch (error) {
       if (error.code === 'ENOENT') {
         // Create default budget file
@@ -68,71 +73,73 @@ class EndpointBudgetChecker {
     console.log('📝 Creating default performance budgets...');
 
     const defaultBudgets = {
-      version: "1.0",
+      version: '1.0',
       global: {
         default_p95_budget_ms: 200,
         default_p99_budget_ms: 500,
         default_error_rate_budget: 0.01,
         baseline_window_hours: 24,
-        comparison_window_minutes: 15
+        comparison_window_minutes: 15,
       },
       endpoints: {
-        "/health": {
+        '/health': {
           p95_budget_ms: 50,
           p99_budget_ms: 100,
           error_rate_budget: 0.001,
           critical: true,
-          description: "Health check endpoint"
+          description: 'Health check endpoint',
         },
-        "/health/ready": {
+        '/health/ready': {
           p95_budget_ms: 100,
           p99_budget_ms: 200,
           error_rate_budget: 0.005,
           critical: true,
-          description: "Readiness check endpoint"
+          description: 'Readiness check endpoint',
         },
-        "/graphql": {
+        '/graphql': {
           p95_budget_ms: 300,
           p99_budget_ms: 800,
           error_rate_budget: 0.02,
           critical: true,
-          description: "GraphQL API endpoint"
+          description: 'GraphQL API endpoint',
         },
-        "/api/v1/entities": {
+        '/api/v1/entities': {
           p95_budget_ms: 250,
           p99_budget_ms: 600,
           error_rate_budget: 0.015,
           critical: false,
-          description: "Entity CRUD operations"
+          description: 'Entity CRUD operations',
         },
-        "/api/v1/search": {
+        '/api/v1/search': {
           p95_budget_ms: 500,
           p99_budget_ms: 1200,
           error_rate_budget: 0.03,
           critical: false,
-          description: "Search functionality"
+          description: 'Search functionality',
         },
-        "/metrics": {
+        '/metrics': {
           p95_budget_ms: 100,
           p99_budget_ms: 250,
           error_rate_budget: 0.001,
           critical: false,
-          description: "Prometheus metrics endpoint"
-        }
+          description: 'Prometheus metrics endpoint',
+        },
       },
       alerting: {
         slack_webhook: process.env.SLACK_WEBHOOK_URL,
         github_issues: true,
-        email_notifications: false
-      }
+        email_notifications: false,
+      },
     };
 
     await fs.writeFile(
       this.config.budgetConfigFile,
-      JSON.stringify(defaultBudgets, null, 2)
+      JSON.stringify(defaultBudgets, null, 2),
     );
 
-    console.log(`📋 Created default budget file: ${this.config.budgetConfigFile}`);
+    console.log(
+      `📋 Created default budget file: ${this.config.budgetConfigFile}`,
+    );
   }
 
   /**
@@ -148,7 +155,7 @@ class EndpointBudgetChecker {
 
       const req = https.get(url, (res) => {
         let data = '';
-        res.on('data', chunk => data += chunk);
+        res.on('data', (chunk) => (data += chunk));
         res.on('end', () => {
           try {
             const result = JSON.parse(data);
@@ -193,7 +200,7 @@ class EndpointBudgetChecker {
       p99_latency: `histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{route="${endpoint}"}[${timeWindow}])) by (le))`,
       error_rate: `sum(rate(http_requests_total{route="${endpoint}",code!~"2.."}[${timeWindow}])) / sum(rate(http_requests_total{route="${endpoint}"}[${timeWindow}]))`,
       request_rate: `sum(rate(http_requests_total{route="${endpoint}"}[${timeWindow}]))`,
-      avg_latency: `sum(rate(http_request_duration_seconds_sum{route="${endpoint}"}[${timeWindow}])) / sum(rate(http_request_duration_seconds_count{route="${endpoint}"}[${timeWindow}]))`
+      avg_latency: `sum(rate(http_request_duration_seconds_sum{route="${endpoint}"}[${timeWindow}])) / sum(rate(http_request_duration_seconds_count{route="${endpoint}"}[${timeWindow}]))`,
     };
 
     const metrics = {};
@@ -203,7 +210,10 @@ class EndpointBudgetChecker {
         const result = await this.prometheusQuery(query);
         metrics[metricName] = this.extractValue(result);
       } catch (error) {
-        console.warn(`⚠️  Failed to fetch ${metricName} for ${endpoint}:`, error.message);
+        console.warn(
+          `⚠️  Failed to fetch ${metricName} for ${endpoint}:`,
+          error.message,
+        );
         metrics[metricName] = null;
       }
     }
@@ -225,10 +235,15 @@ class EndpointBudgetChecker {
       console.log(`\n📍 Checking endpoint: ${endpoint}`);
 
       // Get current metrics
-      const currentMetrics = await this.getEndpointMetrics(endpoint, `${config.currentWindowMinutes}m`);
+      const currentMetrics = await this.getEndpointMetrics(
+        endpoint,
+        `${config.currentWindowMinutes}m`,
+      );
 
       // Get baseline metrics for comparison
-      const baselineTime = Math.floor((Date.now() - config.baselineHours * 60 * 60 * 1000) / 1000);
+      const baselineTime = Math.floor(
+        (Date.now() - config.baselineHours * 60 * 60 * 1000) / 1000,
+      );
       const baselineMetrics = await this.getEndpointMetrics(endpoint, '1h');
 
       // Check budget compliance
@@ -238,21 +253,34 @@ class EndpointBudgetChecker {
         current: currentMetrics,
         baseline: baselineMetrics,
         compliance: {
-          p95_latency: this.checkLatencyBudget(currentMetrics.p95_latency, budget.p95_budget_ms),
-          p99_latency: this.checkLatencyBudget(currentMetrics.p99_latency, budget.p99_budget_ms),
-          error_rate: this.checkErrorRateBudget(currentMetrics.error_rate, budget.error_rate_budget),
+          p95_latency: this.checkLatencyBudget(
+            currentMetrics.p95_latency,
+            budget.p95_budget_ms,
+          ),
+          p99_latency: this.checkLatencyBudget(
+            currentMetrics.p99_latency,
+            budget.p99_budget_ms,
+          ),
+          error_rate: this.checkErrorRateBudget(
+            currentMetrics.error_rate,
+            budget.error_rate_budget,
+          ),
         },
         status: 'unknown',
         issues: [],
       };
 
       // Determine overall status
-      const violations = Object.values(result.compliance).filter(c => c.status === 'violation');
-      const missing = Object.values(result.compliance).filter(c => c.status === 'no_data');
+      const violations = Object.values(result.compliance).filter(
+        (c) => c.status === 'violation',
+      );
+      const missing = Object.values(result.compliance).filter(
+        (c) => c.status === 'no_data',
+      );
 
       if (violations.length > 0) {
         result.status = 'failed';
-        result.issues = violations.map(v => v.message);
+        result.issues = violations.map((v) => v.message);
         this.results.summary.failed++;
       } else if (missing.length === Object.keys(result.compliance).length) {
         result.status = 'no_data';
@@ -268,14 +296,14 @@ class EndpointBudgetChecker {
 
       // Log result
       const statusIcon = {
-        'passed': '✅',
-        'failed': '❌',
-        'no_data': '❓'
+        passed: '✅',
+        failed: '❌',
+        no_data: '❓',
       }[result.status];
 
       console.log(`   ${statusIcon} Status: ${result.status}`);
       if (result.issues.length > 0) {
-        result.issues.forEach(issue => console.log(`     ⚠️  ${issue}`));
+        result.issues.forEach((issue) => console.log(`     ⚠️  ${issue}`));
       }
     }
 
@@ -359,8 +387,8 @@ class EndpointBudgetChecker {
    */
   generateReport() {
     const timestamp = new Date().toISOString();
-    const hasCriticalFailures = this.results.endpoints.some(ep =>
-      ep.budget.critical && ep.status === 'failed'
+    const hasCriticalFailures = this.results.endpoints.some(
+      (ep) => ep.budget.critical && ep.status === 'failed',
     );
 
     let report = `# 🎯 Endpoint Performance Budget Report
@@ -385,21 +413,39 @@ class EndpointBudgetChecker {
 
     for (const result of this.results.endpoints) {
       const statusIcon = {
-        'passed': '✅',
-        'failed': '❌',
-        'no_data': '❓'
+        passed: '✅',
+        failed: '❌',
+        no_data: '❓',
       }[result.status];
 
-      const p95Status = result.compliance.p95_latency.status === 'compliant' ? '✅' :
-                       result.compliance.p95_latency.status === 'violation' ? '❌' : '❓';
-      const p99Status = result.compliance.p99_latency.status === 'compliant' ? '✅' :
-                       result.compliance.p99_latency.status === 'violation' ? '❌' : '❓';
-      const errorStatus = result.compliance.error_rate.status === 'compliant' ? '✅' :
-                         result.compliance.error_rate.status === 'violation' ? '❌' : '❓';
+      const p95Status =
+        result.compliance.p95_latency.status === 'compliant'
+          ? '✅'
+          : result.compliance.p95_latency.status === 'violation'
+            ? '❌'
+            : '❓';
+      const p99Status =
+        result.compliance.p99_latency.status === 'compliant'
+          ? '✅'
+          : result.compliance.p99_latency.status === 'violation'
+            ? '❌'
+            : '❓';
+      const errorStatus =
+        result.compliance.error_rate.status === 'compliant'
+          ? '✅'
+          : result.compliance.error_rate.status === 'violation'
+            ? '❌'
+            : '❓';
 
-      const p95Value = result.current.p95_latency ? `${(result.current.p95_latency * 1000).toFixed(0)}ms` : 'N/A';
-      const p99Value = result.current.p99_latency ? `${(result.current.p99_latency * 1000).toFixed(0)}ms` : 'N/A';
-      const errorValue = result.current.error_rate ? `${(result.current.error_rate * 100).toFixed(2)}%` : 'N/A';
+      const p95Value = result.current.p95_latency
+        ? `${(result.current.p95_latency * 1000).toFixed(0)}ms`
+        : 'N/A';
+      const p99Value = result.current.p99_latency
+        ? `${(result.current.p99_latency * 1000).toFixed(0)}ms`
+        : 'N/A';
+      const errorValue = result.current.error_rate
+        ? `${(result.current.error_rate * 100).toFixed(2)}%`
+        : 'N/A';
 
       report += `\n| ${result.endpoint} | ${statusIcon} ${result.status} | ${p95Value} ${p95Status} | ${p99Value} ${p99Status} | ${errorValue} ${errorStatus} | ${result.budget.critical ? '🔥' : ''} |`;
     }
@@ -415,16 +461,18 @@ class EndpointBudgetChecker {
     }
 
     // Add violations section if any
-    const violations = this.results.endpoints.filter(ep => ep.status === 'failed');
+    const violations = this.results.endpoints.filter(
+      (ep) => ep.status === 'failed',
+    );
     if (violations.length > 0) {
       report += `\n\n## ⚠️ Budget Violations
 
 `;
-      violations.forEach(violation => {
+      violations.forEach((violation) => {
         report += `### ${violation.endpoint}
 
 `;
-        violation.issues.forEach(issue => {
+        violation.issues.forEach((issue) => {
           report += `- ❌ ${issue}\n`;
         });
 
@@ -491,8 +539,8 @@ Non-critical endpoints are exceeding budgets. Consider:
 
     // Check for existing budget report comment
     const commentsResponse = await this.githubRequest(commentsUrl);
-    const existingComment = commentsResponse.data.find(comment =>
-      comment.body.includes('Endpoint Performance Budget Report')
+    const existingComment = commentsResponse.data.find((comment) =>
+      comment.body.includes('Endpoint Performance Budget Report'),
     );
 
     const commentBody = `<!-- PERFORMANCE-BUDGET-REPORT -->
@@ -518,8 +566,8 @@ ${report}`;
       const options = {
         method,
         headers: {
-          'Authorization': `token ${config.githubToken}`,
-          'Accept': 'application/vnd.github.v3+json',
+          Authorization: `token ${config.githubToken}`,
+          Accept: 'application/vnd.github.v3+json',
           'User-Agent': 'endpoint-budget-checker/1.0',
           'Content-Type': 'application/json',
         },
@@ -527,7 +575,7 @@ ${report}`;
 
       const req = https.request(url, options, (res) => {
         let data = '';
-        res.on('data', chunk => data += chunk);
+        res.on('data', (chunk) => (data += chunk));
         res.on('end', () => {
           try {
             const jsonData = data ? JSON.parse(data) : {};
@@ -554,7 +602,9 @@ ${report}`;
   async run() {
     console.log('🎯 Starting endpoint performance budget check...');
     console.log(`📊 Prometheus: ${config.prometheusUrl}`);
-    console.log(`⏱️  Window: ${config.currentWindowMinutes}m vs ${config.baselineHours}h baseline`);
+    console.log(
+      `⏱️  Window: ${config.currentWindowMinutes}m vs ${config.baselineHours}h baseline`,
+    );
     console.log(`🚫 Fail on breach: ${config.failOnBudgetBreach}`);
 
     try {
@@ -579,8 +629,8 @@ ${report}`;
       console.log(`📄 Report saved to ${reportFile}`);
 
       // Determine exit code
-      const hasCriticalFailures = this.results.endpoints.some(ep =>
-        ep.budget.critical && ep.status === 'failed'
+      const hasCriticalFailures = this.results.endpoints.some(
+        (ep) => ep.budget.critical && ep.status === 'failed',
       );
 
       if (hasCriticalFailures && config.failOnBudgetBreach) {
@@ -593,7 +643,6 @@ ${report}`;
         console.log('✅ All performance budgets within limits');
         process.exit(0);
       }
-
     } catch (error) {
       console.error('❌ Budget check failed:', error.message);
       process.exit(1);

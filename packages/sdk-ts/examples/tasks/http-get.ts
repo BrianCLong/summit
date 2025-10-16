@@ -1,4 +1,8 @@
-import { defineTask, createRunContext, type TaskInput } from ' @summit/maestro-sdk';
+import {
+  defineTask,
+  createRunContext,
+  type TaskInput,
+} from ' @summit/maestro-sdk';
 
 export default defineTask<{ url: string }, { status: number; body: string }>({
   async validate(input: TaskInput<{ url: string }>) {
@@ -17,5 +21,7 @@ export default defineTask<{ url: string }, { status: number; body: string }>({
 if (process.env.NODE_ENV === 'development') {
   const ctx = createRunContext({});
   const task = (await import('./http-get.ts')).default;
-  task.execute(ctx, { payload: { url: 'https://example.com' } }).then((r) => console.log(r));
+  task
+    .execute(ctx, { payload: { url: 'https://example.com' } })
+    .then((r) => console.log(r));
 }

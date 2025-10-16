@@ -1,6 +1,6 @@
 /**
  * Similarity Service
- * 
+ *
  * Provides fast similarity search using pgvector HNSW index
  * for entity recommendations and graph exploration.
  */
@@ -15,22 +15,24 @@ import { z } from 'zod';
 const logger = pino({ name: 'SimilarityService' });
 
 // Input validation schemas
-const SimilarityQuerySchema = z.object({
-  investigationId: z.string().min(1),
-  entityId: z.string().optional(),
-  text: z.string().optional(),
-  topK: z.number().int().min(1).max(100).default(10),
-  threshold: z.number().min(0).max(1).default(0.7),
-  includeText: z.boolean().default(false)
-}).refine(data => data.entityId || data.text, {
-  message: "Either entityId or text must be provided"
-});
+const SimilarityQuerySchema = z
+  .object({
+    investigationId: z.string().min(1),
+    entityId: z.string().optional(),
+    text: z.string().optional(),
+    topK: z.number().int().min(1).max(100).default(10),
+    threshold: z.number().min(0).max(1).default(0.7),
+    includeText: z.boolean().default(false),
+  })
+  .refine((data) => data.entityId || data.text, {
+    message: 'Either entityId or text must be provided',
+  });
 
 const BulkSimilarityQuerySchema = z.object({
   investigationId: z.string().min(1),
   entityIds: z.array(z.string()).min(1).max(50),
   topK: z.number().int().min(1).max(100).default(5),
-  threshold: z.number().min(0).max(1).default(0.7)
+  threshold: z.number().min(0).max(1).default(0.7),
 });
 
 // Types
@@ -67,12 +69,12 @@ export class SimilarityService {
   constructor() {
     this.postgres = null; // Will be initialized lazily
     this.embeddingService = new EmbeddingService();
-    
+
     this.config = {
       defaultTopK: 10,
       defaultThreshold: 0.7,
       maxBatchSize: 50,
-      cacheExpiry: 3600 // 1 hour
+      cacheExpiry: 3600, // 1 hour
     };
   }
 
@@ -88,16 +90,16 @@ export class SimilarityService {
    */
   async findSimilar(query: SimilarityQuery): Promise<SimilarityResult> {
     const startTime = Date.now();
-    
+
     return otelService.wrapNeo4jOperation('similarity-search', async () => {
       try {
         const validated = SimilarityQuerySchema.parse(query);
-        
+
         logger.debug('Similarity search requested', {
           investigationId: validated.investigationId,
           entityId: validated.entityId,
           hasText: !!validated.text,
-          topK: validated.topK
+          topK: validated.topK,
         });
 
         let targetEmbedding: number[];
@@ -113,7 +115,7 @@ export class SimilarityService {
           // Search by text embedding
           targetEmbedding = await this.embeddingService.generateEmbedding({
             text: validated.text!,
-            model: process.env.EMBEDDING_MODEL || 'text-embedding-3-small'
+            model: process.env.EMBEDDING_MODEL || 'text-embedding-3-small',
           });
           queryType = 'text';
           queryValue = validated.text!;
@@ -126,7 +128,7 @@ export class SimilarityService {
           validated.topK,
           validated.threshold,
           validated.includeText,
-          validated.entityId // Exclude the query entity itself
+          validated.entityId, // Exclude the query entity itself
         );
 
         const executionTime = Date.now() - startTime;
@@ -136,7 +138,7 @@ export class SimilarityService {
           queryType,
           resultsCount: results.length,
           executionTime,
-          topSimilarity: results[0]?.similarity || 0
+          topSimilarity: results[0]?.similarity || 0,
         });
 
         otelService.addSpanAttributes({
@@ -144,23 +146,22 @@ export class SimilarityService {
           'similarity.query_type': queryType,
           'similarity.results_count': results.length,
           'similarity.execution_time': executionTime,
-          'similarity.top_k': validated.topK
+          'similarity.top_k': validated.topK,
         });
 
         return {
           query: {
             type: queryType,
-            value: queryValue
+            value: queryValue,
           },
           results,
           totalResults: results.length,
-          executionTime
+          executionTime,
         };
-
       } catch (error) {
         logger.error('Similarity search failed', {
           investigationId: query.investigationId,
-          error: error instanceof Error ? error.message : 'Unknown error'
+          error: error instanceof Error ? error.message : 'Unknown error',
         });
         throw error;
       }
@@ -170,68 +171,72 @@ export class SimilarityService {
   /**
    * Find similar entities for multiple entities at once
    */
-  async findSimilarBulk(query: BulkSimilarityQuery): Promise<Map<string, SimilarEntity[]>> {
-    return otelService.wrapNeo4jOperation('bulk-similarity-search', async () => {
-      try {
-        const validated = BulkSimilarityQuerySchema.parse(query);
-        
-        logger.debug('Bulk similarity search requested', {
-          investigationId: validated.investigationId,
-          entityCount: validated.entityIds.length,
-          topK: validated.topK
-        });
+  async findSimilarBulk(
+    query: BulkSimilarityQuery,
+  ): Promise<Map<string, SimilarEntity[]>> {
+    return otelService.wrapNeo4jOperation(
+      'bulk-similarity-search',
+      async () => {
+        try {
+          const validated = BulkSimilarityQuerySchema.parse(query);
 
-        const results = new Map<string, SimilarEntity[]>();
-
-        // Process entities in smaller batches to avoid overwhelming the database
-        const batchSize = Math.min(validated.entityIds.length, 10);
-        
-        for (let i = 0; i < validated.entityIds.length; i += batchSize) {
-          const batch = validated.entityIds.slice(i, i + batchSize);
-          
-          const batchPromises = batch.map(async entityId => {
-            try {
-              const similarResult = await this.findSimilar({
-                investigationId: validated.investigationId,
-                entityId,
-                topK: validated.topK,
-                threshold: validated.threshold
-              });
-              
-              return [entityId, similarResult.results] as const;
-              
-            } catch (error) {
-              logger.warn('Failed to find similar entities for entity', {
-                entityId,
-                error: error instanceof Error ? error.message : 'Unknown error'
-              });
-              return [entityId, []] as const;
-            }
+          logger.debug('Bulk similarity search requested', {
+            investigationId: validated.investigationId,
+            entityCount: validated.entityIds.length,
+            topK: validated.topK,
           });
 
-          const batchResults = await Promise.all(batchPromises);
-          
-          for (const [entityId, similarEntities] of batchResults) {
-            results.set(entityId, similarEntities);
+          const results = new Map<string, SimilarEntity[]>();
+
+          // Process entities in smaller batches to avoid overwhelming the database
+          const batchSize = Math.min(validated.entityIds.length, 10);
+
+          for (let i = 0; i < validated.entityIds.length; i += batchSize) {
+            const batch = validated.entityIds.slice(i, i + batchSize);
+
+            const batchPromises = batch.map(async (entityId) => {
+              try {
+                const similarResult = await this.findSimilar({
+                  investigationId: validated.investigationId,
+                  entityId,
+                  topK: validated.topK,
+                  threshold: validated.threshold,
+                });
+
+                return [entityId, similarResult.results] as const;
+              } catch (error) {
+                logger.warn('Failed to find similar entities for entity', {
+                  entityId,
+                  error:
+                    error instanceof Error ? error.message : 'Unknown error',
+                });
+                return [entityId, []] as const;
+              }
+            });
+
+            const batchResults = await Promise.all(batchPromises);
+
+            for (const [entityId, similarEntities] of batchResults) {
+              results.set(entityId, similarEntities);
+            }
           }
+
+          logger.info('Bulk similarity search completed', {
+            investigationId: validated.investigationId,
+            entityCount: validated.entityIds.length,
+            successfulResults: results.size,
+          });
+
+          return results;
+        } catch (error) {
+          logger.error('Bulk similarity search failed', {
+            investigationId: query.investigationId,
+            error: error instanceof Error ? error.message : 'Unknown error',
+          });
+          throw error;
         }
-
-        logger.info('Bulk similarity search completed', {
-          investigationId: validated.investigationId,
-          entityCount: validated.entityIds.length,
-          successfulResults: results.size
-        });
-
-        return results;
-
-      } catch (error) {
-        logger.error('Bulk similarity search failed', {
-          investigationId: query.investigationId,
-          error: error instanceof Error ? error.message : 'Unknown error'
-        });
-        throw error;
-      }
-    });
+      },
+    );
   }
 
   /**
@@ -239,11 +244,11 @@ export class SimilarityService {
    */
   private async getEntityEmbedding(entityId: string): Promise<number[]> {
     const client = await this.getPool().connect();
-    
+
     try {
       const result = await client.query(
         'SELECT embedding FROM entity_embeddings WHERE entity_id = $1',
-        [entityId]
+        [entityId],
       );
 
       if (result.rows.length === 0) {
@@ -253,7 +258,6 @@ export class SimilarityService {
       // pgvector returns the embedding as a string, parse it back to array
       const embeddingString = result.rows[0].embedding;
       return this.parseVectorString(embeddingString);
-
     } finally {
       client.release();
     }
@@ -268,14 +272,14 @@ export class SimilarityService {
     topK: number,
     threshold: number,
     includeText: boolean,
-    excludeEntityId?: string
+    excludeEntityId?: string,
   ): Promise<SimilarEntity[]> {
     const client = await this.getPool().connect();
-    
+
     try {
       // Convert embedding to pgvector format
       const vectorString = `[${targetEmbedding.join(',')}]`;
-      
+
       // Build query
       let query = `
         SELECT 
@@ -285,7 +289,7 @@ export class SimilarityService {
         FROM entity_embeddings ee
         WHERE ee.investigation_id = $2
       `;
-      
+
       const params: any[] = [vectorString, investigationId];
       let paramIndex = 3;
 
@@ -310,12 +314,11 @@ export class SimilarityService {
 
       const result = await client.query(query, params);
 
-      return result.rows.map(row => ({
+      return result.rows.map((row) => ({
         entityId: row.entity_id,
         similarity: parseFloat(row.similarity),
-        text: includeText ? row.text : undefined
+        text: includeText ? row.text : undefined,
       }));
-
     } finally {
       client.release();
     }
@@ -327,7 +330,7 @@ export class SimilarityService {
   private parseVectorString(vectorString: string): number[] {
     // Remove brackets and split by comma
     const cleaned = vectorString.replace(/^\[|\]$/g, '');
-    return cleaned.split(',').map(v => parseFloat(v.trim()));
+    return cleaned.split(',').map((v) => parseFloat(v.trim()));
   }
 
   /**
@@ -340,16 +343,19 @@ export class SimilarityService {
     indexHealth: 'healthy' | 'degraded' | 'missing';
   }> {
     const client = await this.getPool().connect();
-    
+
     try {
       // Get embedding count and last update
-      const statsResult = await client.query(`
+      const statsResult = await client.query(
+        `
         SELECT 
           COUNT(*) as total_embeddings,
           MAX(updated_at) as last_updated
         FROM entity_embeddings 
         WHERE investigation_id = $1
-      `, [investigationId]);
+      `,
+        [investigationId],
+      );
 
       // Check index health
       const indexResult = await client.query(`
@@ -369,9 +375,8 @@ export class SimilarityService {
         totalEmbeddings: parseInt(statsResult.rows[0].total_embeddings),
         avgSimilarityThreshold: this.config.defaultThreshold,
         lastUpdated: statsResult.rows[0].last_updated,
-        indexHealth
+        indexHealth,
       };
-
     } finally {
       client.release();
     }
@@ -382,13 +387,13 @@ export class SimilarityService {
    */
   async rebuildIndex(): Promise<void> {
     const client = await this.getPool().connect();
-    
+
     try {
       logger.info('Rebuilding HNSW index...');
 
       // Drop existing index
       await client.query('DROP INDEX IF EXISTS entity_embeddings_hnsw_idx');
-      
+
       // Recreate index
       await client.query(`
         CREATE INDEX entity_embeddings_hnsw_idx 
@@ -398,7 +403,6 @@ export class SimilarityService {
       `);
 
       logger.info('HNSW index rebuilt successfully');
-
     } finally {
       client.release();
     }

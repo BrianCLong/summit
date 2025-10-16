@@ -3,9 +3,17 @@
  * Tests for Neo4j entity modeling, constraints, indexes, and migrations
  */
 
-const { EntityModelService, entityModelService } = require('../services/EntityModelService');
+const {
+  EntityModelService,
+  entityModelService,
+} = require('../services/EntityModelService');
 const { migrationManager } = require('../db/migrations/index');
-const { connectNeo4j, connectPostgres, getNeo4jDriver, closeConnections } = require('../config/database');
+const {
+  connectNeo4j,
+  connectPostgres,
+  getNeo4jDriver,
+  closeConnections,
+} = require('../config/database');
 
 describe('Entity Model System', () => {
   beforeAll(async () => {
@@ -27,9 +35,9 @@ describe('Entity Model System', () => {
     test('should get migration status', async () => {
       const status = await migrationManager.status();
       expect(Array.isArray(status)).toBe(true);
-      
+
       // Should have at least the initial migrations
-      const migrationVersions = status.map(s => s.version);
+      const migrationVersions = status.map((s) => s.version);
       expect(migrationVersions).toContain('001_initial_entity_model');
       expect(migrationVersions).toContain('002_entity_type_specialization');
     });
@@ -58,9 +66,10 @@ describe('Entity Model System', () => {
 
     test('should enforce unique entity IDs', async () => {
       const entityId = 'test-duplicate-entity-' + Date.now();
-      
+
       // First entity should succeed
-      await session.run(`
+      await session.run(
+        `
         CREATE (e:Entity {
           id: $id,
           type: 'PERSON',
@@ -70,10 +79,14 @@ describe('Entity Model System', () => {
           createdAt: datetime(),
           updatedAt: datetime()
         })
-      `, { id: entityId });
+      `,
+        { id: entityId },
+      );
 
       // Second entity with same ID should fail
-      await expect(session.run(`
+      await expect(
+        session.run(
+          `
         CREATE (e:Entity {
           id: $id,
           type: 'PERSON', 
@@ -83,15 +96,21 @@ describe('Entity Model System', () => {
           createdAt: datetime(),
           updatedAt: datetime()
         })
-      `, { id: entityId })).rejects.toThrow();
+      `,
+          { id: entityId },
+        ),
+      ).rejects.toThrow();
 
       // Cleanup
-      await session.run('MATCH (e:Entity {id: $id}) DELETE e', { id: entityId });
+      await session.run('MATCH (e:Entity {id: $id}) DELETE e', {
+        id: entityId,
+      });
     });
 
     test('should enforce required fields', async () => {
       // Entity without required type should fail
-      await expect(session.run(`
+      await expect(
+        session.run(`
         CREATE (e:Entity {
           id: 'test-invalid-entity',
           label: 'Test Entity',
@@ -100,14 +119,17 @@ describe('Entity Model System', () => {
           createdAt: datetime(),
           updatedAt: datetime()
         })
-      `)).rejects.toThrow();
+      `),
+      ).rejects.toThrow();
     });
 
     test('should enforce email format for EMAIL entities', async () => {
       const entityId = 'test-invalid-email-' + Date.now();
-      
+
       // Invalid email format should fail
-      await expect(session.run(`
+      await expect(
+        session.run(
+          `
         CREATE (e:Entity {
           id: $id,
           type: 'EMAIL',
@@ -117,7 +139,10 @@ describe('Entity Model System', () => {
           createdAt: datetime(),
           updatedAt: datetime()
         })
-      `, { id: entityId })).rejects.toThrow();
+      `,
+          { id: entityId },
+        ),
+      ).rejects.toThrow();
     });
   });
 
@@ -134,8 +159,9 @@ describe('Entity Model System', () => {
         for (let i = 0; i < 5; i++) {
           const entityId = `test-entity-${testInvestigationId}-${i}`;
           testEntityIds.push(entityId);
-          
-          await session.run(`
+
+          await session.run(
+            `
             CREATE (e:Entity {
               id: $id,
               type: $type,
@@ -146,17 +172,20 @@ describe('Entity Model System', () => {
               createdAt: datetime(),
               updatedAt: datetime()
             })
-          `, {
-            id: entityId,
-            type: i % 2 === 0 ? 'PERSON' : 'ORGANIZATION',
-            label: `Test Entity ${i}`,
-            investigationId: testInvestigationId,
-            confidence: 0.5 + (i * 0.1)
-          });
+          `,
+            {
+              id: entityId,
+              type: i % 2 === 0 ? 'PERSON' : 'ORGANIZATION',
+              label: `Test Entity ${i}`,
+              investigationId: testInvestigationId,
+              confidence: 0.5 + i * 0.1,
+            },
+          );
         }
 
         // Create test relationships
-        await session.run(`
+        await session.run(
+          `
           MATCH (e1:Entity {investigationId: $investigationId})
           MATCH (e2:Entity {investigationId: $investigationId})
           WHERE e1.id < e2.id
@@ -169,8 +198,9 @@ describe('Entity Model System', () => {
             createdAt: datetime(),
             updatedAt: datetime()
           }]->(e2)
-        `, { investigationId: testInvestigationId });
-
+        `,
+          { investigationId: testInvestigationId },
+        );
       } finally {
         await session.close();
       }
@@ -182,19 +212,23 @@ describe('Entity Model System', () => {
       const session = driver.session();
 
       try {
-        await session.run(`
+        await session.run(
+          `
           MATCH (e:Entity {investigationId: $investigationId})
           OPTIONAL MATCH (e)-[r:RELATIONSHIP]-()
           DELETE r, e
-        `, { investigationId: testInvestigationId });
+        `,
+          { investigationId: testInvestigationId },
+        );
       } finally {
         await session.close();
       }
     });
 
     test('should get entity statistics', async () => {
-      const stats = await entityModelService.getEntityStatistics(testInvestigationId);
-      
+      const stats =
+        await entityModelService.getEntityStatistics(testInvestigationId);
+
       expect(stats).toHaveProperty('totalEntities');
       expect(stats).toHaveProperty('entityTypes');
       expect(stats).toHaveProperty('avgConfidence');
@@ -205,12 +239,15 @@ describe('Entity Model System', () => {
     });
 
     test('should find hub entities', async () => {
-      const hubs = await entityModelService.findHubEntities(testInvestigationId, 2);
-      
+      const hubs = await entityModelService.findHubEntities(
+        testInvestigationId,
+        2,
+      );
+
       expect(Array.isArray(hubs)).toBe(true);
       // With 5 entities in a connected graph, some should have multiple connections
       expect(hubs.length).toBeGreaterThan(0);
-      
+
       if (hubs.length > 0) {
         expect(hubs[0]).toHaveProperty('entityId');
         expect(hubs[0]).toHaveProperty('connectionCount');
@@ -219,25 +256,27 @@ describe('Entity Model System', () => {
     });
 
     test('should validate model integrity', async () => {
-      const validation = await entityModelService.validateModelIntegrity(testInvestigationId);
-      
+      const validation =
+        await entityModelService.validateModelIntegrity(testInvestigationId);
+
       expect(validation).toHaveProperty('isValid');
       expect(validation).toHaveProperty('issues');
       expect(validation).toHaveProperty('totalIssues');
-      
+
       // Our test data should be valid
       expect(validation.isValid).toBe(true);
       expect(validation.totalIssues).toBe(0);
     });
 
     test('should get query performance stats', async () => {
-      const perfStats = await entityModelService.getQueryPerformanceStats(testInvestigationId);
-      
+      const perfStats =
+        await entityModelService.getQueryPerformanceStats(testInvestigationId);
+
       expect(perfStats).toHaveProperty('investigationId');
       expect(perfStats).toHaveProperty('queryStats');
       expect(Array.isArray(perfStats.queryStats)).toBe(true);
-      
-      perfStats.queryStats.forEach(stat => {
+
+      perfStats.queryStats.forEach((stat) => {
         expect(stat).toHaveProperty('queryName');
         expect(stat).toHaveProperty('executionTimeMs');
         expect(stat).toHaveProperty('resultCount');

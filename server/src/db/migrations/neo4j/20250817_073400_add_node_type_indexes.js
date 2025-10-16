@@ -4,7 +4,7 @@
  */
 
 module.exports = {
-  description: "Add id indexes for Person, Location, and Event nodes",
+  description: 'Add id indexes for Person, Location, and Event nodes',
 
   /**
    * Apply migration
@@ -13,13 +13,13 @@ module.exports = {
   async up(session) {
     // Create indexes for fast node lookup by id
     await session.run(
-      "CREATE INDEX person_id IF NOT EXISTS FOR (p:Person) ON (p.id)",
+      'CREATE INDEX person_id IF NOT EXISTS FOR (p:Person) ON (p.id)',
     );
     await session.run(
-      "CREATE INDEX location_id IF NOT EXISTS FOR (l:Location) ON (l.id)",
+      'CREATE INDEX location_id IF NOT EXISTS FOR (l:Location) ON (l.id)',
     );
     await session.run(
-      "CREATE INDEX event_id IF NOT EXISTS FOR (e:Event) ON (e.id)",
+      'CREATE INDEX event_id IF NOT EXISTS FOR (e:Event) ON (e.id)',
     );
   },
 
@@ -28,8 +28,8 @@ module.exports = {
    * @param {Session} session Neo4j session
    */
   async down(session) {
-    await session.run("DROP INDEX person_id IF EXISTS");
-    await session.run("DROP INDEX location_id IF EXISTS");
-    await session.run("DROP INDEX event_id IF EXISTS");
+    await session.run('DROP INDEX person_id IF EXISTS');
+    await session.run('DROP INDEX location_id IF EXISTS');
+    await session.run('DROP INDEX event_id IF EXISTS');
   },
 };

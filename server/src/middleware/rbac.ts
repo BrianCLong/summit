@@ -11,7 +11,11 @@ const authService = new AuthService();
  * Middleware to require specific permission(s)
  */
 export function requirePermission(permission: string) {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction): Response | void => {
+  return (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction,
+  ): Response | void => {
     const user = req.user;
     if (!user) {
       return res.status(401).json({ error: 'Authentication required' });
@@ -33,7 +37,11 @@ export function requirePermission(permission: string) {
  * Middleware to require any of the specified permissions
  */
 export function requireAnyPermission(permissions: string[]) {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction): Response | void => {
+  return (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction,
+  ): Response | void => {
     const user = req.user;
     if (!user) {
       return res.status(401).json({ error: 'Authentication required' });
@@ -55,7 +63,11 @@ export function requireAnyPermission(permissions: string[]) {
  * Middleware to require all of the specified permissions
  */
 export function requireAllPermissions(permissions: string[]) {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction): Response | void => {
+  return (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction,
+  ): Response | void => {
     const user = req.user;
     if (!user) {
       return res.status(401).json({ error: 'Authentication required' });
@@ -77,13 +89,20 @@ export function requireAllPermissions(permissions: string[]) {
  * Middleware for role-based access (convenience wrapper)
  */
 export function requireRole(role: string) {
-  return (req: AuthenticatedRequest, res: Response, next: NextFunction): Response | void => {
+  return (
+    req: AuthenticatedRequest,
+    res: Response,
+    next: NextFunction,
+  ): Response | void => {
     const user = req.user;
     if (!user) {
       return res.status(401).json({ error: 'Authentication required' });
     }
 
-    if (user.role?.toUpperCase() !== role.toUpperCase() && user.role?.toUpperCase() !== 'ADMIN') {
+    if (
+      user.role?.toUpperCase() !== role.toUpperCase() &&
+      user.role?.toUpperCase() !== 'ADMIN'
+    ) {
       return res.status(403).json({
         error: 'Insufficient role',
         required: role,

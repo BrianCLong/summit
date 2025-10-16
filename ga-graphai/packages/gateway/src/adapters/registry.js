@@ -7,10 +7,10 @@ function defaultTemplate(payload, metadata) {
   const objective = payload.objective ? `Objective: ${payload.objective}` : '';
   const mode = payload.mode ? `Mode: ${payload.mode}` : 'Mode: generate';
   const context = payload.context ? `Context: ${payload.context}` : '';
-  const extras = payload.tools?.length ? `Tools: ${payload.tools.map((t) => t.name ?? 'tool').join(', ')}` : '';
-  return [header, objective, mode, context, extras]
-    .filter(Boolean)
-    .join('\n');
+  const extras = payload.tools?.length
+    ? `Tools: ${payload.tools.map((t) => t.name ?? 'tool').join(', ')}`
+    : '';
+  return [header, objective, mode, context, extras].filter(Boolean).join('\n');
 }
 
 function defaultCitations(payload) {
@@ -22,7 +22,7 @@ function defaultCitations(payload) {
       uri,
       hash,
       title: attachment.title ?? 'Attachment',
-      retrievedAt: new Date().toISOString()
+      retrievedAt: new Date().toISOString(),
     };
   });
 }
@@ -34,7 +34,10 @@ function createTemplateAdapter(modelId, behaviour = {}) {
   }
   const template = behaviour.template ?? defaultTemplate;
   const citationBuilder = behaviour.citations ?? defaultCitations;
-  const latency = behaviour.latency ?? ((tokens) => Math.max(45, Math.round(tokens * (metadata.local ? 0.6 : 1.5))));
+  const latency =
+    behaviour.latency ??
+    ((tokens) =>
+      Math.max(45, Math.round(tokens * (metadata.local ? 0.6 : 1.5))));
 
   return {
     id: metadata.id,
@@ -53,9 +56,9 @@ function createTemplateAdapter(modelId, behaviour = {}) {
         usd: cost.usd,
         latencyMs: latency(totalTokens),
         model: metadata,
-        citations: citationBuilder(payload)
+        citations: citationBuilder(payload),
       };
-    }
+    },
   };
 }
 
@@ -67,27 +70,37 @@ function mixtralTemplate(payload, metadata) {
     'Phases:',
     '- Analyze policy inputs and constraints.',
     '- Draft backlog slices with acceptance criteria.',
-    '- Prepare observability + rollback steps.'
+    '- Prepare observability + rollback steps.',
   ];
   return sections.join('\n');
 }
 
 function llamaTemplate(payload, metadata) {
-  return `${metadata.id} condensed response for ${payload.objective ?? 'request'}\n` +
-    'Lightweight reasoning path selected for rapid turnaround.';
+  return (
+    `${metadata.id} condensed response for ${payload.objective ?? 'request'}\n` +
+    'Lightweight reasoning path selected for rapid turnaround.'
+  );
 }
 
 function qwenTemplate(payload, metadata) {
   const language = payload.language ?? 'en';
-  return `${metadata.id} multilingual handler (${language})\n` +
-    'Response localized with governance hooks intact.';
+  return (
+    `${metadata.id} multilingual handler (${language})\n` +
+    'Response localized with governance hooks intact.'
+  );
 }
 
 function falconTemplate(payload, metadata) {
   const attachmentSummary = (payload.attachments ?? [])
-    .map((attachment) => `- ${attachment.type ?? 'file'} :: ${attachment.uri ?? 'resource'}`)
+    .map(
+      (attachment) =>
+        `- ${attachment.type ?? 'file'} :: ${attachment.uri ?? 'resource'}`,
+    )
     .join('\n');
-  return [`${metadata.id} multimodal synthesis`, attachmentSummary || 'No attachments provided'].join('\n');
+  return [
+    `${metadata.id} multimodal synthesis`,
+    attachmentSummary || 'No attachments provided',
+  ].join('\n');
 }
 
 function paidTemplate(payload, metadata) {
@@ -105,13 +118,21 @@ export class ModelRegistry {
 
   registerDefaults() {
     [
-      createTemplateAdapter('mixtral-8x22b-instruct', { template: mixtralTemplate }),
+      createTemplateAdapter('mixtral-8x22b-instruct', {
+        template: mixtralTemplate,
+      }),
       createTemplateAdapter('llama-3-8b-instruct', { template: llamaTemplate }),
       createTemplateAdapter('qwen-14b-instruct', { template: qwenTemplate }),
       createTemplateAdapter('gemma-2-9b-it'),
       createTemplateAdapter('falcon-2-vlm', { template: falconTemplate }),
-      createTemplateAdapter('gpt-4o-mini', { template: paidTemplate, citations: defaultCitations }),
-      createTemplateAdapter('grok-2', { template: paidTemplate, citations: defaultCitations })
+      createTemplateAdapter('gpt-4o-mini', {
+        template: paidTemplate,
+        citations: defaultCitations,
+      }),
+      createTemplateAdapter('grok-2', {
+        template: paidTemplate,
+        citations: defaultCitations,
+      }),
     ].forEach((adapter) => this.register(adapter));
   }
 
@@ -124,7 +145,9 @@ export class ModelRegistry {
   }
 
   list() {
-    return Array.from(this.adapters.values()).map((adapter) => adapter.metadata);
+    return Array.from(this.adapters.values()).map(
+      (adapter) => adapter.metadata,
+    );
   }
 
   async generate(modelId, payload) {
@@ -135,4 +158,3 @@ export class ModelRegistry {
     return adapter.generate(payload);
   }
 }
-

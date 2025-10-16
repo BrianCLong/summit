@@ -7,15 +7,15 @@ tasks:
     name: Collect Incident Data
     uses: connector:elastic
     with:
-      sources: ["endpoint-logs", "network-logs", "file-changes"]
-      incident_window: "24h"
+      sources: ['endpoint-logs', 'network-logs', 'file-changes']
+      incident_window: '24h'
 
   - id: malware_classification
     name: Classify Malware Family
     uses: analyze:risk
     needs: [incident_data_collection]
     with:
-      classification_model: "ransomware-family-v2"
+      classification_model: 'ransomware-family-v2'
       hash_analysis: true
 
   - id: impact_assessment
@@ -31,22 +31,22 @@ tasks:
     uses: ml:forecast
     needs: [impact_assessment]
     with:
-      recovery_scenarios: ["backup_restore", "decryption", "rebuild"]
+      recovery_scenarios: ['backup_restore', 'decryption', 'rebuild']
 
   - id: triage_explanation
     name: Explain Triage Decisions
     uses: xai:explanations
     needs: [recovery_planning]
     with:
-      model: "incident-response-v1"
+      model: 'incident-response-v1'
 
   - id: response_playbook
     name: Generate Response Playbook
     uses: export:bundle
     needs: [triage_explanation]
     with:
-      format: "incident-response"
-      urgency: "critical"
+      format: 'incident-response'
+      urgency: 'critical'
 
 kpis:
   - triage_speed

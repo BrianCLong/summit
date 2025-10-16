@@ -20,16 +20,24 @@ const createClock = (...ticks: number[]): (() => number) => {
 describe('EventBooster', () => {
   it('registers patterns and prevents duplicates', () => {
     const booster = new EventBooster();
-    const pattern = createAmplifyPattern({ name: 'amplify', intensities: [1.5] });
+    const pattern = createAmplifyPattern({
+      name: 'amplify',
+      intensities: [1.5],
+    });
     booster.registerPattern(pattern);
     expect(booster.listPatterns()).toEqual([
       { name: 'amplify', description: expect.stringContaining('Amplifies') },
     ]);
-    expect(() => booster.registerPattern(pattern)).toThrow('already registered');
+    expect(() => booster.registerPattern(pattern)).toThrow(
+      'already registered',
+    );
   });
 
   it('boosts events using an amplify pattern', () => {
-    const booster = new EventBooster({ now: createClock(0, 4), performanceBudgetMs: 5 });
+    const booster = new EventBooster({
+      now: createClock(0, 4),
+      performanceBudgetMs: 5,
+    });
     const pattern = createAmplifyPattern({ name: 'amp', intensities: [2, 3] });
     booster.registerPattern(pattern);
     const events: EventRecord[] = [
@@ -52,7 +60,10 @@ describe('EventBooster', () => {
       now: createClock(0, 10),
       performanceBudgetMs: 5,
     });
-    const pattern = createTemporalShiftPattern({ name: 'shift', offsetsMs: [0] });
+    const pattern = createTemporalShiftPattern({
+      name: 'shift',
+      offsetsMs: [0],
+    });
     booster.registerPattern(pattern);
     const events = generateUniformEvents(1, { signal: 5, random: () => 0.5 });
     const result = booster.boost(events, 'shift');
@@ -71,7 +82,10 @@ describe('EventBooster', () => {
       now: createClock(0, 1, 0, 1, 0, 1),
       maxHistory: 2,
     });
-    const pattern = createTemporalShiftPattern({ name: 'shift', offsetsMs: [0] });
+    const pattern = createTemporalShiftPattern({
+      name: 'shift',
+      offsetsMs: [0],
+    });
     booster.registerPattern(pattern);
     const events = generateUniformEvents(1, { random: () => 0.5 });
     booster.boost(events, 'shift');
@@ -89,7 +103,9 @@ describe('EventBooster', () => {
     const booster = new EventBooster();
     const pattern = createAmplifyPattern({ name: 'amp', intensities: [1.1] });
     booster.registerPattern(pattern);
-    const generator = jest.fn(() => generateUniformEvents(1, { signal: 2, random: () => 0.5 }));
+    const generator = jest.fn(() =>
+      generateUniformEvents(1, { signal: 2, random: () => 0.5 }),
+    );
     const result: BoostRunResult = booster.boostFromGenerator(generator, 'amp');
     expect(generator).toHaveBeenCalled();
     expect(result.outputCount).toBe(1);

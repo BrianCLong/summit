@@ -17,7 +17,7 @@ spec:
           for: 5m
           labels: { severity: page }
           annotations:
-            summary: "API fast error budget burn"
+            summary: 'API fast error budget burn'
         - alert: APISLOSlowBurn
           expr: |
             (
@@ -28,4 +28,4 @@ spec:
           for: 2h
           labels: { severity: ticket }
           annotations:
-            summary: "API slow error budget burn"
+            summary: 'API slow error budget burn'

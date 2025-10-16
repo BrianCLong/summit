@@ -9,6 +9,9 @@ export class MerkleLog {
     return this.entries.length;
   }
   root() {
-    return crypto.createHash('sha256').update(this.entries.join('')).digest('hex');
+    return crypto
+      .createHash('sha256')
+      .update(this.entries.join(''))
+      .digest('hex');
   }
 }

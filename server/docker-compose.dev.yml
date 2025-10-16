@@ -6,8 +6,8 @@ services:
     image: neo4j:5.15-community
     container_name: intelgraph-neo4j-dev
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - '7474:7474'
+      - '7687:7687'
     environment:
       - NEO4J_AUTH=neo4j/devpassword
       - NEO4J_PLUGINS=["apoc"]
@@ -21,7 +21,7 @@ services:
       - neo4j_logs_dev:/logs
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "cypher-shell -u neo4j -p devpassword 'RETURN 1'"]
+      test: ['CMD-SHELL', "cypher-shell -u neo4j -p devpassword 'RETURN 1'"]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -34,7 +34,7 @@ services:
     image: postgres:15-alpine
     container_name: intelgraph-postgres-dev
     ports:
-      - "5432:5432"
+      - '5432:5432'
     environment:
       - POSTGRES_DB=intelgraph_dev
       - POSTGRES_USER=intelgraph
@@ -44,7 +44,7 @@ services:
       - ./infrastructure/postgres/init:/docker-entrypoint-initdb.d
     restart: unless-stopped
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U intelgraph -d intelgraph_dev"]
+      test: ['CMD-SHELL', 'pg_isready -U intelgraph -d intelgraph_dev']
       interval: 30s
       timeout: 10s
       retries: 5
@@ -56,13 +56,13 @@ services:
     image: redis:7-alpine
     container_name: intelgraph-redis-dev
     ports:
-      - "6379:6379"
+      - '6379:6379'
     command: redis-server --requirepass devpassword
     volumes:
       - redis_data_dev:/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "redis-cli", "-a", "devpassword", "ping"]
+      test: ['CMD', 'redis-cli', '-a', 'devpassword', 'ping']
       interval: 30s
       timeout: 10s
       retries: 5

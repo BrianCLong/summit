@@ -2,7 +2,7 @@
 
 Summit should enable resilient, covert, and high-throughput OSINT/graph analytics, team orchestration, and autonomous operations in hostile, fragmented, or degraded environments.
 
-***
+---
 
 ### Feature Checklist for Summit (Civil War Use Case)
 
@@ -36,7 +36,7 @@ Summit should enable resilient, covert, and high-throughput OSINT/graph analytic
   - "Automate SLA, authorization, and workflow rules for safe, compliant deployment in zero-trust/contested environments"
   - "Enforce process, credential, and operation separation at all layers for resilience against supply chain and inside threats"
 
-***
+---
 
 ### Prompt Examples for Specific Features
 
@@ -48,21 +48,22 @@ Summit should enable resilient, covert, and high-throughput OSINT/graph analytic
 - "Enable resilient, permissioned code collaboration and CI/CD for distributed teams; harden all workflows against interception or compromise."
 - "Audit all workflow results and auto-escalations; export visual dashboards and log digests to secure, off-network storage."
 
-***
+---
 
 ### Use Case Deep Dive
 
-| Use Case                | Purpose                                      | Tech/Prompt Summary            |
-|------------------------ |----------------------------------------------|-------------------------------|
-| Intelligence Collection | Map conflict actors, threat movements        | "Ingest channels, correlate signals, visualize graph with timelines" |
-| Incident Response       | Automate alerting/mitigation of breaches     | "Runbook triggers, multi-step auto response, agent deployment" |
-| Secure Comms/Collab     | Resilient team ops in split networks         | "GitOps, CI/CD with secret scanning, encrypted sync" |
-| Influence Monitoring    | Track info ops, narrative manipulation       | "Cross-platform analysis, bot/fake detection, actor clustering" |
-| Tactical Orchestration  | Field team, asset, evac, supply chain ops    | "Automate requests, resource allocation, live status checks" |
+| Use Case                | Purpose                                   | Tech/Prompt Summary                                                  |
+| ----------------------- | ----------------------------------------- | -------------------------------------------------------------------- |
+| Intelligence Collection | Map conflict actors, threat movements     | "Ingest channels, correlate signals, visualize graph with timelines" |
+| Incident Response       | Automate alerting/mitigation of breaches  | "Runbook triggers, multi-step auto response, agent deployment"       |
+| Secure Comms/Collab     | Resilient team ops in split networks      | "GitOps, CI/CD with secret scanning, encrypted sync"                 |
+| Influence Monitoring    | Track info ops, narrative manipulation    | "Cross-platform analysis, bot/fake detection, actor clustering"      |
+| Tactical Orchestration  | Field team, asset, evac, supply chain ops | "Automate requests, resource allocation, live status checks"         |
 
-***
+---
 
 ### State Assumptions:
+
 - Communications, power, and cloud may be degraded or intermittently available—drive for edge, resilient, multi-platform deployment.
 - Security, privacy, attribution, and auditability of every action matter; conflict context privileges zero-trust and anomaly detection.
 - Needs include high agility for team scaling, parallelization for mass events, and code isolation for adversarial scenarios.

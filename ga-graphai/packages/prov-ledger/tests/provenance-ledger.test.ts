@@ -10,7 +10,7 @@ describe('ProvenanceLedger', () => {
       actor: 'ci-bot',
       action: 'promote',
       resource: 'service-api',
-      payload: { version: '1.0.0' }
+      payload: { version: '1.0.0' },
     });
 
     const second = ledger.append({
@@ -19,7 +19,7 @@ describe('ProvenanceLedger', () => {
       actor: 'ci-bot',
       action: 'promote',
       resource: 'service-api',
-      payload: { version: '1.0.1' }
+      payload: { version: '1.0.1' },
     });
 
     expect(first.hash).toBeTruthy();
@@ -35,7 +35,7 @@ describe('ProvenanceLedger', () => {
       actor: 'compliance',
       action: 'approve',
       resource: 'llm',
-      payload: { policy: 'safe' }
+      payload: { policy: 'safe' },
     });
     ledger.append({
       id: '2',
@@ -43,7 +43,7 @@ describe('ProvenanceLedger', () => {
       actor: 'ci-bot',
       action: 'promote',
       resource: 'service-api',
-      payload: { version: '1.0.0' }
+      payload: { version: '1.0.0' },
     });
 
     const filtered = ledger.list({ category: 'deployment', limit: 1 });
@@ -59,7 +59,7 @@ describe('ProvenanceLedger', () => {
       actor: 'eval-service',
       action: 'score',
       resource: 'rag-output',
-      payload: { score: 0.95 }
+      payload: { score: 0.95 },
     });
 
     const bundle = ledger.exportEvidence();

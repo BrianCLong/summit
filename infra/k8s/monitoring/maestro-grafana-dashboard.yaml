@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/name: maestro-conductor
     app.kubernetes.io/component: dashboard
     app.kubernetes.io/part-of: intelgraph
-    grafana_dashboard: "1"
+    grafana_dashboard: '1'
 data:
   maestro-conductor.json: |
     {

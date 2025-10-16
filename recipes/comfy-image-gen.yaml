@@ -5,7 +5,7 @@ inputs:
 steps:
   - id: run
     type: comfy_graph
-    params: { graph: "comfy/graphs/image_gen.json" }
+    params: { graph: 'comfy/graphs/image_gen.json' }
   - id: persist
     type: asset_persist
     params: { store: s3 }

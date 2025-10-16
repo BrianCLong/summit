@@ -1,7 +1,7 @@
 import { createHash, createHmac } from 'node:crypto';
-import type { 
-  EvidenceBundle, 
-  LedgerEntry, 
+import type {
+  EvidenceBundle,
+  LedgerEntry,
   LedgerFactInput,
   BudgetResult,
   CursorEvent,
@@ -14,7 +14,7 @@ import type {
   WorkflowRunRecord,
   PolicyMetadata,
   PolicyTag,
-  ProvenanceRecord as CoopProvenanceRecord
+  ProvenanceRecord as CoopProvenanceRecord,
 } from 'common-types';
 import {
   buildLedgerUri,
@@ -55,8 +55,8 @@ import {
   planGuardedInvocationForBinding,
   buildCommandPaletteManifest,
   buildKeyboardShortcutMap,
-  generateGraphQLSchemaSDL
-} from "../../common-types/src/linearx";
+  generateGraphQLSchemaSDL,
+} from '../../common-types/src/linearx';
 
 import type {
   AssignmentPlan,
@@ -82,7 +82,7 @@ import {
   GraphQLSchema,
   GraphQLString,
   Kind,
-  graphql
+  graphql,
 } from 'graphql';
 import type {
   PolicyEvaluationRequest,
@@ -91,7 +91,7 @@ import type {
   WorkOrderResult,
   WorkOrderSubmission,
   WorkcellAgentDefinition,
-  WorkcellToolDefinition
+  WorkcellToolDefinition,
 } from '../../common-types/src/index.js';
 import { PolicyEngine, buildDefaultPolicyEngine } from 'policy';
 import { ProvenanceLedger } from 'prov-ledger';
@@ -125,9 +125,9 @@ function parseJsonLiteral(ast: ValueNode): unknown {
 const GraphQLJSON = new GraphQLScalarType({
   name: 'JSON',
   description: 'Arbitrary JSON value',
-  serialize: value => value,
-  parseValue: value => value,
-  parseLiteral: parseJsonLiteral
+  serialize: (value) => value,
+  parseValue: (value) => value,
+  parseLiteral: parseJsonLiteral,
 });
 
 interface GatewayContext {
@@ -140,16 +140,16 @@ const PolicyEffectEnum = new GraphQLEnumType({
   name: 'PolicyEffect',
   values: {
     ALLOW: { value: 'allow' },
-    DENY: { value: 'deny' }
-  }
+    DENY: { value: 'deny' },
+  },
 });
 
 const PolicyObligationType = new GraphQLObjectType({
   name: 'PolicyObligation',
   fields: {
     type: { type: new GraphQLNonNull(GraphQLString) },
-    configuration: { type: GraphQLJSON }
-  }
+    configuration: { type: GraphQLJSON },
+  },
 });
 
 const PolicyTraceType = new GraphQLObjectType({
@@ -157,8 +157,12 @@ const PolicyTraceType = new GraphQLObjectType({
   fields: {
     ruleId: { type: new GraphQLNonNull(GraphQLString) },
     matched: { type: new GraphQLNonNull(GraphQLBoolean) },
-    reasons: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLString))) }
-  }
+    reasons: {
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(GraphQLString)),
+      ),
+    },
+  },
 });
 
 const PolicyEvaluationType = new GraphQLObjectType({
@@ -167,14 +171,26 @@ const PolicyEvaluationType = new GraphQLObjectType({
     allowed: { type: new GraphQLNonNull(GraphQLBoolean) },
     effect: { type: new GraphQLNonNull(PolicyEffectEnum) },
     matchedRules: {
-      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLString)))
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(GraphQLString)),
+      ),
     },
-    reasons: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLString))) },
+    reasons: {
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(GraphQLString)),
+      ),
+    },
     obligations: {
-      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(PolicyObligationType)))
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(PolicyObligationType)),
+      ),
     },
-    trace: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(PolicyTraceType))) }
-  }
+    trace: {
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(PolicyTraceType)),
+      ),
+    },
+  },
 });
 
 const WorkTaskStatusEnum = new GraphQLEnumType({
@@ -182,8 +198,8 @@ const WorkTaskStatusEnum = new GraphQLEnumType({
   values: {
     SUCCESS: { value: 'success' },
     REJECTED: { value: 'rejected' },
-    FAILED: { value: 'failed' }
-  }
+    FAILED: { value: 'failed' },
+  },
 });
 
 const WorkOrderStatusEnum = new GraphQLEnumType({
@@ -191,8 +207,8 @@ const WorkOrderStatusEnum = new GraphQLEnumType({
   values: {
     COMPLETED: { value: 'completed' },
     PARTIAL: { value: 'partial' },
-    REJECTED: { value: 'rejected' }
-  }
+    REJECTED: { value: 'rejected' },
+  },
 });
 
 const LedgerEntryType = new GraphQLObjectType({
@@ -206,8 +222,8 @@ const LedgerEntryType = new GraphQLObjectType({
     payload: { type: new GraphQLNonNull(GraphQLJSON) },
     timestamp: { type: new GraphQLNonNull(GraphQLString) },
     hash: { type: new GraphQLNonNull(GraphQLString) },
-    previousHash: { type: GraphQLString }
-  }
+    previousHash: { type: GraphQLString },
+  },
 });
 
 const PolicyRuleType = new GraphQLObjectType({
@@ -216,10 +232,18 @@ const PolicyRuleType = new GraphQLObjectType({
     id: { type: new GraphQLNonNull(GraphQLString) },
     description: { type: new GraphQLNonNull(GraphQLString) },
     effect: { type: new GraphQLNonNull(PolicyEffectEnum) },
-    actions: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLString))) },
-    resources: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLString))) },
-    tags: { type: new GraphQLList(new GraphQLNonNull(GraphQLString)) }
-  }
+    actions: {
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(GraphQLString)),
+      ),
+    },
+    resources: {
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(GraphQLString)),
+      ),
+    },
+    tags: { type: new GraphQLList(new GraphQLNonNull(GraphQLString)) },
+  },
 });
 
 const WorkTaskResultType = new GraphQLObjectType({
@@ -227,9 +251,13 @@ const WorkTaskResultType = new GraphQLObjectType({
   fields: {
     taskId: { type: new GraphQLNonNull(GraphQLString) },
     status: { type: new GraphQLNonNull(WorkTaskStatusEnum) },
-    logs: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLString))) },
-    output: { type: new GraphQLNonNull(GraphQLJSON) }
-  }
+    logs: {
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(GraphQLString)),
+      ),
+    },
+    output: { type: new GraphQLNonNull(GraphQLJSON) },
+  },
 });
 
 const WorkOrderResultType = new GraphQLObjectType({
@@ -242,12 +270,22 @@ const WorkOrderResultType = new GraphQLObjectType({
     status: { type: new GraphQLNonNull(WorkOrderStatusEnum) },
     startedAt: { type: new GraphQLNonNull(GraphQLString) },
     finishedAt: { type: new GraphQLNonNull(GraphQLString) },
-    tasks: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(WorkTaskResultType))) },
-    obligations: {
-      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(PolicyObligationType)))
+    tasks: {
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(WorkTaskResultType)),
+      ),
     },
-    reasons: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLString))) }
-  }
+    obligations: {
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(PolicyObligationType)),
+      ),
+    },
+    reasons: {
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(GraphQLString)),
+      ),
+    },
+  },
 });
 
 const LedgerEntryInput = new GraphQLInputObjectType({
@@ -259,8 +297,8 @@ const LedgerEntryInput = new GraphQLInputObjectType({
     action: { type: new GraphQLNonNull(GraphQLString) },
     resource: { type: new GraphQLNonNull(GraphQLString) },
     payload: { type: new GraphQLNonNull(GraphQLJSON) },
-    timestamp: { type: GraphQLString }
-  }
+    timestamp: { type: GraphQLString },
+  },
 });
 
 const PolicyEvaluationInput = new GraphQLInputObjectType({
@@ -270,10 +308,14 @@ const PolicyEvaluationInput = new GraphQLInputObjectType({
     resource: { type: new GraphQLNonNull(GraphQLString) },
     tenantId: { type: new GraphQLNonNull(GraphQLString) },
     userId: { type: new GraphQLNonNull(GraphQLString) },
-    roles: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLString))) },
+    roles: {
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(GraphQLString)),
+      ),
+    },
     region: { type: GraphQLString },
-    attributes: { type: GraphQLJSON }
-  }
+    attributes: { type: GraphQLJSON },
+  },
 });
 
 const WorkTaskInputType = new GraphQLInputObjectType({
@@ -284,8 +326,8 @@ const WorkTaskInputType = new GraphQLInputObjectType({
     action: { type: new GraphQLNonNull(GraphQLString) },
     resource: { type: new GraphQLNonNull(GraphQLString) },
     payload: { type: new GraphQLNonNull(GraphQLJSON) },
-    requiredAuthority: { type: GraphQLInt }
-  }
+    requiredAuthority: { type: GraphQLInt },
+  },
 });
 
 const WorkOrderInputType = new GraphQLInputObjectType({
@@ -296,41 +338,56 @@ const WorkOrderInputType = new GraphQLInputObjectType({
     tenantId: { type: new GraphQLNonNull(GraphQLString) },
     userId: { type: new GraphQLNonNull(GraphQLString) },
     agentName: { type: new GraphQLNonNull(GraphQLString) },
-    roles: { type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(GraphQLString))) },
+    roles: {
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(GraphQLString)),
+      ),
+    },
     region: { type: GraphQLString },
     attributes: { type: GraphQLJSON },
     metadata: { type: GraphQLJSON },
     tasks: {
-      type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(WorkTaskInputType)))
-    }
-  }
+      type: new GraphQLNonNull(
+        new GraphQLList(new GraphQLNonNull(WorkTaskInputType)),
+      ),
+    },
+  },
 });
 
 function buildSchema(): GraphQLSchema {
   const queryType = new GraphQLObjectType({
     name: 'Query',
-      fields: {
-        ledgerEntries: {
-          type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(LedgerEntryType))),
-          args: {
-            category: { type: GraphQLString },
-            limit: { type: GraphQLInt }
-          },
-          resolve: (_source, args: { category?: string; limit?: number }, context: GatewayContext) =>
-            context.ledger.list(args)
+    fields: {
+      ledgerEntries: {
+        type: new GraphQLNonNull(
+          new GraphQLList(new GraphQLNonNull(LedgerEntryType)),
+        ),
+        args: {
+          category: { type: GraphQLString },
+          limit: { type: GraphQLInt },
         },
-        policyRules: {
-          type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(PolicyRuleType))),
-          resolve: (_source, _args, context: GatewayContext): PolicyRule[] =>
-            context.policy.getRules()
-        },
-        workOrders: {
-          type: new GraphQLNonNull(new GraphQLList(new GraphQLNonNull(WorkOrderResultType))),
-          resolve: (_source, _args, context: GatewayContext): WorkOrderResult[] =>
-            context.workcell.listOrders()
-        }
-      }
-    });
+        resolve: (
+          _source,
+          args: { category?: string; limit?: number },
+          context: GatewayContext,
+        ) => context.ledger.list(args),
+      },
+      policyRules: {
+        type: new GraphQLNonNull(
+          new GraphQLList(new GraphQLNonNull(PolicyRuleType)),
+        ),
+        resolve: (_source, _args, context: GatewayContext): PolicyRule[] =>
+          context.policy.getRules(),
+      },
+      workOrders: {
+        type: new GraphQLNonNull(
+          new GraphQLList(new GraphQLNonNull(WorkOrderResultType)),
+        ),
+        resolve: (_source, _args, context: GatewayContext): WorkOrderResult[] =>
+          context.workcell.listOrders(),
+      },
+    },
+  });
 
   const mutationType = new GraphQLObjectType({
     name: 'Mutation',
@@ -338,19 +395,19 @@ function buildSchema(): GraphQLSchema {
       appendLedgerEntry: {
         type: new GraphQLNonNull(LedgerEntryType),
         args: {
-          input: { type: new GraphQLNonNull(LedgerEntryInput) }
+          input: { type: new GraphQLNonNull(LedgerEntryInput) },
         },
         resolve: (
           _source,
           args: { input: LedgerFactInput },
-          context: GatewayContext
-        ): LedgerEntry => context.ledger.append(args.input)
+          context: GatewayContext,
+        ): LedgerEntry => context.ledger.append(args.input),
       },
-        simulatePolicy: {
-          type: new GraphQLNonNull(PolicyEvaluationType),
-          args: {
-            input: { type: new GraphQLNonNull(PolicyEvaluationInput) }
-          },
+      simulatePolicy: {
+        type: new GraphQLNonNull(PolicyEvaluationType),
+        args: {
+          input: { type: new GraphQLNonNull(PolicyEvaluationInput) },
+        },
         resolve: (
           _source,
           args: {
@@ -364,7 +421,7 @@ function buildSchema(): GraphQLSchema {
               attributes?: Record<string, string | number | boolean>;
             };
           },
-          context: GatewayContext
+          context: GatewayContext,
         ): PolicyEvaluationResult => {
           const request: PolicyEvaluationRequest = {
             action: args.input.action,
@@ -374,66 +431,67 @@ function buildSchema(): GraphQLSchema {
               userId: args.input.userId,
               roles: args.input.roles,
               region: args.input.region,
-              attributes: args.input.attributes
-            }
-            };
-            return context.policy.evaluate(request);
-          }
-        },
-        submitWorkOrder: {
-          type: new GraphQLNonNull(WorkOrderResultType),
-          args: {
-            input: { type: new GraphQLNonNull(WorkOrderInputType) }
-          },
-          resolve: async (
-            _source,
-            args: {
-              input: {
-                orderId: string;
-                submittedBy: string;
-                tenantId: string;
-                userId: string;
-                agentName: string;
-                roles: string[];
-                region?: string;
-                attributes?: Record<string, string | number | boolean>;
-                metadata?: Record<string, unknown>;
-                tasks: Array<{
-                  taskId: string;
-                  tool: string;
-                  action: string;
-                  resource: string;
-                  payload: Record<string, unknown>;
-                  requiredAuthority?: number;
-                }>;
-              };
+              attributes: args.input.attributes,
             },
-            context: GatewayContext
-          ): Promise<WorkOrderResult> => {
-            const submission: WorkOrderSubmission = {
-              orderId: args.input.orderId,
-              submittedBy: args.input.submittedBy,
-              tenantId: args.input.tenantId,
-              userId: args.input.userId,
-              agentName: args.input.agentName,
-              roles: args.input.roles,
-              region: args.input.region,
-              attributes: args.input.attributes as WorkOrderSubmission['attributes'],
-              metadata: args.input.metadata as WorkOrderSubmission['metadata'],
-              tasks: args.input.tasks.map(task => ({
-                taskId: task.taskId,
-                tool: task.tool,
-                action: task.action,
-                resource: task.resource,
-                payload: task.payload as Record<string, unknown>,
-                requiredAuthority: task.requiredAuthority ?? undefined
-              }))
+          };
+          return context.policy.evaluate(request);
+        },
+      },
+      submitWorkOrder: {
+        type: new GraphQLNonNull(WorkOrderResultType),
+        args: {
+          input: { type: new GraphQLNonNull(WorkOrderInputType) },
+        },
+        resolve: async (
+          _source,
+          args: {
+            input: {
+              orderId: string;
+              submittedBy: string;
+              tenantId: string;
+              userId: string;
+              agentName: string;
+              roles: string[];
+              region?: string;
+              attributes?: Record<string, string | number | boolean>;
+              metadata?: Record<string, unknown>;
+              tasks: Array<{
+                taskId: string;
+                tool: string;
+                action: string;
+                resource: string;
+                payload: Record<string, unknown>;
+                requiredAuthority?: number;
+              }>;
             };
-            return context.workcell.submitOrder(submission);
-          }
-        }
-      }
-    });
+          },
+          context: GatewayContext,
+        ): Promise<WorkOrderResult> => {
+          const submission: WorkOrderSubmission = {
+            orderId: args.input.orderId,
+            submittedBy: args.input.submittedBy,
+            tenantId: args.input.tenantId,
+            userId: args.input.userId,
+            agentName: args.input.agentName,
+            roles: args.input.roles,
+            region: args.input.region,
+            attributes: args.input
+              .attributes as WorkOrderSubmission['attributes'],
+            metadata: args.input.metadata as WorkOrderSubmission['metadata'],
+            tasks: args.input.tasks.map((task) => ({
+              taskId: task.taskId,
+              tool: task.tool,
+              action: task.action,
+              resource: task.resource,
+              payload: task.payload as Record<string, unknown>,
+              requiredAuthority: task.requiredAuthority ?? undefined,
+            })),
+          };
+          return context.workcell.submitOrder(submission);
+        },
+      },
+    },
+  });
 
   return new GraphQLSchema({ query: queryType, mutation: mutationType });
 }
@@ -456,7 +514,9 @@ export class GatewayRuntime {
   private readonly workcell: WorkcellRuntime;
 
   constructor(options: GatewayOptions = {}) {
-    this.policy = options.rules ? new PolicyEngine(options.rules) : buildDefaultPolicyEngine();
+    this.policy = options.rules
+      ? new PolicyEngine(options.rules)
+      : buildDefaultPolicyEngine();
     this.ledger = new ProvenanceLedger();
     if (options.seedEntries) {
       for (const entry of options.seedEntries) {
@@ -467,7 +527,7 @@ export class GatewayRuntime {
       policy: this.policy,
       ledger: this.ledger,
       tools: options.workcell?.tools,
-      agents: options.workcell?.agents
+      agents: options.workcell?.agents,
     });
     if (!options.workcell?.tools || options.workcell.tools.length === 0) {
       this.workcell.registerTool({
@@ -475,8 +535,8 @@ export class GatewayRuntime {
         minimumAuthority: 1,
         handler: (task, context) => ({
           message: `analysis completed for ${context.orderId}`,
-          echo: task.payload
-        })
+          echo: task.payload,
+        }),
       });
     }
     if (!options.workcell?.agents || options.workcell.agents.length === 0) {
@@ -484,7 +544,7 @@ export class GatewayRuntime {
         name: 'baseline-agent',
         authority: 2,
         allowedTools: ['analysis'],
-        roles: ['developer']
+        roles: ['developer'],
       });
     }
     this.schema = buildSchema();
@@ -498,8 +558,8 @@ export class GatewayRuntime {
       contextValue: {
         policy: this.policy,
         ledger: this.ledger,
-        workcell: this.workcell
-      }
+        workcell: this.workcell,
+      },
     });
   }
 
@@ -562,8 +622,13 @@ const DEFAULT_AUTOMATION_PLAN: ManualControlPlan = {
   pauseBeforeCapture: false,
 };
 
-function capabilityScore(ticket: TicketDescriptor, worker: WorkerDescriptor): number {
-  const required = new Set(ticket.requiredCapabilities.map((cap) => cap.toLowerCase()));
+function capabilityScore(
+  ticket: TicketDescriptor,
+  worker: WorkerDescriptor,
+): number {
+  const required = new Set(
+    ticket.requiredCapabilities.map((cap) => cap.toLowerCase()),
+  );
   return worker.capabilities.reduce((score, capability) => {
     if (required.has(capability.skill.toLowerCase())) {
       return score + capability.weight;
@@ -602,15 +667,22 @@ export class LinearXOrchestrator {
     return [...this.spec.fallbackChain];
   }
 
-  selectProvider(tag: string, options: ProviderResolutionOptions = {}): ProviderSelectionResult {
+  selectProvider(
+    tag: string,
+    options: ProviderResolutionOptions = {},
+  ): ProviderSelectionResult {
     const provider = resolveProviderForTag(tag, options, this.spec);
-    const route = this.spec.providerRouting.find((candidate) => candidate.tags.includes(tag));
-    const usedFallback = route ? provider !== route.primary : provider !== this.spec.fallbackChain[0];
+    const route = this.spec.providerRouting.find((candidate) =>
+      candidate.tags.includes(tag),
+    );
+    const usedFallback = route
+      ? provider !== route.primary
+      : provider !== this.spec.fallbackChain[0];
     return {
       tag,
       provider,
       usedFallback,
-      route
+      route,
     };
   }
 
@@ -623,7 +695,7 @@ export class LinearXOrchestrator {
       ...selection,
       chain,
       qualityGates: this.getQualityGates(),
-      reason: selection.usedFallback ? "fallback" : "primary"
+      reason: selection.usedFallback ? 'fallback' : 'primary',
     };
   }
 
@@ -668,15 +740,21 @@ export class LinearXOrchestrator {
   }
 
   getCommandPaletteIntent(id: string): LinearXCommandPaletteIntent | undefined {
-    return listCommandPaletteIntents(id) as LinearXCommandPaletteIntent | undefined;
+    return listCommandPaletteIntents(id) as
+      | LinearXCommandPaletteIntent
+      | undefined;
   }
 
   getCommandPaletteCategories(): LinearXCommandPaletteCategory[] {
     return listCommandPaletteCategories() as LinearXCommandPaletteCategory[];
   }
 
-  getCommandPaletteCategory(id: string): LinearXCommandPaletteCategory | undefined {
-    return listCommandPaletteCategories(id) as LinearXCommandPaletteCategory | undefined;
+  getCommandPaletteCategory(
+    id: string,
+  ): LinearXCommandPaletteCategory | undefined {
+    return listCommandPaletteCategories(id) as
+      | LinearXCommandPaletteCategory
+      | undefined;
   }
 
   getCommandPaletteManifest(): LinearXCommandPaletteManifest {
@@ -688,7 +766,9 @@ export class LinearXOrchestrator {
   }
 
   getBoardEnhancement(feature: string): LinearXBoardEnhancement | undefined {
-    return listBoardEnhancements(feature) as LinearXBoardEnhancement | undefined;
+    return listBoardEnhancements(feature) as
+      | LinearXBoardEnhancement
+      | undefined;
   }
 
   getGraphQLBindings(): LinearXGraphQLBinding[] {
@@ -717,19 +797,23 @@ export class LinearXOrchestrator {
       return undefined;
     }
     const relatedShortcuts = binding.keyboardShortcutAction
-      ? this.getKeyboardShortcuts().filter((shortcut) => shortcut.action === binding.keyboardShortcutAction)
+      ? this.getKeyboardShortcuts().filter(
+          (shortcut) => shortcut.action === binding.keyboardShortcutAction,
+        )
       : [];
     const relatedIntents = binding.commandPaletteIntentId
-      ? this.getCommandPaletteIntents().filter((intent) => intent.id === binding.commandPaletteIntentId)
+      ? this.getCommandPaletteIntents().filter(
+          (intent) => intent.id === binding.commandPaletteIntentId,
+        )
       : [];
-    const resolverSignature = `${binding.operation === "Mutation" ? "extend type Mutation" : "extend type Query"} { ${binding.field}(input: ${binding.inputType}) : ${binding.returnType} }`;
+    const resolverSignature = `${binding.operation === 'Mutation' ? 'extend type Mutation' : 'extend type Query'} { ${binding.field}(input: ${binding.inputType}) : ${binding.returnType} }`;
     return {
       binding,
       invocation,
       resolverSignature,
       guardrails: [...binding.guardrails],
       relatedShortcuts,
-      relatedIntents
+      relatedIntents,
     };
   }
 
@@ -746,7 +830,7 @@ export class LinearXOrchestrator {
       boardEnhancements: this.getBoardEnhancements(),
       commandPaletteIntents: this.getCommandPaletteIntents(),
       commandPaletteCategories: this.getCommandPaletteCategories(),
-      commandPaletteManifest: this.getCommandPaletteManifest()
+      commandPaletteManifest: this.getCommandPaletteManifest(),
     };
   }
 
@@ -762,7 +846,7 @@ export class LinearXOrchestrator {
       commandPaletteIntents: this.getCommandPaletteIntents(),
       commandPaletteCategories: this.getCommandPaletteCategories(),
       boardEnhancements: this.getBoardEnhancements(),
-      graphqlBindings: this.getGraphQLBindings()
+      graphqlBindings: this.getGraphQLBindings(),
     };
   }
 }
@@ -822,19 +906,19 @@ export class WorkloadAllocator {
 
     let selection = eligibleWorkers[0];
     if (overrideWorkerId) {
-      const overridden = eligibleWorkers.find((entry) => entry.worker.id === overrideWorkerId);
+      const overridden = eligibleWorkers.find(
+        (entry) => entry.worker.id === overrideWorkerId,
+      );
       if (overridden) {
         selection = overridden;
       }
     } else {
-      selection = eligibleWorkers
-        .slice()
-        .sort((a, b) => {
-          if (b.score === a.score) {
-            return b.remainingCapacity - a.remainingCapacity;
-          }
-          return b.score - a.score;
-        })[0];
+      selection = eligibleWorkers.slice().sort((a, b) => {
+        if (b.score === a.score) {
+          return b.remainingCapacity - a.remainingCapacity;
+        }
+        return b.score - a.score;
+      })[0];
     }
 
     selection.worker.currentLoad += 1;
@@ -850,7 +934,12 @@ export class WorkloadAllocator {
   private estimateEffort(ticket: TicketDescriptor): number {
     const base = 30;
     const priorityAdjustment = Math.max(0, ticket.priority - 1) * 5;
-    const manualMultiplier = ticket.automationMode === 'manual' ? 2 : ticket.automationMode === 'guided' ? 1.3 : 1;
+    const manualMultiplier =
+      ticket.automationMode === 'manual'
+        ? 2
+        : ticket.automationMode === 'guided'
+          ? 1.3
+          : 1;
     return Math.ceil((base + priorityAdjustment) * manualMultiplier);
   }
 }
@@ -858,7 +947,9 @@ export class WorkloadAllocator {
 export class AutomationCommandBuilder {
   constructor(private readonly allocator: WorkloadAllocator) {}
 
-  public createCommands(tickets: readonly TicketDescriptor[]): AutomationCommand[] {
+  public createCommands(
+    tickets: readonly TicketDescriptor[],
+  ): AutomationCommand[] {
     const plan = this.allocator.plan(tickets);
     return plan.parcels.map((parcel) => this.createCommand(parcel));
   }
@@ -878,7 +969,9 @@ export class AutomationCommandBuilder {
     const tuning = parcel.ticket.llmCommand.tuning;
     const instruction = tuning.systemInstruction.trim();
     const styleGuide = tuning.styleGuide.map((line) => `- ${line}`).join('\n');
-    const safeguards = tuning.safetyClauses.map((line) => `- ${line}`).join('\n');
+    const safeguards = tuning.safetyClauses
+      .map((line) => `- ${line}`)
+      .join('\n');
     const contextEntries = Object.entries(parcel.ticket.context)
       .map(([key, value]) => `${key}: ${value}`)
       .join('\n');
@@ -897,7 +990,9 @@ export class AutomationCommandBuilder {
 
 export const orchestrator = new LinearXOrchestrator();
 
-export function createLinearXOrchestrator(spec: LinearXOrchestratorSpec = LINEARX_SPEC) {
+export function createLinearXOrchestrator(
+  spec: LinearXOrchestratorSpec = LINEARX_SPEC,
+) {
   return new LinearXOrchestrator(spec);
 }
 
@@ -913,8 +1008,8 @@ export { ZeroSpendOrchestrator } from './orchestrator.js';
 // CURSOR GOVERNANCE GATEWAY - Added from PR 1299
 // ============================================================================
 
-import { createServer, type IncomingMessage } from "node:http";
-import { URL } from "node:url";
+import { createServer, type IncomingMessage } from 'node:http';
+import { URL } from 'node:url';
 import {
   type BudgetConfig,
   type BudgetState,
@@ -925,8 +1020,8 @@ import {
   type RateLimitConfig,
   type RateLimitState,
   normalizeCursorEvent,
-} from "common-types";
-import { PolicyEvaluator } from "policy";
+} from 'common-types';
+import { PolicyEvaluator } from 'policy';
 
 export interface GatewayLogger {
   info?(message: string, meta?: Record<string, unknown>): void;
@@ -949,18 +1044,18 @@ export class CursorGatewayError extends Error {
   constructor(
     message: string,
     readonly status: number,
-    readonly ruleId?: string
+    readonly ruleId?: string,
   ) {
     super(message);
   }
 }
 
 const DEFAULT_SCOPE_MAPPING: Record<CursorEventName, string[]> = {
-  "cursor.session.start": ["read_repo"],
-  "cursor.session.stop": ["read_repo"],
-  "cursor.prompt": ["call_llm"],
-  "cursor.applyDiff": ["generate_code"],
-  "cursor.commit": ["generate_code", "run_tool"],
+  'cursor.session.start': ['read_repo'],
+  'cursor.session.stop': ['read_repo'],
+  'cursor.prompt': ['call_llm'],
+  'cursor.applyDiff': ['generate_code'],
+  'cursor.commit': ['generate_code', 'run_tool'],
 };
 
 export class CursorGateway {
@@ -978,34 +1073,38 @@ export class CursorGateway {
     this.validateTenant(event, auth);
     this.validateTokenExpiry(auth, now);
     if (this.options.requireDeviceBinding && !auth.deviceId) {
-      throw new CursorGatewayError("device-binding-required", 401, "device-binding");
+      throw new CursorGatewayError(
+        'device-binding-required',
+        401,
+        'device-binding',
+      );
     }
     if (this.options.requireMtls && !auth.mTLSFingerprint) {
-      throw new CursorGatewayError("mtls-required", 401, "mtls");
+      throw new CursorGatewayError('mtls-required', 401, 'mtls');
     }
 
     const requiredScopes = this.resolveScopes(event.event);
     const missingScopes = requiredScopes.filter(
-      (scope) => !auth.scopes.includes(scope)
+      (scope) => !auth.scopes.includes(scope),
     );
     if (missingScopes.length > 0) {
       throw new CursorGatewayError(
-        `missing-scopes:${missingScopes.join(",")}`,
+        `missing-scopes:${missingScopes.join(',')}`,
         403,
-        "scopes"
+        'scopes',
       );
     }
 
     const rateResult = this.options.rateLimiter.check(event, now.getTime());
     if (!rateResult.allowed) {
-      const decision = this.buildDenyDecision(now, "deny:rate-limit", event, [
-        "rate-limit",
+      const decision = this.buildDenyDecision(now, 'deny:rate-limit', event, [
+        'rate-limit',
       ]);
       const budget = this.options.budgetManager.consume(
         auth.tenantId,
         event.usage,
         now,
-        { commit: false }
+        { commit: false },
       );
       const record = await this.options.ledger.append(event, {
         decision,
@@ -1013,7 +1112,7 @@ export class CursorGateway {
         rateLimit: rateResult,
         receivedAt: now,
       });
-      this.options.logger?.warn?.("cursor.rate-limit", {
+      this.options.logger?.warn?.('cursor.rate-limit', {
         tenantId: event.tenantId,
         requestId: event.provenance.requestId,
       });
@@ -1023,14 +1122,14 @@ export class CursorGateway {
     const budget = this.options.budgetManager.consume(
       auth.tenantId,
       event.usage,
-      now
+      now,
     );
     if (!budget.allowed) {
       const decision = this.buildDenyDecision(
         now,
-        budget.reason ?? "deny:budget-exceeded",
+        budget.reason ?? 'deny:budget-exceeded',
         event,
-        ["budget"]
+        ['budget'],
       );
       const record = await this.options.ledger.append(event, {
         decision,
@@ -1038,7 +1137,7 @@ export class CursorGateway {
         rateLimit: rateResult,
         receivedAt: now,
       });
-      this.options.logger?.warn?.("cursor.budget-deny", {
+      this.options.logger?.warn?.('cursor.budget-deny', {
         tenantId: event.tenantId,
         requestId: event.provenance.requestId,
         reason: budget.reason,
@@ -1048,7 +1147,7 @@ export class CursorGateway {
 
     const policyDecision = this.options.policyEvaluator.evaluate(
       event,
-      this.buildPolicyContext(event, auth)
+      this.buildPolicyContext(event, auth),
     );
 
     const record = await this.options.ledger.append(event, {
@@ -1058,14 +1157,14 @@ export class CursorGateway {
       receivedAt: now,
     });
 
-    if (policyDecision.decision === "deny") {
-      this.options.logger?.warn?.("cursor.policy-deny", {
+    if (policyDecision.decision === 'deny') {
+      this.options.logger?.warn?.('cursor.policy-deny', {
         tenantId: event.tenantId,
         requestId: event.provenance.requestId,
         explanations: policyDecision.explanations,
       });
     } else {
-      this.options.logger?.info?.("cursor.event.accepted", {
+      this.options.logger?.info?.('cursor.event.accepted', {
         tenantId: event.tenantId,
         requestId: event.provenance.requestId,
         checksum: record.checksum,
@@ -1085,17 +1184,17 @@ export class CursorGateway {
 
   private validateTenant(event: CursorEvent, auth: GatewayAuthContext): void {
     if (event.tenantId !== auth.tenantId) {
-      throw new CursorGatewayError("tenant-mismatch", 403, "tenant");
+      throw new CursorGatewayError('tenant-mismatch', 403, 'tenant');
     }
   }
 
   private validateTokenExpiry(auth: GatewayAuthContext, now: Date): void {
     const expires = Date.parse(auth.tokenExpiresAt);
     if (Number.isNaN(expires)) {
-      throw new CursorGatewayError("token-expiry-invalid", 401, "token");
+      throw new CursorGatewayError('token-expiry-invalid', 401, 'token');
     }
     if (expires <= now.getTime()) {
-      throw new CursorGatewayError("token-expired", 401, "token");
+      throw new CursorGatewayError('token-expired', 401, 'token');
     }
   }
 
@@ -1114,10 +1213,10 @@ export class CursorGateway {
     now: Date,
     explanation: string,
     event: CursorEvent,
-    ruleIds: string[]
+    ruleIds: string[],
   ): PolicyDecision {
     return {
-      decision: "deny",
+      decision: 'deny',
       explanations: [explanation],
       ruleIds,
       timestamp: now.now().toISOString(),
@@ -1150,9 +1249,9 @@ export class BudgetManager {
 
   consume(
     tenantId: string,
-    usage: CursorEvent["usage"],
+    usage: CursorEvent['usage'],
     at: Date = this.now(),
-    opts: { commit?: boolean } = {}
+    opts: { commit?: boolean } = {},
   ): BudgetResult {
     const config = this.budgets[tenantId] ?? this.defaultBudget;
     const commit = opts.commit ?? true;
@@ -1200,7 +1299,9 @@ export class BudgetManager {
 
     return {
       allowed,
-      reason: allowed ? undefined : this.buildBudgetReason(tokensAllowed, currencyAllowed),
+      reason: allowed
+        ? undefined
+        : this.buildBudgetReason(tokensAllowed, currencyAllowed),
       remainingTokens: Math.max(config.tokens - nextTokens, 0),
       remainingCurrency:
         config.currency !== undefined
@@ -1212,23 +1313,26 @@ export class BudgetManager {
     };
   }
 
-  private buildBudgetReason(tokensAllowed: boolean, currencyAllowed: boolean): string {
+  private buildBudgetReason(
+    tokensAllowed: boolean,
+    currencyAllowed: boolean,
+  ): string {
     if (!tokensAllowed && !currencyAllowed) {
-      return "deny:budget-tokens-currency";
+      return 'deny:budget-tokens-currency';
     }
     if (!tokensAllowed) {
-      return "deny:budget-tokens";
+      return 'deny:budget-tokens';
     }
     if (!currencyAllowed) {
-      return "deny:budget-currency";
+      return 'deny:budget-currency';
     }
-    return "deny:budget";
+    return 'deny:budget';
   }
 
   private resolveState(
     tenantId: string,
     config: BudgetConfig,
-    at: Date
+    at: Date,
   ): BudgetState {
     const existing = this.states.get(tenantId);
     if (!existing) {
@@ -1288,7 +1392,7 @@ export class RateLimiter {
       this.states.set(key, state);
       return {
         allowed: false,
-        reason: "rate-limit-exceeded",
+        reason: 'rate-limit-exceeded',
         state: { ...state },
         config: this.config,
       };
@@ -1312,10 +1416,10 @@ export interface GatewayHttpOptions {
 
 export function createGatewayHttpServer(options: GatewayHttpOptions) {
   const server = createServer(async (req, res) => {
-    const url = new URL(req.url ?? "", "http://localhost");
-    if (req.method !== "POST" || url.pathname !== "/v1/cursor/events") {
-      res.writeHead(404, { "content-type": "application/json" });
-      res.end(JSON.stringify({ error: "not-found" }));
+    const url = new URL(req.url ?? '', 'http://localhost');
+    if (req.method !== 'POST' || url.pathname !== '/v1/cursor/events') {
+      res.writeHead(404, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ error: 'not-found' }));
       return;
     }
 
@@ -1325,28 +1429,28 @@ export function createGatewayHttpServer(options: GatewayHttpOptions) {
       const event = normalizePayloadToEvent(eventPayload);
       const auth = buildAuthContext(payload.auth, req, event);
       const result = await options.gateway.handle({ event, auth });
-      const status = result.decision.decision === "allow" ? 202 : 403;
-      res.writeHead(status, { "content-type": "application/json" });
+      const status = result.decision.decision === 'allow' ? 202 : 403;
+      res.writeHead(status, { 'content-type': 'application/json' });
       res.end(
         JSON.stringify({
           decision: result.decision,
           budget: result.budget,
           rateLimit: result.rateLimit,
           checksum: result.record.checksum,
-        })
+        }),
       );
     } catch (error) {
       if (error instanceof CursorGatewayError) {
-        res.writeHead(error.status, { "content-type": "application/json" });
+        res.writeHead(error.status, { 'content-type': 'application/json' });
         res.end(JSON.stringify({ error: error.message, ruleId: error.ruleId }));
         return;
       }
 
-      options.logger?.error?.("cursor.gateway.error", {
+      options.logger?.error?.('cursor.gateway.error', {
         message: (error as Error).message,
       });
-      res.writeHead(500, { "content-type": "application/json" });
-      res.end(JSON.stringify({ error: "internal-error" }));
+      res.writeHead(500, { 'content-type': 'application/json' });
+      res.end(JSON.stringify({ error: 'internal-error' }));
     }
   });
 
@@ -1361,7 +1465,7 @@ async function readJson(req: IncomingMessage): Promise<any> {
   if (chunks.length === 0) {
     return {};
   }
-  const raw = Buffer.concat(chunks).toString("utf8");
+  const raw = Buffer.concat(chunks).toString('utf8');
   if (!raw) {
     return {};
   }
@@ -1375,50 +1479,57 @@ function normalizePayloadToEvent(payload: unknown): CursorEvent {
   if (isCursorEventPayload(payload)) {
     return normalizeCursorEvent(payload);
   }
-  throw new CursorGatewayError("invalid-event-payload", 400, "payload");
+  throw new CursorGatewayError('invalid-event-payload', 400, 'payload');
 }
 
 function isCursorEvent(value: unknown): value is CursorEvent {
   return (
-    typeof value === "object" &&
+    typeof value === 'object' &&
     value !== null &&
-    "tenantId" in value &&
-    "event" in value &&
-    "provenance" in value
+    'tenantId' in value &&
+    'event' in value &&
+    'provenance' in value
   );
 }
 
 function isCursorEventPayload(value: unknown): value is CursorEventPayload {
   return (
-    typeof value === "object" &&
+    typeof value === 'object' &&
     value !== null &&
-    "tenant_id" in value &&
-    "provenance" in value
+    'tenant_id' in value &&
+    'provenance' in value
   );
 }
 
 function buildAuthContext(
   payload: any,
   req: IncomingMessage,
-  event: CursorEvent
+  event: CursorEvent,
 ): GatewayAuthContext {
-  const scopes = parseScopes(payload?.scopes ?? req.headers["x-mc-scopes"]);
+  const scopes = parseScopes(payload?.scopes ?? req.headers['x-mc-scopes']);
   const actor = payload?.actor ?? {
-    id: payload?.actorId ?? req.headers["x-actor-id"] ?? event.actor.id,
-    email: payload?.actorEmail ?? req.headers["x-actor-email"] ?? event.actor.email,
+    id: payload?.actorId ?? req.headers['x-actor-id'] ?? event.actor.id,
+    email:
+      payload?.actorEmail ?? req.headers['x-actor-email'] ?? event.actor.email,
     displayName:
-      payload?.actorDisplayName ?? req.headers["x-actor-display-name"] ?? event.actor.displayName,
+      payload?.actorDisplayName ??
+      req.headers['x-actor-display-name'] ??
+      event.actor.displayName,
   };
 
   return {
     tenantId: payload?.tenantId ?? event.tenantId,
     actor,
-    deviceId: payload?.deviceId ?? (req.headers["x-device-id"] as string | undefined),
+    deviceId:
+      payload?.deviceId ?? (req.headers['x-device-id'] as string | undefined),
     scopes,
     tokenExpiresAt:
-      payload?.tokenExpiresAt ?? (req.headers["x-token-expiry"] as string) ?? new Date(Date.now() + 5 * 60 * 1000).toISOString(),
+      payload?.tokenExpiresAt ??
+      (req.headers['x-token-expiry'] as string) ??
+      new Date(Date.now() + 5 * 60 * 1000).toISOString(),
     mTLSFingerprint:
-      payload?.mTLSFingerprint ?? (req.headers["x-mtls-fingerprint"] as string | undefined),
+      payload?.mTLSFingerprint ??
+      (req.headers['x-mtls-fingerprint'] as string | undefined),
     purpose: payload?.purpose,
     storyRef: payload?.storyRef ?? event.storyRef,
     attributes: payload?.attributes,
@@ -1427,7 +1538,8 @@ function buildAuthContext(
     scan: payload?.scan,
     model: payload?.model ?? event.model,
     requestIp: req.socket.remoteAddress ?? undefined,
-    requestId: (req.headers["x-request-id"] as string | undefined) ?? payload?.requestId,
+    requestId:
+      (req.headers['x-request-id'] as string | undefined) ?? payload?.requestId,
   };
 }
 
@@ -1435,9 +1547,9 @@ function parseScopes(input: unknown): string[] {
   if (Array.isArray(input)) {
     return input.map(String);
   }
-  if (typeof input === "string") {
+  if (typeof input === 'string') {
     return input
-      .split(",")
+      .split(',')
       .map((scope) => scope.trim())
       .filter((scope) => scope.length > 0);
   }
@@ -1449,7 +1561,10 @@ function parseScopes(input: unknown): string[] {
 // ============================================================================
 
 export { TicketNormalizer, NormalizationOptions } from './normalization.js';
-export { AcceptanceCriteriaSynthesizer, AcceptanceCriteriaVerifier } from './acceptanceCriteria.js';
+export {
+  AcceptanceCriteriaSynthesizer,
+  AcceptanceCriteriaVerifier,
+} from './acceptanceCriteria.js';
 export { PolicyTagger } from './policyTagger.js';
 export {
   CapabilityRegistry,
@@ -1466,7 +1581,10 @@ export {
   GeneratorFn,
   CriticFn,
 } from './promptOps.js';
-export { CooperationOrchestrator, ExecutionResult } from './cooperation/orchestrator.js';
+export {
+  CooperationOrchestrator,
+  ExecutionResult,
+} from './cooperation/orchestrator.js';
 export { SemanticBraidCoordinator } from './cooperation/semanticBraid.js';
 export { CounterfactualShadowingCoordinator } from './cooperation/counterfactualShadowing.js';
 export { CausalChallengeGamesCoordinator } from './cooperation/causalChallengeGames.js';

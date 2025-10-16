@@ -1,25 +1,30 @@
-import React, { useEffect } from 'react'
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
-import { Provider } from 'react-redux'
-import { ApolloProvider } from '@apollo/client'
-import { ThemeProvider, CssBaseline } from '@mui/material'
+import React, { useEffect } from 'react';
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from 'react-router-dom';
+import { Provider } from 'react-redux';
+import { ApolloProvider } from '@apollo/client';
+import { ThemeProvider, CssBaseline } from '@mui/material';
 
-import { store } from './store'
-import { apolloClient } from './services/apollo'
-import { theme } from './styles/theme'
+import { store } from './store';
+import { apolloClient } from './services/apollo';
+import { theme } from './styles/theme';
 
-import Layout from './components/common/Layout'
-import LoginPage from './components/auth/LoginPage'
-import Dashboard from './components/dashboard/Dashboard'
-import InvestigationPage from './components/investigation/InvestigationPage'
-import GraphExplorer from './components/graph/GraphExplorer'
-import ActivitiesPage from './components/activities/ActivitiesPage'
-import NotFound from './components/common/NotFound'
+import Layout from './components/common/Layout';
+import LoginPage from './components/auth/LoginPage';
+import Dashboard from './components/dashboard/Dashboard';
+import InvestigationPage from './components/investigation/InvestigationPage';
+import GraphExplorer from './components/graph/GraphExplorer';
+import ActivitiesPage from './components/activities/ActivitiesPage';
+import NotFound from './components/common/NotFound';
 
 function App() {
   useEffect(() => {
-    console.log('IntelGraph Platform Starting...')
-  }, [])
+    console.log('IntelGraph Platform Starting...');
+  }, []);
 
   return (
     <Provider store={store}>
@@ -43,7 +48,7 @@ function App() {
         </ThemeProvider>
       </ApolloProvider>
     </Provider>
-  )
+  );
 }
 
-export default App
+export default App;

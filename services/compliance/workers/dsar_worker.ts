@@ -20,7 +20,11 @@ const dsarWorker = new Worker(
       // 1. Simulate data fetching
       await new Promise((res) => setTimeout(res, 2000));
       const simulatedData = {
-        profile: { id: subject_id, name: 'User Name', email: 'user@example.com' },
+        profile: {
+          id: subject_id,
+          name: 'User Name',
+          email: 'user@example.com',
+        },
         activity: [{ action: 'login', ts: new Date().toISOString() }],
       };
 
@@ -46,12 +50,18 @@ const dsarWorker = new Worker(
       return { success: true, exportPath };
     } catch (error) {
       console.error(`Failed to process DSAR request ${id}:`, error);
-      await pg.query("UPDATE dsar_requests SET status = 'failed' WHERE id = $1", [id]);
+      await pg.query(
+        "UPDATE dsar_requests SET status = 'failed' WHERE id = $1",
+        [id],
+      );
       throw error;
     }
   },
   {
-    connection: { host: process.env.REDIS_HOST, port: parseInt(process.env.REDIS_PORT || '6379') },
+    connection: {
+      host: process.env.REDIS_HOST,
+      port: parseInt(process.env.REDIS_PORT || '6379'),
+    },
   },
 );
 

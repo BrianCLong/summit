@@ -77,7 +77,8 @@ export class ExplorationGuardrails {
 
     // Check emergency stop conditions
     if (state.isEmergencyStop) {
-      const coolingPeriodElapsed = Date.now() - state.lastAdjustment > config.coolingPeriodMs;
+      const coolingPeriodElapsed =
+        Date.now() - state.lastAdjustment > config.coolingPeriodMs;
 
       if (!coolingPeriodElapsed) {
         return {
@@ -95,10 +96,17 @@ export class ExplorationGuardrails {
     }
 
     // Get recent regret measurements
-    const regretMeasurement = await this.getRegretMeasurement(tenantId, expertType);
+    const regretMeasurement = await this.getRegretMeasurement(
+      tenantId,
+      expertType,
+    );
 
     // Check regret-based guardrails
-    const regretCheck = await this.checkRegretGuardrails(config, state, regretMeasurement);
+    const regretCheck = await this.checkRegretGuardrails(
+      config,
+      state,
+      regretMeasurement,
+    );
     if (regretCheck.emergencyStop) {
       state.isEmergencyStop = true;
       state.lastAdjustment = Date.now();
@@ -123,7 +131,10 @@ export class ExplorationGuardrails {
     // Check error rate guardrails
     const errorRate = await this.getErrorRate(tenantId, expertType);
     if (errorRate > config.errorRateThreshold) {
-      const reduction = Math.min(0.5, errorRate / config.errorRateThreshold - 1);
+      const reduction = Math.min(
+        0.5,
+        errorRate / config.errorRateThreshold - 1,
+      );
       state.currentRate = Math.max(0.005, state.currentRate * (1 - reduction));
       state.lastAdjustment = Date.now();
 
@@ -141,11 +152,15 @@ export class ExplorationGuardrails {
     // Adaptive rate adjustment based on exploration success
     if (state.totalExplorationCount >= 100) {
       // Enough data to adapt
-      const successRate = state.successfulExplorations / state.totalExplorationCount;
+      const successRate =
+        state.successfulExplorations / state.totalExplorationCount;
 
       if (successRate > 0.7 && state.currentRate < config.maxExplorationRate) {
         // Successful explorations - can increase rate
-        state.currentRate = Math.min(config.maxExplorationRate, state.currentRate * 1.1);
+        state.currentRate = Math.min(
+          config.maxExplorationRate,
+          state.currentRate * 1.1,
+        );
       } else if (successRate < 0.3) {
         // Poor exploration performance - decrease rate
         state.currentRate = Math.max(0.005, state.currentRate * 0.9);
@@ -156,15 +171,23 @@ export class ExplorationGuardrails {
     const shouldExplore = Math.random() < state.currentRate;
 
     // Record metrics
-    prometheusConductorMetrics.recordOperationalMetric('exploration_rate', state.currentRate, {
-      tenant_id: tenantId,
-      expert_type: expertType,
-    });
+    prometheusConductorMetrics.recordOperationalMetric(
+      'exploration_rate',
+      state.currentRate,
+      {
+        tenant_id: tenantId,
+        expert_type: expertType,
+      },
+    );
 
-    prometheusConductorMetrics.recordOperationalEvent('exploration_decision', shouldExplore, {
-      tenant_id: tenantId,
-      expert_type: expertType,
-    });
+    prometheusConductorMetrics.recordOperationalEvent(
+      'exploration_decision',
+      shouldExplore,
+      {
+        tenant_id: tenantId,
+        expert_type: expertType,
+      },
+    );
 
     if (regretMeasurement.instantRegret > 0) {
       prometheusConductorMetrics.recordOperationalMetric(
@@ -220,7 +243,11 @@ export class ExplorationGuardrails {
     this.configs.set(configKey, config);
 
     // Persist to Redis
-    await this.redis.hSet('exploration_configs', configKey, JSON.stringify(config));
+    await this.redis.hSet(
+      'exploration_configs',
+      configKey,
+      JSON.stringify(config),
+    );
 
     logger.info('Exploration configured', {
       tenantId: config.tenantId,
@@ -239,17 +266,24 @@ export class ExplorationGuardrails {
           const config: ExplorationConfig = JSON.parse(configStr);
           this.configs.set(key, config);
         } catch (error) {
-          logger.warn('Failed to parse exploration config', { key, error: error.message });
+          logger.warn('Failed to parse exploration config', {
+            key,
+            error: error.message,
+          });
         }
       }
 
       logger.info(`Loaded ${this.configs.size} exploration configurations`);
     } catch (error) {
-      logger.error('Failed to load exploration configurations', { error: error.message });
+      logger.error('Failed to load exploration configurations', {
+        error: error.message,
+      });
     }
   }
 
-  private async getExplorationState(configKey: string): Promise<ExplorationState> {
+  private async getExplorationState(
+    configKey: string,
+  ): Promise<ExplorationState> {
     let state = this.states.get(configKey);
 
     if (!state) {
@@ -283,9 +317,16 @@ export class ExplorationGuardrails {
     return state;
   }
 
-  private async saveExplorationState(configKey: string, state: ExplorationState): Promise<void> {
+  private async saveExplorationState(
+    configKey: string,
+    state: ExplorationState,
+  ): Promise<void> {
     this.states.set(configKey, state);
-    await this.redis.hSet('exploration_states', configKey, JSON.stringify(state));
+    await this.redis.hSet(
+      'exploration_states',
+      configKey,
+      JSON.stringify(state),
+    );
   }
 
   private async getRegretMeasurement(
@@ -311,10 +352,13 @@ export class ExplorationGuardrails {
       };
     }
 
-    const values = measurements.filter((_, i) => i % 2 === 0).map((v) => parseFloat(v as string));
+    const values = measurements
+      .filter((_, i) => i % 2 === 0)
+      .map((v) => parseFloat(v as string));
     const instantRegret = values[values.length - 1] || 0;
     const cumulativeRegret = values.reduce((sum, val) => sum + val, 0);
-    const windowRegret = values.length > 0 ? cumulativeRegret / values.length : 0;
+    const windowRegret =
+      values.length > 0 ? cumulativeRegret / values.length : 0;
 
     return {
       instantRegret,
@@ -359,15 +403,26 @@ export class ExplorationGuardrails {
     }
   }
 
-  private async getErrorRate(tenantId: string, expertType: string): Promise<number> {
+  private async getErrorRate(
+    tenantId: string,
+    expertType: string,
+  ): Promise<number> {
     const key = `errors:${tenantId}:${expertType}`;
 
     // Get error count in last 5 minutes
-    const errorCount = await this.redis.zCount(key, Date.now() - 300000, Date.now());
+    const errorCount = await this.redis.zCount(
+      key,
+      Date.now() - 300000,
+      Date.now(),
+    );
 
     // Get total request count
     const totalKey = `requests:${tenantId}:${expertType}`;
-    const totalCount = await this.redis.zCount(totalKey, Date.now() - 300000, Date.now());
+    const totalCount = await this.redis.zCount(
+      totalKey,
+      Date.now() - 300000,
+      Date.now(),
+    );
 
     return totalCount > 0 ? errorCount / totalCount : 0;
   }

@@ -23,6 +23,9 @@ test('rejects overly deep query', async () => {
   const hash = createHash('sha256').update(query).digest('hex');
   const res = await request(app)
     .post('/graphql')
-    .send({ query, extensions: { persistedQuery: { version: 1, sha256Hash: hash } } });
+    .send({
+      query,
+      extensions: { persistedQuery: { version: 1, sha256Hash: hash } },
+    });
   expect(res.status).toBe(400);
 });

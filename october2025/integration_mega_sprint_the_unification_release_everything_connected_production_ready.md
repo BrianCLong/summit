@@ -9,6 +9,7 @@
 ## 0) Inventory & Dependency Map (Everything)
 
 ### 0.1 Services & Roles
+
 - **Core**: `gateway-graphql`, `lac-policy-compiler (LAC)`, `prov-ledger`, `analytics-service (GDS)`, `pattern-miner`, `ai-nl2cypher`, `case-service`, `report-service`, `runbook-engine`, `budget-guard`, `archive-tier (MinIO)`, `offline-sync (CRDT)`
 - **Advanced**: `xai-service`, `federation-service`, `wallet-service`
 - **Ops/Sec**: `hardening` (fuzz/sbom/a11y/soak), `dsar-service`, `retention-jobs`
@@ -16,6 +17,7 @@
 - **Infra**: Compose (dev), Helm/Kustomize (k8s), CI pipelines, Make targets
 
 ### 0.2 Unified Dependency Graph (simplified)
+
 ```
  webapp
    │
@@ -41,6 +43,7 @@
 ---
 
 ## 1) Unification Deliverables (This Sprint)
+
 1. **Single Config Standard** (`/config/unified.yaml`) → generates env for dev/k8s; includes secrets refs (Vault) and feature flags.
 2. **Auth Everywhere**: Keycloak OIDC + RBAC/ABAC propagation; `subject` context enforced gateway→services; step‑up for EXPORT.
 3. **Schema of Truth**: canonical types, GraphQL schema finalized; service contracts pinned; JSON Schemas published.
@@ -103,22 +106,39 @@ env:
 ---
 
 ## 3) Auth/RBAC/ABAC Wiring (Gateway & Services)
+
 - Gateway middleware validates Keycloak JWT, extracts `sub`, `roles`, and `attrs` (tenant, clearance), attaches to `ctx.subject`.
 - All mutations call LAC first; LAC calls OPA; deny returns **human reason**.
 - Step‑up: operations tagged `EXPORT` require WebAuthn/ACR level enforced by Keycloak; propagated claim in token.
 
 **Gateway snippet (final):**
+
 ```ts
 // services/gateway-graphql/src/auth.ts
-import jwksRsa from 'jwks-rsa'; import jwt from 'jsonwebtoken';
-export async function auth(req:any){
-  const token = (req.headers.authorization||'').replace('Bearer ','');
-  if(!token) throw new Error('unauthenticated');
-  const kid:any = (jwt.decode(token,{complete:true}) as any)?.header?.kid;
-  const client = jwksRsa({ jwksUri: process.env.KEYCLOAK_JWKS||`${process.env.KEYCLOAK_ISSUER}/protocol/openid-connect/certs` });
-  const key = await client.getSigningKey(kid); const pub = key.getPublicKey();
-  const decoded:any = jwt.verify(token, pub, { audience: process.env.KEYCLOAK_AUDIENCE, issuer: process.env.KEYCLOAK_ISSUER });
-  return { subject: { sub: decoded.sub, roles: decoded.realm_access?.roles||[], attrs: { tenant: decoded.tnt, acr: decoded.acr } } };
+import jwksRsa from 'jwks-rsa';
+import jwt from 'jsonwebtoken';
+export async function auth(req: any) {
+  const token = (req.headers.authorization || '').replace('Bearer ', '');
+  if (!token) throw new Error('unauthenticated');
+  const kid: any = (jwt.decode(token, { complete: true }) as any)?.header?.kid;
+  const client = jwksRsa({
+    jwksUri:
+      process.env.KEYCLOAK_JWKS ||
+      `${process.env.KEYCLOAK_ISSUER}/protocol/openid-connect/certs`,
+  });
+  const key = await client.getSigningKey(kid);
+  const pub = key.getPublicKey();
+  const decoded: any = jwt.verify(token, pub, {
+    audience: process.env.KEYCLOAK_AUDIENCE,
+    issuer: process.env.KEYCLOAK_ISSUER,
+  });
+  return {
+    subject: {
+      sub: decoded.sub,
+      roles: decoded.realm_access?.roles || [],
+      attrs: { tenant: decoded.tnt, acr: decoded.acr },
+    },
+  };
 }
 ```
 
@@ -127,6 +147,7 @@ export async function auth(req:any){
 ---
 
 ## 4) Schema of Truth & Contracts
+
 - Publish **GraphQL SDL** under `/contracts/schema.graphql` (frozen for this release).
 - Publish **JSON Schemas** for REST payloads: LAC enforce, ledger claims/manifests, runbook run, pattern params, wallet bundle.
 - Contract tests in CI (`services/*/contract.test.ts`) call gateway with canned fixtures; snapshots stored.
@@ -134,24 +155,28 @@ export async function auth(req:any){
 ---
 
 ## 5) Policy Path & Simulation Panel
+
 - Webapp **Policy Inspector**: paste action + resource → see LAC decision & OPA reason; diff simulator.
 - All denials emit `policy_denied{rule="id",opa_reason="..."}` metric + audit log with trace id.
 
 ---
 
 ## 6) Provenance Everywhere
+
 - Ingest wizard registers initial claims; analytics services register derived claims; report captions attach manifest IDs; wallets include claim hash lists; federation returns only claim hashes + proof.
 - `prov-ledger` adds `/claims/search` + pagination; `/manifests/:id/export` returns W3C‑style proof envelope (seeded).
 
 ---
 
 ## 7) Cost Guard & Budgets (Finalized)
+
 - Gateway wraps `generateCypher/runAnalytics/runPattern` with estimate → budget check (tenant/case) → execute; slow‑killer cancels if p99 > threshold.
 - Grafana: CPI gauge (from perf pack), budget denies, slow‑kill counts; alerts to Slack/Email (configurable).
 
 ---
 
 ## 8) Data Lifecycle: Ingest→Archive→Retention→DSAR
+
 - Archive‑tier receives report artifacts & large analytic outputs.
 - Retention cron deletes claims past TTL unless legal hold; audit emitted.
 - DSAR endpoint composes subject bundle with redactions by audience profile; includes verification checksum.
@@ -159,6 +184,7 @@ export async function auth(req:any){
 ---
 
 ## 9) Observability Unification
+
 - **OTEL resource attrs** standardized: `service.name`, `tenant`, `caseId`, `subject.sub`, `policy.ruleId`.
 - **Prom labels** standardized: `service`, `endpoint`, `tenant`, `status`.
 - Grafana space **“IntelGraph GA”** imports all dashboards: guardrails, analytics, CPI, collab/report, XAI/fed/wallet, audit/forensics.
@@ -166,6 +192,7 @@ export async function auth(req:any){
 ---
 
 ## 10) Kubernetes Production: Helm Values & Security
+
 - **Resources**: right‑sized requests/limits per service; HPA (CPU+RPS custom metric).
 - **PodDisruptionBudgets** & **PriorityClasses** for gateway, LAC, ledger.
 - **NetworkPolicies** lock east‑west; only gateway may call services (plus approved side‑paths).
@@ -176,12 +203,14 @@ export async function auth(req:any){
 ---
 
 ## 11) Docs & Runbooks Unification
+
 - `/docs` includes Analyst Guide, Operator Runbook, API Reference (generated), Security & DPIA packs, and the Demo Cue Sheets.
 - Add “golden path” — a 10‑minute quickstart from login → insight → report → wallet.
 
 ---
 
 ## 12) One‑Command Mega Orchestrator
+
 ```make
 mega:
 	# 1. Render configs and spin up dev stack
@@ -199,6 +228,7 @@ mega:
 ---
 
 ## 13) QA Gates (Definition of Done — Integrated)
+
 - ✅ Contract tests green across all services
 - ✅ E2E flow emits valid manifests; verify succeeds
 - ✅ Policy denials carry readable OPA reason; simulation panel matches CLI
@@ -212,6 +242,7 @@ mega:
 ---
 
 ## 14) Integration Work Items (Stories)
+
 1. **Config Render Tool** (`tools/config/render.ts`) — parse `unified.yaml`, output `.env` + Helm overrides.
 2. **Gateway Auth Middleware** — Keycloak JWT → ctx.subject; forward `x-subject` to services.
 3. **OPA sidecar & bundle** — bake `compliance/opa` into bundle; CI `opa test`.
@@ -227,6 +258,7 @@ mega:
 ---
 
 ## 15) Risks & Mitigations
+
 - **Config drift**: single source (`unified.yaml`) + CI check that generated files match.
 - **Auth regressions**: canary route requiring ACR level; fallback to deny‑by‑default.
 - **Query cost blowups**: budget guard + slow‑killer + previews; alerts & kill switch.
@@ -236,9 +268,9 @@ mega:
 ---
 
 ## 16) Final Release Checklist (Unification)
+
 - [ ] Mega target runs clean end‑to‑end on a fresh clone
 - [ ] `helm upgrade` on `stage` green; smoke & soak OK
 - [ ] All dashboards visible; alerts wired
 - [ ] Docs published; PR body updated
 - [ ] Tag `v1.0.0-uni` and push images
-

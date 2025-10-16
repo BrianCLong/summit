@@ -98,14 +98,18 @@ app.post('/plan', planRoute); // Use the named export
 
 describe('planRoute', () => {
   it('denies without rule', async () => {
-    const res = await request(app).post('/plan').send({ task: 'unknown.task', env: 'dev', loa: 0 });
+    const res = await request(app)
+      .post('/plan')
+      .send({ task: 'unknown.task', env: 'dev', loa: 0 });
     expect(res.status).toBe(400); // Changed to 400 as per the new plan.ts logic
     expect(res.body.allow).toBe(false);
     expect(res.body.denial).toBe('no_matching_rule');
   });
 
   it('denies with insufficient LOA', async () => {
-    const res = await request(app).post('/plan').send({ task: 'qa', env: 'dev', loa: 2 }); // loa_max for qa is 1
+    const res = await request(app)
+      .post('/plan')
+      .send({ task: 'qa', env: 'dev', loa: 2 }); // loa_max for qa is 1
     expect(res.status).toBe(200); // Still 200, but allow:false
     expect(res.body.policy.allow).toBe(false);
     expect(res.body.policy.reason).toContain('Insufficient LOA');
@@ -119,7 +123,9 @@ describe('planRoute', () => {
       usedInFixed: jest.fn(() => ({ used: 0, windowStart: '', windowEnd: '' })),
     }));
 
-    const res = await request(app).post('/plan').send({ task: 'qa', env: 'dev', loa: 1 });
+    const res = await request(app)
+      .post('/plan')
+      .send({ task: 'qa', env: 'dev', loa: 1 });
     expect(res.status).toBe(200);
     expect(res.body.decision.model).not.toBe('openai/chatgpt-plus');
     expect(res.body.decision.model).toBe('google/gemini-pro'); // Should fall back to gemini
@@ -128,7 +134,12 @@ describe('planRoute', () => {
   it('allows hosted models when allowed', async () => {
     const res = await request(app)
       .post('/plan')
-      .send({ task: 'qa', env: 'dev', loa: 1, controls: { allow_hosted: true } });
+      .send({
+        task: 'qa',
+        env: 'dev',
+        loa: 1,
+        controls: { allow_hosted: true },
+      });
     expect(res.status).toBe(200);
     expect(res.body.decision.model).toBe('openai/chatgpt-plus');
   });
@@ -138,7 +149,9 @@ describe('planRoute', () => {
     const originalRules = mockPolicy.policy.routing_rules;
     mockPolicy.policy.routing_rules = [];
 
-    const res = await request(app).post('/plan').send({ task: 'qa', env: 'dev', loa: 1 });
+    const res = await request(app)
+      .post('/plan')
+      .send({ task: 'qa', env: 'dev', loa: 1 });
     expect(res.status).toBe(200);
     expect(res.body.policy.allow).toBe(false);
     expect(res.body.policy.denial).toBe('no_matching_rule');

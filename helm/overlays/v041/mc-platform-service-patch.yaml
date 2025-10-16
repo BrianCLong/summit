@@ -3,14 +3,14 @@ kind: Service
 metadata:
   name: mc-platform
   annotations:
-    mc-platform.io/sovereign-safeguards: "enabled"
-    mc-platform.io/version: "v0.4.1"
-    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: "http"
-    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: "arn:aws:acm:region:account:certificate/cert-id"
-    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: "https"
-    prometheus.io/scrape: "true"
-    prometheus.io/port: "9090"
-    prometheus.io/path: "/metrics"
+    mc-platform.io/sovereign-safeguards: 'enabled'
+    mc-platform.io/version: 'v0.4.1'
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: 'http'
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: 'arn:aws:acm:region:account:certificate/cert-id'
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: 'https'
+    prometheus.io/scrape: 'true'
+    prometheus.io/port: '9090'
+    prometheus.io/path: '/metrics'
 spec:
   # No changes to port configuration needed
   # Annotations provide additional metadata for sovereign safeguards

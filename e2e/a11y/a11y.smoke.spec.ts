@@ -10,7 +10,9 @@ async function check(page: any, path: string) {
   expect(serious).toEqual([]);
 }
 
-test('a11y smoke: /dashboard, /graph, /investigations/inv1', async ({ page }) => {
+test('a11y smoke: /dashboard, /graph, /investigations/inv1', async ({
+  page,
+}) => {
   await check(page, '/dashboard');
   await check(page, '/graph');
   await check(page, '/investigations/inv1');

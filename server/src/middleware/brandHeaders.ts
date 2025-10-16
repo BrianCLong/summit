@@ -1,7 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 
 // Brand header aliasing and banner injection
-export function brandHeaders(): (req: Request, res: Response, next: NextFunction) => void {
+export function brandHeaders(): (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => void {
   const brand = process.env.PRODUCT_BRAND || 'IntelGraph';
   const notice = brand === 'Summit' ? 'IntelGraph is now Summit.' : '';
   return (req, res, next) => {

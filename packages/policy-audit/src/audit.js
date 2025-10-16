@@ -18,7 +18,10 @@ export function audit(entry, logDir = '.') {
     timestamp: new Date().toISOString(),
     prevHash,
   };
-  const hash = crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex');
+  const hash = crypto
+    .createHash('sha256')
+    .update(JSON.stringify(data))
+    .digest('hex');
   const record = { ...data, hash };
   fs.appendFileSync(file, JSON.stringify(record) + '\n');
   return { auditId: hash };
@@ -31,7 +34,10 @@ export function verify(file) {
   for (const line of lines) {
     const entry = JSON.parse(line);
     const { hash, ...data } = entry;
-    const calc = crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex');
+    const calc = crypto
+      .createHash('sha256')
+      .update(JSON.stringify(data))
+      .digest('hex');
     if (entry.prevHash !== prevHash || calc !== hash) return false;
     prevHash = hash;
   }

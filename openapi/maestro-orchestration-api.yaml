@@ -4,22 +4,22 @@ info:
   description: |
     Maestro provides autonomous workflow orchestration with AI-driven optimization, premium model routing, 
     compliance enforcement, and intelligent resource management.
-    
+
     ## Key Features
     - **Autonomous Orchestration**: AI-driven workflow management
     - **Premium Model Routing**: Thompson sampling-based optimization
     - **Compliance Gates**: Real-time policy enforcement
     - **Cost Optimization**: Budget-aware resource allocation
     - **SIG Integration**: Seamless integration with IntelGraph Core
-    
+
     ## Authentication
     All endpoints require JWT authentication. Include token in Authorization header: `Authorization: Bearer <token>`
-    
+
     ## Rate Limiting
     - **Standard**: 200 requests per hour
     - **Premium**: 2,000 requests per hour
     - **Enterprise**: Unlimited
-    
+
     ## Workflow Execution
     Workflows are defined using the Maestro YAML schema and executed through the orchestration engine.
     Results include comprehensive provenance tracking and compliance auditing.
@@ -240,8 +240,8 @@ paths:
                   type: object
                   additionalProperties: true
                   example:
-                    source_bucket: "intel-data-staging"
-                    caseId: "CASE-2024-001"
+                    source_bucket: 'intel-data-staging'
+                    caseId: 'CASE-2024-001'
                 dryRun:
                   type: boolean
                   default: false
@@ -483,7 +483,7 @@ components:
         query:
           type: string
           maxLength: 5000
-          example: "Analyze the threat landscape for financial services sector in Q4 2024"
+          example: 'Analyze the threat landscape for financial services sector in Q4 2024'
         context:
           type: object
           required: [userId, tenantId, purpose]
@@ -499,7 +499,8 @@ components:
               format: uuid
             purpose:
               type: string
-              enum: [intelligence_analysis, research, documentation, development]
+              enum:
+                [intelligence_analysis, research, documentation, development]
               example: intelligence_analysis
             urgency:
               type: string
@@ -545,12 +546,12 @@ components:
               type: array
               items:
                 type: string
-              example: ["reuters.com", "bbc.com", "cnn.com"]
+              example: ['reuters.com', 'bbc.com', 'cnn.com']
             blockedDomains:
               type: array
               items:
                 type: string
-              example: ["example-blocked.com"]
+              example: ['example-blocked.com']
             requireCitations:
               type: boolean
               default: true
@@ -569,7 +570,7 @@ components:
           example: maestro-1736950200000-abc123def
         answer:
           type: string
-          example: "Based on analysis of 15 sources, the Q4 2024 threat landscape shows increased sophistication in financial sector attacks..."
+          example: 'Based on analysis of 15 sources, the Q4 2024 threat landscape shows increased sophistication in financial sector attacks...'
         confidence:
           type: number
           format: float
@@ -586,12 +587,12 @@ components:
           type: array
           items:
             type: string
-          example: ["Cost $6.50 exceeded budget $5.00"]
+          example: ['Cost $6.50 exceeded budget $5.00']
         fallbacksUsed:
           type: array
           items:
             type: string
-          example: ["web_search_fallback"]
+          example: ['web_search_fallback']
 
     OrchestrationMetadata:
       type: object
@@ -601,7 +602,7 @@ components:
           example: 15
         synthesisMethod:
           type: string
-          example: "web_consensus+premium_gpt4"
+          example: 'web_consensus+premium_gpt4'
         totalCost:
           type: number
           format: float
@@ -629,16 +630,16 @@ components:
         url:
           type: string
           format: uri
-          example: "https://www.reuters.com/technology/cybersecurity/financial-sector-attacks-2024"
+          example: 'https://www.reuters.com/technology/cybersecurity/financial-sector-attacks-2024'
         title:
           type: string
-          example: "Financial Sector Cyberattacks Rise 40% in Q4 2024"
+          example: 'Financial Sector Cyberattacks Rise 40% in Q4 2024'
         snippet:
           type: string
-          example: "Analysis shows a significant increase in sophisticated attacks targeting financial institutions..."
+          example: 'Analysis shows a significant increase in sophisticated attacks targeting financial institutions...'
         domain:
           type: string
-          example: "reuters.com"
+          example: 'reuters.com'
         relevanceScore:
           type: number
           format: float
@@ -647,7 +648,7 @@ components:
           example: 0.92
         licenseInfo:
           type: string
-          example: "© 2024 Reuters. Fair use for research purposes."
+          example: '© 2024 Reuters. Fair use for research purposes.'
 
     OrchestrationStatus:
       type: object
@@ -665,7 +666,7 @@ components:
           example: 0.75
         currentStage:
           type: string
-          example: "premium_synthesis"
+          example: 'premium_synthesis'
         result:
           $ref: '#/components/schemas/OrchestrationResult'
         error:
@@ -707,21 +708,21 @@ components:
           format: uuid
         name:
           type: string
-          example: "ingest-enrich-handoff"
+          example: 'ingest-enrich-handoff'
         version:
           type: string
-          example: "1.2.0"
+          example: '1.2.0'
         description:
           type: string
-          example: "Ingest raw files, validate, normalize, and hand off to SIG"
+          example: 'Ingest raw files, validate, normalize, and hand off to SIG'
         owner:
           type: string
-          example: "platform@summit"
+          example: 'platform@summit'
         labels:
           type: array
           items:
             type: string
-          example: ["sig", "etl", "production"]
+          example: ['sig', 'etl', 'production']
         parameters:
           type: array
           items:
@@ -739,11 +740,11 @@ components:
       properties:
         name:
           type: string
-          example: "source_bucket"
+          example: 'source_bucket'
         type:
           type: string
           enum: [string, integer, boolean, array, object]
-          example: "string"
+          example: 'string'
         required:
           type: boolean
           example: true
@@ -757,15 +758,15 @@ components:
       properties:
         id:
           type: string
-          example: "fetch_raw"
+          example: 'fetch_raw'
         uses:
           type: string
-          example: "tasks/s3.get@1.4.3"
+          example: 'tasks/s3.get@1.4.3'
         needs:
           type: array
           items:
             type: string
-          example: ["validate_schema"]
+          example: ['validate_schema']
         with:
           type: object
           additionalProperties: true
@@ -818,13 +819,13 @@ components:
       properties:
         name:
           type: string
-          example: "backfill-entity-resolver"
+          example: 'backfill-entity-resolver'
         version:
           type: string
-          example: "0.9.0"
+          example: '0.9.0'
         owner:
           type: string
-          example: "sre@summit"
+          example: 'sre@summit'
         approvals:
           type: object
           properties:
@@ -836,7 +837,7 @@ components:
                 type: string
         workflowRef:
           type: string
-          example: "ingest-enrich-handoff@1.2.0"
+          example: 'ingest-enrich-handoff@1.2.0'
 
     Runbook:
       allOf:
@@ -889,7 +890,8 @@ components:
           type: string
         status:
           type: string
-          enum: [pending_approval, approved, running, completed, failed, cancelled]
+          enum:
+            [pending_approval, approved, running, completed, failed, cancelled]
         inputs:
           type: object
           additionalProperties: true
@@ -904,18 +906,18 @@ components:
       properties:
         id:
           type: string
-          example: "gpt-4-turbo"
+          example: 'gpt-4-turbo'
         name:
           type: string
-          example: "GPT-4 Turbo"
+          example: 'GPT-4 Turbo'
         provider:
           type: string
-          example: "openai"
+          example: 'openai'
         capabilities:
           type: array
           items:
             type: string
-          example: ["reasoning", "analysis", "synthesis"]
+          example: ['reasoning', 'analysis', 'synthesis']
         costPerToken:
           type: number
           format: float
@@ -992,7 +994,7 @@ components:
           example: 0.87
         reasoning:
           type: string
-          example: "Selected GPT-4 Turbo based on high quality requirement and sufficient budget"
+          example: 'Selected GPT-4 Turbo based on high quality requirement and sufficient budget'
         alternatives:
           type: array
           items:
@@ -1055,16 +1057,16 @@ components:
           format: uuid
         action:
           type: string
-          example: "orchestration_request"
+          example: 'orchestration_request'
         resource:
           type: string
-          example: "orchestration/maestro-1736950200000-abc123def"
+          example: 'orchestration/maestro-1736950200000-abc123def'
         details:
           type: object
           additionalProperties: true
         ipAddress:
           type: string
-          example: "192.168.1.100"
+          example: '192.168.1.100'
         userAgent:
           type: string
         outcome:

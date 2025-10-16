@@ -22,7 +22,13 @@ async function gh(path: string, method: string, body?: any) {
 
 ghRouter.post('/issues', async (req, res) => {
   try {
-    const { kind = 'decision', title, body, labels = [], attachments = [] } = req.body || {};
+    const {
+      kind = 'decision',
+      title,
+      body,
+      labels = [],
+      attachments = [],
+    } = req.body || {};
     const issue = await gh('/issues', 'POST', {
       title: `[${kind.toUpperCase()}] ${title}`,
       body,

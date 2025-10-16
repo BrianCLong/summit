@@ -18,4 +18,3 @@ router.post('/analyze', async (req, res) => {
 });
 
 module.exports = router;
-

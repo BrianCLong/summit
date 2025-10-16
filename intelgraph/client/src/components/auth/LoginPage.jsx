@@ -1,17 +1,24 @@
-import React, { useState } from 'react'
-import { Box, Paper, TextField, Button, Typography, Alert } from '@mui/material'
-import { useNavigate } from 'react-router-dom'
-import { useDispatch } from 'react-redux'
-import { loginSuccess } from '../../store/slices/authSlice'
+import React, { useState } from 'react';
+import {
+  Box,
+  Paper,
+  TextField,
+  Button,
+  Typography,
+  Alert,
+} from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
+import { loginSuccess } from '../../store/slices/authSlice';
 
 function LoginPage() {
-  const navigate = useNavigate()
-  const dispatch = useDispatch()
-  const [credentials, setCredentials] = useState({ email: '', password: '' })
-  const [error, setError] = useState('')
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const [credentials, setCredentials] = useState({ email: '', password: '' });
+  const [error, setError] = useState('');
 
   const handleLogin = (event) => {
-    event.preventDefault()
+    event.preventDefault();
 
     if (credentials.email && credentials.password) {
       const mockUser = {
@@ -20,20 +27,20 @@ function LoginPage() {
         firstName: 'Demo',
         lastName: 'User',
         role: 'ANALYST',
-      }
+      };
 
       dispatch(
         loginSuccess({
           user: mockUser,
           token: 'demo-token-12345',
         }),
-      )
+      );
 
-      navigate('/dashboard')
+      navigate('/dashboard');
     } else {
-      setError('Please enter email and password')
+      setError('Please enter email and password');
     }
-  }
+  };
 
   return (
     <Box
@@ -49,7 +56,12 @@ function LoginPage() {
         <Typography variant="h4" align="center" gutterBottom fontWeight="bold">
           IntelGraph
         </Typography>
-        <Typography variant="subtitle1" align="center" color="text.secondary" sx={{ mb: 3 }}>
+        <Typography
+          variant="subtitle1"
+          align="center"
+          color="text.secondary"
+          sx={{ mb: 3 }}
+        >
           Intelligence Analysis Platform
         </Typography>
 
@@ -90,7 +102,7 @@ function LoginPage() {
         </Alert>
       </Paper>
     </Box>
-  )
+  );
 }
 
-export default LoginPage
+export default LoginPage;

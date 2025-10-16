@@ -4,10 +4,14 @@ import type { Request, Response, NextFunction } from 'express';
 export function otelRoute(spanName: string) {
   const tracer = trace.getTracer('maestro-mcp');
   return function (req: Request, res: Response, next: NextFunction) {
-    const name = `${spanName} ${req.method} ${req.baseUrl || ''}${req.route?.path || ''}`.trim();
+    const name =
+      `${spanName} ${req.method} ${req.baseUrl || ''}${req.route?.path || ''}`.trim();
     const span: Span = tracer.startSpan(name);
     span.setAttribute('http.method', req.method);
-    span.setAttribute('http.route', (req.baseUrl || '') + (req.route?.path || req.path));
+    span.setAttribute(
+      'http.route',
+      (req.baseUrl || '') + (req.route?.path || req.path),
+    );
     const user: any = (req as any).user || {};
     if (user?.id) span.setAttribute('user.id', String(user.id));
     // Try to capture runId in params when present

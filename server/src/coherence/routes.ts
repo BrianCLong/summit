@@ -11,19 +11,25 @@ const SignalIngestSchema = z.object({
   value: z.number().min(-1000).max(1000),
   weight: z.number().optional().default(1.0),
   source: z.string().min(1),
-  ts: z.string().datetime().optional().default(() => new Date().toISOString()),
+  ts: z
+    .string()
+    .datetime()
+    .optional()
+    .default(() => new Date().toISOString()),
   signalId: z.string().optional(),
-  metadata: z.object({}).optional()
+  metadata: z.object({}).optional(),
 });
 
 const AnalysisRequestSchema = z.object({
   tenantId: z.string().min(1),
-  timeRange: z.object({
-    start: z.string().datetime(),
-    end: z.string().datetime()
-  }).optional(),
+  timeRange: z
+    .object({
+      start: z.string().datetime(),
+      end: z.string().datetime(),
+    })
+    .optional(),
   forceRefresh: z.boolean().optional().default(false),
-  includeRealTimeAnalysis: z.boolean().optional().default(true)
+  includeRealTimeAnalysis: z.boolean().optional().default(true),
 });
 
 const ConfigurationSchema = z.object({
@@ -34,30 +40,44 @@ const ConfigurationSchema = z.object({
   anomalyThreshold: z.number().min(0.5).max(5).optional(),
   enableRealTimeAnalysis: z.boolean().optional(),
   enablePredictiveAnalysis: z.boolean().optional(),
-  notificationSettings: z.object({
-    scoreThreshold: z.number().min(0).max(1).optional(),
-    riskThreshold: z.number().min(0).max(1).optional(),
-    enableSlack: z.boolean().optional(),
-    enableEmail: z.boolean().optional()
-  }).optional()
+  notificationSettings: z
+    .object({
+      scoreThreshold: z.number().min(0).max(1).optional(),
+      riskThreshold: z.number().min(0).max(1).optional(),
+      enableSlack: z.boolean().optional(),
+      enableEmail: z.boolean().optional(),
+    })
+    .optional(),
 });
 
 const MissionContextSchema = z.object({
   tenantId: z.string().min(1),
   name: z.string().min(1),
   description: z.string(),
-  priority: z.enum(['low', 'medium', 'high', 'critical']).optional().default('medium'),
-  classification: z.enum(['public', 'internal', 'confidential', 'secret']).optional().default('internal'),
-  objectives: z.array(z.object({
-    title: z.string(),
-    description: z.string(),
-    type: z.enum(['intelligence', 'operational', 'strategic', 'tactical']),
-    priority: z.number().min(1).max(10)
-  })).optional(),
-  timeline: z.object({
-    startDate: z.string().datetime(),
-    plannedEndDate: z.string().datetime()
-  }).optional()
+  priority: z
+    .enum(['low', 'medium', 'high', 'critical'])
+    .optional()
+    .default('medium'),
+  classification: z
+    .enum(['public', 'internal', 'confidential', 'secret'])
+    .optional()
+    .default('internal'),
+  objectives: z
+    .array(
+      z.object({
+        title: z.string(),
+        description: z.string(),
+        type: z.enum(['intelligence', 'operational', 'strategic', 'tactical']),
+        priority: z.number().min(1).max(10),
+      }),
+    )
+    .optional(),
+  timeline: z
+    .object({
+      startDate: z.string().datetime(),
+      plannedEndDate: z.string().datetime(),
+    })
+    .optional(),
 });
 
 // Rate limiting
@@ -77,7 +97,9 @@ const ingestRateLimit = rateLimit({
   legacyHeaders: false,
 });
 
-export function createCoherenceRoutes(coherenceService: CoherenceService): Router {
+export function createCoherenceRoutes(
+  coherenceService: CoherenceService,
+): Router {
   const router = Router();
 
   // Health check endpoint
@@ -90,8 +112,8 @@ export function createCoherenceRoutes(coherenceService: CoherenceService): Route
         components: {
           coherenceService: 'healthy',
           database: 'healthy',
-          cache: 'healthy'
-        }
+          cache: 'healthy',
+        },
       };
 
       res.json(health);
@@ -99,151 +121,171 @@ export function createCoherenceRoutes(coherenceService: CoherenceService): Route
       logger.error('Health check failed', { error });
       res.status(500).json({
         status: 'unhealthy',
-        error: 'Internal server error'
+        error: 'Internal server error',
       });
     }
   });
 
   // Signal ingestion endpoint
-  router.post('/signals/ingest', ingestRateLimit, async (req: Request, res: Response) => {
-    try {
-      const validatedInput = SignalIngestSchema.parse(req.body);
-      
-      const result = await coherenceService.ingestSignal(
-        validatedInput.tenantId,
-        validatedInput
-      );
+  router.post(
+    '/signals/ingest',
+    ingestRateLimit,
+    async (req: Request, res: Response) => {
+      try {
+        const validatedInput = SignalIngestSchema.parse(req.body);
 
-      logger.info('Signal ingested via API', {
-        tenantId: validatedInput.tenantId,
-        signalId: result.signalId,
-        type: validatedInput.type,
-        triggeredAnalysis: result.triggeredAnalysis
-      });
+        const result = await coherenceService.ingestSignal(
+          validatedInput.tenantId,
+          validatedInput,
+        );
 
-      res.status(201).json(result);
+        logger.info('Signal ingested via API', {
+          tenantId: validatedInput.tenantId,
+          signalId: result.signalId,
+          type: validatedInput.type,
+          triggeredAnalysis: result.triggeredAnalysis,
+        });
 
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        logger.warn('Invalid signal ingestion request', { errors: error.errors });
-        return res.status(400).json({
+        res.status(201).json(result);
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          logger.warn('Invalid signal ingestion request', {
+            errors: error.errors,
+          });
+          return res.status(400).json({
+            success: false,
+            error: 'Invalid request format',
+            details: error.errors,
+          });
+        }
+
+        logger.error('Signal ingestion failed', { error });
+        res.status(500).json({
           success: false,
-          error: 'Invalid request format',
-          details: error.errors
+          error: 'Internal server error',
         });
       }
-
-      logger.error('Signal ingestion failed', { error });
-      res.status(500).json({
-        success: false,
-        error: 'Internal server error'
-      });
-    }
-  });
+    },
+  );
 
   // Batch signal ingestion
-  router.post('/signals/batch', ingestRateLimit, async (req: Request, res: Response) => {
-    try {
-      const { tenantId, signals } = req.body;
+  router.post(
+    '/signals/batch',
+    ingestRateLimit,
+    async (req: Request, res: Response) => {
+      try {
+        const { tenantId, signals } = req.body;
 
-      if (!tenantId || !Array.isArray(signals)) {
-        return res.status(400).json({
-          success: false,
-          error: 'tenantId and signals array are required'
-        });
-      }
-
-      if (signals.length > 100) {
-        return res.status(400).json({
-          success: false,
-          error: 'Batch size limited to 100 signals'
-        });
-      }
-
-      const results = [];
-      let successCount = 0;
-      let failureCount = 0;
-
-      for (const signalData of signals) {
-        try {
-          const validatedSignal = SignalIngestSchema.parse({ ...signalData, tenantId });
-          const result = await coherenceService.ingestSignal(tenantId, validatedSignal);
-          results.push({ success: true, signalId: result.signalId });
-          successCount++;
-        } catch (error) {
-          results.push({ 
-            success: false, 
-            error: error instanceof z.ZodError ? 'Validation error' : 'Processing error',
-            signalData: signalData.signalId || 'unknown'
+        if (!tenantId || !Array.isArray(signals)) {
+          return res.status(400).json({
+            success: false,
+            error: 'tenantId and signals array are required',
           });
-          failureCount++;
         }
+
+        if (signals.length > 100) {
+          return res.status(400).json({
+            success: false,
+            error: 'Batch size limited to 100 signals',
+          });
+        }
+
+        const results = [];
+        let successCount = 0;
+        let failureCount = 0;
+
+        for (const signalData of signals) {
+          try {
+            const validatedSignal = SignalIngestSchema.parse({
+              ...signalData,
+              tenantId,
+            });
+            const result = await coherenceService.ingestSignal(
+              tenantId,
+              validatedSignal,
+            );
+            results.push({ success: true, signalId: result.signalId });
+            successCount++;
+          } catch (error) {
+            results.push({
+              success: false,
+              error:
+                error instanceof z.ZodError
+                  ? 'Validation error'
+                  : 'Processing error',
+              signalData: signalData.signalId || 'unknown',
+            });
+            failureCount++;
+          }
+        }
+
+        logger.info('Batch signal ingestion completed', {
+          tenantId,
+          totalSignals: signals.length,
+          successCount,
+          failureCount,
+        });
+
+        res.json({
+          success: true,
+          summary: {
+            total: signals.length,
+            successful: successCount,
+            failed: failureCount,
+          },
+          results,
+        });
+      } catch (error) {
+        logger.error('Batch signal ingestion failed', { error });
+        res.status(500).json({
+          success: false,
+          error: 'Internal server error',
+        });
       }
-
-      logger.info('Batch signal ingestion completed', {
-        tenantId,
-        totalSignals: signals.length,
-        successCount,
-        failureCount
-      });
-
-      res.json({
-        success: true,
-        summary: {
-          total: signals.length,
-          successful: successCount,
-          failed: failureCount
-        },
-        results
-      });
-
-    } catch (error) {
-      logger.error('Batch signal ingestion failed', { error });
-      res.status(500).json({
-        success: false,
-        error: 'Internal server error'
-      });
-    }
-  });
+    },
+  );
 
   // Coherence analysis endpoint
-  router.post('/analysis', analysisRateLimit, async (req: Request, res: Response) => {
-    try {
-      const validatedInput = AnalysisRequestSchema.parse(req.body);
-      
-      const result = await coherenceService.analyzeCoherence(
-        validatedInput.tenantId,
-        {
-          timeRange: validatedInput.timeRange,
-          forceRefresh: validatedInput.forceRefresh,
-          includeRealTimeAnalysis: validatedInput.includeRealTimeAnalysis
+  router.post(
+    '/analysis',
+    analysisRateLimit,
+    async (req: Request, res: Response) => {
+      try {
+        const validatedInput = AnalysisRequestSchema.parse(req.body);
+
+        const result = await coherenceService.analyzeCoherence(
+          validatedInput.tenantId,
+          {
+            timeRange: validatedInput.timeRange,
+            forceRefresh: validatedInput.forceRefresh,
+            includeRealTimeAnalysis: validatedInput.includeRealTimeAnalysis,
+          },
+        );
+
+        logger.info('Coherence analysis completed via API', {
+          tenantId: validatedInput.tenantId,
+          analysisId: result.analysisId,
+          coherenceScore: result.coherenceScore,
+          signalCount: result.metadata.signalCount,
+        });
+
+        res.json(result);
+      } catch (error) {
+        if (error instanceof z.ZodError) {
+          logger.warn('Invalid analysis request', { errors: error.errors });
+          return res.status(400).json({
+            error: 'Invalid request format',
+            details: error.errors,
+          });
         }
-      );
 
-      logger.info('Coherence analysis completed via API', {
-        tenantId: validatedInput.tenantId,
-        analysisId: result.analysisId,
-        coherenceScore: result.coherenceScore,
-        signalCount: result.metadata.signalCount
-      });
-
-      res.json(result);
-
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        logger.warn('Invalid analysis request', { errors: error.errors });
-        return res.status(400).json({
-          error: 'Invalid request format',
-          details: error.errors
+        logger.error('Coherence analysis failed', { error });
+        res.status(500).json({
+          error: 'Internal server error',
         });
       }
-
-      logger.error('Coherence analysis failed', { error });
-      res.status(500).json({
-        error: 'Internal server error'
-      });
-    }
-  });
+    },
+  );
 
   // Get coherence status
   router.get('/status/:tenantId', async (req: Request, res: Response) => {
@@ -252,18 +294,20 @@ export function createCoherenceRoutes(coherenceService: CoherenceService): Route
 
       if (!tenantId) {
         return res.status(400).json({
-          error: 'tenantId is required'
+          error: 'tenantId is required',
         });
       }
 
       const status = await coherenceService.getCoherenceStatus(tenantId);
 
       res.json(status);
-
     } catch (error) {
-      logger.error('Failed to get coherence status', { error, tenantId: req.params.tenantId });
+      logger.error('Failed to get coherence status', {
+        error,
+        tenantId: req.params.tenantId,
+      });
       res.status(500).json({
-        error: 'Internal server error'
+        error: 'Internal server error',
       });
     }
   });
@@ -272,32 +316,31 @@ export function createCoherenceRoutes(coherenceService: CoherenceService): Route
   router.post('/configuration', async (req: Request, res: Response) => {
     try {
       const validatedInput = ConfigurationSchema.parse(req.body);
-      
+
       const { tenantId, ...config } = validatedInput;
-      
+
       await coherenceService.configureTenant(tenantId, config);
 
       logger.info('Tenant configuration updated', { tenantId, config });
 
       res.json({
         success: true,
-        message: 'Configuration updated successfully'
+        message: 'Configuration updated successfully',
       });
-
     } catch (error) {
       if (error instanceof z.ZodError) {
         logger.warn('Invalid configuration request', { errors: error.errors });
         return res.status(400).json({
           success: false,
           error: 'Invalid configuration format',
-          details: error.errors
+          details: error.errors,
         });
       }
 
       logger.error('Configuration update failed', { error });
       res.status(500).json({
         success: false,
-        error: 'Internal server error'
+        error: 'Internal server error',
       });
     }
   });
@@ -306,31 +349,34 @@ export function createCoherenceRoutes(coherenceService: CoherenceService): Route
   router.post('/missions', async (req: Request, res: Response) => {
     try {
       const validatedInput = MissionContextSchema.parse(req.body);
-      
+
       const { tenantId, ...missionData } = validatedInput;
-      
-      const mission = await coherenceService.getMissionVault().createMissionContext(tenantId, missionData);
+
+      const mission = await coherenceService
+        .getMissionVault()
+        .createMissionContext(tenantId, missionData);
 
       logger.info('Mission created via API', {
         tenantId,
         missionId: mission.missionId,
-        name: mission.name
+        name: mission.name,
       });
 
       res.status(201).json(mission);
-
     } catch (error) {
       if (error instanceof z.ZodError) {
-        logger.warn('Invalid mission creation request', { errors: error.errors });
+        logger.warn('Invalid mission creation request', {
+          errors: error.errors,
+        });
         return res.status(400).json({
           error: 'Invalid mission format',
-          details: error.errors
+          details: error.errors,
         });
       }
 
       logger.error('Mission creation failed', { error });
       res.status(500).json({
-        error: 'Internal server error'
+        error: 'Internal server error',
       });
     }
   });
@@ -342,32 +388,38 @@ export function createCoherenceRoutes(coherenceService: CoherenceService): Route
 
       if (!tenantId) {
         return res.status(400).json({
-          error: 'tenantId is required'
+          error: 'tenantId is required',
         });
       }
 
       if (missionId) {
         // Get specific mission
-        const mission = await coherenceService.getMissionVault().getMissionContext(tenantId, missionId as string);
+        const mission = await coherenceService
+          .getMissionVault()
+          .getMissionContext(tenantId, missionId as string);
         if (!mission) {
           return res.status(404).json({
-            error: 'Mission not found'
+            error: 'Mission not found',
           });
         }
         res.json(mission);
       } else {
         // Get all active missions
-        const missions = await coherenceService.getMissionVault().getActiveMissions(tenantId);
+        const missions = await coherenceService
+          .getMissionVault()
+          .getActiveMissions(tenantId);
         res.json({
           missions,
-          count: missions.length
+          count: missions.length,
         });
       }
-
     } catch (error) {
-      logger.error('Failed to get missions', { error, tenantId: req.params.tenantId });
+      logger.error('Failed to get missions', {
+        error,
+        tenantId: req.params.tenantId,
+      });
       res.status(500).json({
-        error: 'Internal server error'
+        error: 'Internal server error',
       });
     }
   });
@@ -376,23 +428,23 @@ export function createCoherenceRoutes(coherenceService: CoherenceService): Route
   router.get('/activity/:tenantId', async (req: Request, res: Response) => {
     try {
       const { tenantId } = req.params;
-      const { 
-        limit = 50, 
-        minConfidence = 0.3, 
+      const {
+        limit = 50,
+        minConfidence = 0.3,
         types,
         startTime,
-        endTime
+        endTime,
       } = req.query;
 
       if (!tenantId) {
         return res.status(400).json({
-          error: 'tenantId is required'
+          error: 'tenantId is required',
         });
       }
 
       const options: any = {
         limit: parseInt(limit as string),
-        minConfidence: parseFloat(minConfidence as string)
+        minConfidence: parseFloat(minConfidence as string),
       };
 
       if (types) {
@@ -402,22 +454,26 @@ export function createCoherenceRoutes(coherenceService: CoherenceService): Route
       if (startTime && endTime) {
         options.timeRange = {
           start: startTime as string,
-          end: endTime as string
+          end: endTime as string,
         };
       }
 
-      const fingerprints = await coherenceService.getActivityIndex().getActivityFingerprints(tenantId, options);
+      const fingerprints = await coherenceService
+        .getActivityIndex()
+        .getActivityFingerprints(tenantId, options);
 
       res.json({
         fingerprints,
         count: fingerprints.length,
-        options
+        options,
       });
-
     } catch (error) {
-      logger.error('Failed to get activity fingerprints', { error, tenantId: req.params.tenantId });
+      logger.error('Failed to get activity fingerprints', {
+        error,
+        tenantId: req.params.tenantId,
+      });
       res.status(500).json({
-        error: 'Internal server error'
+        error: 'Internal server error',
       });
     }
   });
@@ -426,23 +482,23 @@ export function createCoherenceRoutes(coherenceService: CoherenceService): Route
   router.get('/narratives/:tenantId', async (req: Request, res: Response) => {
     try {
       const { tenantId } = req.params;
-      const { 
-        limit = 20, 
-        minMagnitude = 0.1, 
+      const {
+        limit = 20,
+        minMagnitude = 0.1,
         impactTypes,
         startTime,
-        endTime
+        endTime,
       } = req.query;
 
       if (!tenantId) {
         return res.status(400).json({
-          error: 'tenantId is required'
+          error: 'tenantId is required',
         });
       }
 
       const options: any = {
         limit: parseInt(limit as string),
-        minMagnitude: parseFloat(minMagnitude as string)
+        minMagnitude: parseFloat(minMagnitude as string),
       };
 
       if (impactTypes) {
@@ -452,114 +508,135 @@ export function createCoherenceRoutes(coherenceService: CoherenceService): Route
       if (startTime && endTime) {
         options.timeRange = {
           start: startTime as string,
-          end: endTime as string
+          end: endTime as string,
         };
       }
 
-      const impacts = await coherenceService.getNarrativeModel().getNarrativeImpacts(tenantId, options);
+      const impacts = await coherenceService
+        .getNarrativeModel()
+        .getNarrativeImpacts(tenantId, options);
 
       res.json({
         impacts,
         count: impacts.length,
-        options
+        options,
       });
-
     } catch (error) {
-      logger.error('Failed to get narrative impacts', { error, tenantId: req.params.tenantId });
+      logger.error('Failed to get narrative impacts', {
+        error,
+        tenantId: req.params.tenantId,
+      });
       res.status(500).json({
-        error: 'Internal server error'
+        error: 'Internal server error',
       });
     }
   });
 
   // Mission health assessment
-  router.get('/missions/:tenantId/:missionId/health', async (req: Request, res: Response) => {
-    try {
-      const { tenantId, missionId } = req.params;
+  router.get(
+    '/missions/:tenantId/:missionId/health',
+    async (req: Request, res: Response) => {
+      try {
+        const { tenantId, missionId } = req.params;
 
-      if (!tenantId || !missionId) {
-        return res.status(400).json({
-          error: 'tenantId and missionId are required'
+        if (!tenantId || !missionId) {
+          return res.status(400).json({
+            error: 'tenantId and missionId are required',
+          });
+        }
+
+        const health = await coherenceService
+          .getMissionVault()
+          .assessMissionHealth(tenantId, missionId);
+
+        res.json(health);
+      } catch (error) {
+        logger.error('Failed to assess mission health', {
+          error,
+          tenantId: req.params.tenantId,
+          missionId: req.params.missionId,
+        });
+        res.status(500).json({
+          error: 'Internal server error',
         });
       }
-
-      const health = await coherenceService.getMissionVault().assessMissionHealth(tenantId, missionId);
-
-      res.json(health);
-
-    } catch (error) {
-      logger.error('Failed to assess mission health', { error, tenantId: req.params.tenantId, missionId: req.params.missionId });
-      res.status(500).json({
-        error: 'Internal server error'
-      });
-    }
-  });
+    },
+  );
 
   // Debugging and testing endpoints (remove in production)
   if (process.env.NODE_ENV !== 'production') {
-    router.post('/debug/simulate-update/:tenantId', async (req: Request, res: Response) => {
-      try {
-        const { tenantId } = req.params;
-        const { type = 'coherence' } = req.body;
+    router.post(
+      '/debug/simulate-update/:tenantId',
+      async (req: Request, res: Response) => {
+        try {
+          const { tenantId } = req.params;
+          const { type = 'coherence' } = req.body;
 
-        const subscriptionManager = coherenceService.getSubscriptionManager();
+          const subscriptionManager = coherenceService.getSubscriptionManager();
 
-        let result;
-        if (type === 'coherence') {
-          result = await subscriptionManager.simulateCoherenceUpdate(tenantId);
-        } else if (type === 'activity') {
-          result = await subscriptionManager.simulateActivityUpdate(tenantId);
-        } else if (type === 'narrative') {
-          result = await subscriptionManager.simulateNarrativeUpdate(tenantId);
-        } else {
-          return res.status(400).json({ error: 'Invalid simulation type' });
+          let result;
+          if (type === 'coherence') {
+            result =
+              await subscriptionManager.simulateCoherenceUpdate(tenantId);
+          } else if (type === 'activity') {
+            result = await subscriptionManager.simulateActivityUpdate(tenantId);
+          } else if (type === 'narrative') {
+            result =
+              await subscriptionManager.simulateNarrativeUpdate(tenantId);
+          } else {
+            return res.status(400).json({ error: 'Invalid simulation type' });
+          }
+
+          res.json({
+            success: true,
+            simulation: result,
+          });
+        } catch (error) {
+          logger.error('Simulation failed', { error });
+          res.status(500).json({
+            error: 'Simulation failed',
+          });
         }
+      },
+    );
 
-        res.json({
-          success: true,
-          simulation: result
-        });
+    router.get(
+      '/debug/subscription-counts',
+      async (req: Request, res: Response) => {
+        try {
+          const subscriptionManager = coherenceService.getSubscriptionManager();
+          const counts = subscriptionManager.getSubscriptionCounts();
 
-      } catch (error) {
-        logger.error('Simulation failed', { error });
-        res.status(500).json({
-          error: 'Simulation failed'
-        });
-      }
-    });
-
-    router.get('/debug/subscription-counts', async (req: Request, res: Response) => {
-      try {
-        const subscriptionManager = coherenceService.getSubscriptionManager();
-        const counts = subscriptionManager.getSubscriptionCounts();
-
-        res.json({
-          subscriptionCounts: counts,
-          totalSubscriptions: Object.values(counts).reduce((sum, count) => sum + count, 0)
-        });
-
-      } catch (error) {
-        logger.error('Failed to get subscription counts', { error });
-        res.status(500).json({
-          error: 'Failed to get subscription counts'
-        });
-      }
-    });
+          res.json({
+            subscriptionCounts: counts,
+            totalSubscriptions: Object.values(counts).reduce(
+              (sum, count) => sum + count,
+              0,
+            ),
+          });
+        } catch (error) {
+          logger.error('Failed to get subscription counts', { error });
+          res.status(500).json({
+            error: 'Failed to get subscription counts',
+          });
+        }
+      },
+    );
   }
 
   // Error handling middleware
   router.use((error: any, req: Request, res: Response, next: any) => {
-    logger.error('Coherence API error', { 
-      error: error.message, 
-      stack: error.stack, 
+    logger.error('Coherence API error', {
+      error: error.message,
+      stack: error.stack,
       path: req.path,
-      method: req.method 
+      method: req.method,
     });
 
     res.status(500).json({
       error: 'Internal server error',
       path: req.path,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   });
 

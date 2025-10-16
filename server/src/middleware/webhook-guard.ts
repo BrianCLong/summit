@@ -5,7 +5,8 @@ const TTL_MS = 5 * 60 * 1000; // 5 minutes
 
 export function replayGuard() {
   return (req: any, res: any, next: any) => {
-    const sig = req.header('Stripe-Signature') || req.header('X-Hub-Signature-256') || '';
+    const sig =
+      req.header('Stripe-Signature') || req.header('X-Hub-Signature-256') || '';
     const key = `${req.originalUrl}:${sig}`;
     const now = Date.now();
     for (const [k, v] of seen) if (v < now) seen.delete(k);
@@ -21,4 +22,3 @@ export const webhookRatelimit = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
-

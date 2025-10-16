@@ -4,7 +4,12 @@
  */
 
 import { Request, Response, NextFunction } from 'express';
-import { GraphQLError, ValidationContext, validate, specifiedRules } from 'graphql';
+import {
+  GraphQLError,
+  ValidationContext,
+  validate,
+  specifiedRules,
+} from 'graphql';
 import { depthLimit } from 'graphql-depth-limit';
 import { costAnalysis } from 'graphql-cost-analysis';
 import { createComplexityLimitRule } from 'graphql-query-complexity';
@@ -72,7 +77,9 @@ const persistedQueries = new Map<string, string>();
 const queryWhitelist = new Set<string>();
 
 // Load persisted queries from file or database
-export async function loadPersistedQueries(queriesPath?: string): Promise<void> {
+export async function loadPersistedQueries(
+  queriesPath?: string,
+): Promise<void> {
   try {
     if (queriesPath) {
       const fs = await import('fs/promises');
@@ -109,7 +116,13 @@ function createComplexityAnalysis(maxComplexity: number) {
     createError: (max: number, actual: number) => {
       return new GraphQLError(
         `Query complexity ${actual} exceeds maximum allowed complexity ${max}`,
-        { extensions: { code: 'COMPLEXITY_LIMIT_EXCEEDED', complexity: actual, maxComplexity: max } }
+        {
+          extensions: {
+            code: 'COMPLEXITY_LIMIT_EXCEEDED',
+            complexity: actual,
+            maxComplexity: max,
+          },
+        },
       );
     },
   });
@@ -170,14 +183,14 @@ function sanitizeQuery(query: string): string {
   // Check for suspicious patterns
   const suspiciousPatterns = [
     /\b__schema\b.*\btypes\b.*\bfields\b/i, // Introspection attacks
-    /\bmutation\b.*\bdelete\b.*\ball\b/i,   // Dangerous bulk operations
-    /\bunion\b.*\bselect\b/i,               // SQL injection attempts
+    /\bmutation\b.*\bdelete\b.*\ball\b/i, // Dangerous bulk operations
+    /\bunion\b.*\bselect\b/i, // SQL injection attempts
   ];
 
   for (const pattern of suspiciousPatterns) {
     if (pattern.test(query)) {
       throw new GraphQLError('Query contains suspicious patterns', {
-        extensions: { code: 'QUERY_REJECTED', reason: 'suspicious_pattern' }
+        extensions: { code: 'QUERY_REJECTED', reason: 'suspicious_pattern' },
       });
     }
   }
@@ -221,7 +234,7 @@ export const createRateLimiter = (config: SecurityConfig['rateLimit']) => {
 export function persistedQueriesMiddleware(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void {
   if (req.method !== 'POST' || !req.body) {
     return next();
@@ -235,19 +248,23 @@ export function persistedQueriesMiddleware(
 
     if (version !== 1) {
       return res.status(400).json({
-        errors: [{
-          message: 'Unsupported persisted query version',
-          extensions: { code: 'PERSISTED_QUERY_NOT_SUPPORTED' }
-        }]
+        errors: [
+          {
+            message: 'Unsupported persisted query version',
+            extensions: { code: 'PERSISTED_QUERY_NOT_SUPPORTED' },
+          },
+        ],
       });
     }
 
     if (!sha256Hash) {
       return res.status(400).json({
-        errors: [{
-          message: 'Missing persisted query hash',
-          extensions: { code: 'PERSISTED_QUERY_NOT_FOUND' }
-        }]
+        errors: [
+          {
+            message: 'Missing persisted query hash',
+            extensions: { code: 'PERSISTED_QUERY_NOT_FOUND' },
+          },
+        ],
       });
     }
 
@@ -257,24 +274,31 @@ export function persistedQueriesMiddleware(
     if (!persistedQueryText) {
       if (!query) {
         return res.status(400).json({
-          errors: [{
-            message: 'Persisted query not found',
-            extensions: { code: 'PERSISTED_QUERY_NOT_FOUND' }
-          }]
+          errors: [
+            {
+              message: 'Persisted query not found',
+              extensions: { code: 'PERSISTED_QUERY_NOT_FOUND' },
+            },
+          ],
         });
       }
 
       // Register new persisted query
-      const computedHash = crypto.createHash('sha256').update(query).digest('hex');
+      const computedHash = crypto
+        .createHash('sha256')
+        .update(query)
+        .digest('hex');
       if (computedHash === sha256Hash) {
         persistedQueries.set(sha256Hash, query);
         console.log(`Registered new persisted query: ${sha256Hash}`);
       } else {
         return res.status(400).json({
-          errors: [{
-            message: 'Persisted query hash mismatch',
-            extensions: { code: 'PERSISTED_QUERY_HASH_MISMATCH' }
-          }]
+          errors: [
+            {
+              message: 'Persisted query hash mismatch',
+              extensions: { code: 'PERSISTED_QUERY_HASH_MISMATCH' },
+            },
+          ],
         });
       }
     } else {
@@ -286,10 +310,12 @@ export function persistedQueriesMiddleware(
   // Enforce persisted queries if configured
   if (defaultConfig.enforcePersistedQueries && !persistedQuery) {
     return res.status(400).json({
-      errors: [{
-        message: 'Only persisted queries are allowed',
-        extensions: { code: 'PERSISTED_QUERY_REQUIRED' }
-      }]
+      errors: [
+        {
+          message: 'Only persisted queries are allowed',
+          extensions: { code: 'PERSISTED_QUERY_REQUIRED' },
+        },
+      ],
     });
   }
 
@@ -300,7 +326,7 @@ export function persistedQueriesMiddleware(
 export async function queryCacheMiddleware(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> {
   if (req.method !== 'POST' || !req.body?.query) {
     return next();
@@ -310,8 +336,10 @@ export async function queryCacheMiddleware(
   const user = (req as any).user;
 
   // Only cache read operations
-  if (query.trim().toLowerCase().startsWith('mutation') ||
-      query.trim().toLowerCase().startsWith('subscription')) {
+  if (
+    query.trim().toLowerCase().startsWith('mutation') ||
+    query.trim().toLowerCase().startsWith('subscription')
+  ) {
     return next();
   }
 
@@ -335,11 +363,12 @@ export async function queryCacheMiddleware(
 
   // Store original send to intercept response
   const originalSend = res.json;
-  res.json = function(data: any) {
+  res.json = function (data: any) {
     // Cache successful responses for 5 minutes
     if (data && !data.errors) {
-      redisClient.setex(`graphql:cache:${cacheKey}`, 300, JSON.stringify(data))
-        .catch(error => console.warn('Cache write error:', error));
+      redisClient
+        .setex(`graphql:cache:${cacheKey}`, 300, JSON.stringify(data))
+        .catch((error) => console.warn('Cache write error:', error));
     }
     return originalSend.call(this, data);
   };
@@ -351,7 +380,7 @@ export async function queryCacheMiddleware(
 export function securityValidationMiddleware(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void {
   if (req.method !== 'POST' || !req.body?.query) {
     return next();
@@ -364,20 +393,25 @@ export function securityValidationMiddleware(
     // Check against whitelist if enabled
     if (defaultConfig.enableQueryWhitelist && !queryWhitelist.has(query)) {
       return res.status(403).json({
-        errors: [{
-          message: 'Query not in whitelist',
-          extensions: { code: 'QUERY_NOT_WHITELISTED' }
-        }]
+        errors: [
+          {
+            message: 'Query not in whitelist',
+            extensions: { code: 'QUERY_NOT_WHITELISTED' },
+          },
+        ],
       });
     }
 
     next();
   } catch (error) {
     res.status(400).json({
-      errors: [{
-        message: error instanceof Error ? error.message : 'Query validation failed',
-        extensions: { code: 'INVALID_QUERY' }
-      }]
+      errors: [
+        {
+          message:
+            error instanceof Error ? error.message : 'Query validation failed',
+          extensions: { code: 'INVALID_QUERY' },
+        },
+      ],
     });
   }
 }
@@ -386,12 +420,12 @@ export function securityValidationMiddleware(
 export function metricsMiddleware(
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): void {
   const startTime = performance.now();
   const originalSend = res.json;
 
-  res.json = function(data: any) {
+  res.json = function (data: any) {
     const duration = performance.now() - startTime;
 
     // Collect metrics

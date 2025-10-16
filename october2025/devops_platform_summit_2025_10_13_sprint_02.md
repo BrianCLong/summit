@@ -9,6 +9,7 @@
 ---
 
 ## 0) Context Snapshot (post Sprint 01)
+
 - Golden path CI/CD live: build→scan→SBOM/attest→preview→canary w/ SLO gates, gated Terraform plan→apply, sealed‑secrets baseline, SLO rules for `gateway`, OTEL baseline.
 - Stage canary proven for `gateway`; rollback runbook validated.
 - Remaining follow‑ons from Sprint 01: DR drill, cost guardrails, data retention & dual‑control deletes, WAF/CDN.
@@ -16,9 +17,11 @@
 ---
 
 ## 1) Sprint Goal
+
 > **Prove we can lose a region and keep service.** Establish cross‑region replicas, automated backups & restores, failover DNS, and cost/guardrail visibility — all governed by policy‑as‑code and exercised via chaos drills.
 
 **Definition of Success:**
+
 - Stage environment can fail over (DB + app + ingress) within RTO ≤ 15 minutes, RPO ≤ 5 minutes, verified via runbook and evidence.
 - Kubecost dashboards show per‑namespace spend; budget alerts wired.
 - WAF rules & CDN caching in front of `gateway` production ingress.
@@ -27,7 +30,9 @@
 ---
 
 ## 2) Scope (In/Out)
+
 **In**
+
 - Cross‑region data layer: Postgres (PITR + replica), Neo4j causal cluster (or read replica), S3 multi‑region replication.
 - DNS failover (Route53) + health checks; ingress readiness scripts.
 - Backups: Velero for K8s objects + CSI snapshots; restore runbook.
@@ -37,7 +42,8 @@
 - Security edge: WAF ruleset + rate limiting + basic bot mitigation.
 
 **Out (this sprint)**
-- Active‑active global traffic management (we’ll deliver active‑passive → evaluate A/A next sprint).  
+
+- Active‑active global traffic management (we’ll deliver active‑passive → evaluate A/A next sprint).
 - Full DLP/classification; advanced bot management.
 
 ---
@@ -122,7 +128,7 @@ configuration:
     config: { region: us-east-1 }
 schedules:
   nightly:
-    schedule: "0 3 * * *"
+    schedule: '0 3 * * *'
     template:
       ttl: 720h
       includedNamespaces:
@@ -202,7 +208,7 @@ prometheus:
   kubeStateMetricsEnabled: true
 ingress:
   enabled: true
-  hosts: ["kubecost.stage.example.com"]
+  hosts: ['kubecost.stage.example.com']
 ```
 
 ```yaml
@@ -213,7 +219,7 @@ metadata: { name: general }
 spec:
   template:
     requirements:
-      - key: "kubernetes.io/arch"
+      - key: 'kubernetes.io/arch'
         operator: In
         values: [amd64, arm64]
     taints: []
@@ -230,15 +236,16 @@ package retention
 
 default allow = false
 allow {
-  input.resource.kind == "DeleteRequest"
-  input.resource.dataset == "user_content"
-  input.resource.requested_by != input.resource.approved_by
-  time.now_ns() - time.parse_rfc3339_ns(input.resource.created_at) > 24*60*60*1e9
+input.resource.kind == "DeleteRequest"
+input.resource.dataset == "user_content"
+input.resource.requested_by != input.resource.approved_by
+time.now_ns() - time.parse_rfc3339_ns(input.resource.created_at) > 24*60*60*1e9
 }
 ```
 
 ```md
 # RUNBOOK: Dual‑Control Delete
+
 - Requester opens DeleteRequest with justification.
 - Second approver (different identity) approves in Admin Console.
 - CI emits immutable audit (Sigstore signed) and executes retention‑aware purge job.
@@ -252,7 +259,7 @@ allow {
 name: DB Migration Gate
 on:
   pull_request:
-    paths: ["db/migrations/**"]
+    paths: ['db/migrations/**']
 jobs:
   plan:
     runs-on: ubuntu-latest
@@ -272,36 +279,41 @@ jobs:
 ## 4) Sprint Backlog
 
 ### Epic F — DR/BCP
-- **F1**: Provision cross‑region replicas (Postgres PITR + read replica).  
-- **F2**: Neo4j cluster w/ read replicas; snapshot strategy documented.  
-- **F3**: Velero backups + nightly schedule + restore test.  
-- **F4**: Route53 failover and health checks.  
+
+- **F1**: Provision cross‑region replicas (Postgres PITR + read replica).
+- **F2**: Neo4j cluster w/ read replicas; snapshot strategy documented.
+- **F3**: Velero backups + nightly schedule + restore test.
+- **F4**: Route53 failover and health checks.
 - **F5**: DR drill workflow + evidence pipeline.
 
 **Acceptance:** RTO ≤ 15m, RPO ≤ 5m on stage; evidence artifacts stored.
 
 ### Epic G — Edge & Ingress
-- **G1**: WAF ruleset via Terraform; attach to CDN/ALB/CloudFront.  
+
+- **G1**: WAF ruleset via Terraform; attach to CDN/ALB/CloudFront.
 - **G2**: Rate limiting and basic bot mitigation enabled.
 
 **Acceptance:** WAF metrics and blocked requests visible; synthetic tests pass.
 
 ### Epic H — FinOps & Autoscaling
-- **H1**: Deploy Kubecost; expose per‑namespace/project costs.  
-- **H2**: Configure Karpenter/Autoscaler profiles; consolidation enabled.  
+
+- **H1**: Deploy Kubecost; expose per‑namespace/project costs.
+- **H2**: Configure Karpenter/Autoscaler profiles; consolidation enabled.
 - **H3**: Budget alerts (Slack) for stage/prod.
 
 **Acceptance:** Cost dashboard live; alert fires in test; >15% idle reclaimed.
 
 ### Epic I — Governance & Data Lifecycle
-- **I1**: Dual‑control delete flow with immutable audits.  
-- **I2**: Retention policies encoded in OPA + scheduled purge job.  
+
+- **I1**: Dual‑control delete flow with immutable audits.
+- **I2**: Retention policies encoded in OPA + scheduled purge job.
 - **I3**: Migration gate for Postgres with safety checks.
 
 **Acceptance:** Successful purge with approvals; migration PR blocked until gate passes.
 
 ### Epic J — Observability Hardening
-- **J1**: Add SLOs for `intelgraph` & `web` services (p95/err/saturation).  
+
+- **J1**: Add SLOs for `intelgraph` & `web` services (p95/err/saturation).
 - **J2**: Alert routing by severity; on‑call runbooks.
 
 **Acceptance:** Dashboards updated; synthetic breach triggers alerts.
@@ -309,36 +321,40 @@ jobs:
 ---
 
 ## 5) Day‑by‑Day Cadence
-- **D1‑D2**: Terraform DR foundations, S3 replication, Route53 health checks.  
-- **D3**: Velero install + first backup, restore rehearsal in an empty ns.  
+
+- **D1‑D2**: Terraform DR foundations, S3 replication, Route53 health checks.
+- **D3**: Velero install + first backup, restore rehearsal in an empty ns.
 - **D4**: Neo4j cluster overlay, Postgres replica hookup, verify replication lag.
-- **D5**: DR drill workflow; k6 load; evidence harness.  
-- **D6**: WAF rules + rate limiting; smoke tests.  
-- **D7**: Kubecost + autoscaling profiles; rightsizing pass.  
-- **D8**: Governance (dual‑control delete + retention OPA); audit wiring.  
-- **D9**: SLOs for remaining services; alert routes; runbooks.  
+- **D5**: DR drill workflow; k6 load; evidence harness.
+- **D6**: WAF rules + rate limiting; smoke tests.
+- **D7**: Kubecost + autoscaling profiles; rightsizing pass.
+- **D8**: Governance (dual‑control delete + retention OPA); audit wiring.
+- **D9**: SLOs for remaining services; alert routes; runbooks.
 - **D10**: Soak, fix, and capture acceptance evidence; ship.
 
 ---
 
 ## 6) Acceptance Evidence to Capture
+
 - Terraform plans/applies, Route53 health check status, Velero backup/restore logs, replication lag graphs, DR drill timings, WAF metrics, Kubecost screenshots, autoscaler events, OPA decision logs, audit attestations, alert screenshots.
 
 ---
 
 ## 7) Risks & Mitigations
-- **Cross‑region costs** → use lower storage class, snapshot pruning, right‑size replicas.  
-- **False positives in WAF** → start in count mode → switch to block after review.  
-- **Backup bloat** → enforce retention and verify restore before turning on broader scopes.  
+
+- **Cross‑region costs** → use lower storage class, snapshot pruning, right‑size replicas.
+- **False positives in WAF** → start in count mode → switch to block after review.
+- **Backup bloat** → enforce retention and verify restore before turning on broader scopes.
 - **Replica lag** → cap write throughput in drill, tune wal
-autovacuum settings.
+  autovacuum settings.
 
 ---
 
 ## 8) Alignment with Other Sprints
-- *UNIFIED DATA FOUNDATION*: relies on durable storage + migrations → Migration Gate (Epic I) provides safety.  
-- *TRIAD MERGE*: cross‑region availability ensures merge rollouts are safe → DR (Epic F) de-risks.  
-- *MAESTRO COMPOSER*: predictable costs → Kubecost (Epic H) and autoscaling feed planning.
+
+- _UNIFIED DATA FOUNDATION_: relies on durable storage + migrations → Migration Gate (Epic I) provides safety.
+- _TRIAD MERGE_: cross‑region availability ensures merge rollouts are safe → DR (Epic F) de-risks.
+- _MAESTRO COMPOSER_: predictable costs → Kubecost (Epic H) and autoscaling feed planning.
 
 ---
 
@@ -346,16 +362,18 @@ autovacuum settings.
 
 ```md
 # RUNBOOK: Stage DR Failover
-1) Trigger `DR Drill (stage)` workflow with reason.
-2) Observe k6 load active.
-3) Simulate primary failure via script; confirm health checks flip.
-4) Validate RTO by timestamped first 2xx on secondary.
-5) Validate RPO by checking latest tx id vs. replica.
-6) Roll back to primary, re‑sync, close incident, attach evidence.
+
+1. Trigger `DR Drill (stage)` workflow with reason.
+2. Observe k6 load active.
+3. Simulate primary failure via script; confirm health checks flip.
+4. Validate RTO by timestamped first 2xx on secondary.
+5. Validate RPO by checking latest tx id vs. replica.
+6. Roll back to primary, re‑sync, close incident, attach evidence.
 ```
 
 ```md
 # RUNBOOK: Velero Restore
+
 - Identify backup: `velero backup get` → name.
 - Restore: `velero restore create --from-backup <name>`.
 - Verify pods ready; run smoke.
@@ -383,8 +401,8 @@ kubectl -n kubecost port-forward svc/kubecost-cost-analyzer 9090:9090
 ---
 
 ## 11) Follow‑on Seeds (Sprint 03)
+
 - Active‑active traffic steering (Geo/Latency) with per‑region write fencing.
 - Data tier benchmarking + tuned p95 targets by domain.
 - Advanced bot mitigation and fraud signals.
 - Cost policies (OPA) that block out‑of‑budget preview spins.
-

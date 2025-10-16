@@ -1,16 +1,66 @@
-<!doctype html><html><head><meta charset="utf-8"><title>Decision Overlay</title>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<style>#dock{position:fixed;right:16px;top:16px;width:360px;border:1px solid #ddd;border-radius:12px;padding:10px;background:#fff;box-shadow:0 6px 24px rgba(0,0,0,.08)}.k{opacity:.7}</style></head>
-<body>
-<div id="dock"><div id=hdr><b>Decision Card</b></div><div id=body></div><div id=act>
-  <button id=a1>Retry (alt arm)</button> <button id=a2>Downshift</button> <button id=a3>Escalate tests</button>
-</div></div>
-<script>
-$(function(){
-  function fmt(c){return '<div><span class=k>arm</span> '+c.chosenArm+' · <span class=k>eval</span> '+c.predictedEval.toFixed(2)+' · <span class=k>$</span>'+c.predictedCostUSD.toFixed(2)+'</div><pre>'+c.rationale+'</pre>'};
-  var card={chosenArm:'impl@small',predictedEval:0.94,predictedCostUSD:0.18,rationale:'Cheapest capable; low risk'}; $('#body').html(fmt(card));
-  $('#a1').on('click',()=>$.post('/api/decision/alt',{arm:'impl@medium'}));
-  $('#a2').on('click',()=>$.post('/api/decision/downshift'));
-  $('#a3').on('click',()=>$.post('/api/decision/tests',{mode:'high'}));
-});
-</script></body></html>
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Decision Overlay</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+      #dock {
+        position: fixed;
+        right: 16px;
+        top: 16px;
+        width: 360px;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 10px;
+        background: #fff;
+        box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+      }
+      .k {
+        opacity: 0.7;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="dock">
+      <div id="hdr"><b>Decision Card</b></div>
+      <div id="body"></div>
+      <div id="act">
+        <button id="a1">Retry (alt arm)</button>
+        <button id="a2">Downshift</button>
+        <button id="a3">Escalate tests</button>
+      </div>
+    </div>
+    <script>
+      $(function () {
+        function fmt(c) {
+          return (
+            '<div><span class=k>arm</span> ' +
+            c.chosenArm +
+            ' · <span class=k>eval</span> ' +
+            c.predictedEval.toFixed(2) +
+            ' · <span class=k>$</span>' +
+            c.predictedCostUSD.toFixed(2) +
+            '</div><pre>' +
+            c.rationale +
+            '</pre>'
+          );
+        }
+        var card = {
+          chosenArm: 'impl@small',
+          predictedEval: 0.94,
+          predictedCostUSD: 0.18,
+          rationale: 'Cheapest capable; low risk',
+        };
+        $('#body').html(fmt(card));
+        $('#a1').on('click', () =>
+          $.post('/api/decision/alt', { arm: 'impl@medium' }),
+        );
+        $('#a2').on('click', () => $.post('/api/decision/downshift'));
+        $('#a3').on('click', () =>
+          $.post('/api/decision/tests', { mode: 'high' }),
+        );
+      });
+    </script>
+  </body>
+</html>

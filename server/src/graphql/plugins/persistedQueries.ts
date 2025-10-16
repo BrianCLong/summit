@@ -17,10 +17,10 @@ for (const p of candidates) {
     const raw = fs.readFileSync(p, 'utf8');
     const manifest = JSON.parse(raw);
     const ids = Object.keys(manifest);
-    if (ids.length) { 
-      allowedOperationIds = new Set(ids); 
+    if (ids.length) {
+      allowedOperationIds = new Set(ids);
       console.log(`Loaded ${ids.length} persisted operations from ${p}`);
-      break; 
+      break;
     }
   } catch (error) {
     // Continue to next candidate
@@ -32,7 +32,10 @@ export const persistedQueriesPlugin: ApolloServerPlugin = {
     return {
       async didResolveOperation(ctx) {
         // Enforce only in production or when explicitly enabled
-        if (process.env.PERSISTED_QUERIES !== '1' && process.env.NODE_ENV !== 'production') {
+        if (
+          process.env.PERSISTED_QUERIES !== '1' &&
+          process.env.NODE_ENV !== 'production'
+        ) {
           return;
         }
 

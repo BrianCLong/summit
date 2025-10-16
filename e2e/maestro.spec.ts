@@ -1,6 +1,13 @@
 import { test, expect, request } from '@playwright/test';
 
-const ROUTES = ['/', '/dashboard', '/pipelines', '/observability', '/settings', '/autonomy'];
+const ROUTES = [
+  '/',
+  '/dashboard',
+  '/pipelines',
+  '/observability',
+  '/settings',
+  '/autonomy',
+];
 
 function isIpHost(u: URL): boolean {
   return /^\d+\.\d+\.\d+\.\d+$/.test(u.hostname);
@@ -16,10 +23,18 @@ test.describe('Maestro UI - Core routes', () => {
         const u = new URL(url);
         // On raw IP targets, SPA fallback for deep routes may not be configured; only enforce root.
         if (isIpHost(u) && path !== '/') {
-          test.info().annotations.push({ type: 'route-skip', description: `Skipping ${path} on IP host (status ${resp!.status()})` });
+          test
+            .info()
+            .annotations.push({
+              type: 'route-skip',
+              description: `Skipping ${path} on IP host (status ${resp!.status()})`,
+            });
           test.skip();
         }
-        expect(resp!.ok(), `Non-OK status for ${url}: ${resp && resp.status()}`).toBeTruthy();
+        expect(
+          resp!.ok(),
+          `Non-OK status for ${url}: ${resp && resp.status()}`,
+        ).toBeTruthy();
       }
       await expect(page).toHaveTitle(/Maestro Conductor/i);
       // Sanity check for app shell
@@ -38,7 +53,10 @@ test.describe('Maestro API - Health and Status', () => {
     expect(typeof json.version).toBe('string');
   });
 
-  test('GET /api/status returns services overview', async ({ request, baseURL }) => {
+  test('GET /api/status returns services overview', async ({
+    request,
+    baseURL,
+  }) => {
     const r = await request.get(new URL('/api/status', baseURL).toString());
     expect(r.ok()).toBeTruthy();
     expect(r.headers()['content-type']).toMatch(/application\/json/);
@@ -49,7 +67,13 @@ test.describe('Maestro API - Health and Status', () => {
 });
 
 test.describe('GraphQL endpoint probe', () => {
-  const candidates = ['/api/graphql', '/graphql', '/gql', '/graph', '/v1/graphql'];
+  const candidates = [
+    '/api/graphql',
+    '/graphql',
+    '/gql',
+    '/graph',
+    '/v1/graphql',
+  ];
   const introspection = {
     operationName: 'Introspection',
     query:
@@ -57,15 +81,24 @@ test.describe('GraphQL endpoint probe', () => {
     variables: {},
   };
 
-  test('Find a working GraphQL endpoint and validate introspection', async ({ request, baseURL }) => {
+  test('Find a working GraphQL endpoint and validate introspection', async ({
+    request,
+    baseURL,
+  }) => {
     let success = false;
     let firstOk: { path: string; json: any } | null = null;
-    const authHeader = process.env.E2E_TOKEN ? { Authorization: `Bearer ${process.env.E2E_TOKEN}` } : {};
+    const authHeader = process.env.E2E_TOKEN
+      ? { Authorization: `Bearer ${process.env.E2E_TOKEN}` }
+      : {};
     for (const path of candidates) {
       const url = new URL(path, baseURL).toString();
       const r = await request.post(url, {
         data: introspection,
-        headers: { 'content-type': 'application/json', accept: 'application/json', ...authHeader },
+        headers: {
+          'content-type': 'application/json',
+          accept: 'application/json',
+          ...authHeader,
+        },
       });
       const ct = r.headers()['content-type'] || '';
       if (!r.ok() || !ct.includes('application/json')) {
@@ -78,12 +111,20 @@ test.describe('GraphQL endpoint probe', () => {
         break;
       }
     }
-    expect(success, 'No GraphQL endpoint responded with JSON to introspection').toBeTruthy();
+    expect(
+      success,
+      'No GraphQL endpoint responded with JSON to introspection',
+    ).toBeTruthy();
 
     // Minimal structural checks
     expect(firstOk!.json).toBeTruthy();
     expect(firstOk!.json.data || firstOk!.json.errors).toBeTruthy();
-    test.info().annotations.push({ type: 'graphql-endpoint', description: firstOk!.path });
+    test
+      .info()
+      .annotations.push({
+        type: 'graphql-endpoint',
+        description: firstOk!.path,
+      });
   });
 });
 
@@ -109,24 +150,32 @@ test.describe('GraphQL mutation roundtrip (conditional)', () => {
   const mutation = process.env.E2E_GQL_MUTATION || defaultMutation;
   const variables = (() => {
     try {
-      return process.env.E2E_GQL_VARIABLES ? JSON.parse(process.env.E2E_GQL_VARIABLES) : {};
+      return process.env.E2E_GQL_VARIABLES
+        ? JSON.parse(process.env.E2E_GQL_VARIABLES)
+        : {};
     } catch {
       return {};
     }
   })();
-  const finalVariables = Object.keys(variables).length ? variables : defaultVariables;
+  const finalVariables = Object.keys(variables).length
+    ? variables
+    : defaultVariables;
 
   const shouldRun = Boolean(mutation);
 
   test.skip(!shouldRun, 'Skipping mutation: set E2E_GQL_MUTATION to enable');
 
-  test('executes provided mutation and returns data', async ({ request, baseURL }) => {
+  test('executes provided mutation and returns data', async ({
+    request,
+    baseURL,
+  }) => {
     const url = new URL(gqlPath, baseURL).toString();
     const headers: Record<string, string> = {
       'content-type': 'application/json',
       accept: 'application/json',
     };
-    if (process.env.E2E_TOKEN) headers.Authorization = `Bearer ${process.env.E2E_TOKEN}`;
+    if (process.env.E2E_TOKEN)
+      headers.Authorization = `Bearer ${process.env.E2E_TOKEN}`;
 
     const r = await request.post(url, {
       headers,
@@ -136,6 +185,9 @@ test.describe('GraphQL mutation roundtrip (conditional)', () => {
     const json = await r.json();
     // Accept either data or errors, but prefer data for pass
     expect(json).toBeTruthy();
-    expect(json.data, `Mutation did not return data. Errors: ${JSON.stringify(json.errors || [])}`).toBeTruthy();
+    expect(
+      json.data,
+      `Mutation did not return data. Errors: ${JSON.stringify(json.errors || [])}`,
+    ).toBeTruthy();
   });
 });

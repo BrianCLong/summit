@@ -42,7 +42,9 @@ export class CounterfactualShadowingCoordinator {
     const primaryCoverage = extractCoveredCriteria(primaryOutput.content, task);
     const shadowCoverage = extractCoveredCriteria(shadowOutput.content, task);
 
-    const deltas = Array.from(shadowCoverage).filter((id) => !primaryCoverage.has(id));
+    const deltas = Array.from(shadowCoverage).filter(
+      (id) => !primaryCoverage.has(id),
+    );
     let mergedContent = primaryOutput.content;
     if (deltas.length > 0) {
       mergedContent += `\n\n[Counterfactual Enhancements]\n${shadowOutput.content}`;
@@ -52,8 +54,13 @@ export class CounterfactualShadowingCoordinator {
       ? await adjudicator.evaluate({
           mode: 'counterfactual-shadowing',
           content: mergedContent,
-          supportingEvidence: [...(primaryOutput.evidence ?? []), ...(shadowOutput.evidence ?? [])],
-          acceptanceCriteriaSatisfied: Array.from(new Set([...primaryCoverage, ...shadowCoverage])),
+          supportingEvidence: [
+            ...(primaryOutput.evidence ?? []),
+            ...(shadowOutput.evidence ?? []),
+          ],
+          acceptanceCriteriaSatisfied: Array.from(
+            new Set([...primaryCoverage, ...shadowCoverage]),
+          ),
           residualRisks: [],
         })
       : [];
@@ -67,7 +74,9 @@ export class CounterfactualShadowingCoordinator {
 
     return {
       artifact,
-      mergedCoverage: Array.from(new Set([...primaryCoverage, ...shadowCoverage])),
+      mergedCoverage: Array.from(
+        new Set([...primaryCoverage, ...shadowCoverage]),
+      ),
       shadowDeltas: deltas,
     };
   }

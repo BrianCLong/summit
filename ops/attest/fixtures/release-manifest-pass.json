@@ -7,10 +7,18 @@
       "image": "registry.intelgraph.dev/conductor-api:2025.09.01",
       "digest": "sha256:111aaa",
       "sbom": "ops/security/cve_budget/fixtures/sbom-conductor-api.json",
-      "signature": {"verified": true, "issuer": "cosign", "certificate": "https://ca.example/fulcio.crt"},
+      "signature": {
+        "verified": true,
+        "issuer": "cosign",
+        "certificate": "https://ca.example/fulcio.crt"
+      },
       "attestations": [
-        {"type": "slsa", "predicateType": "https://slsa.dev/provenance/v1", "verified": true},
-        {"type": "sbom", "predicateType": "spdx", "verified": true}
+        {
+          "type": "slsa",
+          "predicateType": "https://slsa.dev/provenance/v1",
+          "verified": true
+        },
+        { "type": "sbom", "predicateType": "spdx", "verified": true }
       ]
     },
     {
@@ -18,9 +26,17 @@
       "image": "registry.intelgraph.dev/inference-worker:2025.09.01",
       "digest": "sha256:222bbb",
       "sbom": "ops/security/cve_budget/fixtures/sbom-inference-worker.json",
-      "signature": {"verified": true, "issuer": "cosign", "certificate": "https://ca.example/fulcio.crt"},
+      "signature": {
+        "verified": true,
+        "issuer": "cosign",
+        "certificate": "https://ca.example/fulcio.crt"
+      },
       "attestations": [
-        {"type": "slsa", "predicateType": "https://slsa.dev/provenance/v1", "verified": true}
+        {
+          "type": "slsa",
+          "predicateType": "https://slsa.dev/provenance/v1",
+          "verified": true
+        }
       ]
     },
     {
@@ -28,10 +44,18 @@
       "image": "registry.intelgraph.dev/reporting-api:2025.09.01",
       "digest": "sha256:333ccc",
       "sbom": "ops/security/cve_budget/fixtures/sbom-reporting-api.json",
-      "signature": {"verified": true, "issuer": "cosign", "certificate": "https://ca.example/fulcio.crt"},
+      "signature": {
+        "verified": true,
+        "issuer": "cosign",
+        "certificate": "https://ca.example/fulcio.crt"
+      },
       "attestations": [
-        {"type": "slsa", "predicateType": "https://slsa.dev/provenance/v1", "verified": true},
-        {"type": "sbom", "predicateType": "spdx", "verified": true}
+        {
+          "type": "slsa",
+          "predicateType": "https://slsa.dev/provenance/v1",
+          "verified": true
+        },
+        { "type": "sbom", "predicateType": "spdx", "verified": true }
       ]
     }
   ]

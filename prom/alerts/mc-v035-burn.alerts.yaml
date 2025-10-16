@@ -1,37 +1,39 @@
 groups:
-- name: mc-v035-burn
-  interval: 30s
-  rules:
-  - alert: GraphQLFastBurn
-    expr: (1 - (sum(rate(http_requests_total{service="agent-workbench",code!~"2..|3.."}[1h]))
-            / clamp_min(sum(rate(http_requests_total{service="agent-workbench"}[1h])),1))) < 0.9995
-    for: 10m
-    labels:
-      severity: page
-      slo: availability
-      window: 1h
-    annotations:
-      summary: "Fast burn: availability below 99.95% (1h)"
-      description: |
-        Fast burn detected: availability is {{ $value | printf "%.4f" }} over 1h window.
-        This indicates a rapid degradation requiring immediate intervention.
-        Check error rates, latency spikes, and recent deployments.
-      runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.5-ops.md#availability
-      dashboard_url: https://grafana.example.com/d/mc-v035-tiles?var-tenant={{ $labels.tenant | urlquery }}&from=now-2h&to=now
+  - name: mc-v035-burn
+    interval: 30s
+    rules:
+      - alert: GraphQLFastBurn
+        expr:
+          (1 - (sum(rate(http_requests_total{service="agent-workbench",code!~"2..|3.."}[1h]))
+          / clamp_min(sum(rate(http_requests_total{service="agent-workbench"}[1h])),1))) < 0.9995
+        for: 10m
+        labels:
+          severity: page
+          slo: availability
+          window: 1h
+        annotations:
+          summary: 'Fast burn: availability below 99.95% (1h)'
+          description: |
+            Fast burn detected: availability is {{ $value | printf "%.4f" }} over 1h window.
+            This indicates a rapid degradation requiring immediate intervention.
+            Check error rates, latency spikes, and recent deployments.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.5-ops.md#availability
+          dashboard_url: https://grafana.example.com/d/mc-v035-tiles?var-tenant={{ $labels.tenant | urlquery }}&from=now-2h&to=now
 
-  - alert: GraphQLSlowBurn
-    expr: (1 - (sum(rate(http_requests_total{service="agent-workbench",code!~"2..|3.."}[24h]))
-            / clamp_min(sum(rate(http_requests_total{service="agent-workbench"}[24h])),1))) < 0.9995
-    for: 30m
-    labels:
-      severity: warn
-      slo: availability
-      window: 24h
-    annotations:
-      summary: "Slow burn: availability below 99.95% (24h)"
-      description: |
-        Slow burn detected: availability is {{ $value | printf "%.4f" }} over 24h window.
-        Error budget is being consumed gradually. Monitor trends and consider intervention.
-        Check for degraded performance patterns or capacity issues.
-      runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.5-ops.md#availability
-      dashboard_url: https://grafana.example.com/d/mc-v035-tiles?var-tenant={{ $labels.tenant | urlquery }}&from=now-48h&to=now
+      - alert: GraphQLSlowBurn
+        expr:
+          (1 - (sum(rate(http_requests_total{service="agent-workbench",code!~"2..|3.."}[24h]))
+          / clamp_min(sum(rate(http_requests_total{service="agent-workbench"}[24h])),1))) < 0.9995
+        for: 30m
+        labels:
+          severity: warn
+          slo: availability
+          window: 24h
+        annotations:
+          summary: 'Slow burn: availability below 99.95% (24h)'
+          description: |
+            Slow burn detected: availability is {{ $value | printf "%.4f" }} over 24h window.
+            Error budget is being consumed gradually. Monitor trends and consider intervention.
+            Check for degraded performance patterns or capacity issues.
+          runbook_url: https://git.example.com/mc/docs/runbooks/v0.3.5-ops.md#availability
+          dashboard_url: https://grafana.example.com/d/mc-v035-tiles?var-tenant={{ $labels.tenant | urlquery }}&from=now-48h&to=now

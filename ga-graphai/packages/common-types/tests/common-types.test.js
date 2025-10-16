@@ -10,18 +10,34 @@ import {
   createDecisionRecord,
   normalizeLatency,
   percentile,
-  updateEma
+  updateEma,
 } from '../src/index.js';
 
 test('computeValueDensity returns higher score for better quality at fixed cost', () => {
-  const base = computeValueDensity({ quality: 0.8, coverage: 0.9, cost: 0.002, latency: 200 });
-  const improved = computeValueDensity({ quality: 0.88, coverage: 0.9, cost: 0.002, latency: 200 });
+  const base = computeValueDensity({
+    quality: 0.8,
+    coverage: 0.9,
+    cost: 0.002,
+    latency: 200,
+  });
+  const improved = computeValueDensity({
+    quality: 0.88,
+    coverage: 0.9,
+    cost: 0.002,
+    latency: 200,
+  });
   assert.ok(improved > base);
 });
 
 test('computeValueDensity returns zero if cost or latency is non-positive', () => {
-  assert.equal(computeValueDensity({ quality: 0.9, coverage: 1, cost: 0, latency: 10 }), 0);
-  assert.equal(computeValueDensity({ quality: 0.9, coverage: 1, cost: 0.001, latency: 0 }), 0);
+  assert.equal(
+    computeValueDensity({ quality: 0.9, coverage: 1, cost: 0, latency: 10 }),
+    0,
+  );
+  assert.equal(
+    computeValueDensity({ quality: 0.9, coverage: 1, cost: 0.001, latency: 0 }),
+    0,
+  );
 });
 
 test('percentile interpolates values', () => {
@@ -33,7 +49,11 @@ test('percentile interpolates values', () => {
 
 test('createBudgetSnapshot calculates burn rate and headroom', () => {
   const now = new Date('2024-05-15T12:00:00Z');
-  const snapshot = createBudgetSnapshot({ baselineMonthlyUSD: 1000, consumedUSD: 400, timestamp: now });
+  const snapshot = createBudgetSnapshot({
+    baselineMonthlyUSD: 1000,
+    consumedUSD: 400,
+    timestamp: now,
+  });
   assert.ok(snapshot.headroomPct < 1);
   assert.ok(snapshot.burnRateUSDPerDay > 0);
 });
@@ -46,7 +66,7 @@ test('createDecisionRecord freezes payload and normalizes values', () => {
     pred: { quality: 0.9, lat: 300, cost: 0.001 },
     actual: { quality: 0.92, lat: 290, cost: 0.0009 },
     provenanceUri: 's3://bucket/task-1',
-    budgetDeltaUSD: -0.0001
+    budgetDeltaUSD: -0.0001,
   });
   assert.equal(record.taskId, 'task-1');
   assert.throws(() => {

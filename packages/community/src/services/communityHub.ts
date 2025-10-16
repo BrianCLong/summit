@@ -34,10 +34,18 @@ export class CommunityHub {
       this.activity,
       this.contributions,
       this.gamification,
-      this.notifications
+      this.notifications,
     );
-    this.profiles = new UserProfileService(this.store, this.activity, this.contributions);
-    this.moderation = new ModerationService(this.store, this.activity, this.notifications);
+    this.profiles = new UserProfileService(
+      this.store,
+      this.activity,
+      this.contributions,
+    );
+    this.moderation = new ModerationService(
+      this.store,
+      this.activity,
+      this.notifications,
+    );
     this.search = new SearchService(this.store);
     this.analytics = new AnalyticsService(this.store);
     this.dashboard = new DashboardService(this.analytics, this.contributions);

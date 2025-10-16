@@ -16,7 +16,12 @@ export interface SecurityPolicy {
   id: string;
   name: string;
   description: string;
-  category: 'access-control' | 'data-protection' | 'network-security' | 'endpoint-protection' | 'compliance';
+  category:
+    | 'access-control'
+    | 'data-protection'
+    | 'network-security'
+    | 'endpoint-protection'
+    | 'compliance';
   severity: 'low' | 'medium' | 'high' | 'critical';
   rules: PolicyRule[];
   enforcement: 'monitor' | 'warn' | 'block' | 'quarantine';
@@ -65,7 +70,13 @@ export interface ThreatRule {
   id: string;
   name: string;
   description: string;
-  category: 'malware' | 'phishing' | 'intrusion' | 'data-exfiltration' | 'insider-threat' | 'apt';
+  category:
+    | 'malware'
+    | 'phishing'
+    | 'intrusion'
+    | 'data-exfiltration'
+    | 'insider-threat'
+    | 'apt';
   severity: 'info' | 'low' | 'medium' | 'high' | 'critical';
   indicators: ThreatIndicator[];
   tactics: string[];
@@ -77,7 +88,15 @@ export interface ThreatRule {
 }
 
 export interface ThreatIndicator {
-  type: 'ip' | 'domain' | 'url' | 'hash' | 'email' | 'user-agent' | 'certificate' | 'behavior';
+  type:
+    | 'ip'
+    | 'domain'
+    | 'url'
+    | 'hash'
+    | 'email'
+    | 'user-agent'
+    | 'certificate'
+    | 'behavior';
   value: string;
   context: string;
   source: string;
@@ -166,7 +185,11 @@ export interface CommunicationChannel {
 export interface MessageTemplate {
   id: string;
   name: string;
-  type: 'incident-created' | 'incident-updated' | 'incident-resolved' | 'escalation';
+  type:
+    | 'incident-created'
+    | 'incident-updated'
+    | 'incident-resolved'
+    | 'escalation';
   subject: string;
   body: string;
   channels: string[];
@@ -210,7 +233,13 @@ export interface AutomatedResponse {
 
 export interface ResponseAction {
   id: string;
-  type: 'isolate' | 'block' | 'quarantine' | 'patch' | 'remediate' | 'collect-evidence';
+  type:
+    | 'isolate'
+    | 'block'
+    | 'quarantine'
+    | 'patch'
+    | 'remediate'
+    | 'collect-evidence';
   target: string;
   parameters: Record<string, any>;
   timeout: number;
@@ -245,7 +274,13 @@ export interface AlertThreshold {
 
 export interface SecurityIntegration {
   id: string;
-  type: 'siem' | 'soar' | 'edr' | 'threat-intel' | 'vulnerability-scanner' | 'deception';
+  type:
+    | 'siem'
+    | 'soar'
+    | 'edr'
+    | 'threat-intel'
+    | 'vulnerability-scanner'
+    | 'deception';
   name: string;
   endpoint: string;
   credentials: Record<string, string>;
@@ -339,7 +374,13 @@ export interface SecurityIncident {
   title: string;
   description: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
-  status: 'new' | 'assigned' | 'investigating' | 'contained' | 'resolved' | 'closed';
+  status:
+    | 'new'
+    | 'assigned'
+    | 'investigating'
+    | 'contained'
+    | 'resolved'
+    | 'closed';
   category: string;
   assignee?: string;
   createdAt: Date;
@@ -364,7 +405,13 @@ export interface IncidentTimelineEntry {
 
 export interface Evidence {
   id: string;
-  type: 'log' | 'file' | 'memory-dump' | 'network-capture' | 'image' | 'document';
+  type:
+    | 'log'
+    | 'file'
+    | 'memory-dump'
+    | 'network-capture'
+    | 'image'
+    | 'document';
   name: string;
   description: string;
   path: string;
@@ -454,7 +501,7 @@ export class SecurityOrchestrator extends EventEmitter {
         total: 0,
         byseverity: {},
         byCategory: {},
-        falsePositiveRate: 0
+        falsePositiveRate: 0,
       },
       incidents: {
         total: 0,
@@ -462,35 +509,40 @@ export class SecurityOrchestrator extends EventEmitter {
         resolved: 0,
         meanTimeToDetection: 0,
         meanTimeToResponse: 0,
-        meanTimeToResolution: 0
+        meanTimeToResolution: 0,
       },
       threats: {
         blocked: 0,
         mitigated: 0,
         active: 0,
-        topThreats: []
+        topThreats: [],
       },
       compliance: {
         overallScore: 0,
         frameworkScores: {},
         violations: 0,
-        remediations: 0
+        remediations: 0,
       },
       automation: {
         responseRate: 0,
         successRate: 0,
-        timesSaved: 0
-      }
+        timesSaved: 0,
+      },
     };
   }
 
-  async ingestEvent(rawEvent: Omit<SecurityEvent, 'id' | 'enrichment' | 'correlations' | 'status'>): Promise<SecurityEvent> {
+  async ingestEvent(
+    rawEvent: Omit<
+      SecurityEvent,
+      'id' | 'enrichment' | 'correlations' | 'status'
+    >,
+  ): Promise<SecurityEvent> {
     const event: SecurityEvent = {
       ...rawEvent,
       id: crypto.randomUUID(),
       enrichment: await this.enrichEvent(rawEvent),
       correlations: [],
-      status: 'new'
+      status: 'new',
     };
 
     this.events.set(event.id, event);
@@ -518,13 +570,15 @@ export class SecurityOrchestrator extends EventEmitter {
       severity: event.severity,
       category: event.category,
       source: event.source,
-      timestamp: event.timestamp
+      timestamp: event.timestamp,
     });
 
     return event;
   }
 
-  private async enrichEvent(event: Omit<SecurityEvent, 'id' | 'enrichment' | 'correlations' | 'status'>): Promise<EventEnrichment> {
+  private async enrichEvent(
+    event: Omit<SecurityEvent, 'id' | 'enrichment' | 'correlations' | 'status'>,
+  ): Promise<EventEnrichment> {
     const enrichment: EventEnrichment = {
       threatIntel: [],
       geoLocation: {
@@ -534,7 +588,7 @@ export class SecurityOrchestrator extends EventEmitter {
         latitude: 0,
         longitude: 0,
         asn: 'Unknown',
-        isp: 'Unknown'
+        isp: 'Unknown',
       },
       assetInfo: {
         hostname: 'Unknown',
@@ -542,7 +596,7 @@ export class SecurityOrchestrator extends EventEmitter {
         operatingSystem: 'Unknown',
         owner: 'Unknown',
         criticality: 'medium',
-        tags: []
+        tags: [],
       },
       userContext: {
         username: 'Unknown',
@@ -550,7 +604,7 @@ export class SecurityOrchestrator extends EventEmitter {
         role: 'Unknown',
         privileged: false,
         lastLogin: new Date(),
-        riskScore: 0
+        riskScore: 0,
       },
       networkContext: {
         protocol: 'Unknown',
@@ -558,7 +612,7 @@ export class SecurityOrchestrator extends EventEmitter {
         destinationPort: 0,
         bytes: 0,
         packets: 0,
-        duration: 0
+        duration: 0,
       },
       processContext: {
         processId: 0,
@@ -566,8 +620,8 @@ export class SecurityOrchestrator extends EventEmitter {
         commandLine: 'Unknown',
         parentProcess: 'Unknown',
         hash: 'Unknown',
-        signed: false
-      }
+        signed: false,
+      },
     };
 
     // Enrich with threat intelligence
@@ -588,7 +642,10 @@ export class SecurityOrchestrator extends EventEmitter {
     return enrichment;
   }
 
-  private async lookupThreatIntel(indicatorType: string, indicatorValue: string): Promise<ThreatIntelResult[]> {
+  private async lookupThreatIntel(
+    indicatorType: string,
+    indicatorValue: string,
+  ): Promise<ThreatIntelResult[]> {
     const cacheKey = `${indicatorType}:${indicatorValue}`;
 
     if (this.threatIntelCache.has(cacheKey)) {
@@ -601,7 +658,11 @@ export class SecurityOrchestrator extends EventEmitter {
     for (const integration of this.config.integrations) {
       if (integration.type === 'threat-intel' && integration.enabled) {
         try {
-          const result = await this.queryThreatIntel(integration, indicatorType, indicatorValue);
+          const result = await this.queryThreatIntel(
+            integration,
+            indicatorType,
+            indicatorValue,
+          );
           if (result) {
             results.push(result);
           }
@@ -609,7 +670,7 @@ export class SecurityOrchestrator extends EventEmitter {
           this.emit('threat_intel_error', {
             integration: integration.name,
             indicator: `${indicatorType}:${indicatorValue}`,
-            error: error instanceof Error ? error.message : 'Unknown error'
+            error: error instanceof Error ? error.message : 'Unknown error',
           });
         }
       }
@@ -622,7 +683,11 @@ export class SecurityOrchestrator extends EventEmitter {
     return results;
   }
 
-  private async queryThreatIntel(integration: SecurityIntegration, type: string, value: string): Promise<ThreatIntelResult | null> {
+  private async queryThreatIntel(
+    integration: SecurityIntegration,
+    type: string,
+    value: string,
+  ): Promise<ThreatIntelResult | null> {
     // Implementation would depend on specific threat intel provider
     // This is a mock implementation
     return {
@@ -630,11 +695,13 @@ export class SecurityOrchestrator extends EventEmitter {
       verdict: 'clean',
       confidence: 0.8,
       categories: [],
-      associations: []
+      associations: [],
     };
   }
 
-  private async evaluateThreatRules(event: SecurityEvent): Promise<ThreatRule[]> {
+  private async evaluateThreatRules(
+    event: SecurityEvent,
+  ): Promise<ThreatRule[]> {
     const matchedRules: ThreatRule[] = [];
 
     for (const rule of this.config.threatDetectionRules) {
@@ -649,7 +716,7 @@ export class SecurityOrchestrator extends EventEmitter {
           ruleName: rule.name,
           eventId: event.id,
           severity: rule.severity,
-          confidence: rule.confidence
+          confidence: rule.confidence,
         });
       }
     }
@@ -657,7 +724,10 @@ export class SecurityOrchestrator extends EventEmitter {
     return matchedRules;
   }
 
-  private async evaluateRuleConditions(rule: ThreatRule, event: SecurityEvent): Promise<boolean> {
+  private async evaluateRuleConditions(
+    rule: ThreatRule,
+    event: SecurityEvent,
+  ): Promise<boolean> {
     // Check if event matches any of the rule's indicators
     for (const indicator of rule.indicators) {
       const eventValue = event.indicators[indicator.type];
@@ -669,7 +739,10 @@ export class SecurityOrchestrator extends EventEmitter {
     return false;
   }
 
-  private matchesIndicator(eventValue: any, indicator: ThreatIndicator): boolean {
+  private matchesIndicator(
+    eventValue: any,
+    indicator: ThreatIndicator,
+  ): boolean {
     switch (indicator.type) {
       case 'ip':
       case 'domain':
@@ -686,7 +759,9 @@ export class SecurityOrchestrator extends EventEmitter {
     }
   }
 
-  private async checkPolicyViolations(event: SecurityEvent): Promise<SecurityPolicy[]> {
+  private async checkPolicyViolations(
+    event: SecurityEvent,
+  ): Promise<SecurityPolicy[]> {
     const violations: SecurityPolicy[] = [];
 
     for (const policy of this.config.securityPolicies) {
@@ -706,7 +781,10 @@ export class SecurityOrchestrator extends EventEmitter {
     return violations;
   }
 
-  private async evaluatePolicyRule(rule: PolicyRule, event: SecurityEvent): Promise<boolean> {
+  private async evaluatePolicyRule(
+    rule: PolicyRule,
+    event: SecurityEvent,
+  ): Promise<boolean> {
     // Implementation would evaluate rule conditions against event data
     return false; // Placeholder
   }
@@ -714,7 +792,7 @@ export class SecurityOrchestrator extends EventEmitter {
   private shouldCreateIncident(
     event: SecurityEvent,
     matchedRules: ThreatRule[],
-    violations: SecurityPolicy[]
+    violations: SecurityPolicy[],
   ): boolean {
     // Create incident if:
     // 1. High or critical severity event
@@ -730,11 +808,15 @@ export class SecurityOrchestrator extends EventEmitter {
       return true;
     }
 
-    if (violations.some(v => v.severity === 'critical')) {
+    if (violations.some((v) => v.severity === 'critical')) {
       return true;
     }
 
-    if (event.enrichment.threatIntel.some(ti => ti.verdict === 'malicious' && ti.confidence > 0.8)) {
+    if (
+      event.enrichment.threatIntel.some(
+        (ti) => ti.verdict === 'malicious' && ti.confidence > 0.8,
+      )
+    ) {
       return true;
     }
 
@@ -744,31 +826,41 @@ export class SecurityOrchestrator extends EventEmitter {
   private async createIncident(
     triggerEvent: SecurityEvent,
     matchedRules: ThreatRule[],
-    violations: SecurityPolicy[]
+    violations: SecurityPolicy[],
   ): Promise<SecurityIncident> {
     const incident: SecurityIncident = {
       id: crypto.randomUUID(),
       title: this.generateIncidentTitle(triggerEvent, matchedRules),
-      description: this.generateIncidentDescription(triggerEvent, matchedRules, violations),
-      severity: this.calculateIncidentSeverity(triggerEvent, matchedRules, violations),
+      description: this.generateIncidentDescription(
+        triggerEvent,
+        matchedRules,
+        violations,
+      ),
+      severity: this.calculateIncidentSeverity(
+        triggerEvent,
+        matchedRules,
+        violations,
+      ),
       status: 'new',
       category: triggerEvent.category,
       createdAt: new Date(),
       updatedAt: new Date(),
       events: [triggerEvent.id],
       tasks: [],
-      timeline: [{
-        id: crypto.randomUUID(),
-        timestamp: new Date(),
-        type: 'event',
-        description: 'Incident created',
-        actor: 'security-orchestrator',
-        details: {
-          triggerEventId: triggerEvent.id,
-          matchedRules: matchedRules.map(r => r.name),
-          violations: violations.map(v => v.name)
-        }
-      }],
+      timeline: [
+        {
+          id: crypto.randomUUID(),
+          timestamp: new Date(),
+          type: 'event',
+          description: 'Incident created',
+          actor: 'security-orchestrator',
+          details: {
+            triggerEventId: triggerEvent.id,
+            matchedRules: matchedRules.map((r) => r.name),
+            violations: violations.map((v) => v.name),
+          },
+        },
+      ],
       artifacts: [],
       impact: {
         scope: 'limited',
@@ -776,8 +868,8 @@ export class SecurityOrchestrator extends EventEmitter {
         affectedUsers: 0,
         dataCompromised: false,
         servicesImpacted: [],
-        reputationalImpact: 'low'
-      }
+        reputationalImpact: 'low',
+      },
     };
 
     this.incidents.set(incident.id, incident);
@@ -794,13 +886,16 @@ export class SecurityOrchestrator extends EventEmitter {
       title: incident.title,
       severity: incident.severity,
       category: incident.category,
-      timestamp: incident.createdAt
+      timestamp: incident.createdAt,
     });
 
     return incident;
   }
 
-  private generateIncidentTitle(event: SecurityEvent, rules: ThreatRule[]): string {
+  private generateIncidentTitle(
+    event: SecurityEvent,
+    rules: ThreatRule[],
+  ): string {
     if (rules.length > 0) {
       return `${rules[0].name} - ${event.type}`;
     }
@@ -810,13 +905,13 @@ export class SecurityOrchestrator extends EventEmitter {
   private generateIncidentDescription(
     event: SecurityEvent,
     rules: ThreatRule[],
-    violations: SecurityPolicy[]
+    violations: SecurityPolicy[],
   ): string {
     let description = `Security incident triggered by ${event.type} event from ${event.source}.\n\n`;
 
     if (rules.length > 0) {
       description += `Matched threat detection rules:\n`;
-      rules.forEach(rule => {
+      rules.forEach((rule) => {
         description += `- ${rule.name} (${rule.severity})\n`;
       });
       description += '\n';
@@ -824,7 +919,7 @@ export class SecurityOrchestrator extends EventEmitter {
 
     if (violations.length > 0) {
       description += `Policy violations:\n`;
-      violations.forEach(violation => {
+      violations.forEach((violation) => {
         description += `- ${violation.name} (${violation.severity})\n`;
       });
       description += '\n';
@@ -842,25 +937,28 @@ export class SecurityOrchestrator extends EventEmitter {
   private calculateIncidentSeverity(
     event: SecurityEvent,
     rules: ThreatRule[],
-    violations: SecurityPolicy[]
+    violations: SecurityPolicy[],
   ): 'low' | 'medium' | 'high' | 'critical' {
     const severityScores = {
-      'info': 0,
-      'low': 1,
-      'medium': 2,
-      'high': 3,
-      'critical': 4
+      info: 0,
+      low: 1,
+      medium: 2,
+      high: 3,
+      critical: 4,
     };
 
-    let maxScore = severityScores[event.severity as keyof typeof severityScores] || 0;
+    let maxScore =
+      severityScores[event.severity as keyof typeof severityScores] || 0;
 
-    rules.forEach(rule => {
-      const ruleScore = severityScores[rule.severity as keyof typeof severityScores] || 0;
+    rules.forEach((rule) => {
+      const ruleScore =
+        severityScores[rule.severity as keyof typeof severityScores] || 0;
       maxScore = Math.max(maxScore, ruleScore);
     });
 
-    violations.forEach(violation => {
-      const violationScore = severityScores[violation.severity as keyof typeof severityScores] || 0;
+    violations.forEach((violation) => {
+      const violationScore =
+        severityScores[violation.severity as keyof typeof severityScores] || 0;
       maxScore = Math.max(maxScore, violationScore);
     });
 
@@ -873,9 +971,14 @@ export class SecurityOrchestrator extends EventEmitter {
     const plan = this.config.incidentResponsePlan;
 
     for (const trigger of plan.triggers) {
-      if (trigger.autoAssign && await this.evaluateIncidentTrigger(trigger, incident)) {
+      if (
+        trigger.autoAssign &&
+        (await this.evaluateIncidentTrigger(trigger, incident))
+      ) {
         // Find available stakeholder
-        const availableStakeholder = this.findAvailableStakeholder(plan.stakeholders);
+        const availableStakeholder = this.findAvailableStakeholder(
+          plan.stakeholders,
+        );
         if (availableStakeholder) {
           incident.assignee = availableStakeholder.id;
           incident.status = 'assigned';
@@ -883,7 +986,7 @@ export class SecurityOrchestrator extends EventEmitter {
           this.emit('incident_assigned', {
             incidentId: incident.id,
             assignee: availableStakeholder.id,
-            timestamp: new Date()
+            timestamp: new Date(),
           });
         }
         break;
@@ -891,22 +994,31 @@ export class SecurityOrchestrator extends EventEmitter {
     }
   }
 
-  private async evaluateIncidentTrigger(trigger: IncidentTrigger, incident: SecurityIncident): Promise<boolean> {
+  private async evaluateIncidentTrigger(
+    trigger: IncidentTrigger,
+    incident: SecurityIncident,
+  ): Promise<boolean> {
     // Implementation would evaluate trigger conditions
     return false; // Placeholder
   }
 
-  private findAvailableStakeholder(stakeholders: Stakeholder[]): Stakeholder | null {
+  private findAvailableStakeholder(
+    stakeholders: Stakeholder[],
+  ): Stakeholder | null {
     // Find stakeholder based on availability and escalation level
     const now = new Date();
     const currentDay = now.toLocaleDateString('en-US', { weekday: 'long' });
     const currentTime = now.toLocaleTimeString('en-US', { hour12: false });
 
-    for (const stakeholder of stakeholders.sort((a, b) => a.escalationLevel - b.escalationLevel)) {
+    for (const stakeholder of stakeholders.sort(
+      (a, b) => a.escalationLevel - b.escalationLevel,
+    )) {
       for (const window of stakeholder.availability) {
-        if (window.days.includes(currentDay) &&
-            currentTime >= window.startTime &&
-            currentTime <= window.endTime) {
+        if (
+          window.days.includes(currentDay) &&
+          currentTime >= window.startTime &&
+          currentTime <= window.endTime
+        ) {
           return stakeholder;
         }
       }
@@ -923,7 +1035,10 @@ export class SecurityOrchestrator extends EventEmitter {
     }
   }
 
-  private async executeIncidentPhase(incident: SecurityIncident, phase: IncidentPhase): Promise<void> {
+  private async executeIncidentPhase(
+    incident: SecurityIncident,
+    phase: IncidentPhase,
+  ): Promise<void> {
     for (const task of phase.tasks) {
       if (task.automated) {
         await this.executeAutomatedTask(incident, task);
@@ -931,13 +1046,16 @@ export class SecurityOrchestrator extends EventEmitter {
         // Create manual task
         incident.tasks.push({
           ...task,
-          assignee: incident.assignee || 'unassigned'
+          assignee: incident.assignee || 'unassigned',
         });
       }
     }
   }
 
-  private async executeAutomatedTask(incident: SecurityIncident, task: IncidentTask): Promise<void> {
+  private async executeAutomatedTask(
+    incident: SecurityIncident,
+    task: IncidentTask,
+  ): Promise<void> {
     try {
       if (task.script) {
         // Execute automation script
@@ -948,7 +1066,7 @@ export class SecurityOrchestrator extends EventEmitter {
         incidentId: incident.id,
         taskId: task.id,
         taskName: task.name,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     } catch (error) {
       this.emit('automated_task_failed', {
@@ -956,7 +1074,7 @@ export class SecurityOrchestrator extends EventEmitter {
         taskId: task.id,
         taskName: task.name,
         error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
   }
@@ -966,18 +1084,30 @@ export class SecurityOrchestrator extends EventEmitter {
     // This is a placeholder
   }
 
-  private updateMetrics(type: 'event' | 'incident', data: SecurityEvent | SecurityIncident): void {
+  private updateMetrics(
+    type: 'event' | 'incident',
+    data: SecurityEvent | SecurityIncident,
+  ): void {
     if (type === 'event') {
       const event = data as SecurityEvent;
       this.metrics.alerts.total++;
-      this.metrics.alerts.byCategory[event.category] = (this.metrics.alerts.byCategory[event.category] || 0) + 1;
-      this.metrics.alerts.bySeverity[event.severity] = (this.metrics.alerts.bySeverity[event.severity] || 0) + 1;
+      this.metrics.alerts.byCategory[event.category] =
+        (this.metrics.alerts.byCategory[event.category] || 0) + 1;
+      this.metrics.alerts.bySeverity[event.severity] =
+        (this.metrics.alerts.bySeverity[event.severity] || 0) + 1;
     } else {
       const incident = data as SecurityIncident;
       this.metrics.incidents.total++;
-      if (incident.status === 'new' || incident.status === 'assigned' || incident.status === 'investigating') {
+      if (
+        incident.status === 'new' ||
+        incident.status === 'assigned' ||
+        incident.status === 'investigating'
+      ) {
         this.metrics.incidents.open++;
-      } else if (incident.status === 'resolved' || incident.status === 'closed') {
+      } else if (
+        incident.status === 'resolved' ||
+        incident.status === 'closed'
+      ) {
         this.metrics.incidents.resolved++;
       }
     }
@@ -1002,19 +1132,19 @@ export class SecurityOrchestrator extends EventEmitter {
 
     if (filters) {
       if (filters.severity) {
-        events = events.filter(e => e.severity === filters.severity);
+        events = events.filter((e) => e.severity === filters.severity);
       }
       if (filters.category) {
-        events = events.filter(e => e.category === filters.category);
+        events = events.filter((e) => e.category === filters.category);
       }
       if (filters.source) {
-        events = events.filter(e => e.source === filters.source);
+        events = events.filter((e) => e.source === filters.source);
       }
       if (filters.startTime) {
-        events = events.filter(e => e.timestamp >= filters.startTime!);
+        events = events.filter((e) => e.timestamp >= filters.startTime!);
       }
       if (filters.endTime) {
-        events = events.filter(e => e.timestamp <= filters.endTime!);
+        events = events.filter((e) => e.timestamp <= filters.endTime!);
       }
     }
 
@@ -1030,24 +1160,30 @@ export class SecurityOrchestrator extends EventEmitter {
 
     if (filters) {
       if (filters.status) {
-        incidents = incidents.filter(i => i.status === filters.status);
+        incidents = incidents.filter((i) => i.status === filters.status);
       }
       if (filters.severity) {
-        incidents = incidents.filter(i => i.severity === filters.severity);
+        incidents = incidents.filter((i) => i.severity === filters.severity);
       }
       if (filters.assignee) {
-        incidents = incidents.filter(i => i.assignee === filters.assignee);
+        incidents = incidents.filter((i) => i.assignee === filters.assignee);
       }
     }
 
-    return incidents.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    return incidents.sort(
+      (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+    );
   }
 
   getMetrics(): SecurityMetrics {
     return { ...this.metrics };
   }
 
-  async updateIncidentStatus(incidentId: string, status: SecurityIncident['status'], actor: string): Promise<void> {
+  async updateIncidentStatus(
+    incidentId: string,
+    status: SecurityIncident['status'],
+    actor: string,
+  ): Promise<void> {
     const incident = this.incidents.get(incidentId);
     if (!incident) {
       throw new Error('Incident not found');
@@ -1067,7 +1203,7 @@ export class SecurityOrchestrator extends EventEmitter {
       type: 'action',
       description: `Status changed from ${oldStatus} to ${status}`,
       actor,
-      details: { oldStatus, newStatus: status }
+      details: { oldStatus, newStatus: status },
     });
 
     this.updateMetrics('incident', incident);
@@ -1077,7 +1213,7 @@ export class SecurityOrchestrator extends EventEmitter {
       oldStatus,
       newStatus: status,
       actor,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 }

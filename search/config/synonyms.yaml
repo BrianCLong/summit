@@ -1,4 +1,4 @@
-- from: ["k8s","kubernetes"]
-  to: "kubernetes"
-- from: ["pg","postgres","postgresql"]
-  to: "postgres"
+- from: ['k8s', 'kubernetes']
+  to: 'kubernetes'
+- from: ['pg', 'postgres', 'postgresql']
+  to: 'postgres'

@@ -1,27 +1,30 @@
 [
   {
-    "entity_a": {"name": "Dr. John Smith", "email": "john.smith@hospital.com"},
-    "entity_b": {"name": "John Smith MD", "email": "john.smith@hospital.com"},
+    "entity_a": {
+      "name": "Dr. John Smith",
+      "email": "john.smith@hospital.com"
+    },
+    "entity_b": { "name": "John Smith MD", "email": "john.smith@hospital.com" },
     "user_decision": "MERGE"
   },
   {
-    "entity_a": {"name": "Google LLC", "email": "contact@google.com"},
-    "entity_b": {"name": "Alphabet Inc", "email": "info@alphabet.com"},
+    "entity_a": { "name": "Google LLC", "email": "contact@google.com" },
+    "entity_b": { "name": "Alphabet Inc", "email": "info@alphabet.com" },
     "user_decision": "NO_MERGE"
   },
   {
-    "entity_a": {"name": "Mike Johnson", "phone": "555-7890"},
-    "entity_b": {"name": "Michael Johnson", "phone": "555-7890"},
+    "entity_a": { "name": "Mike Johnson", "phone": "555-7890" },
+    "entity_b": { "name": "Michael Johnson", "phone": "555-7890" },
     "user_decision": "MERGE"
   },
   {
-    "entity_a": {"name": "Susan Williams", "email": "susan@company.com"},
-    "entity_b": {"name": "Sue Williams", "email": "susan@company.com"},
+    "entity_a": { "name": "Susan Williams", "email": "susan@company.com" },
+    "entity_b": { "name": "Sue Williams", "email": "susan@company.com" },
     "user_decision": "MERGE"
   },
   {
-    "entity_a": {"name": "Random Corp", "email": "info@random.com"},
-    "entity_b": {"name": "Different Inc", "email": "contact@different.com"},
+    "entity_a": { "name": "Random Corp", "email": "info@random.com" },
+    "entity_b": { "name": "Different Inc", "email": "contact@different.com" },
     "user_decision": "NO_MERGE"
   }
 ]

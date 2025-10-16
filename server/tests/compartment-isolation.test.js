@@ -31,7 +31,12 @@ describe('compartment-aware investigation isolation', () => {
       orgId: 'org-2',
     }))(async () => 'ok');
     await expect(
-      resolver({}, {}, { user: baseUser }, { fieldName: 'test', path: 'testPath' }),
+      resolver(
+        {},
+        {},
+        { user: baseUser },
+        { fieldName: 'test', path: 'testPath' },
+      ),
     ).rejects.toThrow(ForbiddenError);
   });
   it('denies access when team differs', async () => {
@@ -42,7 +47,12 @@ describe('compartment-aware investigation isolation', () => {
       teamId: 'team-2',
     }))(async () => 'ok');
     await expect(
-      resolver({}, {}, { user: baseUser }, { fieldName: 'test', path: 'testPath' }),
+      resolver(
+        {},
+        {},
+        { user: baseUser },
+        { fieldName: 'test', path: 'testPath' },
+      ),
     ).rejects.toThrow(ForbiddenError);
   });
 });

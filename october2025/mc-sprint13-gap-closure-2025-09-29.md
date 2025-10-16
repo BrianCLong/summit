@@ -7,7 +7,9 @@
 ## Repository Audit (auto‑discovered from uploads)
 
 ### Repo: **extract_october2025**
+
 Root: `/mnt/data/extract_october2025`
+
 - Workflows: 0
 - Package manager hint: []
 - Engines: []
@@ -17,6 +19,7 @@ Root: `/mnt/data/extract_october2025`
 - Common scripts (top): []
 
 **Detected Gaps**
+
 - [ ] Missing CODEOWNERS for clear code ownership and review routing.
 - [ ] No GitHub Actions workflows detected; CI/CD may be absent.
 - [ ] No dependency bot config (Renovate or Dependabot).
@@ -27,8 +30,10 @@ Root: `/mnt/data/extract_october2025`
 - [ ] No docs site or docs/ content detected.
 
 ### Repo: **summit-main**
+
 Root: `/mnt/data/extract_summit-main_(1)/summit-main`
-- Workflows (146): .github/workflows/_reusable-ci-fast.yml, .github/workflows/_reusable-ci-perf.yml, .github/workflows/_reusable-ci-security.yml, .github/workflows/_reusable-release.yml, .github/workflows/abac-policy.yml, .github/workflows/add-to-project.yml, .github/workflows/attest-provenance.yml, .github/workflows/attest-sbom.yml, .github/workflows/auto-assign.yml, .github/workflows/auto-merge-ready.yml ...
+
+- Workflows (146): .github/workflows/\_reusable-ci-fast.yml, .github/workflows/\_reusable-ci-perf.yml, .github/workflows/\_reusable-ci-security.yml, .github/workflows/\_reusable-release.yml, .github/workflows/abac-policy.yml, .github/workflows/add-to-project.yml, .github/workflows/attest-provenance.yml, .github/workflows/attest-sbom.yml, .github/workflows/auto-assign.yml, .github/workflows/auto-merge-ready.yml ...
 - Package manager hint: [('npm @10.8.1', 38), ('npm@10.8.1', 18), ('pnpm*', 8), ('npm@9.8.1', 2)]
 - Engines: ['node:>=18', 'node:>=18.0.0', 'node:>=18.18', 'node:>=18.18 <20', 'node:>=18.18 <21', 'node:>=20.0.0', 'node:>=20.11 <21', 'npm:>=10.5', 'npm:>=8.0.0', 'pkgMgr:npm @10.8.1', 'pkgMgr:npm@10.8.1', 'pkgMgr:npm@9.8.1']
 - Makefile: yes; Docs: yes; CODEOWNERS: yes
@@ -37,46 +42,56 @@ Root: `/mnt/data/extract_summit-main_(1)/summit-main`
 - Common scripts (top): [('build', 842), ('test', 794), ('dev', 632), ('lint', 600), ('format', 442), ('typecheck', 353), ('start', 350), ('lint:fix', 332), ('test:coverage', 296), ('test:e2e', 289), ('preview', 200), ('test:watch', 167), ('db:migrate', 157), ('db:seed', 157), ('db:reset', 157)]
 
 **Detected Gaps**
+
 - [ ] No scoped/paths-filtered workflows for component-level checks.
 
 ## Sprint Objective
+
 Close all structural/wiring gaps and achieve a “Green‑Lock” baseline: reproducible installs, deterministic builds, passing CI across all packages, and evidence of security & compliance (SBOM + provenance).
 
 ## Swimlanes & Workstreams
 
 ### CI/CD & Release
+
 - [ ] Unify Node & pnpm versions via `.nvmrc` + `packageManager` pin; add matrix where needed.
 - [ ] Ensure unified CI (build/lint/typecheck/test) and scoped component workflows with `dorny/paths-filter`.
 - [ ] Add release automation (release-please) with conventional commits; generate changelogs and tags.
 
 ### Security & Supply Chain
+
 - [ ] SBOM generation (CycloneDX) for all workspaces; push as CI artifact and to `artifacts/sbom/`.
 - [ ] SLSA provenance (attest-build-provenance) or equivalent; sign images/bundles with cosign.
 - [ ] Dependency automation (Renovate) weekly; security audit gate with `npm audit`/`pnpm audit` (allowlist low).
 
 ### Policy & Governance
+
 - [ ] OPA/ABAC bundle skeleton; policy tests; CI gate for deny‑by‑default violations.
 - [ ] CODEOWNERS routing & branch protections; required checks mapped to swimlanes.
 
 ### Observability & Ops
+
 - [ ] Bootstrap Grafana dashboards for CI durations, error rates, and service health; alert thresholds documented.
 - [ ] Add health/readiness endpoints and synthetic checks; wire to status page or CI smoke.
 
 ### Dev Experience
+
 - [ ] Root Makefile targets: `bootstrap`, `doctor`, `codegen`, `lint`, `test`, `build`, `e2e`, `sbom`.
 - [ ] Pre-commit hooks (lint-staged + simple-import-sort); Vitest/Jest types preflight.
 
 ### Docs & Runbooks
+
 - [ ] Create `/docs` with Runbook Cards: CI lanes, Security Attestations, Release Process, On‑call cheat sheet.
 - [ ] README badges for CI, license, coverage, SBOM, provenance.
 
 ## Definition of Done
+
 - All CI lanes are green across all packages; flaky tests quarantined or fixed.
 - SBOM + provenance artifacts produced on every main build and attached to releases.
 - Policies compile; deny rules tested; CODEOWNERS enforced; branch protections verified.
 - Docs updated; “Green‑Lock” checklist checked in and signed off.
 
 ## Deliverables
+
 - PRs: CI unification, Release automation, SBOM/Provenance, OPA bundle, Renovate, CODEOWNERS.
 - Artifacts: SBOMs, provenance attestations, dashboards JSON, on‑call cheat sheet.
 - Docs: Runbook cards, updated CONTRIBUTING and security notes.
@@ -88,7 +103,7 @@ Close all structural/wiring gaps and achieve a “Green‑Lock” baseline: repr
 name: release-please
 on:
   push:
-    branches: [ main ]
+    branches: [main]
 permissions:
   contents: write
   pull-requests: write

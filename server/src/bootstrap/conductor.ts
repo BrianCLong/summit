@@ -8,11 +8,14 @@ import express, { Express } from 'express';
 import cors from 'cors';
 import { typeDefs as schema } from '../graphql/schema/index.js';
 import logger from '../config/logger';
-import { initializeConductorSystem, shutdownConductorSystem } from '../conductor/config';
+import {
+  initializeConductorSystem,
+  shutdownConductorSystem,
+} from '../conductor/config';
 import GraphOpsServer from '../conductor/mcp/servers/graphops-server';
 import FilesServer from '../conductor/mcp/servers/files-server';
 import { createConductorGraphQLPlugin } from '../conductor/observability';
-import { _prometheusConductorMetrics } from '../conductor/observability/prometheus';
+import { prometheusConductorMetrics } from '../conductor/observability/prometheus';
 
 const conductorLogger = logger.child({ name: 'conductor-bootstrap' });
 
@@ -40,15 +43,19 @@ export async function wireConductor(options: {
 
   try {
     // Validate required environment variables
-  const requiredEnvVars = [
-    'NEO4J_URI',
-    process.env.NEO4J_USER ? 'NEO4J_USER' : 'NEO4J_USERNAME',
-    'NEO4J_PASSWORD',
-  ];
+    const requiredEnvVars = [
+      'NEO4J_URI',
+      process.env.NEO4J_USER ? 'NEO4J_USER' : 'NEO4J_USERNAME',
+      'NEO4J_PASSWORD',
+    ];
 
-    const missingVars = requiredEnvVars.filter((varName) => !process.env[varName]);
+    const missingVars = requiredEnvVars.filter(
+      (varName) => !process.env[varName],
+    );
     if (missingVars.length > 0) {
-      throw new Error(`Missing required environment variables: ${missingVars.join(', ')}`);
+      throw new Error(
+        `Missing required environment variables: ${missingVars.join(', ')}`,
+      );
     }
 
     // Initialize the conductor system with MCP servers
@@ -68,9 +75,9 @@ export async function wireConductor(options: {
         '/graphql',
         cors(),
         express.json(),
-// expressMiddleware(apollo, {
-          //   context: async ({ req }) => ({ auth: req.headers.authorization ?? null }),
-          // }),
+        // expressMiddleware(apollo, {
+        //   context: async ({ req }) => ({ auth: req.headers.authorization ?? null }),
+        // }),
       );
       conductorLogger.info('[conductor] GraphQL mounted at /graphql');
     }
@@ -82,7 +89,12 @@ export async function wireConductor(options: {
           const { getConductorHealth } = await import('../conductor/metrics');
           const health = await getConductorHealth();
 
-          const statusCode = health.status === 'pass' ? 200 : health.status === 'warn' ? 200 : 503;
+          const statusCode =
+            health.status === 'pass'
+              ? 200
+              : health.status === 'warn'
+                ? 200
+                : 503;
 
           res.status(statusCode).json(health);
         } catch (error) {
@@ -118,7 +130,9 @@ export async function wireConductor(options: {
     if (process.env.CONDUCTOR_REQUIRED === 'true') {
       throw error;
     } else {
-      conductorLogger.warn('Continuing without Conductor (graceful degradation)');
+      conductorLogger.warn(
+        'Continuing without Conductor (graceful degradation)',
+      );
       return null;
     }
   }
@@ -177,7 +191,9 @@ export function validateConductorEnvironment(): {
     if (value) {
       const numValue = parseInt(value, 10);
       if (isNaN(numValue) || numValue < min || numValue > max) {
-        errors.push(`${name} must be a number between ${min} and ${max}, got: ${value}`);
+        errors.push(
+          `${name} must be a number between ${min} and ${max}, got: ${value}`,
+        );
       }
     }
   });

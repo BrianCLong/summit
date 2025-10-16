@@ -13,7 +13,7 @@ spec:
   metrics:
     - name: error-rate
       interval: 60s
-      successCondition: result < 0.005   # <0.5% errors
+      successCondition: result < 0.005 # <0.5% errors
       failureLimit: 1
       provider:
         prometheus:
@@ -24,7 +24,7 @@ spec:
             sum(rate(http_requests_total{job="{{args.service}}", namespace="{{args.namespace}}"}[2m]))
     - name: p95-latency
       interval: 60s
-      successCondition: result < 0.35     # <350ms
+      successCondition: result < 0.35 # <350ms
       failureLimit: 1
       provider:
         prometheus:

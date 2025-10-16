@@ -304,6 +304,7 @@ index 0000000..7c5c8b2
 **Title:** feat: hardening + coverage — OPA tests, key KID, OTEL attrs, Redis background flush
 
 **Summary**
+
 - **OPA tests**: `infra/opa/tests/authz_test.rego` with baseline rules and policy version asserts
 - **Keys**: dev rotation utility; surfaces `SIGNER_KID` via headers and OTEL
 - **OTEL**: API & Worker annotate spans with `authz.receipt_hash`, `policy.version`, `signer.kid`
@@ -311,11 +312,13 @@ index 0000000..7c5c8b2
 - **CI**: outage scenario workflow validates queueing/flush path
 
 **Config**
+
 - `SIGNER_KID` (default `dev`)
 - `REDIS_URL` (default `redis://redis:6379`)
 - `ANCHOR_QUEUE` (default `anchor:q:v1`)
 
 **Test locally**
+
 ```bash
 # run OPA, Redis, Ledger
 docker compose up -d opa ledger redis
@@ -323,6 +326,6 @@ docker compose up -d opa ledger redis
 ```
 
 **Security/Compliance**
+
 - No private keys logged; KID only. Dev key util prints to console for local use only.
 - All additions Apache‑2.0.
-

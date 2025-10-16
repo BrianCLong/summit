@@ -1,7 +1,7 @@
 // server/src/optimization/optimization-manager.ts
 
 import { getNeo4jDriver, getPostgresPool } from '../config/database.js';
-import logger from '../config/logger.js';
+import logger from '../utils/logger.js';
 import { Neo4jQueryOptimizer } from './neo4j-query-optimizer.js';
 import { PostgresPerformanceOptimizer } from './postgres-performance-optimizer.js';
 import { ApiGatewayOptimizer } from './api-gateway-optimizer.js';
@@ -94,7 +94,7 @@ export class OptimizationManager {
   private gatewayOptimizer: ApiGatewayOptimizer;
   private costOptimizer: CostEfficiencyOptimizer;
   private monitoringSystem: PerformanceMonitoringSystem;
-  
+
   private initialized = false;
   private startTime = Date.now();
 
@@ -105,33 +105,33 @@ export class OptimizationManager {
         enableQueryCaching: true,
         enableMaterializedViews: true,
         queryTimeoutMs: 30000,
-        cacheMaxMemoryMB: 512
+        cacheMaxMemoryMB: 512,
       },
       postgres: {
         enableQueryCaching: true,
         enableAutoIndexing: true,
         connectionPoolSize: 20,
-        slowQueryThresholdMs: 1000
+        slowQueryThresholdMs: 1000,
       },
       apiGateway: {
         enableResponseCaching: true,
         enableCircuitBreaker: true,
         enableBulkhead: true,
-        enableRequestBatching: true
+        enableRequestBatching: true,
       },
       costOptimization: {
         enableIntelligentRouting: true,
         enableBudgetTracking: true,
         enableCostPrediction: true,
-        defaultBudgetLimit: 100.0
+        defaultBudgetLimit: 100.0,
       },
       monitoring: {
         metricsRetentionHours: 72,
         alertingEnabled: true,
         sloMonitoringEnabled: true,
-        regressionDetectionEnabled: true
+        regressionDetectionEnabled: true,
       },
-      ...config
+      ...config,
     };
   }
 
@@ -158,7 +158,7 @@ export class OptimizationManager {
         neo4j: this.neo4jOptimizer,
         postgres: this.pgOptimizer,
         gateway: this.gatewayOptimizer,
-        cost: this.costOptimizer
+        cost: this.costOptimizer,
       });
 
       // Set up event listeners for cross-system coordination
@@ -168,8 +168,9 @@ export class OptimizationManager {
       await this.runInitialOptimizationAssessment();
 
       this.initialized = true;
-      logger.info('✅ IntelGraph Performance Optimization Suite initialized successfully');
-
+      logger.info(
+        '✅ IntelGraph Performance Optimization Suite initialized successfully',
+      );
     } catch (error) {
       logger.error('❌ Failed to initialize optimization systems:', error);
       throw error;
@@ -196,24 +197,33 @@ export class OptimizationManager {
           if (!originalQuery) return next();
 
           try {
-            const optimizedResult = await this.neo4jOptimizer.executeOptimizedQuery(
-              originalQuery,
-              req.body.parameters || {},
-              {
-                useCache: this.config.neo4j.enableQueryCaching,
-                timeout: this.config.neo4j.queryTimeoutMs,
-                ...options
-              }
-            );
+            const optimizedResult =
+              await this.neo4jOptimizer.executeOptimizedQuery(
+                originalQuery,
+                req.body.parameters || {},
+                {
+                  useCache: this.config.neo4j.enableQueryCaching,
+                  timeout: this.config.neo4j.queryTimeoutMs,
+                  ...options,
+                },
+              );
 
             // Attach optimization metadata to response
-            res.set('X-Query-Optimizations', optimizedResult.optimizationApplied.join(','));
-            res.set('X-Cache-Status', optimizedResult.cacheHit ? 'HIT' : 'MISS');
-            res.set('X-Query-Time', optimizedResult.metrics.executionTimeMs.toString());
+            res.set(
+              'X-Query-Optimizations',
+              optimizedResult.optimizationApplied.join(','),
+            );
+            res.set(
+              'X-Cache-Status',
+              optimizedResult.cacheHit ? 'HIT' : 'MISS',
+            );
+            res.set(
+              'X-Query-Time',
+              optimizedResult.metrics.executionTimeMs.toString(),
+            );
 
             req.optimizedQuery = optimizedResult;
             next();
-
           } catch (error) {
             logger.error('Neo4j query optimization failed:', error);
             next();
@@ -221,10 +231,13 @@ export class OptimizationManager {
         };
       },
 
-      // PostgreSQL query optimization middleware  
+      // PostgreSQL query optimization middleware
       postgresQuery: (options?: any) => {
         return async (req: any, res: any, next: any) => {
-          if (!this.config.enabled || !this.config.postgres.enableQueryCaching) {
+          if (
+            !this.config.enabled ||
+            !this.config.postgres.enableQueryCaching
+          ) {
             return next();
           }
 
@@ -234,23 +247,32 @@ export class OptimizationManager {
           if (!originalQuery) return next();
 
           try {
-            const optimizedResult = await this.pgOptimizer.executeOptimizedQuery(
-              originalQuery,
-              parameters,
-              {
-                useCache: this.config.postgres.enableQueryCaching,
-                ...options
-              }
-            );
+            const optimizedResult =
+              await this.pgOptimizer.executeOptimizedQuery(
+                originalQuery,
+                parameters,
+                {
+                  useCache: this.config.postgres.enableQueryCaching,
+                  ...options,
+                },
+              );
 
             // Attach optimization metadata
-            res.set('X-Query-Optimizations', optimizedResult.optimizationApplied.join(','));
-            res.set('X-Cache-Status', optimizedResult.cacheHit ? 'HIT' : 'MISS');
-            res.set('X-Execution-Time', optimizedResult.executionTime.toString());
+            res.set(
+              'X-Query-Optimizations',
+              optimizedResult.optimizationApplied.join(','),
+            );
+            res.set(
+              'X-Cache-Status',
+              optimizedResult.cacheHit ? 'HIT' : 'MISS',
+            );
+            res.set(
+              'X-Execution-Time',
+              optimizedResult.executionTime.toString(),
+            );
 
             req.optimizedQuery = optimizedResult;
             next();
-
           } catch (error) {
             logger.error('PostgreSQL query optimization failed:', error);
             next();
@@ -260,19 +282,25 @@ export class OptimizationManager {
 
       // API response caching middleware
       responseCache: (config?: any) => {
-        if (!this.config.enabled || !this.config.apiGateway.enableResponseCaching) {
+        if (
+          !this.config.enabled ||
+          !this.config.apiGateway.enableResponseCaching
+        ) {
           return (req: any, res: any, next: any) => next();
         }
 
         return this.gatewayOptimizer.createCacheMiddleware({
           ttl: 300, // 5 minutes default
-          ...config
+          ...config,
         });
       },
 
       // Circuit breaker middleware
       circuitBreaker: (config?: any) => {
-        if (!this.config.enabled || !this.config.apiGateway.enableCircuitBreaker) {
+        if (
+          !this.config.enabled ||
+          !this.config.apiGateway.enableCircuitBreaker
+        ) {
           return (req: any, res: any, next: any) => next();
         }
 
@@ -281,7 +309,7 @@ export class OptimizationManager {
           resetTimeoutMs: 60000,
           monitoringPeriodMs: 10000,
           halfOpenMaxCalls: 3,
-          ...config
+          ...config,
         });
       },
 
@@ -295,13 +323,16 @@ export class OptimizationManager {
           maxConcurrent: 100,
           queueSize: 50,
           timeoutMs: 30000,
-          ...config
+          ...config,
         });
       },
 
       // Request batching middleware
       requestBatching: () => {
-        if (!this.config.enabled || !this.config.apiGateway.enableRequestBatching) {
+        if (
+          !this.config.enabled ||
+          !this.config.apiGateway.enableRequestBatching
+        ) {
           return (req: any, res: any, next: any) => next();
         }
 
@@ -310,12 +341,15 @@ export class OptimizationManager {
 
       // Budget tracking middleware
       budgetTracking: (config?: any) => {
-        if (!this.config.enabled || !this.config.costOptimization.enableBudgetTracking) {
+        if (
+          !this.config.enabled ||
+          !this.config.costOptimization.enableBudgetTracking
+        ) {
           return (req: any, res: any, next: any) => next();
         }
 
         return this.gatewayOptimizer.createBudgetMiddleware();
-      }
+      },
     };
   }
 
@@ -345,7 +379,8 @@ export class OptimizationManager {
 
     return await this.costOptimizer.selectOptimalModel({
       ...criteria,
-      budgetLimit: criteria.budgetLimit || this.config.costOptimization.defaultBudgetLimit
+      budgetLimit:
+        criteria.budgetLimit || this.config.costOptimization.defaultBudgetLimit,
     });
   }
 
@@ -357,19 +392,14 @@ export class OptimizationManager {
       throw new Error('OptimizationManager not initialized');
     }
 
-    const [
-      neo4jStats,
-      pgReport,
-      gatewayReport,
-      costReport,
-      dashboard
-    ] = await Promise.all([
-      this.neo4jOptimizer.getPerformanceStats(),
-      this.pgOptimizer.getPerformanceReport(),
-      this.gatewayOptimizer.getPerformanceReport(),
-      this.costOptimizer.getUsageReport('system', 'system'),
-      this.monitoringSystem.getDashboard()
-    ]);
+    const [neo4jStats, pgReport, gatewayReport, costReport, dashboard] =
+      await Promise.all([
+        this.neo4jOptimizer.getPerformanceStats(),
+        this.pgOptimizer.getPerformanceReport(),
+        this.gatewayOptimizer.getPerformanceReport(),
+        this.costOptimizer.getUsageReport('system', 'system'),
+        this.monitoringSystem.getDashboard(),
+      ]);
 
     const uptime = (Date.now() - this.startTime) / 1000 / 60 / 60 / 24; // Days
 
@@ -379,35 +409,38 @@ export class OptimizationManager {
         avgResponseTime: dashboard.overview.avgResponseTime,
         costSavings: this.calculateTotalCostSavings(costReport),
         performanceImprovement: this.calculatePerformanceImprovement(),
-        uptime
+        uptime,
       },
       databases: {
         neo4j: {
           queryOptimizations: neo4jStats.totalQueries,
           cacheHitRate: neo4jStats.p95ExecutionTime > 0 ? 0.85 : 0, // Simplified
           avgQueryTime: neo4jStats.avgExecutionTime,
-          materializedViewsActive: neo4jStats.materializedViewsCount
+          materializedViewsActive: neo4jStats.materializedViewsCount,
         },
         postgres: {
           queryOptimizations: pgReport.queryStats?.totalQueries || 0,
           indexRecommendations: pgReport.indexRecommendations?.length || 0,
-          connectionEfficiency: this.calculateConnectionEfficiency(pgReport.connectionPoolMetrics),
-          slowQueryReductions: pgReport.slowQueries?.length || 0
-        }
+          connectionEfficiency: this.calculateConnectionEfficiency(
+            pgReport.connectionPoolMetrics,
+          ),
+          slowQueryReductions: pgReport.slowQueries?.length || 0,
+        },
       },
       apiGateway: {
         cacheHitRate: gatewayReport.cache?.totalEntries ? 0.75 : 0, // Simplified
-        circuitBreakerActivations: this.countCircuitBreakerActivations(gatewayReport),
+        circuitBreakerActivations:
+          this.countCircuitBreakerActivations(gatewayReport),
         requestBatchingEfficiency: gatewayReport.activeBatches || 0,
-        latencyReduction: this.calculateLatencyReduction()
+        latencyReduction: this.calculateLatencyReduction(),
       },
       costOptimization: {
         totalSavings: costReport.costs?.total || 0,
         modelSwitchingBenefit: this.calculateModelSwitchingBenefit(costReport),
         budgetComplianceRate: this.calculateBudgetCompliance(costReport),
-        optimizationRecommendations: costReport.recommendations?.length || 0
+        optimizationRecommendations: costReport.recommendations?.length || 0,
       },
-      recommendations: await this.generateOptimizationRecommendations()
+      recommendations: await this.generateOptimizationRecommendations(),
     };
 
     return report;
@@ -424,7 +457,7 @@ export class OptimizationManager {
     const results = {
       neo4j: { success: false },
       postgres: { success: false },
-      apiGateway: { success: false }
+      apiGateway: { success: false },
     };
 
     try {
@@ -459,7 +492,11 @@ export class OptimizationManager {
     return await this.pgOptimizer.createRecommendedIndexes(limit);
   }
 
-  async updateBudgetLimit(userId: string, tenantId: string, newLimit: number): Promise<void> {
+  async updateBudgetLimit(
+    userId: string,
+    tenantId: string,
+    newLimit: number,
+  ): Promise<void> {
     if (!this.config.costOptimization.enableBudgetTracking) {
       throw new Error('Budget tracking is disabled');
     }
@@ -517,7 +554,7 @@ export class OptimizationManager {
       pgOptimizer: 'healthy' as const,
       gatewayOptimizer: 'healthy' as const,
       costOptimizer: 'healthy' as const,
-      monitoringSystem: 'healthy' as const
+      monitoringSystem: 'healthy' as const,
     };
 
     const details: any = {};
@@ -551,7 +588,10 @@ export class OptimizationManager {
     }
 
     try {
-      const costStats = await this.costOptimizer.getUsageReport('system', 'system');
+      const costStats = await this.costOptimizer.getUsageReport(
+        'system',
+        'system',
+      );
       details.cost = costStats;
     } catch (error) {
       components.costOptimizer = 'critical';
@@ -570,8 +610,12 @@ export class OptimizationManager {
     }
 
     // Determine overall status
-    const criticalCount = Object.values(components).filter(status => status === 'critical').length;
-    const degradedCount = Object.values(components).filter(status => status === 'degraded').length;
+    const criticalCount = Object.values(components).filter(
+      (status) => status === 'critical',
+    ).length;
+    const degradedCount = Object.values(components).filter(
+      (status) => status === 'degraded',
+    ).length;
 
     let overallStatus: 'healthy' | 'degraded' | 'critical';
     if (criticalCount > 0) {
@@ -585,7 +629,7 @@ export class OptimizationManager {
     return {
       status: overallStatus,
       components,
-      details
+      details,
     };
   }
 
@@ -645,13 +689,20 @@ export class OptimizationManager {
     try {
       // Check database indexes
       const pgReport = await this.pgOptimizer.getPerformanceReport();
-      if (pgReport.indexRecommendations && pgReport.indexRecommendations.length > 0) {
-        logger.info(`Found ${pgReport.indexRecommendations.length} index optimization opportunities`);
+      if (
+        pgReport.indexRecommendations &&
+        pgReport.indexRecommendations.length > 0
+      ) {
+        logger.info(
+          `Found ${pgReport.indexRecommendations.length} index optimization opportunities`,
+        );
       }
 
       // Check Neo4j constraints
       const neo4jStats = await this.neo4jOptimizer.getPerformanceStats();
-      logger.info(`Neo4j materialized views active: ${neo4jStats.materializedViewsCount}`);
+      logger.info(
+        `Neo4j materialized views active: ${neo4jStats.materializedViewsCount}`,
+      );
 
       // Check cache configurations
       const cacheStats = await this.gatewayOptimizer.getCacheStats();
@@ -660,16 +711,22 @@ export class OptimizationManager {
       }
 
       logger.info('✅ Initial optimization assessment completed');
-
     } catch (error) {
-      logger.warn('⚠️ Initial optimization assessment partially failed:', error);
+      logger.warn(
+        '⚠️ Initial optimization assessment partially failed:',
+        error,
+      );
     }
   }
 
   private calculateTotalCostSavings(costReport: any): number {
     // Calculate estimated savings from optimization
-    return costReport.recommendations?.reduce((sum: number, rec: any) => 
-      sum + (rec.estimatedSavings || 0), 0) || 0;
+    return (
+      costReport.recommendations?.reduce(
+        (sum: number, rec: any) => sum + (rec.estimatedSavings || 0),
+        0,
+      ) || 0
+    );
   }
 
   private calculatePerformanceImprovement(): number {
@@ -679,16 +736,18 @@ export class OptimizationManager {
 
   private calculateConnectionEfficiency(poolMetrics: any): number {
     if (!poolMetrics) return 0;
-    
+
     const totalConnections = poolMetrics.totalConnections || 1;
     const activeConnections = poolMetrics.activeConnections || 0;
-    
+
     return (activeConnections / totalConnections) * 100;
   }
 
   private countCircuitBreakerActivations(gatewayReport: any): number {
-    return Object.values(gatewayReport.circuitBreakers || {})
-      .reduce((sum: number, cb: any) => sum + (cb.failures || 0), 0);
+    return Object.values(gatewayReport.circuitBreakers || {}).reduce(
+      (sum: number, cb: any) => sum + (cb.failures || 0),
+      0,
+    );
   }
 
   private calculateLatencyReduction(): number {
@@ -704,25 +763,33 @@ export class OptimizationManager {
   private calculateBudgetCompliance(costReport: any): number {
     // Calculate budget compliance rate
     if (!costReport.budget) return 100;
-    
-    return Math.min(100, (costReport.budget.remaining / costReport.budget.total) * 100);
+
+    return Math.min(
+      100,
+      (costReport.budget.remaining / costReport.budget.total) * 100,
+    );
   }
 
-  private async generateOptimizationRecommendations(): Promise<Array<{
-    category: string;
-    priority: 'low' | 'medium' | 'high' | 'critical';
-    title: string;
-    description: string;
-    estimatedImpact: number;
-    implementationComplexity: 'low' | 'medium' | 'high';
-    estimatedTimeToImplement: string;
-  }>> {
+  private async generateOptimizationRecommendations(): Promise<
+    Array<{
+      category: string;
+      priority: 'low' | 'medium' | 'high' | 'critical';
+      title: string;
+      description: string;
+      estimatedImpact: number;
+      implementationComplexity: 'low' | 'medium' | 'high';
+      estimatedTimeToImplement: string;
+    }>
+  > {
     const recommendations = [];
 
     // Get recommendations from individual optimizers
     const [pgReport, costRecommendations] = await Promise.all([
       this.pgOptimizer.getPerformanceReport(),
-      this.costOptimizer.generateOptimizationRecommendations('system', 'system')
+      this.costOptimizer.generateOptimizationRecommendations(
+        'system',
+        'system',
+      ),
     ]);
 
     // Convert index recommendations
@@ -735,7 +802,7 @@ export class OptimizationManager {
           description: rec.reason,
           estimatedImpact: rec.estimatedImprovement * 100,
           implementationComplexity: 'low' as const,
-          estimatedTimeToImplement: '5 minutes'
+          estimatedTimeToImplement: '5 minutes',
         });
       });
     }
@@ -749,7 +816,7 @@ export class OptimizationManager {
         description: rec.description,
         estimatedImpact: (rec.estimatedSavings / 100) * 100, // Convert to percentage
         implementationComplexity: rec.implementation.complexity,
-        estimatedTimeToImplement: rec.implementation.effort
+        estimatedTimeToImplement: rec.implementation.effort,
       });
     });
 
@@ -760,10 +827,11 @@ export class OptimizationManager {
         category: 'System Health',
         priority: 'high',
         title: 'Address System Performance Issues',
-        description: 'System is showing degraded performance. Review active alerts and metrics.',
+        description:
+          'System is showing degraded performance. Review active alerts and metrics.',
         estimatedImpact: 20,
         implementationComplexity: 'medium',
-        estimatedTimeToImplement: '2-4 hours'
+        estimatedTimeToImplement: '2-4 hours',
       });
     }
 
@@ -784,7 +852,7 @@ export class OptimizationManager {
       await this.clearAllCaches();
 
       // Close database connections would be handled by the database config
-      
+
       logger.info('✅ Optimization systems shut down successfully');
     } catch (error) {
       logger.error('❌ Error during optimization systems shutdown:', error);

@@ -4,4 +4,4 @@ when:
   - event: model_call
 assert:
   - expr: total_spend_usd <= budget_usd
-    message: "Budget exceeded: spent {{total_spend_usd}} > {{budget_usd}}"
+    message: 'Budget exceeded: spent {{total_spend_usd}} > {{budget_usd}}'

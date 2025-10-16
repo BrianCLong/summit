@@ -1,20 +1,20 @@
 # IntelGraph GA Q4 2025 – GitHub Project Plan
 
-> Repo: `github.com/BrianCLong/intelgraph`  ·  Timeframe: **Sep 29 – Dec 19, 2025** (6 sprints × 2 weeks)  ·  Goal: **GA Core** + **Prov‑Ledger (beta)** + **Predictive (alpha)** with governance-by-design.
+> Repo: `github.com/BrianCLong/intelgraph` · Timeframe: **Sep 29 – Dec 19, 2025** (6 sprints × 2 weeks) · Goal: **GA Core** + **Prov‑Ledger (beta)** + **Predictive (alpha)** with governance-by-design.
 
 ---
 
 ## 0) Milestones, Sprints & Dates
 
-| Milestone | Dates (America/Denver) | Theme | Exit Criteria |
-|---|---|---|---|
-| **M0: Bootstrap** | Sep 29 – Oct 3 | Projects, labels, CI/CD skeleton, branch protections, envs | Project v2 live; labels+templates in `main`; CI green on scaffolds; protected branches enforced |
-| **M1: Graph Core & API** | Oct 6 – Oct 17 | Graph schema + GraphQL gateway + cost guard stubs | Cookbooks pass for time-travel, policy-aware shortest path; p95 < 1.5s on 50k neighborhood (synthetic) |
-| **M2: Ingest & ER v1** | Oct 20 – Oct 31 | 10 connectors + Ingest Wizard + ER w/ explain | Connectors land w/ golden IO; ER scorecards + override logs; reproducible merges |
-| **M3: Copilot v1** | Nov 3 – Nov 14 | NL→Cypher preview + RAG w/ inline citations | Feature-flagged; sandboxes estimate cost/rows; guardrail denials have reasons |
-| **M4: Governance & Security** | Nov 17 – Nov 28 | OPA ABAC + Audit + WebAuthn | Policy simulation view; immutable audit trails; dual-control flows |
-| **M5: Prov‑Ledger (beta)** | Dec 1 – Dec 12 | Evidence registration + export manifests (Merkle) | Deterministic DAG runner prototype + replayable proofs |
-| **M6: GA RC** | Dec 15 – Dec 19 | Polish, perf, docs, demo | GA tag, release notes, demo storyline, training labs |
+| Milestone                     | Dates (America/Denver) | Theme                                                      | Exit Criteria                                                                                          |
+| ----------------------------- | ---------------------- | ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| **M0: Bootstrap**             | Sep 29 – Oct 3         | Projects, labels, CI/CD skeleton, branch protections, envs | Project v2 live; labels+templates in `main`; CI green on scaffolds; protected branches enforced        |
+| **M1: Graph Core & API**      | Oct 6 – Oct 17         | Graph schema + GraphQL gateway + cost guard stubs          | Cookbooks pass for time-travel, policy-aware shortest path; p95 < 1.5s on 50k neighborhood (synthetic) |
+| **M2: Ingest & ER v1**        | Oct 20 – Oct 31        | 10 connectors + Ingest Wizard + ER w/ explain              | Connectors land w/ golden IO; ER scorecards + override logs; reproducible merges                       |
+| **M3: Copilot v1**            | Nov 3 – Nov 14         | NL→Cypher preview + RAG w/ inline citations                | Feature-flagged; sandboxes estimate cost/rows; guardrail denials have reasons                          |
+| **M4: Governance & Security** | Nov 17 – Nov 28        | OPA ABAC + Audit + WebAuthn                                | Policy simulation view; immutable audit trails; dual-control flows                                     |
+| **M5: Prov‑Ledger (beta)**    | Dec 1 – Dec 12         | Evidence registration + export manifests (Merkle)          | Deterministic DAG runner prototype + replayable proofs                                                 |
+| **M6: GA RC**                 | Dec 15 – Dec 19        | Polish, perf, docs, demo                                   | GA tag, release notes, demo storyline, training labs                                                   |
 
 > **Freeze windows:** RC code freeze Dec 16, GA branch cut Dec 18, ship notes Dec 19.
 
@@ -25,6 +25,7 @@
 **Project name:** `IntelGraph – GA Q4 2025`
 
 ### 1.1 Project fields
+
 - `Status` (select): Backlog, Ready, In Progress, In Review, Blocked, Done
 - `Area` (select): Graph, Ingest, ER, Analytics, Copilot, Governance, Prov‑Ledger, Ops, UI, Docs
 - `Priority` (select): P0, P1, P2
@@ -35,6 +36,7 @@
 - `Exit Criteria` (text)
 
 ### 1.2 Create via `gh` CLI
+
 ```bash
 # 0) pre-req: gh auth login && gh extension install github/gh-projects
 ORG=BrianCLong
@@ -57,25 +59,26 @@ gh projects views create $PROJ --name "By Area" --layout table --group-by "Area"
 
 ## 2) Labels (single source of truth)
 
-| Label | Color | Description |
-|---|---|---|
-| `area:graph` | `#1f77b4` | Graph core, schema, queries |
-| `area:ingest` | `#2ca02c` | Connectors, pipelines |
-| `area:er` | `#17becf` | Entity resolution |
-| `area:analytics` | `#9467bd` | Link/path/anomaly/etc. |
-| `area:copilot` | `#ff7f0e` | NL→Cypher, RAG, guardrails |
-| `area:governance` | `#8c564b` | OPA/ABAC, audit, WebAuthn |
-| `area:prov-ledger` | `#e377c2` | Evidence, Merkle, DAG |
-| `area:ops` | `#7f7f7f` | OTEL/Prom, SLOs, chaos |
-| `area:ui` | `#bcbd22` | Tri‑pane, map/timeline |
-| `area:docs` | `#17a2b8` | Docs, runbooks |
-| `prio:P0` | `#d62728` | Must‑ship |
-| `prio:P1` | `#ff9896` | Should‑ship |
-| `prio:P2` | `#c7c7c7` | Nice |
-| `risk:high` | `#d62728` | Needs mitigation |
-| `good first issue` | `#6cc644` | Onboarders |
+| Label              | Color     | Description                 |
+| ------------------ | --------- | --------------------------- |
+| `area:graph`       | `#1f77b4` | Graph core, schema, queries |
+| `area:ingest`      | `#2ca02c` | Connectors, pipelines       |
+| `area:er`          | `#17becf` | Entity resolution           |
+| `area:analytics`   | `#9467bd` | Link/path/anomaly/etc.      |
+| `area:copilot`     | `#ff7f0e` | NL→Cypher, RAG, guardrails  |
+| `area:governance`  | `#8c564b` | OPA/ABAC, audit, WebAuthn   |
+| `area:prov-ledger` | `#e377c2` | Evidence, Merkle, DAG       |
+| `area:ops`         | `#7f7f7f` | OTEL/Prom, SLOs, chaos      |
+| `area:ui`          | `#bcbd22` | Tri‑pane, map/timeline      |
+| `area:docs`        | `#17a2b8` | Docs, runbooks              |
+| `prio:P0`          | `#d62728` | Must‑ship                   |
+| `prio:P1`          | `#ff9896` | Should‑ship                 |
+| `prio:P2`          | `#c7c7c7` | Nice                        |
+| `risk:high`        | `#d62728` | Needs mitigation            |
+| `good first issue` | `#6cc644` | Onboarders                  |
 
 **Script:**
+
 ```bash
 cat <<'EOF' > .github/labels.json
 [
@@ -109,6 +112,7 @@ jq -r '.[] | [.name,.color] | @tsv' .github/labels.json | while IFS=$'\t' read -
   - Require PR, linear history, signed commits, 2 code owners, status checks (CI, SAST, lint, test).
   - Disallow force-push; dismiss stale approvals on new commits; require conversations resolved.
 - **CLI:**
+
 ```bash
 # protect main & develop
 for BR in main develop; do
@@ -127,9 +131,10 @@ done
 ```
 .github/ISSUE_TEMPLATE/feature_request.yml
 ```
+
 ```yaml
 name: Feature request
-labels: ["prio:P1"]
+labels: ['prio:P1']
 body:
   - type: textarea
     id: context
@@ -145,7 +150,19 @@ body:
     id: area
     attributes:
       label: Area
-      options: [Graph, Ingest, ER, Analytics, Copilot, Governance, Prov-Ledger, Ops, UI, Docs]
+      options:
+        [
+          Graph,
+          Ingest,
+          ER,
+          Analytics,
+          Copilot,
+          Governance,
+          Prov-Ledger,
+          Ops,
+          UI,
+          Docs,
+        ]
   - type: input
     id: exit
     attributes:
@@ -155,9 +172,10 @@ body:
 ```
 .github/ISSUE_TEMPLATE/bug_report.yml
 ```
+
 ```yaml
 name: Bug report
-labels: ["prio:P0"]
+labels: ['prio:P0']
 body:
   - type: textarea
     id: reproduce
@@ -180,6 +198,7 @@ body:
 ```
 .github/PULL_REQUEST_TEMPLATE.md
 ```
+
 ```md
 ## What
 
@@ -202,6 +221,7 @@ body:
 ```
 .github/workflows/ci.yml
 ```
+
 ```yaml
 name: CI
 on:
@@ -245,11 +265,12 @@ jobs:
 ```
 .github/workflows/release.yml
 ```
+
 ```yaml
 name: Release
 on:
   push:
-    tags: [ 'v*.*.*' ]
+    tags: ['v*.*.*']
 jobs:
   publish-charts:
     runs-on: ubuntu-latest
@@ -265,6 +286,7 @@ jobs:
 ```
 .github/CODEOWNERS
 ```
+
 ```txt
 /services/api/                 @graph-leads @platform-owners
 /services/er/                  @data-leads @platform-owners
@@ -305,35 +327,45 @@ runbooks/
 Each epic is a GitHub issue with child issues. Add to Project, set `Status=Backlog`, `Priority=P0`, owners, and exit criteria.
 
 ### EPIC-1: Graph Core & API
+
 - **Exit:** Time-travel queries; policy-aware shortest path; p95<1.5s synthetic; cost hints enforced.
 - **Children:** schema v1, bitemporal edges, GraphQL gateway, persisted queries, cost limiter, query cookbook, perf tests.
 
 ### EPIC-2: Ingest & 10 Connectors
+
 - **Exit:** 10 connectors w/ manifests + golden IO tests; Ingest Wizard.
 - **List (v1):** CSV, RSS, STIX/TAXII, MISP, OFAC sanctions, DNS/WHOIS, S3 bucket, HTTP fetcher, Kafka, IMAP email.
 
 ### EPIC-3: Entity Resolution v1 (Explainable)
+
 - **Exit:** Scorecards, merge/split APIs, override logs, golden datasets.
 
 ### EPIC-4: Analytics v1
+
 - **Exit:** Link/path centralities; pattern templates (burst, co-presence); anomaly queues; hypothesis workbench MVP.
 
 ### EPIC-5: Copilot v1 (Auditable)
+
 - **Exit:** NL→Cypher preview w/ cost/row estimates; RAG w/ inline citations; guardrail denials with reasons; feature flag.
 
 ### EPIC-6: Governance & Security
+
 - **Exit:** OPA ABAC, immutable audit, WebAuthn, policy simulation view; dual-control high-risk actions.
 
 ### EPIC-7: Prov‑Ledger (beta) & PCQ groundwork
+
 - **Exit:** Evidence registration; export manifests (Merkle); deterministic DAG runner proto; replay determinism test.
 
 ### EPIC-8: Ops/Observability/FinOps
+
 - **Exit:** OTEL traces; Prom/Grafana dashboards; SLO alerts; slow-query killer; archive tiering; chaos drills.
 
 ### EPIC-9: UI/UX Tri‑pane
+
 - **Exit:** Graph/Timeline/Map with synced brushing; command palette; XAI overlays; a11y pass.
 
 ### EPIC-10: Runbooks R1–R7, R9, R10
+
 - **Exit:** 10 runbooks published; KPIs defined; sample datasets wired; export templates.
 
 ---
@@ -406,6 +438,7 @@ done
 - **Acceptance (per epic):** Gherkin scenarios stored in `tests/acceptance/` and wired to CI with tags per Area.
 
 **Example Gherkin (Graph time-travel):**
+
 ```gherkin
 Feature: Time-travel queries
   Scenario: Query snapshot at historical time
@@ -462,6 +495,7 @@ Feature: Time-travel queries
 ---
 
 ### Appendix A: Makefile (developer ergonomics)
+
 ```makefile
 .PHONY: setup labels project test docker helm
 setup: labels
@@ -482,8 +516,10 @@ project:
 ```
 
 ### Appendix B: Repository ADR template
+
 ```md
 # ADR-000: Title
+
 - Date:
 - Status: Proposed | Accepted | Superseded
 - Context
@@ -492,6 +528,7 @@ project:
 ```
 
 ### Appendix C: Example OPA policy test (rego)
+
 ```rego
 package intelgraph.authz
 
@@ -502,4 +539,3 @@ allow {
   not sensitive[input.resource]
 }
 ```
-

@@ -1,13 +1,13 @@
-import { Session } from "neo4j-driver";
-import pino from "pino";
-import { getPostgresPool } from "../config/database";
+import { Session } from 'neo4j-driver';
+import pino from 'pino';
+import { getPostgresPool } from '../config/database';
 import {
   BehavioralFingerprintService,
   BehavioralTelemetry,
   BehavioralFingerprint,
-} from "./BehavioralFingerprintService.js";
+} from './BehavioralFingerprintService.js';
 
-const log = pino({ name: "EntityResolutionService" });
+const log = pino({ name: 'EntityResolutionService' });
 
 interface NormalizedProperties {
   name?: string;
@@ -55,9 +55,9 @@ export class EntityResolutionService {
     if (normalizedProps.url) parts.push(`url:${normalizedProps.url}`);
 
     if (parts.length === 0) {
-      return ""; // Cannot generate a canonical key without identifying properties
+      return ''; // Cannot generate a canonical key without identifying properties
     }
-    return parts.sort().join("|");
+    return parts.sort().join('|');
   }
 
   /**
@@ -76,11 +76,11 @@ export class EntityResolutionService {
     `);
 
     for (const record of result.records) {
-      const entityId = record.get("id");
+      const entityId = record.get('id');
       const entityProps = {
-        name: record.get("name"),
-        email: record.get("email"),
-        url: record.get("url"),
+        name: record.get('name'),
+        email: record.get('email'),
+        url: record.get('url'),
       };
       const normalized = this.normalizeEntityProperties(entityProps);
       const canonicalKey = this.generateCanonicalKey(normalized);
@@ -118,7 +118,7 @@ export class EntityResolutionService {
   ): Promise<void> {
     if (duplicateEntityIds.includes(masterEntityId)) {
       throw new Error(
-        "Master entity ID cannot be in the list of duplicate entity IDs.",
+        'Master entity ID cannot be in the list of duplicate entity IDs.',
       );
     }
 
@@ -172,7 +172,7 @@ export class EntityResolutionService {
     );
 
     log.info(
-      `Merged entities: ${duplicateEntityIds.join(", ")} into ${masterEntityId}`,
+      `Merged entities: ${duplicateEntityIds.join(', ')} into ${masterEntityId}`,
     );
 
     // Log to audit_logs
@@ -181,8 +181,8 @@ export class EntityResolutionService {
       `INSERT INTO audit_logs (action, resource_type, resource_id, details)
        VALUES ($1, $2, $3, $4)`,
       [
-        "entity_merge",
-        "Entity",
+        'entity_merge',
+        'Entity',
         masterEntityId,
         { merged_from: duplicateEntityIds },
       ],

@@ -123,7 +123,6 @@ class JWTSecurityManager {
 
       // Generate new key if none exists or current is expired
       await this.rotateKey();
-
     } catch (error) {
       console.error('❌ Failed to load current JWT key:', error);
       throw error;
@@ -144,7 +143,7 @@ class JWTSecurityManager {
       await this.redis.setex(
         `jwt:key:${this.currentKey.kid}`,
         86400 * 7, // Keep old keys for 7 days
-        JSON.stringify(this.currentKey)
+        JSON.stringify(this.currentKey),
       );
     }
 
@@ -266,7 +265,6 @@ class JWTSecurityManager {
 
       console.log(`✅ Verified JWT: ${payload.jti} (kid: ${kid})`);
       return payload;
-
     } catch (error) {
       console.error('❌ JWT verification failed:', error.message);
       throw error;
@@ -315,7 +313,7 @@ class JWTSecurityManager {
     await this.redis.setex(
       key,
       Math.floor(this.config.replayProtectionTTL / 1000),
-      '1'
+      '1',
     );
   }
 
@@ -373,13 +371,13 @@ class JWTSecurityManager {
     details: any;
   }> {
     try {
-      const redisHealthy = await this.redis.ping() === 'PONG';
+      const redisHealthy = (await this.redis.ping()) === 'PONG';
       const hasCurrentKey = !!this.currentKey;
-      const keyValid = this.currentKey && this.currentKey.expiresAt > new Date();
+      const keyValid =
+        this.currentKey && this.currentKey.expiresAt > new Date();
 
-      const status = redisHealthy && hasCurrentKey && keyValid
-        ? 'healthy'
-        : 'degraded';
+      const status =
+        redisHealthy && hasCurrentKey && keyValid ? 'healthy' : 'degraded';
 
       return {
         status,
@@ -413,7 +411,9 @@ class JWTSecurityManager {
 }
 
 // Factory function for creating JWT security manager
-export function createJWTSecurityManager(config: Partial<JWTConfig>): JWTSecurityManager {
+export function createJWTSecurityManager(
+  config: Partial<JWTConfig>,
+): JWTSecurityManager {
   const defaultConfig: JWTConfig = {
     issuer: 'intelgraph-server',
     audience: 'intelgraph-api',

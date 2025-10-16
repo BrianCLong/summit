@@ -47,7 +47,9 @@ export async function createApp() {
   // CORS configuration
   app.use(
     cors({
-      origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000'],
+      origin: process.env.ALLOWED_ORIGINS?.split(',') || [
+        'http://localhost:3000',
+      ],
       credentials: true,
       methods: ['GET', 'POST', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization', 'X-Tenant-ID'],
@@ -120,19 +122,23 @@ export async function createApp() {
   await server.start();
 
   // Basic GraphQL guard: require operationName (optional) and limit naive complexity by brace count
-  function graphGuard(req: any, res: any, next: any){
-    try{
-      if(req.method === 'POST'){
+  function graphGuard(req: any, res: any, next: any) {
+    try {
+      if (req.method === 'POST') {
         const body = req.body || {};
-        if(process.env.ENFORCE_GRAPHQL_OPNAME === 'true' && !body.operationName){
-          return res.status(400).json({ error:'operation_name_required' });
+        if (
+          process.env.ENFORCE_GRAPHQL_OPNAME === 'true' &&
+          !body.operationName
+        ) {
+          return res.status(400).json({ error: 'operation_name_required' });
         }
-        const q = String(body.query||'');
-        const braces = (q.match(/[{}]/g)||[]).length;
+        const q = String(body.query || '');
+        const braces = (q.match(/[{}]/g) || []).length;
         const maxBraces = Number(process.env.GQL_MAX_BRACES || '200');
-        if(braces > maxBraces) return res.status(400).json({ error:'query_too_complex' });
+        if (braces > maxBraces)
+          return res.status(400).json({ error: 'query_too_complex' });
       }
-    }catch{}
+    } catch {}
     next();
   }
 

@@ -4,4 +4,3 @@ export function rejectIfStale(tsHeader: string | undefined, maxSkewSec = 300) {
   const now = Math.floor(Date.now() / 1000);
   return Math.abs(now - ts) > maxSkewSec;
 }
-

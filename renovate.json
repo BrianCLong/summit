@@ -5,6 +5,10 @@
   "rangeStrategy": "bump",
   "automerge": false,
   "packageRules": [
-    { "matchManagers": ["github-actions"], "groupName": "github-actions", "schedule": ["before 8am on monday"] }
+    {
+      "matchManagers": ["github-actions"],
+      "groupName": "github-actions",
+      "schedule": ["before 8am on monday"]
+    }
   ]
 }

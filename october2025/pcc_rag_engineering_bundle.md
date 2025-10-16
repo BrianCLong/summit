@@ -3,6 +3,7 @@
 ---
 
 ## /impl/Makefile
+
 ```
 .PHONY: bootstrap test run bench lint sbom
 
@@ -32,6 +33,7 @@ sbom:
 ---
 
 ## /impl/requirements.txt
+
 ```
 numpy>=1.26
 scipy>=1.11
@@ -48,6 +50,7 @@ pytest>=8.3
 ---
 
 ## /impl/Cargo.toml (pq_kernel)
+
 ```
 [package]
 name = "pq_kernel"
@@ -67,6 +70,7 @@ pyo3 = { version = "0.21", features = ["extension-module"] }
 ---
 
 ## /impl/src/lib.rs (Rust PQ distance kernel)
+
 ```rust
 use ndarray::{Array2, ArrayView1};
 use pyo3::prelude::*;
@@ -98,6 +102,7 @@ fn pq_kernel(_py: Python, m: &PyModule) -> PyResult<()> {
 ---
 
 ## /apps/demo_server.py (FastAPI demo)
+
 ```python
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -128,6 +133,7 @@ def answer(q: Query):
 ## /integration/api_contracts.md
 
 ### Summit Decoder Hook
+
 - **Endpoint:** in-process hook `proof_context_hook(draft, cc)`
 - **Inputs:**
   - `draft`: structured object with `claims: List[Claim]`
@@ -136,12 +142,15 @@ def answer(q: Query):
   - `draft`: possibly modified; claims flagged/removed
 
 ### IntelGraph Services
+
 - **POST /corpus/commit** → `{ root: string, timestamp }`
 - **GET /corpus/proof?doc=...&chunk=...&span=...`** → Merkle branch
 - **GET /retrieval/sketch/{id}`** → candidate chunk IDs
 
 ### Maestro Conductor Policies
+
 - **OPA Policy Inputs:**
+
 ```
 {
   "device": {"build_hash": "..."},
@@ -150,11 +159,13 @@ def answer(q: Query):
   "risk": "default"
 }
 ```
+
 - **Decision:** allow/deny/flag
 
 ---
 
 ## /schemas/coverage_certificate.schema.json
+
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -162,28 +173,31 @@ def answer(q: Query):
   "type": "object",
   "required": ["root", "spans", "policy", "sketch_ids", "timestamp"],
   "properties": {
-    "root": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+    "root": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
     "spans": {
       "type": "array",
       "items": {
         "type": "object",
         "required": ["doc", "chunk", "span", "branch"],
         "properties": {
-          "doc": {"type": "string"},
-          "chunk": {"type": "integer", "minimum": 0},
+          "doc": { "type": "string" },
+          "chunk": { "type": "integer", "minimum": 0 },
           "span": {
-            "type": "array", "items": {"type": "integer"}, "minItems": 2, "maxItems": 2
+            "type": "array",
+            "items": { "type": "integer" },
+            "minItems": 2,
+            "maxItems": 2
           },
-          "branch": {"type": "array", "items": {"type": "string"}}
+          "branch": { "type": "array", "items": { "type": "string" } }
         }
       }
     },
     "policy": {
       "type": "object",
-      "properties": {"tau": {"type": "number", "minimum": 0, "maximum": 1}}
+      "properties": { "tau": { "type": "number", "minimum": 0, "maximum": 1 } }
     },
-    "sketch_ids": {"type": "array", "items": {"type": "integer"}},
-    "timestamp": {"type": "string", "format": "date-time"}
+    "sketch_ids": { "type": "array", "items": { "type": "integer" } },
+    "timestamp": { "type": "string", "format": "date-time" }
   }
 }
 ```
@@ -191,6 +205,7 @@ def answer(q: Query):
 ---
 
 ## /tests/test_coverage.py
+
 ```python
 import json, jsonschema
 from schemas.coverage_certificate_schema import schema
@@ -210,6 +225,7 @@ def test_schema_valid():
 ---
 
 ## /telemetry/spec.md
+
 - **Event:** `pcc.response`
 - **Fields:**
   - `latency_ms` (int)
@@ -224,17 +240,19 @@ def test_schema_valid():
 ---
 
 ## /security/threat_model.md
+
 - **Assets:** corpus root, span proofs, runtime attestation, user prompts.
 - **Adversaries:** on-device attacker, network MITM, poisoned index maintainer.
 - **Threats & Mitigations:**
-  - *Tampered proofs* → verify Merkle branches client-side; signed root rotation.
-  - *Model hallucination* → verifier-gated decoding + min coverage τ.
-  - *Data exfiltration* → RTD with PII scrub; DP noise on updates.
-  - *Replay of old corpus* → MC policy requires fresh root within SLA.
+  - _Tampered proofs_ → verify Merkle branches client-side; signed root rotation.
+  - _Model hallucination_ → verifier-gated decoding + min coverage τ.
+  - _Data exfiltration_ → RTD with PII scrub; DP noise on updates.
+  - _Replay of old corpus_ → MC policy requires fresh root within SLA.
 
 ---
 
 ## /privacy/dpia.md
+
 - **Purpose:** verifiable grounding for enterprise copilots.
 - **Data Types:** user queries (transient), spans (public/synthetic), telemetry (aggregated).
 - **Legal Basis:** legitimate interest/contractual necessity.
@@ -244,6 +262,7 @@ def test_schema_valid():
 ---
 
 ## /compliance/policies.md
+
 - **License Policy:** Apache-2.0 only; third-party inventory in SPDX.
 - **Security Policy:** SLSA provenance for releases; cosign container images.
 - **Data Policy:** ingestion redactors, retention ≤30 days for telemetry.
@@ -251,6 +270,7 @@ def test_schema_valid():
 ---
 
 ## /.github/workflows/ci.yml
+
 ```yaml
 name: ci
 on: [push, pull_request]
@@ -282,6 +302,7 @@ jobs:
 ---
 
 ## /release/process.md
+
 - **Tags:** `vMAJOR.MINOR.PATCH`.
 - **Provenance:** SLSA Level 2 with GitHub OIDC; sign artifacts with cosign.
 - **Packages:**
@@ -293,6 +314,7 @@ jobs:
 ---
 
 ## /integration/sdk_stubs.py
+
 ```python
 class PCCSDK:
     def verify(self, cc: dict) -> bool:
@@ -306,6 +328,7 @@ class PCCSDK:
 ---
 
 ## /docs/api_examples.http
+
 ```
 POST http://localhost:8000/answer
 Content-Type: application/json
@@ -318,20 +341,21 @@ Content-Type: application/json
 ---
 
 ## /risk_register.md
-| ID | Risk | Likelihood | Impact | Mitigation | Owner |
-|----|------|------------|--------|------------|-------|
-| R1 | PQ kernel perf regress | M | H | SIMD + benches | Eng |
-| R2 | Verifier FN | M | M | Threshold tuning, retrain | Research |
-| R3 | Proof bloat | L | M | Branch dedup, KZG option | Arch |
-| R4 | Policy drift | M | M | MC compliance tests | PM |
+
+| ID  | Risk                   | Likelihood | Impact | Mitigation                | Owner    |
+| --- | ---------------------- | ---------- | ------ | ------------------------- | -------- |
+| R1  | PQ kernel perf regress | M          | H      | SIMD + benches            | Eng      |
+| R2  | Verifier FN            | M          | M      | Threshold tuning, retrain | Research |
+| R3  | Proof bloat            | L          | M      | Branch dedup, KZG option  | Arch     |
+| R4  | Policy drift           | M          | M      | MC compliance tests       | PM       |
 
 ---
 
 ## /docs/README.md
+
 - Quickstart: `make bootstrap && make run`.
 - Verify CC schema: `pytest tests/test_coverage.py`.
 - See `/integration/api_contracts.md` for Summit/IntelGraph/MC hooks.
 - Patent materials in `/ip/` and figures in `/figures/`.
 
 ---
-

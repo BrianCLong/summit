@@ -5,36 +5,36 @@ const logger = pino({ name: 'cost-guard' });
 
 // Cost configuration per operation type
 interface CostConfig {
-  graphql_query: number;        // Cost per GraphQL query
-  cypher_query: number;         // Cost per Cypher query
-  nlq_parse: number;           // Cost per NL→Cypher parse
-  provenance_write: number;    // Cost per provenance write
-  export_operation: number;    // Cost per export operation
-  connector_ingest: number;    // Cost per connector ingest
+  graphql_query: number; // Cost per GraphQL query
+  cypher_query: number; // Cost per Cypher query
+  nlq_parse: number; // Cost per NL→Cypher parse
+  provenance_write: number; // Cost per provenance write
+  export_operation: number; // Cost per export operation
+  connector_ingest: number; // Cost per connector ingest
 }
 
 const DEFAULT_COSTS: CostConfig = {
-  graphql_query: 0.001,        // $0.001 per query
-  cypher_query: 0.002,         // $0.002 per Cypher query
-  nlq_parse: 0.005,           // $0.005 per NL parse
-  provenance_write: 0.0001,   // $0.0001 per provenance write
-  export_operation: 0.01,     // $0.01 per export
-  connector_ingest: 0.0005,   // $0.0005 per ingest operation
+  graphql_query: 0.001, // $0.001 per query
+  cypher_query: 0.002, // $0.002 per Cypher query
+  nlq_parse: 0.005, // $0.005 per NL parse
+  provenance_write: 0.0001, // $0.0001 per provenance write
+  export_operation: 0.01, // $0.01 per export
+  connector_ingest: 0.0005, // $0.0005 per ingest operation
 };
 
 // Budget limits per tenant
 interface BudgetLimit {
   daily: number;
   monthly: number;
-  query_burst: number;        // Max cost for burst queries
-  rate_limit_cost: number;    // Cost threshold for rate limiting
+  query_burst: number; // Max cost for burst queries
+  rate_limit_cost: number; // Cost threshold for rate limiting
 }
 
 const DEFAULT_BUDGET: BudgetLimit = {
-  daily: 10.0,               // $10/day default
-  monthly: 250.0,            // $250/month default
-  query_burst: 1.0,          // $1 burst limit
-  rate_limit_cost: 0.5,      // Rate limit at $0.50
+  daily: 10.0, // $10/day default
+  monthly: 250.0, // $250/month default
+  query_burst: 1.0, // $1 burst limit
+  rate_limit_cost: 0.5, // Rate limit at $0.50
 };
 
 // Cost calculation context
@@ -42,9 +42,9 @@ interface CostContext {
   tenantId: string;
   userId: string;
   operation: string;
-  complexity?: number;        // Query complexity multiplier
-  resultCount?: number;       // Number of results
-  duration?: number;          // Operation duration in ms
+  complexity?: number; // Query complexity multiplier
+  resultCount?: number; // Number of results
+  duration?: number; // Operation duration in ms
   metadata?: Record<string, any>;
 }
 
@@ -63,8 +63,14 @@ interface CostGuardResult {
 export class CostGuardService {
   private costs: CostConfig;
   private tenantBudgets = new Map<string, BudgetLimit>();
-  private tenantUsage = new Map<string, { daily: number; monthly: number; lastReset: Date }>();
-  private activeCostlyOperations = new Map<string, { cost: number; startTime: Date }>();
+  private tenantUsage = new Map<
+    string,
+    { daily: number; monthly: number; lastReset: Date }
+  >();
+  private activeCostlyOperations = new Map<
+    string,
+    { cost: number; startTime: Date }
+  >();
 
   constructor(costConfig?: Partial<CostConfig>) {
     this.costs = { ...DEFAULT_COSTS, ...costConfig };
@@ -81,7 +87,11 @@ export class CostGuardService {
   }
 
   // Get current usage for a tenant
-  getCurrentUsage(tenantId: string): { daily: number; monthly: number; lastReset: Date } {
+  getCurrentUsage(tenantId: string): {
+    daily: number;
+    monthly: number;
+    lastReset: Date;
+  } {
     const usage = this.tenantUsage.get(tenantId);
     if (!usage) {
       const now = new Date();
@@ -93,7 +103,10 @@ export class CostGuardService {
     // Reset daily usage if it's a new day
     const now = new Date();
     const lastReset = usage.lastReset;
-    if (now.getDate() !== lastReset.getDate() || now.getMonth() !== lastReset.getMonth()) {
+    if (
+      now.getDate() !== lastReset.getDate() ||
+      now.getMonth() !== lastReset.getMonth()
+    ) {
       usage.daily = 0;
       usage.lastReset = now;
 
@@ -117,13 +130,17 @@ export class CostGuardService {
     }
 
     // Apply result count multiplier for queries
-    if (context.resultCount && ['graphql_query', 'cypher_query'].includes(context.operation)) {
+    if (
+      context.resultCount &&
+      ['graphql_query', 'cypher_query'].includes(context.operation)
+    ) {
       const resultMultiplier = Math.log10(context.resultCount + 1) / 10 + 1;
       cost *= resultMultiplier;
     }
 
     // Apply duration multiplier for long-running operations
-    if (context.duration && context.duration > 5000) { // > 5 seconds
+    if (context.duration && context.duration > 5000) {
+      // > 5 seconds
       const durationMultiplier = Math.min(context.duration / 5000, 10); // Cap at 10x
       cost *= durationMultiplier;
     }
@@ -148,19 +165,25 @@ export class CostGuardService {
 
     if (estimatedCost > budgetRemaining) {
       allowed = false;
-      warnings.push(`Insufficient budget: estimated cost $${estimatedCost}, remaining $${budgetRemaining}`);
+      warnings.push(
+        `Insufficient budget: estimated cost $${estimatedCost}, remaining $${budgetRemaining}`,
+      );
     }
 
     // Check burst limits
     if (estimatedCost > limits.query_burst) {
       allowed = false;
-      warnings.push(`Exceeds burst limit: estimated cost $${estimatedCost}, limit $${limits.query_burst}`);
+      warnings.push(
+        `Exceeds burst limit: estimated cost $${estimatedCost}, limit $${limits.query_burst}`,
+      );
     }
 
     // Check rate limiting threshold
     if (usage.daily > limits.rate_limit_cost) {
       rateLimited = true;
-      warnings.push(`Rate limited: daily usage $${usage.daily} exceeds $${limits.rate_limit_cost}`);
+      warnings.push(
+        `Rate limited: daily usage $${usage.daily} exceeds $${limits.rate_limit_cost}`,
+      );
     }
 
     const budgetUtilization = (usage.daily + estimatedCost) / limits.daily;
@@ -181,7 +204,10 @@ export class CostGuardService {
   }
 
   // Record actual cost after operation completion
-  async recordActualCost(context: CostContext, actualCost?: number): Promise<void> {
+  async recordActualCost(
+    context: CostContext,
+    actualCost?: number,
+  ): Promise<void> {
     const cost = actualCost || this.calculateCost(context);
     const usage = this.getCurrentUsage(context.tenantId);
 
@@ -198,17 +224,23 @@ export class CostGuardService {
       duration: context.duration,
     });
 
-    logger.debug({
-      tenantId: context.tenantId,
-      operation: context.operation,
-      cost,
-      dailyUsage: usage.daily,
-      monthlyUsage: usage.monthly,
-    }, 'Cost recorded');
+    logger.debug(
+      {
+        tenantId: context.tenantId,
+        operation: context.operation,
+        cost,
+        dailyUsage: usage.daily,
+        monthlyUsage: usage.monthly,
+      },
+      'Cost recorded',
+    );
   }
 
   // Kill expensive operations
-  async killExpensiveOperation(operationId: string, reason: string): Promise<boolean> {
+  async killExpensiveOperation(
+    operationId: string,
+    reason: string,
+  ): Promise<boolean> {
     const operation = this.activeCostlyOperations.get(operationId);
     if (!operation) {
       return false;
@@ -216,12 +248,15 @@ export class CostGuardService {
 
     const duration = Date.now() - operation.startTime.getTime();
 
-    logger.warn({
-      operationId,
-      reason,
-      estimatedCost: operation.cost,
-      duration,
-    }, 'Killing expensive operation');
+    logger.warn(
+      {
+        operationId,
+        reason,
+        estimatedCost: operation.cost,
+        duration,
+      },
+      'Killing expensive operation',
+    );
 
     // Remove from active operations
     this.activeCostlyOperations.delete(operationId);
@@ -241,7 +276,10 @@ export class CostGuardService {
     const limits = this.tenantBudgets.get(context.tenantId) || DEFAULT_BUDGET;
 
     // Only monitor operations that could be expensive
-    if (estimatedCost > 0.01 || context.complexity && context.complexity > 5) {
+    if (
+      estimatedCost > 0.01 ||
+      (context.complexity && context.complexity > 5)
+    ) {
       this.activeCostlyOperations.set(operationId, {
         cost: estimatedCost,
         startTime: new Date(),
@@ -278,21 +316,31 @@ export class CostGuardService {
     // Project monthly spend based on current daily average
     const currentDate = new Date();
     const dayOfMonth = currentDate.getDate();
-    const daysInMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0).getDate();
+    const daysInMonth = new Date(
+      currentDate.getFullYear(),
+      currentDate.getMonth() + 1,
+      0,
+    ).getDate();
     const projectedMonthlySpend = (usage.monthly / dayOfMonth) * daysInMonth;
 
     const recommendations: string[] = [];
 
     if (dailyUtilization > 0.8) {
-      recommendations.push('Daily budget utilization is high. Consider optimizing queries or increasing budget.');
+      recommendations.push(
+        'Daily budget utilization is high. Consider optimizing queries or increasing budget.',
+      );
     }
 
     if (projectedMonthlySpend > limits.monthly * 1.2) {
-      recommendations.push('Projected monthly spend exceeds budget by 20%. Review query patterns.');
+      recommendations.push(
+        'Projected monthly spend exceeds budget by 20%. Review query patterns.',
+      );
     }
 
     if (this.activeCostlyOperations.size > 10) {
-      recommendations.push('Many active expensive operations detected. Consider query optimization.');
+      recommendations.push(
+        'Many active expensive operations detected. Consider query optimization.',
+      );
     }
 
     return {
@@ -311,7 +359,10 @@ export class CostGuardService {
   }
 
   // Generate cost report
-  async generateCostReport(tenantId: string, days: number = 30): Promise<{
+  async generateCostReport(
+    tenantId: string,
+    days: number = 30,
+  ): Promise<{
     totalCost: number;
     averageDailyCost: number;
     operationBreakdown: Record<string, number>;
@@ -344,7 +395,9 @@ export function costGuardMiddleware() {
   return async (req: any, res: any, next: any) => {
     const tenantId = req.headers['x-tenant-id'] || 'default';
     const userId = req.headers['x-user-id'] || 'unknown';
-    const operation = req.path.includes('graphql') ? 'graphql_query' : 'api_request';
+    const operation = req.path.includes('graphql')
+      ? 'graphql_query'
+      : 'api_request';
 
     const context: CostContext = {
       tenantId,
@@ -380,7 +433,10 @@ export function costGuardMiddleware() {
 
       next();
     } catch (error) {
-      logger.error({ error, tenantId, operation }, 'Cost guard middleware error');
+      logger.error(
+        { error, tenantId, operation },
+        'Cost guard middleware error',
+      );
       next(); // Allow request to proceed on error
     }
   };

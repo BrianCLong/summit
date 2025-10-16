@@ -8,7 +8,11 @@ import { stopObservability } from '../src/observability';
 import type { AddressInfo } from 'net';
 
 function signChallenge(challenge: string) {
-  const privateKeyPath = path.join(__dirname, 'fixtures', 'webauthn-private.pem');
+  const privateKeyPath = path.join(
+    __dirname,
+    'fixtures',
+    'webauthn-private.pem',
+  );
   const privateKey = readFileSync(privateKeyPath, 'utf8');
   const signer = crypto.createSign('SHA256');
   signer.update(Buffer.from(challenge, 'utf8'));

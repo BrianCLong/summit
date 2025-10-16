@@ -43,7 +43,11 @@ export class PostgresStateStore implements StateStore {
     }
   }
 
-  async updateRunStatus(runId: string, status: string, error?: string): Promise<void> {
+  async updateRunStatus(
+    runId: string,
+    status: string,
+    error?: string,
+  ): Promise<void> {
     await this.pool.query(
       `
       UPDATE workflow_runs 
@@ -55,9 +59,10 @@ export class PostgresStateStore implements StateStore {
   }
 
   async getRunStatus(runId: string): Promise<string> {
-    const result = await this.pool.query('SELECT status FROM workflow_runs WHERE run_id = $1', [
-      runId,
-    ]);
+    const result = await this.pool.query(
+      'SELECT status FROM workflow_runs WHERE run_id = $1',
+      [runId],
+    );
     return result.rows[0]?.status || 'not_found';
   }
 
@@ -141,7 +146,10 @@ export class PostgresStateStore implements StateStore {
     );
   }
 
-  async getStepExecution(runId: string, stepId: string): Promise<StepExecution | null> {
+  async getStepExecution(
+    runId: string,
+    stepId: string,
+  ): Promise<StepExecution | null> {
     const result = await this.pool.query(
       `
       SELECT * FROM step_executions 
@@ -198,7 +206,9 @@ export class PostgresStateStore implements StateStore {
       completedSteps: parseInt(row.completed_steps),
       failedSteps: parseInt(row.failed_steps),
       totalCost: parseFloat(row.total_cost),
-      duration: row.duration_seconds ? parseFloat(row.duration_seconds) : undefined,
+      duration: row.duration_seconds
+        ? parseFloat(row.duration_seconds)
+        : undefined,
     };
   }
 }

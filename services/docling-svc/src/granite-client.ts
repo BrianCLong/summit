@@ -11,7 +11,7 @@ import {
   SummarizeRequestBody,
   SummarizeResponseBody,
   ExtractRequestBody,
-  ExtractResponseBody
+  ExtractResponseBody,
 } from './types.js';
 
 const config = loadConfig();
@@ -41,8 +41,8 @@ export class GraniteDoclingClient {
           'x-model-id': config.GRANITE_DOCLING_MODEL_ID,
           ...(config.GRANITE_DOCLING_API_KEY
             ? { Authorization: `Bearer ${config.GRANITE_DOCLING_API_KEY}` }
-            : {})
-        }
+            : {}),
+        },
       });
     }
     return this.http;
@@ -53,7 +53,11 @@ export class GraniteDoclingClient {
     const response = await this.invokeRemote('/parse', payload);
     const fragments =
       response.fragments ||
-      synthesizeFragments(payload.bytes ? Buffer.from(payload.bytes, 'base64').toString('utf8') : '');
+      synthesizeFragments(
+        payload.bytes
+          ? Buffer.from(payload.bytes, 'base64').toString('utf8')
+          : '',
+      );
     const latencyMs = Date.now() - start;
     return {
       requestId: payload.requestId,
@@ -67,23 +71,29 @@ export class GraniteDoclingClient {
         promptHash: hashPrompt(payload),
         parameters: { hints: payload.hints, contentType: payload.contentType },
         policyTags: [],
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
       usage: {
-        characters: fragments.reduce((acc, fragment) => acc + fragment.text.length, 0),
+        characters: fragments.reduce(
+          (acc, fragment) => acc + fragment.text.length,
+          0,
+        ),
         tokens: response.tokens,
         costUsd: this.estimateCost(fragments),
-        latencyMs
+        latencyMs,
       },
       result: { fragments },
-      policySignals: response.policySignals || []
+      policySignals: response.policySignals || [],
     };
   }
 
-  async summarize(payload: SummarizeRequestBody): Promise<SummarizeResponseBody> {
+  async summarize(
+    payload: SummarizeRequestBody,
+  ): Promise<SummarizeResponseBody> {
     const start = Date.now();
     const response = await this.invokeRemote('/summarize', payload);
-    const summary = response.summary || synthesizeSummary(payload.text, payload.focus);
+    const summary =
+      response.summary || synthesizeSummary(payload.text, payload.focus);
     const latencyMs = Date.now() - start;
     return {
       requestId: payload.requestId,
@@ -97,30 +107,38 @@ export class GraniteDoclingClient {
         promptHash: hashPrompt(payload),
         parameters: { focus: payload.focus, maxTokens: payload.maxTokens },
         policyTags: [],
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
       usage: {
         characters: payload.text.length,
         tokens: response.tokens,
         costUsd: this.estimateCost(payload.text),
-        latencyMs
+        latencyMs,
       },
       result: {
         id: payload.requestId,
         text: summary,
         focus: payload.focus,
         highlights: response.highlights || deriveHighlights(summary),
-        qualitySignals: response.qualitySignals || { relevance: 0.82, actionability: 0.78 }
+        qualitySignals: response.qualitySignals || {
+          relevance: 0.82,
+          actionability: 0.78,
+        },
       },
-      policySignals: response.policySignals || []
+      policySignals: response.policySignals || [],
     };
   }
 
   async extract(payload: ExtractRequestBody): Promise<ExtractResponseBody> {
     const start = Date.now();
     const response = await this.invokeRemote('/extract', payload);
-    const source = payload.text || (payload.bytes ? Buffer.from(payload.bytes, 'base64').toString('utf8') : '');
-    const findings = response.findings || synthesizeFindings(source, payload.targets);
+    const source =
+      payload.text ||
+      (payload.bytes
+        ? Buffer.from(payload.bytes, 'base64').toString('utf8')
+        : '');
+    const findings =
+      response.findings || synthesizeFindings(source, payload.targets);
     const latencyMs = Date.now() - start;
     return {
       requestId: payload.requestId,
@@ -134,25 +152,30 @@ export class GraniteDoclingClient {
         promptHash: hashPrompt(payload),
         parameters: { targets: payload.targets },
         policyTags: [],
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
       },
       usage: {
         characters: source.length,
         tokens: response.tokens,
         costUsd: this.estimateCost(source),
-        latencyMs
+        latencyMs,
       },
       result: {
         findings: findings.map((finding) => ({
           ...finding,
-          qualitySignals: response.qualitySignals || { confidence: finding.confidence }
-        }))
+          qualitySignals: response.qualitySignals || {
+            confidence: finding.confidence,
+          },
+        })),
       },
-      policySignals: response.policySignals || []
+      policySignals: response.policySignals || [],
     };
   }
 
-  private async invokeRemote(path: string, payload: unknown): Promise<RemoteResponse> {
+  private async invokeRemote(
+    path: string,
+    payload: unknown,
+  ): Promise<RemoteResponse> {
     if (!config.GRANITE_DOCLING_ENDPOINT) {
       return {};
     }
@@ -203,7 +226,7 @@ const synthesizeFragments = (text: string): DocFragment[] => {
       sizeBytes: Buffer.byteLength(chunk),
       language: 'en',
       text: chunk.trim(),
-      metadata: { ordinal: idx }
+      metadata: { ordinal: idx },
     }));
 };
 
@@ -215,7 +238,10 @@ const deriveHighlights = (summary: string): string[] => {
     .slice(0, 3);
 };
 
-const synthesizeFindings = (text: string, targets: ExtractRequestBody['targets']): Array<Omit<ExtractionFinding, 'qualitySignals'>> => {
+const synthesizeFindings = (
+  text: string,
+  targets: ExtractRequestBody['targets'],
+): Array<Omit<ExtractionFinding, 'qualitySignals'>> => {
   const findings: Array<Omit<ExtractionFinding, 'qualitySignals'>> = [];
   if (targets.includes('license')) {
     const licenseMatch = text.match(/license[:\s]+([A-Za-z0-9\-\.]+)/i);
@@ -224,7 +250,7 @@ const synthesizeFindings = (text: string, targets: ExtractRequestBody['targets']
         id: 'license-0',
         label: 'license',
         value: licenseMatch[1],
-        confidence: 0.88
+        confidence: 0.88,
       });
     }
   }
@@ -235,15 +261,22 @@ const synthesizeFindings = (text: string, targets: ExtractRequestBody['targets']
         id: 'version-0',
         label: 'version',
         value: versionMatch[1],
-        confidence: 0.74
+        confidence: 0.74,
       });
     }
   }
   if (targets.includes('cve')) {
     const cveMatches = text.match(/CVE-\d{4}-\d{4,7}/gi) || [];
-    cveMatches.slice(0, 5).forEach((match, index) =>
-      findings.push({ id: `cve-${index}`, label: 'cve', value: match, confidence: 0.65 })
-    );
+    cveMatches
+      .slice(0, 5)
+      .forEach((match, index) =>
+        findings.push({
+          id: `cve-${index}`,
+          label: 'cve',
+          value: match,
+          confidence: 0.65,
+        }),
+      );
   }
   if (targets.includes('owner')) {
     const ownerMatch = text.match(/owner[:\s]+([A-Za-z\s]+)/i);
@@ -252,7 +285,7 @@ const synthesizeFindings = (text: string, targets: ExtractRequestBody['targets']
         id: 'owner-0',
         label: 'owner',
         value: ownerMatch[1].trim(),
-        confidence: 0.7
+        confidence: 0.7,
       });
     }
   }

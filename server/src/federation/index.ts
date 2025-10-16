@@ -12,6 +12,5 @@ export function registerSubgraph(name: string, url: string): Subgraph {
 }
 
 export function federationStatus(): string {
-  return "ok";
+  return 'ok';
 }
-

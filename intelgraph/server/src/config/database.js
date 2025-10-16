@@ -16,7 +16,7 @@ async function connectNeo4j() {
   try {
     neo4jDriver = neo4j.driver(
       config.neo4j.uri,
-      neo4j.auth.basic(config.neo4j.username, config.neo4j.password)
+      neo4j.auth.basic(config.neo4j.username, config.neo4j.password),
     );
 
     // Test connection
@@ -26,7 +26,7 @@ async function connectNeo4j() {
 
     // Create constraints and indexes
     await createNeo4jConstraints();
-    
+
     logger.info('✅ Connected to Neo4j');
     return neo4jDriver;
   } catch (error) {
@@ -37,22 +37,22 @@ async function connectNeo4j() {
 
 async function createNeo4jConstraints() {
   const session = neo4jDriver.session();
-  
+
   try {
     const constraints = [
       // Entity constraints
       'CREATE CONSTRAINT entity_id IF NOT EXISTS FOR (e:Entity) REQUIRE e.id IS UNIQUE',
       'CREATE CONSTRAINT entity_uuid IF NOT EXISTS FOR (e:Entity) REQUIRE e.uuid IS UNIQUE',
-      
+
       // User constraints
       'CREATE CONSTRAINT user_id IF NOT EXISTS FOR (u:User) REQUIRE u.id IS UNIQUE',
       'CREATE CONSTRAINT user_email IF NOT EXISTS FOR (u:User) REQUIRE u.email IS UNIQUE',
-      
+
       // Investigation constraints
       'CREATE CONSTRAINT investigation_id IF NOT EXISTS FOR (i:Investigation) REQUIRE i.id IS UNIQUE',
-      
+
       // Relationship constraints
-      'CREATE CONSTRAINT relationship_id IF NOT EXISTS FOR ()-[r:RELATIONSHIP]-() REQUIRE r.id IS UNIQUE'
+      'CREATE CONSTRAINT relationship_id IF NOT EXISTS FOR ()-[r:RELATIONSHIP]-() REQUIRE r.id IS UNIQUE',
     ];
 
     for (const constraint of constraints) {
@@ -60,7 +60,11 @@ async function createNeo4jConstraints() {
         await session.run(constraint);
       } catch (error) {
         if (!error.message.includes('already exists')) {
-          logger.warn('Failed to create constraint:', constraint, error.message);
+          logger.warn(
+            'Failed to create constraint:',
+            constraint,
+            error.message,
+          );
         }
       }
     }
@@ -73,7 +77,7 @@ async function createNeo4jConstraints() {
       'CREATE INDEX investigation_status IF NOT EXISTS FOR (i:Investigation) ON (i.status)',
       'CREATE INDEX user_username IF NOT EXISTS FOR (u:User) ON (u.username)',
       'CREATE FULLTEXT INDEX entity_search IF NOT EXISTS FOR (e:Entity) ON EACH [e.label, e.description]',
-      'CREATE FULLTEXT INDEX investigation_search IF NOT EXISTS FOR (i:Investigation) ON EACH [i.title, i.description]'
+      'CREATE FULLTEXT INDEX investigation_search IF NOT EXISTS FOR (i:Investigation) ON EACH [i.title, i.description]',
     ];
 
     for (const index of indexes) {
@@ -85,7 +89,7 @@ async function createNeo4jConstraints() {
         }
       }
     }
-    
+
     logger.info('Neo4j constraints and indexes created');
   } catch (error) {
     logger.error('Failed to create Neo4j constraints:', error);
@@ -115,7 +119,7 @@ async function connectPostgres() {
 
     // Create tables
     await createPostgresTables();
-    
+
     logger.info('✅ Connected to PostgreSQL');
     return postgresPool;
   } catch (error) {
@@ -126,7 +130,7 @@ async function connectPostgres() {
 
 async function createPostgresTables() {
   const client = await postgresPool.connect();
-  
+
   try {
     // Users table
     await client.query(`
@@ -187,11 +191,19 @@ async function createPostgresTables() {
     `);
 
     // Create indexes for performance
-    await client.query('CREATE INDEX IF NOT EXISTS idx_audit_logs_user_id ON audit_logs(user_id)');
-    await client.query('CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at)');
-    await client.query('CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON user_sessions(user_id)');
-    await client.query('CREATE INDEX IF NOT EXISTS idx_analysis_investigation ON analysis_results(investigation_id)');
-    
+    await client.query(
+      'CREATE INDEX IF NOT EXISTS idx_audit_logs_user_id ON audit_logs(user_id)',
+    );
+    await client.query(
+      'CREATE INDEX IF NOT EXISTS idx_audit_logs_created_at ON audit_logs(created_at)',
+    );
+    await client.query(
+      'CREATE INDEX IF NOT EXISTS idx_sessions_user_id ON user_sessions(user_id)',
+    );
+    await client.query(
+      'CREATE INDEX IF NOT EXISTS idx_analysis_investigation ON analysis_results(investigation_id)',
+    );
+
     logger.info('PostgreSQL tables created');
   } catch (error) {
     logger.error('Failed to create PostgreSQL tables:', error);
@@ -218,7 +230,7 @@ async function connectRedis() {
 
     // Test connection
     await redisClient.ping();
-    
+
     logger.info('✅ Connected to Redis');
     return redisClient;
   } catch (error) {
@@ -266,7 +278,7 @@ module.exports = {
   getNeo4jDriver,
   getPostgresPool,
   getRedisClient,
-  closeConnections
+  closeConnections,
 };
 
 // ===================================
@@ -281,7 +293,7 @@ const typeDefs = gql`
   # Enums
   enum Role {
     ADMIN
-    ANALYST 
+    ANALYST
     VIEWER
   }
 
@@ -638,9 +650,9 @@ const typeDefs = gql`
 
     # Investigations
     investigations(
-      page: Int = 1, 
-      limit: Int = 10, 
-      status: InvestigationStatus,
+      page: Int = 1
+      limit: Int = 10
+      status: InvestigationStatus
       priority: InvestigationPriority
     ): [Investigation!]!
     investigation(id: ID!): Investigation
@@ -648,9 +660,9 @@ const typeDefs = gql`
 
     # Entities
     entities(
-      investigationId: ID,
-      filter: EntityFilterInput,
-      page: Int = 1,
+      investigationId: ID
+      filter: EntityFilterInput
+      page: Int = 1
       limit: Int = 50
     ): [Entity!]!
     entity(id: ID!): Entity
@@ -658,8 +670,8 @@ const typeDefs = gql`
 
     # Relationships
     relationships(
-      investigationId: ID,
-      page: Int = 1,
+      investigationId: ID
+      page: Int = 1
       limit: Int = 50
     ): [Relationship!]!
     relationship(id: ID!): Relationship
@@ -670,7 +682,11 @@ const typeDefs = gql`
 
     # Search
     search(query: String!, limit: Int = 20): SearchResults!
-    searchEntities(query: String!, investigationId: ID, limit: Int = 20): [Entity!]!
+    searchEntities(
+      query: String!
+      investigationId: ID
+      limit: Int = 20
+    ): [Entity!]!
 
     # AI Analysis
     linkPredictions(investigationId: ID!, limit: Int = 10): [LinkPrediction!]!
@@ -693,7 +709,10 @@ const typeDefs = gql`
 
     # Investigations
     createInvestigation(input: CreateInvestigationInput!): Investigation!
-    updateInvestigation(id: ID!, input: UpdateInvestigationInput!): Investigation!
+    updateInvestigation(
+      id: ID!
+      input: UpdateInvestigationInput!
+    ): Investigation!
     deleteInvestigation(id: ID!): Boolean!
 
     # Entities
@@ -722,17 +741,17 @@ const typeDefs = gql`
   type Subscription {
     # Investigation updates
     investigationUpdated(investigationId: ID!): Investigation!
-    
+
     # Entity updates
     entityAdded(investigationId: ID!): Entity!
     entityUpdated(investigationId: ID!): Entity!
     entityDeleted(investigationId: ID!): ID!
-    
+
     # Relationship updates
     relationshipAdded(investigationId: ID!): Relationship!
     relationshipUpdated(investigationId: ID!): Relationship!
     relationshipDeleted(investigationId: ID!): ID!
-    
+
     # Analysis updates
     analysisCompleted(investigationId: ID!): AnalysisResult!
   }
@@ -756,7 +775,7 @@ class GraphAnalysisService {
    */
   async calculateGraphMetrics(investigationId) {
     const session = this.driver.session();
-    
+
     try {
       // Get basic metrics
       const metricsQuery = `
@@ -766,20 +785,23 @@ class GraphAnalysisService {
           count(DISTINCT e) as nodeCount,
           count(DISTINCT r) as edgeCount
       `;
-      
-      const metricsResult = await session.run(metricsQuery, { investigationId });
+
+      const metricsResult = await session.run(metricsQuery, {
+        investigationId,
+      });
       const metrics = metricsResult.records[0].toObject();
-      
+
       // Calculate density
       const nodeCount = metrics.nodeCount;
       const edgeCount = metrics.edgeCount;
-      const maxEdges = nodeCount * (nodeCount - 1) / 2;
+      const maxEdges = (nodeCount * (nodeCount - 1)) / 2;
       const density = maxEdges > 0 ? edgeCount / maxEdges : 0;
       const averageDegree = nodeCount > 0 ? (2 * edgeCount) / nodeCount : 0;
 
       // Calculate centrality scores
-      const centralityScores = await this.calculateCentralityScores(investigationId);
-      
+      const centralityScores =
+        await this.calculateCentralityScores(investigationId);
+
       // Detect clusters
       const clusters = await this.detectCommunities(investigationId);
 
@@ -789,7 +811,7 @@ class GraphAnalysisService {
         density,
         averageDegree,
         centralityScores,
-        clusters
+        clusters,
       };
     } catch (error) {
       logger.error('Error calculating graph metrics:', error);
@@ -804,7 +826,7 @@ class GraphAnalysisService {
    */
   async calculateCentralityScores(investigationId) {
     const session = this.driver.session();
-    
+
     try {
       // Calculate degree centrality
       const degreeQuery = `
@@ -815,18 +837,18 @@ class GraphAnalysisService {
           count(r) as degree
         ORDER BY degree DESC
       `;
-      
+
       const degreeResult = await session.run(degreeQuery, { investigationId });
-      const centralityScores = degreeResult.records.map(record => ({
+      const centralityScores = degreeResult.records.map((record) => ({
         entityId: record.get('entityId'),
         degree: record.get('degree').toNumber(),
         betweenness: 0, // Placeholder - would need more complex calculation
         closeness: 0, // Placeholder - would need more complex calculation
-        pagerank: 0 // Placeholder - would need PageRank algorithm
+        pagerank: 0, // Placeholder - would need PageRank algorithm
       }));
 
       // For demo purposes, we'll simulate betweenness and PageRank scores
-      centralityScores.forEach(score => {
+      centralityScores.forEach((score) => {
         score.betweenness = Math.random() * score.degree;
         score.closeness = Math.random();
         score.pagerank = Math.random() * 0.1;
@@ -846,7 +868,7 @@ class GraphAnalysisService {
    */
   async detectCommunities(investigationId) {
     const session = this.driver.session();
-    
+
     try {
       // Simple clustering based on connection patterns
       const clusterQuery = `
@@ -859,31 +881,34 @@ class GraphAnalysisService {
           connections,
           neighbors
       `;
-      
-      const clusterResult = await session.run(clusterQuery, { investigationId });
-      
+
+      const clusterResult = await session.run(clusterQuery, {
+        investigationId,
+      });
+
       // Simple clustering algorithm - group by entity type and high connectivity
       const clusters = new Map();
-      const entities = clusterResult.records.map(record => record.toObject());
-      
-      entities.forEach(entity => {
-        const clusterKey = entity.connections > 3 ? 'high_connectivity' : entity.entityType;
-        
+      const entities = clusterResult.records.map((record) => record.toObject());
+
+      entities.forEach((entity) => {
+        const clusterKey =
+          entity.connections > 3 ? 'high_connectivity' : entity.entityType;
+
         if (!clusters.has(clusterKey)) {
           clusters.set(clusterKey, {
             id: clusterKey,
             entities: [],
             size: 0,
-            cohesion: 0
+            cohesion: 0,
           });
         }
-        
+
         clusters.get(clusterKey).entities.push(entity.entityId);
         clusters.get(clusterKey).size++;
       });
 
       // Calculate cohesion scores
-      clusters.forEach(cluster => {
+      clusters.forEach((cluster) => {
         cluster.cohesion = Math.random() * 0.5 + 0.5; // Simulated cohesion score
       });
 
@@ -901,7 +926,7 @@ class GraphAnalysisService {
    */
   async predictLinks(investigationId, limit = 10) {
     const session = this.driver.session();
-    
+
     try {
       // Find entities that are not directly connected but have common neighbors
       const linkPredictionQuery = `
@@ -928,24 +953,30 @@ class GraphAnalysisService {
         ORDER BY commonNeighbors DESC
         LIMIT $limit
       `;
-      
-      const result = await session.run(linkPredictionQuery, { investigationId, limit });
-      
-      return result.records.map(record => {
+
+      const result = await session.run(linkPredictionQuery, {
+        investigationId,
+        limit,
+      });
+
+      return result.records.map((record) => {
         const sourceType = record.get('sourceType');
         const targetType = record.get('targetType');
         const commonNeighbors = record.get('commonNeighbors').toNumber();
-        
+
         // Predict relationship type based on entity types and patterns
-        const predictedType = this.predictRelationshipType(sourceType, targetType);
+        const predictedType = this.predictRelationshipType(
+          sourceType,
+          targetType,
+        );
         const confidence = Math.min(0.9, commonNeighbors * 0.2 + 0.1);
-        
+
         return {
           sourceEntityId: record.get('sourceEntityId'),
           targetEntityId: record.get('targetEntityId'),
           predictedRelationshipType: predictedType,
           confidence,
-          reasoning: `${commonNeighbors} common connections suggest potential relationship`
+          reasoning: `${commonNeighbors} common connections suggest potential relationship`,
         };
       });
     } catch (error) {
@@ -961,10 +992,10 @@ class GraphAnalysisService {
    */
   async detectAnomalies(investigationId) {
     const session = this.driver.session();
-    
+
     try {
       const anomalies = [];
-      
+
       // Detect entities with unusually high connectivity
       const highConnectivityQuery = `
         MATCH (e:Entity)-[:BELONGS_TO]->(i:Investigation {id: $investigationId})
@@ -975,17 +1006,19 @@ class GraphAnalysisService {
         ORDER BY connections DESC
         LIMIT 5
       `;
-      
-      const highConnResult = await session.run(highConnectivityQuery, { investigationId });
-      
-      highConnResult.records.forEach(record => {
+
+      const highConnResult = await session.run(highConnectivityQuery, {
+        investigationId,
+      });
+
+      highConnResult.records.forEach((record) => {
         const connections = record.get('connections').toNumber();
         anomalies.push({
           entityId: record.get('entityId'),
           anomalyType: 'HIGH_CONNECTIVITY',
           severity: Math.min(1.0, connections / 20),
           description: `Entity has unusually high connectivity (${connections} connections)`,
-          evidence: [`${connections} direct connections`]
+          evidence: [`${connections} direct connections`],
         });
       });
 
@@ -998,16 +1031,18 @@ class GraphAnalysisService {
         RETURN e.id as entityId, e.label as label
         LIMIT 10
       `;
-      
-      const isolatedResult = await session.run(isolatedQuery, { investigationId });
-      
-      isolatedResult.records.forEach(record => {
+
+      const isolatedResult = await session.run(isolatedQuery, {
+        investigationId,
+      });
+
+      isolatedResult.records.forEach((record) => {
         anomalies.push({
           entityId: record.get('entityId'),
           anomalyType: 'ISOLATED_ENTITY',
           severity: 0.6,
           description: 'Entity has no connections to other entities',
-          evidence: ['Zero connections', 'Potential data quality issue']
+          evidence: ['Zero connections', 'Potential data quality issue'],
         });
       });
 
@@ -1018,16 +1053,18 @@ class GraphAnalysisService {
         RETURN e.id as entityId, e.label as label, e.properties as properties
         LIMIT 10
       `;
-      
-      const propertyResult = await session.run(propertyAnomalyQuery, { investigationId });
-      
-      propertyResult.records.forEach(record => {
+
+      const propertyResult = await session.run(propertyAnomalyQuery, {
+        investigationId,
+      });
+
+      propertyResult.records.forEach((record) => {
         anomalies.push({
           entityId: record.get('entityId'),
           anomalyType: 'INCOMPLETE_DATA',
           severity: 0.4,
           description: 'Entity has missing or incomplete data',
-          evidence: ['Missing label or properties']
+          evidence: ['Missing label or properties'],
         });
       });
 
@@ -1047,22 +1084,23 @@ class GraphAnalysisService {
     // Simple entity extraction patterns
     const patterns = {
       EMAIL: /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g,
-      PHONE: /\b(?:\+?1[-.\s]?)?\(?[2-9][0-8][0-9]\)?[-.\s]?[2-9][0-9]{2}[-.\s]?[0-9]{4}\b/g,
+      PHONE:
+        /\b(?:\+?1[-.\s]?)?\(?[2-9][0-8][0-9]\)?[-.\s]?[2-9][0-9]{2}[-.\s]?[0-9]{4}\b/g,
       IP_ADDRESS: /\b(?:[0-9]{1,3}\.){3}[0-9]{1,3}\b/g,
       URL: /https?:\/\/(?:[-\w.])+(?:\:[0-9]+)?(?:\/(?:[\w/_.])*(?:\?(?:[\w&=%.])*)?(?:\#(?:[\w.])*)?)?/g,
       // Add more patterns for organizations, locations, etc.
     };
 
     const extractedEntities = [];
-    
+
     Object.entries(patterns).forEach(([type, pattern]) => {
       const matches = text.match(pattern) || [];
-      matches.forEach(match => {
+      matches.forEach((match) => {
         extractedEntities.push({
           type,
           label: match,
           confidence: 0.8,
-          properties: { extractedFrom: 'text' }
+          properties: { extractedFrom: 'text' },
         });
       });
     });
@@ -1070,12 +1108,12 @@ class GraphAnalysisService {
     // Simple person name extraction (very basic)
     const namePattern = /\b[A-Z][a-z]+ [A-Z][a-z]+\b/g;
     const nameMatches = text.match(namePattern) || [];
-    nameMatches.forEach(match => {
+    nameMatches.forEach((match) => {
       extractedEntities.push({
         type: 'PERSON',
         label: match,
         confidence: 0.6,
-        properties: { extractedFrom: 'text' }
+        properties: { extractedFrom: 'text' },
       });
     });
 
@@ -1087,18 +1125,18 @@ class GraphAnalysisService {
    */
   predictRelationshipType(sourceType, targetType) {
     const typeMap = {
-      'PERSON_ORGANIZATION': 'WORKS_FOR',
-      'PERSON_LOCATION': 'LOCATED_AT',
-      'PERSON_PERSON': 'KNOWS',
-      'ORGANIZATION_LOCATION': 'LOCATED_AT',
-      'PERSON_PHONE': 'OWNS',
-      'PERSON_EMAIL': 'OWNS',
-      'ORGANIZATION_DOCUMENT': 'OWNS'
+      PERSON_ORGANIZATION: 'WORKS_FOR',
+      PERSON_LOCATION: 'LOCATED_AT',
+      PERSON_PERSON: 'KNOWS',
+      ORGANIZATION_LOCATION: 'LOCATED_AT',
+      PERSON_PHONE: 'OWNS',
+      PERSON_EMAIL: 'OWNS',
+      ORGANIZATION_DOCUMENT: 'OWNS',
     };
 
     const key = `${sourceType}_${targetType}`;
     const reverseKey = `${targetType}_${sourceType}`;
-    
+
     return typeMap[key] || typeMap[reverseKey] || 'RELATED_TO';
   }
 }
@@ -1119,7 +1157,7 @@ class EntityService {
 
   async createEntity(entityData, userId) {
     const session = this.driver.session();
-    
+
     try {
       const entityId = uuidv4();
       const entityUuid = uuidv4();
@@ -1146,12 +1184,16 @@ class EntityService {
         CREATE (e)-[:BELONGS_TO]->(i)
         CREATE (e)-[:CREATED_BY]->(u)
         
-        ${entityData.position ? `
+        ${
+          entityData.position
+            ? `
         CREATE (e)-[:HAS_POSITION]->(:Position {
           x: $positionX,
           y: $positionY
         })
-        ` : ''}
+        `
+            : ''
+        }
         
         RETURN e, i, u
       `;
@@ -1171,12 +1213,12 @@ class EntityService {
         createdAt: now,
         ...(entityData.position && {
           positionX: entityData.position.x,
-          positionY: entityData.position.y
-        })
+          positionY: entityData.position.y,
+        }),
       };
 
       const result = await session.run(query, params);
-      
+
       if (result.records.length === 0) {
         throw new Error('Failed to create entity');
       }
@@ -1190,21 +1232,25 @@ class EntityService {
     }
   }
 
-  async getEntitiesByInvestigation(investigationId, filters = {}, pagination = {}) {
+  async getEntitiesByInvestigation(
+    investigationId,
+    filters = {},
+    pagination = {},
+  ) {
     const session = this.driver.session();
-    
+
     try {
       const { page = 1, limit = 50 } = pagination;
       const skip = (page - 1) * limit;
-      
+
       let whereClause = '';
       const params = { investigationId, skip, limit };
-      
+
       if (filters.types && filters.types.length > 0) {
         whereClause += ' AND e.type IN $types';
         params.types = filters.types;
       }
-      
+
       if (filters.verified !== undefined) {
         whereClause += ' AND e.verified = $verified';
         params.verified = filters.verified;
@@ -1224,8 +1270,8 @@ class EntityService {
       `;
 
       const result = await session.run(query, params);
-      
-      return result.records.map(record => this.formatEntityResult(record));
+
+      return result.records.map((record) => this.formatEntityResult(record));
     } catch (error) {
       logger.error('Error getting entities:', error);
       throw error;
@@ -1236,7 +1282,7 @@ class EntityService {
 
   async updateEntity(entityId, updateData, userId) {
     const session = this.driver.session();
-    
+
     try {
       const now = new Date().toISOString();
       const setClauses = [];
@@ -1274,7 +1320,7 @@ class EntityService {
       `;
 
       const result = await session.run(query, params);
-      
+
       if (result.records.length === 0) {
         throw new Error('Entity not found');
       }
@@ -1290,7 +1336,7 @@ class EntityService {
 
   async deleteEntity(entityId, userId) {
     const session = this.driver.session();
-    
+
     try {
       const query = `
         MATCH (e:Entity {id: $entityId})
@@ -1314,7 +1360,7 @@ class EntityService {
       `;
 
       const result = await session.run(query, { entityId, userId });
-      
+
       return result.records[0].get('deletedCount').toNumber() > 0;
     } catch (error) {
       logger.error('Error deleting entity:', error);
@@ -1326,7 +1372,7 @@ class EntityService {
 
   async searchEntities(query, investigationId = null, limit = 20) {
     const session = this.driver.session();
-    
+
     try {
       let cypher = `
         CALL db.index.fulltext.queryNodes("entity_search", $searchQuery) 
@@ -1335,9 +1381,9 @@ class EntityService {
         OPTIONAL MATCH (e)-[:HAS_POSITION]->(pos:Position)
       `;
 
-      const params = { 
+      const params = {
         searchQuery: `*${query}*`,
-        limit
+        limit,
       };
 
       if (investigationId) {
@@ -1352,10 +1398,10 @@ class EntityService {
       `;
 
       const result = await session.run(cypher, params);
-      
-      return result.records.map(record => ({
+
+      return result.records.map((record) => ({
         ...this.formatEntityResult(record),
-        searchScore: record.get('score')
+        searchScore: record.get('score'),
       }));
     } catch (error) {
       logger.error('Error searching entities:', error);
@@ -1385,10 +1431,10 @@ class EntityService {
         id: user.id,
         username: user.username,
         firstName: user.firstName,
-        lastName: user.lastName
+        lastName: user.lastName,
       },
       createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt
+      updatedAt: entity.updatedAt,
     };
   }
 }

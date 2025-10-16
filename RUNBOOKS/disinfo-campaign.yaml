@@ -7,16 +7,16 @@ tasks:
     name: Ingest Social Media Data
     uses: connector:elastic
     with:
-      indices: ["twitter-*", "facebook-*", "telegram-*"]
-      keywords: ["disinfo", "propaganda", "coordinated"]
-      time_range: "14d"
+      indices: ['twitter-*', 'facebook-*', 'telegram-*']
+      keywords: ['disinfo', 'propaganda', 'coordinated']
+      time_range: '14d'
 
   - id: content_analysis
     name: Content Similarity Analysis
     uses: graph:entity-resolution
     needs: [social_ingest]
     with:
-      content_similarity: "semantic"
+      content_similarity: 'semantic'
       language_detection: true
 
   - id: network_mapping
@@ -24,7 +24,7 @@ tasks:
     uses: graph:entity-resolution
     needs: [content_analysis]
     with:
-      entity_types: ["account", "hashtag", "url"]
+      entity_types: ['account', 'hashtag', 'url']
       temporal_analysis: true
 
   - id: authenticity_scoring
@@ -32,7 +32,7 @@ tasks:
     uses: analyze:risk
     needs: [network_mapping]
     with:
-      model: "authenticity-detector-v3"
+      model: 'authenticity-detector-v3'
       bot_detection: true
 
   - id: campaign_explanation
@@ -40,7 +40,7 @@ tasks:
     uses: xai:explanations
     needs: [authenticity_scoring]
     with:
-      model: "disinfo-explainer-v1"
+      model: 'disinfo-explainer-v1'
       narrative_analysis: true
 
   - id: impact_forecast
@@ -49,14 +49,14 @@ tasks:
     needs: [campaign_explanation]
     with:
       horizon: 7
-      metrics: ["reach", "engagement", "sentiment"]
+      metrics: ['reach', 'engagement', 'sentiment']
 
   - id: export_report
     name: Export Analysis Report
     uses: export:bundle
     needs: [impact_forecast]
     with:
-      format: "intelligence-report"
+      format: 'intelligence-report'
       include_visualizations: true
 
 kpis:

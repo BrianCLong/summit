@@ -58,16 +58,25 @@ export class PolicySimulator {
     try {
       // Fetch recent access logs with sampling
       const accessLogs = await this.fetchAccessLogs(lookbackDays, sampleSize);
-      logger.info(`Policy simulation: analyzing ${accessLogs.length} access log entries`);
+      logger.info(
+        `Policy simulation: analyzing ${accessLogs.length} access log entries`,
+      );
 
       // Test current policy
       const currentResults = await this.testPolicyAgainstLogs(null, accessLogs);
 
       // Test new policy
-      const newResults = await this.testPolicyAgainstLogs(newPolicyBundle, accessLogs);
+      const newResults = await this.testPolicyAgainstLogs(
+        newPolicyBundle,
+        accessLogs,
+      );
 
       // Calculate impact
-      const impactSummary = this.calculateImpact(accessLogs, currentResults, newResults);
+      const impactSummary = this.calculateImpact(
+        accessLogs,
+        currentResults,
+        newResults,
+      );
 
       const result: PolicySimulationResult = {
         totalRequests: accessLogs.length,
@@ -96,7 +105,10 @@ export class PolicySimulator {
 
       return result;
     } catch (error) {
-      logger.error('Policy simulation failed', { error: error.message, stack: error.stack });
+      logger.error('Policy simulation failed', {
+        error: error.message,
+        stack: error.stack,
+      });
       throw error;
     }
   }
@@ -182,7 +194,10 @@ export class PolicySimulator {
 
       return { passed, failed, violations };
     } catch (error) {
-      logger.error('Tag propagation validation failed', { error: error.message, tenantId });
+      logger.error('Tag propagation validation failed', {
+        error: error.message,
+        tenantId,
+      });
       throw error;
     }
   }
@@ -277,7 +292,10 @@ export class PolicySimulator {
           reason: result?.explanations || result?.deny_reason,
         });
       } catch (error) {
-        logger.warn('Policy test failed for log entry', { error: error.message, log });
+        logger.warn('Policy test failed for log entry', {
+          error: error.message,
+          log,
+        });
         results.push({ allowed: false, reason: 'test_error' });
       }
     }

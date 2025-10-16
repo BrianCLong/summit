@@ -106,14 +106,19 @@ export class OllamaPlugin implements StepPlugin {
 
     // Validate that either prompt or messages are provided
     if (!stepConfig.prompt && !stepConfig.messages && !stepConfig.template) {
-      throw new Error('Ollama step requires either prompt, messages, or template');
+      throw new Error(
+        'Ollama step requires either prompt, messages, or template',
+      );
     }
 
     // Validate options
     if (stepConfig.options) {
       const opts = stepConfig.options;
 
-      if (opts.temperature !== undefined && (opts.temperature < 0 || opts.temperature > 2)) {
+      if (
+        opts.temperature !== undefined &&
+        (opts.temperature < 0 || opts.temperature > 2)
+      ) {
         throw new Error('temperature must be between 0 and 2');
       }
 
@@ -185,7 +190,12 @@ export class OllamaPlugin implements StepPlugin {
     } catch (error) {
       // Try fallback models if configured
       if (stepConfig.fallback_models && stepConfig.fallback_models.length > 0) {
-        return await this.executeWithFallback(stepConfig, context, execution, error as Error);
+        return await this.executeWithFallback(
+          stepConfig,
+          context,
+          execution,
+          error as Error,
+        );
       }
 
       throw new Error(`Ollama execution failed: ${(error as Error).message}`);
@@ -222,7 +232,10 @@ export class OllamaPlugin implements StepPlugin {
     return Array.from(this.availableModels.keys());
   }
 
-  async pullModel(modelName: string, progressCallback?: (progress: any) => void): Promise<void> {
+  async pullModel(
+    modelName: string,
+    progressCallback?: (progress: any) => void,
+  ): Promise<void> {
     const response = await this.client.post(
       '/api/pull',
       { name: modelName },
@@ -261,7 +274,9 @@ export class OllamaPlugin implements StepPlugin {
     });
   }
 
-  private async selectOptimalModel(stepConfig: OllamaStepConfig): Promise<string> {
+  private async selectOptimalModel(
+    stepConfig: OllamaStepConfig,
+  ): Promise<string> {
     if (!this.config.autoModelSelection) {
       return stepConfig.model;
     }
@@ -276,7 +291,9 @@ export class OllamaPlugin implements StepPlugin {
     ) {
       const smallerModel = this.findSmallerAlternative(stepConfig.model);
       if (smallerModel) {
-        console.log(`Selected smaller model ${smallerModel} due to GPU memory constraints`);
+        console.log(
+          `Selected smaller model ${smallerModel} due to GPU memory constraints`,
+        );
         return smallerModel;
       }
     }
@@ -298,7 +315,11 @@ export class OllamaPlugin implements StepPlugin {
     }
   }
 
-  private preparePayload(stepConfig: OllamaStepConfig, model: string, context: RunContext): any {
+  private preparePayload(
+    stepConfig: OllamaStepConfig,
+    model: string,
+    context: RunContext,
+  ): any {
     const payload: any = {
       model,
       stream: stepConfig.stream || false,
@@ -364,7 +385,11 @@ export class OllamaPlugin implements StepPlugin {
         console.log(`Trying fallback model: ${fallbackModel}`);
 
         const fallbackConfig = { ...stepConfig, model: fallbackModel };
-        const payload = this.preparePayload(fallbackConfig, fallbackModel, context);
+        const payload = this.preparePayload(
+          fallbackConfig,
+          fallbackModel,
+          context,
+        );
 
         const startTime = Date.now();
         const response = await this.makeRequest(payload);
@@ -385,7 +410,10 @@ export class OllamaPlugin implements StepPlugin {
           },
         };
       } catch (fallbackError) {
-        console.log(`Fallback model ${fallbackModel} also failed:`, fallbackError);
+        console.log(
+          `Fallback model ${fallbackModel} also failed:`,
+          fallbackError,
+        );
         continue;
       }
     }

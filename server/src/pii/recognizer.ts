@@ -8,16 +8,29 @@ import {
   RecognitionOptions,
   RecognitionRequest,
   RecognitionResult,
-  RecognitionStats
+  RecognitionStats,
 } from './types.js';
 
 export interface MLDetector {
   id: string;
   supportedTypes?: Set<string>;
-  detect: (value: string, context: ClassificationContext) => Promise<Pick<EntityMatch, 'type' | 'value' | 'confidence' | 'rawScore' | 'metadata'>[]>;
+  detect: (
+    value: string,
+    context: ClassificationContext,
+  ) => Promise<
+    Pick<
+      EntityMatch,
+      'type' | 'value' | 'confidence' | 'rawScore' | 'metadata'
+    >[]
+  >;
 }
 
-const buildContext = (value: string, start: number, end: number, request?: RecognitionRequest): ClassificationContext => {
+const buildContext = (
+  value: string,
+  start: number,
+  end: number,
+  request?: RecognitionRequest,
+): ClassificationContext => {
   const padding = 48;
   const beforeStart = Math.max(0, start - padding);
   const afterEnd = Math.min(value.length, end + padding);
@@ -27,10 +40,12 @@ const buildContext = (value: string, start: number, end: number, request?: Recog
     after: value.slice(end, afterEnd),
     schemaField: request?.schemaField?.fieldName,
     schemaDescription: request?.schemaField?.description,
-    schemaPath: request?.schema?.fields ? [request.schema.name, request.schemaField?.fieldName ?? ''] : undefined,
+    schemaPath: request?.schema?.fields
+      ? [request.schema.name, request.schemaField?.fieldName ?? '']
+      : undefined,
     recordId: request?.recordId,
     tableName: request?.tableName,
-    additionalMetadata: request?.additionalContext
+    additionalMetadata: request?.additionalContext,
   };
 };
 
@@ -39,7 +54,8 @@ const withGlobalFlag = (regex: RegExp): RegExp => {
   return new RegExp(regex.source, flags);
 };
 
-const clamp = (value: number, min: number, max: number): number => Math.min(max, Math.max(min, value));
+const clamp = (value: number, min: number, max: number): number =>
+  Math.min(max, Math.max(min, value));
 
 export class HybridEntityRecognizer {
   private patterns: PatternDefinition[];
@@ -57,7 +73,10 @@ export class HybridEntityRecognizer {
     this.mlDetectors.push(detector);
   }
 
-  async recognize(request: RecognitionRequest, options: RecognitionOptions = {}): Promise<RecognitionResult> {
+  async recognize(
+    request: RecognitionRequest,
+    options: RecognitionOptions = {},
+  ): Promise<RecognitionResult> {
     const value = request.value ?? '';
     const startTime = performance.now();
     const entities: EntityMatch[] = [];
@@ -76,10 +95,18 @@ export class HybridEntityRecognizer {
         const context = buildContext(value, start, end, request);
         const detectors = [`pattern:${pattern.id}`];
         const baseScore = pattern.confidence;
-        const schemaBoost = request.schemaField?.piiHints?.includes(pattern.type) ? 0.1 : 0;
+        const schemaBoost = request.schemaField?.piiHints?.includes(
+          pattern.type,
+        )
+          ? 0.1
+          : 0;
         const optionBoost = options.signalBoost?.[pattern.type] ?? 0;
         const labelBoost = this.getLabelBoost(context);
-        const rawScore = clamp(baseScore + schemaBoost + optionBoost + labelBoost, 0, 1);
+        const rawScore = clamp(
+          baseScore + schemaBoost + optionBoost + labelBoost,
+          0,
+          1,
+        );
         if (options.minimumConfidence && rawScore < options.minimumConfidence) {
           continue;
         }
@@ -96,8 +123,8 @@ export class HybridEntityRecognizer {
           rawScore,
           metadata: {
             patternId: pattern.id,
-            groups: match.slice(1)
-          }
+            groups: match.slice(1),
+          },
         });
       }
     }
@@ -118,9 +145,12 @@ export class HybridEntityRecognizer {
             confidence: clamp(result.confidence, 0, 1),
             context,
             rawScore: clamp(result.rawScore, 0, 1),
-            metadata: result.metadata
+            metadata: result.metadata,
           };
-          if (!options.minimumConfidence || entity.confidence >= options.minimumConfidence) {
+          if (
+            !options.minimumConfidence ||
+            entity.confidence >= options.minimumConfidence
+          ) {
             entities.push(entity);
             mlDecisions += 1;
           }
@@ -136,13 +166,14 @@ export class HybridEntityRecognizer {
         evaluatedPatterns,
         matchedPatterns,
         mlDecisions,
-        durationMs
-      }
+        durationMs,
+      },
     };
   }
 
   private getLabelBoost(context: ClassificationContext): number {
-    const normalized = `${context.schemaField ?? ''} ${context.schemaDescription ?? ''}`.toLowerCase();
+    const normalized =
+      `${context.schemaField ?? ''} ${context.schemaDescription ?? ''}`.toLowerCase();
     const boosts: Record<string, number> = {
       name: 0.05,
       address: 0.08,
@@ -155,7 +186,7 @@ export class HybridEntityRecognizer {
       medical: 0.05,
       card: 0.08,
       bank: 0.07,
-      geo: 0.05
+      geo: 0.05,
     };
 
     let boost = 0;
@@ -167,4 +198,3 @@ export class HybridEntityRecognizer {
     return clamp(boost, 0, 0.2);
   }
 }
-

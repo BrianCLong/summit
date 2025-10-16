@@ -19,7 +19,9 @@ export interface AssetUsageEvent {
   timestamp?: Date;
 }
 
-export interface AssetRegistrationInput<T extends Record<string, any> = Record<string, any>> {
+export interface AssetRegistrationInput<
+  T extends Record<string, any> = Record<string, any>,
+> {
   id: string;
   name: string;
   type: string;
@@ -34,8 +36,9 @@ export interface AssetRegistrationInput<T extends Record<string, any> = Record<s
   healthScore?: number;
 }
 
-export interface ManagedAsset<T extends Record<string, any> = Record<string, any>>
-  extends AssetRegistrationInput<T> {
+export interface ManagedAsset<
+  T extends Record<string, any> = Record<string, any>,
+> extends AssetRegistrationInput<T> {
   owners: string[];
   tags: string[];
   dependencies: string[];
@@ -49,7 +52,9 @@ export interface ManagedAsset<T extends Record<string, any> = Record<string, any
   healthScore: number;
 }
 
-export interface AssetUpdate<T extends Record<string, any> = Record<string, any>> {
+export interface AssetUpdate<
+  T extends Record<string, any> = Record<string, any>,
+> {
   name?: string;
   type?: string;
   domain?: string;
@@ -87,7 +92,9 @@ export interface AssetDependencyGraph {
 
 const DEFAULT_HISTORY_LIMIT = 50;
 
-export class AssetManager<T extends Record<string, any> = Record<string, any>> extends EventEmitter {
+export class AssetManager<
+  T extends Record<string, any> = Record<string, any>,
+> extends EventEmitter {
   private assets = new Map<string, ManagedAsset<T>>();
   private domainIndex = new Map<string, Set<string>>();
   private dependencies = new Map<string, Set<string>>();
@@ -96,7 +103,8 @@ export class AssetManager<T extends Record<string, any> = Record<string, any>> e
 
   constructor(options?: { usageHistoryLimit?: number }) {
     super();
-    this.usageHistoryLimit = options?.usageHistoryLimit ?? DEFAULT_HISTORY_LIMIT;
+    this.usageHistoryLimit =
+      options?.usageHistoryLimit ?? DEFAULT_HISTORY_LIMIT;
   }
 
   registerAsset(input: AssetRegistrationInput<T>): ManagedAsset<T> {
@@ -111,7 +119,10 @@ export class AssetManager<T extends Record<string, any> = Record<string, any>> e
         domain: input.domain ?? existing.domain,
         owners: this.mergeStringArrays(existing.owners, input.owners),
         tags: this.mergeStringArrays(existing.tags, input.tags),
-        dependencies: this.mergeDependencies(existing.dependencies, input.dependencies),
+        dependencies: this.mergeDependencies(
+          existing.dependencies,
+          input.dependencies,
+        ),
         lifecycle: input.lifecycle ?? existing.lifecycle,
         metadata: { ...existing.metadata, ...(input.metadata ?? ({} as T)) },
         status: input.status ?? existing.status,
@@ -121,7 +132,10 @@ export class AssetManager<T extends Record<string, any> = Record<string, any>> e
       } satisfies ManagedAsset<T>;
 
       this.assets.set(updated.id, updated);
-      this.indexAsset(updated, existing.domain !== updated.domain ? existing.domain : undefined);
+      this.indexAsset(
+        updated,
+        existing.domain !== updated.domain ? existing.domain : undefined,
+      );
       this.updateDependencyIndex(updated.id, updated.dependencies);
       this.emit('asset-updated', updated);
       return updated;
@@ -136,7 +150,7 @@ export class AssetManager<T extends Record<string, any> = Record<string, any>> e
       tags: Array.from(new Set(input.tags ?? [])),
       dependencies: Array.from(new Set(input.dependencies ?? [])),
       lifecycle: input.lifecycle ?? [],
-      metadata: (input.metadata ?? ({} as T)),
+      metadata: input.metadata ?? ({} as T),
       usage: [],
       createdAt: now,
       updatedAt: now,
@@ -153,10 +167,13 @@ export class AssetManager<T extends Record<string, any> = Record<string, any>> e
   }
 
   bulkUpsert(inputs: AssetRegistrationInput<T>[]): ManagedAsset<T>[] {
-    return inputs.map(input => this.registerAsset(input));
+    return inputs.map((input) => this.registerAsset(input));
   }
 
-  updateAsset(id: string, updates: AssetUpdate<T>): ManagedAsset<T> | undefined {
+  updateAsset(
+    id: string,
+    updates: AssetUpdate<T>,
+  ): ManagedAsset<T> | undefined {
     const asset = this.assets.get(id);
     if (!asset) {
       return undefined;
@@ -177,14 +194,18 @@ export class AssetManager<T extends Record<string, any> = Record<string, any>> e
     if (updates.lifecycle) asset.lifecycle = updates.lifecycle;
     if (updates.status) asset.status = updates.status;
     if (updates.criticality) asset.criticality = updates.criticality;
-    if (typeof updates.healthScore === 'number') asset.healthScore = updates.healthScore;
+    if (typeof updates.healthScore === 'number')
+      asset.healthScore = updates.healthScore;
     if (updates.metadata) {
       asset.metadata = { ...asset.metadata, ...updates.metadata };
     }
 
     asset.updatedAt = now;
     this.assets.set(id, asset);
-    this.indexAsset(asset, originalDomain !== asset.domain ? originalDomain : undefined);
+    this.indexAsset(
+      asset,
+      originalDomain !== asset.domain ? originalDomain : undefined,
+    );
     this.emit('asset-updated', asset);
     return asset;
   }
@@ -235,7 +256,9 @@ export class AssetManager<T extends Record<string, any> = Record<string, any>> e
       return;
     }
 
-    asset.dependencies = asset.dependencies.filter(dep => dep !== dependencyId);
+    asset.dependencies = asset.dependencies.filter(
+      (dep) => dep !== dependencyId,
+    );
     this.updateDependencyIndex(assetId, asset.dependencies);
     this.assets.set(assetId, asset);
 
@@ -253,7 +276,13 @@ export class AssetManager<T extends Record<string, any> = Record<string, any>> e
     if (!asset) {
       return undefined;
     }
-    return { ...asset, owners: [...asset.owners], tags: [...asset.tags], dependencies: [...asset.dependencies], usage: [...asset.usage] };
+    return {
+      ...asset,
+      owners: [...asset.owners],
+      tags: [...asset.tags],
+      dependencies: [...asset.dependencies],
+      usage: [...asset.usage],
+    };
   }
 
   listAssets(filter?: AssetFilter): ManagedAsset<T>[] {
@@ -264,22 +293,24 @@ export class AssetManager<T extends Record<string, any> = Record<string, any>> e
       if (!domainIds) {
         return [];
       }
-      assets = assets.filter(asset => domainIds.has(asset.id));
+      assets = assets.filter((asset) => domainIds.has(asset.id));
     }
 
     if (filter?.status) {
-      assets = assets.filter(asset => asset.status === filter.status);
+      assets = assets.filter((asset) => asset.status === filter.status);
     }
 
     if (filter?.criticality) {
-      assets = assets.filter(asset => asset.criticality === filter.criticality);
+      assets = assets.filter(
+        (asset) => asset.criticality === filter.criticality,
+      );
     }
 
     if (filter?.tag) {
-      assets = assets.filter(asset => asset.tags.includes(filter.tag!));
+      assets = assets.filter((asset) => asset.tags.includes(filter.tag!));
     }
 
-    return assets.map(asset => ({
+    return assets.map((asset) => ({
       ...asset,
       owners: [...asset.owners],
       tags: [...asset.tags],
@@ -288,7 +319,10 @@ export class AssetManager<T extends Record<string, any> = Record<string, any>> e
     }));
   }
 
-  getUsageHistory(assetId: string, limit = this.usageHistoryLimit): AssetUsageEvent[] {
+  getUsageHistory(
+    assetId: string,
+    limit = this.usageHistoryLimit,
+  ): AssetUsageEvent[] {
     const asset = this.assets.get(assetId);
     if (!asset) {
       return [];
@@ -337,7 +371,10 @@ export class AssetManager<T extends Record<string, any> = Record<string, any>> e
       total: domainIds.size,
       byStatus,
       byCriticality,
-      averageHealth: healthCount > 0 ? Math.round((healthAccumulator / healthCount) * 100) / 100 : null,
+      averageHealth:
+        healthCount > 0
+          ? Math.round((healthAccumulator / healthCount) * 100) / 100
+          : null,
       updatedAt: new Date(),
     };
   }

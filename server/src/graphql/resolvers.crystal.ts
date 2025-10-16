@@ -32,14 +32,18 @@ function toStartRunInput(args: StartRunArgs['input']): StartRunInput {
 function createRunLogAsyncIterator(sessionId: string, runId: string) {
   const queue: any[] = [];
   const listeners: Array<(value: IteratorResult<any>) => void> = [];
-  const unsubscribe = crystalOrchestrator.subscribeToRunLogs(sessionId, runId, (event) => {
-    if (listeners.length) {
-      const resolve = listeners.shift();
-      resolve?.({ value: event, done: false });
-    } else {
-      queue.push(event);
-    }
-  });
+  const unsubscribe = crystalOrchestrator.subscribeToRunLogs(
+    sessionId,
+    runId,
+    (event) => {
+      if (listeners.length) {
+        const resolve = listeners.shift();
+        resolve?.({ value: event, done: false });
+      } else {
+        queue.push(event);
+      }
+    },
+  );
 
   return {
     async next(): Promise<IteratorResult<any>> {
@@ -66,7 +70,8 @@ function createRunLogAsyncIterator(sessionId: string, runId: string) {
 
 export const Query = {
   crystalSessions: () => crystalOrchestrator.listSessions(),
-  crystalSession: (_: unknown, { id }: { id: string }) => crystalOrchestrator.getSession(id),
+  crystalSession: (_: unknown, { id }: { id: string }) =>
+    crystalOrchestrator.getSession(id),
   crystalAdapters: () => crystalOrchestrator.getAdapters(),
   crystalBudgets: () => crystalOrchestrator.getCostSnapshot().budgets,
 };
@@ -86,10 +91,8 @@ export const Mutation = {
 
 export const Subscription = {
   crystalRunLogs: {
-    subscribe: (
-      _: unknown,
-      args: { sessionId: string; runId: string }
-    ) => createRunLogAsyncIterator(args.sessionId, args.runId),
+    subscribe: (_: unknown, args: { sessionId: string; runId: string }) =>
+      createRunLogAsyncIterator(args.sessionId, args.runId),
   },
 };
 

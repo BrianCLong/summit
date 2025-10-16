@@ -24,14 +24,18 @@ test.describe('Case Workflow E2E', () => {
 
     // 5. Create a new case and add the item
     await page.locator('text="Create New Case"').click();
-    await page.locator('input[label="New Case Name"]').fill('E2E Test Case ' + Date.now());
+    await page
+      .locator('input[label="New Case Name"]')
+      .fill('E2E Test Case ' + Date.now());
     await page
       .locator('textarea[label="New Case Summary"]')
       .fill('This is a test case created by E2E workflow.');
     await page.locator('button:has-text("Create Case and Add")').click();
 
     // Wait for toast confirmation
-    await page.waitForSelector('div[role="alert"]:has-text("Item added to case successfully!")');
+    await page.waitForSelector(
+      'div[role="alert"]:has-text("Item added to case successfully!")',
+    );
     await page.waitForTimeout(1000); // Wait for toast to disappear
 
     // 6. Get the new case ID from the toast or by querying cases (more robust)
@@ -41,7 +45,9 @@ test.describe('Case Workflow E2E', () => {
 
     // Find the newly created case and navigate to its detail page
     // This part might need refinement based on how cases are listed and identified
-    const newCaseLink = await page.locator(`a:has-text("E2E Test Case")`).first();
+    const newCaseLink = await page
+      .locator(`a:has-text("E2E Test Case")`)
+      .first();
     const caseId = (await newCaseLink.getAttribute('href'))?.split('/').pop();
     expect(caseId).toBeDefined();
     await newCaseLink.click();

@@ -21,12 +21,12 @@
           "name": "service",
           "type": "custom",
           "options": [
-            {"text": "All", "value": "$__all", "selected": true},
-            {"text": "API", "value": "api", "selected": false},
-            {"text": "Web", "value": "web", "selected": false},
-            {"text": "Gateway", "value": "gateway", "selected": false}
+            { "text": "All", "value": "$__all", "selected": true },
+            { "text": "API", "value": "api", "selected": false },
+            { "text": "Web", "value": "web", "selected": false },
+            { "text": "Gateway", "value": "gateway", "selected": false }
           ],
-          "current": {"text": "All", "value": "$__all"},
+          "current": { "text": "All", "value": "$__all" },
           "includeAll": true,
           "multi": true
         }
@@ -57,7 +57,7 @@
         "id": 1,
         "title": "Deployment Health SLO",
         "type": "stat",
-        "gridPos": {"h": 6, "w": 24, "x": 0, "y": 0},
+        "gridPos": { "h": 6, "w": 24, "x": 0, "y": 0 },
         "targets": [
           {
             "expr": "avg(rc_deploy_health_ratio) * 100",
@@ -88,39 +88,45 @@
             "thresholds": {
               "mode": "absolute",
               "steps": [
-                {"color": "red", "value": 0},
-                {"color": "yellow", "value": 95},
-                {"color": "green", "value": 99}
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 95 },
+                { "color": "green", "value": 99 }
               ]
             }
           },
           "overrides": [
             {
-              "matcher": {"id": "byName", "options": "Rollbacks (24h)"},
+              "matcher": { "id": "byName", "options": "Rollbacks (24h)" },
               "properties": [
-                {"id": "unit", "value": "short"},
-                {"id": "max", "value": null},
-                {"id": "thresholds", "value": {
-                  "steps": [
-                    {"color": "green", "value": 0},
-                    {"color": "yellow", "value": 1},
-                    {"color": "red", "value": 3}
-                  ]
-                }}
+                { "id": "unit", "value": "short" },
+                { "id": "max", "value": null },
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "green", "value": 0 },
+                      { "color": "yellow", "value": 1 },
+                      { "color": "red", "value": 3 }
+                    ]
+                  }
+                }
               ]
             },
             {
-              "matcher": {"id": "byName", "options": "P95 Health Check (s)"},
+              "matcher": { "id": "byName", "options": "P95 Health Check (s)" },
               "properties": [
-                {"id": "unit", "value": "s"},
-                {"id": "max", "value": null},
-                {"id": "thresholds", "value": {
-                  "steps": [
-                    {"color": "green", "value": 0},
-                    {"color": "yellow", "value": 5},
-                    {"color": "red", "value": 10}
-                  ]
-                }}
+                { "id": "unit", "value": "s" },
+                { "id": "max", "value": null },
+                {
+                  "id": "thresholds",
+                  "value": {
+                    "steps": [
+                      { "color": "green", "value": 0 },
+                      { "color": "yellow", "value": 5 },
+                      { "color": "red", "value": 10 }
+                    ]
+                  }
+                }
               ]
             }
           ]
@@ -141,7 +147,7 @@
         "id": 2,
         "title": "Service Health Over Time",
         "type": "timeseries",
-        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 6},
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 6 },
         "targets": [
           {
             "expr": "rc_deploy_health_ratio{service=~\"$service\"} * 100",
@@ -161,27 +167,31 @@
               "pointSize": 5,
               "fillOpacity": 20,
               "spanNulls": false,
-              "stacking": {"mode": "none", "group": "A"}
+              "stacking": { "mode": "none", "group": "A" }
             },
             "thresholds": {
               "mode": "absolute",
               "steps": [
-                {"color": "transparent", "value": null},
-                {"color": "red", "value": 95},
-                {"color": "yellow", "value": 99},
-                {"color": "green", "value": 99.9}
+                { "color": "transparent", "value": null },
+                { "color": "red", "value": 95 },
+                { "color": "yellow", "value": 99 },
+                { "color": "green", "value": 99.9 }
               ]
             }
           }
         },
         "options": {
-          "tooltip": {"mode": "multi", "sort": "desc"},
-          "legend": {"displayMode": "table", "placement": "bottom", "calcs": ["mean", "min"]},
+          "tooltip": { "mode": "multi", "sort": "desc" },
+          "legend": {
+            "displayMode": "table",
+            "placement": "bottom",
+            "calcs": ["mean", "min"]
+          },
           "overrides": [
             {
-              "matcher": {"id": "byFrameRefID", "options": "A"},
+              "matcher": { "id": "byFrameRefID", "options": "A" },
               "properties": [
-                {"id": "custom.thresholdsStyle", "value": {"mode": "area"}}
+                { "id": "custom.thresholdsStyle", "value": { "mode": "area" } }
               ]
             }
           ]
@@ -191,7 +201,7 @@
         "id": 3,
         "title": "Health Check Response Times",
         "type": "timeseries",
-        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 6},
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 6 },
         "targets": [
           {
             "expr": "histogram_quantile(0.50, rate(rc_health_check_duration_seconds_bucket{service=~\"$service\"}[5m]))",
@@ -222,15 +232,15 @@
           }
         },
         "options": {
-          "tooltip": {"mode": "multi", "sort": "desc"},
-          "legend": {"displayMode": "table", "placement": "bottom"}
+          "tooltip": { "mode": "multi", "sort": "desc" },
+          "legend": { "displayMode": "table", "placement": "bottom" }
         }
       },
       {
         "id": 4,
         "title": "Error Budget Burn Rate",
         "type": "gauge",
-        "gridPos": {"h": 8, "w": 8, "x": 0, "y": 14},
+        "gridPos": { "h": 8, "w": 8, "x": 0, "y": 14 },
         "targets": [
           {
             "expr": "(1 - avg_over_time(rc_deploy_health_ratio[1h])) * 100 / 0.1",
@@ -255,9 +265,9 @@
             "max": 100,
             "thresholds": {
               "steps": [
-                {"color": "green", "value": 0},
-                {"color": "yellow", "value": 50},
-                {"color": "red", "value": 100}
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 50 },
+                { "color": "red", "value": 100 }
               ]
             }
           }
@@ -277,7 +287,7 @@
         "id": 5,
         "title": "Rollback Events",
         "type": "timeseries",
-        "gridPos": {"h": 8, "w": 8, "x": 8, "y": 14},
+        "gridPos": { "h": 8, "w": 8, "x": 8, "y": 14 },
         "targets": [
           {
             "expr": "increase(rc_rollback_total[5m])",
@@ -302,24 +312,24 @@
           },
           "overrides": [
             {
-              "matcher": {"id": "byName", "options": "P95 Duration (s)"},
+              "matcher": { "id": "byName", "options": "P95 Duration (s)" },
               "properties": [
-                {"id": "unit", "value": "s"},
-                {"id": "custom.drawStyle", "value": "line"}
+                { "id": "unit", "value": "s" },
+                { "id": "custom.drawStyle", "value": "line" }
               ]
             }
           ]
         },
         "options": {
-          "tooltip": {"mode": "multi", "sort": "desc"},
-          "legend": {"displayMode": "list", "placement": "bottom"}
+          "tooltip": { "mode": "multi", "sort": "desc" },
+          "legend": { "displayMode": "list", "placement": "bottom" }
         }
       },
       {
         "id": 6,
         "title": "Deployment Success Rate",
         "type": "gauge",
-        "gridPos": {"h": 8, "w": 8, "x": 16, "y": 14},
+        "gridPos": { "h": 8, "w": 8, "x": 16, "y": 14 },
         "targets": [
           {
             "expr": "rate(rc_workflow_success_total[1h]) / (rate(rc_workflow_success_total[1h]) + rate(rc_workflow_failure_total[1h])) * 100",
@@ -334,9 +344,9 @@
             "max": 100,
             "thresholds": {
               "steps": [
-                {"color": "red", "value": 0},
-                {"color": "yellow", "value": 90},
-                {"color": "green", "value": 99}
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 90 },
+                { "color": "green", "value": 99 }
               ]
             }
           }
@@ -356,7 +366,7 @@
         "id": 7,
         "title": "Service Status Matrix",
         "type": "status-history",
-        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 22},
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 22 },
         "targets": [
           {
             "expr": "rc_deploy_health_ratio{service=~\"$service\"}",
@@ -373,8 +383,14 @@
               "spanNulls": false
             },
             "mappings": [
-              {"options": {"0": {"text": "DOWN", "color": "red"}}, "type": "value"},
-              {"options": {"1": {"text": "UP", "color": "green"}}, "type": "value"}
+              {
+                "options": { "0": { "text": "DOWN", "color": "red" } },
+                "type": "value"
+              },
+              {
+                "options": { "1": { "text": "UP", "color": "green" } },
+                "type": "value"
+              }
             ]
           }
         },
@@ -388,7 +404,7 @@
         "id": 8,
         "title": "Recent Incidents",
         "type": "logs",
-        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 22},
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 22 },
         "targets": [
           {
             "expr": "{job=\"release-captain\"} |~ \"ERROR|WARN|rollback|incident\"",

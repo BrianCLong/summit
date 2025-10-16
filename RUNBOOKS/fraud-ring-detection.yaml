@@ -7,22 +7,22 @@ tasks:
     name: Ingest Fraud Reports
     uses: connector:elastic
     with:
-      index: "fraud-reports-*"
-      time_range: "60d"
+      index: 'fraud-reports-*'
+      time_range: '60d'
 
   - id: network_construction
     name: Build Fraud Network
     uses: graph:entity-resolution
     needs: [fraud_data_ingest]
     with:
-      edge_types: ["shared_device", "shared_address", "transaction_flow"]
+      edge_types: ['shared_device', 'shared_address', 'transaction_flow']
 
   - id: community_detection
     name: Detect Fraud Communities
     uses: ml:forecast
     needs: [network_construction]
     with:
-      algorithm: "louvain"
+      algorithm: 'louvain'
       min_community_size: 3
 
   - id: ring_scoring
@@ -30,7 +30,7 @@ tasks:
     uses: analyze:risk
     needs: [community_detection]
     with:
-      model: "fraud-ring-v2"
+      model: 'fraud-ring-v2'
 
   - id: ring_explanation
     name: Explain Ring Structure

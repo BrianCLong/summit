@@ -6,7 +6,7 @@ import {
   DatasetMetadata,
   LegalHold,
   RetentionRecord,
-  RetentionSchedule
+  RetentionSchedule,
 } from './types.js';
 
 export class DataRetentionRepository {
@@ -31,7 +31,10 @@ export class DataRetentionRepository {
     await this.persistRecord(record);
   }
 
-  async updatePolicy(datasetId: string, policy: AppliedRetentionPolicy): Promise<void> {
+  async updatePolicy(
+    datasetId: string,
+    policy: AppliedRetentionPolicy,
+  ): Promise<void> {
     const record = this.records.get(datasetId);
     if (!record) {
       throw new Error(`Unknown dataset ${datasetId}`);
@@ -42,7 +45,10 @@ export class DataRetentionRepository {
     await this.persistRecord(record);
   }
 
-  async updateMetadata(datasetId: string, metadata: DatasetMetadata): Promise<void> {
+  async updateMetadata(
+    datasetId: string,
+    metadata: DatasetMetadata,
+  ): Promise<void> {
     const record = this.records.get(datasetId);
     if (!record) {
       throw new Error(`Unknown dataset ${datasetId}`);
@@ -64,7 +70,10 @@ export class DataRetentionRepository {
     await this.persistRecord(record);
   }
 
-  async setSchedule(datasetId: string, schedule?: RetentionSchedule): Promise<void> {
+  async setSchedule(
+    datasetId: string,
+    schedule?: RetentionSchedule,
+  ): Promise<void> {
     const record = this.records.get(datasetId);
     if (!record) {
       throw new Error(`Unknown dataset ${datasetId}`);
@@ -74,7 +83,10 @@ export class DataRetentionRepository {
     await this.persistRecord(record);
   }
 
-  async appendArchivalEvent(datasetId: string, workflow: ArchivalWorkflow): Promise<void> {
+  async appendArchivalEvent(
+    datasetId: string,
+    workflow: ArchivalWorkflow,
+  ): Promise<void> {
     const record = this.records.get(datasetId);
     if (!record) {
       throw new Error(`Unknown dataset ${datasetId}`);
@@ -113,12 +125,15 @@ export class DataRetentionRepository {
           record.legalHold ? JSON.stringify(record.legalHold) : null,
           record.schedule ? JSON.stringify(record.schedule) : null,
           JSON.stringify(record.archiveHistory),
-          record.lastEvaluatedAt
-        ]
+          record.lastEvaluatedAt,
+        ],
       );
     } catch (error: any) {
       if (this.isIgnorablePersistenceError(error)) {
-        this.logger.debug({ error: error.message }, 'Falling back to in-memory retention repository.');
+        this.logger.debug(
+          { error: error.message },
+          'Falling back to in-memory retention repository.',
+        );
         return;
       }
 
@@ -136,7 +151,10 @@ export class DataRetentionRepository {
       return true;
     }
 
-    if (typeof error.message === 'string' && error.message.includes('does not exist')) {
+    if (
+      typeof error.message === 'string' &&
+      error.message.includes('does not exist')
+    ) {
       return true;
     }
 

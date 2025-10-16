@@ -77,7 +77,10 @@ async function runVerification() {
     ['server/src/conductor/config.ts', 'Conductor configuration'],
     ['server/src/conductor/router/index.ts', 'MoE routing logic'],
     ['server/src/conductor/mcp/client.ts', 'MCP protocol client'],
-    ['server/src/conductor/mcp/servers/graphops-server.ts', 'GraphOps MCP server'],
+    [
+      'server/src/conductor/mcp/servers/graphops-server.ts',
+      'GraphOps MCP server',
+    ],
     ['server/src/conductor/mcp/servers/files-server.ts', 'Files MCP server'],
     ['server/src/conductor/metrics/index.ts', 'Metrics and health checks'],
     ['server/src/conductor/resolvers.ts', 'GraphQL resolvers'],
@@ -95,8 +98,16 @@ async function runVerification() {
   const serverIntegrations = [
     ['server/src/bootstrap/conductor.ts', 'Server bootstrap integration'],
     ['server/src/index.ts', 'wireConductor', 'Conductor wiring in main server'],
-    ['server/src/index.ts', 'validateConductorEnvironment', 'Environment validation'],
-    ['server/src/index.ts', 'conductorSystem?.shutdown', 'Graceful shutdown integration'],
+    [
+      'server/src/index.ts',
+      'validateConductorEnvironment',
+      'Environment validation',
+    ],
+    [
+      'server/src/index.ts',
+      'conductorSystem?.shutdown',
+      'Graceful shutdown integration',
+    ],
   ];
 
   serverIntegrations.forEach(([file, search, desc]) => {
@@ -115,7 +126,11 @@ async function runVerification() {
   const dockerChecks = [
     ['docker-compose.dev.yml', 'mcp-graphops:', 'GraphOps MCP service'],
     ['docker-compose.dev.yml', 'mcp-files:', 'Files MCP service'],
-    ['docker-compose.dev.yml', 'CONDUCTOR_ENABLED', 'Conductor environment config'],
+    [
+      'docker-compose.dev.yml',
+      'CONDUCTOR_ENABLED',
+      'Conductor environment config',
+    ],
     ['docker-compose.dev.yml', 'mcp_files_data:', 'MCP files volume'],
   ];
 
@@ -128,7 +143,10 @@ async function runVerification() {
   logInfo('\n🎨 UI Integration:');
 
   const uiChecks = [
-    ['client/src/features/conductor/ConductorStudio.tsx', 'Conductor Studio component'],
+    [
+      'client/src/features/conductor/ConductorStudio.tsx',
+      'Conductor Studio component',
+    ],
     ['client/src/App.router.jsx', '/conductor', 'Conductor route registration'],
     ['client/src/App.router.jsx', 'ConductorStudio', 'Component import'],
     ['client/src/App.router.jsx', 'Engineering', 'Conductor icon import'],
@@ -209,15 +227,23 @@ async function runVerification() {
   const successRate = ((passed / total) * 100).toFixed(1);
 
   if (failed === 0) {
-    logSuccess(`🎉 All ${total} checks passed! Conductor integration is complete.`);
+    logSuccess(
+      `🎉 All ${total} checks passed! Conductor integration is complete.`,
+    );
   } else if (successRate >= 90) {
-    logSuccess(`✅ ${passed}/${total} checks passed (${successRate}% success rate)`);
+    logSuccess(
+      `✅ ${passed}/${total} checks passed (${successRate}% success rate)`,
+    );
     logWarning(`⚠️  ${failed} minor issues found, but integration is ready`);
   } else if (successRate >= 75) {
-    logWarning(`⚠️  ${passed}/${total} checks passed (${successRate}% success rate)`);
+    logWarning(
+      `⚠️  ${passed}/${total} checks passed (${successRate}% success rate)`,
+    );
     logWarning(`🔧 ${failed} issues need attention before go-live`);
   } else {
-    logError(`❌ ${passed}/${total} checks passed (${successRate}% success rate)`);
+    logError(
+      `❌ ${passed}/${total} checks passed (${successRate}% success rate)`,
+    );
     logError(`🚨 ${failed} critical issues - integration incomplete`);
   }
 

@@ -3,6 +3,7 @@
 > This pack contains **mailbox-format patches** (one per PR) that you can apply with `git am`. They align with the sprint implementation packs already on canvas. Each patch includes multiple files per commit in a single squashed changeset.
 
 ## How to apply
+
 ```bash
 # from a clean working tree at repo root
 mkdir -p patches && cd patches
@@ -32,6 +33,7 @@ git am 0005-chore-release-bundle.patch
 ---
 
 ## 0001-feat-foundation-lac-ledger.patch
+
 ```
 From 1111111111111111111111111111111111111111 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -130,13 +132,15 @@ index 0000000..aaaaaaa
 +    depends_on: [lac, ledger]
 ```
 
-*(Patch truncated for brevity; includes all files listed above.)*
+_(Patch truncated for brevity; includes all files listed above.)_
+
 ```
 
 ---
 
 ## 0002-feat-analyst-surface-analytics.patch
 ```
+
 From 2222222222222222222222222222222222222222 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
 Date: Tue, 14 Oct 2025 10:00:00 -0600
@@ -146,26 +150,29 @@ Enables GDS plugin, adds Analytics & Pattern services, promotes NL→Cypher, cos
 and upgrades webapp with jQuery bridges + cost badge. Adds Grafana panels and k6.
 
 ---
- docker-compose.dev.yaml                           |  12 +-
- services/analytics-service/src/index.ts           |  54 +++++
- services/analytics-service/src/gds.ts             | 118 ++++++++++
- services/pattern-miner/src/index.ts               |  53 +++++
- services/pattern-miner/src/templates.ts           |  47 ++++
- services/ai-nl2cypher/src/index.ts                |  52 +++++
- services/ai-nl2cypher/src/rules.ts                |  36 +++
- services/ai-nl2cypher/src/estimator.ts            |  26 ++
- services/gateway-graphql/src/index.ts             |  61 ++++-
- services/gateway-graphql/src/schema.graphql       |  24 ++
- webapp/src/features/cost/CostBadge.tsx            |  22 ++
- webapp/tests/e2e/tripane.spec.ts                  |  20 ++
- ops/k6/gateway-queries.js                         |  24 ++
- 13 files changed, 549 insertions(+), 10 deletions(-)
+
+docker-compose.dev.yaml | 12 +-
+services/analytics-service/src/index.ts | 54 +++++
+services/analytics-service/src/gds.ts | 118 ++++++++++
+services/pattern-miner/src/index.ts | 53 +++++
+services/pattern-miner/src/templates.ts | 47 ++++
+services/ai-nl2cypher/src/index.ts | 52 +++++
+services/ai-nl2cypher/src/rules.ts | 36 +++
+services/ai-nl2cypher/src/estimator.ts | 26 ++
+services/gateway-graphql/src/index.ts | 61 ++++-
+services/gateway-graphql/src/schema.graphql | 24 ++
+webapp/src/features/cost/CostBadge.tsx | 22 ++
+webapp/tests/e2e/tripane.spec.ts | 20 ++
+ops/k6/gateway-queries.js | 24 ++
+13 files changed, 549 insertions(+), 10 deletions(-)
+
 ```
 
 ---
 
 ## 0003-feat-cases-runbooks-offline.patch
 ```
+
 From 3333333333333333333333333333333333333333 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
 Date: Tue, 28 Oct 2025 10:00:00 -0600
@@ -175,26 +182,29 @@ Adds case-service, report-service with redaction, runbook-engine with proofs,
 budget-guard, archive-tier (MinIO), offline-sync (CRDT), plus UI screens and tests.
 
 ---
- docker-compose.dev.yaml                           |  24 ++
- services/case-service/src/index.ts                |  72 +++++
- services/case-service/prisma/schema.prisma        |  24 ++
- services/report-service/src/index.ts              |  66 +++++
- services/report-service/src/redact.ts             |  17 +
- services/runbook-engine/src/index.ts              |  98 +++++++
- services/runbook-engine/src/schema.ts             |  20 ++
- services/runbook-engine/src/proofs.ts             |  16 +
- services/budget-guard/src/index.ts                |  35 +++
- services/archive-tier/src/index.ts                |  29 ++
- services/offline-sync/src/index.ts                |  38 +++
- webapp/src/features/case/ReportStudio.tsx         |  54 ++++
- ops/k6/report-export.js                           |  23 ++
- 13 files changed, 516 insertions(+)
+
+docker-compose.dev.yaml | 24 ++
+services/case-service/src/index.ts | 72 +++++
+services/case-service/prisma/schema.prisma | 24 ++
+services/report-service/src/index.ts | 66 +++++
+services/report-service/src/redact.ts | 17 +
+services/runbook-engine/src/index.ts | 98 +++++++
+services/runbook-engine/src/schema.ts | 20 ++
+services/runbook-engine/src/proofs.ts | 16 +
+services/budget-guard/src/index.ts | 35 +++
+services/archive-tier/src/index.ts | 29 ++
+services/offline-sync/src/index.ts | 38 +++
+webapp/src/features/case/ReportStudio.tsx | 54 ++++
+ops/k6/report-export.js | 23 ++
+13 files changed, 516 insertions(+)
+
 ```
 
 ---
 
 ## 0004-feat-xai-fed-wallets-ga.patch
 ```
+
 From 4444444444444444444444444444444444444444 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
 Date: Tue, 11 Nov 2025 10:00:00 -0600
@@ -205,29 +215,32 @@ selectors + push‑down + revoke), wallet-service (bundles/verify), and hardenin
 artifacts (fuzz, sbom, a11y, soak). Updates gateway schema/resolvers and webapp panels.
 
 ---
- services/gateway-graphql/src/schema.graphql       |  48 ++++
- services/gateway-graphql/src/index.ts             |  62 +++++
- services/xai-service/src/index.ts                 |  47 ++++
- services/xai-service/src/counterfactual.ts        |  18 ++
- services/xai-service/src/saliency.ts              |  21 ++
- services/xai-service/src/modelcard.ts             |  15 +
- services/federation-service/src/index.ts          |  44 ++++
- services/federation-service/src/pushdown.ts       |  24 ++
- services/federation-service/src/zk.ts             |  14 +
- services/wallet-service/src/index.ts              |  45 ++++
- services/wallet-service/src/bundler.ts            |  28 ++
- services/wallet-service/src/profiles.ts           |  14 +
- webapp/src/features/xai/XaiPanel.tsx              |  52 +++++
- webapp/src/features/federation/FedPanel.tsx       |  37 +++
- webapp/src/features/wallets/WalletComposer.tsx    |  33 +++
- ops/k6/federation-demo.js                          |  26 ++
- 16 files changed, 518 insertions(+)
+
+services/gateway-graphql/src/schema.graphql | 48 ++++
+services/gateway-graphql/src/index.ts | 62 +++++
+services/xai-service/src/index.ts | 47 ++++
+services/xai-service/src/counterfactual.ts | 18 ++
+services/xai-service/src/saliency.ts | 21 ++
+services/xai-service/src/modelcard.ts | 15 +
+services/federation-service/src/index.ts | 44 ++++
+services/federation-service/src/pushdown.ts | 24 ++
+services/federation-service/src/zk.ts | 14 +
+services/wallet-service/src/index.ts | 45 ++++
+services/wallet-service/src/bundler.ts | 28 ++
+services/wallet-service/src/profiles.ts | 14 +
+webapp/src/features/xai/XaiPanel.tsx | 52 +++++
+webapp/src/features/federation/FedPanel.tsx | 37 +++
+webapp/src/features/wallets/WalletComposer.tsx | 33 +++
+ops/k6/federation-demo.js | 26 ++
+16 files changed, 518 insertions(+)
+
 ```
 
 ---
 
 ## 0005-chore-release-bundle.patch
 ```
+
 From 5555555555555555555555555555555555555555 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
 Date: Tue, 25 Nov 2025 10:00:00 -0600
@@ -237,17 +250,19 @@ Adds ga-pipeline workflow, Helm chart skeleton, Kustomize overlays, CHANGELOG,
 Release PR body, Makefile e2e demo, and E2E orchestrator.
 
 ---
- .github/workflows/ga-pipeline.yaml                 | 120 +++++++++
- deploy/helm/intelgraph/Chart.yaml                  |  10 +
- deploy/helm/intelgraph/values.yaml                 |  42 ++++
- deploy/helm/intelgraph/templates/deployment-gateway.yaml |  36 +++
- CHANGELOG.md                                       |  48 ++++
- .github/RELEASE_PR_BODY.md                         |  44 ++++
- Makefile                                           |  18 ++
- tools/demo/e2e-demo.ts                             | 140 ++++++++++
- tools/demo/seed-graph.cypher                       |  18 ++
- 9 files changed, 476 insertions(+)
-```
+
+.github/workflows/ga-pipeline.yaml | 120 +++++++++
+deploy/helm/intelgraph/Chart.yaml | 10 +
+deploy/helm/intelgraph/values.yaml | 42 ++++
+deploy/helm/intelgraph/templates/deployment-gateway.yaml | 36 +++
+CHANGELOG.md | 48 ++++
+.github/RELEASE_PR_BODY.md | 44 ++++
+Makefile | 18 ++
+tools/demo/e2e-demo.ts | 140 ++++++++++
+tools/demo/seed-graph.cypher | 18 ++
+9 files changed, 476 insertions(+)
+
+````
 
 ---
 
@@ -257,5 +272,6 @@ Release PR body, Makefile e2e demo, and E2E orchestrator.
 ```bash
 pnpm install && pnpm -r build && pnpm -r test
 docker compose -f docker-compose.dev.yaml up -d --build
-```
+````
+
 - Helm chart placeholders use `ghcr.io/ORG/intelgraph`; set `imageRepo` to your GitHub org.

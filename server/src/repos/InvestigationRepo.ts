@@ -55,7 +55,10 @@ export class InvestigationRepo {
   /**
    * Create new investigation
    */
-  async create(input: InvestigationInput, userId: string): Promise<Investigation> {
+  async create(
+    input: InvestigationInput,
+    userId: string,
+  ): Promise<Investigation> {
     const id = uuidv4();
 
     const { rows } = await this.pg.query<InvestigationRow>(
@@ -135,7 +138,10 @@ export class InvestigationRepo {
 
       // Note: In a full implementation, you might want to soft-delete
       // or handle related entities/relationships more carefully
-      const { rowCount } = await client.query(`DELETE FROM investigations WHERE id = $1`, [id]);
+      const { rowCount } = await client.query(
+        `DELETE FROM investigations WHERE id = $1`,
+        [id],
+      );
 
       await client.query('COMMIT');
       return rowCount !== null && rowCount > 0;
@@ -232,7 +238,10 @@ export class InvestigationRepo {
   /**
    * Batch load investigations by IDs (for DataLoader)
    */
-  async batchByIds(ids: readonly string[], tenantId?: string): Promise<(Investigation | null)[]> {
+  async batchByIds(
+    ids: readonly string[],
+    tenantId?: string,
+  ): Promise<(Investigation | null)[]> {
     if (ids.length === 0) return [];
 
     const params = [ids];
@@ -244,7 +253,9 @@ export class InvestigationRepo {
     }
 
     const { rows } = await this.pg.query<InvestigationRow>(query, params);
-    const investigationsMap = new Map(rows.map((row) => [row.id, this.mapRow(row)]));
+    const investigationsMap = new Map(
+      rows.map((row) => [row.id, this.mapRow(row)]),
+    );
 
     return ids.map((id) => investigationsMap.get(id) || null);
   }

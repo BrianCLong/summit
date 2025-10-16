@@ -12,4 +12,4 @@ spec:
             (sum(rate(graphql_requests_total{status=~"5.."}[1h])) / sum(rate(graphql_requests_total[1h]))) > 0.001
           for: 10m
           labels: { severity: warning }
-          annotations: { summary: "GraphQL read SLO burn‑rate high" }
+          annotations: { summary: 'GraphQL read SLO burn‑rate high' }

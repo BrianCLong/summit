@@ -40,7 +40,11 @@ interface FairnessMetrics {
 }
 
 interface ExplanationPanel {
-  decisionTree: Array<{ condition: string; impact: number; explanation: string }>;
+  decisionTree: Array<{
+    condition: string;
+    impact: number;
+    explanation: string;
+  }>;
   featureImportance: Array<{ feature: string; weight: number; value: number }>;
   alternatives: Array<{ model: string; score: number; tradeoffs: string }>;
   policyInfluence: string[];
@@ -74,21 +78,24 @@ export class LearningToRankRouter {
   private initializeWeights() {
     // Initial feature weights (will be learned over time)
     this.weights.set('complexity', 0.25);
-    this.weights.set('cost', 0.20);
-    this.weights.set('latency', 0.20);
+    this.weights.set('cost', 0.2);
+    this.weights.set('latency', 0.2);
     this.weights.set('quality', 0.25);
-    this.weights.set('context', 0.10);
+    this.weights.set('context', 0.1);
   }
 
-  async routeQuery(features: QueryFeatures, tenantId: string): Promise<RouteDecision> {
+  async routeQuery(
+    features: QueryFeatures,
+    tenantId: string,
+  ): Promise<RouteDecision> {
     const span = otelService.createSpan('router.learning_to_rank');
 
     try {
       // Get all available models
       const candidates = Array.from(this.models.values());
-      
+
       // Score each candidate
-      const scoredCandidates = candidates.map(model => ({
+      const scoredCandidates = candidates.map((model) => ({
         model,
         score: this.scoreModel(model, features),
         reasoning: this.explainScore(model, features),
@@ -99,17 +106,17 @@ export class LearningToRankRouter {
 
       // Apply fairness adjustments
       const adjustedScores = await this.applyFairnessAdjustments(
-        scoredCandidates, 
-        tenantId, 
-        features
+        scoredCandidates,
+        tenantId,
+        features,
       );
 
       const selectedCandidate = adjustedScores[0];
       const fairnessMetrics = await this.calculateFairnessMetrics(tenantId);
       const explanation = this.generateExplanationPanel(
-        selectedCandidate, 
-        adjustedScores.slice(0, 3), 
-        features
+        selectedCandidate,
+        adjustedScores.slice(0, 3),
+        features,
       );
 
       // Update fairness tracking
@@ -149,11 +156,12 @@ export class LearningToRankRouter {
 
     // Cost-based scoring (inverse - lower cost = higher score)
     const estimatedCost = model.costPerToken * features.estimatedTokens;
-    const costScore = Math.max(0, 1 - (estimatedCost / 10)); // Normalize to 0-1
-    score += (this.weights.get('cost') || 0) * costScore * features.costSensitivity;
+    const costScore = Math.max(0, 1 - estimatedCost / 10); // Normalize to 0-1
+    score +=
+      (this.weights.get('cost') || 0) * costScore * features.costSensitivity;
 
     // Latency-based scoring (inverse - lower latency = higher score)
-    const latencyScore = Math.max(0, 1 - (model.avgLatencyMs / 5000)); // Normalize to 0-1
+    const latencyScore = Math.max(0, 1 - model.avgLatencyMs / 5000); // Normalize to 0-1
     score += (this.weights.get('latency') || 0) * latencyScore;
 
     // Quality-based scoring
@@ -180,7 +188,7 @@ export class LearningToRankRouter {
   private getComplexityFit(model: ModelCandidate, complexity: number): number {
     // Simple heuristic: match model capability to task complexity
     const modelCapability = model.qualityScore; // Assume quality correlates with capability
-    
+
     if (complexity < 0.3) {
       // Simple tasks: prefer efficient models
       return modelCapability > 0.7 ? 0.6 : 1.0; // Penalty for over-engineering
@@ -189,7 +197,7 @@ export class LearningToRankRouter {
       return modelCapability;
     } else {
       // Medium complexity: balanced approach
-      return 0.8 + (modelCapability * 0.2);
+      return 0.8 + modelCapability * 0.2;
     }
   }
 
@@ -222,17 +230,25 @@ export class LearningToRankRouter {
       factors.push('⚠️ Context window may be insufficient');
     }
 
-    return factors.length > 0 ? factors.join('; ') : 'Balanced selection based on overall fit';
+    return factors.length > 0
+      ? factors.join('; ')
+      : 'Balanced selection based on overall fit';
   }
 
   private async applyFairnessAdjustments(
-    scoredCandidates: Array<{ model: ModelCandidate; score: number; reasoning: string }>,
+    scoredCandidates: Array<{
+      model: ModelCandidate;
+      score: number;
+      reasoning: string;
+    }>,
     tenantId: string,
-    features: QueryFeatures
-  ): Promise<Array<{ model: ModelCandidate; score: number; reasoning: string }>> {
+    features: QueryFeatures,
+  ): Promise<
+    Array<{ model: ModelCandidate; score: number; reasoning: string }>
+  > {
     // Get recent selection history for this tenant
     const recentSelections = await this.getRecentSelections(tenantId, 100);
-    
+
     // Calculate provider distribution
     const providerCount = new Map<string, number>();
     for (const selection of recentSelections) {
@@ -241,18 +257,20 @@ export class LearningToRankRouter {
     }
 
     // Apply fairness adjustments
-    return scoredCandidates.map(candidate => {
-      const providerSelections = providerCount.get(candidate.model.provider) || 0;
-      const overrepresentationRatio = providerSelections / recentSelections.length;
-      
+    return scoredCandidates.map((candidate) => {
+      const providerSelections =
+        providerCount.get(candidate.model.provider) || 0;
+      const overrepresentationRatio =
+        providerSelections / recentSelections.length;
+
       let adjustedScore = candidate.score;
-      
+
       // Reduce score for over-represented providers
       if (overrepresentationRatio > 0.6) {
         adjustedScore *= 0.9; // 10% penalty
         candidate.reasoning += '; Fairness adjustment applied';
       }
-      
+
       // Boost under-represented providers (if quality is reasonable)
       if (overrepresentationRatio < 0.2 && candidate.score > 0.6) {
         adjustedScore *= 1.1; // 10% boost
@@ -263,9 +281,11 @@ export class LearningToRankRouter {
     });
   }
 
-  private async calculateFairnessMetrics(tenantId: string): Promise<FairnessMetrics> {
+  private async calculateFairnessMetrics(
+    tenantId: string,
+  ): Promise<FairnessMetrics> {
     const recentSelections = await this.getRecentSelections(tenantId, 100);
-    
+
     if (recentSelections.length === 0) {
       return {
         diversityScore: 1.0,
@@ -292,7 +312,8 @@ export class LearningToRankRouter {
     const diversityScore = maxEntropy > 0 ? entropy / maxEntropy : 1.0;
 
     // Calculate bias score (concentration in single provider)
-    const maxProviderShare = Math.max(...providerCount.values()) / recentSelections.length;
+    const maxProviderShare =
+      Math.max(...providerCount.values()) / recentSelections.length;
     const biasScore = maxProviderShare > 0.8 ? maxProviderShare - 0.8 : 0;
 
     // Representation score
@@ -303,10 +324,14 @@ export class LearningToRankRouter {
     // Generate warnings
     const equityWarnings: string[] = [];
     if (biasScore > 0.1) {
-      equityWarnings.push(`High bias detected: ${Math.round(maxProviderShare * 100)}% selections from single provider`);
+      equityWarnings.push(
+        `High bias detected: ${Math.round(maxProviderShare * 100)}% selections from single provider`,
+      );
     }
     if (representationScore < 0.5) {
-      equityWarnings.push(`Low representation: Only ${representedProviders}/${totalProviders} providers used`);
+      equityWarnings.push(
+        `Low representation: Only ${representedProviders}/${totalProviders} providers used`,
+      );
     }
 
     return {
@@ -319,8 +344,12 @@ export class LearningToRankRouter {
 
   private generateExplanationPanel(
     selected: { model: ModelCandidate; score: number; reasoning: string },
-    alternatives: Array<{ model: ModelCandidate; score: number; reasoning: string }>,
-    features: QueryFeatures
+    alternatives: Array<{
+      model: ModelCandidate;
+      score: number;
+      reasoning: string;
+    }>,
+    features: QueryFeatures,
   ): ExplanationPanel {
     // Decision tree (simplified)
     const decisionTree = [
@@ -343,14 +372,30 @@ export class LearningToRankRouter {
 
     // Feature importance
     const featureImportance = [
-      { feature: 'Model Quality', weight: this.weights.get('quality') || 0, value: selected.model.qualityScore },
-      { feature: 'Cost Efficiency', weight: this.weights.get('cost') || 0, value: 1 - selected.model.costPerToken },
-      { feature: 'Response Speed', weight: this.weights.get('latency') || 0, value: 1 - (selected.model.avgLatencyMs / 5000) },
-      { feature: 'Task Fit', weight: this.weights.get('complexity') || 0, value: features.complexity },
+      {
+        feature: 'Model Quality',
+        weight: this.weights.get('quality') || 0,
+        value: selected.model.qualityScore,
+      },
+      {
+        feature: 'Cost Efficiency',
+        weight: this.weights.get('cost') || 0,
+        value: 1 - selected.model.costPerToken,
+      },
+      {
+        feature: 'Response Speed',
+        weight: this.weights.get('latency') || 0,
+        value: 1 - selected.model.avgLatencyMs / 5000,
+      },
+      {
+        feature: 'Task Fit',
+        weight: this.weights.get('complexity') || 0,
+        value: features.complexity,
+      },
     ];
 
     // Alternatives with tradeoffs
-    const alternativeModels = alternatives.slice(1, 3).map(alt => ({
+    const alternativeModels = alternatives.slice(1, 3).map((alt) => ({
       model: alt.model.name,
       score: alt.score,
       tradeoffs: this.compareModels(selected.model, alt.model),
@@ -364,22 +409,33 @@ export class LearningToRankRouter {
     };
   }
 
-  private compareModels(selected: ModelCandidate, alternative: ModelCandidate): string {
+  private compareModels(
+    selected: ModelCandidate,
+    alternative: ModelCandidate,
+  ): string {
     const tradeoffs: string[] = [];
 
     if (alternative.costPerToken < selected.costPerToken) {
-      tradeoffs.push(`${Math.round((1 - alternative.costPerToken/selected.costPerToken) * 100)}% cheaper`);
+      tradeoffs.push(
+        `${Math.round((1 - alternative.costPerToken / selected.costPerToken) * 100)}% cheaper`,
+      );
     }
 
     if (alternative.avgLatencyMs < selected.avgLatencyMs) {
-      tradeoffs.push(`${Math.round((selected.avgLatencyMs - alternative.avgLatencyMs))}ms faster`);
+      tradeoffs.push(
+        `${Math.round(selected.avgLatencyMs - alternative.avgLatencyMs)}ms faster`,
+      );
     }
 
     if (alternative.qualityScore > selected.qualityScore) {
-      tradeoffs.push(`${Math.round((alternative.qualityScore - selected.qualityScore) * 100)}% higher quality`);
+      tradeoffs.push(
+        `${Math.round((alternative.qualityScore - selected.qualityScore) * 100)}% higher quality`,
+      );
     }
 
-    return tradeoffs.length > 0 ? tradeoffs.join(', ') : 'Similar performance profile';
+    return tradeoffs.length > 0
+      ? tradeoffs.join(', ')
+      : 'Similar performance profile';
   }
 
   private updateFairnessTracking(modelId: string, tenantId: string): void {
@@ -388,31 +444,38 @@ export class LearningToRankRouter {
     this.fairnessTracker.set(key, current + 1);
   }
 
-  private async logDecision(modelId: string, features: QueryFeatures, tenantId: string): Promise<void> {
+  private async logDecision(
+    modelId: string,
+    features: QueryFeatures,
+    tenantId: string,
+  ): Promise<void> {
     try {
       const pool = getPostgresPool();
       await pool.query(
         `INSERT INTO router_decisions_v2 
          (tenant_id, selected_model, features, timestamp)
          VALUES ($1, $2, $3, now())`,
-        [tenantId, modelId, JSON.stringify(features)]
+        [tenantId, modelId, JSON.stringify(features)],
       );
     } catch (error) {
       console.error('Failed to log routing decision:', error);
     }
   }
 
-  private async getRecentSelections(tenantId: string, limit: number): Promise<Array<{ provider: string; model: string }>> {
+  private async getRecentSelections(
+    tenantId: string,
+    limit: number,
+  ): Promise<Array<{ provider: string; model: string }>> {
     try {
       const pool = getPostgresPool();
       const { rows } = await pool.query(
         `SELECT selected_model FROM router_decisions_v2 
          WHERE tenant_id = $1 
          ORDER BY timestamp DESC LIMIT $2`,
-        [tenantId, limit]
+        [tenantId, limit],
       );
 
-      return rows.map(row => {
+      return rows.map((row) => {
         const model = this.models.get(row.selected_model);
         return {
           provider: model?.provider || 'unknown',
@@ -487,12 +550,15 @@ export class LearningToRankRouter {
 
   async trainFromFeedback(feedback: TrainingExample): Promise<void> {
     this.trainingData.push(feedback);
-    
+
     // Simple weight adjustment based on feedback
     if (feedback.outcome.success && feedback.outcome.userSatisfaction > 0.8) {
       // Reinforce successful decisions
       this.adjustWeights(feedback.features, 1.02); // 2% increase
-    } else if (!feedback.outcome.success || feedback.outcome.userSatisfaction < 0.5) {
+    } else if (
+      !feedback.outcome.success ||
+      feedback.outcome.userSatisfaction < 0.5
+    ) {
       // Penalize poor decisions
       this.adjustWeights(feedback.features, 0.98); // 2% decrease
     }
@@ -507,19 +573,22 @@ export class LearningToRankRouter {
       const current = this.weights.get('cost') || 0;
       this.weights.set('cost', current * factor);
     }
-    
+
     if (features.qualityRequirement > 0.7) {
       const current = this.weights.get('quality') || 0;
       this.weights.set('quality', current * factor);
     }
-    
+
     if (features.urgency > 0.7) {
       const current = this.weights.get('latency') || 0;
       this.weights.set('latency', current * factor);
     }
 
     // Normalize weights to sum to 1
-    const total = Array.from(this.weights.values()).reduce((sum, w) => sum + w, 0);
+    const total = Array.from(this.weights.values()).reduce(
+      (sum, w) => sum + w,
+      0,
+    );
     for (const [key, weight] of this.weights.entries()) {
       this.weights.set(key, weight / total);
     }
@@ -529,13 +598,13 @@ export class LearningToRankRouter {
     try {
       const pool = getPostgresPool();
       const weightsJson = JSON.stringify(Object.fromEntries(this.weights));
-      
+
       await pool.query(
         `INSERT INTO router_weights (weights, updated_at)
          VALUES ($1, now())
          ON CONFLICT ((SELECT 1)) DO UPDATE SET
          weights = $1, updated_at = now()`,
-        [weightsJson]
+        [weightsJson],
       );
     } catch (error) {
       console.error('Failed to save weights:', error);

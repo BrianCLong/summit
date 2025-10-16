@@ -2,5 +2,5 @@ apiVersion: v2
 name: docling-svc
 description: Granite Docling 258M microservice
 version: 0.1.0
-appVersion: "1.0.0"
+appVersion: '1.0.0'
 type: application

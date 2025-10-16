@@ -5,7 +5,7 @@ import {
   doclingInferenceDuration,
   doclingInferenceTotal,
   doclingCharactersProcessed,
-  doclingCostUsd
+  doclingCostUsd,
 } from '../monitoring/metrics.js';
 import { doclingRepository } from '../db/repositories/doclingRepository.js';
 import { doclingGraphRepository } from '../db/repositories/doclingGraphRepository.js';
@@ -21,7 +21,7 @@ import type {
   ReleaseNotesResult,
   DocFragment,
   DocSummary,
-  DocFinding
+  DocFinding,
 } from '../types/docling.js';
 
 interface DoclingCallOptions {
@@ -38,7 +38,9 @@ class DoclingService {
     });
   }
 
-  async summarizeBuildFailure(input: SummarizeBuildFailureInput): Promise<SummarizeBuildFailureResult> {
+  async summarizeBuildFailure(
+    input: SummarizeBuildFailureInput,
+  ): Promise<SummarizeBuildFailureResult> {
     const requestId = input.requestId || randomUUID();
     const parsePayload = {
       requestId,
@@ -53,9 +55,19 @@ class DoclingService {
     let parseResponse: DoclingBaseResponse<{ fragments: DocFragment[] }>;
     let parseFallback = false;
     try {
-      parseResponse = await this.callDocling<{ fragments: DocFragment[] }>('parse', '/v1/parse', parsePayload);
+      parseResponse = await this.callDocling<{ fragments: DocFragment[] }>(
+        'parse',
+        '/v1/parse',
+        parsePayload,
+      );
     } catch (error) {
-      parseResponse = this.baselineParse(input.tenantId, requestId, input.logText, input.purpose, input.retention);
+      parseResponse = this.baselineParse(
+        input.tenantId,
+        requestId,
+        input.logText,
+        input.purpose,
+        input.retention,
+      );
       parseFallback = true;
     }
 
@@ -83,7 +95,7 @@ class DoclingService {
         text: fragment.text,
         sourceUri: fragment.sourceUri,
       })),
-      { tenantId: input.tenantId, buildId: input.buildId }
+      { tenantId: input.tenantId, buildId: input.buildId },
     );
 
     const summaryPayload = {
@@ -94,15 +106,27 @@ class DoclingService {
       text: input.logText,
       focus: 'failures' as const,
       maxTokens: input.maxTokens ?? 512,
-      relatedFragmentIds: storedFragments.slice(0, 5).map((fragment) => fragment.id),
+      relatedFragmentIds: storedFragments
+        .slice(0, 5)
+        .map((fragment) => fragment.id),
     };
 
     let summaryResponse: DoclingBaseResponse<DocSummary>;
     let summaryFallback = false;
     try {
-      summaryResponse = await this.callDocling<DocSummary>('summarize', '/v1/summarize', summaryPayload);
+      summaryResponse = await this.callDocling<DocSummary>(
+        'summarize',
+        '/v1/summarize',
+        summaryPayload,
+      );
     } catch (error) {
-      summaryResponse = this.baselineSummary(input.tenantId, requestId, input.logText, input.purpose, input.retention);
+      summaryResponse = this.baselineSummary(
+        input.tenantId,
+        requestId,
+        input.logText,
+        input.purpose,
+        input.retention,
+      );
       summaryFallback = true;
     }
 
@@ -125,7 +149,7 @@ class DoclingService {
         focus: summaryResponse.result.focus,
         text: summaryResponse.result.text,
       },
-      { buildId: input.buildId, tenantId: input.tenantId }
+      { buildId: input.buildId, tenantId: input.tenantId },
     );
 
     const findingRecords = await doclingRepository.saveFindings(
@@ -149,10 +173,14 @@ class DoclingService {
       label: record.label,
       value: record.value,
       confidence: record.confidence ?? 0,
-      severity: (record.severity ?? undefined) as DocFinding['severity'] | undefined,
+      severity: (record.severity ?? undefined) as
+        | DocFinding['severity']
+        | undefined,
       metadata: record.metadata || {},
       qualitySignals:
-        (record.metadata?.qualitySignals as Record<string, unknown> | undefined) ?? {},
+        (record.metadata?.qualitySignals as
+          | Record<string, unknown>
+          | undefined) ?? {},
     }));
 
     const traceLinks = storedFragments.slice(0, 3).map((fragment) => ({
@@ -162,8 +190,16 @@ class DoclingService {
       relation: 'EVIDENCES',
       score: 0.8,
     }));
-    await doclingRepository.saveTraceLinks(input.tenantId, requestId, traceLinks);
-    await doclingGraphRepository.linkTrace(requestId, input.tenantId, traceLinks);
+    await doclingRepository.saveTraceLinks(
+      input.tenantId,
+      requestId,
+      traceLinks,
+    );
+    await doclingGraphRepository.linkTrace(
+      requestId,
+      input.tenantId,
+      traceLinks,
+    );
 
     const policySignalRecords = await doclingRepository.savePolicySignals(
       input.tenantId,
@@ -186,14 +222,25 @@ class DoclingService {
       retention: record.retention,
       fragmentId: record.fragmentId ?? undefined,
       metadata: record.metadata || {},
-      qualitySignals: (record.metadata?.qualitySignals as Record<string, number> | undefined) ?? undefined,
+      qualitySignals:
+        (record.metadata?.qualitySignals as
+          | Record<string, number>
+          | undefined) ?? undefined,
     }));
 
     if (parseFallback) {
-      this.recordUsageMetrics('parseFallback', input.tenantId, parseResponse.usage);
+      this.recordUsageMetrics(
+        'parseFallback',
+        input.tenantId,
+        parseResponse.usage,
+      );
     }
     if (summaryFallback) {
-      this.recordUsageMetrics('summarizeBuildFailureFallback', input.tenantId, summaryResponse.usage);
+      this.recordUsageMetrics(
+        'summarizeBuildFailureFallback',
+        input.tenantId,
+        summaryResponse.usage,
+      );
     }
 
     provenanceLedger.appendEntry({
@@ -224,7 +271,9 @@ class DoclingService {
     };
   }
 
-  async extractLicenses(input: ExtractLicensesInput): Promise<ExtractLicensesResult> {
+  async extractLicenses(
+    input: ExtractLicensesInput,
+  ): Promise<ExtractLicensesResult> {
     const requestId = input.requestId || randomUUID();
     const payload = {
       requestId,
@@ -238,9 +287,19 @@ class DoclingService {
     let response: DoclingBaseResponse<{ findings: DocFinding[] }>;
     let fallback = false;
     try {
-      response = await this.callDocling<{ findings: DocFinding[] }>('extract', '/v1/extract', payload);
+      response = await this.callDocling<{ findings: DocFinding[] }>(
+        'extract',
+        '/v1/extract',
+        payload,
+      );
     } catch (error) {
-      response = this.baselineExtract(input.tenantId, requestId, input.text, input.purpose, input.retention);
+      response = this.baselineExtract(
+        input.tenantId,
+        requestId,
+        input.text,
+        input.purpose,
+        input.retention,
+      );
       fallback = true;
     }
 
@@ -265,10 +324,14 @@ class DoclingService {
       label: record.label,
       value: record.value,
       confidence: record.confidence ?? 0,
-      severity: (record.severity ?? undefined) as DocFinding['severity'] | undefined,
+      severity: (record.severity ?? undefined) as
+        | DocFinding['severity']
+        | undefined,
       metadata: record.metadata || {},
       qualitySignals:
-        (record.metadata?.qualitySignals as Record<string, unknown> | undefined) ?? {},
+        (record.metadata?.qualitySignals as
+          | Record<string, unknown>
+          | undefined) ?? {},
     }));
 
     const policySignalRecords = await doclingRepository.savePolicySignals(
@@ -292,11 +355,18 @@ class DoclingService {
       retention: record.retention,
       fragmentId: record.fragmentId ?? undefined,
       metadata: record.metadata || {},
-      qualitySignals: (record.metadata?.qualitySignals as Record<string, number> | undefined) ?? undefined,
+      qualitySignals:
+        (record.metadata?.qualitySignals as
+          | Record<string, number>
+          | undefined) ?? undefined,
     }));
 
     if (fallback) {
-      this.recordUsageMetrics('extractLicensesFallback', input.tenantId, response.usage);
+      this.recordUsageMetrics(
+        'extractLicensesFallback',
+        input.tenantId,
+        response.usage,
+      );
     }
 
     provenanceLedger.appendEntry({
@@ -323,7 +393,9 @@ class DoclingService {
     };
   }
 
-  async generateReleaseNotes(input: ReleaseNotesInput): Promise<ReleaseNotesResult> {
+  async generateReleaseNotes(
+    input: ReleaseNotesInput,
+  ): Promise<ReleaseNotesResult> {
     const requestId = input.requestId || randomUUID();
     const payload = {
       requestId,
@@ -338,9 +410,20 @@ class DoclingService {
     let response: DoclingBaseResponse<DocSummary>;
     let fallback = false;
     try {
-      response = await this.callDocling<DocSummary>('summarize', '/v1/summarize', payload);
+      response = await this.callDocling<DocSummary>(
+        'summarize',
+        '/v1/summarize',
+        payload,
+      );
     } catch (error) {
-      response = this.baselineSummary(input.tenantId, requestId, input.diffText, input.purpose, input.retention, 'changelog');
+      response = this.baselineSummary(
+        input.tenantId,
+        requestId,
+        input.diffText,
+        input.purpose,
+        input.retention,
+        'changelog',
+      );
       fallback = true;
     }
 
@@ -355,7 +438,11 @@ class DoclingService {
     );
 
     if (fallback) {
-      this.recordUsageMetrics('generateReleaseNotesFallback', input.tenantId, response.usage);
+      this.recordUsageMetrics(
+        'generateReleaseNotesFallback',
+        input.tenantId,
+        response.usage,
+      );
     }
 
     return {
@@ -368,19 +455,30 @@ class DoclingService {
     path: string,
     payload: unknown,
   ): Promise<DoclingBaseResponse<T>> {
-    const endTimer = doclingInferenceDuration.startTimer({ operation, tenant_id: (payload as any).tenantId });
+    const endTimer = doclingInferenceDuration.startTimer({
+      operation,
+      tenant_id: (payload as any).tenantId,
+    });
     try {
       const { data } = await this.http.post<T>(path, payload);
       endTimer();
       doclingInferenceTotal.labels(operation, 'success').inc();
       const usage = (data as any).usage;
       if (usage) {
-        doclingCharactersProcessed.labels((payload as any).tenantId, operation).inc(usage.characters || 0);
-        doclingCostUsd.labels((payload as any).tenantId).inc(usage.costUsd || 0);
-        tenantCostService.recordDoclingCost((payload as any).tenantId, usage.costUsd || 0, {
-          requestId: (data as any).requestId,
-          operation,
-        });
+        doclingCharactersProcessed
+          .labels((payload as any).tenantId, operation)
+          .inc(usage.characters || 0);
+        doclingCostUsd
+          .labels((payload as any).tenantId)
+          .inc(usage.costUsd || 0);
+        tenantCostService.recordDoclingCost(
+          (payload as any).tenantId,
+          usage.costUsd || 0,
+          {
+            requestId: (data as any).requestId,
+            operation,
+          },
+        );
       }
       return data as DoclingBaseResponse<T>;
     } catch (error) {
@@ -390,8 +488,14 @@ class DoclingService {
     }
   }
 
-  private recordUsageMetrics(operation: string, tenantId: string, usage: { characters: number; costUsd: number }) {
-    doclingCharactersProcessed.labels(tenantId, operation).inc(usage.characters || 0);
+  private recordUsageMetrics(
+    operation: string,
+    tenantId: string,
+    usage: { characters: number; costUsd: number },
+  ) {
+    doclingCharactersProcessed
+      .labels(tenantId, operation)
+      .inc(usage.characters || 0);
     doclingCostUsd.labels(tenantId).inc(usage.costUsd || 0);
   }
 
@@ -402,13 +506,16 @@ class DoclingService {
     purpose: string,
     retention: string,
   ): DoclingBaseResponse<{ fragments: DocFragment[] }> {
-    const fragments = text.split(/\n{2,}/).slice(0, 10).map((chunk, index) => ({
-      id: `${requestId}-fragment-${index}`,
-      sha256: createHash('sha256').update(chunk).digest('hex'),
-      text: chunk,
-      mimeType: 'text/plain',
-      metadata: { heuristic: true },
-    }));
+    const fragments = text
+      .split(/\n{2,}/)
+      .slice(0, 10)
+      .map((chunk, index) => ({
+        id: `${requestId}-fragment-${index}`,
+        sha256: createHash('sha256').update(chunk).digest('hex'),
+        text: chunk,
+        mimeType: 'text/plain',
+        metadata: { heuristic: true },
+      }));
     return {
       requestId,
       tenantId,
@@ -433,7 +540,9 @@ class DoclingService {
     focus: 'failures' | 'changelog' | 'compliance' = 'failures',
   ): DoclingBaseResponse<DocSummary> {
     const lines = text.split('\n').filter(Boolean);
-    const failures = lines.filter((line) => /error|fail/i.test(line)).slice(0, 3);
+    const failures = lines
+      .filter((line) => /error|fail/i.test(line))
+      .slice(0, 3);
     const summaryText = failures.length
       ? `Heuristic ${focus} summary: ${failures.join(' ')}`
       : `Heuristic ${focus} summary: No explicit failure lines found.`;

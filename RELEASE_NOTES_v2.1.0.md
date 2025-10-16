@@ -1,4 +1,3 @@
-
 # Release Notes: v2.1.0 - Hardening & Resilience
 
 This release focuses on improving the overall security, resilience, and health of the Maestro Conductor platform.

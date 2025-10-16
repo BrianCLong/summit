@@ -16,17 +16,27 @@ const ExecCreate = z.object({
   status: z.enum(['ready', 'busy', 'offline']).default('ready'),
 });
 
-router.get('/executors', requirePermission('executor:read'), async (_req, res) => {
-  const list = await executorsRepo.list();
-  res.json(list);
-});
+router.get(
+  '/executors',
+  requirePermission('executor:read'),
+  async (_req, res) => {
+    const list = await executorsRepo.list();
+    res.json(list);
+  },
+);
 
-router.post('/executors', requirePermission('executor:update'), async (req, res) => {
-  const parse = ExecCreate.safeParse(req.body || {});
-  if (!parse.success)
-    return res.status(400).json({ error: 'invalid_input', details: parse.error.issues });
-  const created = await executorsRepo.create(parse.data as any);
-  res.status(201).json(created);
-});
+router.post(
+  '/executors',
+  requirePermission('executor:update'),
+  async (req, res) => {
+    const parse = ExecCreate.safeParse(req.body || {});
+    if (!parse.success)
+      return res
+        .status(400)
+        .json({ error: 'invalid_input', details: parse.error.issues });
+    const created = await executorsRepo.create(parse.data as any);
+    res.status(201).json(created);
+  },
+);
 
 export default router;

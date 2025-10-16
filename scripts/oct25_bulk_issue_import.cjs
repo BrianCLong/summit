@@ -22,7 +22,9 @@ if (!OWNER || !REPO) {
   process.exit(1);
 }
 if (!GH_TOKEN) {
-  console.error('Set GH_TOKEN environment variable (Fine-grained PAT or gh auth token).');
+  console.error(
+    'Set GH_TOKEN environment variable (Fine-grained PAT or gh auth token).',
+  );
   process.exit(1);
 }
 
@@ -32,12 +34,18 @@ const CSV_PATH = process.env.CSV_PATH
 const BATCH_DIR = process.env.BATCH_DIR
   ? path.resolve(process.env.BATCH_DIR)
   : path.join('project_management', 'october2025_issue_json');
-const SECONDARY_BACKOFF_BASE_MS = Number(process.env.SECONDARY_BACKOFF_MS || '60000');
-const SECONDARY_BACKOFF_MAX_MS = Number(process.env.SECONDARY_BACKOFF_MAX_MS || '300000');
+const SECONDARY_BACKOFF_BASE_MS = Number(
+  process.env.SECONDARY_BACKOFF_MS || '60000',
+);
+const SECONDARY_BACKOFF_MAX_MS = Number(
+  process.env.SECONDARY_BACKOFF_MAX_MS || '300000',
+);
 
 const START_INDEX = Math.max(1, Number(process.env.START_BATCH || '1'));
 const END_INDEX_RAW = Number(process.env.END_BATCH || '999999');
-const END_INDEX = Number.isNaN(END_INDEX_RAW) ? Number.POSITIVE_INFINITY : END_INDEX_RAW;
+const END_INDEX = Number.isNaN(END_INDEX_RAW)
+  ? Number.POSITIVE_INFINITY
+  : END_INDEX_RAW;
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -140,7 +148,9 @@ function loadEntriesFromCsv() {
   for (let i = 1; i < rows.length; i += 1) {
     const row = rows[i];
     const title = (row[headerIndex.get('Title')] || '').trim();
-    const repository = (row[headerIndex.get('Repository')] || '').trim().toLowerCase();
+    const repository = (row[headerIndex.get('Repository')] || '')
+      .trim()
+      .toLowerCase();
     if (!title) {
       continue;
     }
@@ -181,7 +191,10 @@ function loadEntriesFromCsv() {
   return entries;
 }
 
-function gh(pathname, { method = 'GET', body = null, accept = 'application/vnd.github+json' } = {}) {
+function gh(
+  pathname,
+  { method = 'GET', body = null, accept = 'application/vnd.github+json' } = {},
+) {
   const payload = body ? JSON.stringify(body) : null;
   return new Promise((resolve, reject) => {
     const req = https.request(
@@ -202,11 +215,17 @@ function gh(pathname, { method = 'GET', body = null, accept = 'application/vnd.g
           raw += chunk;
         });
         res.on('end', async () => {
-          if (res.statusCode === 403 && res.headers['x-ratelimit-remaining'] === '0') {
-            const reset = Number(res.headers['x-ratelimit-reset'] || '0') * 1000;
+          if (
+            res.statusCode === 403 &&
+            res.headers['x-ratelimit-remaining'] === '0'
+          ) {
+            const reset =
+              Number(res.headers['x-ratelimit-reset'] || '0') * 1000;
             const wait = Math.max(reset - Date.now(), 5000);
             const seconds = Math.ceil(wait / 1000);
-            console.warn(`Rate limit hit. Sleeping for ${seconds}s before retrying ${method} ${pathname}`);
+            console.warn(
+              `Rate limit hit. Sleeping for ${seconds}s before retrying ${method} ${pathname}`,
+            );
             await sleep(wait);
             try {
               const retry = await gh(pathname, { method, body, accept });
@@ -219,7 +238,9 @@ function gh(pathname, { method = 'GET', body = null, accept = 'application/vnd.g
 
           if (res.statusCode < 200 || res.statusCode >= 300) {
             const message = raw || res.statusMessage;
-            reject(new Error(`${res.statusCode} ${res.statusMessage}: ${message}`));
+            reject(
+              new Error(`${res.statusCode} ${res.statusMessage}: ${message}`),
+            );
             return;
           }
           try {
@@ -229,7 +250,7 @@ function gh(pathname, { method = 'GET', body = null, accept = 'application/vnd.g
             reject(err);
           }
         });
-      }
+      },
     );
     req.on('error', reject);
     if (payload) {
@@ -245,7 +266,7 @@ async function fetchExistingTitles() {
   const labelFilter = encodeURIComponent('program/release-train,type/chore');
   while (true) {
     const { data } = await gh(
-      `/repos/${OWNER}/${REPO}/issues?state=all&per_page=100&page=${page}&labels=${labelFilter}`
+      `/repos/${OWNER}/${REPO}/issues?state=all&per_page=100&page=${page}&labels=${labelFilter}`,
     );
     if (!Array.isArray(data) || data.length === 0) {
       break;
@@ -272,7 +293,11 @@ async function addToProject(nodeId) {
     }`,
     variables: { projectId: PROJECT_ID, contentId: nodeId },
   };
-  await gh('/graphql', { method: 'POST', body: mutation, accept: 'application/json' });
+  await gh('/graphql', {
+    method: 'POST',
+    body: mutation,
+    accept: 'application/json',
+  });
 }
 
 async function processEntries(entries, existingTitles, label = 'entries') {
@@ -310,7 +335,12 @@ async function processEntries(entries, existingTitles, label = 'entries') {
         });
         existingTitles.add(entry.title);
         created += 1;
-        if (entry.state && entry.state.toLowerCase() === 'closed' && data && data.number) {
+        if (
+          entry.state &&
+          entry.state.toLowerCase() === 'closed' &&
+          data &&
+          data.number
+        ) {
           await gh(`/repos/${OWNER}/${REPO}/issues/${data.number}`, {
             method: 'PATCH',
             body: { state: 'closed' },
@@ -320,7 +350,9 @@ async function processEntries(entries, existingTitles, label = 'entries') {
           await addToProject(data.node_id);
         }
         if ((created + skipped) % 50 === 0) {
-          console.log(`   Progress ${created}/${entries.length} created (${skipped} skipped)`);
+          console.log(
+            `   Progress ${created}/${entries.length} created (${skipped} skipped)`,
+          );
         }
         break;
       } catch (err) {
@@ -328,17 +360,19 @@ async function processEntries(entries, existingTitles, label = 'entries') {
         if (message.includes('secondary rate limit') && attempts < 10) {
           const backoff = Math.min(
             SECONDARY_BACKOFF_BASE_MS * attempts,
-            SECONDARY_BACKOFF_MAX_MS
+            SECONDARY_BACKOFF_MAX_MS,
           );
           console.warn(
             `   Secondary rate limit encountered for "${entry.title}". Sleeping ${Math.ceil(
-              backoff / 1000
-            )}s (attempt ${attempts})`
+              backoff / 1000,
+            )}s (attempt ${attempts})`,
           );
           await sleep(backoff);
           continue;
         }
-        console.error(`   Error creating issue for "${entry.title}": ${message}`);
+        console.error(
+          `   Error creating issue for "${entry.title}": ${message}`,
+        );
         skipped += 1;
         break;
       }
@@ -359,12 +393,12 @@ async function main() {
     const selectedEntries = csvEntries.slice(START_INDEX - 1, endSlice);
     if (selectedEntries.length === 0) {
       console.log(
-        `No CSV rows selected. Check START_BATCH/END_BATCH values (current range ${START_INDEX}-${END_INDEX}).`
+        `No CSV rows selected. Check START_BATCH/END_BATCH values (current range ${START_INDEX}-${END_INDEX}).`,
       );
       return;
     }
     console.log(
-      `Processing ${selectedEntries.length} CSV rows (range ${START_INDEX}-${Number.isFinite(END_INDEX) ? END_INDEX : csvEntries.length}).`
+      `Processing ${selectedEntries.length} CSV rows (range ${START_INDEX}-${Number.isFinite(END_INDEX) ? END_INDEX : csvEntries.length}).`,
     );
     sources = [{ label: 'CSV rows', entries: selectedEntries }];
   } else {
@@ -388,7 +422,9 @@ async function main() {
       return;
     }
 
-    console.log(`Processing ${selected.length} batch files (range ${START_INDEX}-${END_INDEX}).`);
+    console.log(
+      `Processing ${selected.length} batch files (range ${START_INDEX}-${END_INDEX}).`,
+    );
     sources = selected.map((file) => {
       const filePath = path.join(BATCH_DIR, file);
       const raw = fs.readFileSync(filePath, 'utf8');
@@ -403,14 +439,20 @@ async function main() {
   let totalSkipped = 0;
   for (const source of sources) {
     console.log(`\n==> Processing ${source.label}`);
-    const result = await processEntries(source.entries, existingTitles, source.label);
+    const result = await processEntries(
+      source.entries,
+      existingTitles,
+      source.label,
+    );
     console.log(
-      `   ${result.label} summary: created ${result.created}, skipped ${result.skipped}, total ${result.total}`
+      `   ${result.label} summary: created ${result.created}, skipped ${result.skipped}, total ${result.total}`,
     );
     totalCreated += result.created;
     totalSkipped += result.skipped;
   }
-  console.log(`\nDone. Created ${totalCreated} issues, skipped ${totalSkipped} (existing or invalid).`);
+  console.log(
+    `\nDone. Created ${totalCreated} issues, skipped ${totalSkipped} (existing or invalid).`,
+  );
 }
 
 main().catch((err) => {

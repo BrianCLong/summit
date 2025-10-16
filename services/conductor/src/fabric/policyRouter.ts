@@ -1,6 +1,11 @@
-import { BuildTaskSpec } from "../build/schema";
-import { AoEBid, CapabilityRegistry, coverageScore, deriveSkills } from "./registry";
-import { recordProvenance, hashObject } from "../provenance/ledger";
+import { BuildTaskSpec } from '../build/schema';
+import {
+  AoEBid,
+  CapabilityRegistry,
+  coverageScore,
+  deriveSkills,
+} from './registry';
+import { recordProvenance, hashObject } from '../provenance/ledger';
 
 export interface RouterOptions {
   costBudgetUsd: number;
@@ -19,11 +24,15 @@ export interface RouterDecision {
   fallback?: string;
 }
 
-export function routeTask(spec: BuildTaskSpec, registry: CapabilityRegistry, options: RouterOptions): RouterDecision {
+export function routeTask(
+  spec: BuildTaskSpec,
+  registry: CapabilityRegistry,
+  options: RouterOptions,
+): RouterDecision {
   const requiredSkills = deriveSkills(spec);
   const bids = registry.createAoEBids(spec, 12);
   if (!bids.length) {
-    return degradedFallback(requiredSkills, "no-bids");
+    return degradedFallback(requiredSkills, 'no-bids');
   }
   const bundles = enumerateBundles(bids, options.maxBundleSize ?? 3);
   let best: EvaluatedBundle | null = null;
@@ -31,26 +40,38 @@ export function routeTask(spec: BuildTaskSpec, registry: CapabilityRegistry, opt
     const decision = evaluateBundle(bundle, spec, requiredSkills);
     if (decision.estimatedCost > options.costBudgetUsd * 1.05) continue;
     if (decision.estimatedLatency > options.latencyBudgetMs * 1.1) continue;
-    if (!best || decision.coverageScore > best.coverageScore || decision.valueDensity > best.valueDensity) {
+    if (
+      !best ||
+      decision.coverageScore > best.coverageScore ||
+      decision.valueDensity > best.valueDensity
+    ) {
       best = decision;
     }
   }
 
   if (!best) {
-    return degradedFallback(requiredSkills, "budget-constraint");
+    return degradedFallback(requiredSkills, 'budget-constraint');
   }
 
   recordProvenance({
     reqId: spec.taskId,
-    step: "router",
+    step: 'router',
     inputHash: hashObject(requiredSkills),
     outputHash: hashObject(best.bundle.map((b) => b.modelId)),
-    policy: { retention: spec.policy.retention, purpose: spec.policy.purpose, licenseClass: spec.policy.licenseClass },
+    policy: {
+      retention: spec.policy.retention,
+      purpose: spec.policy.purpose,
+      licenseClass: spec.policy.licenseClass,
+    },
     time: { start: new Date().toISOString(), end: new Date().toISOString() },
-    tags: ["policy-router"],
+    tags: ['policy-router'],
   });
 
-  const { coverageScore: _coverageScore, valueDensity: _valueDensity, ...decision } = best;
+  const {
+    coverageScore: _coverageScore,
+    valueDensity: _valueDensity,
+    ...decision
+  } = best;
   return decision;
 }
 
@@ -59,7 +80,11 @@ interface EvaluatedBundle extends RouterDecision {
   valueDensity: number;
 }
 
-function evaluateBundle(bundle: AoEBid[], spec: BuildTaskSpec, requiredSkills: string[]): EvaluatedBundle {
+function evaluateBundle(
+  bundle: AoEBid[],
+  spec: BuildTaskSpec,
+  requiredSkills: string[],
+): EvaluatedBundle {
   const unionTags = new Set<string>();
   let quality = 0;
   let latency = 0;
@@ -72,7 +97,8 @@ function evaluateBundle(bundle: AoEBid[], spec: BuildTaskSpec, requiredSkills: s
   }
   const skillsCoverage = coverageScore([...unionTags], requiredSkills);
   const acCoverage = acceptanceCoverage(spec, unionTags);
-  const valueDensity = (quality * Math.max(0.1, acCoverage)) / Math.max(0.01, cost * latency);
+  const valueDensity =
+    (quality * Math.max(0.1, acCoverage)) / Math.max(0.01, cost * latency);
   return {
     bundle,
     estimatedCost: Number(cost.toFixed(4)),
@@ -90,7 +116,11 @@ function acceptanceCoverage(spec: BuildTaskSpec, tags: Set<string>): number {
   let satisfied = 0;
   for (const ac of spec.acceptanceCriteria) {
     if (!ac.metric) continue;
-    if (tags.has(ac.metric) || tags.has(ac.verify) || tags.has(ac.statement.toLowerCase())) {
+    if (
+      tags.has(ac.metric) ||
+      tags.has(ac.verify) ||
+      tags.has(ac.statement.toLowerCase())
+    ) {
       satisfied += 1;
     }
   }
@@ -115,10 +145,10 @@ function enumerateBundles(bids: AoEBid[], maxSize: number): AoEBid[][] {
 
 function degradedFallback(skills: string[], reason: string): RouterDecision {
   const heuristics: AoEBid = {
-    modelId: "regex-baseline",
+    modelId: 'regex-baseline',
     est: { quality: 0.35, latencyMs: 200, costUSD: 0.0 },
     confidence: 0.4,
-    fitTags: skills.length ? skills : ["generic"],
+    fitTags: skills.length ? skills : ['generic'],
     rationale: `Fallback triggered: ${reason}`,
   };
   return {

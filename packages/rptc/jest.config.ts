@@ -7,7 +7,7 @@ const config: Config = {
   testMatch: ['<rootDir>/test/**/*.test.ts'],
   collectCoverageFrom: ['src/**/*.ts'],
   coverageDirectory: '<rootDir>/coverage',
-  clearMocks: true
+  clearMocks: true,
 };
 
 export default config;

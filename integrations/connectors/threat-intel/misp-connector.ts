@@ -222,11 +222,15 @@ export class MISPConnector extends EventEmitter {
       apiCalls: 0,
       enrichmentQueries: 0,
       averageResponseTime: 0,
-      errorRate: 0
+      errorRate: 0,
     };
   }
 
-  private async makeRequest(endpoint: string, method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET', data?: any): Promise<any> {
+  private async makeRequest(
+    endpoint: string,
+    method: 'GET' | 'POST' | 'PUT' | 'DELETE' = 'GET',
+    data?: any,
+  ): Promise<any> {
     const startTime = Date.now();
     const url = `${this.config.baseUrl}${endpoint}`;
 
@@ -234,20 +238,23 @@ export class MISPConnector extends EventEmitter {
       const response = await fetch(url, {
         method,
         headers: {
-          'Authorization': this.config.apiKey,
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
+          Authorization: this.config.apiKey,
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
         },
-        body: data ? JSON.stringify(data) : undefined
+        body: data ? JSON.stringify(data) : undefined,
       });
 
       this.metrics.apiCalls++;
       const responseTime = Date.now() - startTime;
-      this.metrics.averageResponseTime = (this.metrics.averageResponseTime + responseTime) / 2;
+      this.metrics.averageResponseTime =
+        (this.metrics.averageResponseTime + responseTime) / 2;
 
       if (!response.ok) {
         this.metrics.errorRate++;
-        throw new Error(`MISP API error: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `MISP API error: ${response.status} ${response.statusText}`,
+        );
       }
 
       return await response.json();
@@ -257,15 +264,19 @@ export class MISPConnector extends EventEmitter {
         endpoint,
         method,
         error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date()
+        timestamp: new Date(),
       });
       throw error;
     }
   }
 
-  async createEvent(event: Omit<MISPEvent, 'id' | 'uuid' | 'timestamp' | 'publish_timestamp'>): Promise<MISPEvent> {
+  async createEvent(
+    event: Omit<MISPEvent, 'id' | 'uuid' | 'timestamp' | 'publish_timestamp'>,
+  ): Promise<MISPEvent> {
     try {
-      const response = await this.makeRequest('/events/add', 'POST', { Event: event });
+      const response = await this.makeRequest('/events/add', 'POST', {
+        Event: event,
+      });
 
       const createdEvent: MISPEvent = response.Event;
       this.metrics.totalEvents++;
@@ -279,7 +290,7 @@ export class MISPConnector extends EventEmitter {
         uuid: createdEvent.uuid,
         info: createdEvent.info,
         threatLevel: createdEvent.threat_level_id,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       return createdEvent;
@@ -287,7 +298,7 @@ export class MISPConnector extends EventEmitter {
       this.emit('event_creation_failed', {
         error: error instanceof Error ? error.message : 'Unknown error',
         eventInfo: event.info,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
       throw error;
     }
@@ -298,26 +309,34 @@ export class MISPConnector extends EventEmitter {
     return response.Event;
   }
 
-  async updateEvent(eventId: string, updates: Partial<MISPEvent>): Promise<MISPEvent> {
-    const response = await this.makeRequest(`/events/edit/${eventId}`, 'POST', { Event: updates });
+  async updateEvent(
+    eventId: string,
+    updates: Partial<MISPEvent>,
+  ): Promise<MISPEvent> {
+    const response = await this.makeRequest(`/events/edit/${eventId}`, 'POST', {
+      Event: updates,
+    });
 
     this.emit('event_updated', {
       eventId,
       updates,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return response.Event;
   }
 
   async publishEvent(eventId: string): Promise<MISPEvent> {
-    const response = await this.makeRequest(`/events/publish/${eventId}`, 'POST');
+    const response = await this.makeRequest(
+      `/events/publish/${eventId}`,
+      'POST',
+    );
 
     this.metrics.publishedEvents++;
 
     this.emit('event_published', {
       eventId,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return response.Event;
@@ -330,13 +349,20 @@ export class MISPConnector extends EventEmitter {
 
     this.emit('event_deleted', {
       eventId,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
-  async addAttribute(eventId: string, attribute: Omit<MISPAttribute, 'id' | 'uuid' | 'event_id' | 'timestamp'>): Promise<MISPAttribute> {
+  async addAttribute(
+    eventId: string,
+    attribute: Omit<MISPAttribute, 'id' | 'uuid' | 'event_id' | 'timestamp'>,
+  ): Promise<MISPAttribute> {
     try {
-      const response = await this.makeRequest(`/attributes/add/${eventId}`, 'POST', { Attribute: attribute });
+      const response = await this.makeRequest(
+        `/attributes/add/${eventId}`,
+        'POST',
+        { Attribute: attribute },
+      );
 
       const createdAttribute: MISPAttribute = response.Attribute;
       this.metrics.totalAttributes++;
@@ -346,7 +372,7 @@ export class MISPConnector extends EventEmitter {
         eventId,
         type: createdAttribute.type,
         value: createdAttribute.value,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       return createdAttribute;
@@ -355,15 +381,22 @@ export class MISPConnector extends EventEmitter {
         error: error instanceof Error ? error.message : 'Unknown error',
         eventId,
         attributeType: attribute.type,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
       throw error;
     }
   }
 
-  async addObject(eventId: string, object: Omit<MISPObject, 'id' | 'uuid' | 'event_id' | 'timestamp'>): Promise<MISPObject> {
+  async addObject(
+    eventId: string,
+    object: Omit<MISPObject, 'id' | 'uuid' | 'event_id' | 'timestamp'>,
+  ): Promise<MISPObject> {
     try {
-      const response = await this.makeRequest(`/objects/add/${eventId}`, 'POST', { Object: object });
+      const response = await this.makeRequest(
+        `/objects/add/${eventId}`,
+        'POST',
+        { Object: object },
+      );
 
       const createdObject: MISPObject = response.Object;
       this.metrics.totalObjects++;
@@ -373,7 +406,7 @@ export class MISPConnector extends EventEmitter {
         eventId,
         name: createdObject.name,
         template: createdObject.template_uuid,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       return createdObject;
@@ -382,51 +415,65 @@ export class MISPConnector extends EventEmitter {
         error: error instanceof Error ? error.message : 'Unknown error',
         eventId,
         objectName: object.name,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
       throw error;
     }
   }
 
   async addTag(eventId: string, tagName: string): Promise<void> {
-    await this.makeRequest(`/events/addTag/${eventId}/${encodeURIComponent(tagName)}`, 'POST');
+    await this.makeRequest(
+      `/events/addTag/${eventId}/${encodeURIComponent(tagName)}`,
+      'POST',
+    );
 
     this.emit('tag_added', {
       eventId,
       tagName,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
   async removeTag(eventId: string, tagName: string): Promise<void> {
-    await this.makeRequest(`/events/removeTag/${eventId}/${encodeURIComponent(tagName)}`, 'POST');
+    await this.makeRequest(
+      `/events/removeTag/${eventId}/${encodeURIComponent(tagName)}`,
+      'POST',
+    );
 
     this.emit('tag_removed', {
       eventId,
       tagName,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
   async searchEvents(query: MISPSearchQuery): Promise<MISPEvent[]> {
-    const response = await this.makeRequest('/events/restSearch', 'POST', query);
+    const response = await this.makeRequest(
+      '/events/restSearch',
+      'POST',
+      query,
+    );
 
     this.emit('events_searched', {
       query,
       resultCount: response.length,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return response.response || [];
   }
 
   async searchAttributes(query: MISPSearchQuery): Promise<MISPAttribute[]> {
-    const response = await this.makeRequest('/attributes/restSearch', 'POST', query);
+    const response = await this.makeRequest(
+      '/attributes/restSearch',
+      'POST',
+      query,
+    );
 
     this.emit('attributes_searched', {
       query,
       resultCount: response.length,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return response.response || [];
@@ -436,7 +483,8 @@ export class MISPConnector extends EventEmitter {
     const cacheKey = `${ioc}:${type || 'any'}`;
     const cached = this.enrichmentCache.get(cacheKey);
 
-    if (cached && Date.now() - cached.lastSeen!.getTime() < 3600000) { // 1 hour cache
+    if (cached && Date.now() - cached.lastSeen!.getTime() < 3600000) {
+      // 1 hour cache
       return cached;
     }
 
@@ -447,7 +495,7 @@ export class MISPConnector extends EventEmitter {
         attribute: [ioc],
         type: type ? [type] : undefined,
         enforceWarninglist: false,
-        metadata: false
+        metadata: false,
       };
 
       const events = await this.searchEvents(searchQuery);
@@ -467,8 +515,8 @@ export class MISPConnector extends EventEmitter {
           malwareFamilies: this.extractMalwareFamilies(events),
           campaigns: this.extractCampaigns(events),
           threatActors: this.extractThreatActors(events),
-          techniques: this.extractTechniques(events)
-        }
+          techniques: this.extractTechniques(events),
+        },
       };
 
       this.enrichmentCache.set(cacheKey, enrichment);
@@ -480,7 +528,7 @@ export class MISPConnector extends EventEmitter {
         attributeCount: attributes.length,
         threatLevel: enrichment.threatLevel,
         confidence: enrichment.confidence,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       return enrichment;
@@ -489,7 +537,7 @@ export class MISPConnector extends EventEmitter {
         ioc,
         type,
         error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date()
+        timestamp: new Date(),
       });
       throw error;
     }
@@ -497,40 +545,60 @@ export class MISPConnector extends EventEmitter {
 
   private getFirstSeen(attributes: MISPAttribute[]): Date | undefined {
     const timestamps = attributes
-      .map(attr => attr.first_seen || attr.timestamp)
-      .filter(ts => ts)
-      .map(ts => typeof ts === 'string' ? new Date(ts) : new Date(ts! * 1000));
+      .map((attr) => attr.first_seen || attr.timestamp)
+      .filter((ts) => ts)
+      .map((ts) =>
+        typeof ts === 'string' ? new Date(ts) : new Date(ts! * 1000),
+      );
 
-    return timestamps.length > 0 ? new Date(Math.min(...timestamps.map(d => d.getTime()))) : undefined;
+    return timestamps.length > 0
+      ? new Date(Math.min(...timestamps.map((d) => d.getTime())))
+      : undefined;
   }
 
   private calculateThreatLevel(events: MISPEvent[]): number {
     if (events.length === 0) return 1; // Low
 
-    const avgThreatLevel = events.reduce((sum, event) => sum + event.threat_level_id, 0) / events.length;
+    const avgThreatLevel =
+      events.reduce((sum, event) => sum + event.threat_level_id, 0) /
+      events.length;
     return Math.round(avgThreatLevel);
   }
 
-  private calculateConfidence(events: MISPEvent[], attributes: MISPAttribute[]): number {
+  private calculateConfidence(
+    events: MISPEvent[],
+    attributes: MISPAttribute[],
+  ): number {
     const factors = [
       events.length > 0 ? 0.3 : 0,
       attributes.length > 0 ? 0.2 : 0,
-      events.filter(e => e.published).length / Math.max(events.length, 1) * 0.3,
-      attributes.filter(a => a.to_ids).length / Math.max(attributes.length, 1) * 0.2
+      (events.filter((e) => e.published).length / Math.max(events.length, 1)) *
+        0.3,
+      (attributes.filter((a) => a.to_ids).length /
+        Math.max(attributes.length, 1)) *
+        0.2,
     ];
 
-    return Math.min(1, factors.reduce((sum, factor) => sum + factor, 0)) * 100;
+    return (
+      Math.min(
+        1,
+        factors.reduce((sum, factor) => sum + factor, 0),
+      ) * 100
+    );
   }
 
-  private extractTags(events: MISPEvent[], attributes: MISPAttribute[]): string[] {
+  private extractTags(
+    events: MISPEvent[],
+    attributes: MISPAttribute[],
+  ): string[] {
     const tags = new Set<string>();
 
-    events.forEach(event => {
-      event.tags?.forEach(tag => tags.add(tag.name));
+    events.forEach((event) => {
+      event.tags?.forEach((tag) => tags.add(tag.name));
     });
 
-    attributes.forEach(attr => {
-      attr.tags?.forEach(tag => tags.add(tag.name));
+    attributes.forEach((attr) => {
+      attr.tags?.forEach((tag) => tags.add(tag.name));
     });
 
     return Array.from(tags);
@@ -539,9 +607,12 @@ export class MISPConnector extends EventEmitter {
   private extractMalwareFamilies(events: MISPEvent[]): string[] {
     const families = new Set<string>();
 
-    events.forEach(event => {
-      event.tags?.forEach(tag => {
-        if (tag.name.includes('malware-family') || tag.name.includes('misp-galaxy:malware')) {
+    events.forEach((event) => {
+      event.tags?.forEach((tag) => {
+        if (
+          tag.name.includes('malware-family') ||
+          tag.name.includes('misp-galaxy:malware')
+        ) {
           families.add(tag.name.split(':').pop() || tag.name);
         }
       });
@@ -553,9 +624,12 @@ export class MISPConnector extends EventEmitter {
   private extractCampaigns(events: MISPEvent[]): string[] {
     const campaigns = new Set<string>();
 
-    events.forEach(event => {
-      event.tags?.forEach(tag => {
-        if (tag.name.includes('campaign') || tag.name.includes('misp-galaxy:threat-actor')) {
+    events.forEach((event) => {
+      event.tags?.forEach((tag) => {
+        if (
+          tag.name.includes('campaign') ||
+          tag.name.includes('misp-galaxy:threat-actor')
+        ) {
           campaigns.add(tag.name.split(':').pop() || tag.name);
         }
       });
@@ -567,8 +641,8 @@ export class MISPConnector extends EventEmitter {
   private extractThreatActors(events: MISPEvent[]): string[] {
     const actors = new Set<string>();
 
-    events.forEach(event => {
-      event.tags?.forEach(tag => {
+    events.forEach((event) => {
+      event.tags?.forEach((tag) => {
         if (tag.name.includes('threat-actor') || tag.name.includes('apt')) {
           actors.add(tag.name.split(':').pop() || tag.name);
         }
@@ -581,9 +655,12 @@ export class MISPConnector extends EventEmitter {
   private extractTechniques(events: MISPEvent[]): string[] {
     const techniques = new Set<string>();
 
-    events.forEach(event => {
-      event.tags?.forEach(tag => {
-        if (tag.name.includes('mitre-attack') || tag.name.includes('technique')) {
+    events.forEach((event) => {
+      event.tags?.forEach((tag) => {
+        if (
+          tag.name.includes('mitre-attack') ||
+          tag.name.includes('technique')
+        ) {
           techniques.add(tag.name.split(':').pop() || tag.name);
         }
       });
@@ -592,11 +669,13 @@ export class MISPConnector extends EventEmitter {
     return Array.from(techniques);
   }
 
-  async createThreatFeed(feed: Omit<ThreatIntelFeed, 'events' | 'attributes'>): Promise<ThreatIntelFeed> {
+  async createThreatFeed(
+    feed: Omit<ThreatIntelFeed, 'events' | 'attributes'>,
+  ): Promise<ThreatIntelFeed> {
     const newFeed: ThreatIntelFeed = {
       ...feed,
       events: [],
-      attributes: []
+      attributes: [],
     };
 
     this.feeds.set(feed.id, newFeed);
@@ -609,7 +688,7 @@ export class MISPConnector extends EventEmitter {
       feedId: feed.id,
       name: feed.name,
       enabled: feed.enabled,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return newFeed;
@@ -626,7 +705,7 @@ export class MISPConnector extends EventEmitter {
       const query: MISPSearchQuery = {
         last: '7d',
         published: true,
-        limit: 1000
+        limit: 1000,
       };
 
       const events = await this.searchEvents(query);
@@ -641,7 +720,7 @@ export class MISPConnector extends EventEmitter {
         feedId,
         eventCount: events.length,
         attributeCount: attributes.length,
-        timestamp: feed.lastUpdated
+        timestamp: feed.lastUpdated,
       });
 
       return feed;
@@ -649,29 +728,36 @@ export class MISPConnector extends EventEmitter {
       this.emit('feed_update_failed', {
         feedId,
         error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date()
+        timestamp: new Date(),
       });
       throw error;
     }
   }
 
-  async exportEvent(eventId: string, format: 'json' | 'xml' | 'stix'): Promise<string> {
-    const response = await this.makeRequest(`/events/view/${eventId}.${format}`);
+  async exportEvent(
+    eventId: string,
+    format: 'json' | 'xml' | 'stix',
+  ): Promise<string> {
+    const response = await this.makeRequest(
+      `/events/view/${eventId}.${format}`,
+    );
 
     this.emit('event_exported', {
       eventId,
       format,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return typeof response === 'string' ? response : JSON.stringify(response);
   }
 
-  async bulkImport(events: MISPEvent[]): Promise<{ success: number; failed: number; errors: string[] }> {
+  async bulkImport(
+    events: MISPEvent[],
+  ): Promise<{ success: number; failed: number; errors: string[] }> {
     const results = {
       success: 0,
       failed: 0,
-      errors: [] as string[]
+      errors: [] as string[],
     };
 
     for (const event of events) {
@@ -680,7 +766,9 @@ export class MISPConnector extends EventEmitter {
         results.success++;
       } catch (error) {
         results.failed++;
-        results.errors.push(error instanceof Error ? error.message : 'Unknown error');
+        results.errors.push(
+          error instanceof Error ? error.message : 'Unknown error',
+        );
       }
     }
 
@@ -688,7 +776,7 @@ export class MISPConnector extends EventEmitter {
       totalEvents: events.length,
       successful: results.success,
       failed: results.failed,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     return results;
@@ -710,7 +798,7 @@ export class MISPConnector extends EventEmitter {
     this.enrichmentCache.clear();
 
     this.emit('cache_cleared', {
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
@@ -720,7 +808,7 @@ export class MISPConnector extends EventEmitter {
 
       this.emit('connection_tested', {
         success: true,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       return true;
@@ -728,7 +816,7 @@ export class MISPConnector extends EventEmitter {
       this.emit('connection_tested', {
         success: false,
         error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       return false;

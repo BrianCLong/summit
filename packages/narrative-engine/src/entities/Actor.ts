@@ -73,7 +73,7 @@ export class Actor {
 
   getRelationships(): Relationship[] {
     return Array.from(this.relationships.values()).map((relationship) =>
-      relationship.clone()
+      relationship.clone(),
     );
   }
 

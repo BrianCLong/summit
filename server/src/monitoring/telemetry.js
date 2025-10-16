@@ -4,9 +4,13 @@
  */
 
 const { NodeSDK } = require('@opentelemetry/sdk-node');
-const { getNodeAutoInstrumentations } = require('@opentelemetry/auto-instrumentations-node');
+const {
+  getNodeAutoInstrumentations,
+} = require('@opentelemetry/auto-instrumentations-node');
 const { Resource } = require('@opentelemetry/resources');
-const { SemanticResourceAttributes } = require('@opentelemetry/semantic-conventions');
+const {
+  SemanticResourceAttributes,
+} = require('@opentelemetry/semantic-conventions');
 const { JaegerExporter } = require('@opentelemetry/exporter-jaeger');
 const { PrometheusExporter } = require('@opentelemetry/exporter-prometheus');
 const { PeriodicExportingMetricReader } = require('@opentelemetry/sdk-metrics');
@@ -23,9 +27,10 @@ class TelemetryService {
       serviceName: process.env.OTEL_SERVICE_NAME || 'intelgraph-api',
       serviceVersion: process.env.OTEL_SERVICE_VERSION || '1.0.0',
       environment: process.env.NODE_ENV || 'development',
-      jaegerEndpoint: process.env.JAEGER_ENDPOINT || 'http://localhost:14268/api/traces',
+      jaegerEndpoint:
+        process.env.JAEGER_ENDPOINT || 'http://localhost:14268/api/traces',
       prometheusPort: parseInt(process.env.PROMETHEUS_PORT) || 9464,
-      enabled: process.env.OTEL_ENABLED !== '0'
+      enabled: process.env.OTEL_ENABLED !== '0',
     };
 
     this.userPathCounter = null;
@@ -47,8 +52,10 @@ class TelemetryService {
       // Resource configuration
       const resource = new Resource({
         [SemanticResourceAttributes.SERVICE_NAME]: this.config.serviceName,
-        [SemanticResourceAttributes.SERVICE_VERSION]: this.config.serviceVersion,
-        [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]: this.config.environment,
+        [SemanticResourceAttributes.SERVICE_VERSION]:
+          this.config.serviceVersion,
+        [SemanticResourceAttributes.DEPLOYMENT_ENVIRONMENT]:
+          this.config.environment,
       });
 
       // Jaeger exporter for traces
@@ -59,7 +66,7 @@ class TelemetryService {
       // Prometheus exporter for metrics
       const prometheusExporter = new PrometheusExporter({
         port: this.config.prometheusPort,
-        preventServerStart: false
+        preventServerStart: false,
       });
 
       // Initialize SDK
@@ -68,7 +75,7 @@ class TelemetryService {
         traceExporter: jaegerExporter,
         metricReader: new PeriodicExportingMetricReader({
           exporter: prometheusExporter,
-          exportIntervalMillis: 10000
+          exportIntervalMillis: 10000,
         }),
         instrumentations: [
           getNodeAutoInstrumentations({
@@ -84,8 +91,10 @@ class TelemetryService {
               enabled: true,
               ignoreIncomingRequestHook: (req) => {
                 // Ignore health checks and metrics endpoints
-                return req.url?.includes('/health') || req.url?.includes('/metrics');
-              }
+                return (
+                  req.url?.includes('/health') || req.url?.includes('/metrics')
+                );
+              },
             },
             // Configure Express instrumentation
             '@opentelemetry/instrumentation-express': {
@@ -95,36 +104,51 @@ class TelemetryService {
             '@opentelemetry/instrumentation-graphql': {
               enabled: true,
               depth: 10,
-              allowValues: process.env.NODE_ENV === 'development'
+              allowValues: process.env.NODE_ENV === 'development',
             },
             // Configure database instrumentations
             '@opentelemetry/instrumentation-redis': {
               enabled: true,
-            }
+            },
           }),
         ],
       });
 
       this.sdk.start();
-      this.tracer = trace.getTracer(this.config.serviceName, this.config.serviceVersion);
+      this.tracer = trace.getTracer(
+        this.config.serviceName,
+        this.config.serviceVersion,
+      );
       this.initialized = true;
 
-      this.userPathCounter = this.createCounter('user_path', 'User navigation between nodes');
-      this.clickCounter = this.createCounter('clickstream', 'User click events');
-      this.dwellHistogram = this.createHistogram('dwell_time', 'Time spent on nodes', 'ms');
-      this.aiInteractionCounter = this.createCounter('ai_interactions', 'AI model interactions');
+      this.userPathCounter = this.createCounter(
+        'user_path',
+        'User navigation between nodes',
+      );
+      this.clickCounter = this.createCounter(
+        'clickstream',
+        'User click events',
+      );
+      this.dwellHistogram = this.createHistogram(
+        'dwell_time',
+        'Time spent on nodes',
+        'ms',
+      );
+      this.aiInteractionCounter = this.createCounter(
+        'ai_interactions',
+        'AI model interactions',
+      );
 
       logger.info('OpenTelemetry initialized', {
         serviceName: this.config.serviceName,
         serviceVersion: this.config.serviceVersion,
         environment: this.config.environment,
         jaegerEndpoint: this.config.jaegerEndpoint,
-        prometheusPort: this.config.prometheusPort
+        prometheusPort: this.config.prometheusPort,
       });
-
     } catch (error) {
       logger.error('Failed to initialize OpenTelemetry', {
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -139,7 +163,7 @@ class TelemetryService {
         logger.info('OpenTelemetry SDK shutdown completed');
       } catch (error) {
         logger.error('Error shutting down OpenTelemetry SDK', {
-          error: error.message
+          error: error.message,
         });
       }
     }
@@ -155,7 +179,7 @@ class TelemetryService {
         setStatus: () => {},
         setAttributes: () => {},
         addEvent: () => {},
-        recordException: () => {}
+        recordException: () => {},
       };
     }
 
@@ -167,19 +191,22 @@ class TelemetryService {
    */
   async traceAsync(name, fn, options = {}) {
     const span = this.startSpan(name, options);
-    
+
     try {
-      const result = await context.with(trace.setSpan(context.active(), span), async () => {
-        return await fn(span);
-      });
-      
+      const result = await context.with(
+        trace.setSpan(context.active(), span),
+        async () => {
+          return await fn(span);
+        },
+      );
+
       span.setStatus({ code: SpanStatusCode.OK });
       return result;
     } catch (error) {
       span.recordException(error);
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: error.message
+        message: error.message,
       });
       throw error;
     } finally {
@@ -192,19 +219,19 @@ class TelemetryService {
    */
   traceSync(name, fn, options = {}) {
     const span = this.startSpan(name, options);
-    
+
     try {
       const result = context.with(trace.setSpan(context.active(), span), () => {
         return fn(span);
       });
-      
+
       span.setStatus({ code: SpanStatusCode.OK });
       return result;
     } catch (error) {
       span.recordException(error);
       span.setStatus({
         code: SpanStatusCode.ERROR,
-        message: error.message
+        message: error.message,
       });
       throw error;
     } finally {
@@ -221,31 +248,34 @@ class TelemetryService {
         return next();
       }
 
-      const span = this.startSpan(`${req.method} ${req.route?.path || req.path}`, {
-        kind: 1, // SpanKind.SERVER
-        attributes: {
-          'http.method': req.method,
-          'http.url': req.url,
-          'http.route': req.route?.path,
-          'user.id': req.user?.id,
-          'http.user_agent': req.get('User-Agent')
-        }
-      });
+      const span = this.startSpan(
+        `${req.method} ${req.route?.path || req.path}`,
+        {
+          kind: 1, // SpanKind.SERVER
+          attributes: {
+            'http.method': req.method,
+            'http.url': req.url,
+            'http.route': req.route?.path,
+            'user.id': req.user?.id,
+            'http.user_agent': req.get('User-Agent'),
+          },
+        },
+      );
 
       // Store span in request for access in resolvers
       req.span = span;
 
       const originalEnd = res.end;
-      res.end = function(...args) {
+      res.end = function (...args) {
         span.setAttributes({
           'http.status_code': res.statusCode,
-          'http.response_size': res.get('content-length')
+          'http.response_size': res.get('content-length'),
         });
 
         if (res.statusCode >= 400) {
           span.setStatus({
             code: SpanStatusCode.ERROR,
-            message: `HTTP ${res.statusCode}`
+            message: `HTTP ${res.statusCode}`,
           });
         } else {
           span.setStatus({ code: SpanStatusCode.OK });
@@ -278,20 +308,20 @@ class TelemetryService {
             'graphql.operation.type': operationType,
             'graphql.field.name': fieldName,
             'graphql.operation.name': info.operation.name?.value,
-            'user.id': context.user?.id
+            'user.id': context.user?.id,
           });
 
           const result = await originalResolver(parent, args, context, info);
-          
+
           // Add result metadata if available
           if (result && typeof result === 'object') {
             if (Array.isArray(result)) {
               span.setAttributes({
-                'graphql.result.count': result.length
+                'graphql.result.count': result.length,
               });
             } else if (result.success !== undefined) {
               span.setAttributes({
-                'graphql.result.success': result.success
+                'graphql.result.success': result.success,
               });
             }
           }
@@ -309,8 +339,9 @@ class TelemetryService {
     return this.traceAsync(`db.${operationType}`, async (span) => {
       span.setAttributes({
         'db.operation': operationType,
-        'db.statement': typeof query === 'string' ? query : JSON.stringify(query),
-        'db.system': 'neo4j'
+        'db.statement':
+          typeof query === 'string' ? query : JSON.stringify(query),
+        'db.system': 'neo4j',
       });
 
       // The actual database operation should be performed by the caller
@@ -331,7 +362,12 @@ class TelemetryService {
   }
 
   recordAiInteraction(userId, model, confidence, overridden = false) {
-    this.aiInteractionCounter?.add(1, { userId, model, confidence, overridden });
+    this.aiInteractionCounter?.add(1, {
+      userId,
+      model,
+      confidence,
+      overridden,
+    });
   }
 
   /**
@@ -341,12 +377,15 @@ class TelemetryService {
     if (!this.initialized) {
       return {
         add: () => {},
-        bind: () => ({ add: () => {} })
+        bind: () => ({ add: () => {} }),
       };
     }
 
     const { metrics } = require('@opentelemetry/api');
-    const meter = metrics.getMeter(this.config.serviceName, this.config.serviceVersion);
+    const meter = metrics.getMeter(
+      this.config.serviceName,
+      this.config.serviceVersion,
+    );
     return meter.createCounter(name, { description, unit });
   }
 
@@ -354,12 +393,15 @@ class TelemetryService {
     if (!this.initialized) {
       return {
         record: () => {},
-        bind: () => ({ record: () => {} })
+        bind: () => ({ record: () => {} }),
       };
     }
 
     const { metrics } = require('@opentelemetry/api');
-    const meter = metrics.getMeter(this.config.serviceName, this.config.serviceVersion);
+    const meter = metrics.getMeter(
+      this.config.serviceName,
+      this.config.serviceVersion,
+    );
     return meter.createHistogram(name, { description, unit });
   }
 
@@ -367,12 +409,15 @@ class TelemetryService {
     if (!this.initialized) {
       return {
         record: () => {},
-        bind: () => ({ record: () => {} })
+        bind: () => ({ record: () => {} }),
       };
     }
 
     const { metrics } = require('@opentelemetry/api');
-    const meter = metrics.getMeter(this.config.serviceName, this.config.serviceVersion);
+    const meter = metrics.getMeter(
+      this.config.serviceName,
+      this.config.serviceVersion,
+    );
     return meter.createUpDownCounter(name, { description, unit });
   }
 
@@ -387,8 +432,8 @@ class TelemetryService {
         serviceName: this.config.serviceName,
         serviceVersion: this.config.serviceVersion,
         environment: this.config.environment,
-        enabled: this.config.enabled
-      }
+        enabled: this.config.enabled,
+      },
     };
   }
 }

@@ -74,17 +74,18 @@ interface VerificationResult {
 
 const SLSA3ConfigSchema = z.object({
   enabled: z.boolean().default(true),
-  trustedBuilders: z.array(z.string()).default([
-    'https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml',
-    'https://github.com/intelgraph/build-system/.github/workflows/federal-build.yml',
-  ]),
+  trustedBuilders: z
+    .array(z.string())
+    .default([
+      'https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml',
+      'https://github.com/intelgraph/build-system/.github/workflows/federal-build.yml',
+    ]),
   trustedKeys: z.array(z.string()).default([]), // Public keys for signature verification
   requireHermetic: z.boolean().default(true),
   requireReproducible: z.boolean().default(false), // SLSA-4 requirement
-  allowedSources: z.array(z.string()).default([
-    'github.com/intelgraph/',
-    'github.com/anthropic/',
-  ]),
+  allowedSources: z
+    .array(z.string())
+    .default(['github.com/intelgraph/', 'github.com/anthropic/']),
   maxAge: z.number().default(86400 * 30), // 30 days max age for provenance
 });
 
@@ -111,14 +112,20 @@ export class SLSA3Verifier {
         try {
           const keyData = await fs.readFile(keyPath, 'utf8');
           const keyObject = crypto.createPublicKey(keyData);
-          const keyId = crypto.createHash('sha256').update(keyData).digest('hex').substring(0, 16);
+          const keyId = crypto
+            .createHash('sha256')
+            .update(keyData)
+            .digest('hex')
+            .substring(0, 16);
           this.trustedKeyCache.set(keyId, keyObject);
         } catch (error) {
           console.warn(`Failed to load trusted key ${keyPath}:`, error);
         }
       }
-      
-      console.log(`✅ Loaded ${this.trustedKeyCache.size} trusted SLSA verification keys`);
+
+      console.log(
+        `✅ Loaded ${this.trustedKeyCache.size} trusted SLSA verification keys`,
+      );
     } catch (error) {
       console.error('Failed to load trusted keys:', error);
     }
@@ -127,10 +134,16 @@ export class SLSA3Verifier {
   /**
    * Verify SHA256 hash of artifact
    */
-  private async verifySHA256(filePath: string, expectedHex: string): Promise<boolean> {
+  private async verifySHA256(
+    filePath: string,
+    expectedHex: string,
+  ): Promise<boolean> {
     try {
       const fileData = await fs.readFile(filePath);
-      const actualHex = crypto.createHash('sha256').update(fileData).digest('hex');
+      const actualHex = crypto
+        .createHash('sha256')
+        .update(fileData)
+        .digest('hex');
       return actualHex === expectedHex.toLowerCase();
     } catch (error) {
       console.error(`SHA256 verification failed for ${filePath}:`, error);
@@ -141,7 +154,10 @@ export class SLSA3Verifier {
   /**
    * Verify SLSA v1.0 provenance format and structure
    */
-  private verifyProvenanceFormat(provenance: any): { valid: boolean; errors: string[] } {
+  private verifyProvenanceFormat(provenance: any): {
+    valid: boolean;
+    errors: string[];
+  } {
     const errors: string[] = [];
 
     // Check required fields
@@ -168,7 +184,7 @@ export class SLSA3Verifier {
     // Check timestamps
     const startedOn = provenance.predicate?.runDetails?.metadata?.startedOn;
     const finishedOn = provenance.predicate?.runDetails?.metadata?.finishedOn;
-    
+
     if (startedOn) {
       try {
         const startTime = new Date(startedOn);
@@ -200,21 +216,28 @@ export class SLSA3Verifier {
    * Verify builder is in trusted list
    */
   private verifyBuilderTrust(builderId: string): boolean {
-    return this.config.trustedBuilders.some(trusted => 
-      builderId === trusted || builderId.startsWith(trusted.replace(/\*$/, ''))
+    return this.config.trustedBuilders.some(
+      (trusted) =>
+        builderId === trusted ||
+        builderId.startsWith(trusted.replace(/\*$/, '')),
     );
   }
 
   /**
    * Verify source repository is allowed
    */
-  private verifySourceIntegrity(provenance: SLSA3Provenance): { valid: boolean; errors: string[] } {
+  private verifySourceIntegrity(provenance: SLSA3Provenance): {
+    valid: boolean;
+    errors: string[];
+  } {
     const errors: string[] = [];
 
     // Check if source URI is in allowed list
-    const resolvedDeps = provenance.predicate?.buildDefinition?.resolvedDependencies || [];
-    const sourceRepos = resolvedDeps.filter(dep => 
-      dep.uri?.includes('github.com') || dep.uri?.includes('gitlab.com')
+    const resolvedDeps =
+      provenance.predicate?.buildDefinition?.resolvedDependencies || [];
+    const sourceRepos = resolvedDeps.filter(
+      (dep) =>
+        dep.uri?.includes('github.com') || dep.uri?.includes('gitlab.com'),
     );
 
     if (sourceRepos.length === 0) {
@@ -223,10 +246,10 @@ export class SLSA3Verifier {
     }
 
     for (const repo of sourceRepos) {
-      const allowed = this.config.allowedSources.some(allowed => 
-        repo.uri.includes(allowed)
+      const allowed = this.config.allowedSources.some((allowed) =>
+        repo.uri.includes(allowed),
       );
-      
+
       if (!allowed) {
         errors.push(`Source repository not allowed: ${repo.uri}`);
       }
@@ -245,7 +268,7 @@ export class SLSA3Verifier {
    */
   private checkHermeticBuild(provenance: SLSA3Provenance): boolean {
     const buildType = provenance.predicate?.buildDefinition?.buildType || '';
-    
+
     // Common indicators of hermetic builds
     const hermeticIndicators = [
       'hermetic',
@@ -254,17 +277,19 @@ export class SLSA3Verifier {
       'github-actions', // GitHub Actions provides some isolation
     ];
 
-    const isHermetic = hermeticIndicators.some(indicator => 
-      buildType.toLowerCase().includes(indicator)
+    const isHermetic = hermeticIndicators.some((indicator) =>
+      buildType.toLowerCase().includes(indicator),
     );
 
     // Additional checks for hermetic build
-    const externalParams = provenance.predicate?.buildDefinition?.externalParameters || {};
-    
+    const externalParams =
+      provenance.predicate?.buildDefinition?.externalParameters || {};
+
     // Check for network access restrictions
-    const hasNetworkRestrictions = externalParams.network === 'none' || 
-                                  externalParams.isolated === true ||
-                                  externalParams.hermetic === true;
+    const hasNetworkRestrictions =
+      externalParams.network === 'none' ||
+      externalParams.isolated === true ||
+      externalParams.hermetic === true;
 
     return isHermetic || hasNetworkRestrictions;
   }
@@ -272,10 +297,15 @@ export class SLSA3Verifier {
   /**
    * Verify DSSE envelope signatures
    */
-  private async verifySignatures(bundle: SLSA3Bundle): Promise<{ valid: boolean; errors: string[] }> {
+  private async verifySignatures(
+    bundle: SLSA3Bundle,
+  ): Promise<{ valid: boolean; errors: string[] }> {
     const errors: string[] = [];
 
-    if (!bundle.dsseEnvelope?.signatures || bundle.dsseEnvelope.signatures.length === 0) {
+    if (
+      !bundle.dsseEnvelope?.signatures ||
+      bundle.dsseEnvelope.signatures.length === 0
+    ) {
       errors.push('No signatures found in DSSE envelope');
       return { valid: false, errors };
     }
@@ -297,24 +327,30 @@ export class SLSA3Verifier {
         }
 
         const signatureBuffer = Buffer.from(signature.sig, 'base64');
-        
+
         // Verify signature against PAE
-        const isValid = crypto.verify('sha256', pae, publicKey, signatureBuffer);
-        
+        const isValid = crypto.verify(
+          'sha256',
+          pae,
+          publicKey,
+          signatureBuffer,
+        );
+
         if (isValid) {
           validSignatures++;
         } else {
           errors.push(`Invalid signature for key: ${signature.keyid}`);
         }
-
       } catch (error: any) {
-        errors.push(`Signature verification failed for ${signature.keyid}: ${error.message}`);
+        errors.push(
+          `Signature verification failed for ${signature.keyid}: ${error.message}`,
+        );
       }
     }
 
     // Require at least one valid signature
     const valid = validSignatures > 0;
-    
+
     if (!valid && validSignatures === 0) {
       errors.push('No valid signatures found');
     }
@@ -338,16 +374,19 @@ export class SLSA3Verifier {
       Buffer.from(' ', 'utf8'),
       Buffer.from(payload, 'utf8'),
     ];
-    
+
     return Buffer.concat(parts);
   }
 
   /**
    * Verify complete SLSA-3 provenance bundle
    */
-  async verifyProvenance(bundlePath: string, artifactPath: string): Promise<VerificationResult> {
+  async verifyProvenance(
+    bundlePath: string,
+    artifactPath: string,
+  ): Promise<VerificationResult> {
     const span = otelService.createSpan('slsa3.verify_provenance');
-    
+
     try {
       if (!this.config.enabled) {
         return {
@@ -389,18 +428,25 @@ export class SLSA3Verifier {
         const bundleData = await fs.readFile(bundlePath, 'utf8');
         bundle = JSON.parse(bundleData);
       } catch (error: any) {
-        result.errors.push(`Failed to parse provenance bundle: ${error.message}`);
+        result.errors.push(
+          `Failed to parse provenance bundle: ${error.message}`,
+        );
         return result;
       }
 
       // Decode and parse provenance
       let provenance: SLSA3Provenance;
       try {
-        const payloadJson = Buffer.from(bundle.dsseEnvelope.payload, 'base64').toString('utf8');
+        const payloadJson = Buffer.from(
+          bundle.dsseEnvelope.payload,
+          'base64',
+        ).toString('utf8');
         provenance = JSON.parse(payloadJson);
         result.provenance = provenance;
       } catch (error: any) {
-        result.errors.push(`Failed to decode provenance payload: ${error.message}`);
+        result.errors.push(
+          `Failed to decode provenance payload: ${error.message}`,
+        );
         return result;
       }
 
@@ -440,9 +486,14 @@ export class SLSA3Verifier {
       if (provenance.subject && provenance.subject.length > 0) {
         const subject = provenance.subject[0];
         if (subject.digest?.sha256) {
-          const hashMatch = await this.verifySHA256(artifactPath, subject.digest.sha256);
+          const hashMatch = await this.verifySHA256(
+            artifactPath,
+            subject.digest.sha256,
+          );
           if (!hashMatch) {
-            result.errors.push('Artifact SHA256 hash does not match provenance');
+            result.errors.push(
+              'Artifact SHA256 hash does not match provenance',
+            );
           }
         } else {
           result.errors.push('Missing SHA256 hash in provenance subject');
@@ -454,18 +505,26 @@ export class SLSA3Verifier {
         // This would require additional verification of reproducible builds
         // For now, check if byproducts include reproducibility attestation
         const byproducts = provenance.predicate?.runDetails?.byproducts || [];
-        const hasReproducibilityAttestation = byproducts.some(bp => 
-          bp.name?.includes('reproducibility') || bp.name?.includes('rebuild')
+        const hasReproducibilityAttestation = byproducts.some(
+          (bp) =>
+            bp.name?.includes('reproducibility') ||
+            bp.name?.includes('rebuild'),
         );
         result.checks.reproduced = hasReproducibilityAttestation;
-        
+
         if (!result.checks.reproduced) {
-          result.warnings.push('No reproducibility attestation found (required for SLSA-4)');
+          result.warnings.push(
+            'No reproducibility attestation found (required for SLSA-4)',
+          );
         }
       }
 
       // Determine SLSA level achieved
-      if (result.checks.formatValid && result.checks.signatureValid && result.checks.builderTrusted) {
+      if (
+        result.checks.formatValid &&
+        result.checks.signatureValid &&
+        result.checks.builderTrusted
+      ) {
         if (result.checks.sourceIntegrity && result.checks.hermetic) {
           if (result.checks.reproduced) {
             result.level = 'SLSA_4';
@@ -480,9 +539,10 @@ export class SLSA3Verifier {
       }
 
       // Overall validity
-      result.valid = result.errors.length === 0 && 
-                    result.level !== 'SLSA_0' &&
-                    (result.level === 'SLSA_3' || result.level === 'SLSA_4');
+      result.valid =
+        result.errors.length === 0 &&
+        result.level !== 'SLSA_0' &&
+        (result.level === 'SLSA_3' || result.level === 'SLSA_4');
 
       otelService.addSpanAttributes({
         'slsa3.valid': result.valid,
@@ -492,14 +552,15 @@ export class SLSA3Verifier {
         'slsa3.warning_count': result.warnings.length,
       });
 
-      console.log(`SLSA verification result: ${result.level} (${result.valid ? 'VALID' : 'INVALID'})`);
+      console.log(
+        `SLSA verification result: ${result.level} (${result.valid ? 'VALID' : 'INVALID'})`,
+      );
       return result;
-
     } catch (error: any) {
       console.error('SLSA-3 verification failed:', error);
       otelService.recordException(error);
       span.setStatus({ code: 2, message: error.message });
-      
+
       return {
         valid: false,
         level: 'SLSA_0',
@@ -523,11 +584,13 @@ export class SLSA3Verifier {
   /**
    * Batch verify multiple artifacts with their provenance
    */
-  async verifyBatch(artifacts: Array<{
-    artifactPath: string;
-    provenancePath: string;
-    name: string;
-  }>): Promise<{
+  async verifyBatch(
+    artifacts: Array<{
+      artifactPath: string;
+      provenancePath: string;
+      name: string;
+    }>,
+  ): Promise<{
     overallValid: boolean;
     results: Array<{ name: string; result: VerificationResult }>;
     summary: {
@@ -545,9 +608,12 @@ export class SLSA3Verifier {
 
     for (const artifact of artifacts) {
       try {
-        const result = await this.verifyProvenance(artifact.provenancePath, artifact.artifactPath);
+        const result = await this.verifyProvenance(
+          artifact.provenancePath,
+          artifact.artifactPath,
+        );
         results.push({ name: artifact.name, result });
-        
+
         if (result.valid) {
           validCount++;
           if (result.level === 'SLSA_3') slsa3Count++;
@@ -570,7 +636,7 @@ export class SLSA3Verifier {
             },
             errors: [error.message],
             warnings: [],
-          }
+          },
         });
       }
     }
@@ -591,7 +657,9 @@ export class SLSA3Verifier {
   /**
    * Generate verification report for compliance
    */
-  generateComplianceReport(results: Array<{ name: string; result: VerificationResult }>): {
+  generateComplianceReport(
+    results: Array<{ name: string; result: VerificationResult }>,
+  ): {
     timestamp: Date;
     overallCompliance: 'COMPLIANT' | 'NON_COMPLIANT';
     minLevel: string;
@@ -611,24 +679,34 @@ export class SLSA3Verifier {
       issues: result.errors,
     }));
 
-    const levels = results.map(r => r.result.level).filter(l => l !== 'SLSA_0');
+    const levels = results
+      .map((r) => r.result.level)
+      .filter((l) => l !== 'SLSA_0');
     const minLevel = levels.length > 0 ? levels.sort()[0] : 'SLSA_0';
     const maxLevel = levels.length > 0 ? levels.sort().reverse()[0] : 'SLSA_0';
 
-    const overallCompliance = artifacts.every(a => a.compliant) ? 'COMPLIANT' : 'NON_COMPLIANT';
+    const overallCompliance = artifacts.every((a) => a.compliant)
+      ? 'COMPLIANT'
+      : 'NON_COMPLIANT';
 
     const recommendations: string[] = [];
-    
+
     if (overallCompliance === 'NON_COMPLIANT') {
-      recommendations.push('Resolve all provenance verification failures before deployment');
+      recommendations.push(
+        'Resolve all provenance verification failures before deployment',
+      );
     }
-    
+
     if (minLevel !== 'SLSA_3' && minLevel !== 'SLSA_4') {
-      recommendations.push('Upgrade build system to achieve SLSA-3 minimum level');
+      recommendations.push(
+        'Upgrade build system to achieve SLSA-3 minimum level',
+      );
     }
-    
-    if (!results.every(r => r.result.checks.hermetic)) {
-      recommendations.push('Ensure all builds are hermetic for improved supply chain security');
+
+    if (!results.every((r) => r.result.checks.hermetic)) {
+      recommendations.push(
+        'Ensure all builds are hermetic for improved supply chain security',
+      );
     }
 
     return {

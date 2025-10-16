@@ -5,6 +5,7 @@
 **Escalation:** Database specialist required
 
 ## 🔍 Symptoms
+
 - Database query timeouts on specific tables
 - Uneven CPU/memory usage across database nodes
 - Specific tenant experiencing degraded performance
@@ -13,6 +14,7 @@
 ## ⚡ Immediate Assessment (0-5 minutes)
 
 ### 1. Identify Hot Partition
+
 ```bash
 # PostgreSQL hot partition detection
 kubectl exec -n intelgraph-prod deployment/postgres -- psql -U postgres -d intelgraph -c "
@@ -37,6 +39,7 @@ ORDER BY data.nodes DESC;"
 ```
 
 ### 2. Check Resource Utilization
+
 ```bash
 # Database CPU/Memory per pod
 kubectl top pods -n intelgraph-prod -l app=postgres --containers
@@ -47,6 +50,7 @@ curl -s "http://prometheus.intelgraph-prod.svc.cluster.local:9090/api/v1/query?q
 ```
 
 ### 3. Identify Tenant/Query Patterns
+
 ```bash
 # Check application logs for slow queries
 kubectl logs -n intelgraph-prod deployment/intelgraph --tail=100 | grep -i "slow\|timeout\|deadlock"
@@ -63,6 +67,7 @@ WHERE (now() - pg_stat_activity.query_start) > interval '5 minutes';"
 ### PostgreSQL Hot Partition
 
 #### 1. Query Optimization (5-10 minutes)
+
 ```bash
 # Terminate long-running queries
 kubectl exec -n intelgraph-prod deployment/postgres -- psql -U postgres -d intelgraph -c "
@@ -79,6 +84,7 @@ ANALYZE investigations;"
 ```
 
 #### 2. Connection Pool Management
+
 ```bash
 # Check connection pool status
 kubectl exec -n intelgraph-prod deployment/intelgraph -- curl -s http://localhost:3000/admin/db-pool-status
@@ -88,6 +94,7 @@ kubectl exec -n intelgraph-prod deployment/intelgraph -- curl -X POST http://loc
 ```
 
 #### 3. Temporary Query Limits
+
 ```bash
 # Apply temporary query timeouts
 kubectl exec -n intelgraph-prod deployment/postgres -- psql -U postgres -d intelgraph -c "
@@ -98,6 +105,7 @@ SET lock_timeout = '10s';"
 ### Neo4j Hot Node
 
 #### 1. Cypher Query Optimization
+
 ```bash
 # Kill expensive queries
 kubectl exec -n intelgraph-prod deployment/neo4j -- cypher-shell "
@@ -108,6 +116,7 @@ RETURN killed;"
 ```
 
 #### 2. Cache Management
+
 ```bash
 # Clear query cache for problematic queries
 kubectl exec -n intelgraph-prod deployment/neo4j -- cypher-shell "
@@ -121,6 +130,7 @@ CALL db.index.fulltext.awaitEventuallyConsistentIndexRefresh();"
 ### Application-Level Mitigation (10-15 minutes)
 
 #### 1. Circuit Breaker Activation
+
 ```bash
 # Enable circuit breakers for expensive operations
 kubectl exec -n intelgraph-prod deployment/intelgraph -- curl -X POST \
@@ -129,6 +139,7 @@ kubectl exec -n intelgraph-prod deployment/intelgraph -- curl -X POST \
 ```
 
 #### 2. Rate Limiting
+
 ```bash
 # Apply temporary rate limiting to affected endpoints
 kubectl patch deployment intelgraph -n intelgraph-prod --patch='
@@ -151,6 +162,7 @@ kubectl patch deployment intelgraph -n intelgraph-prod --patch='
 ```
 
 #### 3. Query Result Caching
+
 ```bash
 # Enable aggressive caching for read operations
 kubectl exec -n intelgraph-prod deployment/redis -- redis-cli CONFIG SET maxmemory-policy allkeys-lru
@@ -162,6 +174,7 @@ kubectl exec -n intelgraph-prod deployment/intelgraph -- curl -X POST \
 ## 🔄 Scaling Response (15-20 minutes)
 
 ### Database Scaling
+
 ```bash
 # Scale PostgreSQL read replicas
 kubectl scale deployment postgres-replica --replicas=3 -n intelgraph-prod
@@ -171,6 +184,7 @@ kubectl scale statefulset neo4j --replicas=5 -n intelgraph-prod
 ```
 
 ### Application Scaling
+
 ```bash
 # Scale application pods to distribute load
 kubectl scale deployment intelgraph --replicas=12 -n intelgraph-prod
@@ -210,6 +224,7 @@ watch -n 30 'kubectl top pods -n intelgraph-prod -l app=postgres'
 ## 📈 Long-Term Prevention
 
 ### PostgreSQL Partitioning
+
 ```sql
 -- Implement time-based partitioning for events table
 CREATE TABLE events_2025_09 PARTITION OF events
@@ -221,6 +236,7 @@ FOR VALUES IN ('tenant-1');
 ```
 
 ### Neo4j Optimization
+
 ```cypher
 // Create composite indexes for common query patterns
 CREATE INDEX entity_type_created FOR (e:Entity) ON (e.type, e.createdAt);
@@ -228,6 +244,7 @@ CREATE INDEX relationship_strength FOR ()-[r:RELATED_TO]-() ON (r.strength);
 ```
 
 ### Monitoring Enhancements
+
 ```bash
 # Set up partition-specific alerting
 kubectl apply -f monitoring/alerts/hot-partition-alerts.yml

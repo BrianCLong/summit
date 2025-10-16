@@ -24,32 +24,80 @@ const TARGET_DOMAINS = [
 
 const TEST_URLS = [
   // docs.python.org tests
-  { url: 'https://docs.python.org/3/library/json.html', expected: true, purpose: 'documentation' },
-  { url: 'https://docs.python.org/3/tutorial/', expected: true, purpose: 'research' },
+  {
+    url: 'https://docs.python.org/3/library/json.html',
+    expected: true,
+    purpose: 'documentation',
+  },
+  {
+    url: 'https://docs.python.org/3/tutorial/',
+    expected: true,
+    purpose: 'research',
+  },
 
   // github.com tests
-  { url: 'https://github.com/python/cpython', expected: true, purpose: 'intelligence_analysis' },
-  { url: 'https://github.com/microsoft/vscode/issues', expected: true, purpose: 'research' },
+  {
+    url: 'https://github.com/python/cpython',
+    expected: true,
+    purpose: 'intelligence_analysis',
+  },
+  {
+    url: 'https://github.com/microsoft/vscode/issues',
+    expected: true,
+    purpose: 'research',
+  },
 
   // stackoverflow.com tests
-  { url: 'https://stackoverflow.com/questions/tagged/python', expected: true, purpose: 'research' },
-  { url: 'https://stackoverflow.com/users/login', expected: false, purpose: 'research' }, // Should be blocked by robots.txt
+  {
+    url: 'https://stackoverflow.com/questions/tagged/python',
+    expected: true,
+    purpose: 'research',
+  },
+  {
+    url: 'https://stackoverflow.com/users/login',
+    expected: false,
+    purpose: 'research',
+  }, // Should be blocked by robots.txt
 
   // arxiv.org tests
-  { url: 'https://arxiv.org/abs/2301.00001', expected: true, purpose: 'research' },
-  { url: 'https://arxiv.org/search', expected: true, purpose: 'intelligence_analysis' },
+  {
+    url: 'https://arxiv.org/abs/2301.00001',
+    expected: true,
+    purpose: 'research',
+  },
+  {
+    url: 'https://arxiv.org/search',
+    expected: true,
+    purpose: 'intelligence_analysis',
+  },
 
   // nist.gov tests
   { url: 'https://nist.gov/publications', expected: true, purpose: 'research' },
-  { url: 'https://nist.gov/cybersecurity', expected: true, purpose: 'intelligence_analysis' },
+  {
+    url: 'https://nist.gov/cybersecurity',
+    expected: true,
+    purpose: 'intelligence_analysis',
+  },
 
   // kubernetes.io tests
-  { url: 'https://kubernetes.io/docs/concepts/', expected: true, purpose: 'documentation' },
+  {
+    url: 'https://kubernetes.io/docs/concepts/',
+    expected: true,
+    purpose: 'documentation',
+  },
   { url: 'https://kubernetes.io/blog/', expected: true, purpose: 'research' },
 
   // nodejs.org tests
-  { url: 'https://nodejs.org/api/fs.html', expected: true, purpose: 'documentation' },
-  { url: 'https://nodejs.org/en/download/', expected: true, purpose: 'research' },
+  {
+    url: 'https://nodejs.org/api/fs.html',
+    expected: true,
+    purpose: 'documentation',
+  },
+  {
+    url: 'https://nodejs.org/en/download/',
+    expected: true,
+    purpose: 'research',
+  },
 
   // developer.mozilla.org tests
   {
@@ -57,15 +105,31 @@ const TEST_URLS = [
     expected: true,
     purpose: 'documentation',
   },
-  { url: 'https://developer.mozilla.org/en-US/docs/Web/API', expected: true, purpose: 'research' },
+  {
+    url: 'https://developer.mozilla.org/en-US/docs/Web/API',
+    expected: true,
+    purpose: 'research',
+  },
 
   // wikipedia.org tests
-  { url: 'https://en.wikipedia.org/wiki/Machine_learning', expected: true, purpose: 'research' },
-  { url: 'https://en.wikipedia.org/wiki/Special:Random', expected: false, purpose: 'research' }, // May be rate limited
+  {
+    url: 'https://en.wikipedia.org/wiki/Machine_learning',
+    expected: true,
+    purpose: 'research',
+  },
+  {
+    url: 'https://en.wikipedia.org/wiki/Special:Random',
+    expected: false,
+    purpose: 'research',
+  }, // May be rate limited
 
   // openai.com tests
   { url: 'https://openai.com/research', expected: true, purpose: 'research' },
-  { url: 'https://openai.com/api', expected: true, purpose: 'intelligence_analysis' },
+  {
+    url: 'https://openai.com/api',
+    expected: true,
+    purpose: 'intelligence_analysis',
+  },
 ];
 
 class ComplianceTester {
@@ -189,13 +253,21 @@ class ComplianceTester {
 
       try {
         // Test normal request
-        const normalResult = await this.rateLimiter.checkRateLimit(domain, 'test-tenant', 1);
+        const normalResult = await this.rateLimiter.checkRateLimit(
+          domain,
+          'test-tenant',
+          1,
+        );
         console.log(
           `  ✅ Normal request: ${normalResult.allowed ? 'ALLOWED' : 'DENIED'} (${normalResult.tokensRemaining} tokens remaining)`,
         );
 
         // Test burst allowance
-        const burstResult = await this.rateLimiter.checkRateLimit(domain, 'test-tenant', 5);
+        const burstResult = await this.rateLimiter.checkRateLimit(
+          domain,
+          'test-tenant',
+          5,
+        );
         console.log(
           `  ⚡ Burst request: ${burstResult.allowed ? 'ALLOWED' : 'DENIED'} (${burstResult.tokensRemaining} tokens remaining)`,
         );
@@ -357,8 +429,17 @@ class ComplianceTester {
         url: 'https://thisisnotarealdomain12345.com/',
         shouldFail: true,
       },
-      { name: 'Blocked path', url: 'https://stackoverflow.com/admin', shouldFail: true },
-      { name: 'Empty purpose', url: 'https://docs.python.org/', purpose: '', shouldFail: true },
+      {
+        name: 'Blocked path',
+        url: 'https://stackoverflow.com/admin',
+        shouldFail: true,
+      },
+      {
+        name: 'Empty purpose',
+        url: 'https://docs.python.org/',
+        purpose: '',
+        shouldFail: true,
+      },
     ];
 
     let correctFailures = 0;
@@ -375,7 +456,9 @@ class ComplianceTester {
           'test-tenant',
         );
 
-        const correctlyHandled = scenario.shouldFail ? !result.allowed : result.allowed;
+        const correctlyHandled = scenario.shouldFail
+          ? !result.allowed
+          : result.allowed;
         const status = correctlyHandled ? '✅ CORRECT' : '❌ INCORRECT';
 
         if (correctlyHandled) correctFailures++;
@@ -387,7 +470,9 @@ class ComplianceTester {
           correctFailures++;
           console.log(`  ✅ CORRECT - Exception handled: ${error.message}`);
         } else {
-          console.log(`  ❌ INCORRECT - Unexpected exception: ${error.message}`);
+          console.log(
+            `  ❌ INCORRECT - Unexpected exception: ${error.message}`,
+          );
         }
       }
     }
@@ -417,8 +502,10 @@ class ComplianceTester {
     console.log('='.repeat(50));
 
     for (const result of this.results) {
-      const passRate = result.passRate || (result.passCount / result.totalCount) * 100 || 0;
-      const status = passRate >= 95 ? '✅ PASS' : passRate >= 80 ? '⚠️  WARN' : '❌ FAIL';
+      const passRate =
+        result.passRate || (result.passCount / result.totalCount) * 100 || 0;
+      const status =
+        passRate >= 95 ? '✅ PASS' : passRate >= 80 ? '⚠️  WARN' : '❌ FAIL';
 
       console.log(
         `${result.test.toUpperCase().replace(/_/g, ' ')}: ${status} (${passRate.toFixed(1)}%)`,
@@ -426,20 +513,34 @@ class ComplianceTester {
     }
 
     // Calculate overall success
-    const robotsPass = this.results.find((r) => r.test === 'robots_compliance')?.passRate >= 95;
-    const rateLimitPass = this.results.find((r) => r.test === 'rate_limiting')?.passCount >= 2;
-    const e2ePass = this.results.find((r) => r.test === 'end_to_end_compliance')?.passRate >= 90;
-    const loadPass = this.results.find((r) => r.test === 'concurrent_load')?.successCount >= 4;
-    const errorPass = this.results.find((r) => r.test === 'error_handling')?.correctFailures >= 3;
+    const robotsPass =
+      this.results.find((r) => r.test === 'robots_compliance')?.passRate >= 95;
+    const rateLimitPass =
+      this.results.find((r) => r.test === 'rate_limiting')?.passCount >= 2;
+    const e2ePass =
+      this.results.find((r) => r.test === 'end_to_end_compliance')?.passRate >=
+      90;
+    const loadPass =
+      this.results.find((r) => r.test === 'concurrent_load')?.successCount >= 4;
+    const errorPass =
+      this.results.find((r) => r.test === 'error_handling')?.correctFailures >=
+      3;
 
-    const overallPass = robotsPass && rateLimitPass && e2ePass && loadPass && errorPass;
+    const overallPass =
+      robotsPass && rateLimitPass && e2ePass && loadPass && errorPass;
     summary.overallStatus = overallPass ? 'PASS' : 'FAIL';
 
     console.log('\n🎯 DAY 1 SUCCESS CRITERIA VALIDATION');
     console.log('='.repeat(50));
-    console.log(`✅ Policy Gate Operational: ${robotsPass ? 'PASS' : 'FAIL'} (≥95% compliance)`);
-    console.log(`✅ Rate Limiting Functional: ${rateLimitPass ? 'PASS' : 'FAIL'} (Redis backend)`);
-    console.log(`✅ End-to-End Audit Trail: ${e2ePass ? 'PASS' : 'FAIL'} (100% decisions logged)`);
+    console.log(
+      `✅ Policy Gate Operational: ${robotsPass ? 'PASS' : 'FAIL'} (≥95% compliance)`,
+    );
+    console.log(
+      `✅ Rate Limiting Functional: ${rateLimitPass ? 'PASS' : 'FAIL'} (Redis backend)`,
+    );
+    console.log(
+      `✅ End-to-End Audit Trail: ${e2ePass ? 'PASS' : 'FAIL'} (100% decisions logged)`,
+    );
     console.log(
       `✅ Robots.txt Compliance: ${robotsPass ? 'PASS' : 'FAIL'} (10+ domains validated)`,
     );

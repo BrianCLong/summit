@@ -13,15 +13,17 @@ class ExternalIntegrations {
 
   initializeServices() {
     // Initialize external API services with resilience patterns
-    
+
     // Threat Intelligence API
     this.threatIntelService = apiServiceFactory.createService('threat-intel', {
-      baseURL: process.env.THREAT_INTEL_API_URL || 'https://api.threatintel.example.com',
+      baseURL:
+        process.env.THREAT_INTEL_API_URL ||
+        'https://api.threatintel.example.com',
       timeout: 15000,
       headers: {
-        'Authorization': `Bearer ${process.env.THREAT_INTEL_API_KEY}`,
-        'Accept': 'application/json'
-      }
+        Authorization: `Bearer ${process.env.THREAT_INTEL_API_KEY}`,
+        Accept: 'application/json',
+      },
     });
 
     // GeoLocation API
@@ -30,8 +32,8 @@ class ExternalIntegrations {
       timeout: 10000,
       headers: {
         'X-API-Key': process.env.GEO_API_KEY,
-        'Accept': 'application/json'
-      }
+        Accept: 'application/json',
+      },
     });
 
     // AI/ML Analysis Service
@@ -39,20 +41,25 @@ class ExternalIntegrations {
       baseURL: process.env.AI_API_URL || 'https://api.aianalysis.example.com',
       timeout: 30000,
       headers: {
-        'Authorization': `Bearer ${process.env.AI_API_KEY}`,
-        'Content-Type': 'application/json'
-      }
+        Authorization: `Bearer ${process.env.AI_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
     });
 
     // Entity Resolution Service
-    this.entityResolutionService = apiServiceFactory.createService('entity-resolution', {
-      baseURL: process.env.ENTITY_RESOLUTION_API_URL || 'https://api.entityresolution.example.com',
-      timeout: 20000,
-      headers: {
-        'Authorization': `Bearer ${process.env.ENTITY_RESOLUTION_API_KEY}`,
-        'Accept': 'application/json'
-      }
-    });
+    this.entityResolutionService = apiServiceFactory.createService(
+      'entity-resolution',
+      {
+        baseURL:
+          process.env.ENTITY_RESOLUTION_API_URL ||
+          'https://api.entityresolution.example.com',
+        timeout: 20000,
+        headers: {
+          Authorization: `Bearer ${process.env.ENTITY_RESOLUTION_API_KEY}`,
+          Accept: 'application/json',
+        },
+      },
+    );
 
     this.setupEventHandlers();
   }
@@ -63,10 +70,10 @@ class ExternalIntegrations {
       this.threatIntelService,
       this.geoLocationService,
       this.aiAnalysisService,
-      this.entityResolutionService
+      this.entityResolutionService,
     ];
 
-    services.forEach(service => {
+    services.forEach((service) => {
       service.on('circuitTripped', (data) => {
         logger.warn(`Circuit breaker tripped for ${service.name}`, data);
         this.handleCircuitTripped(service.name, data);
@@ -90,9 +97,9 @@ class ExternalIntegrations {
   async lookupThreatIntelligence(indicator, type = 'ip') {
     try {
       logger.info(`Looking up threat intelligence for ${type}: ${indicator}`);
-      
+
       const response = await this.threatIntelService.get('/lookup', {
-        params: { indicator, type }
+        params: { indicator, type },
       });
 
       return {
@@ -103,12 +110,14 @@ class ExternalIntegrations {
         categories: response.data.categories || [],
         sources: response.data.sources || [],
         last_seen: response.data.last_seen || null,
-        confidence: response.data.confidence || 0
+        confidence: response.data.confidence || 0,
       };
-
     } catch (error) {
-      logger.error(`Threat intelligence lookup failed for ${indicator}:`, error.message);
-      
+      logger.error(
+        `Threat intelligence lookup failed for ${indicator}:`,
+        error.message,
+      );
+
       // Return safe default when service is unavailable
       return {
         indicator,
@@ -120,7 +129,7 @@ class ExternalIntegrations {
         last_seen: null,
         confidence: 0,
         error: error.message,
-        service_available: false
+        service_available: false,
       };
     }
   }
@@ -131,9 +140,9 @@ class ExternalIntegrations {
   async enrichWithGeoLocation(ipAddress) {
     try {
       logger.info(`Enriching IP address with geolocation: ${ipAddress}`);
-      
+
       const response = await this.geoLocationService.get('/geolocate', {
-        params: { ip: ipAddress }
+        params: { ip: ipAddress },
       });
 
       return {
@@ -144,12 +153,14 @@ class ExternalIntegrations {
         coordinates: response.data.coordinates || null,
         timezone: response.data.timezone || null,
         isp: response.data.isp || null,
-        organization: response.data.organization || null
+        organization: response.data.organization || null,
       };
-
     } catch (error) {
-      logger.error(`Geolocation enrichment failed for ${ipAddress}:`, error.message);
-      
+      logger.error(
+        `Geolocation enrichment failed for ${ipAddress}:`,
+        error.message,
+      );
+
       return {
         ip_address: ipAddress,
         country: null,
@@ -160,7 +171,7 @@ class ExternalIntegrations {
         isp: null,
         organization: null,
         error: error.message,
-        service_available: false
+        service_available: false,
       };
     }
   }
@@ -170,13 +181,15 @@ class ExternalIntegrations {
    */
   async analyzeEntityWithAI(entityData, analysisType = 'comprehensive') {
     try {
-      logger.info(`Running AI analysis on entity: ${entityData.id || 'unknown'}`);
-      
+      logger.info(
+        `Running AI analysis on entity: ${entityData.id || 'unknown'}`,
+      );
+
       const response = await this.aiAnalysisService.post('/analyze', {
         entity: entityData,
         analysis_type: analysisType,
         include_relationships: true,
-        include_risk_assessment: true
+        include_risk_assessment: true,
       });
 
       return {
@@ -188,12 +201,11 @@ class ExternalIntegrations {
         relationships: response.data.relationships || [],
         indicators: response.data.indicators || [],
         recommendations: response.data.recommendations || [],
-        processing_time: response.data.processing_time || null
+        processing_time: response.data.processing_time || null,
       };
-
     } catch (error) {
       logger.error(`AI entity analysis failed:`, error.message);
-      
+
       return {
         entity_id: entityData.id,
         analysis_type: analysisType,
@@ -205,7 +217,7 @@ class ExternalIntegrations {
         recommendations: [],
         processing_time: null,
         error: error.message,
-        service_available: false
+        service_available: false,
       };
     }
   }
@@ -215,13 +227,15 @@ class ExternalIntegrations {
    */
   async resolveEntity(entityData) {
     try {
-      logger.info(`Resolving entity: ${entityData.name || entityData.id || 'unknown'}`);
-      
+      logger.info(
+        `Resolving entity: ${entityData.name || entityData.id || 'unknown'}`,
+      );
+
       const response = await this.entityResolutionService.post('/resolve', {
         entity: entityData,
         confidence_threshold: 0.8,
         max_results: 10,
-        include_metadata: true
+        include_metadata: true,
       });
 
       return {
@@ -230,12 +244,11 @@ class ExternalIntegrations {
         confidence_scores: response.data.confidence_scores || {},
         data_sources: response.data.sources || [],
         resolution_time: response.data.resolution_time || null,
-        total_matches: response.data.total_matches || 0
+        total_matches: response.data.total_matches || 0,
       };
-
     } catch (error) {
       logger.error(`Entity resolution failed:`, error.message);
-      
+
       return {
         original_entity: entityData,
         resolved_entities: [],
@@ -244,7 +257,7 @@ class ExternalIntegrations {
         resolution_time: null,
         total_matches: 0,
         error: error.message,
-        service_available: false
+        service_available: false,
       };
     }
   }
@@ -254,29 +267,30 @@ class ExternalIntegrations {
    */
   async batchProcessEntities(entities, processFunction, options = {}) {
     const { maxConcurrency = 5, failFast = false } = options;
-    
+
     try {
-      logger.info(`Batch processing ${entities.length} entities with max concurrency ${maxConcurrency}`);
-      
-      const requests = entities.map(entity => ({
+      logger.info(
+        `Batch processing ${entities.length} entities with max concurrency ${maxConcurrency}`,
+      );
+
+      const requests = entities.map((entity) => ({
         method: 'POST',
         url: '/batch-process',
-        data: { entity, function: processFunction.name }
+        data: { entity, function: processFunction.name },
       }));
 
       const result = await this.aiAnalysisService.batchRequests(requests, {
         maxConcurrency,
-        failFast
+        failFast,
       });
 
       return {
         total: entities.length,
-        successful: result.results.filter(r => r).length,
+        successful: result.results.filter((r) => r).length,
         failed: result.errors.length,
         results: result.results,
-        errors: result.errors
+        errors: result.errors,
       };
-
     } catch (error) {
       logger.error('Batch entity processing failed:', error.message);
       throw error;
@@ -293,17 +307,17 @@ class ExternalIntegrations {
         // Switch to local threat intelligence cache
         logger.info('Switching to local threat intelligence cache');
         break;
-      
+
       case 'geo-location':
         // Use simplified geolocation from IP ranges
         logger.info('Using simplified IP geolocation fallback');
         break;
-      
+
       case 'ai-analysis':
         // Use rule-based analysis instead of AI
         logger.info('Switching to rule-based entity analysis');
         break;
-      
+
       case 'entity-resolution':
         // Use local entity cache for resolution
         logger.info('Using local entity resolution cache');
@@ -312,7 +326,9 @@ class ExternalIntegrations {
   }
 
   handleCircuitReset(serviceName, data) {
-    logger.info(`Service ${serviceName} circuit breaker reset - resuming normal operation`);
+    logger.info(
+      `Service ${serviceName} circuit breaker reset - resuming normal operation`,
+    );
   }
 
   handleRequestFailure(serviceName, data) {
@@ -321,7 +337,7 @@ class ExternalIntegrations {
       url: data.url,
       method: data.method,
       status: data.status,
-      duration: data.duration
+      duration: data.duration,
     });
   }
 
@@ -343,8 +359,13 @@ class ExternalIntegrations {
    * Cleanup resources
    */
   destroy() {
-    const serviceNames = ['threat-intel', 'geo-location', 'ai-analysis', 'entity-resolution'];
-    serviceNames.forEach(name => {
+    const serviceNames = [
+      'threat-intel',
+      'geo-location',
+      'ai-analysis',
+      'entity-resolution',
+    ];
+    serviceNames.forEach((name) => {
       try {
         apiServiceFactory.destroyService(name);
       } catch (error) {
@@ -359,5 +380,5 @@ const externalIntegrations = new ExternalIntegrations();
 
 module.exports = {
   ExternalIntegrations,
-  externalIntegrations
+  externalIntegrations,
 };

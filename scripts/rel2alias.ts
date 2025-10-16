@@ -2,7 +2,9 @@
 import { Project } from 'ts-morph';
 import path from 'path';
 
-const project = new Project({ tsConfigFilePath: path.resolve('tsconfig.json') });
+const project = new Project({
+  tsConfigFilePath: path.resolve('tsconfig.json'),
+});
 const files = project.getSourceFiles([
   'src/**/*.ts',
   'client/src/**/*.ts',
@@ -32,4 +34,3 @@ for (const sf of files) {
 
 project.saveSync();
 console.log('aliases applied');
-

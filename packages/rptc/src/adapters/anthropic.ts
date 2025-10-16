@@ -17,8 +17,14 @@ export class AnthropicAdapter implements LLMAdapter {
     this.defaultSystemPrompt = options.systemPrompt;
   }
 
-  format<TSlots extends SlotSchemaMap>(compiled: CompiledPrompt<TSlots>, options: Record<string, unknown> = {}) {
-    const system = (options.systemPrompt as string | undefined) ?? this.defaultSystemPrompt ?? compiled.description;
+  format<TSlots extends SlotSchemaMap>(
+    compiled: CompiledPrompt<TSlots>,
+    options: Record<string, unknown> = {},
+  ) {
+    const system =
+      (options.systemPrompt as string | undefined) ??
+      this.defaultSystemPrompt ??
+      compiled.description;
     const model = (options.model as string | undefined) ?? this.defaultModel;
 
     return {
@@ -27,14 +33,14 @@ export class AnthropicAdapter implements LLMAdapter {
       messages: [
         {
           role: 'user',
-          content: [{ type: 'text', text: compiled.rendered }]
-        }
+          content: [{ type: 'text', text: compiled.rendered }],
+        },
       ],
       metadata: {
         template: compiled.name,
         slots: compiled.slots,
-        values: compiled.values
-      }
+        values: compiled.values,
+      },
     };
   }
 }

@@ -23,7 +23,13 @@ export async function upsertTrustContract(tc: TrustContract) {
     `INSERT INTO trust_contracts(id, provider, consumer, scope, residency, expires_at, signature)
      VALUES (gen_random_uuid(), $1, $2, $3, $4, $5, $6)
      ON CONFLICT (provider, consumer, signature) DO NOTHING`,
-    [tc.providerTenant, tc.consumerTenant, tc.scope, tc.residency, tc.expiresAt, tc.signature],
+    [
+      tc.providerTenant,
+      tc.consumerTenant,
+      tc.scope,
+      tc.residency,
+      tc.expiresAt,
+      tc.signature,
+    ],
   );
 }
-

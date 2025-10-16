@@ -12,7 +12,11 @@
       "sentiment": -0.4,
       "volatility": 0.7,
       "resilience": 0.3,
-      "themes": { "network propagation": 0.9, "fact-checking": 0.2, "audience resilience": 0.3 },
+      "themes": {
+        "network propagation": 0.9,
+        "fact-checking": 0.2,
+        "audience resilience": 0.3
+      },
       "relationships": [{ "targetId": "swing_audience", "strength": 0.8 }]
     },
     {
@@ -24,7 +28,11 @@
       "sentiment": 0.1,
       "volatility": 0.4,
       "resilience": 0.7,
-      "themes": { "network propagation": 0.5, "fact-checking": 0.9, "audience resilience": 0.6 },
+      "themes": {
+        "network propagation": 0.5,
+        "fact-checking": 0.9,
+        "audience resilience": 0.6
+      },
       "relationships": [{ "targetId": "regional_media_pool", "strength": 0.7 }]
     },
     {
@@ -36,7 +44,11 @@
       "sentiment": -0.05,
       "volatility": 0.5,
       "resilience": 0.5,
-      "themes": { "network propagation": 0.6, "fact-checking": 0.6, "audience resilience": 0.5 },
+      "themes": {
+        "network propagation": 0.6,
+        "fact-checking": 0.6,
+        "audience resilience": 0.5
+      },
       "relationships": []
     },
     {
@@ -48,7 +60,11 @@
       "sentiment": -0.1,
       "volatility": 0.6,
       "resilience": 0.4,
-      "themes": { "network propagation": 0.7, "fact-checking": 0.5, "audience resilience": 0.8 },
+      "themes": {
+        "network propagation": 0.7,
+        "fact-checking": 0.5,
+        "audience resilience": 0.8
+      },
       "relationships": []
     }
   ],
@@ -66,7 +82,9 @@
       "intensity": 1,
       "sentimentShift": -0.35,
       "influenceShift": 0.15,
-      "parameterAdjustments": [{ "name": "misinformation_velocity", "delta": 0.15 }],
+      "parameterAdjustments": [
+        { "name": "misinformation_velocity", "delta": 0.15 }
+      ],
       "description": "Coordinated drop of manipulated videos",
       "scheduledTick": 1
     },
@@ -79,7 +97,9 @@
       "intensity": 0.9,
       "sentimentShift": 0.25,
       "influenceShift": 0.1,
-      "parameterAdjustments": [{ "name": "countermessage_reach", "delta": 0.2 }],
+      "parameterAdjustments": [
+        { "name": "countermessage_reach", "delta": 0.2 }
+      ],
       "description": "Rapid fact-check package deployed",
       "scheduledTick": 2
     },

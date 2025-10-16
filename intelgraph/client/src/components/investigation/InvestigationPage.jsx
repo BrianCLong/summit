@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -14,25 +14,32 @@ import {
   DialogContent,
   DialogActions,
   MenuItem,
-} from '@mui/material'
-import { Add as AddIcon, Search as SearchIcon, Visibility, Edit, AccountTree } from '@mui/icons-material'
-import { useNavigate } from 'react-router-dom'
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  Search as SearchIcon,
+  Visibility,
+  Edit,
+  AccountTree,
+} from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 function InvestigationPage() {
-  const navigate = useNavigate()
-  const [searchTerm, setSearchTerm] = useState('')
-  const [openDialog, setOpenDialog] = useState(false)
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState('');
+  const [openDialog, setOpenDialog] = useState(false);
   const [newInvestigation, setNewInvestigation] = useState({
     title: '',
     description: '',
     priority: 'medium',
-  })
+  });
 
   const investigations = [
     {
       id: 1,
       title: 'Financial Network Analysis',
-      description: 'Investigating suspicious financial transactions across multiple entities',
+      description:
+        'Investigating suspicious financial transactions across multiple entities',
       status: 'active',
       priority: 'high',
       entities: 45,
@@ -43,7 +50,8 @@ function InvestigationPage() {
     {
       id: 2,
       title: 'Supply Chain Investigation',
-      description: 'Analyzing supply chain connections and potential fraud indicators',
+      description:
+        'Analyzing supply chain connections and potential fraud indicators',
       status: 'pending',
       priority: 'medium',
       entities: 78,
@@ -62,53 +70,67 @@ function InvestigationPage() {
       created: '2024-01-08',
       updated: '1 day ago',
     },
-  ]
+  ];
 
   const getStatusColor = (status) => {
     switch (status) {
       case 'active':
-        return 'success'
+        return 'success';
       case 'pending':
-        return 'warning'
+        return 'warning';
       case 'completed':
-        return 'info'
+        return 'info';
       default:
-        return 'default'
+        return 'default';
     }
-  }
+  };
 
   const getPriorityColor = (priority) => {
     switch (priority) {
       case 'high':
-        return 'error'
+        return 'error';
       case 'medium':
-        return 'warning'
+        return 'warning';
       case 'low':
-        return 'info'
+        return 'info';
       default:
-        return 'default'
+        return 'default';
     }
-  }
+  };
 
   const handleCreateInvestigation = () => {
-    console.log('Creating investigation:', newInvestigation)
-    setOpenDialog(false)
-    setNewInvestigation({ title: '', description: '', priority: 'medium' })
-  }
+    console.log('Creating investigation:', newInvestigation);
+    setOpenDialog(false);
+    setNewInvestigation({ title: '', description: '', priority: 'medium' });
+  };
 
   const filteredInvestigations = investigations.filter(
     (investigation) =>
       investigation.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      investigation.description.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+      investigation.description
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase()),
+  );
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 4,
+        }}
+      >
         <Typography variant="h4" component="h1" fontWeight="bold">
           Investigations
         </Typography>
-        <Button variant="contained" startIcon={<AddIcon />} onClick={() => setOpenDialog(true)} size="large">
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => setOpenDialog(true)}
+          size="large"
+        >
           New Investigation
         </Button>
       </Box>
@@ -133,21 +155,48 @@ function InvestigationPage() {
           <Grid item xs={12} md={6} lg={4} key={investigation.id}>
             <Card sx={{ height: '100%' }}>
               <CardContent>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                    mb: 2,
+                  }}
+                >
                   <Typography variant="h6" fontWeight="bold" sx={{ flex: 1 }}>
                     {investigation.title}
                   </Typography>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-                    <Chip label={investigation.status} color={getStatusColor(investigation.status)} size="small" />
-                    <Chip label={investigation.priority} color={getPriorityColor(investigation.priority)} size="small" />
+                  <Box
+                    sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
+                  >
+                    <Chip
+                      label={investigation.status}
+                      color={getStatusColor(investigation.status)}
+                      size="small"
+                    />
+                    <Chip
+                      label={investigation.priority}
+                      color={getPriorityColor(investigation.priority)}
+                      size="small"
+                    />
                   </Box>
                 </Box>
 
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 2 }}
+                >
                   {investigation.description}
                 </Typography>
 
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    mb: 2,
+                  }}
+                >
                   <Typography variant="body2" color="text.secondary">
                     Entities: {investigation.entities}
                   </Typography>
@@ -156,10 +205,19 @@ function InvestigationPage() {
                   </Typography>
                 </Box>
 
-                <Typography variant="caption" color="text.secondary" display="block">
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  display="block"
+                >
                   Created: {investigation.created}
                 </Typography>
-                <Typography variant="caption" color="text.secondary" display="block" sx={{ mb: 2 }}>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  display="block"
+                  sx={{ mb: 2 }}
+                >
                   Updated: {investigation.updated}
                 </Typography>
 
@@ -175,7 +233,11 @@ function InvestigationPage() {
                   <Button variant="text" startIcon={<Edit />} size="small">
                     Edit
                   </Button>
-                  <Button variant="text" startIcon={<AccountTree />} size="small">
+                  <Button
+                    variant="text"
+                    startIcon={<AccountTree />}
+                    size="small"
+                  >
                     Assign
                   </Button>
                 </Box>
@@ -185,14 +247,24 @@ function InvestigationPage() {
         ))}
       </Grid>
 
-      <Dialog open={openDialog} onClose={() => setOpenDialog(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={openDialog}
+        onClose={() => setOpenDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>Create Investigation</DialogTitle>
         <DialogContent>
           <TextField
             fullWidth
             label="Title"
             value={newInvestigation.title}
-            onChange={(event) => setNewInvestigation({ ...newInvestigation, title: event.target.value })}
+            onChange={(event) =>
+              setNewInvestigation({
+                ...newInvestigation,
+                title: event.target.value,
+              })
+            }
             sx={{ mb: 2 }}
           />
           <TextField
@@ -202,7 +274,10 @@ function InvestigationPage() {
             minRows={3}
             value={newInvestigation.description}
             onChange={(event) =>
-              setNewInvestigation({ ...newInvestigation, description: event.target.value })
+              setNewInvestigation({
+                ...newInvestigation,
+                description: event.target.value,
+              })
             }
             sx={{ mb: 2 }}
           />
@@ -211,7 +286,12 @@ function InvestigationPage() {
             fullWidth
             label="Priority"
             value={newInvestigation.priority}
-            onChange={(event) => setNewInvestigation({ ...newInvestigation, priority: event.target.value })}
+            onChange={(event) =>
+              setNewInvestigation({
+                ...newInvestigation,
+                priority: event.target.value,
+              })
+            }
           >
             <MenuItem value="low">Low</MenuItem>
             <MenuItem value="medium">Medium</MenuItem>
@@ -226,7 +306,7 @@ function InvestigationPage() {
         </DialogActions>
       </Dialog>
     </Box>
-  )
+  );
 }
 
-export default InvestigationPage
+export default InvestigationPage;

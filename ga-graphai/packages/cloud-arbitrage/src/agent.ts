@@ -3,7 +3,7 @@ import type {
   CompositeMarketSnapshot,
   StrategyRecommendation,
   StrategySummary,
-  WorkloadProfile
+  WorkloadProfile,
 } from './types.js';
 
 export interface RecommendationOptions {
@@ -14,20 +14,25 @@ export interface RecommendationOptions {
 export class ArbitrageAgent {
   constructor(private readonly strategies = STRATEGIES) {}
 
-  evaluate(snapshot: CompositeMarketSnapshot, profile: WorkloadProfile): StrategyRecommendation[] {
-    return this.strategies.flatMap(strategy =>
-      strategy.evaluate({ snapshot, workloadProfile: profile })
+  evaluate(
+    snapshot: CompositeMarketSnapshot,
+    profile: WorkloadProfile,
+  ): StrategyRecommendation[] {
+    return this.strategies.flatMap((strategy) =>
+      strategy.evaluate({ snapshot, workloadProfile: profile }),
     );
   }
 
   recommendPortfolio(
     snapshot: CompositeMarketSnapshot,
     profile: WorkloadProfile,
-    options: RecommendationOptions = {}
+    options: RecommendationOptions = {},
   ): StrategySummary[] {
     const recommendations = this.evaluate(snapshot, profile);
     const minScore = options.minScore ?? 0.6;
-    const filtered = recommendations.filter(rec => rec.totalScore >= minScore);
+    const filtered = recommendations.filter(
+      (rec) => rec.totalScore >= minScore,
+    );
 
     const ranked = [...filtered].sort((a, b) => {
       const priceDelta = a.expectedUnitPrice - b.expectedUnitPrice;
@@ -39,13 +44,13 @@ export class ArbitrageAgent {
 
     const top = options.topN ? ranked.slice(0, options.topN) : ranked;
 
-    return top.map(recommendation => ({
+    return top.map((recommendation) => ({
       strategy: recommendation.strategy,
       provider: recommendation.provider,
       region: recommendation.region,
       blendedUnitPrice: recommendation.expectedUnitPrice,
       estimatedSavings: this.estimateSavings(recommendation),
-      confidence: Math.min(0.95, recommendation.totalScore / 3)
+      confidence: Math.min(0.95, recommendation.totalScore / 3),
     }));
   }
 

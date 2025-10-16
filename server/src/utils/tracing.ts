@@ -18,7 +18,10 @@ class NoopSpan implements Span {
 }
 
 export const tracer = {
-  async startActiveSpan<T>(name: string, handler: (span: Span) => Promise<T> | T): Promise<T> {
+  async startActiveSpan<T>(
+    name: string,
+    handler: (span: Span) => Promise<T> | T,
+  ): Promise<T> {
     const span = new NoopSpan(name);
     try {
       return await handler(span);
@@ -28,7 +31,7 @@ export const tracer = {
     } finally {
       span.end();
     }
-  }
+  },
 };
 
 export { NoopSpan as SpanImpl };

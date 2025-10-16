@@ -4,6 +4,7 @@
 import os from 'os';
 import { performance } from 'perf_hooks';
 import { dbQueryDuration, dbQueriesTotal } from './metrics.js';
+import { evaluateHealthForRemediation } from './remediation.js';
 // Health check status cache
 let healthStatus = {
     status: "unknown",
@@ -221,6 +222,9 @@ async function performHealthCheck() {
             environment: process.env.NODE_ENV || "development",
             checks,
         };
+        if (overallStatus === "unhealthy") {
+            await evaluateHealthForRemediation(healthStatus);
+        }
         return healthStatus;
     }
     catch (error) {
@@ -230,6 +234,7 @@ async function performHealthCheck() {
             error: error.message,
             checks: {},
         };
+        await evaluateHealthForRemediation(healthStatus);
         return healthStatus;
     }
 }

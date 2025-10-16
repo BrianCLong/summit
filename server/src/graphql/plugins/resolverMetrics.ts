@@ -1,9 +1,9 @@
-import type { ApolloServerPlugin } from "@apollo/server";
+import type { ApolloServerPlugin } from '@apollo/server';
 import {
   graphqlResolverDurationSeconds,
   graphqlResolverErrorsTotal,
   graphqlResolverCallsTotal,
-} from "../../monitoring/metrics.js";
+} from '../../monitoring/metrics.js';
 
 const resolverMetricsPlugin: ApolloServerPlugin = {
   requestDidStart() {
@@ -21,11 +21,11 @@ const resolverMetricsPlugin: ApolloServerPlugin = {
             return (error: unknown) => {
               const duration = Number(process.hrtime.bigint() - start) / 1e9;
               graphqlResolverDurationSeconds.observe(
-                { ...labels, status: error ? "error" : "success" },
+                { ...labels, status: error ? 'error' : 'success' },
                 duration,
               );
               if (error) {
-                const errType = (error as any)?.constructor?.name || "Error";
+                const errType = (error as any)?.constructor?.name || 'Error';
                 graphqlResolverErrorsTotal.inc({
                   ...labels,
                   error_type: errType,

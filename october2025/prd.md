@@ -159,20 +159,17 @@ Please indicate if specific system details or architectures require further elab
 
 2
 
-
-
-
 <img src="https://r2cdn.perplexity.ai/pplx-full-logo-primary-dark%402x.png" style="height:64px;margin-right:32px"/>
 
 # 1
 
 IntelGraph Platform — Executive Summary of Core System Subsystems (Category 1)
 
-***
+---
 
 The Core System Subsystems form the backbone of IntelGraph, providing the essential infrastructure, business logic, user interface, data storage, real-time collaboration, AI capabilities, and security frameworks necessary to deliver a powerful intelligence analysis platform. These foundational components enable robust investigative workflows, seamless user experience, scalable data processing, and enterprise-grade reliability.
 
-***
+---
 
 ## Subsystems Included
 
@@ -182,13 +179,11 @@ The Core System Subsystems form the backbone of IntelGraph, providing the essent
 - GraphQL and REST API endpoints for core functionalities.
 - Secure integration points with AI engine and real-time services.
 
-
 ### 1.2 Frontend \& User Interface
 
 - Responsive React-based user dashboards and workspaces.
 - Interactive graph visualizations and AI Copilot chat interface.
 - Accessibility and multilingual support.
-
 
 ### 1.3 Databases \& Data Management
 
@@ -196,13 +191,11 @@ The Core System Subsystems form the backbone of IntelGraph, providing the essent
 - Data consistency, backup, and replication strategies.
 - Support for metadata, vector embeddings, and audit data.
 
-
 ### 1.4 Real-Time Collaboration \& WebSockets
 
 - Multi-user synchronous editing and presence awareness.
 - WebSocket event broadcasting with conflict resolution.
 - Robust connection handling and security.
-
 
 ### 1.5 AI/ML Extraction \& Analytics Engine
 
@@ -210,13 +203,11 @@ The Core System Subsystems form the backbone of IntelGraph, providing the essent
 - Entity and relationship enrichment with AI confidence scoring.
 - Scalable orchestration of AI inference tasks.
 
-
 ### 1.6 Security and Access Control
 
 - Authentication frameworks including JWT, SSO, MFA.
 - Role-Based Access Control (RBAC) and policy enforcement using OPA.
 - Data encryption, audit logging, and compliance supports.
-
 
 ### 1.7 Observability \& Monitoring
 
@@ -224,14 +215,13 @@ The Core System Subsystems form the backbone of IntelGraph, providing the essent
 - Alerting, dashboards, and health endpoints.
 - Performance and security monitoring integration.
 
-
 ### 1.8 DevOps, CI/CD, and Deployment
 
 - Automated build, test, and deployment pipelines.
 - Container orchestration with Helm and Kubernetes.
 - Secrets management and release automation.
 
-***
+---
 
 ## Overall Architecture \& Integration
 
@@ -240,17 +230,17 @@ The Core System Subsystems form the backbone of IntelGraph, providing the essent
 - Consistent security and policy enforcement across all layers.
 - Scalable and resilient cloud-native infrastructure.
 
-***
+---
 
 This core subsystem suite establishes a solid, extensible foundation for IntelGraph’s MVP-2 and scalable enterprise GA deployment, enabling complex investigations powered by AI and secure collaboration.
 
 Please advise if a deeper dive or synthesis is needed on any specific subsystem or cross-cutting concerns.IntelGraph Platform — Executive Summary of Core System Subsystems (Category 1)
 
-***
+---
 
 The Core System Subsystems form the technical foundation for IntelGraph’s intelligence analysis platform, driving critical capabilities from backend logic and APIs through data management, user experience, real-time collaboration, AI integration, and security.
 
-***
+---
 
 ## Included Subsystems
 
@@ -263,7 +253,7 @@ The Core System Subsystems form the technical foundation for IntelGraph’s inte
 - **1.7 Observability \& Monitoring:** Metrics, logging, distributed tracing, alerting, and operational dashboards.
 - **1.8 DevOps, CI/CD, and Deployment:** Automated build/test/deploy pipelines, Helm/Kubernetes orchestration, secrets management.
 
-***
+---
 
 ## Architecture \& Integration Highlights
 
@@ -272,9 +262,8 @@ The Core System Subsystems form the technical foundation for IntelGraph’s inte
 - Scalable state management with event sourcing and real-time event propagation.
 - Cloud-native resilient infrastructure for high availability and fault tolerance.
 
-***
+---
 
 This comprehensive subsystem suite enables IntelGraph to deliver scalable, secure, and AI-enhanced intelligence workflows for advanced investigative operations, ready for MVP-2 and enterprise GA deployment.
 
 Please indicate if specific system details or architectures require further elaboration.
-

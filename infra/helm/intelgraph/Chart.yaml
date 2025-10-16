@@ -3,7 +3,7 @@ name: intelgraph
 description: IntelGraph Enterprise Intelligence Analysis Platform
 type: application
 version: 2025.09.19
-appVersion: "2025.09.19"
+appVersion: '2025.09.19'
 home: https://github.com/BrianCLong/intelgraph
 sources:
   - https://github.com/BrianCLong/intelgraph

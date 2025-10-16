@@ -45,7 +45,9 @@ export class IdempotentQueue {
   /**
    * Enqueue item with idempotency protection
    */
-  async enqueue(item: Omit<QueueItem, 'id' | 'retryCount' | 'createdAt'>): Promise<{
+  async enqueue(
+    item: Omit<QueueItem, 'id' | 'retryCount' | 'createdAt'>,
+  ): Promise<{
     success: boolean;
     id?: string;
     duplicate?: boolean;
@@ -63,7 +65,10 @@ export class IdempotentQueue {
       if (item.idempotencyKey) {
         const dupCheck = await this.checkDuplicate(item.idempotencyKey);
         if (dupCheck) {
-          prometheusConductorMetrics.recordOperationalEvent('queue_duplicate_ignored', true);
+          prometheusConductorMetrics.recordOperationalEvent(
+            'queue_duplicate_ignored',
+            true,
+          );
           return { success: true, duplicate: true, id: dupCheck };
         }
       }
@@ -72,13 +77,19 @@ export class IdempotentQueue {
       const poisonCheck = await this.checkPoisonPill(queueItem);
       if (poisonCheck.quarantine) {
         await this.quarantineItem(queueItem, poisonCheck.reason);
-        prometheusConductorMetrics.recordOperationalEvent('queue_item_quarantined', false);
+        prometheusConductorMetrics.recordOperationalEvent(
+          'queue_item_quarantined',
+          false,
+        );
         return { success: false, quarantined: true, id: queueItem.id };
       }
 
       // Add to queue with priority
       const score = this.calculateScore(queueItem);
-      await this.redis.zAdd(`queue:${this.queueName}`, { score, value: JSON.stringify(queueItem) });
+      await this.redis.zAdd(`queue:${this.queueName}`, {
+        score,
+        value: JSON.stringify(queueItem),
+      });
 
       // Set idempotency key with TTL
       if (item.idempotencyKey) {
@@ -90,8 +101,14 @@ export class IdempotentQueue {
       }
 
       // Update metrics
-      prometheusConductorMetrics.recordOperationalMetric('queue_depth', await this.getDepth());
-      prometheusConductorMetrics.recordOperationalEvent('queue_item_enqueued', true);
+      prometheusConductorMetrics.recordOperationalMetric(
+        'queue_depth',
+        await this.getDepth(),
+      );
+      prometheusConductorMetrics.recordOperationalEvent(
+        'queue_item_enqueued',
+        true,
+      );
 
       logger.debug('Item enqueued successfully', {
         queueName: this.queueName,
@@ -101,8 +118,14 @@ export class IdempotentQueue {
 
       return { success: true, id: queueItem.id };
     } catch (error) {
-      logger.error('Failed to enqueue item', { error: error.message, queueName: this.queueName });
-      prometheusConductorMetrics.recordOperationalEvent('queue_enqueue_error', false);
+      logger.error('Failed to enqueue item', {
+        error: error.message,
+        queueName: this.queueName,
+      });
+      prometheusConductorMetrics.recordOperationalEvent(
+        'queue_enqueue_error',
+        false,
+      );
       return { success: false };
     }
   }
@@ -110,7 +133,10 @@ export class IdempotentQueue {
   /**
    * Dequeue item with lease semantics
    */
-  async dequeue(workerId: string, leaseTimeSeconds: number = 300): Promise<QueueItem | null> {
+  async dequeue(
+    workerId: string,
+    leaseTimeSeconds: number = 300,
+  ): Promise<QueueItem | null> {
     try {
       // Get highest priority item
       const items = await this.redis.zPopMax(`queue:${this.queueName}`, 1);
@@ -121,11 +147,21 @@ export class IdempotentQueue {
       const queueItem: QueueItem = JSON.parse(items[0].value);
 
       // Set processing lease
-      await this.redis.setEx(`lease:${this.queueName}:${queueItem.id}`, leaseTimeSeconds, workerId);
+      await this.redis.setEx(
+        `lease:${this.queueName}:${queueItem.id}`,
+        leaseTimeSeconds,
+        workerId,
+      );
 
       // Track processing start
-      prometheusConductorMetrics.recordOperationalEvent('queue_item_dequeued', true);
-      prometheusConductorMetrics.recordOperationalMetric('queue_depth', await this.getDepth());
+      prometheusConductorMetrics.recordOperationalEvent(
+        'queue_item_dequeued',
+        true,
+      );
+      prometheusConductorMetrics.recordOperationalMetric(
+        'queue_depth',
+        await this.getDepth(),
+      );
 
       logger.debug('Item dequeued', {
         queueName: this.queueName,
@@ -135,8 +171,14 @@ export class IdempotentQueue {
 
       return queueItem;
     } catch (error) {
-      logger.error('Failed to dequeue item', { error: error.message, queueName: this.queueName });
-      prometheusConductorMetrics.recordOperationalEvent('queue_dequeue_error', false);
+      logger.error('Failed to dequeue item', {
+        error: error.message,
+        queueName: this.queueName,
+      });
+      prometheusConductorMetrics.recordOperationalEvent(
+        'queue_dequeue_error',
+        false,
+      );
       return null;
     }
   }
@@ -150,14 +192,25 @@ export class IdempotentQueue {
       const currentLease = await this.redis.get(leaseKey);
 
       if (currentLease !== workerId) {
-        logger.warn('Lease mismatch on completion', { itemId, workerId, currentLease });
+        logger.warn('Lease mismatch on completion', {
+          itemId,
+          workerId,
+          currentLease,
+        });
         return false;
       }
 
       await this.redis.del(leaseKey);
-      prometheusConductorMetrics.recordOperationalEvent('queue_item_completed', true);
+      prometheusConductorMetrics.recordOperationalEvent(
+        'queue_item_completed',
+        true,
+      );
 
-      logger.debug('Item completed', { queueName: this.queueName, itemId, workerId });
+      logger.debug('Item completed', {
+        queueName: this.queueName,
+        itemId,
+        workerId,
+      });
       return true;
     } catch (error) {
       logger.error('Failed to complete item', { error: error.message, itemId });
@@ -181,9 +234,15 @@ export class IdempotentQueue {
       const backoffMs = Math.min(1000 * Math.pow(2, item.retryCount), 60000);
       const score = Date.now() + backoffMs;
 
-      await this.redis.zAdd(`queue:${this.queueName}`, { score, value: JSON.stringify(item) });
+      await this.redis.zAdd(`queue:${this.queueName}`, {
+        score,
+        value: JSON.stringify(item),
+      });
 
-      prometheusConductorMetrics.recordOperationalEvent('queue_item_requeued', true);
+      prometheusConductorMetrics.recordOperationalEvent(
+        'queue_item_requeued',
+        true,
+      );
       logger.info('Item requeued with backoff', {
         itemId: item.id,
         retryCount: item.retryCount,
@@ -192,7 +251,10 @@ export class IdempotentQueue {
 
       return true;
     } catch (error) {
-      logger.error('Failed to requeue item', { error: error.message, itemId: item.id });
+      logger.error('Failed to requeue item', {
+        error: error.message,
+        itemId: item.id,
+      });
       return false;
     }
   }
@@ -217,11 +279,17 @@ export class IdempotentQueue {
       const [depth, quarantinedCount, activeLeases] = await Promise.all([
         this.getDepth(),
         this.redis.lLen(`quarantine:${this.queueName}`),
-        this.redis.keys(`lease:${this.queueName}:*`).then((keys) => keys.length),
+        this.redis
+          .keys(`lease:${this.queueName}:*`)
+          .then((keys) => keys.length),
       ]);
 
       // Get oldest item age
-      const oldestItems = await this.redis.zRangeWithScores(`queue:${this.queueName}`, 0, 0);
+      const oldestItems = await this.redis.zRangeWithScores(
+        `queue:${this.queueName}`,
+        0,
+        0,
+      );
       let oldestItemAge = 0;
 
       if (oldestItems.length > 0) {
@@ -231,8 +299,15 @@ export class IdempotentQueue {
 
       return { depth, oldestItemAge, quarantinedCount, activeLeases };
     } catch (error) {
-      logger.error('Failed to get queue health metrics', { error: error.message });
-      return { depth: 0, oldestItemAge: 0, quarantinedCount: 0, activeLeases: 0 };
+      logger.error('Failed to get queue health metrics', {
+        error: error.message,
+      });
+      return {
+        depth: 0,
+        oldestItemAge: 0,
+        quarantinedCount: 0,
+        activeLeases: 0,
+      };
     }
   }
 
@@ -251,14 +326,23 @@ export class IdempotentQueue {
           if (rule.action === 'quarantine') {
             return { quarantine: true, reason };
           } else if (rule.action === 'drop') {
-            logger.warn('Item dropped by poison pill rule', { itemId: item.id, rule: rule.name });
-            prometheusConductorMetrics.recordOperationalEvent('queue_item_dropped', false);
+            logger.warn('Item dropped by poison pill rule', {
+              itemId: item.id,
+              rule: rule.name,
+            });
+            prometheusConductorMetrics.recordOperationalEvent(
+              'queue_item_dropped',
+              false,
+            );
             return { quarantine: false };
           }
           // retry_later would need additional logic
         }
       } catch (error) {
-        logger.error('Poison pill rule error', { rule: rule.name, error: error.message });
+        logger.error('Poison pill rule error', {
+          rule: rule.name,
+          error: error.message,
+        });
       }
     }
 
@@ -272,7 +356,10 @@ export class IdempotentQueue {
       quarantinedAt: new Date().toISOString(),
     };
 
-    await this.redis.lPush(`quarantine:${this.queueName}`, JSON.stringify(quarantineItem));
+    await this.redis.lPush(
+      `quarantine:${this.queueName}`,
+      JSON.stringify(quarantineItem),
+    );
 
     logger.warn('Item quarantined', {
       queueName: this.queueName,
@@ -283,7 +370,8 @@ export class IdempotentQueue {
 
   private calculateScore(item: QueueItem): number {
     // Higher priority = lower score (for zRange ordering)
-    const priorityScore = (10 - Math.min(9, Math.max(1, item.priority))) * 1000000;
+    const priorityScore =
+      (10 - Math.min(9, Math.max(1, item.priority))) * 1000000;
     const timeScore = Date.now();
     return priorityScore + timeScore;
   }
@@ -302,7 +390,10 @@ export class IdempotentQueue {
       },
       {
         name: 'unknown_expert',
-        check: (item) => !['graph_ops', 'rag_retrieval', 'osint_analysis'].includes(item.expert),
+        check: (item) =>
+          !['graph_ops', 'rag_retrieval', 'osint_analysis'].includes(
+            item.expert,
+          ),
         action: 'quarantine',
       },
       {

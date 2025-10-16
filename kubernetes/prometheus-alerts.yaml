@@ -9,38 +9,39 @@ spec:
           expr: histogram_quantile(0.95, sum(rate(graphql_request_duration_seconds_bucket{op="query"}[5m])) by (le)) > 0.35
           for: 10m
           labels: { severity: warning }
-          annotations: { summary: "GraphQL read p95 > 350ms" }
+          annotations: { summary: 'GraphQL read p95 > 350ms' }
         - alert: GraphQLErrorRateHigh
           expr: sum(rate(graphql_requests_total{status=~"5.."}[5m])) / sum(rate(graphql_requests_total[5m])) > 0.001
           for: 10m
           labels: { severity: critical }
-          annotations: { summary: "GraphQL error rate > 0.1%" }
+          annotations: { summary: 'GraphQL error rate > 0.1%' }
     - name: subscriptions
       rules:
         - alert: SubFanoutLatencyHigh
           expr: histogram_quantile(0.95, sum(rate(subscription_fanout_latency_ms_bucket[5m])) by (le)) > 250
           for: 10m
           labels: { severity: warning }
-          annotations: { summary: "Subscription fan‑out p95 > 250ms" }
+          annotations: { summary: 'Subscription fan‑out p95 > 250ms' }
     - name: ingest-telemetry
       rules:
         - alert: IngestDedupeRateHigh
           expr: ingest_dedupe_rate > 0.10
           for: 5m
           labels: { severity: warning }
-          annotations: { summary: "Ingest deduplication rate is high (>=10%)" }
+          annotations: { summary: 'Ingest deduplication rate is high (>=10%)' }
         - alert: IngestDedupeRateCritical
           expr: ingest_dedupe_rate > 0.20
           for: 5m
           labels: { severity: critical }
-          annotations: { summary: "Ingest deduplication rate is critical (>=20%)" }
+          annotations:
+            { summary: 'Ingest deduplication rate is critical (>=20%)' }
         - alert: IngestBacklogHigh
           expr: ingest_backlog > 50
           for: 5m
           labels: { severity: warning }
-          annotations: { summary: "Ingest backlog is high (>50)" }
+          annotations: { summary: 'Ingest backlog is high (>50)' }
         - alert: IngestBacklogCritical
           expr: ingest_backlog > 100
           for: 5m
           labels: { severity: critical }
-          annotations: { summary: "Ingest backlog is critical (>100)" }
+          annotations: { summary: 'Ingest backlog is critical (>100)' }

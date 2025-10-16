@@ -28,6 +28,7 @@ docker compose up -d
 ```
 
 ### Scripts (from package.json)
+
 - Frontend: `vite dev`, `vite build`, `vitest`, `playwright test`
 - Backend: `nodemon dev`, `jest`, `db:migrate`, `db:seed`
 
@@ -41,9 +42,9 @@ GraphQL schemas and resolvers live in `server/src/graphql/`. If present, a compi
 
 ## Roadmap & Contributing
 
-- Roadmap: `docs/generated/ROADMAP.md`  
-- Project plan & OKRs: `docs/generated/PROJECT_PLAN.md`  
-- Contributing: `docs/generated/CONTRIBUTING.md`  
+- Roadmap: `docs/generated/ROADMAP.md`
+- Project plan & OKRs: `docs/generated/PROJECT_PLAN.md`
+- Contributing: `docs/generated/CONTRIBUTING.md`
 - Security: `docs/generated/SECURITY.md`
 
 ## Competitive Positioning

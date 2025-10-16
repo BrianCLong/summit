@@ -26,7 +26,8 @@ paths:
               schema:
                 type: object
                 properties:
-                  workflowRef: { type: string, example: ingest-enrich-handoff @1.2.0 }
+                  workflowRef:
+                    { type: string, example: ingest-enrich-handoff @1.2.0 }
                   digest: { type: string }
         '400': { $ref: '#/components/responses/BadRequest' }
   /workflows/{name}:
@@ -50,7 +51,8 @@ paths:
       parameters:
         - in: query
           name: status
-          schema: { type: string, enum: [queued, running, success, failed, canceled] }
+          schema:
+            { type: string, enum: [queued, running, success, failed, canceled] }
         - in: query
           name: workflowRef
           schema: { type: string }
@@ -185,7 +187,8 @@ components:
       required: [id, status]
       properties:
         id: { type: string }
-        status: { type: string, enum: [queued, running, success, failed, canceled] }
+        status:
+          { type: string, enum: [queued, running, success, failed, canceled] }
         startedAt: { type: string, format: date-time }
         finishedAt: { type: string, format: date-time }
         workflowRef: { type: string }

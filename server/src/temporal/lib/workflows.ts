@@ -4,10 +4,15 @@ export async function runCoreJob(input: any): Promise<any> {
 }
 
 // Orchestrate a core run with simple plan/execute/finalize
-export async function orchestrateRun(input: { runId: string; tenantId?: string; parameters?: any }): Promise<any> {
+export async function orchestrateRun(input: {
+  runId: string;
+  tenantId?: string;
+  parameters?: any;
+}): Promise<any> {
   const { tenantId } = input;
   // @ts-ignore - runtime provided by temporal worker
-  const { planRun, executeStep, finalizeRun } = (global as any).activities ?? {};
+  const { planRun, executeStep, finalizeRun } =
+    (global as any).activities ?? {};
   let runRepo: any = null;
   try {
     // Lazy import to avoid hard coupling when disabled
@@ -18,8 +23,12 @@ export async function orchestrateRun(input: { runId: string; tenantId?: string; 
   let traceId: string | undefined = undefined;
   let rootSpan: any = null;
   try {
-    const { otelService } = await import('../../middleware/observability/otel-tracing.js');
-    rootSpan = otelService.createSpan('temporal.orchestrateRun', { 'run.id': input.runId });
+    const { otelService } = await import(
+      '../../middleware/observability/otel-tracing.js'
+    );
+    rootSpan = otelService.createSpan('temporal.orchestrateRun', {
+      'run.id': input.runId,
+    });
     if (rootSpan && typeof rootSpan.spanContext === 'function') {
       traceId = rootSpan.spanContext().traceId;
     }
@@ -30,31 +39,51 @@ export async function orchestrateRun(input: { runId: string; tenantId?: string; 
     if (runRepo && tenantId) {
       const prev = await runRepo.get(input.runId, tenantId);
       const out = { ...(prev?.output_data || {}), otelTraceId: traceId };
-      await runRepo.update(input.runId, { status: 'running', started_at: new Date(), output_data: out }, tenantId);
+      await runRepo.update(
+        input.runId,
+        { status: 'running', started_at: new Date(), output_data: out },
+        tenantId,
+      );
     }
   } catch {}
 
   try {
-    const plan = await planRun({ runId: input.runId, parameters: input.parameters });
+    const plan = await planRun({
+      runId: input.runId,
+      parameters: input.parameters,
+    });
     const results: any[] = [];
     let idx = 0;
     for (const step of plan.plan) {
       // OTEL per-step
       try {
-        const { otelService } = await import('../../middleware/observability/otel-tracing.js');
-        const s = otelService.createSpan('temporal.executeStep', { 'run.id': input.runId, step, idx });
+        const { otelService } = await import(
+          '../../middleware/observability/otel-tracing.js'
+        );
+        const s = otelService.createSpan('temporal.executeStep', {
+          'run.id': input.runId,
+          step,
+          idx,
+        });
         if (s) s.end();
       } catch {}
       const r = await executeStep({ runId: input.runId, step, idx });
       results.push(r);
       idx++;
     }
-    const summary = await finalizeRun({ runId: input.runId, result: { steps: results } });
+    const summary = await finalizeRun({
+      runId: input.runId,
+      result: { steps: results },
+    });
     // Persist: succeeded
     try {
       if (runRepo && tenantId) {
         const prev = await runRepo.get(input.runId, tenantId);
-        const out = { ...(prev?.output_data || {}), ...(summary || {}), otelTraceId: traceId };
+        const out = {
+          ...(prev?.output_data || {}),
+          ...(summary || {}),
+          otelTraceId: traceId,
+        };
         await runRepo.update(
           input.runId,
           { status: 'succeeded', completed_at: new Date(), output_data: out },
@@ -62,7 +91,9 @@ export async function orchestrateRun(input: { runId: string; tenantId?: string; 
         );
       }
     } catch {}
-    try { if (rootSpan) rootSpan.end(); } catch {}
+    try {
+      if (rootSpan) rootSpan.end();
+    } catch {}
     return summary;
   } catch (e: any) {
     try {
@@ -71,12 +102,19 @@ export async function orchestrateRun(input: { runId: string; tenantId?: string; 
         const out = { ...(prev?.output_data || {}), otelTraceId: traceId };
         await runRepo.update(
           input.runId,
-          { status: 'failed', completed_at: new Date(), error_message: String(e?.message || e), output_data: out },
+          {
+            status: 'failed',
+            completed_at: new Date(),
+            error_message: String(e?.message || e),
+            output_data: out,
+          },
           tenantId,
         );
       }
     } catch {}
-    try { if (rootSpan) rootSpan.end(); } catch {}
+    try {
+      if (rootSpan) rootSpan.end();
+    } catch {}
     throw e;
   }
 }

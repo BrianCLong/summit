@@ -140,7 +140,7 @@ spec:
               </body>
               </html>
               EOF
-              
+
               nginx -g "daemon off;"
           resources:
             requests:

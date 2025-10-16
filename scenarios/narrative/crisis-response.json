@@ -12,7 +12,11 @@
       "sentiment": 0.1,
       "volatility": 0.3,
       "resilience": 0.7,
-      "themes": { "stability": 0.9, "infrastructure": 0.8, "public sentiment": 0.4 },
+      "themes": {
+        "stability": 0.9,
+        "infrastructure": 0.8,
+        "public sentiment": 0.4
+      },
       "relationships": [{ "targetId": "citizen_watch", "strength": 0.6 }]
     },
     {
@@ -24,7 +28,11 @@
       "sentiment": -0.2,
       "volatility": 0.5,
       "resilience": 0.5,
-      "themes": { "stability": 0.5, "infrastructure": 0.4, "public sentiment": 0.7 },
+      "themes": {
+        "stability": 0.5,
+        "infrastructure": 0.4,
+        "public sentiment": 0.7
+      },
       "relationships": [{ "targetId": "regional_media", "strength": 0.5 }]
     },
     {
@@ -36,7 +44,11 @@
       "sentiment": -0.1,
       "volatility": 0.6,
       "resilience": 0.4,
-      "themes": { "stability": 0.3, "infrastructure": 0.6, "public sentiment": 0.8 },
+      "themes": {
+        "stability": 0.3,
+        "infrastructure": 0.6,
+        "public sentiment": 0.8
+      },
       "relationships": []
     }
   ],

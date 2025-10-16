@@ -1,9 +1,36 @@
 scalar JSON
 
-type Claim { id: ID!, type: String!, subject: String!, evidenceUri: String!, hash: String!, signer: String!, issuedAt: String! }
-type ClaimSet { id: ID!, runId: ID!, stepId: ID!, claims: [Claim!]!, merkleRoot: String!, signature: String! }
-type DisclosureBundle { id: ID!, uri: String!, sha256: String!, verified: Boolean! }
-type Retraction { id: ID!, subject: String!, reason: String!, createdAt: String!, status: String!, affectedBundles: [ID!]! }
+type Claim {
+  id: ID!
+  type: String!
+  subject: String!
+  evidenceUri: String!
+  hash: String!
+  signer: String!
+  issuedAt: String!
+}
+type ClaimSet {
+  id: ID!
+  runId: ID!
+  stepId: ID!
+  claims: [Claim!]!
+  merkleRoot: String!
+  signature: String!
+}
+type DisclosureBundle {
+  id: ID!
+  uri: String!
+  sha256: String!
+  verified: Boolean!
+}
+type Retraction {
+  id: ID!
+  subject: String!
+  reason: String!
+  createdAt: String!
+  status: String!
+  affectedBundles: [ID!]!
+}
 
 extend type Mutation {
   publishDisclosure(runId: ID!, stepId: ID!): DisclosureBundle!
@@ -16,4 +43,3 @@ extend type Query {
   retractions(status: String): [Retraction!]!
   costAdvice(runbookYaml: String!): JSON
 }
-

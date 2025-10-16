@@ -1,13 +1,26 @@
 // Maestro Conductor v24.3.0 - JDBC Connector for PostgreSQL/MySQL
 // Epic E15: New Connectors - Database connectivity for external sources
 
-import { trace, Span } from '@opentelemetry/api';
+// No-op tracer shim to avoid OTEL dependency
 import { Pool, PoolClient, types as pgTypes } from 'pg';
 import mysql from 'mysql2/promise';
 import { Counter, Histogram, Gauge } from 'prom-client';
 import { EventEmitter } from 'events';
 
-const tracer = trace.getTracer('jdbc-connector', '24.3.0');
+const tracer = {
+  startActiveSpan: async (
+    _name: string,
+    fn: (span: any) => Promise<any> | any,
+  ) => {
+    const span = {
+      setAttributes: (_a?: any) => {},
+      recordException: (_e?: any) => {},
+      setStatus: (_s?: any) => {},
+      end: () => {},
+    };
+    return await fn(span);
+  },
+};
 
 // Fix PostgreSQL parsing for large integers
 pgTypes.setTypeParser(20, (val) => parseInt(val, 10)); // BIGINT
@@ -17,27 +30,27 @@ pgTypes.setTypeParser(1700, (val) => parseFloat(val)); // NUMERIC
 const jdbcOperations = new Counter({
   name: 'jdbc_operations_total',
   help: 'Total JDBC operations',
-  labelNames: ['tenant_id', 'database_type', 'operation', 'result']
+  labelNames: ['tenant_id', 'database_type', 'operation', 'result'],
 });
 
 const jdbcLatency = new Histogram({
   name: 'jdbc_operation_latency_ms',
   help: 'JDBC operation latency',
   buckets: [1, 5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000],
-  labelNames: ['database_type', 'operation']
+  labelNames: ['database_type', 'operation'],
 });
 
 const jdbcConnections = new Gauge({
   name: 'jdbc_active_connections',
   help: 'Active JDBC connections',
-  labelNames: ['tenant_id', 'database_type', 'host']
+  labelNames: ['tenant_id', 'database_type', 'host'],
 });
 
 const jdbcQueryRows = new Histogram({
   name: 'jdbc_query_rows',
   help: 'Number of rows returned by queries',
   buckets: [1, 10, 100, 1000, 10000, 100000],
-  labelNames: ['database_type', 'operation']
+  labelNames: ['database_type', 'operation'],
 });
 
 export type DatabaseType = 'postgresql' | 'mysql';
@@ -63,7 +76,11 @@ export interface QueryOptions {
   maxRows?: number;
   fetchSize?: number;
   readOnly?: boolean;
-  isolationLevel?: 'READ_UNCOMMITTED' | 'READ_COMMITTED' | 'REPEATABLE_READ' | 'SERIALIZABLE';
+  isolationLevel?:
+    | 'READ_UNCOMMITTED'
+    | 'READ_COMMITTED'
+    | 'REPEATABLE_READ'
+    | 'SERIALIZABLE';
 }
 
 export interface QueryResult {
@@ -123,13 +140,13 @@ export class JDBCConnector extends EventEmitter {
   }
 
   async connect(): Promise<void> {
-    return tracer.startActiveSpan('jdbc.connect', async (span: Span) => {
-      span.setAttributes({
-        'tenant_id': this.tenantId,
-        'database_type': this.config.type,
-        'host': this.config.host,
-        'port': this.config.port,
-        'database': this.config.database
+    return tracer.startActiveSpan('jdbc.connect', async (span: any) => {
+      span.setAttributes?.({
+        tenant_id: this.tenantId,
+        database_type: this.config.type,
+        host: this.config.host,
+        port: this.config.port,
+        database: this.config.database,
       });
 
       try {
@@ -142,25 +159,24 @@ export class JDBCConnector extends EventEmitter {
         }
 
         this.connected = true;
-        jdbcConnections.inc({ 
-          tenant_id: this.tenantId, 
+        jdbcConnections.inc({
+          tenant_id: this.tenantId,
           database_type: this.config.type,
-          host: this.config.host 
+          host: this.config.host,
         });
 
-        this.emit('connected', { 
-          tenantId: this.tenantId, 
-          type: this.config.type, 
-          host: this.config.host 
+        this.emit('connected', {
+          tenantId: this.tenantId,
+          type: this.config.type,
+          host: this.config.host,
         });
-
       } catch (error) {
-        span.recordException(error as Error);
-        span.setStatus({ code: 2, message: (error as Error).message });
+        span.recordException?.(error as Error);
+        span.setStatus?.({ message: (error as Error).message });
         this.emit('error', { tenantId: this.tenantId, error });
         throw error;
       } finally {
-        span.end();
+        span.end?.();
       }
     });
   }
@@ -217,14 +233,18 @@ export class JDBCConnector extends EventEmitter {
     }
   }
 
-  async query(sql: string, params: any[] = [], options: QueryOptions = {}): Promise<QueryResult> {
-    return tracer.startActiveSpan('jdbc.query', async (span: Span) => {
-      span.setAttributes({
-        'tenant_id': this.tenantId,
-        'database_type': this.config.type,
-        'sql_length': sql.length,
-        'param_count': params.length,
-        'read_only': options.readOnly || false
+  async query(
+    sql: string,
+    params: any[] = [],
+    options: QueryOptions = {},
+  ): Promise<QueryResult> {
+    return tracer.startActiveSpan('jdbc.query', async (span: any) => {
+      span.setAttributes?.({
+        tenant_id: this.tenantId,
+        database_type: this.config.type,
+        sql_length: sql.length,
+        param_count: params.length,
+        read_only: options.readOnly || false,
       });
 
       if (!this.connected || !this.pool) {
@@ -247,55 +267,58 @@ export class JDBCConnector extends EventEmitter {
 
         jdbcLatency.observe(
           { database_type: this.config.type, operation: 'query' },
-          executionTime
+          executionTime,
         );
 
         jdbcQueryRows.observe(
           { database_type: this.config.type, operation: 'query' },
-          result.rowCount
+          result.rowCount,
         );
 
-        jdbcOperations.inc({ 
-          tenant_id: this.tenantId, 
-          database_type: this.config.type, 
-          operation: 'query', 
-          result: 'success' 
+        jdbcOperations.inc({
+          tenant_id: this.tenantId,
+          database_type: this.config.type,
+          operation: 'query',
+          result: 'success',
         });
 
         span.setAttributes({
-          'row_count': result.rowCount,
-          'field_count': result.fields.length,
-          'execution_time': executionTime
+          row_count: result.rowCount,
+          field_count: result.fields.length,
+          execution_time: executionTime,
         });
 
-        this.emit('queryExecuted', { 
-          tenantId: this.tenantId, 
+        this.emit('queryExecuted', {
+          tenantId: this.tenantId,
           sql: sql.substring(0, 100) + (sql.length > 100 ? '...' : ''),
           rowCount: result.rowCount,
-          executionTime 
+          executionTime,
         });
 
         return result;
-
       } catch (error) {
-        span.recordException(error as Error);
-        span.setStatus({ code: 2, message: (error as Error).message });
-        jdbcOperations.inc({ 
-          tenant_id: this.tenantId, 
-          database_type: this.config.type, 
-          operation: 'query', 
-          result: 'error' 
+        span.recordException?.(error as Error);
+        span.setStatus?.({ message: (error as Error).message });
+        jdbcOperations.inc({
+          tenant_id: this.tenantId,
+          database_type: this.config.type,
+          operation: 'query',
+          result: 'error',
         });
         throw error;
       } finally {
-        span.end();
+        span.end?.();
       }
     });
   }
 
-  private async executePostgreSQLQuery(sql: string, params: any[], options: QueryOptions): Promise<QueryResult> {
+  private async executePostgreSQLQuery(
+    sql: string,
+    params: any[],
+    options: QueryOptions,
+  ): Promise<QueryResult> {
     const client = await (this.pool as Pool).connect();
-    
+
     try {
       // Set query timeout if specified
       if (options.timeout) {
@@ -304,7 +327,9 @@ export class JDBCConnector extends EventEmitter {
 
       // Set isolation level if specified
       if (options.isolationLevel) {
-        await client.query(`SET TRANSACTION ISOLATION LEVEL ${options.isolationLevel}`);
+        await client.query(
+          `SET TRANSACTION ISOLATION LEVEL ${options.isolationLevel}`,
+        );
       }
 
       const pgResult = await client.query(sql, params);
@@ -312,31 +337,38 @@ export class JDBCConnector extends EventEmitter {
       return {
         rows: pgResult.rows,
         rowCount: pgResult.rowCount || pgResult.rows.length,
-        fields: pgResult.fields.map(field => ({
+        fields: pgResult.fields.map((field) => ({
           name: field.name,
           type: this.mapPostgreSQLType(field.dataTypeID),
           nullable: true, // PostgreSQL doesn't provide this info easily
         })),
-        executionTime: 0 // Will be set by caller
+        executionTime: 0, // Will be set by caller
       };
-
     } finally {
       client.release();
     }
   }
 
-  private async executeMySQLQuery(sql: string, params: any[], options: QueryOptions): Promise<QueryResult> {
+  private async executeMySQLQuery(
+    sql: string,
+    params: any[],
+    options: QueryOptions,
+  ): Promise<QueryResult> {
     const connection = await (this.pool as mysql.Pool).getConnection();
-    
+
     try {
       // Set query timeout if specified
       if (options.timeout) {
-        await connection.execute(`SET SESSION wait_timeout = ${Math.ceil(options.timeout / 1000)}`);
+        await connection.execute(
+          `SET SESSION wait_timeout = ${Math.ceil(options.timeout / 1000)}`,
+        );
       }
 
       // Set isolation level if specified
       if (options.isolationLevel) {
-        await connection.execute(`SET TRANSACTION ISOLATION LEVEL ${options.isolationLevel.replace('_', ' ')}`);
+        await connection.execute(
+          `SET TRANSACTION ISOLATION LEVEL ${options.isolationLevel.replace('_', ' ')}`,
+        );
       }
 
       const [rows, fields] = await connection.execute(sql, params);
@@ -344,26 +376,31 @@ export class JDBCConnector extends EventEmitter {
       return {
         rows: Array.isArray(rows) ? rows : [],
         rowCount: Array.isArray(rows) ? rows.length : 0,
-        fields: Array.isArray(fields) ? fields.map(field => ({
-          name: field.name,
-          type: this.mapMySQLType(field.type),
-          nullable: (field.flags & 1) === 0, // NOT_NULL flag
-          length: field.length,
-        })) : [],
-        executionTime: 0 // Will be set by caller
+        fields: Array.isArray(fields)
+          ? fields.map((field) => ({
+              name: field.name,
+              type: this.mapMySQLType(field.type),
+              nullable: (field.flags & 1) === 0, // NOT_NULL flag
+              length: field.length,
+            }))
+          : [],
+        executionTime: 0, // Will be set by caller
       };
-
     } finally {
       connection.release();
     }
   }
 
-  async batchExecute(sqls: string[], paramSets: any[][], options: QueryOptions = {}): Promise<BatchResult> {
-    return tracer.startActiveSpan('jdbc.batch_execute', async (span: Span) => {
-      span.setAttributes({
-        'tenant_id': this.tenantId,
-        'database_type': this.config.type,
-        'batch_size': sqls.length
+  async batchExecute(
+    sqls: string[],
+    paramSets: any[][],
+    options: QueryOptions = {},
+  ): Promise<BatchResult> {
+    return tracer.startActiveSpan('jdbc.batch_execute', async (span: any) => {
+      span.setAttributes?.({
+        tenant_id: this.tenantId,
+        database_type: this.config.type,
+        batch_size: sqls.length,
       });
 
       if (!this.connected || !this.pool) {
@@ -378,7 +415,11 @@ export class JDBCConnector extends EventEmitter {
       try {
         for (let i = 0; i < sqls.length; i++) {
           try {
-            const result = await this.query(sqls[i], paramSets[i] || [], options);
+            const result = await this.query(
+              sqls[i],
+              paramSets[i] || [],
+              options,
+            );
             affectedRows.push(result.rowCount);
             totalRows += result.rowCount;
           } catch (error) {
@@ -391,80 +432,83 @@ export class JDBCConnector extends EventEmitter {
 
         jdbcLatency.observe(
           { database_type: this.config.type, operation: 'batch' },
-          executionTime
+          executionTime,
         );
 
-        jdbcOperations.inc({ 
-          tenant_id: this.tenantId, 
-          database_type: this.config.type, 
-          operation: 'batch', 
-          result: errors.length > 0 ? 'partial' : 'success' 
+        jdbcOperations.inc({
+          tenant_id: this.tenantId,
+          database_type: this.config.type,
+          operation: 'batch',
+          result: errors.length > 0 ? 'partial' : 'success',
         });
 
         span.setAttributes({
-          'total_rows': totalRows,
-          'error_count': errors.length,
-          'execution_time': executionTime
+          total_rows: totalRows,
+          error_count: errors.length,
+          execution_time: executionTime,
         });
 
         const result: BatchResult = {
           totalRows,
           affectedRows,
           executionTime,
-          errors: errors.length > 0 ? errors : undefined
+          errors: errors.length > 0 ? errors : undefined,
         };
 
-        this.emit('batchExecuted', { 
-          tenantId: this.tenantId, 
+        this.emit('batchExecuted', {
+          tenantId: this.tenantId,
           batchSize: sqls.length,
           totalRows,
           errorCount: errors.length,
-          executionTime 
+          executionTime,
         });
 
         return result;
-
       } catch (error) {
-        span.recordException(error as Error);
-        span.setStatus({ code: 2, message: (error as Error).message });
-        jdbcOperations.inc({ 
-          tenant_id: this.tenantId, 
-          database_type: this.config.type, 
-          operation: 'batch', 
-          result: 'error' 
+        span.recordException?.(error as Error);
+        span.setStatus?.({ message: (error as Error).message });
+        jdbcOperations.inc({
+          tenant_id: this.tenantId,
+          database_type: this.config.type,
+          operation: 'batch',
+          result: 'error',
         });
         throw error;
       } finally {
-        span.end();
+        span.end?.();
       }
     });
   }
 
   async getSchemaInfo(schemaName?: string): Promise<SchemaInfo> {
-    return tracer.startActiveSpan('jdbc.get_schema_info', async (span: Span) => {
-      span.setAttributes({
-        'tenant_id': this.tenantId,
-        'database_type': this.config.type,
-        'schema_name': schemaName || 'default'
+    return tracer.startActiveSpan('jdbc.get_schema_info', async (span: any) => {
+      span.setAttributes?.({
+        tenant_id: this.tenantId,
+        database_type: this.config.type,
+        schema_name: schemaName || 'default',
       });
 
       try {
         if (this.config.type === 'postgresql') {
           return await this.getPostgreSQLSchemaInfo(schemaName || 'public');
         } else {
-          return await this.getMySQLSchemaInfo(schemaName || this.config.database);
+          return await this.getMySQLSchemaInfo(
+            schemaName || this.config.database,
+          );
         }
       } catch (error) {
-        span.recordException(error as Error);
-        span.setStatus({ code: 2, message: (error as Error).message });
+        span.recordException?.(error as Error);
+        span.setStatus?.({ message: (error as Error).message });
         throw error;
       } finally {
-        span.end();
+        span.end?.();
       }
     });
   }
 
-  private async getPostgreSQLSchemaInfo(schemaName: string): Promise<SchemaInfo> {
+  private async getPostgreSQLSchemaInfo(
+    schemaName: string,
+  ): Promise<SchemaInfo> {
     const tablesQuery = `
       SELECT table_name, table_schema, table_type, 
              obj_description(c.oid) as comment
@@ -506,32 +550,32 @@ export class JDBCConnector extends EventEmitter {
     const [tablesResult, columnsResult, indexesResult] = await Promise.all([
       this.query(tablesQuery, [schemaName]),
       this.query(columnsQuery, [schemaName]),
-      this.query(indexesQuery, [schemaName])
+      this.query(indexesQuery, [schemaName]),
     ]);
 
     return {
-      tables: tablesResult.rows.map(row => ({
+      tables: tablesResult.rows.map((row) => ({
         name: row.table_name,
         schema: row.table_schema,
         type: row.table_type === 'BASE TABLE' ? 'TABLE' : 'VIEW',
-        comment: row.comment
+        comment: row.comment,
       })),
-      columns: columnsResult.rows.map(row => ({
+      columns: columnsResult.rows.map((row) => ({
         table: row.table_name,
         name: row.column_name,
         type: row.data_type,
         nullable: row.nullable,
         defaultValue: row.default_value,
         isPrimaryKey: row.is_primary_key,
-        isForeignKey: row.is_foreign_key
+        isForeignKey: row.is_foreign_key,
       })),
-      indexes: indexesResult.rows.map(row => ({
+      indexes: indexesResult.rows.map((row) => ({
         table: row.table_name,
         name: row.index_name,
         columns: row.columns,
         unique: row.unique,
-        type: row.type
-      }))
+        type: row.type,
+      })),
     };
   }
 
@@ -568,32 +612,32 @@ export class JDBCConnector extends EventEmitter {
     const [tablesResult, columnsResult, indexesResult] = await Promise.all([
       this.query(tablesQuery, [databaseName]),
       this.query(columnsQuery, [databaseName]),
-      this.query(indexesQuery, [databaseName])
+      this.query(indexesQuery, [databaseName]),
     ]);
 
     return {
-      tables: tablesResult.rows.map(row => ({
+      tables: tablesResult.rows.map((row) => ({
         name: row.table_name,
         schema: row.table_schema,
         type: row.table_type === 'BASE TABLE' ? 'TABLE' : 'VIEW',
-        comment: row.comment
+        comment: row.comment,
       })),
-      columns: columnsResult.rows.map(row => ({
+      columns: columnsResult.rows.map((row) => ({
         table: row.table_name,
         name: row.column_name,
         type: row.data_type,
         nullable: row.nullable,
         defaultValue: row.default_value,
         isPrimaryKey: row.is_primary_key,
-        isForeignKey: row.is_foreign_key
+        isForeignKey: row.is_foreign_key,
       })),
-      indexes: indexesResult.rows.map(row => ({
+      indexes: indexesResult.rows.map((row) => ({
         table: row.table_name,
         name: row.index_name,
         columns: row.columns.split(','),
         unique: row.unique,
-        type: row.type
-      }))
+        type: row.type,
+      })),
     };
   }
 
@@ -611,9 +655,9 @@ export class JDBCConnector extends EventEmitter {
       1114: 'timestamp',
       1184: 'timestamptz',
       1700: 'numeric',
-      2950: 'uuid'
+      2950: 'uuid',
     };
-    
+
     return typeMap[typeId] || `unknown(${typeId})`;
   }
 
@@ -635,31 +679,35 @@ export class JDBCConnector extends EventEmitter {
       15: 'varchar',
       252: 'text',
       253: 'varchar',
-      254: 'char'
+      254: 'char',
     };
-    
+
     return typeMap[type] || `unknown(${type})`;
   }
 
-  async testConnection(): Promise<{ connected: boolean; latency?: number; error?: string }> {
+  async testConnection(): Promise<{
+    connected: boolean;
+    latency?: number;
+    error?: string;
+  }> {
     const startTime = Date.now();
-    
+
     try {
       if (this.config.type === 'postgresql') {
         await this.query('SELECT 1 as test');
       } else {
         await this.query('SELECT 1 as test');
       }
-      
-      return { 
-        connected: true, 
-        latency: Date.now() - startTime 
+
+      return {
+        connected: true,
+        latency: Date.now() - startTime,
       };
     } catch (error) {
-      return { 
-        connected: false, 
+      return {
+        connected: false,
         latency: Date.now() - startTime,
-        error: (error as Error).message 
+        error: (error as Error).message,
       };
     }
   }
@@ -671,20 +719,20 @@ export class JDBCConnector extends EventEmitter {
       } else {
         await (this.pool as mysql.Pool).end();
       }
-      
+
       this.pool = null;
       this.connected = false;
-      
-      jdbcConnections.dec({ 
-        tenant_id: this.tenantId, 
+
+      jdbcConnections.dec({
+        tenant_id: this.tenantId,
         database_type: this.config.type,
-        host: this.config.host 
+        host: this.config.host,
       });
 
-      this.emit('disconnected', { 
-        tenantId: this.tenantId, 
-        type: this.config.type, 
-        host: this.config.host 
+      this.emit('disconnected', {
+        tenantId: this.tenantId,
+        type: this.config.type,
+        host: this.config.host,
       });
     }
   }

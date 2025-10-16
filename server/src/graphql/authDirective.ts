@@ -10,7 +10,12 @@ export function authDirective(directiveName = 'auth') {
           if (!dir) return fieldConfig;
           const { scope } = dir;
           const orig = fieldConfig.resolve;
-          fieldConfig.resolve = async (src: any, args: any, ctx: any, info: any) => {
+          fieldConfig.resolve = async (
+            src: any,
+            args: any,
+            ctx: any,
+            info: any,
+          ) => {
             ctx.policy.assert(ctx.user, scope, { args, info });
             return orig ? orig(src, args, ctx, info) : src[fieldConfig.name];
           };

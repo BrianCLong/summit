@@ -1,14 +1,23 @@
-import { Session, InvokeArgs, ToolDescriptor, ResourceDescriptor, PromptDescriptor } from './types';
+import {
+  Session,
+  InvokeArgs,
+  ToolDescriptor,
+  ResourceDescriptor,
+  PromptDescriptor,
+} from './types';
 import { sse, SseMessage } from './sse';
 
 export class McpClient {
-  constructor(private readonly baseUrl: string, private readonly token: string) {}
+  constructor(
+    private readonly baseUrl: string,
+    private readonly token: string,
+  ) {}
 
   async connect(toolClass: string): Promise<Session> {
     const res = await fetch(`${this.baseUrl}/v1/session`, {
       method: 'POST',
       headers: this.jsonHeaders(),
-      body: JSON.stringify({ toolClass })
+      body: JSON.stringify({ toolClass }),
     });
     if (!res.ok) throw new Error(`connect failed: ${res.status}`);
     return res.json();
@@ -18,7 +27,7 @@ export class McpClient {
     const res = await fetch(`${this.baseUrl}/v1/session/${session.id}/invoke`, {
       method: 'POST',
       headers: this.jsonHeaders(),
-      body: JSON.stringify(input)
+      body: JSON.stringify(input),
     });
     if (!res.ok) throw new Error(`invoke failed: ${res.status}`);
     return res.json();
@@ -27,9 +36,10 @@ export class McpClient {
   async release(session: Session) {
     const res = await fetch(`${this.baseUrl}/v1/session/${session.id}`, {
       method: 'DELETE',
-      headers: this.authHeaders()
+      headers: this.authHeaders(),
     });
-    if (!res.ok && res.status !== 404) throw new Error(`release failed: ${res.status}`);
+    if (!res.ok && res.status !== 404)
+      throw new Error(`release failed: ${res.status}`);
   }
 
   listTools(): Promise<ToolDescriptor[]> {
@@ -49,21 +59,23 @@ export class McpClient {
   }
 
   private async getTyped<T>(path: string): Promise<T> {
-    const res = await fetch(`${this.baseUrl}${path}`, { headers: this.authHeaders() });
+    const res = await fetch(`${this.baseUrl}${path}`, {
+      headers: this.authHeaders(),
+    });
     if (!res.ok) throw new Error(`fetch ${path} failed: ${res.status}`);
     return res.json() as Promise<T>;
   }
 
   private authHeaders() {
     return {
-      authorization: `Bearer ${this.token}`
+      authorization: `Bearer ${this.token}`,
     };
   }
 
   private jsonHeaders() {
     return {
       'content-type': 'application/json',
-      ...this.authHeaders()
+      ...this.authHeaders(),
     };
   }
 }

@@ -12,4 +12,3 @@
   - Enable caching or prefetch for slow endpoints.
   - Optimize hotspots; roll back regressions.
 - Validation: 95% freshness under 5 minutes over next 30–60 minutes.
-

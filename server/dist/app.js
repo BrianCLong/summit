@@ -7,11 +7,12 @@ import cors from "cors";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import pino from "pino";
-import { pinoHttp } from "pino-http";
+import pinoHttp from "pino-http";
 import { auditLogger } from "./middleware/audit-logger.js";
 import monitoringRouter from "./routes/monitoring.js";
 import aiRouter from "./routes/ai.js";
 import disclosuresRouter from "./routes/disclosures.js";
+import narrativeSimulationRouter from "./routes/narrative-sim.js";
 import { register } from "./monitoring/metrics.js";
 import rbacRouter from "./routes/rbacRoutes.js";
 import { typeDefs } from "./graphql/schema.js";
@@ -33,10 +34,12 @@ export const createApp = async () => {
         credentials: true,
     }));
     app.use(pinoHttp({ logger, redact: ["req.headers.authorization"] }));
+    app.use(express.json({ limit: "1mb" }));
     app.use(auditLogger);
     // Rate limiting (exempt monitoring endpoints)
     app.use("/monitoring", monitoringRouter);
     app.use("/api/ai", aiRouter);
+    app.use("/api/narrative-sim", narrativeSimulationRouter);
     app.use("/disclosures", disclosuresRouter);
     app.use("/rbac", rbacRouter);
     app.get("/metrics", async (_req, res) => {
@@ -98,7 +101,7 @@ export const createApp = async () => {
             await session.close();
         }
     });
-    const schema = makeExecutableSchema({ typeDefs, resolvers });
+    const schema = makeExecutableSchema({ typeDefs: typeDefs, resolvers: resolvers });
     // GraphQL over HTTP
     const { persistedQueriesPlugin } = await import("./graphql/plugins/persistedQueries.js");
     const { default: pbacPlugin } = await import("./graphql/plugins/pbac.js");

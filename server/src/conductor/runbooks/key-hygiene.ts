@@ -1,6 +1,12 @@
 // server/src/conductor/runbooks/key-hygiene.ts
 
-import { createHash, createSign, createVerify, generateKeyPairSync, randomBytes } from 'crypto';
+import {
+  createHash,
+  createSign,
+  createVerify,
+  generateKeyPairSync,
+  randomBytes,
+} from 'crypto';
 import { Pool } from 'pg';
 import Redis from 'ioredis';
 import logger from '../../config/logger.js';
@@ -57,8 +63,12 @@ export class KeyHygieneManager {
   constructor() {
     this.pool = new Pool({ connectionString: process.env.DATABASE_URL });
     this.redis = createClient({ url: process.env.REDIS_URL });
-    this.keyRotationIntervalDays = parseInt(process.env.KEY_ROTATION_DAYS || '90');
-    this.signatureValidityDays = parseInt(process.env.SIGNATURE_VALIDITY_DAYS || '365');
+    this.keyRotationIntervalDays = parseInt(
+      process.env.KEY_ROTATION_DAYS || '90',
+    );
+    this.signatureValidityDays = parseInt(
+      process.env.SIGNATURE_VALIDITY_DAYS || '365',
+    );
   }
 
   async connect(): Promise<void> {
@@ -84,8 +94,12 @@ export class KeyHygieneManager {
         algorithm,
         status: 'active',
         createdAt: new Date(),
-        expiresAt: new Date(Date.now() + this.signatureValidityDays * 24 * 60 * 60 * 1000),
-        rotationDue: new Date(Date.now() + this.keyRotationIntervalDays * 24 * 60 * 60 * 1000),
+        expiresAt: new Date(
+          Date.now() + this.signatureValidityDays * 24 * 60 * 60 * 1000,
+        ),
+        rotationDue: new Date(
+          Date.now() + this.keyRotationIntervalDays * 24 * 60 * 60 * 1000,
+        ),
       };
 
       // Store key securely
@@ -111,7 +125,10 @@ export class KeyHygieneManager {
       logger.info('Signing key generated', { keyId, fingerprint, algorithm });
       return signingKey;
     } catch (error) {
-      logger.error('Failed to generate signing key', { error: error.message, keyId });
+      logger.error('Failed to generate signing key', {
+        error: error.message,
+        keyId,
+      });
       throw error;
     }
   }
@@ -170,16 +187,30 @@ export class KeyHygieneManager {
       await this.storeRunbookSignature(runbookSignature);
 
       // Update metrics
-      prometheusConductorMetrics.recordOperationalEvent('runbook_signed', true, {
-        runbook_id: runbookId,
-        signed_by: signedBy,
-      });
+      prometheusConductorMetrics.recordOperationalEvent(
+        'runbook_signed',
+        true,
+        {
+          runbook_id: runbookId,
+          signed_by: signedBy,
+        },
+      );
 
-      logger.info('Runbook signed successfully', { runbookId, version, signedBy });
+      logger.info('Runbook signed successfully', {
+        runbookId,
+        version,
+        signedBy,
+      });
       return runbookSignature;
     } catch (error) {
-      logger.error('Failed to sign runbook', { error: error.message, runbookId });
-      prometheusConductorMetrics.recordOperationalEvent('runbook_sign_error', false);
+      logger.error('Failed to sign runbook', {
+        error: error.message,
+        runbookId,
+      });
+      prometheusConductorMetrics.recordOperationalEvent(
+        'runbook_sign_error',
+        false,
+      );
       throw error;
     }
   }
@@ -221,14 +252,20 @@ export class KeyHygieneManager {
       // Verify signature
       const verify = createVerify('sha256');
       verify.update(signaturePayload);
-      const signatureValid = verify.verify(signature.publicKey, signature.signature, 'base64');
+      const signatureValid = verify.verify(
+        signature.publicKey,
+        signature.signature,
+        'base64',
+      );
 
       if (!signatureValid) {
         violations.push('invalid_signature');
       }
 
       // Check key validity
-      const key = await this.getSigningKeyByFingerprint(signature.keyFingerprint);
+      const key = await this.getSigningKeyByFingerprint(
+        signature.keyFingerprint,
+      );
       let keyValid = true;
 
       if (!key) {
@@ -246,7 +283,8 @@ export class KeyHygieneManager {
       }
 
       // Check signature age
-      const daysSinceSigning = (Date.now() - signature.signedAt.getTime()) / (1000 * 60 * 60 * 24);
+      const daysSinceSigning =
+        (Date.now() - signature.signedAt.getTime()) / (1000 * 60 * 60 * 24);
       if (daysSinceSigning > this.signatureValidityDays) {
         violations.push('signature_expired');
       }
@@ -267,10 +305,14 @@ export class KeyHygieneManager {
       await this.storeVerificationResult(integrity);
 
       // Update metrics
-      prometheusConductorMetrics.recordOperationalEvent('runbook_verified', isValid, {
-        runbook_id: runbookId,
-        violations: violations.join(','),
-      });
+      prometheusConductorMetrics.recordOperationalEvent(
+        'runbook_verified',
+        isValid,
+        {
+          runbook_id: runbookId,
+          violations: violations.join(','),
+        },
+      );
 
       logger.info('Runbook verification completed', {
         runbookId,
@@ -281,8 +323,14 @@ export class KeyHygieneManager {
 
       return integrity;
     } catch (error) {
-      logger.error('Runbook verification failed', { error: error.message, runbookId });
-      prometheusConductorMetrics.recordOperationalEvent('runbook_verify_error', false);
+      logger.error('Runbook verification failed', {
+        error: error.message,
+        runbookId,
+      });
+      prometheusConductorMetrics.recordOperationalEvent(
+        'runbook_verify_error',
+        false,
+      );
       throw error;
     }
   }
@@ -368,9 +416,16 @@ export class KeyHygieneManager {
 
       for (const row of runbookResult.rows) {
         // Get runbook content (simplified - would integrate with runbook storage)
-        const content = await this.getRunbookContent(row.runbook_id, row.version);
+        const content = await this.getRunbookContent(
+          row.runbook_id,
+          row.version,
+        );
         if (content) {
-          const integrity = await this.verifyRunbook(row.runbook_id, row.version, content);
+          const integrity = await this.verifyRunbook(
+            row.runbook_id,
+            row.version,
+            content,
+          );
 
           if (integrity.isValid) {
             validSignatures++;
@@ -438,7 +493,10 @@ export class KeyHygieneManager {
     }
   }
 
-  private createKeyPair(algorithm: string): { publicKey: string; privateKey: string } {
+  private createKeyPair(algorithm: string): {
+    publicKey: string;
+    privateKey: string;
+  } {
     if (algorithm === 'RSA-SHA256') {
       return generateKeyPairSync('rsa', {
         modulusLength: 4096,
@@ -457,7 +515,10 @@ export class KeyHygieneManager {
   }
 
   private calculateKeyFingerprint(publicKey: string): string {
-    return createHash('sha256').update(publicKey).digest('hex').substring(0, 16);
+    return createHash('sha256')
+      .update(publicKey)
+      .digest('hex')
+      .substring(0, 16);
   }
 
   private async encryptPrivateKey(privateKey: string): Promise<string> {
@@ -533,7 +594,9 @@ export class KeyHygieneManager {
     }
   }
 
-  private async getSigningKeyByFingerprint(fingerprint: string): Promise<SigningKey | null> {
+  private async getSigningKeyByFingerprint(
+    fingerprint: string,
+  ): Promise<SigningKey | null> {
     const client = await this.pool.connect();
     try {
       const result = await client.query(
@@ -562,7 +625,9 @@ export class KeyHygieneManager {
     }
   }
 
-  private async storeRunbookSignature(signature: RunbookSignature): Promise<void> {
+  private async storeRunbookSignature(
+    signature: RunbookSignature,
+  ): Promise<void> {
     const client = await this.pool.connect();
     try {
       await client.query(
@@ -622,7 +687,10 @@ export class KeyHygieneManager {
     }
   }
 
-  private async deactivateSigningKey(keyId: string, reason: string): Promise<void> {
+  private async deactivateSigningKey(
+    keyId: string,
+    reason: string,
+  ): Promise<void> {
     const client = await this.pool.connect();
     try {
       await client.query(
@@ -675,7 +743,9 @@ export class KeyHygieneManager {
     await this.redis.zadd('key_rotation_reminders', reminderTime, key.keyId);
   }
 
-  private async storeVerificationResult(integrity: RunbookIntegrity): Promise<void> {
+  private async storeVerificationResult(
+    integrity: RunbookIntegrity,
+  ): Promise<void> {
     const client = await this.pool.connect();
     try {
       await client.query(
@@ -700,7 +770,10 @@ export class KeyHygieneManager {
     }
   }
 
-  private async getRunbookContent(runbookId: string, version: string): Promise<string | null> {
+  private async getRunbookContent(
+    runbookId: string,
+    version: string,
+  ): Promise<string | null> {
     // Placeholder - would integrate with actual runbook storage
     // This could be S3, database, or other storage system
     try {

@@ -5,34 +5,51 @@
   "type": "object",
   "required": ["id", "hypothesis", "metrics", "guardrails", "population"],
   "properties": {
-    "id": {"type": "string"},
-    "hypothesis": {"type": "string"},
-    "horizon": {"type": "string", "pattern": "^\\d+[hdw]$"},
-    "mde": {"type": "number", "minimum": 0},
+    "id": { "type": "string" },
+    "hypothesis": { "type": "string" },
+    "horizon": { "type": "string", "pattern": "^\\d+[hdw]$" },
+    "mde": { "type": "number", "minimum": 0 },
     "population": {
       "type": "object",
       "required": ["unit", "variants"],
       "properties": {
-        "unit": {"type": "string", "enum": ["user", "session", "request"]},
+        "unit": { "type": "string", "enum": ["user", "session", "request"] },
         "variants": {
           "type": "array",
-          "items": {"type": "object", "required": ["name", "weight"], "properties": {"name": {"type": "string"}, "weight": {"type": "number"}}}
+          "items": {
+            "type": "object",
+            "required": ["name", "weight"],
+            "properties": {
+              "name": { "type": "string" },
+              "weight": { "type": "number" }
+            }
+          }
         }
       }
     },
     "metrics": {
       "type": "array",
-      "items": {"type": "string", "enum": ["lcp", "ttfb", "inp", "api_p95", "error_rate", "conversion", "cost_per_req"]}
+      "items": {
+        "type": "string",
+        "enum": [
+          "lcp",
+          "ttfb",
+          "inp",
+          "api_p95",
+          "error_rate",
+          "conversion",
+          "cost_per_req"
+        ]
+      }
     },
     "guardrails": {
       "type": "object",
       "properties": {
-        "latency_p95": {"type": "number"},
-        "error_rate": {"type": "number", "minimum": 0, "maximum": 1},
-        "cost_per_req": {"type": "number"}
+        "latency_p95": { "type": "number" },
+        "error_rate": { "type": "number", "minimum": 0, "maximum": 1 },
+        "cost_per_req": { "type": "number" }
       }
     },
-    "flags": {"type": "array", "items": {"type": "string"}}
+    "flags": { "type": "array", "items": { "type": "string" } }
   }
 }
-

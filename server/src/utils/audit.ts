@@ -6,11 +6,15 @@ type JsonObject = Record<string, unknown>;
 function deepDiff(before: JsonObject = {}, after: JsonObject = {}): JsonObject {
   // Simple structural diff capturing changed keys only
   const changed: JsonObject = {};
-  const keys = new Set([...Object.keys(before || {}), ...Object.keys(after || {})]);
+  const keys = new Set([
+    ...Object.keys(before || {}),
+    ...Object.keys(after || {}),
+  ]);
   for (const k of keys) {
     const bv = (before as any)?.[k];
     const av = (after as any)?.[k];
-    const bothObjects = bv && av && typeof bv === 'object' && typeof av === 'object';
+    const bothObjects =
+      bv && av && typeof bv === 'object' && typeof av === 'object';
     if (bothObjects) {
       const nested = deepDiff(bv as JsonObject, av as JsonObject);
       if (nested && Object.keys(nested).length) changed[k] = nested;
@@ -82,7 +86,7 @@ async function writeAudit({
           after: enrichedDetails.after ?? null,
           at: new Date().toISOString(),
         },
-        secret
+        secret,
       );
     }
 
@@ -97,7 +101,7 @@ async function writeAudit({
         enrichedDetails,
         ip || null,
         userAgent || null,
-      ]
+      ],
     );
   } catch (e) {
     // non-fatal, avoid throwing in hot paths

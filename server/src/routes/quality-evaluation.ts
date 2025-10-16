@@ -10,7 +10,16 @@ const qualityPlatform = new QualityEvaluationPlatform();
 const SLOSchema = z.object({
   name: z.string().min(1),
   description: z.string().min(1),
-  metricType: z.enum(['accuracy', 'relevance', 'coherence', 'toxicity', 'bias', 'hallucination', 'latency', 'cost']),
+  metricType: z.enum([
+    'accuracy',
+    'relevance',
+    'coherence',
+    'toxicity',
+    'bias',
+    'hallucination',
+    'latency',
+    'cost',
+  ]),
   threshold: z.number().min(0).max(1),
   operator: z.enum(['gt', 'lt', 'eq', 'gte', 'lte']),
   timeWindow: z.number().min(1).max(10080),
@@ -23,25 +32,33 @@ const SingleEvaluationSchema = z.object({
   inputText: z.string().min(1),
   outputText: z.string().min(1),
   groundTruth: z.string().optional(),
-  evaluationTypes: z.array(z.string()).default(['accuracy', 'relevance', 'coherence']),
-  metadata: z.object({
-    latencyMs: z.number().optional(),
-    costUSD: z.number().optional(),
-    targetLatencyMs: z.number().optional(),
-    targetCostUSD: z.number().optional(),
-    expectedAccuracy: z.number().optional(),
-  }).optional(),
+  evaluationTypes: z
+    .array(z.string())
+    .default(['accuracy', 'relevance', 'coherence']),
+  metadata: z
+    .object({
+      latencyMs: z.number().optional(),
+      costUSD: z.number().optional(),
+      targetLatencyMs: z.number().optional(),
+      targetCostUSD: z.number().optional(),
+      expectedAccuracy: z.number().optional(),
+    })
+    .optional(),
 });
 
 const BatchEvaluationSchema = z.object({
   modelId: z.string().min(1),
-  dataset: z.array(z.object({
-    input: z.string(),
-    output: z.string(),
-    groundTruth: z.string().optional(),
-    metadata: z.object({}).passthrough().optional(),
-  })),
-  evaluationTypes: z.array(z.string()).default(['accuracy', 'relevance', 'coherence']),
+  dataset: z.array(
+    z.object({
+      input: z.string(),
+      output: z.string(),
+      groundTruth: z.string().optional(),
+      metadata: z.object({}).passthrough().optional(),
+    }),
+  ),
+  evaluationTypes: z
+    .array(z.string())
+    .default(['accuracy', 'relevance', 'coherence']),
   sloIds: z.array(z.string()).optional(),
 });
 
@@ -51,34 +68,36 @@ const BatchEvaluationSchema = z.object({
  */
 router.post('/slos', async (req, res) => {
   const span = otelService.createSpan('quality-evaluation.create-slo');
-  
+
   try {
-    const tenantId = req.headers['x-tenant-id'] as string || 'default';
+    const tenantId = (req.headers['x-tenant-id'] as string) || 'default';
     const validatedSLO = SLOSchema.parse(req.body);
-    
-    const sloId = await qualityPlatform.createSemanticSLO(tenantId, validatedSLO);
-    
+
+    const sloId = await qualityPlatform.createSemanticSLO(
+      tenantId,
+      validatedSLO,
+    );
+
     res.json({
       success: true,
       sloId,
       message: 'Semantic SLO created successfully',
       slo: validatedSLO,
     });
-    
+
     otelService.addSpanAttributes({
       'quality-evaluation.tenant_id': tenantId,
       'quality-evaluation.slo_id': sloId,
       'quality-evaluation.metric_type': validatedSLO.metricType,
       'quality-evaluation.criticality': validatedSLO.criticality,
     });
-    
   } catch (error: any) {
     console.error('SLO creation failed:', error);
     otelService.recordException(error);
-    
+
     if (error.name === 'ZodError') {
-      res.status(400).json({ 
-        error: 'Invalid SLO configuration', 
+      res.status(400).json({
+        error: 'Invalid SLO configuration',
         details: error.errors,
         example: {
           name: 'Response Accuracy SLO',
@@ -88,13 +107,13 @@ router.post('/slos', async (req, res) => {
           operator: 'gte',
           timeWindow: 60,
           evaluationMethod: 'automated',
-          criticality: 'high'
-        }
+          criticality: 'high',
+        },
       });
     } else {
-      res.status(500).json({ 
-        error: 'SLO creation failed', 
-        message: error.message 
+      res.status(500).json({
+        error: 'SLO creation failed',
+        message: error.message,
       });
     }
   } finally {
@@ -108,37 +127,41 @@ router.post('/slos', async (req, res) => {
  */
 router.post('/evaluate-single', async (req, res) => {
   const span = otelService.createSpan('quality-evaluation.evaluate-single');
-  
+
   try {
-    const tenantId = req.headers['x-tenant-id'] as string || 'default';
+    const tenantId = (req.headers['x-tenant-id'] as string) || 'default';
     const validatedRequest = SingleEvaluationSchema.parse(req.body);
-    
-    const result = await qualityPlatform.evaluateSingle(tenantId, validatedRequest);
-    
+
+    const result = await qualityPlatform.evaluateSingle(
+      tenantId,
+      validatedRequest,
+    );
+
     res.json({
       success: true,
       evaluation: result,
       summary: {
-        overallScore: Object.values(result.metrics).reduce((sum, val) => sum + val, 0) / Object.keys(result.metrics).length,
+        overallScore:
+          Object.values(result.metrics).reduce((sum, val) => sum + val, 0) /
+          Object.keys(result.metrics).length,
         sloViolations: result.sloViolations.length,
         metricsEvaluated: Object.keys(result.metrics).length,
       },
     });
-    
+
     otelService.addSpanAttributes({
       'quality-evaluation.tenant_id': tenantId,
       'quality-evaluation.model_id': validatedRequest.modelId,
       'quality-evaluation.metrics_count': Object.keys(result.metrics).length,
       'quality-evaluation.slo_violations': result.sloViolations.length,
     });
-    
   } catch (error: any) {
     console.error('Single evaluation failed:', error);
     otelService.recordException(error);
-    
+
     if (error.name === 'ZodError') {
-      res.status(400).json({ 
-        error: 'Invalid evaluation request', 
+      res.status(400).json({
+        error: 'Invalid evaluation request',
         details: error.errors,
         example: {
           modelId: 'gpt-4-turbo',
@@ -148,14 +171,14 @@ router.post('/evaluate-single', async (req, res) => {
           evaluationTypes: ['accuracy', 'relevance', 'coherence'],
           metadata: {
             latencyMs: 800,
-            costUSD: 0.002
-          }
-        }
+            costUSD: 0.002,
+          },
+        },
       });
     } else {
-      res.status(500).json({ 
-        error: 'Evaluation failed', 
-        message: error.message 
+      res.status(500).json({
+        error: 'Evaluation failed',
+        message: error.message,
       });
     }
   } finally {
@@ -169,40 +192,46 @@ router.post('/evaluate-single', async (req, res) => {
  */
 router.post('/evaluate-batch', async (req, res) => {
   const span = otelService.createSpan('quality-evaluation.evaluate-batch');
-  
+
   try {
-    const tenantId = req.headers['x-tenant-id'] as string || 'default';
+    const tenantId = (req.headers['x-tenant-id'] as string) || 'default';
     const validatedRequest = BatchEvaluationSchema.parse(req.body);
-    
-    const result = await qualityPlatform.evaluateBatch(tenantId, validatedRequest);
-    
+
+    const result = await qualityPlatform.evaluateBatch(
+      tenantId,
+      validatedRequest,
+    );
+
     res.json({
       success: true,
       batchEvaluation: result,
       insights: {
         totalEvaluated: result.results.length,
-        averageOverallScore: result.summary.averageScores ? 
-          Object.values(result.summary.averageScores).reduce((sum: number, val: any) => sum + val, 0) / 
-          Object.keys(result.summary.averageScores).length : 0,
+        averageOverallScore: result.summary.averageScores
+          ? Object.values(result.summary.averageScores).reduce(
+              (sum: number, val: any) => sum + val,
+              0,
+            ) / Object.keys(result.summary.averageScores).length
+          : 0,
         sloComplianceRate: result.summary.sloComplianceRate,
         regressionDetected: result.summary.regressionDetected,
       },
     });
-    
+
     otelService.addSpanAttributes({
       'quality-evaluation.tenant_id': tenantId,
       'quality-evaluation.model_id': validatedRequest.modelId,
       'quality-evaluation.batch_size': validatedRequest.dataset.length,
-      'quality-evaluation.regression_detected': result.summary.regressionDetected,
+      'quality-evaluation.regression_detected':
+        result.summary.regressionDetected,
     });
-    
   } catch (error: any) {
     console.error('Batch evaluation failed:', error);
     otelService.recordException(error);
-    
+
     if (error.name === 'ZodError') {
-      res.status(400).json({ 
-        error: 'Invalid batch evaluation request', 
+      res.status(400).json({
+        error: 'Invalid batch evaluation request',
         details: error.errors,
         example: {
           modelId: 'claude-3-sonnet',
@@ -211,17 +240,17 @@ router.post('/evaluate-batch', async (req, res) => {
               input: 'Explain quantum computing',
               output: 'Quantum computing uses quantum mechanics...',
               groundTruth: 'Quantum computing is a type of computation...',
-              metadata: { topic: 'technology' }
-            }
+              metadata: { topic: 'technology' },
+            },
           ],
           evaluationTypes: ['accuracy', 'relevance', 'coherence', 'toxicity'],
-          sloIds: ['slo-accuracy-001']
-        }
+          sloIds: ['slo-accuracy-001'],
+        },
       });
     } else {
-      res.status(500).json({ 
-        error: 'Batch evaluation failed', 
-        message: error.message 
+      res.status(500).json({
+        error: 'Batch evaluation failed',
+        message: error.message,
       });
     }
   } finally {
@@ -235,26 +264,39 @@ router.post('/evaluate-batch', async (req, res) => {
  */
 router.get('/reports/:modelId', async (req, res) => {
   const span = otelService.createSpan('quality-evaluation.generate-report');
-  
+
   try {
-    const tenantId = req.headers['x-tenant-id'] as string || 'default';
+    const tenantId = (req.headers['x-tenant-id'] as string) || 'default';
     const { modelId } = req.params;
     const timeRangeHours = parseInt(req.query.timeRangeHours as string) || 24;
-    
-    const report = await qualityPlatform.generateQualityReport(tenantId, modelId, timeRangeHours);
-    
+
+    const report = await qualityPlatform.generateQualityReport(
+      tenantId,
+      modelId,
+      timeRangeHours,
+    );
+
     res.json({
       report,
       insights: {
-        qualityTrend: report.overallScore > 0.8 ? 'excellent' : 
-                     report.overallScore > 0.6 ? 'good' : 
-                     report.overallScore > 0.4 ? 'needs_improvement' : 'poor',
-        sloStatus: report.sloCompliance > 0.95 ? 'compliant' : 
-                   report.sloCompliance > 0.9 ? 'mostly_compliant' : 'non_compliant',
+        qualityTrend:
+          report.overallScore > 0.8
+            ? 'excellent'
+            : report.overallScore > 0.6
+              ? 'good'
+              : report.overallScore > 0.4
+                ? 'needs_improvement'
+                : 'poor',
+        sloStatus:
+          report.sloCompliance > 0.95
+            ? 'compliant'
+            : report.sloCompliance > 0.9
+              ? 'mostly_compliant'
+              : 'non_compliant',
         actionRequired: report.regressionDetected || report.sloCompliance < 0.9,
       },
     });
-    
+
     otelService.addSpanAttributes({
       'quality-evaluation.tenant_id': tenantId,
       'quality-evaluation.model_id': modelId,
@@ -262,13 +304,12 @@ router.get('/reports/:modelId', async (req, res) => {
       'quality-evaluation.slo_compliance': report.sloCompliance,
       'quality-evaluation.regression_detected': report.regressionDetected,
     });
-    
   } catch (error: any) {
     console.error('Report generation failed:', error);
     otelService.recordException(error);
-    res.status(500).json({ 
-      error: 'Report generation failed', 
-      message: error.message 
+    res.status(500).json({
+      error: 'Report generation failed',
+      message: error.message,
     });
   } finally {
     span?.end();
@@ -281,37 +322,42 @@ router.get('/reports/:modelId', async (req, res) => {
  */
 router.get('/slo-dashboard', async (req, res) => {
   const span = otelService.createSpan('quality-evaluation.slo-dashboard');
-  
+
   try {
-    const tenantId = req.headers['x-tenant-id'] as string || 'default';
-    
+    const tenantId = (req.headers['x-tenant-id'] as string) || 'default';
+
     const dashboard = await qualityPlatform.getSLODashboard(tenantId);
-    
+
     res.json({
       dashboard,
       status: dashboard.health?.overallHealth || 'unknown',
       alerts: {
-        critical: dashboard.recentViolations?.filter((v: any) => 
-          JSON.parse(v.slo_violations).some((sloId: string) => 
-            dashboard.slos?.find((slo: any) => slo.id === sloId)?.criticality === 'critical'
-          )).length || 0,
+        critical:
+          dashboard.recentViolations?.filter((v: any) =>
+            JSON.parse(v.slo_violations).some(
+              (sloId: string) =>
+                dashboard.slos?.find((slo: any) => slo.id === sloId)
+                  ?.criticality === 'critical',
+            ),
+          ).length || 0,
         warnings: dashboard.recentViolations?.length || 0,
       },
     });
-    
+
     otelService.addSpanAttributes({
       'quality-evaluation.tenant_id': tenantId,
       'quality-evaluation.total_slos': dashboard.summary?.totalSLOs || 0,
-      'quality-evaluation.recent_violations': dashboard.summary?.recentViolations || 0,
-      'quality-evaluation.overall_health': dashboard.health?.overallHealth || 'unknown',
+      'quality-evaluation.recent_violations':
+        dashboard.summary?.recentViolations || 0,
+      'quality-evaluation.overall_health':
+        dashboard.health?.overallHealth || 'unknown',
     });
-    
   } catch (error: any) {
     console.error('SLO dashboard failed:', error);
     otelService.recordException(error);
-    res.status(500).json({ 
-      error: 'Dashboard generation failed', 
-      message: error.message 
+    res.status(500).json({
+      error: 'Dashboard generation failed',
+      message: error.message,
     });
   } finally {
     span?.end();
@@ -324,52 +370,53 @@ router.get('/slo-dashboard', async (req, res) => {
  */
 router.get('/metrics/supported', async (req, res) => {
   const span = otelService.createSpan('quality-evaluation.supported-metrics');
-  
+
   try {
     const supportedMetrics = {
-      'accuracy': {
-        description: 'Semantic accuracy against ground truth using similarity measures',
+      accuracy: {
+        description:
+          'Semantic accuracy against ground truth using similarity measures',
         range: [0, 1],
         higherIsBetter: true,
         evaluationType: 'automated',
         requiresGroundTruth: true,
       },
-      'relevance': {
+      relevance: {
         description: 'Contextual relevance of response to input query',
         range: [0, 1],
         higherIsBetter: true,
         evaluationType: 'automated',
         requiresGroundTruth: false,
       },
-      'coherence': {
+      coherence: {
         description: 'Logical coherence and flow of the response',
         range: [0, 1],
         higherIsBetter: true,
         evaluationType: 'automated',
         requiresGroundTruth: false,
       },
-      'toxicity': {
+      toxicity: {
         description: 'Content safety and toxicity detection (inverted scale)',
         range: [0, 1],
         higherIsBetter: true,
         evaluationType: 'automated',
         requiresGroundTruth: false,
       },
-      'bias': {
+      bias: {
         description: 'Bias detection across demographic categories',
         range: [0, 1],
         higherIsBetter: true,
         evaluationType: 'automated',
         requiresGroundTruth: false,
       },
-      'hallucination': {
+      hallucination: {
         description: 'Factual accuracy and hallucination detection',
         range: [0, 1],
         higherIsBetter: true,
         evaluationType: 'automated',
         requiresGroundTruth: false,
       },
-      'latency': {
+      latency: {
         description: 'Response time performance evaluation',
         range: [0, 1],
         higherIsBetter: true,
@@ -377,7 +424,7 @@ router.get('/metrics/supported', async (req, res) => {
         requiresGroundTruth: false,
         requiresMetadata: ['latencyMs', 'targetLatencyMs'],
       },
-      'cost': {
+      cost: {
         description: 'Cost per inference evaluation',
         range: [0, 1],
         higherIsBetter: true,
@@ -386,7 +433,7 @@ router.get('/metrics/supported', async (req, res) => {
         requiresMetadata: ['costUSD', 'targetCostUSD'],
       },
     };
-    
+
     res.json({
       supportedMetrics,
       totalMetrics: Object.keys(supportedMetrics).length,
@@ -394,12 +441,11 @@ router.get('/metrics/supported', async (req, res) => {
       operators: ['gt', 'gte', 'lt', 'lte', 'eq'],
       criticality: ['low', 'medium', 'high', 'critical'],
     });
-    
   } catch (error: any) {
     console.error('Supported metrics query failed:', error);
-    res.status(500).json({ 
-      error: 'Metrics query failed', 
-      message: error.message 
+    res.status(500).json({
+      error: 'Metrics query failed',
+      message: error.message,
     });
   } finally {
     span?.end();
@@ -412,7 +458,7 @@ router.get('/metrics/supported', async (req, res) => {
  */
 router.get('/health', async (req, res) => {
   const span = otelService.createSpan('quality-evaluation.health');
-  
+
   try {
     const health = {
       status: 'healthy',
@@ -435,13 +481,12 @@ router.get('/health', async (req, res) => {
         customMetrics: false, // Future feature
       },
     };
-    
+
     res.json(health);
-    
   } catch (error: any) {
     console.error('Quality evaluation health check failed:', error);
-    res.status(500).json({ 
-      status: 'unhealthy', 
+    res.status(500).json({
+      status: 'unhealthy',
       error: error.message,
       timestamp: new Date().toISOString(),
     });
@@ -456,11 +501,11 @@ router.get('/health', async (req, res) => {
  */
 router.get('/benchmarks', async (req, res) => {
   const span = otelService.createSpan('quality-evaluation.benchmarks');
-  
+
   try {
     const benchmarks = {
       industry: {
-        'chatbots': {
+        chatbots: {
           accuracy: { min: 0.8, target: 0.9, excellent: 0.95 },
           relevance: { min: 0.75, target: 0.85, excellent: 0.95 },
           coherence: { min: 0.8, target: 0.9, excellent: 0.95 },
@@ -489,8 +534,16 @@ router.get('/benchmarks', async (req, res) => {
       },
       recommended_slos: {
         'high-stakes': {
-          accuracy: { threshold: 0.95, operator: 'gte', criticality: 'critical' },
-          toxicity: { threshold: 0.98, operator: 'gte', criticality: 'critical' },
+          accuracy: {
+            threshold: 0.95,
+            operator: 'gte',
+            criticality: 'critical',
+          },
+          toxicity: {
+            threshold: 0.98,
+            operator: 'gte',
+            criticality: 'critical',
+          },
           bias: { threshold: 0.9, operator: 'gte', criticality: 'high' },
         },
         'general-purpose': {
@@ -512,18 +565,17 @@ router.get('/benchmarks', async (req, res) => {
         'long-term': 1440, // 24 hours
       },
     };
-    
+
     res.json({
       benchmarks,
       note: 'These benchmarks are based on industry standards and may need adjustment based on your specific use case',
       lastUpdated: '2024-01-15',
     });
-    
   } catch (error: any) {
     console.error('Benchmarks query failed:', error);
-    res.status(500).json({ 
-      error: 'Benchmarks query failed', 
-      message: error.message 
+    res.status(500).json({
+      error: 'Benchmarks query failed',
+      message: error.message,
     });
   } finally {
     span?.end();

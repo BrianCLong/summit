@@ -1,341 +1,334 @@
 {
-    "annotations": {
-        "list": []
-    },
-    "editable": true,
-    "graphTooltip": 0,
-    "panels": [
+  "annotations": {
+    "list": []
+  },
+  "editable": true,
+  "graphTooltip": 0,
+  "panels": [
+    {
+      "type": "stat",
+      "title": "HTTP p95 Latency (5m)",
+      "datasource": {
+        "type": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 8,
+        "h": 6
+      },
+      "targets": [
         {
-            "type": "stat",
-            "title": "HTTP p95 Latency (5m)",
-            "datasource": {
-                "type": "prometheus"
-            },
-            "gridPos": {
-                "x": 0,
-                "y": 0,
-                "w": 8,
-                "h": 6
-            },
-            "targets": [
-                {
-                    "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
-                    "legendFormat": "p95"
-                }
-            ],
-            "fieldConfig": {
-                "defaults": {
-                    "unit": "s",
-                    "decimals": 2,
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green"
-                            },
-                            {
-                                "color": "orange",
-                                "value": 1
-                            },
-                            {
-                                "color": "red",
-                                "value": 1.5
-                            }
-                        ]
-                    }
-                },
-                "overrides": []
-            },
-            "options": {
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "values": false
-                },
-                "orientation": "auto",
-                "colorMode": "value",
-                "graphMode": "none",
-                "justifyMode": "auto"
-            }
-        },
-        {
-            "type": "stat",
-            "title": "HTTP 5xx Error Ratio (5m)",
-            "datasource": {
-                "type": "prometheus"
-            },
-            "gridPos": {
-                "x": 8,
-                "y": 0,
-                "w": 8,
-                "h": 6
-            },
-            "targets": [
-                {
-                    "expr": "(sum(rate(http_requests_total{status_code=~\"5..\"}[5m])) / clamp_min(sum(rate(http_requests_total[5m])), 1))",
-                    "legendFormat": "error_rate"
-                }
-            ],
-            "fieldConfig": {
-                "defaults": {
-                    "unit": "percentunit",
-                    "decimals": 2,
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green"
-                            },
-                            {
-                                "color": "red",
-                                "value": 0.02
-                            }
-                        ]
-                    }
-                },
-                "overrides": []
-            },
-            "options": {
-                "reduceOptions": {
-                    "calcs": [
-                        "lastNotNull"
-                    ],
-                    "values": false
-                },
-                "orientation": "auto",
-                "colorMode": "value",
-                "graphMode": "none",
-                "justifyMode": "auto"
-            }
-        },
-        {
-            "type": "timeseries",
-            "title": "Signup Rate (per minute)",
-            "datasource": {
-                "type": "prometheus"
-            },
-            "gridPos": {
-                "x": 16,
-                "y": 0,
-                "w": 8,
-                "h": 6
-            },
-            "targets": [
-                {
-                    "expr": "business:user_signup_rate_per_minute{tenant=~\"$tenant\"}",
-                    "legendFormat": "{{tenant}}/{{plan}}"
-                }
-            ],
-            "fieldConfig": {
-                "defaults": {
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "options": {
-                "legend": {
-                    "displayMode": "table",
-                    "placement": "right"
-                },
-                "tooltip": {
-                    "mode": "multi"
-                }
-            }
-        },
-        {
-            "type": "timeseries",
-            "title": "API Call Rate (per minute)",
-            "datasource": {
-                "type": "prometheus"
-            },
-            "gridPos": {
-                "x": 0,
-                "y": 6,
-                "w": 12,
-                "h": 7
-            },
-            "targets": [
-                {
-                    "expr": "business:api_call_rate_per_minute{tenant=~\"$tenant\"}",
-                    "legendFormat": "{{tenant}}/{{service}}"
-                }
-            ],
-            "fieldConfig": {
-                "defaults": {
-                    "unit": "short"
-                },
-                "overrides": []
-            },
-            "options": {
-                "legend": {
-                    "displayMode": "table",
-                    "placement": "right"
-                },
-                "tooltip": {
-                    "mode": "multi"
-                }
-            }
-        },
-        {
-            "type": "timeseries",
-            "title": "Revenue Run Rate (annualized)",
-            "datasource": {
-                "type": "prometheus"
-            },
-            "gridPos": {
-                "x": 12,
-                "y": 6,
-                "w": 12,
-                "h": 7
-            },
-            "targets": [
-                {
-                    "expr": "business:revenue_annual_run_rate{tenant=~\"$tenant\"}",
-                    "legendFormat": "{{tenant}}/{{currency}}"
-                }
-            ],
-            "fieldConfig": {
-                "defaults": {
-                    "unit": "currencyUSD",
-                    "decimals": 0
-                },
-                "overrides": []
-            },
-            "options": {
-                "legend": {
-                    "displayMode": "table",
-                    "placement": "right"
-                },
-                "tooltip": {
-                    "mode": "multi"
-                }
-            }
-        },
-        {
-            "type": "timeseries",
-            "title": "API Volume Anomaly Z-Score",
-            "datasource": {
-                "type": "prometheus"
-            },
-            "gridPos": {
-                "x": 0,
-                "y": 13,
-                "w": 12,
-                "h": 7
-            },
-            "targets": [
-                {
-                    "expr": "abs((business:api_call_rate_per_minute{tenant=~\"$tenant\"} - avg_over_time(business:api_call_rate_per_minute{tenant=~\"$tenant\"}[2h])) / clamp_min(stddev_over_time(business:api_call_rate_per_minute{tenant=~\"$tenant\"}[2h]), 0.1))",
-                    "legendFormat": "{{tenant}}"
-                }
-            ],
-            "fieldConfig": {
-                "defaults": {
-                    "unit": "short",
-                    "thresholds": {
-                        "mode": "absolute",
-                        "steps": [
-                            {
-                                "color": "green"
-                            },
-                            {
-                                "color": "orange",
-                                "value": 2
-                            },
-                            {
-                                "color": "red",
-                                "value": 4
-                            }
-                        ]
-                    }
-                },
-                "overrides": []
-            },
-            "options": {
-                "legend": {
-                    "displayMode": "list",
-                    "placement": "bottom"
-                },
-                "tooltip": {
-                    "mode": "single"
-                }
-            }
-        },
-        {
-            "type": "timeseries",
-            "title": "Capacity Forecast (CPU)",
-            "datasource": {
-                "type": "prometheus"
-            },
-            "gridPos": {
-                "x": 12,
-                "y": 13,
-                "w": 12,
-                "h": 7
-            },
-            "targets": [
-                {
-                    "expr": "capacity:cpu_two_week_forecast",
-                    "legendFormat": "two-week forecast"
-                },
-                {
-                    "expr": "sum(rate(container_cpu_usage_seconds_total{container!=\"\",pod!=\"\"}[5m]))",
-                    "legendFormat": "current utilization"
-                }
-            ],
-            "fieldConfig": {
-                "defaults": {
-                    "unit": "percentunit",
-                    "decimals": 2
-                },
-                "overrides": []
-            },
-            "options": {
-                "legend": {
-                    "displayMode": "table",
-                    "placement": "right"
-                },
-                "tooltip": {
-                    "mode": "multi"
-                }
-            }
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "p95"
         }
-    ],
-    "schemaVersion": 39,
-    "style": "dark",
-    "tags": [
-        "observability",
-        "business"
-    ],
-    "templating": {
-        "list": [
-            {
-                "name": "tenant",
-                "type": "query",
-                "datasource": {
-                    "type": "prometheus"
-                },
-                "refresh": 1,
-                "query": "label_values(business_user_signups_total, tenant)",
-                "current": {
-                    "text": "All",
-                    "value": ".*"
-                },
-                "includeAll": true,
-                "multi": true,
-                "regex": "",
-                "sort": 1
-            }
-        ]
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "orange",
+                "value": 1
+              },
+              {
+                "color": "red",
+                "value": 1.5
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "values": false
+        },
+        "orientation": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      }
     },
-    "time": {
-        "from": "now-6h",
-        "to": "now"
+    {
+      "type": "stat",
+      "title": "HTTP 5xx Error Ratio (5m)",
+      "datasource": {
+        "type": "prometheus"
+      },
+      "gridPos": {
+        "x": 8,
+        "y": 0,
+        "w": 8,
+        "h": 6
+      },
+      "targets": [
+        {
+          "expr": "(sum(rate(http_requests_total{status_code=~\"5..\"}[5m])) / clamp_min(sum(rate(http_requests_total[5m])), 1))",
+          "legendFormat": "error_rate"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 2,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "red",
+                "value": 0.02
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "values": false
+        },
+        "orientation": "auto",
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto"
+      }
     },
-    "timepicker": {},
-    "timezone": "",
-    "title": "Infrastructure Monitoring & Business Observability",
-    "uid": "intelgraph-monitoring-platform",
-    "version": 1
+    {
+      "type": "timeseries",
+      "title": "Signup Rate (per minute)",
+      "datasource": {
+        "type": "prometheus"
+      },
+      "gridPos": {
+        "x": 16,
+        "y": 0,
+        "w": 8,
+        "h": 6
+      },
+      "targets": [
+        {
+          "expr": "business:user_signup_rate_per_minute{tenant=~\"$tenant\"}",
+          "legendFormat": "{{tenant}}/{{plan}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "API Call Rate (per minute)",
+      "datasource": {
+        "type": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 6,
+        "w": 12,
+        "h": 7
+      },
+      "targets": [
+        {
+          "expr": "business:api_call_rate_per_minute{tenant=~\"$tenant\"}",
+          "legendFormat": "{{tenant}}/{{service}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Revenue Run Rate (annualized)",
+      "datasource": {
+        "type": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 6,
+        "w": 12,
+        "h": 7
+      },
+      "targets": [
+        {
+          "expr": "business:revenue_annual_run_rate{tenant=~\"$tenant\"}",
+          "legendFormat": "{{tenant}}/{{currency}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "currencyUSD",
+          "decimals": 0
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "API Volume Anomaly Z-Score",
+      "datasource": {
+        "type": "prometheus"
+      },
+      "gridPos": {
+        "x": 0,
+        "y": 13,
+        "w": 12,
+        "h": 7
+      },
+      "targets": [
+        {
+          "expr": "abs((business:api_call_rate_per_minute{tenant=~\"$tenant\"} - avg_over_time(business:api_call_rate_per_minute{tenant=~\"$tenant\"}[2h])) / clamp_min(stddev_over_time(business:api_call_rate_per_minute{tenant=~\"$tenant\"}[2h]), 0.1))",
+          "legendFormat": "{{tenant}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "short",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green"
+              },
+              {
+                "color": "orange",
+                "value": 2
+              },
+              {
+                "color": "red",
+                "value": 4
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        },
+        "tooltip": {
+          "mode": "single"
+        }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Capacity Forecast (CPU)",
+      "datasource": {
+        "type": "prometheus"
+      },
+      "gridPos": {
+        "x": 12,
+        "y": 13,
+        "w": 12,
+        "h": 7
+      },
+      "targets": [
+        {
+          "expr": "capacity:cpu_two_week_forecast",
+          "legendFormat": "two-week forecast"
+        },
+        {
+          "expr": "sum(rate(container_cpu_usage_seconds_total{container!=\"\",pod!=\"\"}[5m]))",
+          "legendFormat": "current utilization"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percentunit",
+          "decimals": 2
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": {
+          "displayMode": "table",
+          "placement": "right"
+        },
+        "tooltip": {
+          "mode": "multi"
+        }
+      }
+    }
+  ],
+  "schemaVersion": 39,
+  "style": "dark",
+  "tags": ["observability", "business"],
+  "templating": {
+    "list": [
+      {
+        "name": "tenant",
+        "type": "query",
+        "datasource": {
+          "type": "prometheus"
+        },
+        "refresh": 1,
+        "query": "label_values(business_user_signups_total, tenant)",
+        "current": {
+          "text": "All",
+          "value": ".*"
+        },
+        "includeAll": true,
+        "multi": true,
+        "regex": "",
+        "sort": 1
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Infrastructure Monitoring & Business Observability",
+  "uid": "intelgraph-monitoring-platform",
+  "version": 1
 }

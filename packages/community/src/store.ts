@@ -7,7 +7,7 @@ import type {
   ModerationAction,
   Notification,
   Post,
-  UserProfile
+  UserProfile,
 } from './types.js';
 
 const cloneArray = <T>(values: Iterable<T>): T[] => Array.from(values);
@@ -20,12 +20,12 @@ const cloneUser = (profile: UserProfile): UserProfile => ({
   badges: cloneArray(profile.badges),
   accessibility: { ...profile.accessibility },
   joinedAt: cloneDate(profile.joinedAt),
-  lastActiveAt: cloneDate(profile.lastActiveAt)
+  lastActiveAt: cloneDate(profile.lastActiveAt),
 });
 
 const cloneCategory = (category: ForumCategory): ForumCategory => ({
   ...category,
-  createdAt: cloneDate(category.createdAt)
+  createdAt: cloneDate(category.createdAt),
 });
 
 const cloneThread = (thread: DiscussionThread): DiscussionThread => ({
@@ -34,7 +34,7 @@ const cloneThread = (thread: DiscussionThread): DiscussionThread => ({
   postIds: cloneArray(thread.postIds),
   createdAt: cloneDate(thread.createdAt),
   updatedAt: cloneDate(thread.updatedAt),
-  lastActivityAt: cloneDate(thread.lastActivityAt)
+  lastActivityAt: cloneDate(thread.lastActivityAt),
 });
 
 const clonePost = (post: Post): Post => ({
@@ -42,35 +42,37 @@ const clonePost = (post: Post): Post => ({
   flaggedBy: cloneArray(post.flaggedBy),
   moderationNotes: cloneArray(post.moderationNotes),
   createdAt: cloneDate(post.createdAt),
-  updatedAt: cloneDate(post.updatedAt)
+  updatedAt: cloneDate(post.updatedAt),
 });
 
 const cloneActivity = (activity: ActivityEvent): ActivityEvent => ({
   ...activity,
   createdAt: cloneDate(activity.createdAt),
-  metadata: { ...activity.metadata }
+  metadata: { ...activity.metadata },
 });
 
 const cloneBadge = (badge: BadgeDefinition): BadgeDefinition => ({
   ...badge,
-  criteria: { ...badge.criteria }
+  criteria: { ...badge.criteria },
 });
 
 const cloneNotification = (notification: Notification): Notification => ({
   ...notification,
   createdAt: cloneDate(notification.createdAt),
   readAt: notification.readAt ? cloneDate(notification.readAt) : null,
-  metadata: { ...notification.metadata }
+  metadata: { ...notification.metadata },
 });
 
-const cloneContribution = (summary: ContributionSummary): ContributionSummary => ({
+const cloneContribution = (
+  summary: ContributionSummary,
+): ContributionSummary => ({
   ...summary,
-  badgesEarned: cloneArray(summary.badgesEarned)
+  badgesEarned: cloneArray(summary.badgesEarned),
 });
 
 const cloneModeration = (action: ModerationAction): ModerationAction => ({
   ...action,
-  createdAt: cloneDate(action.createdAt)
+  createdAt: cloneDate(action.createdAt),
 });
 
 export class CommunityStore {
@@ -162,7 +164,10 @@ export class CommunityStore {
 
   public appendNotification(notification: Notification): void {
     const current = this.#notifications.get(notification.userId) ?? [];
-    this.#notifications.set(notification.userId, [...current, cloneNotification(notification)]);
+    this.#notifications.set(notification.userId, [
+      ...current,
+      cloneNotification(notification),
+    ]);
   }
 
   public listNotifications(userId: string): Notification[] {
@@ -170,7 +175,10 @@ export class CommunityStore {
     return queue.map(cloneNotification);
   }
 
-  public replaceNotifications(userId: string, notifications: Notification[]): void {
+  public replaceNotifications(
+    userId: string,
+    notifications: Notification[],
+  ): void {
     this.#notifications.set(userId, notifications.map(cloneNotification));
   }
 

@@ -8,14 +8,14 @@ import type {
   SlowQueryRecord,
   TenantBudgetProfile,
   WorkloadBalancingPlan,
-  WorkloadSample
+  WorkloadSample,
 } from './types.js';
 
 const DEFAULT_PROFILE: TenantBudgetProfile = {
   tenantId: 'global-default',
   maxRru: 150,
   maxLatencyMs: 1500,
-  concurrencyLimit: 12
+  concurrencyLimit: 12,
 };
 
 export class CostGuard {
@@ -32,33 +32,52 @@ export class CostGuard {
     return {
       budgetsExceeded: this.budgetsExceeded,
       kills: this.kills,
-      activeSlowQueries: this.slowQueries.size
+      activeSlowQueries: this.slowQueries.size,
     };
   }
 
   planBudget(input: PlanBudgetInput): CostGuardDecision {
     const profile = input.profile ?? this.profile;
     const projectedRru = input.plan.estimatedRru;
-    const projectedLatency = Math.max(input.plan.estimatedLatencyMs, input.recentLatencyP95);
+    const projectedLatency = Math.max(
+      input.plan.estimatedLatencyMs,
+      input.recentLatencyP95,
+    );
     const saturation = (input.activeQueries + 1) / profile.concurrencyLimit;
 
-    if (input.plan.containsCartesianProduct || projectedRru > profile.maxRru * 1.6) {
+    if (
+      input.plan.containsCartesianProduct ||
+      projectedRru > profile.maxRru * 1.6
+    ) {
       this.budgetsExceeded += 1;
       return {
         action: 'kill',
-        reason: 'Plan exceeds safe limits (cartesian product or excessive RRU).',
+        reason:
+          'Plan exceeds safe limits (cartesian product or excessive RRU).',
         nextCheckMs: 0,
-        metrics: { projectedRru, projectedLatencyMs: projectedLatency, saturation }
+        metrics: {
+          projectedRru,
+          projectedLatencyMs: projectedLatency,
+          saturation,
+        },
       };
     }
 
-    if (projectedLatency > profile.maxLatencyMs || saturation > 1 || input.plan.depth > 5) {
+    if (
+      projectedLatency > profile.maxLatencyMs ||
+      saturation > 1 ||
+      input.plan.depth > 5
+    ) {
       this.budgetsExceeded += 1;
       return {
         action: 'throttle',
         reason: 'Plan approaches tenant guardrails; deferring execution.',
         nextCheckMs: 250,
-        metrics: { projectedRru, projectedLatencyMs: projectedLatency, saturation }
+        metrics: {
+          projectedRru,
+          projectedLatencyMs: projectedLatency,
+          saturation,
+        },
       };
     }
 
@@ -66,17 +85,25 @@ export class CostGuard {
       action: 'allow',
       reason: 'Plan within guardrails.',
       nextCheckMs: 120,
-      metrics: { projectedRru, projectedLatencyMs: projectedLatency, saturation }
+      metrics: {
+        projectedRru,
+        projectedLatencyMs: projectedLatency,
+        saturation,
+      },
     };
   }
 
-  killSlowQuery(queryId: string, tenantId: string, reason: string): SlowQueryRecord {
+  killSlowQuery(
+    queryId: string,
+    tenantId: string,
+    reason: string,
+  ): SlowQueryRecord {
     const record: SlowQueryRecord = {
       queryId,
       tenantId,
       startedAt: performance.now(),
       observedLatencyMs: 0,
-      reason
+      reason,
     };
     this.slowQueries.set(queryId, record);
     this.kills += 1;
@@ -107,7 +134,7 @@ const DEFAULT_OPTIMIZATION_CONFIG: ResourceOptimizationConfig = {
   minNodes: 2,
   maxNodes: 64,
   rebalanceTolerance: 0.15,
-  confidenceWindow: 6
+  confidenceWindow: 6,
 };
 
 export class ResourceOptimizationEngine {
@@ -117,7 +144,10 @@ export class ResourceOptimizationEngine {
     this.config = { ...DEFAULT_OPTIMIZATION_CONFIG, ...config };
   }
 
-  recommendScaling(currentNodes: number, samples: WorkloadSample[]): ScalingDecision {
+  recommendScaling(
+    currentNodes: number,
+    samples: WorkloadSample[],
+  ): ScalingDecision {
     const forecast = this.forecast(samples);
     const loadIndex = this.calculateLoadIndex(forecast);
     const confidence = this.calculateConfidence(samples.length);
@@ -125,10 +155,15 @@ export class ResourceOptimizationEngine {
     let action: ScalingDecision['action'] = 'hold';
     let recommendedNodes = currentNodes;
     const clamp = (value: number) =>
-      Math.min(this.config.maxNodes, Math.max(this.config.minNodes, Math.max(1, Math.round(value))));
+      Math.min(
+        this.config.maxNodes,
+        Math.max(this.config.minNodes, Math.max(1, Math.round(value))),
+      );
 
     if (loadIndex > this.config.scaleUpThreshold) {
-      const scaled = Math.ceil(currentNodes * Math.max(loadIndex, this.config.scaleUpThreshold));
+      const scaled = Math.ceil(
+        currentNodes * Math.max(loadIndex, this.config.scaleUpThreshold),
+      );
       recommendedNodes = clamp(Math.max(currentNodes + 1, scaled));
       action = recommendedNodes > currentNodes ? 'scale_up' : 'hold';
     } else if (loadIndex < this.config.scaleDownThreshold) {
@@ -145,7 +180,7 @@ export class ResourceOptimizationEngine {
       reason,
       confidence,
       loadIndex,
-      forecast
+      forecast,
     };
   }
 
@@ -155,42 +190,54 @@ export class ResourceOptimizationEngine {
         strategy: 'maintain',
         reason: 'No nodes available to balance.',
         confidence: 0,
-        allocations: []
+        allocations: [],
       };
     }
 
-    const totalSessions = nodes.reduce((sum, node) => sum + node.activeSessions, 0);
-    const totalCapacity = nodes.reduce((sum, node) => sum + node.maxSessions, 0);
+    const totalSessions = nodes.reduce(
+      (sum, node) => sum + node.activeSessions,
+      0,
+    );
+    const totalCapacity = nodes.reduce(
+      (sum, node) => sum + node.maxSessions,
+      0,
+    );
 
     if (totalCapacity === 0) {
       return {
         strategy: 'maintain',
-        reason: 'Unable to compute target distribution without capacity metadata.',
+        reason:
+          'Unable to compute target distribution without capacity metadata.',
         confidence: this.calculateConfidence(nodes.length),
-        allocations: nodes.map(node => ({ nodeId: node.nodeId, targetSessions: node.activeSessions, delta: 0 }))
+        allocations: nodes.map((node) => ({
+          nodeId: node.nodeId,
+          targetSessions: node.activeSessions,
+          delta: 0,
+        })),
       };
     }
 
     const targetRatio = totalSessions / totalCapacity;
-    const allocations = nodes.map(node => {
+    const allocations = nodes.map((node) => {
       const targetSessions = Math.round(targetRatio * node.maxSessions);
       return {
         nodeId: node.nodeId,
         targetSessions,
-        delta: targetSessions - node.activeSessions
+        delta: targetSessions - node.activeSessions,
       };
     });
 
-    const loadRatios = nodes.map(node =>
+    const loadRatios = nodes.map((node) =>
       Math.max(
         node.cpuUtilization,
         node.memoryUtilization,
-        node.maxSessions === 0 ? 0 : node.activeSessions / node.maxSessions
-      )
+        node.maxSessions === 0 ? 0 : node.activeSessions / node.maxSessions,
+      ),
     );
     const minLoad = Math.min(...loadRatios);
     const maxLoad = Math.max(...loadRatios);
-    const requiresRebalance = maxLoad - minLoad > this.config.rebalanceTolerance;
+    const requiresRebalance =
+      maxLoad - minLoad > this.config.rebalanceTolerance;
 
     return {
       strategy: requiresRebalance ? 'rebalance' : 'maintain',
@@ -198,7 +245,9 @@ export class ResourceOptimizationEngine {
         ? 'Detected uneven workload distribution across nodes; rebalance recommended.'
         : 'Workload distribution within acceptable tolerance.',
       confidence: this.calculateConfidence(nodes.length),
-      allocations: requiresRebalance ? allocations : allocations.map(allocation => ({ ...allocation, delta: 0 }))
+      allocations: requiresRebalance
+        ? allocations
+        : allocations.map((allocation) => ({ ...allocation, delta: 0 })),
     };
   }
 
@@ -222,15 +271,19 @@ export class ResourceOptimizationEngine {
     return {
       cpuUtilization: Number(cpu.toFixed(3)),
       memoryUtilization: Number(memory.toFixed(3)),
-      throughputPerNode: Number(throughput.toFixed(3))
+      throughputPerNode: Number(throughput.toFixed(3)),
     };
   }
 
   private calculateLoadIndex(forecast: ScalingDecision['forecast']): number {
     const cpuRatio =
-      this.config.targetCpuUtilization === 0 ? 0 : forecast.cpuUtilization / this.config.targetCpuUtilization;
+      this.config.targetCpuUtilization === 0
+        ? 0
+        : forecast.cpuUtilization / this.config.targetCpuUtilization;
     const memoryRatio =
-      this.config.targetMemoryUtilization === 0 ? 0 : forecast.memoryUtilization / this.config.targetMemoryUtilization;
+      this.config.targetMemoryUtilization === 0
+        ? 0
+        : forecast.memoryUtilization / this.config.targetMemoryUtilization;
     const throughputRatio =
       this.config.targetThroughputPerNode === 0
         ? 0
@@ -243,22 +296,24 @@ export class ResourceOptimizationEngine {
     if (observationCount <= 0) {
       return 0;
     }
-    return Number(Math.min(1, observationCount / this.config.confidenceWindow).toFixed(3));
+    return Number(
+      Math.min(1, observationCount / this.config.confidenceWindow).toFixed(3),
+    );
   }
 
   private buildScalingReason(
     action: ScalingDecision['action'],
     loadIndex: number,
-    forecast: ScalingDecision['forecast']
+    forecast: ScalingDecision['forecast'],
   ): string {
     if (action === 'scale_up') {
       return `Predicted workload exceeds guardrails (load index ${loadIndex.toFixed(
-        2
+        2,
       )}); scaling up to maintain performance.`;
     }
     if (action === 'scale_down') {
       return `Forecast suggests excess capacity (load index ${loadIndex.toFixed(
-        2
+        2,
       )}); scaling down to improve efficiency.`;
     }
     return `Workload steady (load index ${loadIndex.toFixed(2)}); maintaining current capacity.`;
@@ -275,5 +330,5 @@ export type {
   SlowQueryRecord,
   TenantBudgetProfile,
   WorkloadBalancingPlan,
-  WorkloadSample
+  WorkloadSample,
 } from './types.js';

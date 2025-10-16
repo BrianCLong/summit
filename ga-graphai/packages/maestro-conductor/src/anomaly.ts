@@ -15,7 +15,7 @@ const DEFAULT_OPTIONS: Required<AnomalyDetectorOptions> = {
   windowSize: 25,
   zThreshold: 2.5,
   trendSlopeThreshold: 0.2,
-  minSamples: 6
+  minSamples: 6,
 };
 
 function computeMean(values: number[]): number {
@@ -58,7 +58,11 @@ function computeSlope(values: number[]): number {
   return (n * sumXY - sumX * sumY) / denominator;
 }
 
-function determineTrend(slope: number, current: number, mean: number): AnomalyTrend {
+function determineTrend(
+  slope: number,
+  current: number,
+  mean: number,
+): AnomalyTrend {
   if (Math.abs(current - mean) < mean * 0.05) {
     return 'oscillation';
   }
@@ -96,8 +100,15 @@ export class AnomalyDetector {
     const mean = computeMean(window.values);
     const std = computeStdDev(window.values, mean);
     const deviation = Math.abs(signal.value - mean);
-    const zScore = std === 0 ? (deviation === 0 ? 0 : deviation / Math.max(mean, 1)) : deviation / std;
-    const slope = computeSlope(window.values.slice(-Math.min(6, window.values.length)));
+    const zScore =
+      std === 0
+        ? deviation === 0
+          ? 0
+          : deviation / Math.max(mean, 1)
+        : deviation / std;
+    const slope = computeSlope(
+      window.values.slice(-Math.min(6, window.values.length)),
+    );
     const severityScore = Math.max(zScore, Math.abs(slope));
 
     if (severityScore < this.options.zThreshold) {
@@ -127,7 +138,7 @@ export class AnomalyDetector {
       trend,
       message,
       timestamp: signal.timestamp,
-      window: [...window.values]
+      window: [...window.values],
     };
   }
 }

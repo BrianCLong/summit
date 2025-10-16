@@ -20,28 +20,51 @@ describe('buildSelfEditEvaluationPlan', () => {
     });
 
     const ready = registry.register({ ...baseProposal, domain: 'compliance' });
-    registry.recordVerifierScore(ready.id, { verifier: 'baseline', score: 0.95, passed: true });
+    registry.recordVerifierScore(ready.id, {
+      verifier: 'baseline',
+      score: 0.95,
+      passed: true,
+    });
 
     now = new Date('2025-10-14T00:10:00.000Z');
-    const queued = registry.register({ ...baseProposal, domain: 'threat-intel' });
-    registry.recordVerifierScore(queued.id, { verifier: 'baseline', score: 0.85, passed: true });
+    const queued = registry.register({
+      ...baseProposal,
+      domain: 'threat-intel',
+    });
+    registry.recordVerifierScore(queued.id, {
+      verifier: 'baseline',
+      score: 0.85,
+      passed: true,
+    });
 
     now = new Date('2025-10-14T00:12:00.000Z');
-    const rejected = registry.register({ ...baseProposal, domain: 'compliance' });
-    registry.recordVerifierScore(rejected.id, { verifier: 'safety', score: 0.6, passed: false });
+    const rejected = registry.register({
+      ...baseProposal,
+      domain: 'compliance',
+    });
+    registry.recordVerifierScore(rejected.id, {
+      verifier: 'safety',
+      score: 0.6,
+      passed: false,
+    });
 
     now = new Date('2025-10-14T00:15:00.000Z');
-    const overflow = registry.register({ ...baseProposal, domain: 'compliance' });
+    const overflow = registry.register({
+      ...baseProposal,
+      domain: 'compliance',
+    });
 
     const plan = buildSelfEditEvaluationPlan(registry, {
       maxPerDomain: 1,
       now: new Date('2025-10-14T00:20:00.000Z'),
     });
 
-    expect(plan.map(item => item.record.id)).toEqual([ready.id, queued.id]);
-    expect(plan.every(item => item.domain === item.record.domain ?? 'general')).toBe(true);
-    expect(plan.find(item => item.record.id === rejected.id)).toBeUndefined();
-    expect(plan.find(item => item.record.id === overflow.id)).toBeUndefined();
+    expect(plan.map((item) => item.record.id)).toEqual([ready.id, queued.id]);
+    expect(
+      plan.every((item) => item.domain === item.record.domain ?? 'general'),
+    ).toBe(true);
+    expect(plan.find((item) => item.record.id === rejected.id)).toBeUndefined();
+    expect(plan.find((item) => item.record.id === overflow.id)).toBeUndefined();
   });
 
   it('allows rejected edits to be surfaced when explicitly requested', () => {
@@ -53,7 +76,11 @@ describe('buildSelfEditEvaluationPlan', () => {
     });
 
     const failed = registry.register({ ...baseProposal, domain: 'general' });
-    registry.recordVerifierScore(failed.id, { verifier: 'policy', score: 0.4, passed: false });
+    registry.recordVerifierScore(failed.id, {
+      verifier: 'policy',
+      score: 0.4,
+      passed: false,
+    });
 
     const plan = buildSelfEditEvaluationPlan(registry, {
       includeRejected: true,

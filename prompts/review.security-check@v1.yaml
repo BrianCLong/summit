@@ -1,15 +1,15 @@
 meta:
   id: review.security-check@v1
-  owner: "platform-security"
-  purpose: "Perform security review of code changes"
+  owner: 'platform-security'
+  purpose: 'Perform security review of code changes'
   guardrails:
-    - "Must identify potential security vulnerabilities"
-    - "Check for credential leaks and secrets"
-    - "Validate input sanitization and output encoding"
-    - "Ensure proper authentication and authorization"
+    - 'Must identify potential security vulnerabilities'
+    - 'Check for credential leaks and secrets'
+    - 'Validate input sanitization and output encoding'
+    - 'Ensure proper authentication and authorization'
   model_requirements:
     min_context_window: 12000
-    preferred_models: ["gpt-4", "claude-3-sonnet"]
+    preferred_models: ['gpt-4', 'claude-3-sonnet']
     max_tokens: 2500
 
 inputs:
@@ -20,24 +20,24 @@ inputs:
 
 template: |
   You are the Security Reviewer agent in Maestro Conductor v0.3. Budget: ${{budget_usd}}.
-  
+
   **Security Review Request**
-  
+
   **PR Description:**
   {{pr_description}}
-  
+
   **Files Changed:**
   {{#file_paths}}
   - {{.}}
   {{/file_paths}}
-  
+
   **Code Changes:**
   ```diff
   {{diff_content}}
   ```
-  
+
   **Perform comprehensive security analysis:**
-  
+
   ## 1. Vulnerability Assessment
   Scan for:
   - SQL injection risks
@@ -46,52 +46,52 @@ template: |
   - Authentication bypasses
   - Authorization flaws
   - Input validation issues
-  
+
   ## 2. Secrets and Credentials
   Check for:
   - Hardcoded passwords/API keys
   - Exposed configuration
   - Debug information leaks
   - Logging of sensitive data
-  
+
   ## 3. Dependencies and Libraries
   - New dependency security
   - Version compatibility
   - Known CVEs
-  
+
   ## 4. Data Handling
   - PII protection
   - Data encryption
   - Secure transmission
-  
+
   **Security Score:** [0-10] (10 = most secure)
   **Critical Issues:** [count]
   **Recommended Actions:**
   - [ ] Action 1
   - [ ] Action 2
-  
+
   **Approval Status:** APPROVED | REQUIRES_CHANGES | BLOCKED
 
 examples:
-  - name: "auth-endpoint-review"
+  - name: 'auth-endpoint-review'
     inputs:
       diff_content: "+app.post('/login', (req, res) => {\n+  const user = findUser(req.body.username);\n+  if (user.password === req.body.password) {\n+    res.json({token: generateToken(user)});\n+  }\n+});"
-      file_paths: ["src/auth.js"]
-      pr_description: "Add login endpoint"
+      file_paths: ['src/auth.js']
+      pr_description: 'Add login endpoint'
       budget_usd: 3.0
     expected_contains:
-      - "password"
-      - "security"
-      - "vulnerability"
-      - "REQUIRES_CHANGES"
-      
-  - name: "database-query-review"
+      - 'password'
+      - 'security'
+      - 'vulnerability'
+      - 'REQUIRES_CHANGES'
+
+  - name: 'database-query-review'
     inputs:
       diff_content: "+const query = `SELECT * FROM users WHERE id = ${userId}`;\\n+db.query(query);"
-      file_paths: ["src/database.js"]
-      pr_description: "Add user lookup query"
+      file_paths: ['src/database.js']
+      pr_description: 'Add user lookup query'
       budget_usd: 2.5
     expected_contains:
-      - "SQL injection"
-      - "parameterized"
-      - "Critical Issues"
+      - 'SQL injection'
+      - 'parameterized'
+      - 'Critical Issues'

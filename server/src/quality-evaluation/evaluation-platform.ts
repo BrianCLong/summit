@@ -6,7 +6,15 @@ interface SemanticSLO {
   id: string;
   name: string;
   description: string;
-  metricType: 'accuracy' | 'relevance' | 'coherence' | 'toxicity' | 'bias' | 'hallucination' | 'latency' | 'cost';
+  metricType:
+    | 'accuracy'
+    | 'relevance'
+    | 'coherence'
+    | 'toxicity'
+    | 'bias'
+    | 'hallucination'
+    | 'latency'
+    | 'cost';
   threshold: number;
   operator: 'gt' | 'lt' | 'eq' | 'gte' | 'lte';
   timeWindow: number; // minutes
@@ -42,7 +50,16 @@ interface QualityReport {
 const SemanticSLOSchema = z.object({
   name: z.string().min(1),
   description: z.string().min(1),
-  metricType: z.enum(['accuracy', 'relevance', 'coherence', 'toxicity', 'bias', 'hallucination', 'latency', 'cost']),
+  metricType: z.enum([
+    'accuracy',
+    'relevance',
+    'coherence',
+    'toxicity',
+    'bias',
+    'hallucination',
+    'latency',
+    'cost',
+  ]),
   threshold: z.number().min(0).max(1),
   operator: z.enum(['gt', 'lt', 'eq', 'gte', 'lte']),
   timeWindow: z.number().min(1).max(10080), // 1 minute to 1 week
@@ -55,25 +72,31 @@ const EvaluationRequestSchema = z.object({
   inputText: z.string().min(1),
   outputText: z.string().min(1),
   groundTruth: z.string().optional(),
-  evaluationTypes: z.array(z.string()).default(['accuracy', 'relevance', 'coherence']),
+  evaluationTypes: z
+    .array(z.string())
+    .default(['accuracy', 'relevance', 'coherence']),
   metadata: z.object({}).passthrough().optional(),
 });
 
 const BatchEvaluationSchema = z.object({
   modelId: z.string().min(1),
-  dataset: z.array(z.object({
-    input: z.string(),
-    output: z.string(),
-    groundTruth: z.string().optional(),
-    metadata: z.object({}).passthrough().optional(),
-  })),
-  evaluationTypes: z.array(z.string()).default(['accuracy', 'relevance', 'coherence']),
+  dataset: z.array(
+    z.object({
+      input: z.string(),
+      output: z.string(),
+      groundTruth: z.string().optional(),
+      metadata: z.object({}).passthrough().optional(),
+    }),
+  ),
+  evaluationTypes: z
+    .array(z.string())
+    .default(['accuracy', 'relevance', 'coherence']),
   sloIds: z.array(z.string()).optional(),
 });
 
 export class QualityEvaluationPlatform {
   private evaluators: Map<string, any> = new Map();
-  
+
   constructor() {
     this.initializeEvaluators();
   }
@@ -131,7 +154,7 @@ export class QualityEvaluationPlatform {
 
   async createSemanticSLO(tenantId: string, sloConfig: any): Promise<string> {
     const span = otelService.createSpan('quality-evaluation.create-slo');
-    
+
     try {
       const validatedConfig = SemanticSLOSchema.parse(sloConfig);
       const pool = getPostgresPool();
@@ -153,7 +176,7 @@ export class QualityEvaluationPlatform {
           validatedConfig.timeWindow,
           validatedConfig.evaluationMethod,
           validatedConfig.criticality,
-        ]
+        ],
       );
 
       // Create audit entry
@@ -170,7 +193,7 @@ export class QualityEvaluationPlatform {
             metricType: validatedConfig.metricType,
             threshold: validatedConfig.threshold,
           }),
-        ]
+        ],
       );
 
       otelService.addSpanAttributes({
@@ -188,9 +211,12 @@ export class QualityEvaluationPlatform {
     }
   }
 
-  async evaluateSingle(tenantId: string, request: any): Promise<EvaluationResult> {
+  async evaluateSingle(
+    tenantId: string,
+    request: any,
+  ): Promise<EvaluationResult> {
     const span = otelService.createSpan('quality-evaluation.evaluate-single');
-    
+
     try {
       const validatedRequest = EvaluationRequestSchema.parse(request);
       const pool = getPostgresPool();
@@ -198,18 +224,20 @@ export class QualityEvaluationPlatform {
 
       // Run all requested evaluations
       const metrics: Record<string, number> = {};
-      const evaluationPromises = validatedRequest.evaluationTypes.map(async (evalType) => {
-        if (this.evaluators.has(evalType)) {
-          const evaluator = this.evaluators.get(evalType);
-          const score = await evaluator.evaluate(
-            validatedRequest.inputText,
-            validatedRequest.outputText,
-            validatedRequest.groundTruth,
-            validatedRequest.metadata
-          );
-          metrics[evalType] = score;
-        }
-      });
+      const evaluationPromises = validatedRequest.evaluationTypes.map(
+        async (evalType) => {
+          if (this.evaluators.has(evalType)) {
+            const evaluator = this.evaluators.get(evalType);
+            const score = await evaluator.evaluate(
+              validatedRequest.inputText,
+              validatedRequest.outputText,
+              validatedRequest.groundTruth,
+              validatedRequest.metadata,
+            );
+            metrics[evalType] = score;
+          }
+        },
+      );
 
       await Promise.all(evaluationPromises);
 
@@ -246,12 +274,16 @@ export class QualityEvaluationPlatform {
           JSON.stringify(metrics),
           JSON.stringify(sloViolations),
           JSON.stringify(validatedRequest.metadata || {}),
-        ]
+        ],
       );
 
       // Create alerts for critical SLO violations
       if (sloViolations.length > 0) {
-        await this.createSLOAlerts(tenantId, validatedRequest.modelId, sloViolations);
+        await this.createSLOAlerts(
+          tenantId,
+          validatedRequest.modelId,
+          sloViolations,
+        );
       }
 
       otelService.addSpanAttributes({
@@ -270,21 +302,24 @@ export class QualityEvaluationPlatform {
     }
   }
 
-  async evaluateBatch(tenantId: string, request: any): Promise<{
+  async evaluateBatch(
+    tenantId: string,
+    request: any,
+  ): Promise<{
     evaluationId: string;
     results: EvaluationResult[];
     summary: any;
   }> {
     const span = otelService.createSpan('quality-evaluation.evaluate-batch');
-    
+
     try {
       const validatedRequest = BatchEvaluationSchema.parse(request);
       const evaluationId = `batch-eval-${tenantId}-${Date.now()}`;
-      
+
       // Process each item in the dataset
       const results: EvaluationResult[] = [];
       const batchMetrics: Record<string, number[]> = {};
-      
+
       for (const item of validatedRequest.dataset) {
         const singleRequest = {
           modelId: validatedRequest.modelId,
@@ -294,10 +329,10 @@ export class QualityEvaluationPlatform {
           evaluationTypes: validatedRequest.evaluationTypes,
           metadata: item.metadata,
         };
-        
+
         const result = await this.evaluateSingle(tenantId, singleRequest);
         results.push(result);
-        
+
         // Collect metrics for aggregation
         Object.entries(result.metrics).forEach(([metric, value]) => {
           if (!batchMetrics[metric]) batchMetrics[metric] = [];
@@ -310,7 +345,11 @@ export class QualityEvaluationPlatform {
         totalEvaluations: results.length,
         averageScores: this.calculateAverageScores(batchMetrics),
         sloComplianceRate: this.calculateSLOComplianceRate(results),
-        regressionDetected: await this.detectRegression(tenantId, validatedRequest.modelId, batchMetrics),
+        regressionDetected: await this.detectRegression(
+          tenantId,
+          validatedRequest.modelId,
+          batchMetrics,
+        ),
         distributionStats: this.calculateDistributionStats(batchMetrics),
       };
 
@@ -320,7 +359,13 @@ export class QualityEvaluationPlatform {
         `INSERT INTO batch_evaluations (
           id, tenant_id, model_id, dataset_size, summary, created_at
         ) VALUES ($1, $2, $3, $4, $5, now())`,
-        [evaluationId, tenantId, validatedRequest.modelId, results.length, JSON.stringify(summary)]
+        [
+          evaluationId,
+          tenantId,
+          validatedRequest.modelId,
+          results.length,
+          JSON.stringify(summary),
+        ],
       );
 
       otelService.addSpanAttributes({
@@ -339,13 +384,19 @@ export class QualityEvaluationPlatform {
     }
   }
 
-  async generateQualityReport(tenantId: string, modelId: string, timeRangeHours: number = 24): Promise<QualityReport> {
+  async generateQualityReport(
+    tenantId: string,
+    modelId: string,
+    timeRangeHours: number = 24,
+  ): Promise<QualityReport> {
     const span = otelService.createSpan('quality-evaluation.generate-report');
-    
+
     try {
       const pool = getPostgresPool();
       const endTime = new Date();
-      const startTime = new Date(endTime.getTime() - timeRangeHours * 60 * 60 * 1000);
+      const startTime = new Date(
+        endTime.getTime() - timeRangeHours * 60 * 60 * 1000,
+      );
 
       // Get evaluation results for time period
       const evaluationsResult = await pool.query(
@@ -353,29 +404,39 @@ export class QualityEvaluationPlatform {
          WHERE tenant_id = $1 AND model_id = $2 
          AND created_at BETWEEN $3 AND $4
          ORDER BY created_at DESC`,
-        [tenantId, modelId, startTime.toISOString(), endTime.toISOString()]
+        [tenantId, modelId, startTime.toISOString(), endTime.toISOString()],
       );
 
       const evaluations = evaluationsResult.rows;
-      
+
       if (evaluations.length === 0) {
-        throw new Error('No evaluation data found for the specified time range');
+        throw new Error(
+          'No evaluation data found for the specified time range',
+        );
       }
 
       // Aggregate metrics
       const aggregatedMetrics = this.aggregateMetrics(evaluations);
-      
+
       // Calculate SLO compliance
       const sloCompliance = this.calculateSLOCompliance(evaluations);
-      
+
       // Calculate overall quality score (weighted average of key metrics)
       const overallScore = this.calculateOverallScore(aggregatedMetrics);
-      
+
       // Generate recommendations
-      const recommendations = await this.generateRecommendations(tenantId, modelId, aggregatedMetrics, sloCompliance);
-      
+      const recommendations = await this.generateRecommendations(
+        tenantId,
+        modelId,
+        aggregatedMetrics,
+        sloCompliance,
+      );
+
       // Check for regressions
-      const regressionDetected = await this.detectRecentRegression(tenantId, modelId);
+      const regressionDetected = await this.detectRecentRegression(
+        tenantId,
+        modelId,
+      );
 
       const report: QualityReport = {
         id: `report-${tenantId}-${modelId}-${Date.now()}`,
@@ -406,7 +467,7 @@ export class QualityEvaluationPlatform {
           JSON.stringify(aggregatedMetrics),
           JSON.stringify(recommendations),
           regressionDetected,
-        ]
+        ],
       );
 
       return report;
@@ -420,14 +481,14 @@ export class QualityEvaluationPlatform {
 
   async getSLODashboard(tenantId: string): Promise<any> {
     const span = otelService.createSpan('quality-evaluation.slo-dashboard');
-    
+
     try {
       const pool = getPostgresPool();
 
       // Get all SLOs for tenant
       const slosResult = await pool.query(
         'SELECT * FROM semantic_slos WHERE tenant_id = $1 ORDER BY created_at DESC',
-        [tenantId]
+        [tenantId],
       );
 
       // Get recent SLO violations
@@ -439,7 +500,7 @@ export class QualityEvaluationPlatform {
          AND created_at > now() - interval '24 hours'
          ORDER BY created_at DESC
          LIMIT 100`,
-        [tenantId]
+        [tenantId],
       );
 
       // Calculate SLO health metrics
@@ -464,130 +525,203 @@ export class QualityEvaluationPlatform {
   }
 
   // Evaluation methods
-  private async evaluateAccuracy(input: string, output: string, groundTruth?: string, metadata?: any): Promise<number> {
+  private async evaluateAccuracy(
+    input: string,
+    output: string,
+    groundTruth?: string,
+    metadata?: any,
+  ): Promise<number> {
     if (!groundTruth) return 0.5; // Default score when no ground truth
-    
+
     // Semantic similarity using simple approach (in production, use embeddings)
-    const similarity = this.calculateStringSimilarity(output.toLowerCase(), groundTruth.toLowerCase());
-    
+    const similarity = this.calculateStringSimilarity(
+      output.toLowerCase(),
+      groundTruth.toLowerCase(),
+    );
+
     // Adjust based on metadata context if available
     if (metadata?.expectedAccuracy) {
       return Math.min(1.0, similarity * metadata.expectedAccuracy);
     }
-    
+
     return similarity;
   }
 
-  private async evaluateRelevance(input: string, output: string, groundTruth?: string, metadata?: any): Promise<number> {
+  private async evaluateRelevance(
+    input: string,
+    output: string,
+    groundTruth?: string,
+    metadata?: any,
+  ): Promise<number> {
     // Contextual relevance - how well does output address the input
     const inputKeywords = this.extractKeywords(input);
     const outputKeywords = this.extractKeywords(output);
-    
-    const relevanceScore = this.calculateKeywordOverlap(inputKeywords, outputKeywords);
-    
+
+    const relevanceScore = this.calculateKeywordOverlap(
+      inputKeywords,
+      outputKeywords,
+    );
+
     // Penalize very short or very long responses
-    const lengthPenalty = this.calculateLengthPenalty(output.length, input.length);
-    
+    const lengthPenalty = this.calculateLengthPenalty(
+      output.length,
+      input.length,
+    );
+
     return Math.max(0, relevanceScore - lengthPenalty);
   }
 
-  private async evaluateCoherence(input: string, output: string, groundTruth?: string, metadata?: any): Promise<number> {
+  private async evaluateCoherence(
+    input: string,
+    output: string,
+    groundTruth?: string,
+    metadata?: any,
+  ): Promise<number> {
     // Logical flow and coherence
-    const sentences = output.split(/[.!?]+/).filter(s => s.trim().length > 0);
-    
+    const sentences = output.split(/[.!?]+/).filter((s) => s.trim().length > 0);
+
     if (sentences.length < 2) return 0.7; // Single sentence gets moderate score
-    
+
     let coherenceScore = 0.8; // Base score
-    
+
     // Check for contradictions (simple approach)
     const contradictionPenalty = this.detectSimpleContradictions(sentences);
     coherenceScore -= contradictionPenalty;
-    
+
     // Check for logical flow
     const flowScore = this.evaluateLogicalFlow(sentences);
     coherenceScore = (coherenceScore + flowScore) / 2;
-    
+
     return Math.max(0, Math.min(1, coherenceScore));
   }
 
-  private async evaluateToxicity(input: string, output: string, groundTruth?: string, metadata?: any): Promise<number> {
+  private async evaluateToxicity(
+    input: string,
+    output: string,
+    groundTruth?: string,
+    metadata?: any,
+  ): Promise<number> {
     // Toxicity detection (inverted - higher score means less toxic)
-    const toxicKeywords = ['hate', 'violence', 'harmful', 'offensive', 'toxic', 'discriminatory'];
-    
+    const toxicKeywords = [
+      'hate',
+      'violence',
+      'harmful',
+      'offensive',
+      'toxic',
+      'discriminatory',
+    ];
+
     const outputWords = output.toLowerCase().split(/\W+/);
-    const toxicCount = outputWords.filter(word => toxicKeywords.includes(word)).length;
-    
+    const toxicCount = outputWords.filter((word) =>
+      toxicKeywords.includes(word),
+    ).length;
+
     // Score is inverted (1.0 = no toxicity, 0.0 = highly toxic)
-    const toxicityScore = Math.max(0, 1 - (toxicCount / outputWords.length) * 10);
-    
+    const toxicityScore = Math.max(
+      0,
+      1 - (toxicCount / outputWords.length) * 10,
+    );
+
     return toxicityScore;
   }
 
-  private async evaluateBias(input: string, output: string, groundTruth?: string, metadata?: any): Promise<number> {
+  private async evaluateBias(
+    input: string,
+    output: string,
+    groundTruth?: string,
+    metadata?: any,
+  ): Promise<number> {
     // Bias detection across demographics (simplified approach)
     const biasIndicators = ['gender', 'race', 'age', 'religion', 'nationality'];
-    const stereotypeWords = ['always', 'never', 'all', 'none', 'typical', 'usually'];
-    
+    const stereotypeWords = [
+      'always',
+      'never',
+      'all',
+      'none',
+      'typical',
+      'usually',
+    ];
+
     const outputLower = output.toLowerCase();
     let biasScore = 1.0;
-    
+
     // Check for stereotype language with demographic terms
-    biasIndicators.forEach(indicator => {
+    biasIndicators.forEach((indicator) => {
       if (outputLower.includes(indicator)) {
-        stereotypeWords.forEach(stereotype => {
+        stereotypeWords.forEach((stereotype) => {
           if (outputLower.includes(stereotype)) {
             biasScore -= 0.1;
           }
         });
       }
     });
-    
+
     return Math.max(0, biasScore);
   }
 
-  private async evaluateHallucination(input: string, output: string, groundTruth?: string, metadata?: any): Promise<number> {
+  private async evaluateHallucination(
+    input: string,
+    output: string,
+    groundTruth?: string,
+    metadata?: any,
+  ): Promise<number> {
     // Factual accuracy assessment (simplified - in production use fact-checking APIs)
-    
+
     // Check for unsupported claims
-    const claimIndicators = ['studies show', 'research proves', 'scientists say', 'data indicates'];
+    const claimIndicators = [
+      'studies show',
+      'research proves',
+      'scientists say',
+      'data indicates',
+    ];
     const outputLower = output.toLowerCase();
-    
+
     let hallucinationScore = 0.9; // Base score assuming mostly factual
-    
-    claimIndicators.forEach(indicator => {
+
+    claimIndicators.forEach((indicator) => {
       if (outputLower.includes(indicator)) {
         // In production, verify these claims against knowledge base
         hallucinationScore -= 0.1; // Penalty for unverified claims
       }
     });
-    
+
     // Check for specific numbers/dates without context
     const numberPattern = /\b\d{4}\b|\b\d+%\b|\b\$\d+/g;
     const numbers = output.match(numberPattern) || [];
     if (numbers.length > 2) {
       hallucinationScore -= 0.05 * numbers.length; // Small penalty for many specific numbers
     }
-    
+
     return Math.max(0, hallucinationScore);
   }
 
-  private async evaluateLatency(input: string, output: string, groundTruth?: string, metadata?: any): Promise<number> {
+  private async evaluateLatency(
+    input: string,
+    output: string,
+    groundTruth?: string,
+    metadata?: any,
+  ): Promise<number> {
     const latencyMs = metadata?.latencyMs || 1000; // Default 1s if not provided
     const targetLatency = metadata?.targetLatencyMs || 2000; // Default 2s target
-    
+
     if (latencyMs <= targetLatency) return 1.0;
-    
+
     // Exponential decay for latency penalty
     const latencyRatio = latencyMs / targetLatency;
     return Math.max(0, 1 / Math.pow(latencyRatio, 2));
   }
 
-  private async evaluateCost(input: string, output: string, groundTruth?: string, metadata?: any): Promise<number> {
+  private async evaluateCost(
+    input: string,
+    output: string,
+    groundTruth?: string,
+    metadata?: any,
+  ): Promise<number> {
     const costUSD = metadata?.costUSD || 0.001; // Default cost
     const targetCost = metadata?.targetCostUSD || 0.01; // Default target
-    
+
     if (costUSD <= targetCost) return 1.0;
-    
+
     // Linear decay for cost penalty
     const costRatio = costUSD / targetCost;
     return Math.max(0, 1 - (costRatio - 1));
@@ -598,10 +732,10 @@ export class QualityEvaluationPlatform {
     // Simple Jaccard similarity
     const set1 = new Set(str1.split(' '));
     const set2 = new Set(str2.split(' '));
-    
-    const intersection = new Set([...set1].filter(x => set2.has(x)));
+
+    const intersection = new Set([...set1].filter((x) => set2.has(x)));
     const union = new Set([...set1, ...set2]);
-    
+
     return intersection.size / union.size;
   }
 
@@ -610,22 +744,28 @@ export class QualityEvaluationPlatform {
     return text
       .toLowerCase()
       .split(/\W+/)
-      .filter(word => word.length > 3)
+      .filter((word) => word.length > 3)
       .slice(0, 20); // Top 20 words
   }
 
-  private calculateKeywordOverlap(keywords1: string[], keywords2: string[]): number {
+  private calculateKeywordOverlap(
+    keywords1: string[],
+    keywords2: string[],
+  ): number {
     const set1 = new Set(keywords1);
     const set2 = new Set(keywords2);
-    
-    const intersection = new Set([...set1].filter(x => set2.has(x)));
+
+    const intersection = new Set([...set1].filter((x) => set2.has(x)));
     return intersection.size / Math.max(set1.size, set2.size);
   }
 
-  private calculateLengthPenalty(outputLength: number, inputLength: number): number {
+  private calculateLengthPenalty(
+    outputLength: number,
+    inputLength: number,
+  ): number {
     const expectedLength = inputLength * 2; // Rough heuristic
     const lengthRatio = outputLength / expectedLength;
-    
+
     if (lengthRatio > 0.5 && lengthRatio < 2.0) return 0; // Good length
     if (lengthRatio <= 0.5) return 0.2; // Too short
     return Math.min(0.3, (lengthRatio - 2.0) * 0.1); // Too long
@@ -634,49 +774,57 @@ export class QualityEvaluationPlatform {
   private detectSimpleContradictions(sentences: string[]): number {
     // Simple contradiction detection
     let contradictions = 0;
-    
+
     for (let i = 0; i < sentences.length - 1; i++) {
       const sent1 = sentences[i].toLowerCase();
       for (let j = i + 1; j < sentences.length; j++) {
         const sent2 = sentences[j].toLowerCase();
-        
+
         // Check for negation patterns
-        if ((sent1.includes('not') && !sent2.includes('not')) ||
-            (!sent1.includes('not') && sent2.includes('not'))) {
+        if (
+          (sent1.includes('not') && !sent2.includes('not')) ||
+          (!sent1.includes('not') && sent2.includes('not'))
+        ) {
           const words1 = new Set(sent1.split(' '));
           const words2 = new Set(sent2.split(' '));
-          const overlap = new Set([...words1].filter(x => words2.has(x)));
-          
+          const overlap = new Set([...words1].filter((x) => words2.has(x)));
+
           if (overlap.size > 2) contradictions++;
         }
       }
     }
-    
+
     return contradictions * 0.1; // Penalty per contradiction
   }
 
   private evaluateLogicalFlow(sentences: string[]): number {
     // Simple logical flow assessment
     let flowScore = 0.8;
-    
+
     for (let i = 0; i < sentences.length - 1; i++) {
       const sent1 = sentences[i].toLowerCase();
       const sent2 = sentences[i + 1].toLowerCase();
-      
+
       // Check for transition words
-      const transitions = ['however', 'therefore', 'furthermore', 'additionally', 'consequently'];
-      const hasTransition = transitions.some(t => sent2.includes(t));
-      
+      const transitions = [
+        'however',
+        'therefore',
+        'furthermore',
+        'additionally',
+        'consequently',
+      ];
+      const hasTransition = transitions.some((t) => sent2.includes(t));
+
       if (hasTransition) flowScore += 0.05;
-      
+
       // Check for topic continuity
       const words1 = new Set(sent1.split(' '));
       const words2 = new Set(sent2.split(' '));
-      const continuity = new Set([...words1].filter(x => words2.has(x))).size;
-      
+      const continuity = new Set([...words1].filter((x) => words2.has(x))).size;
+
       if (continuity === 0) flowScore -= 0.1; // No word overlap might indicate topic jump
     }
-    
+
     return Math.max(0, Math.min(1, flowScore));
   }
 
@@ -684,10 +832,10 @@ export class QualityEvaluationPlatform {
     const pool = getPostgresPool();
     const result = await pool.query(
       'SELECT * FROM semantic_slos WHERE tenant_id = $1',
-      [tenantId]
+      [tenantId],
     );
-    
-    return result.rows.map(row => ({
+
+    return result.rows.map((row) => ({
       id: row.id,
       name: row.name,
       description: row.description,
@@ -700,13 +848,16 @@ export class QualityEvaluationPlatform {
     }));
   }
 
-  private checkSLOViolations(metrics: Record<string, number>, slos: SemanticSLO[]): string[] {
+  private checkSLOViolations(
+    metrics: Record<string, number>,
+    slos: SemanticSLO[],
+  ): string[] {
     const violations: string[] = [];
-    
-    slos.forEach(slo => {
+
+    slos.forEach((slo) => {
       const metricValue = metrics[slo.metricType];
       if (metricValue === undefined) return;
-      
+
       let violated = false;
       switch (slo.operator) {
         case 'gt':
@@ -725,64 +876,79 @@ export class QualityEvaluationPlatform {
           violated = Math.abs(metricValue - slo.threshold) > 0.05;
           break;
       }
-      
+
       if (violated) {
         violations.push(slo.id);
       }
     });
-    
+
     return violations;
   }
 
-  private async createSLOAlerts(tenantId: string, modelId: string, violations: string[]): Promise<void> {
+  private async createSLOAlerts(
+    tenantId: string,
+    modelId: string,
+    violations: string[],
+  ): Promise<void> {
     const pool = getPostgresPool();
-    
+
     for (const violationSloId of violations) {
       await pool.query(
         `INSERT INTO slo_alerts (
           tenant_id, model_id, slo_id, alert_level, created_at
         ) VALUES ($1, $2, $3, $4, now())`,
-        [tenantId, modelId, violationSloId, 'warning']
+        [tenantId, modelId, violationSloId, 'warning'],
       );
     }
   }
 
-  private calculateAverageScores(batchMetrics: Record<string, number[]>): Record<string, number> {
+  private calculateAverageScores(
+    batchMetrics: Record<string, number[]>,
+  ): Record<string, number> {
     const averages: Record<string, number> = {};
-    
+
     Object.entries(batchMetrics).forEach(([metric, values]) => {
-      averages[metric] = values.reduce((sum, val) => sum + val, 0) / values.length;
+      averages[metric] =
+        values.reduce((sum, val) => sum + val, 0) / values.length;
     });
-    
+
     return averages;
   }
 
   private calculateSLOComplianceRate(results: EvaluationResult[]): number {
     if (results.length === 0) return 1.0;
-    
-    const compliantResults = results.filter(r => r.sloViolations.length === 0);
+
+    const compliantResults = results.filter(
+      (r) => r.sloViolations.length === 0,
+    );
     return compliantResults.length / results.length;
   }
 
-  private async detectRegression(tenantId: string, modelId: string, currentMetrics: Record<string, number[]>): Promise<boolean> {
+  private async detectRegression(
+    tenantId: string,
+    modelId: string,
+    currentMetrics: Record<string, number[]>,
+  ): Promise<boolean> {
     // Compare with historical data (simplified)
     const pool = getPostgresPool();
-    
+
     const historicalResult = await pool.query(
       `SELECT metrics FROM batch_evaluations 
        WHERE tenant_id = $1 AND model_id = $2 
        AND created_at > now() - interval '7 days'
        AND created_at < now() - interval '1 day'
        ORDER BY created_at DESC LIMIT 5`,
-      [tenantId, modelId]
+      [tenantId, modelId],
     );
-    
+
     if (historicalResult.rows.length === 0) return false;
-    
+
     // Simple regression detection - check if current scores are significantly lower
     const currentAverages = this.calculateAverageScores(currentMetrics);
-    const historicalAverages = this.calculateHistoricalAverages(historicalResult.rows);
-    
+    const historicalAverages = this.calculateHistoricalAverages(
+      historicalResult.rows,
+    );
+
     let significantDeclines = 0;
     Object.entries(currentAverages).forEach(([metric, currentValue]) => {
       const historicalValue = historicalAverages[metric];
@@ -790,38 +956,47 @@ export class QualityEvaluationPlatform {
         significantDeclines++;
       }
     });
-    
+
     return significantDeclines >= 2; // Regression if 2+ metrics declined significantly
   }
 
-  private calculateDistributionStats(batchMetrics: Record<string, number[]>): any {
+  private calculateDistributionStats(
+    batchMetrics: Record<string, number[]>,
+  ): any {
     const stats: any = {};
-    
+
     Object.entries(batchMetrics).forEach(([metric, values]) => {
       values.sort((a, b) => a - b);
       const mean = values.reduce((sum, val) => sum + val, 0) / values.length;
       const median = values[Math.floor(values.length / 2)];
       const p90 = values[Math.floor(values.length * 0.9)];
       const p99 = values[Math.floor(values.length * 0.99)];
-      
-      stats[metric] = { mean, median, p90, p99, min: values[0], max: values[values.length - 1] };
+
+      stats[metric] = {
+        mean,
+        median,
+        p90,
+        p99,
+        min: values[0],
+        max: values[values.length - 1],
+      };
     });
-    
+
     return stats;
   }
 
   private aggregateMetrics(evaluations: any[]): Record<string, any> {
     const aggregated: Record<string, any> = {};
     const metricsByType: Record<string, number[]> = {};
-    
-    evaluations.forEach(eval => {
+
+    evaluations.forEach((eval) => {
       const metrics = JSON.parse(eval.metrics);
       Object.entries(metrics).forEach(([metric, value]) => {
         if (!metricsByType[metric]) metricsByType[metric] = [];
         metricsByType[metric].push(value as number);
       });
     });
-    
+
     Object.entries(metricsByType).forEach(([metric, values]) => {
       values.sort((a, b) => a - b);
       aggregated[metric] = {
@@ -833,22 +1008,24 @@ export class QualityEvaluationPlatform {
         count: values.length,
       };
     });
-    
+
     return aggregated;
   }
 
   private calculateSLOCompliance(evaluations: any[]): number {
     if (evaluations.length === 0) return 1.0;
-    
-    const compliantCount = evaluations.filter(eval => {
+
+    const compliantCount = evaluations.filter((eval) => {
       const violations = JSON.parse(eval.slo_violations);
       return violations.length === 0;
     }).length;
-    
+
     return compliantCount / evaluations.length;
   }
 
-  private calculateOverallScore(aggregatedMetrics: Record<string, any>): number {
+  private calculateOverallScore(
+    aggregatedMetrics: Record<string, any>,
+  ): number {
     // Weighted average of key metrics
     const weights = {
       accuracy: 0.3,
@@ -857,109 +1034,129 @@ export class QualityEvaluationPlatform {
       toxicity: 0.15,
       bias: 0.1,
     };
-    
+
     let weightedSum = 0;
     let totalWeight = 0;
-    
+
     Object.entries(weights).forEach(([metric, weight]) => {
       if (aggregatedMetrics[metric]) {
         weightedSum += aggregatedMetrics[metric].mean * weight;
         totalWeight += weight;
       }
     });
-    
+
     return totalWeight > 0 ? weightedSum / totalWeight : 0.5;
   }
 
   private async generateRecommendations(
-    tenantId: string, 
-    modelId: string, 
-    metrics: Record<string, any>, 
-    sloCompliance: number
+    tenantId: string,
+    modelId: string,
+    metrics: Record<string, any>,
+    sloCompliance: number,
   ): Promise<string[]> {
     const recommendations: string[] = [];
-    
+
     // Accuracy recommendations
     if (metrics.accuracy && metrics.accuracy.mean < 0.7) {
-      recommendations.push('Consider fine-tuning the model with domain-specific data to improve accuracy');
+      recommendations.push(
+        'Consider fine-tuning the model with domain-specific data to improve accuracy',
+      );
     }
-    
+
     // Relevance recommendations
     if (metrics.relevance && metrics.relevance.mean < 0.6) {
-      recommendations.push('Review prompt engineering to improve response relevance');
+      recommendations.push(
+        'Review prompt engineering to improve response relevance',
+      );
     }
-    
+
     // Coherence recommendations
     if (metrics.coherence && metrics.coherence.mean < 0.7) {
-      recommendations.push('Consider using a model with better reasoning capabilities');
+      recommendations.push(
+        'Consider using a model with better reasoning capabilities',
+      );
     }
-    
+
     // Toxicity recommendations
     if (metrics.toxicity && metrics.toxicity.mean < 0.9) {
-      recommendations.push('Implement content filtering to reduce harmful outputs');
+      recommendations.push(
+        'Implement content filtering to reduce harmful outputs',
+      );
     }
-    
+
     // Bias recommendations
     if (metrics.bias && metrics.bias.mean < 0.8) {
-      recommendations.push('Review training data for bias and consider bias mitigation techniques');
+      recommendations.push(
+        'Review training data for bias and consider bias mitigation techniques',
+      );
     }
-    
+
     // SLO compliance recommendations
     if (sloCompliance < 0.9) {
-      recommendations.push('Review and adjust SLO thresholds or improve model performance');
+      recommendations.push(
+        'Review and adjust SLO thresholds or improve model performance',
+      );
     }
-    
+
     // Latency recommendations
     if (metrics.latency && metrics.latency.mean < 0.8) {
-      recommendations.push('Consider model optimization or infrastructure scaling to improve response times');
+      recommendations.push(
+        'Consider model optimization or infrastructure scaling to improve response times',
+      );
     }
-    
+
     // Default recommendation
     if (recommendations.length === 0) {
       recommendations.push('Model performance is within acceptable ranges');
-      recommendations.push('Continue monitoring for any performance degradation');
+      recommendations.push(
+        'Continue monitoring for any performance degradation',
+      );
     }
-    
+
     return recommendations;
   }
 
-  private async detectRecentRegression(tenantId: string, modelId: string): Promise<boolean> {
+  private async detectRecentRegression(
+    tenantId: string,
+    modelId: string,
+  ): Promise<boolean> {
     const pool = getPostgresPool();
-    
+
     const recentResults = await pool.query(
       `SELECT overall_score FROM quality_reports 
        WHERE tenant_id = $1 AND model_id = $2 
        ORDER BY created_at DESC LIMIT 5`,
-      [tenantId, modelId]
+      [tenantId, modelId],
     );
-    
+
     if (recentResults.rows.length < 3) return false;
-    
-    const scores = recentResults.rows.map(row => row.overall_score);
+
+    const scores = recentResults.rows.map((row) => row.overall_score);
     const trend = this.calculateTrend(scores);
-    
+
     return trend < -0.05; // Significant downward trend
   }
 
   private async calculateSLOHealth(tenantId: string): Promise<any> {
     const pool = getPostgresPool();
-    
+
     // Get SLO violation rates for the last 24 hours
     const violationsResult = await pool.query(
       `SELECT COUNT(*) as total_evaluations,
               SUM(CASE WHEN JSON_ARRAY_LENGTH(slo_violations) > 0 THEN 1 ELSE 0 END) as violations
        FROM evaluation_results 
        WHERE tenant_id = $1 AND created_at > now() - interval '24 hours'`,
-      [tenantId]
+      [tenantId],
     );
-    
+
     const { total_evaluations, violations } = violationsResult.rows[0];
-    const violationRate = total_evaluations > 0 ? violations / total_evaluations : 0;
-    
+    const violationRate =
+      total_evaluations > 0 ? violations / total_evaluations : 0;
+
     let overallHealth = 'healthy';
     if (violationRate > 0.1) overallHealth = 'degraded';
     if (violationRate > 0.3) overallHealth = 'critical';
-    
+
     return {
       overallHealth,
       violationRate,
@@ -968,10 +1165,12 @@ export class QualityEvaluationPlatform {
     };
   }
 
-  private calculateHistoricalAverages(historicalData: any[]): Record<string, number> {
+  private calculateHistoricalAverages(
+    historicalData: any[],
+  ): Record<string, number> {
     const allMetrics: Record<string, number[]> = {};
-    
-    historicalData.forEach(data => {
+
+    historicalData.forEach((data) => {
       const summary = JSON.parse(data.metrics);
       if (summary.averageScores) {
         Object.entries(summary.averageScores).forEach(([metric, value]) => {
@@ -980,25 +1179,26 @@ export class QualityEvaluationPlatform {
         });
       }
     });
-    
+
     const averages: Record<string, number> = {};
     Object.entries(allMetrics).forEach(([metric, values]) => {
-      averages[metric] = values.reduce((sum, val) => sum + val, 0) / values.length;
+      averages[metric] =
+        values.reduce((sum, val) => sum + val, 0) / values.length;
     });
-    
+
     return averages;
   }
 
   private calculateTrend(values: number[]): number {
     if (values.length < 2) return 0;
-    
+
     // Simple linear trend calculation
     const n = values.length;
     const sumX = (n * (n - 1)) / 2;
     const sumY = values.reduce((sum, val) => sum + val, 0);
-    const sumXY = values.reduce((sum, val, idx) => sum + (idx * val), 0);
-    const sumX2 = values.reduce((sum, _, idx) => sum + (idx * idx), 0);
-    
+    const sumXY = values.reduce((sum, val, idx) => sum + idx * val, 0);
+    const sumX2 = values.reduce((sum, _, idx) => sum + idx * idx, 0);
+
     const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
     return slope;
   }

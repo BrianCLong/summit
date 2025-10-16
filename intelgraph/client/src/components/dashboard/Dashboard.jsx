@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import {
   Box,
   Typography,
@@ -8,43 +8,95 @@ import {
   Button,
   Chip,
   LinearProgress,
-} from '@mui/material'
-import { Add as AddIcon, TrendingUp, Group, AccountTree, Assessment } from '@mui/icons-material'
-import { useNavigate } from 'react-router-dom'
+} from '@mui/material';
+import {
+  Add as AddIcon,
+  TrendingUp,
+  Group,
+  AccountTree,
+  Assessment,
+} from '@mui/icons-material';
+import { useNavigate } from 'react-router-dom';
 
 function Dashboard() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const stats = [
-    { label: 'Active Investigations', value: '12', icon: <Assessment />, color: 'primary' },
-    { label: 'Total Entities', value: '1,247', icon: <Group />, color: 'secondary' },
-    { label: 'Relationships', value: '3,891', icon: <AccountTree />, color: 'success' },
+    {
+      label: 'Active Investigations',
+      value: '12',
+      icon: <Assessment />,
+      color: 'primary',
+    },
+    {
+      label: 'Total Entities',
+      value: '1,247',
+      icon: <Group />,
+      color: 'secondary',
+    },
+    {
+      label: 'Relationships',
+      value: '3,891',
+      icon: <AccountTree />,
+      color: 'success',
+    },
     { label: 'This Month', value: '+23%', icon: <TrendingUp />, color: 'info' },
-  ]
+  ];
 
   const recentInvestigations = [
-    { id: 1, title: 'Financial Network Analysis', status: 'active', entities: 45, updated: '2 hours ago' },
-    { id: 2, title: 'Supply Chain Investigation', status: 'pending', entities: 78, updated: '5 hours ago' },
-    { id: 3, title: 'Communication Pattern Analysis', status: 'completed', entities: 123, updated: '1 day ago' },
-    { id: 4, title: 'Geographic Movement Tracking', status: 'active', entities: 34, updated: '2 days ago' },
-  ]
+    {
+      id: 1,
+      title: 'Financial Network Analysis',
+      status: 'active',
+      entities: 45,
+      updated: '2 hours ago',
+    },
+    {
+      id: 2,
+      title: 'Supply Chain Investigation',
+      status: 'pending',
+      entities: 78,
+      updated: '5 hours ago',
+    },
+    {
+      id: 3,
+      title: 'Communication Pattern Analysis',
+      status: 'completed',
+      entities: 123,
+      updated: '1 day ago',
+    },
+    {
+      id: 4,
+      title: 'Geographic Movement Tracking',
+      status: 'active',
+      entities: 34,
+      updated: '2 days ago',
+    },
+  ];
 
   const getStatusColor = (status) => {
     switch (status) {
       case 'active':
-        return 'success'
+        return 'success';
       case 'pending':
-        return 'warning'
+        return 'warning';
       case 'completed':
-        return 'info'
+        return 'info';
       default:
-        return 'default'
+        return 'default';
     }
-  }
+  };
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          mb: 4,
+        }}
+      >
         <Typography variant="h4" component="h1" fontWeight="bold">
           Dashboard
         </Typography>
@@ -115,10 +167,15 @@ function Dashboard() {
                         {investigation.title}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
-                        {investigation.entities} entities • Updated {investigation.updated}
+                        {investigation.entities} entities • Updated{' '}
+                        {investigation.updated}
                       </Typography>
                     </Box>
-                    <Chip label={investigation.status} color={getStatusColor(investigation.status)} size="small" />
+                    <Chip
+                      label={investigation.status}
+                      color={getStatusColor(investigation.status)}
+                      size="small"
+                    />
                   </Box>
                 ))}
               </Box>
@@ -148,7 +205,7 @@ function Dashboard() {
         </Grid>
       </Grid>
     </Box>
-  )
+  );
 }
 
-export default Dashboard
+export default Dashboard;

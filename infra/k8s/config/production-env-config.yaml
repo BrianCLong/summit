@@ -11,118 +11,118 @@ metadata:
     environment: production
 data:
   # Core Application Configuration
-  NODE_ENV: "production"
-  LOG_LEVEL: "info"
-  API_VERSION: "2.0.0-production"
-  
+  NODE_ENV: 'production'
+  LOG_LEVEL: 'info'
+  API_VERSION: '2.0.0-production'
+
   # Database Configuration
-  DATABASE_HOST: "postgres-conductor.intelgraph-prod.svc.cluster.local"
-  DATABASE_PORT: "5432"
-  DATABASE_NAME: "maestro_conductor_prod"
-  DATABASE_POOL_MIN: "5"
-  DATABASE_POOL_MAX: "50"
-  DATABASE_QUERY_TIMEOUT: "30000"
-  DATABASE_SSL: "true"
-  
+  DATABASE_HOST: 'postgres-conductor.intelgraph-prod.svc.cluster.local'
+  DATABASE_PORT: '5432'
+  DATABASE_NAME: 'maestro_conductor_prod'
+  DATABASE_POOL_MIN: '5'
+  DATABASE_POOL_MAX: '50'
+  DATABASE_QUERY_TIMEOUT: '30000'
+  DATABASE_SSL: 'true'
+
   # Redis Configuration
-  REDIS_HOST: "redis-conductor.intelgraph-prod.svc.cluster.local"
-  REDIS_PORT: "6379"
-  REDIS_DB: "0"
-  REDIS_KEY_PREFIX: "maestro:prod:"
-  REDIS_CONNECTION_POOL_SIZE: "20"
-  
+  REDIS_HOST: 'redis-conductor.intelgraph-prod.svc.cluster.local'
+  REDIS_PORT: '6379'
+  REDIS_DB: '0'
+  REDIS_KEY_PREFIX: 'maestro:prod:'
+  REDIS_CONNECTION_POOL_SIZE: '20'
+
   # Authentication Configuration
-  AUTH_ENABLED: "true"
-  RBAC_ENABLED: "true"
-  RBAC_ROLES_CLAIM: "groups"
-  RBAC_DEFAULT_ROLE: "viewer"
-  JWT_ISSUER: "https://maestro.intelgraph.io"
-  JWT_AUDIENCE: "intelgraph-platform"
-  JWT_ROTATION_INTERVAL_MS: "86400000" # 24 hours
-  JWT_VALIDITY_MS: "604800000" # 7 days
-  
+  AUTH_ENABLED: 'true'
+  RBAC_ENABLED: 'true'
+  RBAC_ROLES_CLAIM: 'groups'
+  RBAC_DEFAULT_ROLE: 'viewer'
+  JWT_ISSUER: 'https://maestro.intelgraph.io'
+  JWT_AUDIENCE: 'intelgraph-platform'
+  JWT_ROTATION_INTERVAL_MS: '86400000' # 24 hours
+  JWT_VALIDITY_MS: '604800000' # 7 days
+
   # OIDC Configuration
-  OIDC_ENABLED: "true"
-  OIDC_ISSUER_URL: "https://auth.intelgraph.io"
-  OIDC_CLIENT_ID: "maestro-conductor-prod"
-  OIDC_SCOPES: "openid,profile,email,groups"
-  OIDC_RESPONSE_TYPE: "code"
-  OIDC_REDIRECT_URI: "https://maestro.intelgraph.io/conductor/auth/callback"
-  OIDC_POST_LOGOUT_REDIRECT_URI: "https://maestro.intelgraph.io/conductor"
-  
+  OIDC_ENABLED: 'true'
+  OIDC_ISSUER_URL: 'https://auth.intelgraph.io'
+  OIDC_CLIENT_ID: 'maestro-conductor-prod'
+  OIDC_SCOPES: 'openid,profile,email,groups'
+  OIDC_RESPONSE_TYPE: 'code'
+  OIDC_REDIRECT_URI: 'https://maestro.intelgraph.io/conductor/auth/callback'
+  OIDC_POST_LOGOUT_REDIRECT_URI: 'https://maestro.intelgraph.io/conductor'
+
   # Rate Limiting Configuration
-  RATE_LIMIT_WINDOW_MS: "60000" # 1 minute
-  RATE_LIMIT_MAX_REQUESTS: "1000"
-  RATE_LIMIT_SKIP_SUCCESSFUL_REQUESTS: "false"
-  RATE_LIMIT_SKIP_FAILED_REQUESTS: "false"
-  
+  RATE_LIMIT_WINDOW_MS: '60000' # 1 minute
+  RATE_LIMIT_MAX_REQUESTS: '1000'
+  RATE_LIMIT_SKIP_SUCCESSFUL_REQUESTS: 'false'
+  RATE_LIMIT_SKIP_FAILED_REQUESTS: 'false'
+
   # Orchestration Configuration
-  ORCHESTRATION_TIMEOUT_MS: "300000" # 5 minutes
-  ORCHESTRATION_MAX_CONCURRENT: "100"
-  ORCHESTRATION_QUEUE_SIZE: "1000"
-  ORCHESTRATION_RETRY_ATTEMPTS: "3"
-  ORCHESTRATION_RETRY_DELAY_MS: "5000"
-  
+  ORCHESTRATION_TIMEOUT_MS: '300000' # 5 minutes
+  ORCHESTRATION_MAX_CONCURRENT: '100'
+  ORCHESTRATION_QUEUE_SIZE: '1000'
+  ORCHESTRATION_RETRY_ATTEMPTS: '3'
+  ORCHESTRATION_RETRY_DELAY_MS: '5000'
+
   # Model Configuration
-  MODEL_TIMEOUT_MS: "120000" # 2 minutes
-  MODEL_MAX_TOKENS: "4096"
-  MODEL_TEMPERATURE: "0.1"
-  MODEL_TOP_P: "0.9"
-  
+  MODEL_TIMEOUT_MS: '120000' # 2 minutes
+  MODEL_MAX_TOKENS: '4096'
+  MODEL_TEMPERATURE: '0.1'
+  MODEL_TOP_P: '0.9'
+
   # Monitoring Configuration
-  METRICS_ENABLED: "true"
-  METRICS_PORT: "9090"
-  METRICS_PATH: "/metrics"
-  HEALTH_CHECK_INTERVAL_MS: "30000"
-  
+  METRICS_ENABLED: 'true'
+  METRICS_PORT: '9090'
+  METRICS_PATH: '/metrics'
+  HEALTH_CHECK_INTERVAL_MS: '30000'
+
   # Observability Configuration
-  TRACING_ENABLED: "true"
-  TRACING_SERVICE_NAME: "maestro-conductor"
-  TRACING_SAMPLE_RATE: "0.1"
-  JAEGER_ENDPOINT: "http://jaeger-collector.monitoring.svc.cluster.local:14268/api/traces"
-  
+  TRACING_ENABLED: 'true'
+  TRACING_SERVICE_NAME: 'maestro-conductor'
+  TRACING_SAMPLE_RATE: '0.1'
+  JAEGER_ENDPOINT: 'http://jaeger-collector.monitoring.svc.cluster.local:14268/api/traces'
+
   # Performance Configuration
-  PERFORMANCE_MONITORING: "true"
-  PERFORMANCE_THRESHOLD_MS: "5000"
-  PERFORMANCE_SLOW_QUERY_MS: "1000"
-  
+  PERFORMANCE_MONITORING: 'true'
+  PERFORMANCE_THRESHOLD_MS: '5000'
+  PERFORMANCE_SLOW_QUERY_MS: '1000'
+
   # Security Configuration
-  SECURITY_CORS_ENABLED: "true"
-  SECURITY_CORS_ORIGINS: "https://maestro.intelgraph.io,https://conductor.intelgraph.io"
-  SECURITY_HELMET_ENABLED: "true"
-  SECURITY_CSP_ENABLED: "true"
-  SECURITY_HSTS_ENABLED: "true"
-  
+  SECURITY_CORS_ENABLED: 'true'
+  SECURITY_CORS_ORIGINS: 'https://maestro.intelgraph.io,https://conductor.intelgraph.io'
+  SECURITY_HELMET_ENABLED: 'true'
+  SECURITY_CSP_ENABLED: 'true'
+  SECURITY_HSTS_ENABLED: 'true'
+
   # Workflow Configuration
-  WORKFLOW_MAX_EXECUTION_TIME: "3600" # 1 hour
-  WORKFLOW_DEFAULT_TIMEOUT: "1800" # 30 minutes
-  WORKFLOW_MAX_RETRY_ATTEMPTS: "3"
-  WORKFLOW_CLEANUP_INTERVAL: "86400" # 24 hours
-  
+  WORKFLOW_MAX_EXECUTION_TIME: '3600' # 1 hour
+  WORKFLOW_DEFAULT_TIMEOUT: '1800' # 30 minutes
+  WORKFLOW_MAX_RETRY_ATTEMPTS: '3'
+  WORKFLOW_CLEANUP_INTERVAL: '86400' # 24 hours
+
   # Task Configuration
-  TASK_QUEUE_SIZE: "10000"
-  TASK_WORKER_CONCURRENCY: "50"
-  TASK_TIMEOUT_MS: "300000" # 5 minutes
-  TASK_MAX_MEMORY_MB: "512"
-  
+  TASK_QUEUE_SIZE: '10000'
+  TASK_WORKER_CONCURRENCY: '50'
+  TASK_TIMEOUT_MS: '300000' # 5 minutes
+  TASK_MAX_MEMORY_MB: '512'
+
   # Alerting Configuration
-  ALERTING_ENABLED: "true"
-  ALERTING_WEBHOOK_TIMEOUT: "10000"
-  SLACK_WEBHOOK_ENABLED: "true"
-  PAGERDUTY_ENABLED: "true"
-  
+  ALERTING_ENABLED: 'true'
+  ALERTING_WEBHOOK_TIMEOUT: '10000'
+  SLACK_WEBHOOK_ENABLED: 'true'
+  PAGERDUTY_ENABLED: 'true'
+
   # Feature Flags
-  FEATURE_WEB_ORCHESTRATION: "true"
-  FEATURE_PREMIUM_MODELS: "true"
-  FEATURE_EVIDENCE_COLLECTION: "true"
-  FEATURE_POLICY_ENFORCEMENT: "true"
-  FEATURE_ADVANCED_ANALYTICS: "true"
-  
+  FEATURE_WEB_ORCHESTRATION: 'true'
+  FEATURE_PREMIUM_MODELS: 'true'
+  FEATURE_EVIDENCE_COLLECTION: 'true'
+  FEATURE_POLICY_ENFORCEMENT: 'true'
+  FEATURE_ADVANCED_ANALYTICS: 'true'
+
   # Resource Limits
-  MAX_UPLOAD_SIZE_MB: "100"
-  MAX_CONCURRENT_UPLOADS: "10"
-  MAX_FILE_RETENTION_DAYS: "90"
-  
+  MAX_UPLOAD_SIZE_MB: '100'
+  MAX_CONCURRENT_UPLOADS: '10'
+  MAX_FILE_RETENTION_DAYS: '90'
+
 ---
 apiVersion: v1
 kind: Secret
@@ -139,24 +139,24 @@ data:
   # Database Credentials
   DATABASE_USERNAME: cG9zdGdyZXM= # postgres
   DATABASE_PASSWORD: TEFSR0VSX1BST0RfUEFTU1dPUkQ= # CHANGE_PROD_PASSWORD (base64)
-  
+
   # Redis Auth
   REDIS_PASSWORD: UkVESVNfUFJPRF9QQVNTV09SRA== # REDIS_PROD_PASSWORD (base64)
-  
+
   # JWT Secrets (rotate these regularly!)
   JWT_SIGNING_SECRET: cHJvZC1qd3Qtc2lnbmluZy1zZWNyZXQtY2hhbmdlLW1l # prod-jwt-signing-secret-change-me (base64)
   JWT_ENCRYPTION_SECRET: cHJvZC1qd3QtZW5jcnlwdGlvbi1zZWNyZXQ= # prod-jwt-encryption-secret (base64)
-  
+
   # OIDC Client Secret
   OIDC_CLIENT_SECRET: b2lkYy1jbGllbnQtc2VjcmV0LXByb2Q= # oidc-client-secret-prod (base64)
-  
+
   # Session Encryption
   SESSION_SECRET: c2Vzc2lvbi1lbmNyeXB0aW9uLWtleS1wcm9k # session-encryption-key-prod (base64)
-  
+
   # API Keys for External Services
   OPENAI_API_KEY: b3BlbmFpLWFwaS1rZXktcHJvZA== # openai-api-key-prod (base64)
   ANTHROPIC_API_KEY: YW50aHJvcGljLWFwaS1rZXktcHJvZA== # anthropic-api-key-prod (base64)
-  
+
   # Monitoring and Alerting
   GRAFANA_API_KEY: Z3JhZmFuYS1hcGkta2V5LXByb2Q= # grafana-api-key-prod (base64)
   SLACK_WEBHOOK_URL: aHR0cHM6Ly9ob29rcy5zbGFjay5jb20vc2VydmljZXMvVDAwL0IwMC94eHh4eHg= # webhook-url (base64)
@@ -338,7 +338,7 @@ data:
         api_requests_per_second:
           target: 1000
           measurement_window: "5m"
-    
+
     alerting:
       error_budget_burn_rates:
         # Page for very fast burn (2% budget in 1 hour)

@@ -90,6 +90,6 @@ export function buildRoot(resolvers) {
   return {
     plan: resolvers.plan,
     generate: resolvers.generate,
-    models: resolvers.models
+    models: resolvers.models,
   };
 }

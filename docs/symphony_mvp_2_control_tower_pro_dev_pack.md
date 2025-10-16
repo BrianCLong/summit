@@ -29,26 +29,74 @@ timezone: America/Denver
 models:
   chatgpt_plus:
     schedule:
-      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: '06:05', duration: '00:25' }
-      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: '09:05', duration: '00:25' }
-      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: '12:05', duration: '00:25' }
-      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: '15:05', duration: '00:25' }
-      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: '18:05', duration: '00:25' }
-      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: '21:05', duration: '00:25' }
+      - {
+          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
+          at: '06:05',
+          duration: '00:25',
+        }
+      - {
+          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
+          at: '09:05',
+          duration: '00:25',
+        }
+      - {
+          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
+          at: '12:05',
+          duration: '00:25',
+        }
+      - {
+          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
+          at: '15:05',
+          duration: '00:25',
+        }
+      - {
+          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
+          at: '18:05',
+          duration: '00:25',
+        }
+      - {
+          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
+          at: '21:05',
+          duration: '00:25',
+        }
     dynamic: { detector: chatgpt_ui, action: shift_to_next_reset }
 
   claude_pro:
     schedule:
-      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: '05:00', duration: '00:55' }
-      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: '10:00', duration: '00:55' }
-      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: '15:00', duration: '00:55' }
-      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: '20:00', duration: '00:55' }
+      - {
+          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
+          at: '05:00',
+          duration: '00:55',
+        }
+      - {
+          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
+          at: '10:00',
+          duration: '00:55',
+        }
+      - {
+          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
+          at: '15:00',
+          duration: '00:55',
+        }
+      - {
+          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
+          at: '20:00',
+          duration: '00:55',
+        }
     dynamic: { detector: claude_ui, action: phase_lock }
 
   gemini_api:
     schedule:
-      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: '01:05', duration: '01:30' }
-      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: '13:00', duration: '00:30' }
+      - {
+          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
+          at: '01:05',
+          duration: '01:30',
+        }
+      - {
+          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
+          at: '13:00',
+          duration: '00:30',
+        }
 
   grok_live_search:
     schedule:
@@ -202,7 +250,13 @@ policy:
 
     - name: xai/grok
       class: hosted
-      quota: { type: rolling, window: header_driven, unit: requests, cap: from_headers }
+      quota:
+        {
+          type: rolling,
+          window: header_driven,
+          unit: requests,
+          cap: from_headers,
+        }
       loa_max: 1
 
     - name: perplexity/api
@@ -217,7 +271,13 @@ policy:
 
     - name: venice/api
       class: hosted
-      quota: { type: rolling, window: header_driven, unit: requests, cap: from_headers }
+      quota:
+        {
+          type: rolling,
+          window: header_driven,
+          unit: requests,
+          cap: from_headers,
+        }
       loa_max: 0
 
   routing_rules:
@@ -285,7 +345,9 @@ receivers:
       { "command": "symphony.explain", "title": "Symphony: Explain Route" },
       { "command": "symphony.incident", "title": "Symphony: File Incident" }
     ],
-    "views": { "explorer": [{ "id": "symphonyModelMatrix", "name": "Model Matrix" }] }
+    "views": {
+      "explorer": [{ "id": "symphonyModelMatrix", "name": "Model Matrix" }]
+    }
   },
   "dependencies": { "node-fetch": "^3.3.2" }
 }
@@ -312,13 +374,23 @@ export function activate(ctx: vscode.ExtensionContext) {
   ctx.subscriptions.push(
     vscode.commands.registerCommand('symphony.execute', async () => {
       const ed = vscode.window.activeTextEditor;
-      const input = ed?.document.getText(ed.selection) || ed?.document.getText() || '';
-      const j = await post('/route/execute', { task: 'qa', loa: 1, input, stream: true });
-      vscode.window.showInformationMessage(`Audit ${j.audit_id} • ${j.latency_ms}ms`);
+      const input =
+        ed?.document.getText(ed.selection) || ed?.document.getText() || '';
+      const j = await post('/route/execute', {
+        task: 'qa',
+        loa: 1,
+        input,
+        stream: true,
+      });
+      vscode.window.showInformationMessage(
+        `Audit ${j.audit_id} • ${j.latency_ms}ms`,
+      );
     }),
     vscode.commands.registerCommand('symphony.explain', async () => {
       const j = await post('/route/plan', { task: 'qa', loa: 1 });
-      vscode.window.showInformationMessage(`Decision: ${j.decision?.primary?.model || 'n/a'}`);
+      vscode.window.showInformationMessage(
+        `Decision: ${j.decision?.primary?.model || 'n/a'}`,
+      );
     }),
   );
 }
@@ -329,7 +401,11 @@ export function activate(ctx: vscode.ExtensionContext) {
 ```json
 {
   "contextProviders": [
-    { "name": "symphonyPolicy", "type": "http", "url": "http://127.0.0.1:8787/status/health.json" },
+    {
+      "name": "symphonyPolicy",
+      "type": "http",
+      "url": "http://127.0.0.1:8787/status/health.json"
+    },
     {
       "name": "symphonyBurndown",
       "type": "http",
@@ -375,7 +451,9 @@ async function allowedByRobots(targetUrl: string): Promise<boolean> {
 export async function snapshot(url: string) {
   if (!(await allowedByRobots(url))) throw new Error('robots.txt disallows');
   const b = await chromium.launch();
-  const p = await b.newPage({ userAgent: 'IntelGraph-Symphony/1.0 (+contact@example.com)' });
+  const p = await b.newPage({
+    userAgent: 'IntelGraph-Symphony/1.0 (+contact@example.com)',
+  });
   await p.goto(url, { waitUntil: 'networkidle' });
   const html = await p.content();
   const dom = new JSDOM(html, { url });

@@ -19,7 +19,9 @@ describe('legal hold guard', () => {
     };
     await denyWhenHold(req, reply);
     expect(reply.status).toBe(423);
-    expect(reply.body).toEqual({ error: 'Legal hold active: operation locked' });
+    expect(reply.body).toEqual({
+      error: 'Legal hold active: operation locked',
+    });
   });
 
   it('passes through when no hold', async () => {

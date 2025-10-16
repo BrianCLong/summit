@@ -82,168 +82,121 @@
         "from": "bot1",
         "to": "propagandahub",
         "weight": 16,
-        "types": [
-          "mention",
-          "share"
-        ]
+        "types": ["mention", "share"]
       },
       {
         "from": "bot2",
         "to": "propagandahub",
         "weight": 16,
-        "types": [
-          "mention",
-          "share"
-        ]
+        "types": ["mention", "share"]
       },
       {
         "from": "bot3",
         "to": "propagandahub",
         "weight": 14,
-        "types": [
-          "mention",
-          "share"
-        ]
+        "types": ["mention", "share"]
       },
       {
         "from": "bob",
         "to": "alice",
         "weight": 12,
-        "types": [
-          "reply",
-          "mention"
-        ]
+        "types": ["reply", "mention"]
       },
       {
         "from": "alice",
         "to": "bob",
         "weight": 10,
-        "types": [
-          "mention"
-        ]
+        "types": ["mention"]
       },
       {
         "from": "alice",
         "to": "carol",
         "weight": 10,
-        "types": [
-          "mention"
-        ]
+        "types": ["mention"]
       },
       {
         "from": "carol",
         "to": "alice",
         "weight": 8,
-        "types": [
-          "mention",
-          "share"
-        ]
+        "types": ["mention", "share"]
       },
       {
         "from": "carol",
         "to": "newsdesk",
         "weight": 8,
-        "types": [
-          "mention",
-          "share"
-        ]
+        "types": ["mention", "share"]
       },
       {
         "from": "bob",
         "to": "carol",
         "weight": 6,
-        "types": [
-          "mention"
-        ]
+        "types": ["mention"]
       },
       {
         "from": "erin",
         "to": "dave",
         "weight": 6,
-        "types": [
-          "reply",
-          "mention"
-        ]
+        "types": ["reply", "mention"]
       },
       {
         "from": "grace",
         "to": "newsdesk",
         "weight": 6,
-        "types": [
-          "share"
-        ]
+        "types": ["share"]
       },
       {
         "from": "henry",
         "to": "newsdesk",
         "weight": 6,
-        "types": [
-          "share"
-        ]
+        "types": ["share"]
       },
       {
         "from": "ivy",
         "to": "newsdesk",
         "weight": 6,
-        "types": [
-          "share"
-        ]
+        "types": ["share"]
       },
       {
         "from": "judy",
         "to": "alice",
         "weight": 5,
-        "types": [
-          "mention"
-        ]
+        "types": ["mention"]
       },
       {
         "from": "alice",
         "to": "newsdesk",
         "weight": 5,
-        "types": [
-          "share"
-        ]
+        "types": ["share"]
       },
       {
         "from": "dave",
         "to": "erin",
         "weight": 4,
-        "types": [
-          "mention"
-        ]
+        "types": ["mention"]
       },
       {
         "from": "erin",
         "to": "alice",
         "weight": 3,
-        "types": [
-          "mention"
-        ]
+        "types": ["mention"]
       },
       {
         "from": "frank",
         "to": "dave",
         "weight": 3,
-        "types": [
-          "mention"
-        ]
+        "types": ["mention"]
       },
       {
         "from": "dave",
         "to": "newsdesk",
         "weight": 3,
-        "types": [
-          "share"
-        ]
+        "types": ["share"]
       },
       {
         "from": "frank",
         "to": "newsdesk",
         "weight": 3,
-        "types": [
-          "share"
-        ]
+        "types": ["share"]
       }
     ],
     "adjacency": {
@@ -743,11 +696,7 @@
       "weight": 3,
       "metadata": {
         "occurrences": 3,
-        "sources": [
-          "post:dave-040",
-          "post:dave-041",
-          "post:dave-042"
-        ]
+        "sources": ["post:dave-040", "post:dave-041", "post:dave-042"]
       }
     },
     {
@@ -757,11 +706,7 @@
       "weight": 3,
       "metadata": {
         "occurrences": 3,
-        "sources": [
-          "post:erin-046",
-          "post:erin-047",
-          "post:erin-048"
-        ]
+        "sources": ["post:erin-046", "post:erin-047", "post:erin-048"]
       }
     },
     {
@@ -771,11 +716,7 @@
       "weight": 3,
       "metadata": {
         "occurrences": 3,
-        "sources": [
-          "post:erin-043",
-          "post:erin-044",
-          "post:erin-045"
-        ]
+        "sources": ["post:erin-043", "post:erin-044", "post:erin-045"]
       }
     },
     {
@@ -785,11 +726,7 @@
       "weight": 3,
       "metadata": {
         "occurrences": 3,
-        "sources": [
-          "post:erin-046",
-          "post:erin-047",
-          "post:erin-048"
-        ]
+        "sources": ["post:erin-046", "post:erin-047", "post:erin-048"]
       }
     },
     {
@@ -799,11 +736,7 @@
       "weight": 3,
       "metadata": {
         "occurrences": 3,
-        "sources": [
-          "post:frank-049",
-          "post:frank-050",
-          "post:frank-051"
-        ]
+        "sources": ["post:frank-049", "post:frank-050", "post:frank-051"]
       }
     },
     {
@@ -813,11 +746,7 @@
       "weight": 3,
       "metadata": {
         "occurrences": 3,
-        "sources": [
-          "post:frank-052",
-          "post:frank-053",
-          "post:frank-054"
-        ]
+        "sources": ["post:frank-052", "post:frank-053", "post:frank-054"]
       }
     }
   ],
@@ -825,31 +754,15 @@
     "botNetworks": [
       {
         "label": "Coordinated share burst targeting propagandahub",
-        "members": [
-          "bot1",
-          "bot2",
-          "bot3"
-        ],
+        "members": ["bot1", "bot2", "bot3"],
         "activityScore": 46,
-        "evidence": [
-          "share"
-        ]
+        "evidence": ["share"]
       },
       {
         "label": "Coordinated share burst targeting newsdesk",
-        "members": [
-          "carol",
-          "grace",
-          "henry",
-          "ivy",
-          "alice",
-          "dave",
-          "frank"
-        ],
+        "members": ["carol", "grace", "henry", "ivy", "alice", "dave", "frank"],
         "activityScore": 37,
-        "evidence": [
-          "share"
-        ]
+        "evidence": ["share"]
       }
     ],
     "amplifierClusters": [

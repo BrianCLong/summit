@@ -21,7 +21,7 @@ const EnvSchema = z.object({
   MAX_CACHE_ENTRIES: z.string().default('500'),
   LOG_LEVEL: z.string().default('info'),
   OTEL_SERVICE_NAME: z.string().default('docling-svc'),
-  OTEL_EXPORTER_OTLP_ENDPOINT: z.string().optional()
+  OTEL_EXPORTER_OTLP_ENDPOINT: z.string().optional(),
 });
 
 export type ServiceConfig = z.infer<typeof EnvSchema> & {
@@ -44,6 +44,6 @@ export const loadConfig = (): ServiceConfig => {
     maxTokens: parseInt(parsed.GRANITE_DOCLING_MAX_TOKENS, 10),
     pricePer1kChars: parseFloat(parsed.GRANITE_DOCLING_PRICE_PER_1K_CHARS),
     cacheTtlSeconds: parseInt(parsed.CACHE_TTL_SECONDS, 10),
-    maxCacheEntries: parseInt(parsed.MAX_CACHE_ENTRIES, 10)
+    maxCacheEntries: parseInt(parsed.MAX_CACHE_ENTRIES, 10),
   };
 };

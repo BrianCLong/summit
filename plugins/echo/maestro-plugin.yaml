@@ -1,11 +1,11 @@
-name: "echo"
-version: "1.0.0"
-entry: "plugin.wasm"
+name: 'echo'
+version: '1.0.0'
+entry: 'plugin.wasm'
 capabilities:
   net: false
   fs: false
   crypto: true
-  env: ["ALLOWED_*"]
+  env: ['ALLOWED_*']
 limits:
   cpuMs: 1000
   memMiB: 64

@@ -1,10 +1,17 @@
 import crypto from 'crypto';
 
-export function verifyStripeSig(payload: string, header: string, secret: string) {
+export function verifyStripeSig(
+  payload: string,
+  header: string,
+  secret: string,
+) {
   const parts = header.split(',');
   const t = parts[0].split('=')[1];
   const v1 = parts[1].split('=')[1];
-  const sig = crypto.createHmac('sha256', secret).update(`${t}.${payload}`).digest('hex');
+  const sig = crypto
+    .createHmac('sha256', secret)
+    .update(`${t}.${payload}`)
+    .digest('hex');
   if (sig !== v1) throw new Error('stripe_sig_invalid');
   return { ts: Number(t), ok: true };
 }
@@ -16,7 +23,7 @@ export async function handleWebhook(
     entitlements: any;
     transparency: any;
     idempotency?: Set<string>;
-  }
+  },
 ) {
   const id = evt.id;
   if (deps.idempotency) {

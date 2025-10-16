@@ -7,6 +7,7 @@
 ## 1) Scope & Deliverables
 
 **What we’re adding**
+
 - **Playbook & Runbooks:** “IO Resilience Living Playbook — Q4 2025” (+ red‑team calendar). Versioned under `docs/io/`.
 - **Data model:** Postgres tables `IOEvents`, `IOActions`, `IOMedia`; Story‑ID canon.
 - **GraphQL API:** Queries/Mutations for IO cases, actions, clusters, KPIs.
@@ -17,6 +18,7 @@
 - **Seeds:** CSV demo datasets to light up dashboards immediately.
 
 **Repo layout** (proposed)
+
 ```
 apps/web/src/features/io/            # UI (React) components + jQuery hooks
 server/graphql/io/                   # Schema + resolvers
@@ -28,6 +30,7 @@ public/verify/                       # Static microsite (optional)
 ```
 
 **Branch & PR**
+
 - Branch: `feature/io-resilience-module`
 - PR gates: migrations applied; unit + integration tests pass; dashboards render with seeds; `/verify` builds.
 
@@ -81,6 +84,7 @@ CREATE TABLE IF NOT EXISTS IOMedia (
 ```
 
 **Story‑ID canon** → `docs/io/story_ids.yaml`
+
 ```yaml
 - Election-Process-Suppression/Voice-Clone/Call-Back-CTA
 - Disaster-Authority-Blame/Agency-Incompetence
@@ -95,6 +99,7 @@ CREATE TABLE IF NOT EXISTS IOMedia (
 ## 3) GraphQL API (Apollo Server)
 
 **Schema** → `server/graphql/io/schema.graphql`
+
 ```graphql
 scalar DateTime
 
@@ -141,9 +146,20 @@ type IOMedia {
   provenance_score: Float
 }
 
-type TTDTTMPoint { bucket: DateTime!, median_ttd: Int!, median_ttm: Int! }
+type TTDTTMPoint {
+  bucket: DateTime!
+  median_ttd: Int!
+  median_ttm: Int!
+}
 
-type TakedownAging { provider: String!, queued: Int!, sent: Int!, ack: Int!, complete: Int!, oldest_outstanding: String }
+type TakedownAging {
+  provider: String!
+  queued: Int!
+  sent: Int!
+  ack: Int!
+  complete: Int!
+  oldest_outstanding: String
+}
 
 type ClusterRollup {
   cluster_id: String!
@@ -158,7 +174,12 @@ type ClusterRollup {
 
 type Query {
   ioEvent(id: ID!): IOEvent
-  ioEvents(limit: Int = 100, topic: String, story_id: String, severityGte: Int): [IOEvent!]!
+  ioEvents(
+    limit: Int = 100
+    topic: String
+    story_id: String
+    severityGte: Int
+  ): [IOEvent!]!
   ioTTDTTM(hours: Int = 24): [TTDTTMPoint!]!
   ioTakedownAging: [TakedownAging!]!
   ioClusterRollup(hours: Int = 72): [ClusterRollup!]!
@@ -199,13 +220,15 @@ type Mutation {
 ```
 
 **Resolver outline** → `server/graphql/io/resolvers.ts`
+
 ```ts
-import { sql } from "../../db";
+import { sql } from '../../db';
 export const resolvers = {
   Query: {
-    ioEvent: async (_: any, { id }) => (await sql`SELECT * FROM "IOEvents" WHERE id = ${id}`)[0],
+    ioEvent: async (_: any, { id }) =>
+      (await sql`SELECT * FROM "IOEvents" WHERE id = ${id}`)[0],
     ioEvents: async (_: any, args) => {
-      const { limit=100, topic, story_id, severityGte } = args;
+      const { limit = 100, topic, story_id, severityGte } = args;
       return await sql`
         SELECT * FROM "IOEvents"
         WHERE (${topic} IS NULL OR topic=${topic})
@@ -214,7 +237,8 @@ export const resolvers = {
         ORDER BY observed_at DESC
         LIMIT ${limit}`;
     },
-    ioTTDTTM: async (_: any, { hours=24 }) => await sql`
+    ioTTDTTM: async (_: any, { hours = 24 }) =>
+      await sql`
       WITH times AS (
         SELECT e.id,
                MIN(e.observed_at) AS first_observed,
@@ -231,7 +255,8 @@ export const resolvers = {
       WHERE first_triage IS NOT NULL AND containment IS NOT NULL
       GROUP BY 1
       ORDER BY 1;`,
-    ioTakedownAging: async () => await sql`
+    ioTakedownAging: async () =>
+      await sql`
       SELECT provider,
              COUNT(*) FILTER (WHERE status = 'queued') AS queued,
              COUNT(*) FILTER (WHERE status = 'sent') AS sent,
@@ -241,7 +266,8 @@ export const resolvers = {
       FROM "IOActions"
       GROUP BY provider
       ORDER BY complete DESC;`,
-    ioClusterRollup: async (_: any, { hours=72 }) => await sql`
+    ioClusterRollup: async (_: any, { hours = 72 }) =>
+      await sql`
       SELECT cluster_id, topic,
              COUNT(*) AS items,
              COUNT(DISTINCT account_handle) AS actors,
@@ -252,20 +278,31 @@ export const resolvers = {
       FROM "IOEvents"
       WHERE observed_at >= NOW() - (${hours} || ' hours')::interval
       GROUP BY 1,2
-      ORDER BY reach DESC;`
+      ORDER BY reach DESC;`,
   },
   IOEvent: {
-    media: async (e: any) => await sql`SELECT * FROM "IOMedia" WHERE event_id=${e.id}`,
-    actions: async (e: any) => await sql`SELECT * FROM "IOActions" WHERE event_id=${e.id} ORDER BY initiated_at ASC`,
+    media: async (e: any) =>
+      await sql`SELECT * FROM "IOMedia" WHERE event_id=${e.id}`,
+    actions: async (e: any) =>
+      await sql`SELECT * FROM "IOActions" WHERE event_id=${e.id} ORDER BY initiated_at ASC`,
   },
   Mutation: {
-    createIOEvent: async (_: any, { input }) => (await sql`
-      INSERT INTO "IOEvents" ${sql(input)} RETURNING *`)[0],
-    createIOAction: async (_: any, { input }) => (await sql`
-      INSERT INTO "IOActions" ${sql(input)} RETURNING *`)[0],
-    completeIOAction: async (_: any, { id }) => (await sql`
-      UPDATE "IOActions" SET status='complete', completed_at=NOW() WHERE id=${id} RETURNING *`)[0]
-  }
+    createIOEvent: async (_: any, { input }) =>
+      (
+        await sql`
+      INSERT INTO "IOEvents" ${sql(input)} RETURNING *`
+      )[0],
+    createIOAction: async (_: any, { input }) =>
+      (
+        await sql`
+      INSERT INTO "IOActions" ${sql(input)} RETURNING *`
+      )[0],
+    completeIOAction: async (_: any, { id }) =>
+      (
+        await sql`
+      UPDATE "IOActions" SET status='complete', completed_at=NOW() WHERE id=${id} RETURNING *`
+      )[0],
+  },
 };
 ```
 
@@ -274,38 +311,67 @@ export const resolvers = {
 ## 4) Detectors & Pipelines (minimal viable stack)
 
 **URL/Domain similarity** → `server/services/io/urlSimilarity.ts`
+
 ```ts
-import levenshtein from "fast-levenshtein";
-const homoglyphs = { '0':'o','1':'l','3':'e','5':'s','@':'a','¡':'i' };
-export function normalizeHost(h: string){
-  return h.toLowerCase().replace(/[\u00A1@015]/g, c => (homoglyphs as any)[c] || c);
+import levenshtein from 'fast-levenshtein';
+const homoglyphs = {
+  '0': 'o',
+  '1': 'l',
+  '3': 'e',
+  '5': 's',
+  '@': 'a',
+  '¡': 'i',
+};
+export function normalizeHost(h: string) {
+  return h
+    .toLowerCase()
+    .replace(/[\u00A1@015]/g, (c) => (homoglyphs as any)[c] || c);
 }
-export function similarity(a: string, b: string){
-  const na = normalizeHost(a), nb = normalizeHost(b);
+export function similarity(a: string, b: string) {
+  const na = normalizeHost(a),
+    nb = normalizeHost(b);
   const d = levenshtein.get(na, nb);
   const m = Math.max(na.length, nb.length);
   return 1 - d / m;
 }
-export function isLookalike(candidate: string, canon: string, threshold=0.82){
-  try { return similarity(candidate, canon) >= threshold; } catch { return false; }
+export function isLookalike(
+  candidate: string,
+  canon: string,
+  threshold = 0.82,
+) {
+  try {
+    return similarity(candidate, canon) >= threshold;
+  } catch {
+    return false;
+  }
 }
 ```
 
 **Voice/face synthetic triage stub** → `server/services/io/synthTriage.ts`
+
 ```ts
-export type MediaTriage = { isSyntheticLikely: boolean; provenanceScore: number; notes?: string };
+export type MediaTriage = {
+  isSyntheticLikely: boolean;
+  provenanceScore: number;
+  notes?: string;
+};
 export async function triageAudio(buf: Buffer): Promise<MediaTriage> {
   // Ensemble placeholder — wire to real model later
-  const hashEntropy = [...buf].reduce((a,b)=>a+(b%7),0) % 100 / 100;
-  return { isSyntheticLikely: hashEntropy > 0.65, provenanceScore: 1 - hashEntropy };
+  const hashEntropy = ([...buf].reduce((a, b) => a + (b % 7), 0) % 100) / 100;
+  return {
+    isSyntheticLikely: hashEntropy > 0.65,
+    provenanceScore: 1 - hashEntropy,
+  };
 }
 ```
 
 **Clusterer (embeddings + HDBSCAN)**
+
 - Use existing embedding service; add `cluster_id` to events via hourly job.
 - Store Story‑ID mapping rules in `docs/io/story_ids.yaml`.
 
 **C2PA verifier**
+
 - Integrate a library to parse C2PA manifests; on success set `c2pa_present=true` and compute `provenance_score`.
 
 ---
@@ -313,10 +379,12 @@ export async function triageAudio(buf: Buffer): Promise<MediaTriage> {
 ## 5) UI — Dashboards & Verify Microsite
 
 **Dashboards**
+
 - Implement TTD/TTM, Narrative Map, and Takedown Status with the provided SQL.
 - Filters: topic, story_id, provider, severity, hours window.
 
 **Verify Microsite**
+
 - Place static HTML at `public/verify/index.html` (from kit) or add the React `VerifyUs` component at `apps/web/src/pages/verify.tsx`.
 
 ---
@@ -332,11 +400,13 @@ export async function triageAudio(buf: Buffer): Promise<MediaTriage> {
 ## 7) Seeds & Loading
 
 **Files (committed to `/mnt/data` during setup)**
+
 - `/mnt/data/IOEvents_seed.csv` (220 rows)
 - `/mnt/data/IOActions_seed.csv` (187 rows)
 - `/mnt/data/IOMedia_seed.csv` (57 rows)
 
 **Load (psql)**
+
 ```sql
 \copy IOEvents  FROM '/mnt/data/IOEvents_seed.csv'  CSV HEADER;
 \copy IOActions FROM '/mnt/data/IOActions_seed.csv' CSV HEADER;
@@ -386,4 +456,3 @@ export async function triageAudio(buf: Buffer): Promise<MediaTriage> {
 
 - All code is open‑source friendly (MIT). No proprietary dependencies were introduced in the stubs above.
 - Next iteration: wire real audio/vision models, add registrar/telco provider adapters, and integrate C2PA parsing.
-

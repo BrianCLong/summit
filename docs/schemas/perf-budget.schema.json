@@ -5,17 +5,16 @@
   "type": "object",
   "required": ["version", "budgets"],
   "properties": {
-    "version": {"type": "string", "enum": ["1"]},
+    "version": { "type": "string", "enum": ["1"] },
     "budgets": {
       "type": "object",
       "properties": {
-        "lcp_ms": {"type": "integer"},
-        "ttfb_ms": {"type": "integer"},
-        "inp_ms": {"type": "integer"},
-        "api_p95_ms": {"type": "integer"},
-        "payload_kb": {"type": "integer"}
+        "lcp_ms": { "type": "integer" },
+        "ttfb_ms": { "type": "integer" },
+        "inp_ms": { "type": "integer" },
+        "api_p95_ms": { "type": "integer" },
+        "payload_kb": { "type": "integer" }
       }
     }
   }
 }
-

@@ -1,5 +1,5 @@
 // import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
-import { randomUUID as uuid } from "crypto";
+import { randomUUID as uuid } from 'crypto';
 
 // Optional parquet writer (parquetjs-lite). Falls back to CSV if not present.
 let parquet: any = null;

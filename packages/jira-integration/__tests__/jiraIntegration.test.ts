@@ -2,7 +2,11 @@ import { jest } from '@jest/globals';
 import { InMemoryAuditLogger } from '../src/logger.js';
 import { JiraIntegrationService } from '../src/jiraIntegration.js';
 import { JiraApiClient } from '../src/client.js';
-import { JiraIntegrationConfig, PerfTraceTicketInput, JiraWebhookEvent } from '../src/types.js';
+import {
+  JiraIntegrationConfig,
+  PerfTraceTicketInput,
+  JiraWebhookEvent,
+} from '../src/types.js';
 
 const baseConfig: JiraIntegrationConfig = {
   baseUrl: 'https://example.atlassian.net',
@@ -16,20 +20,44 @@ const baseConfig: JiraIntegrationConfig = {
     owners: 'customfield_3',
     perfMetric: 'customfield_4',
     baselineValue: 'customfield_5',
-    currentValue: 'customfield_6'
+    currentValue: 'customfield_6',
   },
   priorityMapping: {
-    blocker: { priorityId: '1', severityFieldId: 'customfield_10', severityValue: 'Blocker' },
-    critical: { priorityId: '2', severityFieldId: 'customfield_10', severityValue: 'Critical' },
-    high: { priorityId: '3', severityFieldId: 'customfield_10', severityValue: 'High' },
-    medium: { priorityId: '4', severityFieldId: 'customfield_10', severityValue: 'Medium' },
-    low: { priorityId: '5', severityFieldId: 'customfield_10', severityValue: 'Low' },
-    info: { priorityId: '6', severityFieldId: 'customfield_10', severityValue: 'Info' }
+    blocker: {
+      priorityId: '1',
+      severityFieldId: 'customfield_10',
+      severityValue: 'Blocker',
+    },
+    critical: {
+      priorityId: '2',
+      severityFieldId: 'customfield_10',
+      severityValue: 'Critical',
+    },
+    high: {
+      priorityId: '3',
+      severityFieldId: 'customfield_10',
+      severityValue: 'High',
+    },
+    medium: {
+      priorityId: '4',
+      severityFieldId: 'customfield_10',
+      severityValue: 'Medium',
+    },
+    low: {
+      priorityId: '5',
+      severityFieldId: 'customfield_10',
+      severityValue: 'Low',
+    },
+    info: {
+      priorityId: '6',
+      severityFieldId: 'customfield_10',
+      severityValue: 'Info',
+    },
   },
   workflowTransitions: {
     Triaged: 'In Progress',
-    Resolved: 'In Review'
-  }
+    Resolved: 'In Review',
+  },
 };
 
 describe('JiraIntegrationService', () => {
@@ -47,11 +75,11 @@ describe('JiraIntegrationService', () => {
       {
         fileName: 'perf.csv',
         contentType: 'text/csv',
-        data: Buffer.from('col1,col2')
-      }
+        data: Buffer.from('col1,col2'),
+      },
     ],
     relatedIssueKeys: ['PERF-100'],
-    labels: ['perf', 'trace']
+    labels: ['perf', 'trace'],
   };
 
   it('creates tickets with attachments and links', async () => {
@@ -71,17 +99,19 @@ describe('JiraIntegrationService', () => {
     expect(requestMock).toHaveBeenNthCalledWith(
       1,
       '/rest/api/3/issue',
-      expect.objectContaining({ method: 'POST' })
+      expect.objectContaining({ method: 'POST' }),
     );
     expect(requestMock).toHaveBeenNthCalledWith(
       2,
       '/rest/api/3/issue/1/attachments',
-      expect.objectContaining({ headers: expect.objectContaining({ 'X-Atlassian-Token': 'no-check' }) })
+      expect.objectContaining({
+        headers: expect.objectContaining({ 'X-Atlassian-Token': 'no-check' }),
+      }),
     );
     expect(requestMock).toHaveBeenNthCalledWith(
       3,
       '/rest/api/3/issueLink',
-      expect.objectContaining({ method: 'POST' })
+      expect.objectContaining({ method: 'POST' }),
     );
     expect(auditLogger.getAll()).toHaveLength(3);
   });
@@ -91,9 +121,7 @@ describe('JiraIntegrationService', () => {
     const requestMock = jest
       .fn()
       .mockResolvedValueOnce({
-        transitions: [
-          { id: '10', name: 'In Progress' }
-        ]
+        transitions: [{ id: '10', name: 'In Progress' }],
       })
       .mockResolvedValueOnce({});
     const client = { request: requestMock } as unknown as JiraApiClient;
@@ -110,7 +138,7 @@ describe('JiraIntegrationService', () => {
     const service = new JiraIntegrationService(
       baseConfig,
       { request: jest.fn() } as unknown as JiraApiClient,
-      new InMemoryAuditLogger()
+      new InMemoryAuditLogger(),
     );
 
     const result = await service.syncWorkflow('1', 'Unmapped');
@@ -122,7 +150,7 @@ describe('JiraIntegrationService', () => {
     const service = new JiraIntegrationService(
       baseConfig,
       { request: jest.fn() } as unknown as JiraApiClient,
-      auditLogger
+      auditLogger,
     );
 
     const webhook: JiraWebhookEvent = {
@@ -131,8 +159,8 @@ describe('JiraIntegrationService', () => {
         key: 'PERF-1',
         fields: {
           status: { name: 'Triaged' },
-          summary: 'Perf issue'
-        }
+          summary: 'Perf issue',
+        },
       },
       webhookEvent: 'jira:issue_updated',
       changelog: {
@@ -140,10 +168,10 @@ describe('JiraIntegrationService', () => {
           {
             field: 'status',
             fromString: 'Open',
-            toString: 'Triaged'
-          }
-        ]
-      }
+            toString: 'Triaged',
+          },
+        ],
+      },
     };
 
     const result = service.handleWebhook(webhook);
@@ -161,8 +189,13 @@ describe('JiraIntegrationService', () => {
     const client = { request: requestMock } as unknown as JiraApiClient;
     const service = new JiraIntegrationService(baseConfig, client, auditLogger);
 
-    const results = await service.bulkCreatePerfTraceTickets([ticketInput, ticketInput]);
+    const results = await service.bulkCreatePerfTraceTickets([
+      ticketInput,
+      ticketInput,
+    ]);
     expect(results).toHaveLength(1);
-    expect(auditLogger.getAll().filter((entry) => entry.status === 'error')).toHaveLength(1);
+    expect(
+      auditLogger.getAll().filter((entry) => entry.status === 'error'),
+    ).toHaveLength(1);
   });
 });

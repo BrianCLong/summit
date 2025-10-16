@@ -8,12 +8,14 @@
 ## 🎯 Break-Glass Activation Criteria
 
 **Activate break-glass access ONLY when:**
+
 - Primary authentication system is completely down
 - Critical security incident requires immediate investigation
 - Data loss prevention requires emergency intervention
 - System compromise requires immediate containment
 
 **DO NOT activate for:**
+
 - Routine troubleshooting
 - Performance degradation (use normal escalation)
 - Planned maintenance
@@ -22,6 +24,7 @@
 ## 👥 2-User Break-Glass System
 
 ### Principle of Dual Control
+
 - **User 1 (Break-Glass Admin):** Full administrative access
 - **User 2 (Break-Glass Operator):** Monitoring and restart permissions
 - **Both required:** for destructive operations
@@ -107,16 +110,16 @@ echo "Monitoring access: kubectl config use-context emergency-operator-context"
 
 ## 🛡️ Access Permissions Matrix
 
-| Operation | Break-Glass Admin | Break-Glass Operator | Dual Approval Required |
-|-----------|------------------|---------------------|----------------------|
-| Read Logs | ✅ | ✅ | ❌ |
-| Read Configs | ✅ | ✅ | ❌ |
-| Restart Pods | ✅ | ✅ | ❌ |
-| Scale Deployments | ✅ | ❌ | ❌ |
-| Modify Configs | ✅ | ❌ | ✅ |
-| Delete Resources | ✅ | ❌ | ✅ |
-| Database Access | ✅ | ❌ | ✅ |
-| Secret Access | ✅ | ❌ | ✅ |
+| Operation         | Break-Glass Admin | Break-Glass Operator | Dual Approval Required |
+| ----------------- | ----------------- | -------------------- | ---------------------- |
+| Read Logs         | ✅                | ✅                   | ❌                     |
+| Read Configs      | ✅                | ✅                   | ❌                     |
+| Restart Pods      | ✅                | ✅                   | ❌                     |
+| Scale Deployments | ✅                | ❌                   | ❌                     |
+| Modify Configs    | ✅                | ❌                   | ✅                     |
+| Delete Resources  | ✅                | ❌                   | ✅                     |
+| Database Access   | ✅                | ❌                   | ✅                     |
+| Secret Access     | ✅                | ❌                   | ✅                     |
 
 ## 🔐 Dual Approval Procedures
 
@@ -268,6 +271,7 @@ kubectl exec -n intelgraph-prod suspicious-pod -- tcpdump -w /tmp/capture.pcap
 ### Mandatory Post-Incident Actions
 
 1. **Document All Actions**
+
    ```bash
    # Generate incident report
    kubectl logs -n intelgraph-prod -l app=audit-logger | \

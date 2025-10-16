@@ -60,7 +60,10 @@ async function main(): Promise<void> {
     }
     const payload = JSON.parse(readFileSync(parsed.input, 'utf8'));
     const endpoint = parsed.command === 'dry-run' ? 'dry-run' : parsed.command;
-    const url = new URL(`/v1/${endpoint}`, `http://${parsed.host}:${parsed.port}`);
+    const url = new URL(
+      `/v1/${endpoint}`,
+      `http://${parsed.host}:${parsed.port}`,
+    );
     const response = await fetch(url, {
       method: 'POST',
       headers: {
@@ -74,7 +77,9 @@ async function main(): Promise<void> {
     try {
       parsedBody = text.length ? JSON.parse(text) : {};
     } catch (error) {
-      throw new Error(`failed to parse orchestrator response: ${(error as Error).message}`);
+      throw new Error(
+        `failed to parse orchestrator response: ${(error as Error).message}`,
+      );
     }
 
     const serialized = JSON.stringify(parsedBody, null, 2);
@@ -85,7 +90,9 @@ async function main(): Promise<void> {
     }
 
     if (!response.ok) {
-      const violations = (parsedBody as { report?: { policyViolations?: unknown } }).report?.policyViolations;
+      const violations = (
+        parsedBody as { report?: { policyViolations?: unknown } }
+      ).report?.policyViolations;
       if (Array.isArray(violations) && violations.length > 0) {
         process.stderr.write('policy violations detected:\n');
         process.stderr.write(`${JSON.stringify(violations, null, 2)}\n`);

@@ -46,8 +46,14 @@ export const options = {
       timeUnit: '1s',
       preAllocatedVUs: Number(__ENV.K6_COMMUNITIES_VUS || 10),
       stages: [
-        { target: Number(__ENV.K6_COMMUNITIES_PEAK_RATE || 25), duration: '30s' },
-        { target: Number(__ENV.K6_COMMUNITIES_PEAK_RATE || 25), duration: '30s' },
+        {
+          target: Number(__ENV.K6_COMMUNITIES_PEAK_RATE || 25),
+          duration: '30s',
+        },
+        {
+          target: Number(__ENV.K6_COMMUNITIES_PEAK_RATE || 25),
+          duration: '30s',
+        },
         { target: Number(__ENV.K6_COMMUNITIES_END_RATE || 5), duration: '20s' },
       ],
     },

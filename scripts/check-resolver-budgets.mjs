@@ -27,14 +27,20 @@ for (let index = 0; index < args.length; index += 1) {
 }
 
 if (files.length === 0) {
-  console.warn('No metrics files supplied; skipping resolver budget enforcement.');
+  console.warn(
+    'No metrics files supplied; skipping resolver budget enforcement.',
+  );
   process.exit(0);
 }
 
 const getValue = (object, keys) => {
   if (!object || typeof object !== 'object') return undefined;
   for (const key of keys) {
-    if (Object.prototype.hasOwnProperty.call(object, key) && object[key] !== null && object[key] !== undefined) {
+    if (
+      Object.prototype.hasOwnProperty.call(object, key) &&
+      object[key] !== null &&
+      object[key] !== undefined
+    ) {
       return object[key];
     }
   }
@@ -60,9 +66,11 @@ const normaliseFields = (payload) => {
   if (typeof payload !== 'object') {
     return [];
   }
-  if (Array.isArray(payload.hotFields)) return normaliseFields(payload.hotFields);
+  if (Array.isArray(payload.hotFields))
+    return normaliseFields(payload.hotFields);
   if (Array.isArray(payload.fields)) return normaliseFields(payload.fields);
-  if (Array.isArray(payload.resolvers)) return normaliseFields(payload.resolvers);
+  if (Array.isArray(payload.resolvers))
+    return normaliseFields(payload.resolvers);
   if (payload.metrics && typeof payload.metrics === 'object') {
     return normaliseFields(payload.metrics);
   }
@@ -86,7 +94,9 @@ for (const input of files) {
     const contents = fs.readFileSync(resolvedPath, 'utf8');
     json = JSON.parse(contents);
   } catch (error) {
-    console.error(`Failed to read metrics from ${resolvedPath}: ${error.message}`);
+    console.error(
+      `Failed to read metrics from ${resolvedPath}: ${error.message}`,
+    );
     failed = true;
     continue;
   }
@@ -103,16 +113,28 @@ for (const input of files) {
     let latencyP95 = asNumber(latencySource);
     if (Number.isNaN(latencyP95)) {
       const latencyObject = getValue(field, ['latency']);
-      if (latencyObject && typeof latencyObject === 'object' && 'p95' in latencyObject) {
+      if (
+        latencyObject &&
+        typeof latencyObject === 'object' &&
+        'p95' in latencyObject
+      ) {
         latencyP95 = asNumber(latencyObject.p95);
       }
     }
 
-    const latencyP99Source = getValue(field, ['latencyP99', 'p99', 'latency_p99']);
+    const latencyP99Source = getValue(field, [
+      'latencyP99',
+      'p99',
+      'latency_p99',
+    ]);
     let latencyP99 = asNumber(latencyP99Source);
     if (Number.isNaN(latencyP99)) {
       const latencyObject = getValue(field, ['latency']);
-      if (latencyObject && typeof latencyObject === 'object' && 'p99' in latencyObject) {
+      if (
+        latencyObject &&
+        typeof latencyObject === 'object' &&
+        'p99' in latencyObject
+      ) {
         latencyP99 = asNumber(latencyObject.p99);
       }
     }
@@ -123,9 +145,16 @@ for (const input of files) {
       baselineP95 = asNumber(getValue(baseline, ['p95', 'latencyP95']));
     }
 
-    const errorRateCandidate = getValue(field, ['errorRate', 'errorsPerSecond']);
+    const errorRateCandidate = getValue(field, [
+      'errorRate',
+      'errorsPerSecond',
+    ]);
     let errorRate = asNumber(errorRateCandidate);
-    if (Number.isNaN(errorRate) && errorRateCandidate && typeof errorRateCandidate === 'object') {
+    if (
+      Number.isNaN(errorRate) &&
+      errorRateCandidate &&
+      typeof errorRateCandidate === 'object'
+    ) {
       errorRate = asNumber(getValue(errorRateCandidate, ['rate', 'value']));
     }
 
@@ -135,28 +164,44 @@ for (const input of files) {
     }
 
     if (requireBaseline && (Number.isNaN(baselineP95) || baselineP95 <= 0)) {
-      console.error(`Baseline missing for ${name}; failing because --require-baseline was set.`);
+      console.error(
+        `Baseline missing for ${name}; failing because --require-baseline was set.`,
+      );
       failed = true;
       continue;
     }
 
-    if (!Number.isNaN(baselineP95) && baselineP95 > 0 && !Number.isNaN(latencyP95)) {
+    if (
+      !Number.isNaN(baselineP95) &&
+      baselineP95 > 0 &&
+      !Number.isNaN(latencyP95)
+    ) {
       const ratio = latencyP95 / baselineP95;
       if (ratio > 1 + regressionBudget) {
         console.error(
-          `Resolver regression detected for ${name}: p95 ${latencyP95.toFixed(2)}ms vs baseline ${baselineP95.toFixed(2)}ms (>${
-            ((1 + regressionBudget) * 100 - 100).toFixed(0)
-          }%)`
+          `Resolver regression detected for ${name}: p95 ${latencyP95.toFixed(2)}ms vs baseline ${baselineP95.toFixed(2)}ms (>${(
+            (1 + regressionBudget) * 100 -
+            100
+          ).toFixed(0)}%)`,
         );
         failed = true;
       }
     }
 
-    if (!Number.isNaN(errorRate) && !Number.isNaN(baselineErrors) && baselineErrors >= 0) {
-      const ratio = baselineErrors === 0 ? (errorRate > 0 ? Infinity : 0) : errorRate / baselineErrors;
+    if (
+      !Number.isNaN(errorRate) &&
+      !Number.isNaN(baselineErrors) &&
+      baselineErrors >= 0
+    ) {
+      const ratio =
+        baselineErrors === 0
+          ? errorRate > 0
+            ? Infinity
+            : 0
+          : errorRate / baselineErrors;
       if (ratio > 1 + regressionBudget) {
         console.error(
-          `Error budget regression detected for ${name}: rate ${errorRate.toFixed(4)} vs baseline ${baselineErrors.toFixed(4)}`
+          `Error budget regression detected for ${name}: rate ${errorRate.toFixed(4)} vs baseline ${baselineErrors.toFixed(4)}`,
         );
         failed = true;
       }
@@ -169,7 +214,7 @@ for (const input of files) {
       latencyP99: Number.isNaN(latencyP99) ? undefined : latencyP99,
       baselineP95: Number.isNaN(baselineP95) ? undefined : baselineP95,
       errorRate: Number.isNaN(errorRate) ? undefined : errorRate,
-      baselineErrors: Number.isNaN(baselineErrors) ? undefined : baselineErrors
+      baselineErrors: Number.isNaN(baselineErrors) ? undefined : baselineErrors,
     });
   }
 }
@@ -179,7 +224,9 @@ if (summaries.length > 0) {
   for (const summary of summaries) {
     const parts = [summary.name];
     if (summary.latencyP95 !== undefined && summary.baselineP95 !== undefined) {
-      parts.push(`p95=${summary.latencyP95}ms (baseline ${summary.baselineP95}ms)`);
+      parts.push(
+        `p95=${summary.latencyP95}ms (baseline ${summary.baselineP95}ms)`,
+      );
     } else if (summary.latencyP95 !== undefined) {
       parts.push(`p95=${summary.latencyP95}ms`);
     }

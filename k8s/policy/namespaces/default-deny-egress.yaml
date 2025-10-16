@@ -8,7 +8,8 @@ spec:
   policyTypes: [Egress]
   egress:
     - to:
-        - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: kube-system } }
+        - namespaceSelector:
+            { matchLabels: { kubernetes.io/metadata.name: kube-system } }
       ports:
         - protocol: UDP
           port: 53

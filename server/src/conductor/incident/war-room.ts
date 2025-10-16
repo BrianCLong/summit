@@ -33,7 +33,13 @@ export interface WarRoomParticipant {
 
 export interface WarRoomEvent {
   id: string;
-  type: 'message' | 'action' | 'status_update' | 'decision' | 'escalation' | 'system';
+  type:
+    | 'message'
+    | 'action'
+    | 'status_update'
+    | 'decision'
+    | 'escalation'
+    | 'system';
   timestamp: number;
   userId?: string;
   content: string;
@@ -274,7 +280,10 @@ export class WarRoomCoordinator extends EventEmitter {
   async makeDecision(
     sessionId: string,
     userId: string,
-    decision: Omit<WarRoomDecision, 'id' | 'decidedBy' | 'decidedAt' | 'status'>,
+    decision: Omit<
+      WarRoomDecision,
+      'id' | 'decidedBy' | 'decidedAt' | 'status'
+    >,
   ): Promise<string> {
     const session = this.sessions.get(sessionId);
     if (!session) throw new Error('Session not found');
@@ -321,12 +330,17 @@ export class WarRoomCoordinator extends EventEmitter {
   async assignAction(
     sessionId: string,
     assignerUserId: string,
-    action: Omit<WarRoomActionItem, 'id' | 'createdAt' | 'status' | 'completedAt'>,
+    action: Omit<
+      WarRoomActionItem,
+      'id' | 'createdAt' | 'status' | 'completedAt'
+    >,
   ): Promise<string> {
     const session = this.sessions.get(sessionId);
     if (!session) throw new Error('Session not found');
 
-    const participant = session.participants.find((p) => p.userId === assignerUserId);
+    const participant = session.participants.find(
+      (p) => p.userId === assignerUserId,
+    );
     if (!participant || !participant.permissions.includes('assign_actions')) {
       throw new Error('Permission denied');
     }
@@ -407,7 +421,10 @@ export class WarRoomCoordinator extends EventEmitter {
   /**
    * Report runbook execution to war room
    */
-  async reportRunbookExecution(sessionId: string, execution: RunbookExecution): Promise<void> {
+  async reportRunbookExecution(
+    sessionId: string,
+    execution: RunbookExecution,
+  ): Promise<void> {
     const session = this.sessions.get(sessionId);
     if (!session) return;
 
@@ -444,7 +461,10 @@ export class WarRoomCoordinator extends EventEmitter {
     if (!session) throw new Error('Session not found');
 
     const participant = session.participants.find((p) => p.userId === userId);
-    if (!participant || !participant.permissions.includes('escalate_incident')) {
+    if (
+      !participant ||
+      !participant.permissions.includes('escalate_incident')
+    ) {
       throw new Error('Permission denied');
     }
 
@@ -464,7 +484,11 @@ export class WarRoomCoordinator extends EventEmitter {
       timestamp: Date.now(),
     });
 
-    this.emit('war_room:escalated', { session, escalationLevel, reason: escalationReason });
+    this.emit('war_room:escalated', {
+      session,
+      escalationLevel,
+      reason: escalationReason,
+    });
   }
 
   /**
@@ -522,7 +546,9 @@ export class WarRoomCoordinator extends EventEmitter {
    * List active war rooms
    */
   getActiveSessions(): WarRoomSession[] {
-    return Array.from(this.sessions.values()).filter((s) => s.status === 'active');
+    return Array.from(this.sessions.values()).filter(
+      (s) => s.status === 'active',
+    );
   }
 
   private setupWebSocketServer(): void {
@@ -591,16 +617,29 @@ export class WarRoomCoordinator extends EventEmitter {
   ): Promise<void> {
     switch (message.type) {
       case 'send_message':
-        await this.sendMessage(sessionId, userId, message.content, message.critical);
+        await this.sendMessage(
+          sessionId,
+          userId,
+          message.content,
+          message.critical,
+        );
         break;
 
       case 'make_decision':
-        const decisionId = await this.makeDecision(sessionId, userId, message.decision);
+        const decisionId = await this.makeDecision(
+          sessionId,
+          userId,
+          message.decision,
+        );
         ws.send(JSON.stringify({ type: 'decision_created', decisionId }));
         break;
 
       case 'assign_action':
-        const actionId = await this.assignAction(sessionId, userId, message.action);
+        const actionId = await this.assignAction(
+          sessionId,
+          userId,
+          message.action,
+        );
         ws.send(JSON.stringify({ type: 'action_created', actionId }));
         break;
 
@@ -633,7 +672,9 @@ export class WarRoomCoordinator extends EventEmitter {
     });
   }
 
-  private getDefaultPermissions(role: WarRoomParticipant['role']): WarRoomPermission[] {
+  private getDefaultPermissions(
+    role: WarRoomParticipant['role'],
+  ): WarRoomPermission[] {
     switch (role) {
       case 'commander':
         return [
@@ -647,9 +688,19 @@ export class WarRoomCoordinator extends EventEmitter {
           'manage_participants',
         ];
       case 'responder':
-        return ['read_timeline', 'write_timeline', 'upload_artifacts', 'assign_actions'];
+        return [
+          'read_timeline',
+          'write_timeline',
+          'upload_artifacts',
+          'assign_actions',
+        ];
       case 'sme':
-        return ['read_timeline', 'write_timeline', 'upload_artifacts', 'make_decisions'];
+        return [
+          'read_timeline',
+          'write_timeline',
+          'upload_artifacts',
+          'make_decisions',
+        ];
       case 'observer':
         return ['read_timeline'];
       default:
@@ -662,10 +713,14 @@ export class WarRoomCoordinator extends EventEmitter {
     incident: IncidentContext,
   ): Promise<void> {
     // Auto-invite based on incident type and severity
-    const invites: Array<{ userId: string; role: WarRoomParticipant['role'] }> = [];
+    const invites: Array<{ userId: string; role: WarRoomParticipant['role'] }> =
+      [];
 
     if (incident.type === 'security') {
-      invites.push({ userId: 'security-lead', role: 'responder' }, { userId: 'ciso', role: 'sme' });
+      invites.push(
+        { userId: 'security-lead', role: 'responder' },
+        { userId: 'ciso', role: 'sme' },
+      );
     }
 
     if (incident.severity === 'P0') {

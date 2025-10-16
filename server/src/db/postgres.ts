@@ -15,7 +15,11 @@ interface QueryOptions {
   label?: string;
 }
 
-type QueryExecutor = <T = any>(query: QueryInput, params?: any[], options?: QueryOptions) => Promise<QueryResult<T>>;
+type QueryExecutor = <T = any>(
+  query: QueryInput,
+  params?: any[],
+  options?: QueryOptions,
+) => Promise<QueryResult<T>>;
 
 interface PoolHealthSnapshot {
   name: string;
@@ -51,19 +55,52 @@ type CircuitState = 'closed' | 'half-open' | 'open';
 
 const logger = baseLogger.child({ name: 'postgres-pool' });
 
-const DEFAULT_WRITE_POOL_SIZE = parseInt(process.env.PG_WRITE_POOL_SIZE ?? '24', 10);
-const DEFAULT_READ_POOL_SIZE = parseInt(process.env.PG_READ_POOL_SIZE ?? '60', 10);
+const DEFAULT_WRITE_POOL_SIZE = parseInt(
+  process.env.PG_WRITE_POOL_SIZE ?? '24',
+  10,
+);
+const DEFAULT_READ_POOL_SIZE = parseInt(
+  process.env.PG_READ_POOL_SIZE ?? '60',
+  10,
+);
 const MAX_RETRIES = parseInt(process.env.PG_QUERY_MAX_RETRIES ?? '3', 10);
-const RETRY_BASE_DELAY_MS = parseInt(process.env.PG_RETRY_BASE_DELAY_MS ?? '40', 10);
-const RETRY_MAX_DELAY_MS = parseInt(process.env.PG_RETRY_MAX_DELAY_MS ?? '500', 10);
+const RETRY_BASE_DELAY_MS = parseInt(
+  process.env.PG_RETRY_BASE_DELAY_MS ?? '40',
+  10,
+);
+const RETRY_MAX_DELAY_MS = parseInt(
+  process.env.PG_RETRY_MAX_DELAY_MS ?? '500',
+  10,
+);
 const READ_TIMEOUT_MS = parseInt(process.env.PG_READ_TIMEOUT_MS ?? '5000', 10);
-const WRITE_TIMEOUT_MS = parseInt(process.env.PG_WRITE_TIMEOUT_MS ?? '30000', 10);
-const CONNECTION_LEAK_THRESHOLD_MS = parseInt(process.env.PG_CONNECTION_LEAK_THRESHOLD_MS ?? '15000', 10);
-const SLOW_QUERY_THRESHOLD_MS = parseInt(process.env.PG_SLOW_QUERY_THRESHOLD_MS ?? '2000', 10);
-const MAX_PREPARED_STATEMENTS = parseInt(process.env.PG_PREPARED_STATEMENT_CACHE_SIZE ?? '500', 10);
-const MAX_SLOW_QUERY_ENTRIES = parseInt(process.env.PG_SLOW_QUERY_ANALYSIS_ENTRIES ?? '200', 10);
-const CIRCUIT_BREAKER_FAILURE_THRESHOLD = parseInt(process.env.PG_CIRCUIT_BREAKER_FAILURE_THRESHOLD ?? '5', 10);
-const CIRCUIT_BREAKER_COOLDOWN_MS = parseInt(process.env.PG_CIRCUIT_BREAKER_COOLDOWN_MS ?? '30000', 10);
+const WRITE_TIMEOUT_MS = parseInt(
+  process.env.PG_WRITE_TIMEOUT_MS ?? '30000',
+  10,
+);
+const CONNECTION_LEAK_THRESHOLD_MS = parseInt(
+  process.env.PG_CONNECTION_LEAK_THRESHOLD_MS ?? '15000',
+  10,
+);
+const SLOW_QUERY_THRESHOLD_MS = parseInt(
+  process.env.PG_SLOW_QUERY_THRESHOLD_MS ?? '2000',
+  10,
+);
+const MAX_PREPARED_STATEMENTS = parseInt(
+  process.env.PG_PREPARED_STATEMENT_CACHE_SIZE ?? '500',
+  10,
+);
+const MAX_SLOW_QUERY_ENTRIES = parseInt(
+  process.env.PG_SLOW_QUERY_ANALYSIS_ENTRIES ?? '200',
+  10,
+);
+const CIRCUIT_BREAKER_FAILURE_THRESHOLD = parseInt(
+  process.env.PG_CIRCUIT_BREAKER_FAILURE_THRESHOLD ?? '5',
+  10,
+);
+const CIRCUIT_BREAKER_COOLDOWN_MS = parseInt(
+  process.env.PG_CIRCUIT_BREAKER_COOLDOWN_MS ?? '30000',
+  10,
+);
 
 interface PoolWrapper {
   name: string;
@@ -87,13 +124,20 @@ class CircuitBreaker {
   private openUntil = 0;
   private lastError?: Error;
 
-  constructor(private readonly name: string, private readonly failureThreshold: number, private readonly cooldownMs: number) {}
+  constructor(
+    private readonly name: string,
+    private readonly failureThreshold: number,
+    private readonly cooldownMs: number,
+  ) {}
 
   canExecute(): boolean {
     if (this.state === 'open') {
       if (Date.now() >= this.openUntil) {
         this.state = 'half-open';
-        logger.warn({ pool: this.name }, 'PostgreSQL circuit breaker half-open');
+        logger.warn(
+          { pool: this.name },
+          'PostgreSQL circuit breaker half-open',
+        );
         return true;
       }
       return false;
@@ -119,11 +163,17 @@ class CircuitBreaker {
     if (this.failureCount >= this.failureThreshold) {
       this.state = 'open';
       this.openUntil = Date.now() + this.cooldownMs;
-      logger.error({ pool: this.name, failureCount: this.failureCount, err: error }, 'PostgreSQL circuit breaker opened');
+      logger.error(
+        { pool: this.name, failureCount: this.failureCount, err: error },
+        'PostgreSQL circuit breaker opened',
+      );
     } else if (this.state === 'half-open') {
       this.state = 'open';
       this.openUntil = Date.now() + this.cooldownMs;
-      logger.error({ pool: this.name, err: error }, 'PostgreSQL circuit breaker re-opened while half-open');
+      logger.error(
+        { pool: this.name, err: error },
+        'PostgreSQL circuit breaker re-opened while half-open',
+      );
     }
   }
 
@@ -144,7 +194,10 @@ class CircuitBreaker {
 }
 
 const preparedStatementCache = new Map<string, string>();
-const slowQueryStats = new Map<string, { count: number; totalDuration: number; maxDuration: number; pool: string }>();
+const slowQueryStats = new Map<
+  string,
+  { count: number; totalDuration: number; maxDuration: number; pool: string }
+>();
 
 let writePoolWrapper: PoolWrapper | null = null;
 let readPoolWrappers: PoolWrapper[] = [];
@@ -166,7 +219,13 @@ const transientErrorCodes = new Set([
   '40001',
 ]);
 
-const transientNodeErrors = new Set(['ECONNRESET', 'ECONNREFUSED', 'ETIMEDOUT', 'EHOSTUNREACH', 'EPIPE']);
+const transientNodeErrors = new Set([
+  'ECONNRESET',
+  'ECONNREFUSED',
+  'ETIMEDOUT',
+  'EHOSTUNREACH',
+  'EPIPE',
+]);
 
 function parseConnectionConfig(): PoolConfig {
   if (process.env.DATABASE_URL) {
@@ -188,19 +247,29 @@ function parseReadReplicaUrls(): string[] {
     .map((url) => url.trim())
     .filter(Boolean);
 
-  const legacy = process.env.DATABASE_READ_URL ? [process.env.DATABASE_READ_URL] : [];
+  const legacy = process.env.DATABASE_READ_URL
+    ? [process.env.DATABASE_READ_URL]
+    : [];
 
   return [...new Set([...explicit, ...legacy])];
 }
 
-function createPool(config: PoolConfig, name: string, type: 'write' | 'read', max: number): PoolWrapper {
+function createPool(
+  config: PoolConfig,
+  name: string,
+  type: 'write' | 'read',
+  max: number,
+): PoolWrapper {
   const pool = new Pool({
     ...config,
     max,
     idleTimeoutMillis: 30000,
     connectionTimeoutMillis: 5000,
     application_name: `summit-${type}-${process.env.CURRENT_REGION || 'global'}`,
-    ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: true } : false,
+    ssl:
+      process.env.NODE_ENV === 'production'
+        ? { rejectUnauthorized: true }
+        : false,
   });
 
   pool.on('error', (err) => {
@@ -211,7 +280,11 @@ function createPool(config: PoolConfig, name: string, type: 'write' | 'read', ma
     name,
     type,
     pool,
-    circuitBreaker: new CircuitBreaker(name, CIRCUIT_BREAKER_FAILURE_THRESHOLD, CIRCUIT_BREAKER_COOLDOWN_MS),
+    circuitBreaker: new CircuitBreaker(
+      name,
+      CIRCUIT_BREAKER_FAILURE_THRESHOLD,
+      CIRCUIT_BREAKER_COOLDOWN_MS,
+    ),
   };
 }
 
@@ -221,36 +294,75 @@ function initializePools(): void {
   }
 
   const baseConfig = parseConnectionConfig();
-  writePoolWrapper = createPool(baseConfig, 'write-primary', 'write', DEFAULT_WRITE_POOL_SIZE);
+  writePoolWrapper = createPool(
+    baseConfig,
+    'write-primary',
+    'write',
+    DEFAULT_WRITE_POOL_SIZE,
+  );
 
   const replicaUrls = parseReadReplicaUrls();
   if (replicaUrls.length === 0) {
-    readPoolWrappers = [createPool(baseConfig, 'read-default', 'read', DEFAULT_READ_POOL_SIZE)];
+    readPoolWrappers = [
+      createPool(baseConfig, 'read-default', 'read', DEFAULT_READ_POOL_SIZE),
+    ];
   } else {
     readPoolWrappers = replicaUrls.map((url, idx) =>
-      createPool({ connectionString: url }, `read-replica-${idx + 1}`, 'read', DEFAULT_READ_POOL_SIZE),
+      createPool(
+        { connectionString: url },
+        `read-replica-${idx + 1}`,
+        'read',
+        DEFAULT_READ_POOL_SIZE,
+      ),
     );
   }
 
   managedPool = createManagedPool(writePoolWrapper, readPoolWrappers);
 }
 
-function createManagedPool(writePool: PoolWrapper, readPools: PoolWrapper[]): ManagedPostgresPool {
+function createManagedPool(
+  writePool: PoolWrapper,
+  readPools: PoolWrapper[],
+): ManagedPostgresPool {
   const query: QueryExecutor = (queryInput, params, options = {}) =>
-    executeManagedQuery({ queryInput, params, options, desiredType: 'auto', writePool, readPools });
+    executeManagedQuery({
+      queryInput,
+      params,
+      options,
+      desiredType: 'auto',
+      writePool,
+      readPools,
+    });
 
   const read: QueryExecutor = (queryInput, params, options = {}) =>
-    executeManagedQuery({ queryInput, params, options: { ...options, forceWrite: false }, desiredType: 'read', writePool, readPools });
+    executeManagedQuery({
+      queryInput,
+      params,
+      options: { ...options, forceWrite: false },
+      desiredType: 'read',
+      writePool,
+      readPools,
+    });
 
   const write: QueryExecutor = (queryInput, params, options = {}) =>
-    executeManagedQuery({ queryInput, params, options: { ...options, forceWrite: true }, desiredType: 'write', writePool, readPools });
+    executeManagedQuery({
+      queryInput,
+      params,
+      options: { ...options, forceWrite: true },
+      desiredType: 'write',
+      writePool,
+      readPools,
+    });
 
   const connect = async (): Promise<PoolClient> => {
     return writePool.pool.connect();
   };
 
   const end = async (): Promise<void> => {
-    await Promise.all([writePool.pool.end(), ...readPools.map((wrapper) => wrapper.pool.end())]);
+    await Promise.all([
+      writePool.pool.end(),
+      ...readPools.map((wrapper) => wrapper.pool.end()),
+    ]);
     managedPool = null;
     writePoolWrapper = null;
     readPoolWrappers = [];
@@ -272,7 +384,8 @@ function createManagedPool(writePool: PoolWrapper, readPools: PoolWrapper[]): Ma
           type: wrapper.type,
           circuitState: wrapper.circuitBreaker.getState(),
           healthy: true,
-          activeConnections: (wrapper.pool.totalCount ?? 0) - (wrapper.pool.idleCount ?? 0),
+          activeConnections:
+            (wrapper.pool.totalCount ?? 0) - (wrapper.pool.idleCount ?? 0),
           idleConnections: wrapper.pool.idleCount ?? 0,
           queuedRequests: wrapper.pool.waitingCount ?? 0,
         };
@@ -302,18 +415,29 @@ function createManagedPool(writePool: PoolWrapper, readPools: PoolWrapper[]): Ma
   };
 
   const slowQueryInsights = (): SlowQueryInsight[] => {
-    const entries = Array.from(slowQueryStats.entries()).map(([key, value]) => ({
-      key,
-      pool: value.pool,
-      executions: value.count,
-      avgDurationMs: value.totalDuration / Math.max(value.count, 1),
-      maxDurationMs: value.maxDuration,
-    }));
+    const entries = Array.from(slowQueryStats.entries()).map(
+      ([key, value]) => ({
+        key,
+        pool: value.pool,
+        executions: value.count,
+        avgDurationMs: value.totalDuration / Math.max(value.count, 1),
+        maxDurationMs: value.maxDuration,
+      }),
+    );
 
     return entries.sort((a, b) => b.maxDurationMs - a.maxDurationMs);
   };
 
-  return { query, read, write, connect, end, on, healthCheck, slowQueryInsights };
+  return {
+    query,
+    read,
+    write,
+    connect,
+    end,
+    on,
+    healthCheck,
+    slowQueryInsights,
+  };
 }
 
 async function executeManagedQuery({
@@ -332,9 +456,15 @@ async function executeManagedQuery({
   readPools: PoolWrapper[];
 }): Promise<QueryResult<any>> {
   const normalized = normalizeQuery(queryInput, params);
-  const queryType = desiredType === 'auto' ? inferQueryType(normalized.text) : desiredType;
-  const poolCandidates = queryType === 'write' ? [writePool] : [...pickReadPoolSequence(readPools), writePool];
-  const timeoutMs = options.timeoutMs ?? (queryType === 'write' ? WRITE_TIMEOUT_MS : READ_TIMEOUT_MS);
+  const queryType =
+    desiredType === 'auto' ? inferQueryType(normalized.text) : desiredType;
+  const poolCandidates =
+    queryType === 'write'
+      ? [writePool]
+      : [...pickReadPoolSequence(readPools), writePool];
+  const timeoutMs =
+    options.timeoutMs ??
+    (queryType === 'write' ? WRITE_TIMEOUT_MS : READ_TIMEOUT_MS);
   const label = options.label ?? inferOperation(normalized.text);
 
   let lastError: Error | undefined;
@@ -409,23 +539,38 @@ async function executeQueryOnClient(
   const duration = performance.now() - start;
 
   if (duration >= SLOW_QUERY_THRESHOLD_MS) {
-    recordSlowQuery(normalizedQuery.name, duration, wrapper.name, normalizedQuery.text);
+    recordSlowQuery(
+      normalizedQuery.name,
+      duration,
+      wrapper.name,
+      normalizedQuery.text,
+    );
   }
 
-  logger.debug({
-    pool: wrapper.name,
-    label,
-    durationMs: duration,
-    rows: result.rowCount ?? 0,
-  }, 'PostgreSQL query executed');
+  logger.debug(
+    {
+      pool: wrapper.name,
+      label,
+      durationMs: duration,
+      rows: result.rowCount ?? 0,
+    },
+    'PostgreSQL query executed',
+  );
 
   return result;
 }
 
-async function withManagedClient<T>(poolWrapper: PoolWrapper, timeoutMs: number, fn: (client: PoolClient) => Promise<T>): Promise<T> {
+async function withManagedClient<T>(
+  poolWrapper: PoolWrapper,
+  timeoutMs: number,
+  fn: (client: PoolClient) => Promise<T>,
+): Promise<T> {
   const client = await poolWrapper.pool.connect();
   const leakTimer = setTimeout(() => {
-    logger.error({ pool: poolWrapper.name }, 'Possible PostgreSQL connection leak detected');
+    logger.error(
+      { pool: poolWrapper.name },
+      'Possible PostgreSQL connection leak detected',
+    );
   }, CONNECTION_LEAK_THRESHOLD_MS);
 
   try {
@@ -442,7 +587,10 @@ async function withManagedClient<T>(poolWrapper: PoolWrapper, timeoutMs: number,
     try {
       await client.query('RESET statement_timeout');
     } catch (error) {
-      logger.warn({ pool: poolWrapper.name, err: error }, 'Failed to reset statement timeout');
+      logger.warn(
+        { pool: poolWrapper.name, err: error },
+        'Failed to reset statement timeout',
+      );
     }
 
     clearTimeout(leakTimer);
@@ -450,7 +598,10 @@ async function withManagedClient<T>(poolWrapper: PoolWrapper, timeoutMs: number,
   }
 }
 
-function normalizeQuery(query: QueryInput, params?: any[]): { text: string; values: any[]; name: string } {
+function normalizeQuery(
+  query: QueryInput,
+  params?: any[],
+): { text: string; values: any[]; name: string } {
   if (typeof query === 'string') {
     const trimmed = query.trim();
     return {
@@ -477,7 +628,11 @@ function getPreparedStatementName(queryText: string): string {
     return existing;
   }
 
-  const hash = crypto.createHash('sha1').update(normalized).digest('hex').slice(0, 16);
+  const hash = crypto
+    .createHash('sha1')
+    .update(normalized)
+    .digest('hex')
+    .slice(0, 16);
   const name = `stmt_${hash}`;
   preparedStatementCache.set(normalized, name);
 
@@ -491,9 +646,19 @@ function getPreparedStatementName(queryText: string): string {
   return name;
 }
 
-function recordSlowQuery(statementName: string, duration: number, poolName: string, sql: string): void {
+function recordSlowQuery(
+  statementName: string,
+  duration: number,
+  poolName: string,
+  sql: string,
+): void {
   const key = `${poolName}:${statementName}`;
-  const entry = slowQueryStats.get(key) ?? { count: 0, totalDuration: 0, maxDuration: 0, pool: poolName };
+  const entry = slowQueryStats.get(key) ?? {
+    count: 0,
+    totalDuration: 0,
+    maxDuration: 0,
+    pool: poolName,
+  };
   entry.count += 1;
   entry.totalDuration += duration;
   entry.maxDuration = Math.max(entry.maxDuration, duration);
@@ -506,7 +671,10 @@ function recordSlowQuery(statementName: string, duration: number, poolName: stri
     }
   }
 
-  logger.warn({ pool: poolName, durationMs: duration, statement: statementName, sql }, 'Slow PostgreSQL query detected');
+  logger.warn(
+    { pool: poolName, durationMs: duration, statement: statementName, sql },
+    'Slow PostgreSQL query detected',
+  );
 }
 
 function pickReadPoolSequence(readPools: PoolWrapper[]): PoolWrapper[] {
@@ -527,9 +695,21 @@ function pickReadPoolSequence(readPools: PoolWrapper[]): PoolWrapper[] {
 function inferQueryType(queryText: string): 'read' | 'write' {
   const normalized = queryText.trim().toLowerCase();
   if (normalized.startsWith('with')) {
-    const match = normalized.match(/with\s+[\s\S]*?\b(select|insert|update|delete|merge|create|alter|drop)\b/);
+    const match = normalized.match(
+      /with\s+[\s\S]*?\b(select|insert|update|delete|merge|create|alter|drop)\b/,
+    );
     if (match && match[1]) {
-      return ['insert', 'update', 'delete', 'merge', 'create', 'alter', 'drop'].includes(match[1]) ? 'write' : 'read';
+      return [
+        'insert',
+        'update',
+        'delete',
+        'merge',
+        'create',
+        'alter',
+        'drop',
+      ].includes(match[1])
+        ? 'write'
+        : 'read';
     }
   }
 
@@ -601,4 +781,3 @@ export const __private = {
   isRetryableError,
   CircuitBreaker,
 };
-

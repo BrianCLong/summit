@@ -3,7 +3,10 @@ import { PolicyMetadata, PolicyTag } from '@ga-graphai/common-types';
 export class PolicyTagger {
   constructor(private readonly defaults: PolicyMetadata) {}
 
-  tag(text: string, overrides?: Partial<PolicyMetadata>): { policy: PolicyMetadata; tags: PolicyTag[] } {
+  tag(
+    text: string,
+    overrides?: Partial<PolicyMetadata>,
+  ): { policy: PolicyMetadata; tags: PolicyTag[] } {
     const policy: PolicyMetadata = {
       ...this.defaults,
       ...overrides,

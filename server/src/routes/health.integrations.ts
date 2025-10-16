@@ -52,7 +52,8 @@ export function healthIntegrationsRouter() {
 
     // Maestro GraphQL check
     try {
-      const base = process.env.MAESTRO_BASE_URL || 'https://maestro.dev.topicality.co';
+      const base =
+        process.env.MAESTRO_BASE_URL || 'https://maestro.dev.topicality.co';
       const path = process.env.MAESTRO_GRAPHQL_PATH || '/api/graphql';
       const q = `query { __typename }`;
       const rsp = await fetch(`${base}${path}`, {
@@ -73,4 +74,3 @@ export function healthIntegrationsRouter() {
 
   return r;
 }
-

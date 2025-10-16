@@ -1,10 +1,17 @@
-import { Queue, Worker, QueueEvents, Job, QueueOptions, WorkerOptions } from "bullmq";
-import Redis from "ioredis";
-import { logger } from "../utils/logger";
-import { PolicyGuard } from "./policyGuard";
-import { Budget } from "../ai/llmBudget";
+import {
+  Queue,
+  Worker,
+  QueueEvents,
+  Job,
+  QueueOptions,
+  WorkerOptions,
+} from 'bullmq';
+import Redis from 'ioredis';
+import { logger } from '../utils/logger';
+import { PolicyGuard } from './policyGuard';
+import { Budget } from '../ai/llmBudget';
 
-const redis = new Redis(process.env.REDIS_URL || "redis://localhost:6379");
+const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
 const queueOptions: QueueOptions = {
   connection: redis,
@@ -13,17 +20,17 @@ const queueOptions: QueueOptions = {
     removeOnFail: 100,
     attempts: 3,
     backoff: {
-      type: "exponential",
+      type: 'exponential',
       delay: 5000,
     },
   },
 };
 
-const maestroQueue = new Queue("maestro", queueOptions);
-const queueEvents = new QueueEvents("maestro", { connection: redis });
+const maestroQueue = new Queue('maestro', queueOptions);
+const queueEvents = new QueueEvents('maestro', { connection: redis });
 
 export type AgentTask = {
-  kind: "plan" | "scaffold" | "implement" | "test" | "review" | "docs";
+  kind: 'plan' | 'scaffold' | 'implement' | 'test' | 'review' | 'docs';
   repo: string;
   pr?: number;
   issue: string;
@@ -69,7 +76,7 @@ class MaestroOrchestrator {
       jobId: `${task.kind}-${task.repo}-${Date.now()}`,
     });
 
-    logger.info("Task enqueued", {
+    logger.info('Task enqueued', {
       taskId: job.id,
       kind: task.kind,
       repo: task.repo,
@@ -81,7 +88,7 @@ class MaestroOrchestrator {
 
   async enqueueTaskChain(tasks: AgentTask[]): Promise<string[]> {
     const taskIds: string[] = [];
-    
+
     for (let i = 0; i < tasks.length; i++) {
       const task = tasks[i];
       if (i > 0) {
@@ -102,55 +109,61 @@ class MaestroOrchestrator {
     };
 
     // Planner Agent
-    const plannerWorker = new Worker<AgentTask>("maestro", 
-      this.withGuards(this.plannerHandler.bind(this)), 
-      { ...workerOptions, name: "planner" }
+    const plannerWorker = new Worker<AgentTask>(
+      'maestro',
+      this.withGuards(this.plannerHandler.bind(this)),
+      { ...workerOptions, name: 'planner' },
     );
-    this.workers.set("planner", plannerWorker);
+    this.workers.set('planner', plannerWorker);
 
-    // Scaffolder Agent  
-    const scaffolderWorker = new Worker<AgentTask>("maestro",
+    // Scaffolder Agent
+    const scaffolderWorker = new Worker<AgentTask>(
+      'maestro',
       this.withGuards(this.scaffolderHandler.bind(this)),
-      { ...workerOptions, name: "scaffolder" }
+      { ...workerOptions, name: 'scaffolder' },
     );
-    this.workers.set("scaffolder", scaffolderWorker);
+    this.workers.set('scaffolder', scaffolderWorker);
 
     // Implementer Agent
-    const implementerWorker = new Worker<AgentTask>("maestro",
+    const implementerWorker = new Worker<AgentTask>(
+      'maestro',
       this.withGuards(this.implementerHandler.bind(this)),
-      { ...workerOptions, name: "implementer" }  
+      { ...workerOptions, name: 'implementer' },
     );
-    this.workers.set("implementer", implementerWorker);
+    this.workers.set('implementer', implementerWorker);
 
     // Tester Agent
-    const testerWorker = new Worker<AgentTask>("maestro",
+    const testerWorker = new Worker<AgentTask>(
+      'maestro',
       this.withGuards(this.testerHandler.bind(this)),
-      { ...workerOptions, name: "tester" }
+      { ...workerOptions, name: 'tester' },
     );
-    this.workers.set("tester", testerWorker);
+    this.workers.set('tester', testerWorker);
 
     // Reviewer Agent
-    const reviewerWorker = new Worker<AgentTask>("maestro",
+    const reviewerWorker = new Worker<AgentTask>(
+      'maestro',
       this.withGuards(this.reviewerHandler.bind(this)),
-      { ...workerOptions, name: "reviewer" }
+      { ...workerOptions, name: 'reviewer' },
     );
-    this.workers.set("reviewer", reviewerWorker);
+    this.workers.set('reviewer', reviewerWorker);
 
     // Doc Writer Agent
-    const docWriterWorker = new Worker<AgentTask>("maestro", 
+    const docWriterWorker = new Worker<AgentTask>(
+      'maestro',
       this.withGuards(this.docWriterHandler.bind(this)),
-      { ...workerOptions, name: "doc-writer" }
+      { ...workerOptions, name: 'doc-writer' },
     );
-    this.workers.set("doc-writer", docWriterWorker);
+    this.workers.set('doc-writer', docWriterWorker);
   }
 
   private withGuards<T extends AgentTask>(
-    handler: (job: Job<T>) => Promise<TaskResult>
+    handler: (job: Job<T>) => Promise<TaskResult>,
   ) {
     return async (job: Job<T>): Promise<TaskResult> => {
       const startTime = Date.now();
       const budget = new Budget(job.data.budgetUSD);
-      
+
       try {
         // Policy guard
         const policyResult = await this.policyGuard.checkPolicy(job.data);
@@ -160,7 +173,7 @@ class MaestroOrchestrator {
 
         // Budget guard
         if (budget.maxUSD <= 0) {
-          throw new Error("Budget exceeded: action blocked by budget guard");
+          throw new Error('Budget exceeded: action blocked by budget guard');
         }
 
         // Wait for dependencies
@@ -168,10 +181,10 @@ class MaestroOrchestrator {
           await this.waitForDependencies(job.data.dependencies);
         }
 
-        logger.info("Starting agent task", { 
+        logger.info('Starting agent task', {
           taskId: job.id,
           kind: job.data.kind,
-          budget: budget.maxUSD 
+          budget: budget.maxUSD,
         });
 
         const result = await handler(job);
@@ -183,13 +196,12 @@ class MaestroOrchestrator {
           duration,
           cost: budget.usedUSD,
         };
-
       } catch (error: any) {
         const duration = Date.now() - startTime;
-        logger.error("Agent task failed", { 
+        logger.error('Agent task failed', {
           taskId: job.id,
           error: error.message,
-          duration 
+          duration,
         });
 
         return {
@@ -210,18 +222,20 @@ class MaestroOrchestrator {
 
     while (Date.now() - startTime < maxWait) {
       const jobs = await Promise.all(
-        dependencies.map(id => maestroQueue.getJob(id))
+        dependencies.map((id) => maestroQueue.getJob(id)),
       );
 
-      const allComplete = jobs.every(job => 
-        job && (job.finishedOn !== undefined || job.failedReason !== undefined)
+      const allComplete = jobs.every(
+        (job) =>
+          job &&
+          (job.finishedOn !== undefined || job.failedReason !== undefined),
       );
 
       if (allComplete) {
         return;
       }
 
-      await new Promise(resolve => setTimeout(resolve, pollInterval));
+      await new Promise((resolve) => setTimeout(resolve, pollInterval));
     }
 
     throw new Error(`Dependencies not satisfied within ${maxWait}ms`);
@@ -230,19 +244,19 @@ class MaestroOrchestrator {
   // Agent Handlers
   private async plannerHandler(job: Job<AgentTask>): Promise<TaskResult> {
     const { repo, issue, context } = job.data;
-    
-    logger.info("Planner agent starting", { repo, issue });
-    
+
+    logger.info('Planner agent starting', { repo, issue });
+
     // Mock planning logic - in reality would call LLM with prompt registry
     const plan = {
       tasks: [
-        { kind: "scaffold" as const, description: "Create boilerplate" },
-        { kind: "implement" as const, description: "Write code" },
-        { kind: "test" as const, description: "Add tests" },
-        { kind: "review" as const, description: "Code review" },
-        { kind: "docs" as const, description: "Update documentation" },
+        { kind: 'scaffold' as const, description: 'Create boilerplate' },
+        { kind: 'implement' as const, description: 'Write code' },
+        { kind: 'test' as const, description: 'Add tests' },
+        { kind: 'review' as const, description: 'Code review' },
+        { kind: 'docs' as const, description: 'Update documentation' },
       ],
-      estimate: "2 hours",
+      estimate: '2 hours',
       confidence: 0.8,
     };
 
@@ -257,16 +271,16 @@ class MaestroOrchestrator {
 
   private async scaffolderHandler(job: Job<AgentTask>): Promise<TaskResult> {
     const { repo, context } = job.data;
-    
-    logger.info("Scaffolder agent starting", { repo });
-    
+
+    logger.info('Scaffolder agent starting', { repo });
+
     // Mock scaffolding logic
     const scaffold = {
       branch: `feature/${job.id}`,
       files_created: [
-        "src/components/NewComponent.tsx",
-        "src/types/NewTypes.ts",
-        "tests/NewComponent.test.tsx",
+        'src/components/NewComponent.tsx',
+        'src/types/NewTypes.ts',
+        'tests/NewComponent.test.tsx',
       ],
     };
 
@@ -281,9 +295,9 @@ class MaestroOrchestrator {
 
   private async implementerHandler(job: Job<AgentTask>): Promise<TaskResult> {
     const { repo, context } = job.data;
-    
-    logger.info("Implementer agent starting", { repo });
-    
+
+    logger.info('Implementer agent starting', { repo });
+
     // Mock implementation logic
     const implementation = {
       files_modified: 3,
@@ -303,9 +317,9 @@ class MaestroOrchestrator {
 
   private async testerHandler(job: Job<AgentTask>): Promise<TaskResult> {
     const { repo, context } = job.data;
-    
-    logger.info("Tester agent starting", { repo });
-    
+
+    logger.info('Tester agent starting', { repo });
+
     // Mock testing logic
     const testResults = {
       tests_run: 25,
@@ -326,9 +340,9 @@ class MaestroOrchestrator {
 
   private async reviewerHandler(job: Job<AgentTask>): Promise<TaskResult> {
     const { repo, context } = job.data;
-    
-    logger.info("Reviewer agent starting", { repo });
-    
+
+    logger.info('Reviewer agent starting', { repo });
+
     // Mock review logic
     const review = {
       security_issues: 0,
@@ -348,12 +362,12 @@ class MaestroOrchestrator {
 
   private async docWriterHandler(job: Job<AgentTask>): Promise<TaskResult> {
     const { repo, context } = job.data;
-    
-    logger.info("Doc writer agent starting", { repo });
-    
+
+    logger.info('Doc writer agent starting', { repo });
+
     // Mock documentation logic
     const docs = {
-      files_updated: ["README.md", "CHANGELOG.md"],
+      files_updated: ['README.md', 'CHANGELOG.md'],
       provenance_manifest: true,
       api_docs_generated: true,
     };
@@ -368,16 +382,16 @@ class MaestroOrchestrator {
   }
 
   private setupEventHandlers() {
-    queueEvents.on("completed", (jobId, result) => {
-      logger.info("Task completed", { taskId: jobId, result });
+    queueEvents.on('completed', (jobId, result) => {
+      logger.info('Task completed', { taskId: jobId, result });
     });
 
-    queueEvents.on("failed", (jobId, failedReason) => {
-      logger.error("Task failed", { taskId: jobId, reason: failedReason });
+    queueEvents.on('failed', (jobId, failedReason) => {
+      logger.error('Task failed', { taskId: jobId, reason: failedReason });
     });
 
-    queueEvents.on("stalled", (jobId) => {
-      logger.warn("Task stalled", { taskId: jobId });
+    queueEvents.on('stalled', (jobId) => {
+      logger.warn('Task stalled', { taskId: jobId });
     });
   }
 
@@ -398,13 +412,13 @@ class MaestroOrchestrator {
   }
 
   async shutdown() {
-    logger.info("Shutting down Maestro orchestrator");
-    
+    logger.info('Shutting down Maestro orchestrator');
+
     for (const [name, worker] of this.workers) {
       logger.info(`Closing worker: ${name}`);
       await worker.close();
     }
-    
+
     await maestroQueue.close();
     await redis.quit();
   }
@@ -414,12 +428,12 @@ class MaestroOrchestrator {
 export const maestro = new MaestroOrchestrator();
 
 // Graceful shutdown
-process.on("SIGTERM", async () => {
+process.on('SIGTERM', async () => {
   await maestro.shutdown();
   process.exit(0);
 });
 
-process.on("SIGINT", async () => {
+process.on('SIGINT', async () => {
   await maestro.shutdown();
   process.exit(0);
 });

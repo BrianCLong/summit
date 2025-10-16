@@ -17,7 +17,9 @@ import {
 const subjectId = 'sub-001';
 const tenantId = 'tenant-a';
 
-const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', { modulusLength: 2048 });
+const { privateKey, publicKey } = crypto.generateKeyPairSync('rsa', {
+  modulusLength: 2048,
+});
 const signer = new ExportPackSigner(
   privateKey.export({ type: 'pkcs1', format: 'pem' }).toString(),
   publicKey.export({ type: 'pkcs1', format: 'pem' }).toString(),
@@ -28,7 +30,11 @@ const postgres = new InMemoryPostgresConnector([
     table: 'profile',
     subjectId,
     tenantId,
-    data: { email: 'original@example.com', name: 'Fixture User', ssn: '123-45-6789' },
+    data: {
+      email: 'original@example.com',
+      name: 'Fixture User',
+      ssn: '123-45-6789',
+    },
   },
   {
     table: 'sessions',
@@ -44,7 +50,11 @@ const elastic = new InMemoryElasticsearchConnector([
     subjectId,
     tenantId,
     index: 'activity',
-    body: { action: 'login', email: 'original@example.com', timestamp: '2025-09-01T00:00:00.000Z' },
+    body: {
+      action: 'login',
+      email: 'original@example.com',
+      timestamp: '2025-09-01T00:00:00.000Z',
+    },
   },
   {
     id: 'activity-2',
@@ -81,10 +91,15 @@ const engine = new DataSubjectFulfillmentEngine({
   const first = await engine.execute(exportRequest);
   assert.equal(first.type, 'export');
   assert.equal(first.meta.idempotentReplay, false);
-  const stored = await storage.getObject(`${tenantId}/${exportRequest.requestId}.json`);
+  const stored = await storage.getObject(
+    `${tenantId}/${exportRequest.requestId}.json`,
+  );
   assert.ok(stored, 'export pack stored in S3');
   const parsed = JSON.parse(stored!);
-  assert.ok(signer.verify(parsed.payload, parsed.signature), 'signature verifies');
+  assert.ok(
+    signer.verify(parsed.payload, parsed.signature),
+    'signature verifies',
+  );
   const second = await engine.execute(exportRequest);
   assert.equal(second.meta.idempotentReplay, true);
   assert.deepEqual(second.result, first.result);
@@ -104,7 +119,9 @@ const engine = new DataSubjectFulfillmentEngine({
   });
   assert.equal(rectify.type, 'rectify');
   assert.equal(rectify.result.proofs.length, 2);
-  rectify.result.proofs.forEach((proof) => assert.ok(validateRectificationProof(proof)));
+  rectify.result.proofs.forEach((proof) =>
+    assert.ok(validateRectificationProof(proof)),
+  );
 
   const deletion = await engine.execute({
     requestId: 'req-delete-1',
@@ -121,7 +138,8 @@ const engine = new DataSubjectFulfillmentEngine({
   const postgresSnapshot = await postgres.snapshot();
   const elasticSnapshot = await elastic.snapshot();
   deletion.result.proofs.forEach((proof) => {
-    const snapshot = proof.connector === 'postgres' ? postgresSnapshot : elasticSnapshot;
+    const snapshot =
+      proof.connector === 'postgres' ? postgresSnapshot : elasticSnapshot;
     assert.ok(validateDeletionProofAgainstSnapshot(proof, snapshot));
   });
 

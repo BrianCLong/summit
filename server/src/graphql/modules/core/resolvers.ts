@@ -6,7 +6,8 @@ const store: GraphStore = createGraphStore();
 const ai: AIService = createAIService();
 
 export const Query = {
-  entities: (_: unknown, { filters }: { filters: any }) => store.getEntities(filters || {}),
+  entities: (_: unknown, { filters }: { filters: any }) =>
+    store.getEntities(filters || {}),
   relationships: (_: unknown, { entityId }: { entityId: string }) =>
     store.getRelationships(entityId),
 };

@@ -16,13 +16,23 @@ export function activate(ctx: vscode.ExtensionContext) {
   ctx.subscriptions.push(
     vscode.commands.registerCommand('symphony.execute', async () => {
       const ed = vscode.window.activeTextEditor;
-      const input = ed?.document.getText(ed.selection) || ed?.document.getText() || '';
-      const j = await post('/route/execute', { task: 'qa', loa: 1, input, stream: true });
-      vscode.window.showInformationMessage(`Audit ${j.audit_id} • ${j.latency_ms}ms`);
+      const input =
+        ed?.document.getText(ed.selection) || ed?.document.getText() || '';
+      const j = await post('/route/execute', {
+        task: 'qa',
+        loa: 1,
+        input,
+        stream: true,
+      });
+      vscode.window.showInformationMessage(
+        `Audit ${j.audit_id} • ${j.latency_ms}ms`,
+      );
     }),
     vscode.commands.registerCommand('symphony.explain', async () => {
       const j = await post('/route/plan', { task: 'qa', loa: 1 });
-      vscode.window.showInformationMessage(`Decision: ${j.decision?.primary?.model || 'n/a'}`);
+      vscode.window.showInformationMessage(
+        `Decision: ${j.decision?.primary?.model || 'n/a'}`,
+      );
     }),
   );
 }

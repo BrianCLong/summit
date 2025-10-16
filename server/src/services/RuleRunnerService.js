@@ -1,4 +1,4 @@
-const { getPostgresPool } = require("../config/database");
+const { getPostgresPool } = require('../config/database');
 
 class RuleRunnerService {
   constructor(logger, options = {}) {
@@ -17,7 +17,7 @@ class RuleRunnerService {
     this.timer = setInterval(
       () =>
         this.runOnce().catch(
-          (e) => this.logger && this.logger.warn("RuleRunner error", e),
+          (e) => this.logger && this.logger.warn('RuleRunner error', e),
         ),
       this.intervalMs,
     );
@@ -47,8 +47,8 @@ class RuleRunnerService {
          VALUES ($1, $2, $3, $4, $5, $6, $7)`,
         [
           null,
-          "model_threshold",
-          "warning",
+          'model_threshold',
+          'warning',
           title,
           message,
           null,

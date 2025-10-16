@@ -1,12 +1,12 @@
 /**
  * Defensive Psychological Operations Service
- * 
+ *
  * DEFENSIVE ONLY: Protects against psychological warfare, influence campaigns,
  * and cognitive manipulation attempts targeting the organization or users.
- * 
+ *
  * This service focuses exclusively on:
  * - Threat detection and analysis
- * - Protective measures and countermeasures  
+ * - Protective measures and countermeasures
  * - Impact assessment and mitigation
  * - Attribution and threat intelligence
  */
@@ -40,7 +40,10 @@ interface DefensiveResponse {
 
 interface BehavioralAnomaly {
   userId: string;
-  anomalyType: 'MANIPULATION_SUSCEPTIBILITY' | 'UNUSUAL_ENGAGEMENT' | 'COGNITIVE_BIAS_EXPLOITATION';
+  anomalyType:
+    | 'MANIPULATION_SUSCEPTIBILITY'
+    | 'UNUSUAL_ENGAGEMENT'
+    | 'COGNITIVE_BIAS_EXPLOITATION';
   severity: number;
   indicators: string[];
   protectiveActions: string[];
@@ -57,7 +60,7 @@ export class DefensivePsyOpsService extends EventEmitter {
     super();
     this.prisma = new PrismaClient();
     // Logger initialized as class property
-    
+
     // Start continuous monitoring
     this.initializeContinuousMonitoring();
   }
@@ -65,18 +68,34 @@ export class DefensivePsyOpsService extends EventEmitter {
   /**
    * DEFENSIVE: Detect incoming psychological warfare campaigns
    */
-  async detectPsychologicalThreats(content: string, metadata: any): Promise<PsyOpsThread | null> {
+  async detectPsychologicalThreats(
+    content: string,
+    metadata: any,
+  ): Promise<PsyOpsThread | null> {
     try {
       // Analyze for manipulation techniques
-      const manipulationScore = await this.analyzeManipulationTechniques(content);
-      const sentimentAnomaly = await this.detectSentimentAnomalies(content, metadata);
-      const narrativeSignatures = await this.identifyMaliciousNarratives(content);
-      
-      if (manipulationScore > 0.7 || sentimentAnomaly || narrativeSignatures.length > 0) {
+      const manipulationScore =
+        await this.analyzeManipulationTechniques(content);
+      const sentimentAnomaly = await this.detectSentimentAnomalies(
+        content,
+        metadata,
+      );
+      const narrativeSignatures =
+        await this.identifyMaliciousNarratives(content);
+
+      if (
+        manipulationScore > 0.7 ||
+        sentimentAnomaly ||
+        narrativeSignatures.length > 0
+      ) {
         const threat: PsyOpsThread = {
           id: this.generateThreatId(),
           source: metadata.source || 'UNKNOWN',
-          threatLevel: this.calculateThreatLevel(manipulationScore, sentimentAnomaly, narrativeSignatures),
+          threatLevel: this.calculateThreatLevel(
+            manipulationScore,
+            sentimentAnomaly,
+            narrativeSignatures,
+          ),
           attackVector: narrativeSignatures.join(', ') || 'UNKNOWN',
           targetAudience: metadata.targetAudience || 'GENERAL',
           narrative: content.substring(0, 500),
@@ -84,12 +103,12 @@ export class DefensivePsyOpsService extends EventEmitter {
           credibilityScore: await this.assessCredibility(content, metadata),
           propagationRate: metadata.propagationRate || 0,
           detectedAt: new Date(),
-          status: 'MONITORING'
+          status: 'MONITORING',
         };
 
         this.activeThreats.set(threat.id, threat);
         this.emit('threatDetected', threat);
-        
+
         await this.logThreatDetection(threat);
         return threat;
       }
@@ -104,31 +123,51 @@ export class DefensivePsyOpsService extends EventEmitter {
   /**
    * DEFENSIVE: Protect users from cognitive manipulation attempts
    */
-  async protectAgainstCognitiveManipulation(userId: string, interaction: any): Promise<BehavioralAnomaly[]> {
+  async protectAgainstCognitiveManipulation(
+    userId: string,
+    interaction: any,
+  ): Promise<BehavioralAnomaly[]> {
     try {
       const anomalies: BehavioralAnomaly[] = [];
 
       // Check for manipulation susceptibility indicators
-      const susceptibilityScore = await this.assessManipulationSusceptibility(userId, interaction);
+      const susceptibilityScore = await this.assessManipulationSusceptibility(
+        userId,
+        interaction,
+      );
       if (susceptibilityScore > 0.6) {
         anomalies.push({
           userId,
           anomalyType: 'MANIPULATION_SUSCEPTIBILITY',
           severity: susceptibilityScore,
-          indicators: ['rapid_opinion_shifts', 'emotional_volatility', 'confirmation_bias_exploitation'],
-          protectiveActions: ['show_fact_checks', 'reduce_emotional_content', 'provide_diverse_perspectives'],
-          detectedAt: new Date()
+          indicators: [
+            'rapid_opinion_shifts',
+            'emotional_volatility',
+            'confirmation_bias_exploitation',
+          ],
+          protectiveActions: [
+            'show_fact_checks',
+            'reduce_emotional_content',
+            'provide_diverse_perspectives',
+          ],
+          detectedAt: new Date(),
         });
       }
 
       // Monitor for unusual engagement patterns
-      const engagementAnomaly = await this.detectUnusualEngagement(userId, interaction);
+      const engagementAnomaly = await this.detectUnusualEngagement(
+        userId,
+        interaction,
+      );
       if (engagementAnomaly) {
         anomalies.push(engagementAnomaly);
       }
 
       // Protect against cognitive bias exploitation
-      const biasExploitation = await this.detectBiasExploitation(userId, interaction);
+      const biasExploitation = await this.detectBiasExploitation(
+        userId,
+        interaction,
+      );
       if (biasExploitation) {
         anomalies.push(biasExploitation);
       }
@@ -140,7 +179,10 @@ export class DefensivePsyOpsService extends EventEmitter {
 
       return anomalies;
     } catch (error) {
-      this.logger.error('Error protecting against cognitive manipulation:', error);
+      this.logger.error(
+        'Error protecting against cognitive manipulation:',
+        error,
+      );
       throw error;
     }
   }
@@ -148,7 +190,9 @@ export class DefensivePsyOpsService extends EventEmitter {
   /**
    * DEFENSIVE: Generate counter-narratives to protect against disinformation
    */
-  async generateDefensiveCounterNarrative(threatId: string): Promise<DefensiveResponse> {
+  async generateDefensiveCounterNarrative(
+    threatId: string,
+  ): Promise<DefensiveResponse> {
     try {
       const threat = this.activeThreats.get(threatId);
       if (!threat) {
@@ -165,7 +209,7 @@ export class DefensivePsyOpsService extends EventEmitter {
         content: counterNarrative,
         channels,
         effectiveness: 0, // To be measured after deployment
-        deployedAt: new Date()
+        deployedAt: new Date(),
       };
 
       // Store defensive response
@@ -207,7 +251,8 @@ export class DefensivePsyOpsService extends EventEmitter {
         moodShift: await this.measureMoodChanges(threat),
         trustDegradation: await this.assessTrustImpact(threat),
         behavioralChanges: await this.identifyBehavioralChanges(threat),
-        mitigationRecommendations: await this.generateMitigationRecommendations(threat)
+        mitigationRecommendations:
+          await this.generateMitigationRecommendations(threat),
       };
 
       await this.logImpactAssessment(threatId, impactMetrics);
@@ -226,16 +271,15 @@ export class DefensivePsyOpsService extends EventEmitter {
       try {
         // Monitor for new threats
         await this.scanForEmergingThreats();
-        
+
         // Update threat assessments
         await this.updateThreatAssessments();
-        
+
         // Evaluate defensive response effectiveness
         await this.evaluateDefensiveEffectiveness();
-        
+
         // Clean up resolved threats
         await this.cleanupResolvedThreats();
-        
       } catch (error) {
         this.logger.error('Error in continuous monitoring:', error);
       }
@@ -243,35 +287,49 @@ export class DefensivePsyOpsService extends EventEmitter {
   }
 
   // Private helper methods for defensive operations only
-  private async analyzeManipulationTechniques(content: string): Promise<number> {
+  private async analyzeManipulationTechniques(
+    content: string,
+  ): Promise<number> {
     // Analyze for psychological manipulation techniques
     // Returns score 0-1 where higher means more manipulative
     const techniques = [
-      'emotional_appeals', 'false_urgency', 'social_proof_manipulation',
-      'authority_exploitation', 'scarcity_tactics', 'fear_mongering'
+      'emotional_appeals',
+      'false_urgency',
+      'social_proof_manipulation',
+      'authority_exploitation',
+      'scarcity_tactics',
+      'fear_mongering',
     ];
-    
+
     // Implementation would use NLP and pattern matching
     return Math.random(); // Placeholder
   }
 
-  private async detectSentimentAnomalies(content: string, metadata: any): Promise<boolean> {
+  private async detectSentimentAnomalies(
+    content: string,
+    metadata: any,
+  ): Promise<boolean> {
     // Detect unusual sentiment patterns that might indicate manipulation
     return Math.random() > 0.8; // Placeholder
   }
 
-  private async identifyMaliciousNarratives(content: string): Promise<string[]> {
+  private async identifyMaliciousNarratives(
+    content: string,
+  ): Promise<string[]> {
     // Identify known malicious narrative patterns
     return ['divisive_polarization', 'trust_erosion']; // Placeholder
   }
 
   private calculateThreatLevel(
-    manipulationScore: number, 
-    sentimentAnomaly: boolean, 
-    narrativeSignatures: string[]
+    manipulationScore: number,
+    sentimentAnomaly: boolean,
+    narrativeSignatures: string[],
   ): 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' {
-    const score = manipulationScore + (sentimentAnomaly ? 0.3 : 0) + (narrativeSignatures.length * 0.2);
-    
+    const score =
+      manipulationScore +
+      (sentimentAnomaly ? 0.3 : 0) +
+      narrativeSignatures.length * 0.2;
+
     if (score > 0.9) return 'CRITICAL';
     if (score > 0.7) return 'HIGH';
     if (score > 0.5) return 'MEDIUM';
@@ -282,29 +340,46 @@ export class DefensivePsyOpsService extends EventEmitter {
     return `PSYOPS_THREAT_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
   }
 
-  private async assessCredibility(content: string, metadata: any): Promise<number> {
+  private async assessCredibility(
+    content: string,
+    metadata: any,
+  ): Promise<number> {
     // Assess source credibility and content reliability
     return Math.random(); // Placeholder
   }
 
-  private async assessManipulationSusceptibility(userId: string, interaction: any): Promise<number> {
+  private async assessManipulationSusceptibility(
+    userId: string,
+    interaction: any,
+  ): Promise<number> {
     // Assess user's susceptibility to manipulation (for protection)
     return Math.random(); // Placeholder
   }
 
-  private async detectUnusualEngagement(userId: string, interaction: any): Promise<BehavioralAnomaly | null> {
+  private async detectUnusualEngagement(
+    userId: string,
+    interaction: any,
+  ): Promise<BehavioralAnomaly | null> {
     // Detect unusual engagement patterns that might indicate manipulation
     return null; // Placeholder
   }
 
-  private async detectBiasExploitation(userId: string, interaction: any): Promise<BehavioralAnomaly | null> {
+  private async detectBiasExploitation(
+    userId: string,
+    interaction: any,
+  ): Promise<BehavioralAnomaly | null> {
     // Detect attempts to exploit cognitive biases
     return null; // Placeholder
   }
 
-  private async applyProtectiveMeasures(anomaly: BehavioralAnomaly): Promise<void> {
+  private async applyProtectiveMeasures(
+    anomaly: BehavioralAnomaly,
+  ): Promise<void> {
     // Apply protective measures based on detected anomalies
-    this.logger.info(`Applying protective measures for user ${anomaly.userId}:`, anomaly.protectiveActions);
+    this.logger.info(
+      `Applying protective measures for user ${anomaly.userId}:`,
+      anomaly.protectiveActions,
+    );
   }
 
   private async createFactBasedResponse(threat: PsyOpsThread): Promise<string> {
@@ -312,7 +387,9 @@ export class DefensivePsyOpsService extends EventEmitter {
     return `Fact-based response to counter threat: ${threat.id}`;
   }
 
-  private async identifyOptimalDefenseChannels(threat: PsyOpsThread): Promise<string[]> {
+  private async identifyOptimalDefenseChannels(
+    threat: PsyOpsThread,
+  ): Promise<string[]> {
     // Identify best channels for defensive messaging
     return ['official_channels', 'fact_check_platforms'];
   }
@@ -323,30 +400,35 @@ export class DefensivePsyOpsService extends EventEmitter {
         type: 'THREAT_DETECTION',
         threatId: threat.id,
         details: JSON.stringify(threat),
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     });
   }
 
-  private async logDefensiveResponse(response: DefensiveResponse): Promise<void> {
+  private async logDefensiveResponse(
+    response: DefensiveResponse,
+  ): Promise<void> {
     await this.prisma.psyOpsLog.create({
       data: {
         type: 'DEFENSIVE_RESPONSE',
         threatId: response.threatId,
         details: JSON.stringify(response),
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     });
   }
 
-  private async logImpactAssessment(threatId: string, metrics: any): Promise<void> {
+  private async logImpactAssessment(
+    threatId: string,
+    metrics: any,
+  ): Promise<void> {
     await this.prisma.psyOpsLog.create({
       data: {
         type: 'IMPACT_ASSESSMENT',
         threatId,
         details: JSON.stringify(metrics),
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     });
   }
 
@@ -383,16 +465,20 @@ export class DefensivePsyOpsService extends EventEmitter {
     return Math.random(); // Placeholder
   }
 
-  private async identifyBehavioralChanges(threat: PsyOpsThread): Promise<string[]> {
+  private async identifyBehavioralChanges(
+    threat: PsyOpsThread,
+  ): Promise<string[]> {
     return ['increased_anxiety', 'reduced_engagement', 'polarized_opinions'];
   }
 
-  private async generateMitigationRecommendations(threat: PsyOpsThread): Promise<string[]> {
+  private async generateMitigationRecommendations(
+    threat: PsyOpsThread,
+  ): Promise<string[]> {
     return [
       'Deploy fact-checking resources',
-      'Increase transparency communications', 
+      'Increase transparency communications',
       'Provide emotional support resources',
-      'Counter disinformation with verified facts'
+      'Counter disinformation with verified facts',
     ];
   }
 }

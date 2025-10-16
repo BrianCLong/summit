@@ -23,7 +23,9 @@ export function dedupeParagraphs(text: string): string {
   return deduped.join('\n\n');
 }
 
-export function detectLanguage(text: string): 'en' | 'es' | 'fr' | 'de' | 'unknown' {
+export function detectLanguage(
+  text: string,
+): 'en' | 'es' | 'fr' | 'de' | 'unknown' {
   const lower = text.toLowerCase();
   if (/¿|¡|ñ/.test(lower)) {
     return 'es';
@@ -79,7 +81,9 @@ export function extractContextLimit(text: string): number | undefined {
 }
 
 export function extractEntities(text: string): string[] {
-  const matches = text.match(/(?:repo|service|component|dataset)[:=]\s*([A-Za-z0-9._\/-]+)/gi);
+  const matches = text.match(
+    /(?:repo|service|component|dataset)[:=]\s*([A-Za-z0-9._\/-]+)/gi,
+  );
   if (!matches) {
     return [];
   }

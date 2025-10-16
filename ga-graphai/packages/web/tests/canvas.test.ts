@@ -8,27 +8,27 @@ import {
   constraintAwareAutoLayout,
   createCanvasState,
   createObserverState,
-  buildDependencyGraphSnapshot
+  buildDependencyGraphSnapshot,
 } from '../src/index.js';
 
 vi.mock('policy', () => ({
   computeWorkflowEstimates: (workflow: WorkflowDefinition) => ({
-    criticalPath: workflow.nodes.map(node => node.id),
+    criticalPath: workflow.nodes.map((node) => node.id),
     totalLatencyMs: 0,
-    totalCostUSD: 0
+    totalCostUSD: 0,
   }),
   topologicalSort: (workflow: WorkflowDefinition) => ({
-    order: workflow.nodes.map(node => node.id)
+    order: workflow.nodes.map((node) => node.id),
   }),
   validateWorkflow: (workflow: WorkflowDefinition) => ({
     normalized: workflow,
     analysis: {
       estimated: {
-        criticalPath: workflow.nodes.map(node => node.id)
-      }
+        criticalPath: workflow.nodes.map((node) => node.id),
+      },
     },
-    warnings: []
-  })
+    warnings: [],
+  }),
 }));
 
 function buildWorkflow(): WorkflowDefinition {
@@ -41,18 +41,33 @@ function buildWorkflow(): WorkflowDefinition {
       purpose: 'engineering',
       retention: 'standard-365d',
       licenseClass: 'MIT-OK',
-      pii: false
+      pii: false,
     },
     constraints: { latencyP95Ms: 100000, budgetUSD: 15 },
     nodes: [
-      { id: 'source', type: 'git.clone', params: {}, estimates: { latencyP95Ms: 1000 } },
-      { id: 'build', type: 'build.compile', params: {}, estimates: { latencyP95Ms: 2000 } },
-      { id: 'test', type: 'test.junit', params: {}, estimates: { latencyP95Ms: 3000 } }
+      {
+        id: 'source',
+        type: 'git.clone',
+        params: {},
+        estimates: { latencyP95Ms: 1000 },
+      },
+      {
+        id: 'build',
+        type: 'build.compile',
+        params: {},
+        estimates: { latencyP95Ms: 2000 },
+      },
+      {
+        id: 'test',
+        type: 'test.junit',
+        params: {},
+        estimates: { latencyP95Ms: 3000 },
+      },
     ],
     edges: [
       { from: 'source', to: 'build', on: 'success' },
-      { from: 'build', to: 'test', on: 'success' }
-    ]
+      { from: 'build', to: 'test', on: 'success' },
+    ],
   };
 }
 
@@ -69,13 +84,18 @@ describe('canvas utilities', () => {
 
   it('autoLayout respects custom spacing', () => {
     const initial = createCanvasState(buildWorkflow());
-    const updated = autoLayout(initial, { columnSpacing: 400, laneSpacing: 200 });
+    const updated = autoLayout(initial, {
+      columnSpacing: 400,
+      laneSpacing: 200,
+    });
     expect(updated.positions.build.x).toBe(400);
     expect(updated.positions.build.y).toBe(0);
   });
 
   it('constraintAwareAutoLayout exposes helper', () => {
-    const layout = constraintAwareAutoLayout(buildWorkflow(), { columnSpacing: 300 });
+    const layout = constraintAwareAutoLayout(buildWorkflow(), {
+      columnSpacing: 300,
+    });
     expect(layout.test.x).toBe(600);
   });
 
@@ -100,25 +120,25 @@ describe('canvas utilities', () => {
       stats: {
         latencyMs: 6000,
         costUSD: 4.2,
-        criticalPath: ['source', 'build', 'test']
+        criticalPath: ['source', 'build', 'test'],
       },
       nodes: [
         {
           nodeId: 'source',
           status: 'succeeded',
           startedAt: '2024-01-01T00:00:00Z',
-          finishedAt: '2024-01-01T00:02:00Z'
+          finishedAt: '2024-01-01T00:02:00Z',
         },
         {
           nodeId: 'build',
           status: 'running',
-          startedAt: '2024-01-01T00:02:00Z'
+          startedAt: '2024-01-01T00:02:00Z',
         },
         {
           nodeId: 'test',
-          status: 'queued'
-        }
-      ]
+          status: 'queued',
+        },
+      ],
     };
 
     const observer = createObserverState(run);
@@ -128,11 +148,17 @@ describe('canvas utilities', () => {
     expect(firstDelta.delta).toEqual({ nodeId: 'source', status: 'running' });
     expect(firstDelta.statusCounts.running).toBe(1);
     const secondDelta = observer.timeline.frames[2];
-    expect(secondDelta.delta).toEqual({ nodeId: 'source', status: 'succeeded' });
+    expect(secondDelta.delta).toEqual({
+      nodeId: 'source',
+      status: 'succeeded',
+    });
     expect(secondDelta.progressPercent).toBe(33);
     const advanced = advancePlayback(observer, { step: 2 });
     expect(advanced.currentIndex).toBe(2);
-    const looped = advancePlayback(observer, { direction: 'backward', loop: true });
+    const looped = advancePlayback(observer, {
+      direction: 'backward',
+      loop: true,
+    });
     expect(looped.currentIndex).toBeGreaterThanOrEqual(0);
   });
 
@@ -146,12 +172,12 @@ describe('canvas utilities', () => {
       stats: {
         latencyMs: 0,
         costUSD: 0,
-        criticalPath: []
+        criticalPath: [],
       },
       nodes: [
         { nodeId: 'build', status: 'running' },
-        { nodeId: 'test', status: 'queued' }
-      ]
+        { nodeId: 'test', status: 'queued' },
+      ],
     };
 
     const withRuntime = applyRunUpdate(state, run);
@@ -170,46 +196,51 @@ describe('canvas utilities', () => {
       stats: {
         latencyMs: 4000,
         costUSD: 3.1,
-        criticalPath: ['source', 'build', 'test']
+        criticalPath: ['source', 'build', 'test'],
       },
       nodes: [
         {
           nodeId: 'source',
           status: 'succeeded',
           startedAt: '2024-01-01T00:00:00Z',
-          finishedAt: '2024-01-01T00:01:00Z'
+          finishedAt: '2024-01-01T00:01:00Z',
         },
         {
           nodeId: 'build',
           status: 'running',
-          startedAt: '2024-01-01T00:01:00Z'
+          startedAt: '2024-01-01T00:01:00Z',
         },
         {
           nodeId: 'test',
-          status: 'queued'
-        }
-      ]
+          status: 'queued',
+        },
+      ],
     };
 
     const observer = createObserverState(run);
     const stateWithRuntime = applyRunUpdate(initial, run);
     const latestFrame = observer.timeline.frames.at(-1);
     expect(latestFrame).toBeDefined();
-    const snapshot = buildDependencyGraphSnapshot(stateWithRuntime, latestFrame);
+    const snapshot = buildDependencyGraphSnapshot(
+      stateWithRuntime,
+      latestFrame,
+    );
 
     expect(snapshot.statusCounts.total).toBe(3);
     expect(snapshot.statusCounts.succeeded).toBe(1);
     expect(snapshot.statusCounts.running).toBe(1);
     expect(snapshot.progressPercent).toBe(33);
 
-    const sourceNode = snapshot.nodes.find(node => node.id === 'source');
-    const testNode = snapshot.nodes.find(node => node.id === 'test');
+    const sourceNode = snapshot.nodes.find((node) => node.id === 'source');
+    const testNode = snapshot.nodes.find((node) => node.id === 'test');
     expect(sourceNode?.isCritical).toBe(true);
     expect(sourceNode?.isBlocked).toBe(false);
     expect(testNode?.dependencies).toEqual(['build']);
     expect(testNode?.isBlocked).toBe(true);
 
-    const satisfiedEdge = snapshot.edges.find(edge => edge.from === 'source' && edge.to === 'build');
+    const satisfiedEdge = snapshot.edges.find(
+      (edge) => edge.from === 'source' && edge.to === 'build',
+    );
     expect(satisfiedEdge?.isSatisfied).toBe(true);
   });
 });

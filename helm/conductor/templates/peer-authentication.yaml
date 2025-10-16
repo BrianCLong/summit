@@ -10,4 +10,3 @@ spec:
       app: conductor
   mtls:
     mode: STRICT
-

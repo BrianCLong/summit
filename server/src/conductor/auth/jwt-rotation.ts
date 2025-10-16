@@ -34,12 +34,13 @@ export class JWTRotationManager {
   private rotationInterval: NodeJS.Timeout | null = null;
   private keys: Map<string, JWTKeyPair> = new Map();
   private activeKeyId: string | null = null;
-  
+
   constructor(
-    private redisUrl: string = process.env.REDIS_URL || 'redis://localhost:6379',
+    private redisUrl: string = process.env.REDIS_URL ||
+      'redis://localhost:6379',
     private keyRotationIntervalMs: number = 24 * 60 * 60 * 1000, // 24 hours
     private keyValidityMs: number = 7 * 24 * 60 * 60 * 1000, // 7 days
-    private maxKeys: number = 5
+    private maxKeys: number = 5,
   ) {
     this.redis = new Redis(redisUrl, {
       retryDelayOnFailover: 100,
@@ -55,22 +56,26 @@ export class JWTRotationManager {
     try {
       await this.redis.connect();
       await this.loadKeysFromStorage();
-      
+
       if (this.keys.size === 0) {
-        logger.info('🔑 No existing JWT keys found, generating initial key pair');
+        logger.info(
+          '🔑 No existing JWT keys found, generating initial key pair',
+        );
         await this.generateNewKeyPair();
       }
 
       await this.cleanupExpiredKeys();
       this.startRotationSchedule();
-      
+
       logger.info('🔐 JWT rotation manager initialized', {
         activeKeys: this.keys.size,
         activeKeyId: this.activeKeyId,
-        rotationInterval: `${this.keyRotationIntervalMs / (60 * 1000)} minutes`
+        rotationInterval: `${this.keyRotationIntervalMs / (60 * 1000)} minutes`,
       });
     } catch (error) {
-      logger.error('❌ Failed to initialize JWT rotation manager', { error: error.message });
+      logger.error('❌ Failed to initialize JWT rotation manager', {
+        error: error.message,
+      });
       throw error;
     }
   }
@@ -81,7 +86,7 @@ export class JWTRotationManager {
   async generateNewKeyPair(): Promise<JWTKeyPair> {
     const keyId = this.generateKeyId();
     const keyPair = await this.generateRSAKeyPair();
-    
+
     const jwtKeyPair: JWTKeyPair = {
       keyId,
       publicKey: keyPair.publicKey,
@@ -89,7 +94,7 @@ export class JWTRotationManager {
       algorithm: 'RS256',
       createdAt: new Date(),
       expiresAt: new Date(Date.now() + this.keyValidityMs),
-      isActive: true
+      isActive: true,
     };
 
     // Deactivate previous active key but keep it valid for token verification
@@ -103,14 +108,19 @@ export class JWTRotationManager {
 
     this.keys.set(keyId, jwtKeyPair);
     this.activeKeyId = keyId;
-    
+
     await this.saveKeyToStorage(jwtKeyPair);
-    await this.redis.set('jwt:active_key_id', keyId, 'EX', this.keyValidityMs / 1000);
-    
+    await this.redis.set(
+      'jwt:active_key_id',
+      keyId,
+      'EX',
+      this.keyValidityMs / 1000,
+    );
+
     logger.info('🔑 Generated new JWT key pair', {
       keyId,
       algorithm: jwtKeyPair.algorithm,
-      expiresAt: jwtKeyPair.expiresAt.toISOString()
+      expiresAt: jwtKeyPair.expiresAt.toISOString(),
     });
 
     return jwtKeyPair;
@@ -119,7 +129,10 @@ export class JWTRotationManager {
   /**
    * Sign JWT token with active key
    */
-  async signToken(payload: object, options: jwt.SignOptions = {}): Promise<string> {
+  async signToken(
+    payload: object,
+    options: jwt.SignOptions = {},
+  ): Promise<string> {
     if (!this.activeKeyId) {
       throw new Error('No active JWT key available for signing');
     }
@@ -135,23 +148,23 @@ export class JWTRotationManager {
       issuer: process.env.JWT_ISSUER || 'maestro-conductor',
       audience: process.env.JWT_AUDIENCE || 'intelgraph-platform',
       expiresIn: '1h',
-      ...options
+      ...options,
     };
 
     try {
       const token = jwt.sign(payload, activeKey.privateKey, signOptions);
-      
+
       logger.debug('🎫 JWT token signed', {
         keyId: activeKey.keyId,
         algorithm: activeKey.algorithm,
-        expiresIn: signOptions.expiresIn
+        expiresIn: signOptions.expiresIn,
       });
 
       return token;
     } catch (error) {
       logger.error('❌ Failed to sign JWT token', {
         error: error.message,
-        keyId: activeKey.keyId
+        keyId: activeKey.keyId,
       });
       throw error;
     }
@@ -182,26 +195,26 @@ export class JWTRotationManager {
     }
 
     const verifyKey = this.keys.get(keyId)!;
-    
+
     try {
       const verifyOptions: jwt.VerifyOptions = {
         algorithms: [verifyKey.algorithm as jwt.Algorithm],
         issuer: process.env.JWT_ISSUER || 'maestro-conductor',
-        audience: process.env.JWT_AUDIENCE || 'intelgraph-platform'
+        audience: process.env.JWT_AUDIENCE || 'intelgraph-platform',
       };
 
       const payload = jwt.verify(token, verifyKey.publicKey, verifyOptions);
-      
+
       logger.debug('✅ JWT token verified', {
         keyId: verifyKey.keyId,
-        algorithm: verifyKey.algorithm
+        algorithm: verifyKey.algorithm,
       });
 
       return payload;
     } catch (error) {
       logger.error('❌ Failed to verify JWT token', {
         error: error.message,
-        keyId: verifyKey.keyId
+        keyId: verifyKey.keyId,
       });
       throw error;
     }
@@ -212,19 +225,19 @@ export class JWTRotationManager {
    */
   async getJWKS(): Promise<JWKSResponse> {
     const validKeys = Array.from(this.keys.values())
-      .filter(key => key.expiresAt > new Date())
+      .filter((key) => key.expiresAt > new Date())
       .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
     const jwks: JWKSResponse = {
-      keys: validKeys.map(key => ({
+      keys: validKeys.map((key) => ({
         kty: 'RSA',
         use: 'sig',
         kid: key.keyId,
         alg: key.algorithm,
         // In production, you'd extract n and e from the RSA public key
         // For now, we'll use the full certificate approach
-        x5c: [Buffer.from(key.publicKey).toString('base64')]
-      }))
+        x5c: [Buffer.from(key.publicKey).toString('base64')],
+      })),
     };
 
     return jwks;
@@ -235,13 +248,13 @@ export class JWTRotationManager {
    */
   async rotateKeys(): Promise<void> {
     logger.info('🔄 Forcing JWT key rotation');
-    
+
     await this.generateNewKeyPair();
     await this.cleanupExpiredKeys();
-    
+
     logger.info('✅ JWT key rotation completed', {
       activeKeyId: this.activeKeyId,
-      totalKeys: this.keys.size
+      totalKeys: this.keys.size,
     });
   }
 
@@ -260,7 +273,7 @@ export class JWTRotationManager {
       algorithm: string;
     }>;
   } {
-    const nextRotation = this.rotationInterval 
+    const nextRotation = this.rotationInterval
       ? new Date(Date.now() + this.keyRotationIntervalMs)
       : null;
 
@@ -268,13 +281,13 @@ export class JWTRotationManager {
       activeKeyId: this.activeKeyId,
       totalKeys: this.keys.size,
       nextRotation,
-      keysMetrics: Array.from(this.keys.values()).map(key => ({
+      keysMetrics: Array.from(this.keys.values()).map((key) => ({
         keyId: key.keyId,
         createdAt: key.createdAt,
         expiresAt: key.expiresAt,
         isActive: key.isActive,
-        algorithm: key.algorithm
-      }))
+        algorithm: key.algorithm,
+      })),
     };
   }
 
@@ -292,14 +305,17 @@ export class JWTRotationManager {
   }
 
   // Private methods
-  
+
   private generateKeyId(): string {
     const timestamp = Date.now().toString(36);
     const random = randomBytes(8).toString('hex');
     return `jwt_key_${timestamp}_${random}`;
   }
 
-  private async generateRSAKeyPair(): Promise<{ publicKey: string; privateKey: string }> {
+  private async generateRSAKeyPair(): Promise<{
+    publicKey: string;
+    privateKey: string;
+  }> {
     const { generateKeyPair } = await import('crypto');
     const generateKeyPairAsync = promisify(generateKeyPair);
 
@@ -307,12 +323,12 @@ export class JWTRotationManager {
       modulusLength: 2048,
       publicKeyEncoding: {
         type: 'spki',
-        format: 'pem'
+        format: 'pem',
       },
       privateKeyEncoding: {
         type: 'pkcs8',
-        format: 'pem'
-      }
+        format: 'pem',
+      },
     });
 
     return { publicKey, privateKey };
@@ -324,7 +340,9 @@ export class JWTRotationManager {
         await this.generateNewKeyPair();
         await this.cleanupExpiredKeys();
       } catch (error) {
-        logger.error('❌ Scheduled JWT key rotation failed', { error: error.message });
+        logger.error('❌ Scheduled JWT key rotation failed', {
+          error: error.message,
+        });
       }
     }, this.keyRotationIntervalMs);
   }
@@ -332,7 +350,7 @@ export class JWTRotationManager {
   private async loadKeysFromStorage(): Promise<void> {
     try {
       const keyIds = await this.redis.smembers('jwt:key_ids');
-      
+
       for (const keyId of keyIds) {
         await this.loadKeyFromStorage(keyId);
       }
@@ -345,17 +363,19 @@ export class JWTRotationManager {
 
       logger.info('📥 Loaded JWT keys from storage', {
         keysLoaded: this.keys.size,
-        activeKeyId: this.activeKeyId
+        activeKeyId: this.activeKeyId,
       });
     } catch (error) {
-      logger.error('❌ Failed to load keys from storage', { error: error.message });
+      logger.error('❌ Failed to load keys from storage', {
+        error: error.message,
+      });
     }
   }
 
   private async loadKeyFromStorage(keyId: string): Promise<void> {
     try {
       const keyData = await this.redis.hgetall(`jwt:key:${keyId}`);
-      
+
       if (keyData.keyId) {
         const jwtKeyPair: JWTKeyPair = {
           keyId: keyData.keyId,
@@ -364,13 +384,16 @@ export class JWTRotationManager {
           algorithm: keyData.algorithm,
           createdAt: new Date(keyData.createdAt),
           expiresAt: new Date(keyData.expiresAt),
-          isActive: keyData.isActive === 'true'
+          isActive: keyData.isActive === 'true',
         };
 
         this.keys.set(keyId, jwtKeyPair);
       }
     } catch (error) {
-      logger.error('❌ Failed to load key from storage', { keyId, error: error.message });
+      logger.error('❌ Failed to load key from storage', {
+        keyId,
+        error: error.message,
+      });
     }
   }
 
@@ -383,16 +406,22 @@ export class JWTRotationManager {
         algorithm: key.algorithm,
         createdAt: key.createdAt.toISOString(),
         expiresAt: key.expiresAt.toISOString(),
-        isActive: key.isActive.toString()
+        isActive: key.isActive.toString(),
       };
 
       await Promise.all([
         this.redis.hmset(`jwt:key:${key.keyId}`, keyData),
         this.redis.sadd('jwt:key_ids', key.keyId),
-        this.redis.expireat(`jwt:key:${key.keyId}`, Math.floor(key.expiresAt.getTime() / 1000))
+        this.redis.expireat(
+          `jwt:key:${key.keyId}`,
+          Math.floor(key.expiresAt.getTime() / 1000),
+        ),
       ]);
     } catch (error) {
-      logger.error('❌ Failed to save key to storage', { keyId: key.keyId, error: error.message });
+      logger.error('❌ Failed to save key to storage', {
+        keyId: key.keyId,
+        error: error.message,
+      });
       throw error;
     }
   }
@@ -416,21 +445,21 @@ export class JWTRotationManager {
       this.keys.delete(keyId);
       await Promise.all([
         this.redis.del(`jwt:key:${keyId}`),
-        this.redis.srem('jwt:key_ids', keyId)
+        this.redis.srem('jwt:key_ids', keyId),
       ]);
     }
 
     // Cleanup if we have too many keys
     if (this.keys.size > this.maxKeys) {
       const sortedKeys = Array.from(this.keys.entries())
-        .sort(([,a], [,b]) => b.createdAt.getTime() - a.createdAt.getTime())
+        .sort(([, a], [, b]) => b.createdAt.getTime() - a.createdAt.getTime())
         .slice(this.maxKeys);
 
       for (const [keyId] of sortedKeys) {
         this.keys.delete(keyId);
         await Promise.all([
           this.redis.del(`jwt:key:${keyId}`),
-          this.redis.srem('jwt:key_ids', keyId)
+          this.redis.srem('jwt:key_ids', keyId),
         ]);
       }
     }
@@ -438,7 +467,7 @@ export class JWTRotationManager {
     if (expiredKeys.length > 0) {
       logger.info('🧹 Cleaned up expired JWT keys', {
         expiredKeysRemoved: expiredKeys.length,
-        remainingKeys: this.keys.size
+        remainingKeys: this.keys.size,
       });
     }
   }

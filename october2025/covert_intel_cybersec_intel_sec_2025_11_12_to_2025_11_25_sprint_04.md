@@ -14,6 +14,7 @@
 **Objective:** Scale **attested identity** to tier-0 services, push **deception & egress governance** into production, and introduce **continuous validation** (attack simulation + drift tests). Add privacy-grade **data classification/tokenization** for sensitive telemetry and automate **vuln remediation** from SBOM data. Outcome: fewer secrets, stricter egress, faster, safer remediation.
 
 **Key outcomes (by Day 14):**
+
 - **Tier-0 attested identity** enforced (service auth via SPIFFE/SPIRE or Fulcio OIDC identities) for 3+ critical workloads.
 - **Deception v2** (service beacons + canary routes) active in prod with FP budget and playbooks.
 - **Data egress governance** (OPA/ABAC) gates risky flows; drift alerts wired.
@@ -35,90 +36,114 @@
 ## 3) Deliverables & Definition of Done
 
 ### D1: Tier-0 Attested Identity & Secretless Patterns
+
 **Deliverables**
+
 - SPIFFE/SPIRE or Sigstore identities for 3+ tier-0 services; mTLS enforced via mesh or sidecar.
 - Secrets replaced with minted short-lived credentials (workload identity → broker → DB/queue).
 - OPA policy to reject non-attested callers (audience-bound + cert SAN check).
 
 **DoD**
+
 - Calls between selected services fail if not attested; zero plaintext secrets in deployments for those services.
 
 ### D2: Production Deception v2
+
 **Deliverables**
+
 - Canary **routes** (unused API endpoints) and **service beacons** that alert on unexpected touches.
 - Honey DB users with no privileges; alert on login attempt.
 - Noise budget and rotation schedule; runbooks.
 
 **DoD**
+
 - ≥6 deceptive assets in prod; test alerts verified; FP <1/week.
 
 ### D3: Data Egress Governance
+
 **Deliverables**
+
 - OPA/Rego policies for domain/IP categories; per-namespace allowlists; ticket-tag-based exceptions.
 - CNI/eBPF helper to log/label flows; policy compliance dashboard.
 
 **DoD**
+
 - Egress to non-approved destinations blocked in staging and logged in prod with 1–2 high-risk categories enforced.
 
 ### D4: SBOM→Fix Automation
+
 **Deliverables**
+
 - Parser for Syft SBOMs + Trivy findings; open issues with CWE/CVE context, proposed version bumps, and auto PRs (Renovate or custom bot) for top packages.
 
 **DoD**
+
 - ≥10 auto-PRs opened & merged; vuln trend shows downward slope; 0 criticals outstanding.
 
 ### D5: Continuous Validation (Purple-Team-as-Code + Drift Tests)
+
 **Deliverables**
+
 - Library of ATT&CK-inspired checks (IAM key misuse, MFA fatigue, kube exec, data egress) run on schedule with kill-switch.
 - Policy drift tests in CI: reject if Gatekeeper/Kyverno rules disabled or exceptions exceed budget.
 
 **DoD**
+
 - Weekly validations run; at least 1 finding leads to rule/coverage improvement.
 
 ### D6: Privacy-Safe Telemetry
+
 **Deliverables**
+
 - Tokenization of email/IP/account IDs in security logs; reversible mapping stored in HSM/KMS; DLP regex+luhn checks for intel exports.
 
 **DoD**
+
 - New telemetry passes privacy checks; legal approved retention; no PII leakage in sample exports.
 
 ---
 
 ## 4) Day-by-Day Plan (14 Days)
 
-**Days 1–2**  
+**Days 1–2**
+
 - Stand up SPIRE server/agents or Sigstore workload IDs; select 3 tier-0 services; issue SVIDs/certs; wire mTLS.
 
-**Days 3–4**  
-- Author OPA policies for identity checks; inject sidecars/filters; validate failure modes.  
+**Days 3–4**
+
+- Author OPA policies for identity checks; inject sidecars/filters; validate failure modes.
 - Deploy deception v2 (canary routes + beacons) behind WAF/API gateway.
 
-**Days 5–6**  
-- Implement egress policies (OPA + CNI rules) in staging; build allowlists; add exception CRD links.  
+**Days 5–6**
+
+- Implement egress policies (OPA + CNI rules) in staging; build allowlists; add exception CRD links.
 - Build SBOM parser + PR bot; open first batch of fixes.
 
-**Days 7–9**  
-- Continuous validation harness; add ATT&CK checks; wire to slack/ticketing; add drift tests to CI.  
+**Days 7–9**
+
+- Continuous validation harness; add ATT&CK checks; wire to slack/ticketing; add drift tests to CI.
 - Tokenization library + telemetry schema; update exporters.
 
-**Days 10–12**  
-- Turn on selective egress enforcement in prod (high-risk categories); monitor; tune.  
+**Days 10–12**
+
+- Turn on selective egress enforcement in prod (high-risk categories); monitor; tune.
 - Expand deception placements; rotate IDs; finalize runbooks.
 
-**Days 13–14**  
+**Days 13–14**
+
 - Dashboarding; SLOs; docs; retro & backlog seeding for Sprint 05.
 
 ---
 
 ## 5) Risks & Mitigations
 
-| Risk | Likelihood | Impact | Mitigation |
-|---|---|---|---|
-| Identity rollout breaks service calls | Med | High | Shadow mode; staged rollouts; circuit breakers; revert plan |
-| Egress policy blocks legitimate vendor | Med | Med | Ticket-tagged exceptions with TTL; audit-first; progressive enforce |
-| Deception discoverability too low/high | Med | Med | Placement reviews; rotate; budgeted alerts |
-| Auto PRs create merge conflicts | Med | Low | Small PRs; owner routing; weekly windows |
-| Privacy tokenization breaks analytics | Low | Med | Dual-write for a week; mapping service; schemas versioned |
+| Risk                                   | Likelihood | Impact | Mitigation                                                          |
+| -------------------------------------- | ---------- | ------ | ------------------------------------------------------------------- |
+| Identity rollout breaks service calls  | Med        | High   | Shadow mode; staged rollouts; circuit breakers; revert plan         |
+| Egress policy blocks legitimate vendor | Med        | Med    | Ticket-tagged exceptions with TTL; audit-first; progressive enforce |
+| Deception discoverability too low/high | Med        | Med    | Placement reviews; rotate; budgeted alerts                          |
+| Auto PRs create merge conflicts        | Med        | Low    | Small PRs; owner routing; weekly windows                            |
+| Privacy tokenization breaks analytics  | Low        | Med    | Dual-write for a week; mapping service; schemas versioned           |
 
 ---
 
@@ -128,6 +153,7 @@
 
 **`/identity/spiffe/spire-server.conf`** (pointer)  
 **`/identity/spiffe/spiffeids.yaml`**
+
 ```
 apiVersion: spiffe.io/v1alpha1
 kind: WorkloadRegistration
@@ -141,6 +167,7 @@ spec:
 ```
 
 **`/identity/opa/verify-spiffe.rego`**
+
 ```
 package identity
 
@@ -158,6 +185,7 @@ deny[msg] {
 ### 6.2 Deception v2
 
 **`/deception/services/canary-routes.yaml`**
+
 ```
 - service: payments
   route: /v2/export/settlements
@@ -166,12 +194,14 @@ deny[msg] {
   response: 404
 ```
 
-**`/deception/beacons/service_beacon.lua`**  
+**`/deception/beacons/service_beacon.lua`**
+
 - Nginx/lua beacon posting minimal metadata to alert bus on unexpected hit.
 
 ### 6.3 Egress Governance (OPA)
 
 **`/policy/egress/deny-uncategorized.rego`**
+
 ```
 package egress
 
@@ -183,6 +213,7 @@ deny[msg] {
 ```
 
 **`/egress/allowlist.yaml`**
+
 ```
 namespaces:
   prod: ["payments.vendors.com", "telemetry.example.com"]
@@ -191,11 +222,13 @@ namespaces:
 ### 6.4 SBOM → PR Bot
 
 **`/automation/sbom/open_fixes.py`**
+
 ```
 # Parses sbom.spdx.json + trivy.sarif, ranks by EPSS/CVSS, opens PRs via GH API with version bumps and changelog links
 ```
 
 **`/.github/workflows/sbom-fix.yml`**
+
 ```
 name: sbom-fix
 on:
@@ -214,6 +247,7 @@ jobs:
 ### 6.5 Continuous Validation
 
 **`/validation/scenarios/mfa_fatigue.yaml`**
+
 ```
 name: MFA Fatigue Simulation
 steps:
@@ -224,6 +258,7 @@ expect:
 ```
 
 **`/validation/run.py`**
+
 ```
 # Executes scenarios safely; abort on guardrails; writes outcomes to /validation/outbox
 ```
@@ -231,11 +266,13 @@ expect:
 ### 6.6 Privacy-Safe Telemetry
 
 **`/telemetry/tokenize.py`**
+
 ```
 # Format-preserving tokenization for emails/IPs with KMS-stored keys; reversible for investigations
 ```
 
 **`/telemetry/dlp/policies.yaml`**
+
 ```
 patterns:
   - name: credit_card
@@ -252,8 +289,8 @@ patterns:
 
 ### 6.8 Runbooks (Additions)
 
-- **`/runbooks/egress-policy.md`** — assess + approve exceptions; rollback; monitoring.  
-- **`/runbooks/validation-fail.md`** — triage failed scenarios; coordinate fixes.  
+- **`/runbooks/egress-policy.md`** — assess + approve exceptions; rollback; monitoring.
+- **`/runbooks/validation-fail.md`** — triage failed scenarios; coordinate fixes.
 - **`/runbooks/tokenization.md`** — key rotation, detokenization approvals.
 
 ---
@@ -271,9 +308,8 @@ patterns:
 
 ## 8) Backlog → Sprint 05 (Preview)
 
-- Extend attested identity to all tier-0/1 services; SPIFFE federation for multi-cluster.  
-- Full egress enforcement in prod; category-based approvals.  
-- Deception targeting high-value DBs and internal admin panels.  
-- Behavioral ML for intel scoring + feature store.  
+- Extend attested identity to all tier-0/1 services; SPIFFE federation for multi-cluster.
+- Full egress enforcement in prod; category-based approvals.
+- Deception targeting high-value DBs and internal admin panels.
+- Behavioral ML for intel scoring + feature store.
 - Incident cost modeling + risk-adjusted KPIs.
-

@@ -59,12 +59,18 @@ export class TicketNormalizer {
     const sla = this.deriveSla(keyValues);
 
     const { policy, tags } = this.tagger.tag(deduped, {
-      retention: (keyValues['retention'] as PolicyMetadata['retention']) ?? this.options.defaultPolicy.retention,
-      purpose: (keyValues['purpose'] as PolicyMetadata['purpose']) ?? this.options.defaultPolicy.purpose,
+      retention:
+        (keyValues['retention'] as PolicyMetadata['retention']) ??
+        this.options.defaultPolicy.retention,
+      purpose:
+        (keyValues['purpose'] as PolicyMetadata['purpose']) ??
+        this.options.defaultPolicy.purpose,
       pii: /pii|personal data/i.test(deduped) || this.options.defaultPolicy.pii,
     });
 
-    const { criteria, missingSignals } = this.synthesizer.generate(deduped, [keyValues['acceptance'] ?? '']);
+    const { criteria, missingSignals } = this.synthesizer.generate(deduped, [
+      keyValues['acceptance'] ?? '',
+    ]);
 
     const taskSpec: TaskSpec = {
       taskId: input.ticketId,
@@ -75,7 +81,8 @@ export class TicketNormalizer {
       inputs,
       constraints,
       policy,
-      acceptanceCriteria: criteria.length > 0 ? criteria : this.buildFallbackCriteria(goal),
+      acceptanceCriteria:
+        criteria.length > 0 ? criteria : this.buildFallbackCriteria(goal),
       risks,
       raci,
       sla,
@@ -100,7 +107,8 @@ export class TicketNormalizer {
     const clarifyingQuestions: ClarifyingQuestion[] = [];
     if (missingSignals.length > 0) {
       clarifyingQuestions.push({
-        question: 'Please provide explicit acceptance criteria or measurable verification steps.',
+        question:
+          'Please provide explicit acceptance criteria or measurable verification steps.',
         reason: 'acceptance criteria gaps',
         priority: 'high',
       });
@@ -118,19 +126,24 @@ export class TicketNormalizer {
 
     const validation = validateTaskSpec(taskSpec);
     if (!validation.valid) {
-      validation.errors.slice(0, this.clarifyingQuestionLimit).forEach((error) => {
-        clarifyingQuestions.push({
-          question: `Resolve validation error: ${error}`,
-          reason: 'spec validation',
-          priority: 'high',
+      validation.errors
+        .slice(0, this.clarifyingQuestionLimit)
+        .forEach((error) => {
+          clarifyingQuestions.push({
+            question: `Resolve validation error: ${error}`,
+            reason: 'spec validation',
+            priority: 'high',
+          });
         });
-      });
     }
 
     return {
       ticket,
       taskSpec,
-      clarifyingQuestions: clarifyingQuestions.slice(0, this.clarifyingQuestionLimit),
+      clarifyingQuestions: clarifyingQuestions.slice(
+        0,
+        this.clarifyingQuestionLimit,
+      ),
     };
   }
 
@@ -148,22 +161,39 @@ export class TicketNormalizer {
     if (!matches) {
       return [];
     }
-    return matches.map((entry) => normalizeWhitespace(entry.split(/[:=]/)[1] ?? ''));
+    return matches.map((entry) =>
+      normalizeWhitespace(entry.split(/[:=]/)[1] ?? ''),
+    );
   }
 
-  private deriveConstraints(body: string, keyValues: Record<string, string>): TaskConstraints {
+  private deriveConstraints(
+    body: string,
+    keyValues: Record<string, string>,
+  ): TaskConstraints {
     const base = { ...this.options.defaultConstraints };
-    const budget = extractBudgetUSD(body) ?? Number.parseFloat(keyValues['budget'] ?? '');
-    const latency = extractLatency(body) ?? Number.parseFloat(keyValues['latency'] ?? '');
-    const context = extractContextLimit(body) ?? Number.parseFloat(keyValues['context'] ?? '');
+    const budget =
+      extractBudgetUSD(body) ?? Number.parseFloat(keyValues['budget'] ?? '');
+    const latency =
+      extractLatency(body) ?? Number.parseFloat(keyValues['latency'] ?? '');
+    const context =
+      extractContextLimit(body) ??
+      Number.parseFloat(keyValues['context'] ?? '');
     return {
-      latencyP95Ms: Number.isFinite(latency) && latency > 0 ? latency : base.latencyP95Ms,
-      budgetUSD: Number.isFinite(budget) && budget > 0 ? budget : base.budgetUSD,
-      contextTokensMax: Number.isFinite(context) && context > 0 ? context : base.contextTokensMax,
+      latencyP95Ms:
+        Number.isFinite(latency) && latency > 0 ? latency : base.latencyP95Ms,
+      budgetUSD:
+        Number.isFinite(budget) && budget > 0 ? budget : base.budgetUSD,
+      contextTokensMax:
+        Number.isFinite(context) && context > 0
+          ? context
+          : base.contextTokensMax,
     };
   }
 
-  private deriveInputs(body: string, keyValues: Record<string, string>): TaskInputReference[] {
+  private deriveInputs(
+    body: string,
+    keyValues: Record<string, string>,
+  ): TaskInputReference[] {
     const entities = extractEntities(body);
     const explicit = keyValues['inputs']?.split(/,\s*/) ?? [];
     const combined = [...entities, ...explicit];

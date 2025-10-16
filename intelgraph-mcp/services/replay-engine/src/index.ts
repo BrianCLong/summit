@@ -9,7 +9,11 @@ const recorder = new Recorder();
 const replayer = new Replayer();
 
 app.post('/v1/recordings', async (req, reply) => {
-  const body = req.body as { seed?: string; sessionId?: string; meta?: Record<string, unknown> };
+  const body = req.body as {
+    seed?: string;
+    sessionId?: string;
+    meta?: Record<string, unknown>;
+  };
   const seed = body?.seed ?? '0';
   const sessionId = body?.sessionId ?? 'unknown';
   const rec = recorder.start(sessionId, seed, body?.meta);
@@ -25,10 +29,20 @@ app.post('/v1/recordings/:id/events', async (req, reply) => {
   }
   const body = req.body as
     | { dir: 'in' | 'out'; channel: string; payload: unknown }
-    | { events: Array<{ dir: 'in' | 'out'; channel: string; payload: unknown }> };
+    | {
+        events: Array<{ dir: 'in' | 'out'; channel: string; payload: unknown }>;
+      };
 
   const entries = Array.isArray((body as any).events)
-    ? ((body as { events: Array<{ dir: 'in' | 'out'; channel: string; payload: unknown }> }).events)
+    ? (
+        body as {
+          events: Array<{
+            dir: 'in' | 'out';
+            channel: string;
+            payload: unknown;
+          }>;
+        }
+      ).events
     : [body as { dir: 'in' | 'out'; channel: string; payload: unknown }];
 
   const accepted = [] as unknown[];
@@ -44,7 +58,7 @@ app.post('/v1/recordings/:id/events', async (req, reply) => {
       t: Date.now(),
       dir: entry.dir,
       channel,
-      payload: entry.payload
+      payload: entry.payload,
     });
     accepted.push(event);
   }
@@ -61,7 +75,9 @@ app.post('/v1/replay/:id', async (req, reply) => {
   return reply.send(replayer.replay(rec));
 });
 
-app.listen({ port: Number(process.env.PORT || 8081), host: '0.0.0.0' }).catch((err) => {
-  app.log.error(err);
-  process.exit(1);
-});
+app
+  .listen({ port: Number(process.env.PORT || 8081), host: '0.0.0.0' })
+  .catch((err) => {
+    app.log.error(err);
+    process.exit(1);
+  });

@@ -1,6 +1,7 @@
 # IntelGraph – PR‑5 Copilot v1 Skeleton (NL→Cypher + RAG + Guardrails)
 
 This package introduces a standalone **copilot** service that provides:
+
 - **NL→Cypher sandbox**: returns preview Cypher, **does not execute**, and estimates row/cost.
 - **RAG Q&A with inline citations** over a local knowledge folder (pluggable store later).
 - **Guardrails**: deny unsafe intents (e.g., bulk PII enumeration) with explicit reasons, and optional OPA check hook.
@@ -13,6 +14,7 @@ Everything below is copy‑pasteable patches + commands to open **PR‑5**.
 
 **Branch:** `feature/copilot-v1`  
 **Open PR:**
+
 ```bash
 git checkout -b feature/copilot-v1
 # apply patches below, commit, push
@@ -337,6 +339,7 @@ services/copilot/
 ## 8) Example usage
 
 - **NL→Cypher preview:**
+
 ```bash
 curl -s http://localhost:4100/copilot/query \
   -H 'content-type: application/json' \
@@ -344,6 +347,7 @@ curl -s http://localhost:4100/copilot/query \
 ```
 
 - **RAG with citations:**
+
 ```bash
 mkdir -p data/kb && printf "---\ntitle: IntelGraph FAQ\n---\nProvenance is recorded in export manifests." > data/kb/faq.md
 curl -s http://localhost:4100/copilot/query \
@@ -352,6 +356,7 @@ curl -s http://localhost:4100/copilot/query \
 ```
 
 - **Guardrail denial example:**
+
 ```bash
 curl -s http://localhost:4100/copilot/query \
   -H 'content-type: application/json' \
@@ -366,4 +371,3 @@ curl -s http://localhost:4100/copilot/query \
 - Plug RAG into per‑case vector indices (e.g., SQLite/pgvector) and add provenance‑aware chunking.
 - Surface copilot UI in the tri‑pane (button opens palette; uses **jQuery** for DOM binding to Cytoscape.js interactions).
 - Add OPA input of `purpose`, `legalBasis`, and `license` fields for runtime policy evaluation.
-

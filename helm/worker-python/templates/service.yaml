@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "worker-python.fullname" . }}
-  labels: {{- include "worker-python.labels" . | nindent 4 }}
+  name: { { include "worker-python.fullname" . } }
+  labels: { { - include "worker-python.labels" . | nindent 4 } }
 spec:
-  selector: {{- include "worker-python.selectorLabels" . | nindent 4 }}
+  selector: { { - include "worker-python.selectorLabels" . | nindent 4 } }
   ports:
     - port: 50051
       name: grpc

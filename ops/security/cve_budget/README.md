@@ -8,11 +8,11 @@ This module implements the Track B "Risk & Compliance Automation" gate:
 
 ## Components
 
-| File | Purpose |
-| --- | --- |
-| `config.yaml` | Declarative budgets, owners, and waiver definitions. |
-| `gate.py` | CI entrypoint. Evaluates SBOM + vulnerability scan data and enforces budgets. |
-| `fixtures/` | Sample SBOM, vulnerability reports, failing build logs, and release manifests for evidence. |
+| File          | Purpose                                                                                     |
+| ------------- | ------------------------------------------------------------------------------------------- |
+| `config.yaml` | Declarative budgets, owners, and waiver definitions.                                        |
+| `gate.py`     | CI entrypoint. Evaluates SBOM + vulnerability scan data and enforces budgets.               |
+| `fixtures/`   | Sample SBOM, vulnerability reports, failing build logs, and release manifests for evidence. |
 
 The policy gate executes in three phases:
 

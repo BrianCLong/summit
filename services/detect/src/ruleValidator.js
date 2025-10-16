@@ -64,9 +64,12 @@ function validateRuleData(data) {
           if (typeof s !== 'object' || s === null) {
             errors.push(`/when.any/${idx}/stream should be object`);
           } else {
-            if (typeof s.topic !== 'string') errors.push(`/when.any/${idx}/stream/topic should be string`);
-            if (typeof s.key_by !== 'string') errors.push(`/when.any/${idx}/stream/key_by should be string`);
-            if (s.where && typeof s.where !== 'string') errors.push(`/when.any/${idx}/stream/where should be string`);
+            if (typeof s.topic !== 'string')
+              errors.push(`/when.any/${idx}/stream/topic should be string`);
+            if (typeof s.key_by !== 'string')
+              errors.push(`/when.any/${idx}/stream/key_by should be string`);
+            if (s.where && typeof s.where !== 'string')
+              errors.push(`/when.any/${idx}/stream/where should be string`);
             if (typeof s.window !== 'object' || s.window === null) {
               errors.push(`/when.any/${idx}/stream/window is required`);
             } else {
@@ -75,10 +78,14 @@ function validateRuleData(data) {
                 errors.push(`/when.any/${idx}/stream/window/type invalid`);
               }
               if (typeof w.size !== 'string') {
-                errors.push(`/when.any/${idx}/stream/window/size should be string`);
+                errors.push(
+                  `/when.any/${idx}/stream/window/size should be string`,
+                );
               }
               if (w.type === 'sliding' && typeof w.step !== 'string') {
-                errors.push(`/when.any/${idx}/stream/window/step required for sliding`);
+                errors.push(
+                  `/when.any/${idx}/stream/window/step required for sliding`,
+                );
               }
             }
           }
@@ -89,13 +96,19 @@ function validateRuleData(data) {
   if (typeof data.then !== 'object' || data.then === null) {
     errors.push('/then should be object');
   } else {
-    if (typeof data.then.create_alert !== 'object' || data.then.create_alert === null) {
+    if (
+      typeof data.then.create_alert !== 'object' ||
+      data.then.create_alert === null
+    ) {
       errors.push('/then.create_alert should be object');
     } else {
       if (typeof data.then.create_alert.severity !== 'string') {
         errors.push('/then.create_alert/severity should be string');
       }
-      if (data.then.create_alert.tags && !Array.isArray(data.then.create_alert.tags)) {
+      if (
+        data.then.create_alert.tags &&
+        !Array.isArray(data.then.create_alert.tags)
+      ) {
         errors.push('/then.create_alert/tags should be array');
       }
     }

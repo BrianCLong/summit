@@ -160,7 +160,9 @@ export class MissionControlConflictResolver {
     participants.sort((a, b) => b.priorityScore - a.priorityScore);
 
     const statesByMission = new Map<string, MissionParticipantState>();
-    participants.forEach((state) => statesByMission.set(state.missionId, state));
+    participants.forEach((state) =>
+      statesByMission.set(state.missionId, state),
+    );
 
     const assignments = new Map<string, SlotAssignment>();
     const negotiationLog: NegotiationEvent[] = [];
@@ -241,7 +243,8 @@ export class MissionControlConflictResolver {
         fairnessIndex: Number(fairnessIndex.toFixed(2)),
         totalConcessions,
         highestPriorityMission: participants[0]?.missionId || null,
-        lowestPriorityMission: participants[participants.length - 1]?.missionId || null,
+        lowestPriorityMission:
+          participants[participants.length - 1]?.missionId || null,
         rounds: round,
         priorityDecisions,
         resolutionLatencyMs,
@@ -260,7 +263,10 @@ export class MissionControlConflictResolver {
     const fallbackCount = Math.max(0, options.length - 1);
     const maxConcessionsByFlex = Math.min(
       fallbackCount,
-      Math.max(0, Math.floor((participant.flexibility.maxDelayMinutes || 0) / 15)),
+      Math.max(
+        0,
+        Math.floor((participant.flexibility.maxDelayMinutes || 0) / 15),
+      ),
     );
 
     let maxConcessions = maxConcessionsByFlex;
@@ -281,11 +287,17 @@ export class MissionControlConflictResolver {
     };
   }
 
-  private buildMissionOptions(participant: MissionParticipantRequest): MissionOptionState[] {
+  private buildMissionOptions(
+    participant: MissionParticipantRequest,
+  ): MissionOptionState[] {
     const options: MissionOptionState[] = [];
     const seen = new Set<string>();
 
-    const addOption = (slot: MissionSlot, label: 'primary' | 'fallback', preference: number) => {
+    const addOption = (
+      slot: MissionSlot,
+      label: 'primary' | 'fallback',
+      preference: number,
+    ) => {
       const key = this.slotKey(slot);
       if (seen.has(key)) return;
       seen.add(key);
@@ -334,7 +346,11 @@ export class MissionControlConflictResolver {
     rules: Required<MissionControlArbitrationRules>,
     round: number,
   ): boolean {
-    for (let optionIndex = 0; optionIndex < participant.options.length; optionIndex += 1) {
+    for (
+      let optionIndex = 0;
+      optionIndex < participant.options.length;
+      optionIndex += 1
+    ) {
       const option = participant.options[optionIndex];
       const key = this.slotKey(option.slot);
       const currentAssignment = assignments.get(key);
@@ -440,7 +456,11 @@ export class MissionControlConflictResolver {
       return -1;
     }
 
-    for (let index = participant.assignedIndex + 1; index < participant.options.length; index += 1) {
+    for (
+      let index = participant.assignedIndex + 1;
+      index < participant.options.length;
+      index += 1
+    ) {
       const option = participant.options[index];
       if (!assignments.has(this.slotKey(option.slot))) {
         return index;
@@ -450,8 +470,13 @@ export class MissionControlConflictResolver {
     return -1;
   }
 
-  private calculateFairnessIndex(participants: MissionParticipantState[]): number {
-    const totalScore = participants.reduce((sum, p) => sum + p.priorityScore, 0);
+  private calculateFairnessIndex(
+    participants: MissionParticipantState[],
+  ): number {
+    const totalScore = participants.reduce(
+      (sum, p) => sum + p.priorityScore,
+      0,
+    );
     if (totalScore === 0) {
       return 1;
     }

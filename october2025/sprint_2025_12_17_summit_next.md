@@ -1,5 +1,6 @@
 ```markdown
 # Sprint Plan — Summit / IntelGraph / Maestro Conductor
+
 **Slug/Version:** `sprint-2025-12-17-intelgraph-summit-v1.5.0`
 **Dates:** Dec 17–Dec 31, 2025 (2 weeks, holiday cadence)
 **Timezone:** America/Denver
@@ -9,6 +10,7 @@
 ---
 
 ## 0) North‑Star & Guardrails
+
 - **North‑Star:** GA candidate branch `release/ga-candidate-2025.12` tagged, with **0 critical** security, golden path green, and 1 referenceable customer story finalized.
 - **SLOs (unchanged):** API availability ≥ 99.5%; read P95 ≤ 300 ms; policy P95 ≤ 10 ms.
 - **Change Control:** Feature freeze Dec 29; hotfix only with approver from SRE + Product.
@@ -16,7 +18,8 @@
 ---
 
 ## 1) Objectives (Show on Dec 31)
-1. **Partner Integration 1 complete** (Splunk app *or* ServiceNow webhook) with README + sample video.
+
+1. **Partner Integration 1 complete** (Splunk app _or_ ServiceNow webhook) with README + sample video.
 2. **Billing/Metering polish:** invoice CSV/PDF stable; budgets UI minimal; export automation.
 3. **Case Study v1 signed** by customer (or anonymized approval) + reference quote captured.
 4. **GA Candidate branch:** cut, tagged, SBOM published, upgrade/runbooks done, migration script tested.
@@ -26,6 +29,7 @@
 ---
 
 ## 2) Scope & Priority
+
 - **P0 (Must):** Partner Integration done; billing exports & invoice stable; GA branch + SBOM; case study approved; GTM pack; CVE sweep; backups/retention verified.
 - **P1 (Should):** Admin budgets UI; success tracker polish; ROI charts; ABM list enrichment; demo environment hardening.
 - **P2 (Could):** Report multi‑tenant branding; cost anomaly stub; read replica notes.
@@ -33,6 +37,7 @@
 ---
 
 ## 3) Swimlanes & Owners
+
 - **Product/GTM (Felix):** Case study approval, ROI template, deck/one‑pager final, Q1 ABM (50–150 named), event calendar.
 - **Frontend:** Budgets UI minimal; export polish; partner app UI
 - **Backend:** Invoice generator stability, export automation, partner endpoints, migration scripts for GA tag.
@@ -45,16 +50,19 @@
 ## 4) Backlog (Stories & Tasks)
 
 ### P0 — Partner Integration Completion
-- **P0‑1** Finalize Splunk App *or* ServiceNow Webhook (owner: FE/BE)
+
+- **P0‑1** Finalize Splunk App _or_ ServiceNow Webhook (owner: FE/BE)
   - Settings UI; auth; deep‑link; audit capture; README & sample demo video.
 
 ### P0 — Billing/Metering Polish
+
 - **P0‑2** Invoice Stability (owner: BE/SRE)
   - Deterministic totals; rounding & timezone; unit tests; PDF layout.
 - **P0‑3** Export Automation (owner: SRE)
   - Nightly export cron; failure alert; sample S3 path or local drop.
 
 ### P0 — GA Candidate Branch & Hygiene
+
 - **P0‑4** Cut GA Branch + Tag (owner: SRE)
   - `release/ga-candidate-2025.12`; tag `v1.5.0-rc1`; SBOM on tag; changelog.
 - **P0‑5** Migration Script Test (owner: BE)
@@ -67,6 +75,7 @@
   - Run purge on sample; verify audit entries & legal hold respect.
 
 ### P0 — Case Study & GTM
+
 - **P0‑9** Case Study Approval (owner: Product/GTM)
   - Legal wording; anonymization if needed; quote + logo or masked.
 - **P0‑10** GTM Pack Lock (owner: Product/GTM)
@@ -75,6 +84,7 @@
   - 50–150 named; by segment; persona mapping; 3‑touch sequence dates.
 
 ### P1 — Nice‑to‑have
+
 - **P1‑1** Budgets UI Minimal (owner: FE)
   - Set thresholds; show current usage; save to API.
 - **P1‑2** Success Tracker Polish (owner: FE/Product)
@@ -85,6 +95,7 @@
 ---
 
 ## 5) Acceptance Criteria & DoD
+
 - **Partner:** App/Webhook works E2E in demo; README + 3‑min video recorded.
 - **Billing:** 3 consecutive exports present; PDF invoices deterministic; budgets UI writes thresholds; audits captured.
 - **GA:** Tag `v1.5.0-rc1` exists; SBOM uploaded; migration path verified; changelog committed.
@@ -94,6 +105,7 @@
 ---
 
 ## 6) Cadence & Dates
+
 - **Standup:** 09:30 MT daily (skip Dec 25)
 - **Freeze:** Dec 29, 18:00 MT
 - **Review & demo:** Dec 31, 11:00 MT (shortened holiday review)
@@ -102,6 +114,7 @@
 ---
 
 ## 7) Deliverables (Repos & Docs)
+
 - `integrations/{splunk-app/* | servicenow-webhook/*}`
 - `server/src/billing/{invoice.ts}` + `ops/usage/export_cron.yaml`
 - `docs/releases/GA_CANDIDATE_2025-12.md` + `CHANGELOG_sprint-2025-12-17.md`
@@ -114,6 +127,7 @@
 ---
 
 ## 8) Demo Script (Dec 31)
+
 1. Show partner hand‑off (Splunk/ServiceNow) into IntelGraph; audit trail visible.
 2. Download invoice PDF/CSV for Dec; adjust budget → observe notify or throttle.
 3. Switch to `release/ga-candidate-2025.12`; run migration; smoke passes; SBOM on tag.
@@ -125,4 +139,3 @@
 **Owner:** Felix (The B.I.Z.) — VP Sales/BD/Growth  
 **Last Updated:** Oct 9, 2025 (v1.5.0 plan)
 ```
-

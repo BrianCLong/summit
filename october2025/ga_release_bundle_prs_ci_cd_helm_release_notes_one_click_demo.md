@@ -5,6 +5,7 @@ This bundle stitches Sprints 1–4 into PR‑ready branches with commits, CI/CD 
 ---
 
 ## 0) Branching & PR Plan
+
 Create four PRs plus a meta release PR. Order matters for clean diffs.
 
 1. **PR #1 — foundation**: `feature/sprint1-lac-ledger`
@@ -28,6 +29,7 @@ Each PR includes: scope, acceptance criteria, screenshots (or GIFs), and **demo 
 ## 1) Commit Layout Examples (squash‑friendly)
 
 **PR #1 commits**
+
 - `feat(lac): policy DSL + compiler + enforcer API with OTEL`
 - `feat(ledger): merkle manifests + verify endpoint + prisma schema`
 - `feat(gateway): GraphQL schema for enforce/verify + tracing`
@@ -36,6 +38,7 @@ Each PR includes: scope, acceptance criteria, screenshots (or GIFs), and **demo 
 - `test(all): jest + playwright + k6 smoke`
 
 **PR #4 commits**
+
 - `feat(xai): counterfactuals + saliency + model cards`
 - `feat(fed): hashed selectors + push-down + revoke`
 - `feat(wallet): bundles + audience profiles + verifier`
@@ -161,6 +164,7 @@ deploy/helm/intelgraph/
 ```
 
 **Chart.yaml**
+
 ```yaml
 apiVersion: v2
 name: intelgraph
@@ -169,6 +173,7 @@ appVersion: 1.0.0
 ```
 
 **values.yaml** (snip)
+
 ```yaml
 imageRepo: ghcr.io/ORG/intelgraph
 replicas: 2
@@ -197,6 +202,7 @@ services:
 ```
 
 **templates/deployment-gateway.yaml**
+
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -243,6 +249,7 @@ Dev overlay example increases logs, sets 1 replica, exposes NodePorts.
 ## 5) Database Migrations & Upgrade Steps
 
 **Order of operations** (prod):
+
 1. Put app in read‑only for 60s window (maintenance banner).
 2. Apply **ledger** & **case-service** migrations first (no breaking changes).
 3. Deploy **gateway** with feature flags disabled for new mutations.
@@ -252,10 +259,12 @@ Dev overlay example increases logs, sets 1 replica, exposes NodePorts.
 7. Flip feature flags per tenant; monitor dashboards.
 
 **Backfill** (optional):
+
 - Generate manifests for existing claims; write to `Manifest` and link via `manifestId`.
 - Initialize budget rows per tenant in budget‑guard.
 
 **Rollback strategy**:
+
 - Blue/green on gateway; DB migrations are additive; keep old pods for 1h.
 
 ---
@@ -288,22 +297,26 @@ load:
 **Version:** 1.0.0 (GA) — 2025‑11‑25
 
 ### Highlights
+
 - Guardrails: **Policy Compiler (LAC)**, **Provenance/Claim Ledger** with deterministic manifests.
 - Analyst Surface: **Tri‑Pane UX v1**, **NL→Cypher v0.9**, **Analytics Pack v1**, **Pattern Miner**.
 - Collaboration/Cost: **Case Spaces**, **Report Studio**, **Runbook Runtime v1**, **Budget Guard**, **Archive Tier**, **Offline Kit v1**.
 - Explain/Federate/Disclose: **Graph‑XAI v1**, **Zero‑Copy Federation stubs**, **Selective Disclosure Wallets**.
 
 ### SLOs
+
 - p95 graph query < 1.5s on 50k nodes / 3‑hop
 - RTO ≤ 1h, RPO ≤ 5m
 
 ### Security & Compliance
+
 - ABAC/RBAC + step‑up, OIDC ready
 - Policy hit rate > 99% on test corpus
 - SBOM generated; zero criticals at release
 - A11y AA/AAA across core flows
 
 ### Known Limitations
+
 - XAI uses baseline algorithms (to be swapped with GNN explainers)
 - Federation is a demo stub (claim hashes not raw records)
 - Wallet verifier is in‑cluster (external CDN planned)
@@ -313,10 +326,12 @@ load:
 ## 8) PR Templates & Issue Templates
 
 **.github/pull_request_template.md**
+
 ```md
 ## Summary
 
 ## Acceptance Criteria
+
 - [ ] Tests added/updated (Jest/Playwright/k6)
 - [ ] OTEL spans and Grafana panels updated
 - [ ] Security checks (SAST/SBOM) green
@@ -328,16 +343,21 @@ load:
 ```
 
 **.github/ISSUE_TEMPLATE/feature.md**
+
 ```md
 ### Goal
+
 ### Acceptance Criteria
+
 ### Data/Privacy Considerations
+
 ### Telemetry Plan
 ```
 
 ---
 
 ## 9) Post‑GA Follow‑ups (tracked as epics)
+
 - Replace baseline XAI with GNN explainers (PGExplainer/CF‑GNN/GraphMask) and fairness panels.
 - True **zero‑copy federation** via MPC/ZK integration; external proof verifier.
 - Mobile‑first tri‑pane; edge sync for Offline Kit.
@@ -346,6 +366,7 @@ load:
 ---
 
 ## 10) Sign‑off Checklist (for the Release PR)
+
 - [ ] All CI jobs required & green
 - [ ] Helm chart packaged and smoke deployed in `stage`
 - [ ] Migrations applied; backfills complete

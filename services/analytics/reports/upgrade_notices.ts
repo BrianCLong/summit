@@ -12,7 +12,11 @@ const THRESHOLD = parseInt(process.env.CAP_HITS_THRESHOLD || '50', 10); // N per
     const hits = parseInt(r.hits, 10);
     if (hits >= THRESHOLD) {
       const msg = `You're hitting exploration caps frequently (${hits}/30d). Consider upgrading for higher limits.`;
-      await pg.query('select add_upgrade_notice($1,$2,$3)', [r.tenant_id, msg, 24 * 7]); // visible for 7 days
+      await pg.query('select add_upgrade_notice($1,$2,$3)', [
+        r.tenant_id,
+        msg,
+        24 * 7,
+      ]); // visible for 7 days
     }
   }
   console.log('upgrade notices processed:', rows.length);

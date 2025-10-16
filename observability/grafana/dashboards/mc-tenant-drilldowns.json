@@ -465,11 +465,7 @@
   "refresh": "30s",
   "schemaVersion": 37,
   "style": "dark",
-  "tags": [
-    "mc-platform",
-    "v0.3.3",
-    "tenant-drilldowns"
-  ],
+  "tags": ["mc-platform", "v0.3.3", "tenant-drilldowns"],
   "templating": {
     "list": [
       {

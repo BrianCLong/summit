@@ -14,4 +14,4 @@ spec:
       metadata:
         addressFromEnv: REDIS_ADDR
         listName: bull:maestro:wait
-        listLength: "50" # scale when >50 jobs waiting
+        listLength: '50' # scale when >50 jobs waiting

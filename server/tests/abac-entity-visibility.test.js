@@ -37,7 +37,12 @@ describe('mission tag and temporal ABAC', () => {
       missionTags: ['charlie'],
     }))(async () => 'ok');
     await expect(
-      resolver({}, {}, { user: baseUser }, { fieldName: 'test', path: 'testPath' }),
+      resolver(
+        {},
+        {},
+        { user: baseUser },
+        { fieldName: 'test', path: 'testPath' },
+      ),
     ).rejects.toThrow(ForbiddenError);
   });
   it('denies entity access outside valid time window', async () => {
@@ -50,7 +55,12 @@ describe('mission tag and temporal ABAC', () => {
       validFrom: new Date(Date.now() + 10000).toISOString(),
     }))(async () => 'ok');
     await expect(
-      resolver({}, {}, { user: baseUser }, { fieldName: 'test', path: 'testPath' }),
+      resolver(
+        {},
+        {},
+        { user: baseUser },
+        { fieldName: 'test', path: 'testPath' },
+      ),
     ).rejects.toThrow(ForbiddenError);
   });
 });

@@ -3,8 +3,8 @@ module.exports = {
   extensionsToTreatAsEsm: ['.ts'],
   globals: {
     'ts-jest': {
-      useESM: true
-    }
+      useESM: true,
+    },
   },
   testEnvironment: 'jsdom',
   roots: ['server', 'client', 'packages'],
@@ -13,7 +13,7 @@ module.exports = {
     '<rootDir>/archive/',
     '<rootDir>/archive_20250926/',
     '<rootDir>/salvage/',
-    '<rootDir>/pull/'
+    '<rootDir>/pull/',
   ],
   testPathIgnorePatterns: [
     '/node_modules/',
@@ -21,7 +21,7 @@ module.exports = {
     '/archive/',
     '/archive_20250926/',
     '/salvage/',
-    '/pull/'
+    '/pull/',
   ],
   watchPathIgnorePatterns: [
     '/node_modules/',
@@ -29,7 +29,7 @@ module.exports = {
     '/archive/',
     '/archive_20250926/',
     '/salvage/',
-    '/pull/'
+    '/pull/',
   ],
   collectCoverageFrom: [
     '**/*.{ts,tsx,js,jsx}',
@@ -41,11 +41,11 @@ module.exports = {
     '!**/archive/**',
     '!**/archive_20250926/**',
     '!**/salvage/**',
-    '!**/pull/**'
+    '!**/pull/**',
   ],
   testMatch: [
     '**/__tests__/**/*.{ts,tsx,js,jsx}',
-    '**/?(*.)+(spec|test).{ts,tsx,js,jsx}'
+    '**/?(*.)+(spec|test).{ts,tsx,js,jsx}',
   ],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1',
@@ -53,9 +53,7 @@ module.exports = {
     '^pg$': '<rootDir>/__mocks__/pg.js',
     '^ioredis$': '<rootDir>/__mocks__/ioredis.js',
     '^puppeteer$': '<rootDir>/__mocks__/puppeteer.js',
-    '^@server/(.*)$': '<rootDir>/server/src/$1'
+    '^@server/(.*)$': '<rootDir>/server/src/$1',
   },
-  transformIgnorePatterns: [
-    'node_modules/(?!(.*\\.mjs$))'
-  ]
+  transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$))'],
 };

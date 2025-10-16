@@ -11,8 +11,16 @@ const program = new Command();
 program
   .name('runner.ts')
   .description('Maestro Evaluation Harness Runner (TypeScript)')
-  .option('-s, --suite <path>', 'Path to evaluation suite YAML', 'eval/suites/router.yaml')
-  .option('-b, --base <url>', 'Base URL for Maestro API', 'http://localhost:8080')
+  .option(
+    '-s, --suite <path>',
+    'Path to evaluation suite YAML',
+    'eval/suites/router.yaml',
+  )
+  .option(
+    '-b, --base <url>',
+    'Base URL for Maestro API',
+    'http://localhost:8080',
+  )
   .option('-t, --token <token>', 'Authentication token')
   .action(async (options) => {
     console.log(`Running evaluation suite: ${options.suite}`);
@@ -23,7 +31,9 @@ program
 
     // Placeholder for actual evaluation logic
     console.log('Evaluation logic to be implemented here.');
-    console.log('This runner will read datasets, invoke models, and capture metrics.');
+    console.log(
+      'This runner will read datasets, invoke models, and capture metrics.',
+    );
 
     // Example of how to use the SDK (conceptual)
     // const client = createClient(options.base, options.token);
@@ -55,7 +65,10 @@ program
       fs.mkdirSync(reportDir);
     }
     const reportFileName = `report-${new Date().toISOString().replace(/:/g, '.')}.json`;
-    fs.writeFileSync(path.join(reportDir, reportFileName), JSON.stringify(results, null, 2));
+    fs.writeFileSync(
+      path.join(reportDir, reportFileName),
+      JSON.stringify(results, null, 2),
+    );
     console.log(`Generated report: ${path.join(reportDir, reportFileName)}`);
   });
 

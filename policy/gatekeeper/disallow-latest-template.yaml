@@ -36,4 +36,3 @@ spec:
           endswith(image, ":latest")
           msg := sprintf("Container %v uses mutable tag 'latest': %v", [c.name, image])
         }
-

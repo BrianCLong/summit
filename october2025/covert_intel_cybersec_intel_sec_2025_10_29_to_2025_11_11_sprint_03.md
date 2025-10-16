@@ -14,6 +14,7 @@
 **Objective:** Move from staging to **production-grade enforcement**, **breadth of telemetry**, and **active defense**—while automating safe remediation. We will (a) roll out image trust + provenance enforcement to production with progressive controls, (b) expand detections to **endpoint/EDR and SaaS audit** sources, (c) deploy **deception/canary controls** and honey-credentials, (d) bind service identities with **token-binding & key attestation**, and (e) codify **threat hunting** with repeatable queries and metrics.
 
 **Sprint Outcomes:**
+
 - **Prod enforcement** of signed images + provenance (progressive, SLO-backed) with validated break-glass.
 - **New log planes** on-boarded: endpoint/EDR + 2 strategic SaaS apps (IdP + Code host). 6+ tested detections live.
 - **Deception assets** (canary tokens + honey users/creds) deployed with alert wiring and FP budget.
@@ -34,86 +35,107 @@
 ## 3) Deliverables & Definition of Done
 
 ### D1: Production Image Trust & Provenance Rollout
+
 **Deliverables**
+
 - Gatekeeper/Kyverno constraints with **progressive enforcement** controlled by ConfigMap/flag.
 - Sigstore policy-controller or cosign verify job wired to prod registry.
 - Emergency bypass with annotated change ticket + auto-expiring exception CRD.
 
 **DoD**
+
 - 100% workloads in prod either validated or on time-bound exception; zero Sev-1 outages from policy.
 
 ### D2: Endpoint/EDR & SaaS Audit Detections
+
 **Deliverables**
+
 - Parsers/normalizers for EDR (e.g., Sysmon-like JSON) and two SaaS sources (IdP + Code host).
 - 6+ detections (credential theft artifacts, persistence, risky OAuth grant, mass repo clone, off-hours MFA push spamming).
 - CI tests with sample logs; deployment to SIEM with owner + runbook link.
 
 **DoD**
+
 - ≥6 rules enabled; FP < 5% over baseline; MTTA < 10m.
 
 ### D3: Deception/Canary Controls
+
 **Deliverables**
+
 - Canary tokens (URLs/Docs/AWS keys) placed in low-traffic but discoverable paths.
 - Honey users/creds with monitored access impossible in normal ops.
 - Alert routes to #sec-alerts with unique tags; suppression windows defined.
 
 **DoD**
+
 - ≥10 canaries deployed; alerting verified; FP budget < 1/week.
 
 ### D4: Service Identity — Token Binding & Key Attestation
+
 **Deliverables**
+
 - Service-to-service auth updated to require **audience-bound**, **short-lived** tokens.
 - One critical deployment using **key attestation** (e.g., cosign/fulcio-issued identities or TPM-backed keys) with policy that rejects un-attested tokens.
 
 **DoD**
+
 - Measurable reduction in token lifetime; attested identity enforced for 1 service; runbook in place.
 
 ### D5: Threat Hunting Pack v1
+
 **Deliverables**
+
 - `/hunting/queries/` library (cloud, endpoint, network, SaaS) with weekly run cadence.
 - Findings pipeline to tickets with severity rubric and enrichment script.
 
 **DoD**
+
 - ≥12 queries scheduled; weekly report generated; ≥1 validated finding triaged.
 
 ---
 
 ## 4) Day-by-Day Plan (14 Days)
 
-**Days 1–2**  
-- Wire prod registry verification; deploy policy-controller; set audit mode + 10% enforce.  
+**Days 1–2**
+
+- Wire prod registry verification; deploy policy-controller; set audit mode + 10% enforce.
 - Onboard endpoint + SaaS logs (schemas + ingestion + test datasets).
 
-**Days 3–5**  
-- Raise enforcement to 25–50%; implement exception CRD + TTL controller; run tabletop for break-glass.  
+**Days 3–5**
+
+- Raise enforcement to 25–50%; implement exception CRD + TTL controller; run tabletop for break-glass.
 - Ship first 4 EDR/SaaS detections; CI tests; SIEM routing.
 
-**Days 6–8**  
-- Deploy canary tokens + honey users/creds; validate alerts; document placement strategy.  
+**Days 6–8**
+
+- Deploy canary tokens + honey users/creds; validate alerts; document placement strategy.
 - Add 2 more SaaS/EDR detections; tune thresholds.
 
-**Days 9–10**  
-- Implement audience-bound tokens + rotation; integrate attestation on 1 service; update admission checks.  
+**Days 9–10**
+
+- Implement audience-bound tokens + rotation; integrate attestation on 1 service; update admission checks.
 - Build hunting pack; schedule weekly runs.
 
-**Days 11–12**  
-- Dashboard updates (new KPIs); runbooks finalize; SLOs wired.  
+**Days 11–12**
+
+- Dashboard updates (new KPIs); runbooks finalize; SLOs wired.
 - Raise enforcement to 100% if burn-in clean; else hold at 50% and extend canary window.
 
-**Days 13–14**  
+**Days 13–14**
+
 - Hardening, docs, retro; backlog for Sprint 04.
 
 ---
 
 ## 5) Risks & Mitigations
 
-| Risk | Likelihood | Impact | Mitigation |
-|---|---|---|---|
-| Prod policy causes deployment failure | Med | High | Progressive rollout; exception CRD; shadow mode; SLO guardrails |
-| SaaS API limits/format drift | Med | Med | Versioned parsers; contract tests; backoff |
-| Canary token noise | Low | Med | Targeted placement; suppression; rotate labels |
-| Attestation toolchain complexity | Med | Med | Wrap in Make targets; clear docs; staged rollout |
-| Hunting FP overrun | Med | Med | Peer review; noise budgets; disable or re-scope queries |
+| Risk                                  | Likelihood | Impact | Mitigation                                                      |
+| ------------------------------------- | ---------- | ------ | --------------------------------------------------------------- |
+| Prod policy causes deployment failure | Med        | High   | Progressive rollout; exception CRD; shadow mode; SLO guardrails |
+| SaaS API limits/format drift          | Med        | Med    | Versioned parsers; contract tests; backoff                      |
+| Canary token noise                    | Low        | Med    | Targeted placement; suppression; rotate labels                  |
+| Attestation toolchain complexity      | Med        | Med    | Wrap in Make targets; clear docs; staged rollout                |
+| Hunting FP overrun                    | Med        | Med    | Peer review; noise budgets; disable or re-scope queries         |
 
 ---
 
@@ -122,6 +144,7 @@
 ### 6.1 Progressive Enforcement Controls
 
 **`/policy/kyverno/require-signed-provenance.yaml`**
+
 ```
 apiVersion: kyverno.io/v1
 kind: ClusterPolicy
@@ -148,6 +171,7 @@ spec:
 ```
 
 **`/policy/exceptions/exception.crd.yaml`** (time-bound exceptions)
+
 ```
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -162,6 +186,7 @@ spec:
 ```
 
 **`/controllers/exception-ttl/controller.py`**
+
 ```
 # Watches PolicyException; auto-expires after ttlHours; triggers re-eval
 ```
@@ -169,16 +194,19 @@ spec:
 ### 6.2 Parsers/Normalizers (Endpoint/SaaS)
 
 **`/ingest/parsers/sysmon_json.py`**
+
 ```
 # Map Sysmon fields to normalized schema: ts, host, user, proc, hash, action
 ```
 
-**`/ingest/parsers/saas_idp.py`** and **`/ingest/parsers/saas_codehost.py`**  
+**`/ingest/parsers/saas_idp.py`** and **`/ingest/parsers/saas_codehost.py`**
+
 - Normalize login events, OAuth grants, repo actions.
 
 ### 6.3 Detections (Examples)
 
 **`/detections/endpoint/suspicious_lsass_access.yml`**
+
 ```
 title: LSASS Access by Non-Allowed Process
 logsource: { product: windows, service: sysmon }
@@ -195,6 +223,7 @@ level: high
 ```
 
 **`/detections/saas/idp_mfa_fatigue.yml`**
+
 ```
 title: MFA Push Fatigue Attack Pattern
 detection:
@@ -206,6 +235,7 @@ level: medium
 ```
 
 **`/detections/saas/code_mass_clone.yml`**
+
 ```
 title: Mass Repository Clone by Single Principal
 detection:
@@ -219,6 +249,7 @@ level: high
 ### 6.4 Deception/Canary Assets
 
 **`/deception/canaries/placement.md`**
+
 ```
 - Drop 3 URL tokens in internal wiki spaces (low traffic).
 - 2 AWS-like keys in non-executable sample configs with warning banner.
@@ -226,12 +257,14 @@ level: high
 - 2 honey users disabled in IdP with login alert only.
 ```
 
-**`/deception/emitters/generate_tokens.py`**  
+**`/deception/emitters/generate_tokens.py`**
+
 - Generates signed canary URLs/keys; registers callbacks; stores IDs.
 
 ### 6.5 Service Identity Hardening
 
 **`/identity/policies/audience-binding.rego`**
+
 ```
 package identity
 
@@ -242,6 +275,7 @@ deny[msg] {
 ```
 
 **`/identity/attestation/attest-verify.sh`**
+
 ```
 #!/usr/bin/env bash
 set -euo pipefail
@@ -250,10 +284,12 @@ set -euo pipefail
 
 ### 6.6 Hunting Pack & Automation
 
-**`/hunting/queries/`**  
+**`/hunting/queries/`**
+
 - `cloud/rare_assume_role.sql`, `endpoint/signedbinaryproxy.kql`, `saas/impossible_travel.sql`, `network/dns_new_sld.sql`, etc.
 
 **`/hunting/run.py`**
+
 ```
 # Executes queries on schedule; writes findings to /hunting/outbox and opens tickets via API
 ```
@@ -265,8 +301,8 @@ set -euo pipefail
 
 ### 6.8 Runbooks (Additions)
 
-- **`/runbooks/exception-ttl.md`** — how to request/approve/expire production exceptions.  
-- **`/runbooks/canary-response.md`** — triage and forensics workflow for canary hits.  
+- **`/runbooks/exception-ttl.md`** — how to request/approve/expire production exceptions.
+- **`/runbooks/canary-response.md`** — triage and forensics workflow for canary hits.
 - **`/runbooks/attested-identity.md`** — rotating keys, verifying attestation failures, rollback path.
 
 ---
@@ -294,4 +330,3 @@ set -euo pipefail
 - Roll deception into prod services (service beacons, canary routes).
 - Add data egress governance (OPA/ABAC) and per-tenant isolation checks.
 - Purple-team exercise + adversary emulation to validate controls.
-

@@ -2,6 +2,6 @@
   "id": "evt2",
   "type": "charge.refunded",
   "data": {
-    "object": {"metadata": {"orderId": "order123"}}
+    "object": { "metadata": { "orderId": "order123" } }
   }
 }

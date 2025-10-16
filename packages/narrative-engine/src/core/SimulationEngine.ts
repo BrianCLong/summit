@@ -61,7 +61,9 @@ export class SimulationEngine {
   injectEvent(event: Event): void {
     this.ensureState();
     const timestamp =
-      typeof event.timestamp === 'number' ? event.timestamp : this.state?.timestamp ?? 0;
+      typeof event.timestamp === 'number'
+        ? event.timestamp
+        : (this.state?.timestamp ?? 0);
     this.eventQueue.push({ ...event, timestamp });
   }
 

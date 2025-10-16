@@ -1,1 +1,5 @@
-{ "jwt": {"tenant": "t1", "roles": ["analyst"], "purpose": ["investigation"]}, "resource": {"tenant": "t2", "labels": []}, "action": "read" }
+{
+  "jwt": { "tenant": "t1", "roles": ["analyst"], "purpose": ["investigation"] },
+  "resource": { "tenant": "t2", "labels": [] },
+  "action": "read"
+}

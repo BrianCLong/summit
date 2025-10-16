@@ -44,10 +44,12 @@ class SecurityHeadersManager {
 
     return helmet({
       // Content Security Policy
-      contentSecurityPolicy: this.config.contentSecurityPolicy.enabled ? {
-        directives: this.buildCSPDirectives(),
-        reportOnly: this.config.contentSecurityPolicy.reportOnly,
-      } : false,
+      contentSecurityPolicy: this.config.contentSecurityPolicy.enabled
+        ? {
+            directives: this.buildCSPDirectives(),
+            reportOnly: this.config.contentSecurityPolicy.reportOnly,
+          }
+        : false,
 
       // Cross-Origin Embedder Policy
       crossOriginEmbedderPolicy: {
@@ -70,11 +72,13 @@ class SecurityHeadersManager {
       },
 
       // Expect-CT (deprecated but still useful)
-      expectCt: isProduction ? {
-        maxAge: 86400, // 24 hours
-        enforce: true,
-        reportUri: this.config.reportingEndpoint,
-      } : false,
+      expectCt: isProduction
+        ? {
+            maxAge: 86400, // 24 hours
+            enforce: true,
+            reportUri: this.config.reportingEndpoint,
+          }
+        : false,
 
       // Frameguard (X-Frame-Options)
       frameguard: {
@@ -85,11 +89,14 @@ class SecurityHeadersManager {
       hidePoweredBy: true,
 
       // HTTP Strict Transport Security
-      hsts: this.config.strictTransportSecurity.enabled ? {
-        maxAge: this.config.strictTransportSecurity.maxAge,
-        includeSubDomains: this.config.strictTransportSecurity.includeSubDomains,
-        preload: this.config.strictTransportSecurity.preload,
-      } : false,
+      hsts: this.config.strictTransportSecurity.enabled
+        ? {
+            maxAge: this.config.strictTransportSecurity.maxAge,
+            includeSubDomains:
+              this.config.strictTransportSecurity.includeSubDomains,
+            preload: this.config.strictTransportSecurity.preload,
+          }
+        : false,
 
       // IE No Open
       ieNoOpen: true,
@@ -142,14 +149,20 @@ class SecurityHeadersManager {
     } else {
       // Development: More permissive for hot reload, etc.
       baseDirectives['script-src'].push("'unsafe-eval'"); // For development tools
-      baseDirectives['connect-src'] = ["'self'", 'ws:', 'wss:', 'http:', 'https:'];
+      baseDirectives['connect-src'] = [
+        "'self'",
+        'ws:',
+        'wss:',
+        'http:',
+        'https:',
+      ];
     }
 
     // Add GraphQL and API endpoints
     baseDirectives['connect-src'].push(
       `https://api.${domain}`,
       `https://graphql.${domain}`,
-      `wss://graphql.${domain}`
+      `wss://graphql.${domain}`,
     );
 
     // Add reporting if enabled
@@ -177,9 +190,10 @@ class SecurityHeadersManager {
       res.setHeader('X-API-Version', process.env.API_VERSION || '1.0');
 
       // Request ID for tracing
-      const requestId = req.headers['x-request-id'] ||
-                       req.headers['x-correlation-id'] ||
-                       `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const requestId =
+        req.headers['x-request-id'] ||
+        req.headers['x-correlation-id'] ||
+        `req_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       res.setHeader('X-Request-ID', requestId);
 
       // Rate limiting info (if available)
@@ -193,7 +207,7 @@ class SecurityHeadersManager {
       if (this.config.enableReporting && this.config.reportingEndpoint) {
         const reportTo = JSON.stringify({
           group: 'csp-endpoint',
-          'max_age': 31536000,
+          max_age: 31536000,
           endpoints: [{ url: this.config.reportingEndpoint }],
         });
         res.setHeader('Report-To', reportTo);
@@ -202,9 +216,9 @@ class SecurityHeadersManager {
       // Network Error Logging (NEL)
       if (this.config.environment === 'production') {
         const nel = JSON.stringify({
-          'report_to': 'csp-endpoint',
-          'max_age': 31536000,
-          'include_subdomains': true,
+          report_to: 'csp-endpoint',
+          max_age: 31536000,
+          include_subdomains: true,
         });
         res.setHeader('NEL', nel);
       }
@@ -235,15 +249,20 @@ class SecurityHeadersManager {
 
       // GraphQL-specific CORS
       res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
-      res.setHeader('Access-Control-Allow-Headers',
-        'Content-Type, Authorization, X-Requested-With, X-GraphQL-Operation-Name'
+      res.setHeader(
+        'Access-Control-Allow-Headers',
+        'Content-Type, Authorization, X-Requested-With, X-GraphQL-Operation-Name',
       );
 
       // Prevent GraphQL introspection in production
-      if (this.config.environment === 'production' &&
-          req.body?.query?.includes('__schema')) {
+      if (
+        this.config.environment === 'production' &&
+        req.body?.query?.includes('__schema')
+      ) {
         return res.status(403).json({
-          errors: [{ message: 'GraphQL introspection is disabled in production' }],
+          errors: [
+            { message: 'GraphQL introspection is disabled in production' },
+          ],
         });
       }
 
@@ -270,7 +289,9 @@ class SecurityHeadersManager {
 /**
  * Factory function for creating security headers manager
  */
-export function createSecurityHeadersManager(config: Partial<SecurityHeadersConfig>): SecurityHeadersManager {
+export function createSecurityHeadersManager(
+  config: Partial<SecurityHeadersConfig>,
+): SecurityHeadersManager {
   const defaultConfig: SecurityHeadersConfig = {
     environment: (process.env.NODE_ENV as any) || 'development',
     domain: process.env.DOMAIN || 'localhost',
@@ -295,7 +316,9 @@ export function createSecurityHeadersManager(config: Partial<SecurityHeadersConf
 /**
  * Express middleware factory
  */
-export function createSecurityMiddleware(config?: Partial<SecurityHeadersConfig>) {
+export function createSecurityMiddleware(
+  config?: Partial<SecurityHeadersConfig>,
+) {
   const manager = createSecurityHeadersManager(config || {});
 
   return [

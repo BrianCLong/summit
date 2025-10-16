@@ -1,4 +1,4 @@
-import { logger } from "../utils/logger";
+import { logger } from '../utils/logger';
 
 export class Budget {
   public usedUSD: number = 0;
@@ -6,26 +6,26 @@ export class Budget {
 
   constructor(
     public maxUSD: number,
-    public softLimitPct: number = 0.8
+    public softLimitPct: number = 0.8,
   ) {}
 
   charge(usd: number, description?: string): void {
     this.usedUSD += usd;
-    
+
     const transaction: BudgetTransaction = {
       amount: usd,
       timestamp: new Date(),
-      description: description || "LLM API call",
-      remainingBudget: this.maxUSD - this.usedUSD
+      description: description || 'LLM API call',
+      remainingBudget: this.maxUSD - this.usedUSD,
     };
-    
+
     this.transactions.push(transaction);
-    
-    logger.debug("Budget charged", {
+
+    logger.debug('Budget charged', {
       amount: usd,
       used: this.usedUSD,
       remaining: this.maxUSD - this.usedUSD,
-      utilization: (this.usedUSD / this.maxUSD) * 100
+      utilization: (this.usedUSD / this.maxUSD) * 100,
     });
 
     // Check limits
@@ -33,16 +33,16 @@ export class Budget {
       throw new BudgetExceededError(
         `Budget cap exceeded: $${this.usedUSD.toFixed(3)} > $${this.maxUSD.toFixed(3)}`,
         this.usedUSD,
-        this.maxUSD
+        this.maxUSD,
       );
     }
 
     // Soft limit warning
     if (this.usedUSD > this.maxUSD * this.softLimitPct) {
-      logger.warn("Budget soft limit exceeded", {
+      logger.warn('Budget soft limit exceeded', {
         used: this.usedUSD,
         limit: this.maxUSD * this.softLimitPct,
-        remaining: this.maxUSD - this.usedUSD
+        remaining: this.maxUSD - this.usedUSD,
       });
     }
   }
@@ -68,11 +68,11 @@ export class Budget {
       return {
         reason: `Budget ${this.getUtilization().toFixed(1)}% utilized`,
         suggestions: [
-          "Switch to smaller model (e.g. gpt-3.5-turbo instead of gpt-4)",
-          "Use cached responses where possible", 
-          "Reduce prompt size",
-          "Batch similar requests"
-        ]
+          'Switch to smaller model (e.g. gpt-3.5-turbo instead of gpt-4)',
+          'Use cached responses where possible',
+          'Reduce prompt size',
+          'Batch similar requests',
+        ],
       };
     }
     return null;
@@ -83,10 +83,10 @@ export class BudgetExceededError extends Error {
   constructor(
     message: string,
     public used: number,
-    public limit: number
+    public limit: number,
   ) {
     super(message);
-    this.name = "BudgetExceededError";
+    this.name = 'BudgetExceededError';
   }
 }
 
@@ -105,8 +105,8 @@ interface DownshiftSuggestion {
 // Budget guard wrapper for LLM calls
 export async function callModel(
   budget: Budget,
-  call: () => Promise<{output: string, costUSD: number}>,
-  description?: string
+  call: () => Promise<{ output: string; costUSD: number }>,
+  description?: string,
 ): Promise<string> {
   const result = await call();
   budget.charge(result.costUSD, description);
@@ -120,7 +120,7 @@ export class PRBudgetTracker {
   getOrCreateBudget(prNumber: number, maxUSD: number = 10): Budget {
     if (!this.prBudgets.has(prNumber)) {
       this.prBudgets.set(prNumber, new Budget(maxUSD));
-      logger.info("Created PR budget", { pr: prNumber, budget: maxUSD });
+      logger.info('Created PR budget', { pr: prNumber, budget: maxUSD });
     }
     return this.prBudgets.get(prNumber)!;
   }
@@ -136,19 +136,19 @@ export class PRBudgetTracker {
       remainingUSD: budget.getRemainingBudget(),
       utilization: budget.getUtilization(),
       transactions: budget.getTransactions(),
-      downshiftSuggestion: budget.suggestDownshift()
+      downshiftSuggestion: budget.suggestDownshift(),
     };
   }
 
   getAllBudgetSummaries(): BudgetSummary[] {
     return Array.from(this.prBudgets.keys())
-      .map(pr => this.getBudgetSummary(pr))
+      .map((pr) => this.getBudgetSummary(pr))
       .filter(Boolean) as BudgetSummary[];
   }
 
   clearPRBudget(prNumber: number): void {
     if (this.prBudgets.delete(prNumber)) {
-      logger.info("Cleared PR budget", { pr: prNumber });
+      logger.info('Cleared PR budget', { pr: prNumber });
     }
   }
 }

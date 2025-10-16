@@ -11,8 +11,8 @@ spec:
         resources:
           kinds: [Pod]
       validate:
-        message: "Images must be pinned by sha256 digest"
+        message: 'Images must be pinned by sha256 digest'
         pattern:
           spec:
             containers:
-              - image: "*@sha256:*"
+              - image: '*@sha256:*'

@@ -1,6 +1,6 @@
 wasm:
   enabled: true
-  runner: "wasmtime"        # wasmtime | node-wasi
+  runner: 'wasmtime' # wasmtime | node-wasi
   limits:
     cpuMs: 1000
     memMiB: 128
@@ -8,4 +8,4 @@ wasm:
 supplyChain:
   enforceSignature: true
   enforceProvenance: true
-  blockOnVulnSeverity: "CRITICAL"
+  blockOnVulnSeverity: 'CRITICAL'

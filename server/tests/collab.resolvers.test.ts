@@ -5,7 +5,10 @@ import collabResolvers from '../src/graphql/resolvers.collab.js';
 
 describe('collab resolvers', () => {
   it('creates a branch', async () => {
-    const schema = makeExecutableSchema({ typeDefs: collabTypeDefs, resolvers: collabResolvers });
+    const schema = makeExecutableSchema({
+      typeDefs: collabTypeDefs,
+      resolvers: collabResolvers,
+    });
     const mutation = `mutation { createBranch(name: \"test\"){ id name } }`;
     const result = await graphql({ schema, source: mutation });
     expect(result.errors).toBeUndefined();

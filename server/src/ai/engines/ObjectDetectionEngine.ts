@@ -54,10 +54,10 @@ export class ObjectDetectionEngine {
     try {
       // Verify Python and dependencies
       await this.verifyDependencies();
-      
+
       // Load available models
       await this.loadAvailableModels();
-      
+
       this.isInitialized = true;
       logger.info('Object Detection Engine initialized successfully');
     } catch (error) {
@@ -71,7 +71,7 @@ export class ObjectDetectionEngine {
    */
   async detectObjects(
     imagePath: string,
-    options: ObjectDetectionOptions = {}
+    options: ObjectDetectionOptions = {},
   ): Promise<DetectionResult[]> {
     if (!this.isInitialized) {
       await this.initialize();
@@ -84,15 +84,19 @@ export class ObjectDetectionEngine {
       maxDetections = 100,
       enableTracking = false,
       extractFeatures = false,
-      customClasses = []
+      customClasses = [],
     } = options;
 
-    logger.info(`Starting object detection for: ${imagePath} with model: ${model}`);
+    logger.info(
+      `Starting object detection for: ${imagePath} with model: ${model}`,
+    );
 
     try {
       // Validate model availability
       if (!this.availableModels.includes(model)) {
-        throw new Error(`Model ${model} not available. Available models: ${this.availableModels.join(', ')}`);
+        throw new Error(
+          `Model ${model} not available. Available models: ${this.availableModels.join(', ')}`,
+        );
       }
 
       // Run object detection
@@ -102,7 +106,7 @@ export class ObjectDetectionEngine {
         confidenceThreshold,
         nmsThreshold,
         maxDetections,
-        customClasses
+        customClasses,
       );
 
       // Extract features if requested
@@ -115,9 +119,10 @@ export class ObjectDetectionEngine {
         this.applyObjectTracking(detections);
       }
 
-      logger.info(`Object detection completed: ${detections.length} objects detected`);
+      logger.info(
+        `Object detection completed: ${detections.length} objects detected`,
+      );
       return detections;
-
     } catch (error) {
       logger.error('Object detection failed:', error);
       throw error;
@@ -129,8 +134,10 @@ export class ObjectDetectionEngine {
    */
   async detectObjectsInVideo(
     videoPath: string,
-    options: VideoDetectionOptions = {}
-  ): Promise<{ frame: number; timestamp: number; detections: DetectionResult[] }[]> {
+    options: VideoDetectionOptions = {},
+  ): Promise<
+    { frame: number; timestamp: number; detections: DetectionResult[] }[]
+  > {
     if (!this.isInitialized) {
       await this.initialize();
     }
@@ -144,7 +151,7 @@ export class ObjectDetectionEngine {
       startTime = 0,
       endTime,
       enableTemporalSmoothing = true,
-      enableTracking = true
+      enableTracking = true,
     } = options;
 
     logger.info(`Starting video object detection for: ${videoPath}`);
@@ -158,7 +165,7 @@ export class ObjectDetectionEngine {
         maxDetections,
         frameRate,
         startTime,
-        endTime
+        endTime,
       );
 
       // Apply temporal smoothing if requested
@@ -171,9 +178,10 @@ export class ObjectDetectionEngine {
         this.applyVideoTracking(results);
       }
 
-      logger.info(`Video object detection completed: ${results.length} frames processed`);
+      logger.info(
+        `Video object detection completed: ${results.length} frames processed`,
+      );
       return results;
-
     } catch (error) {
       logger.error('Video object detection failed:', error);
       throw error;
@@ -189,18 +197,26 @@ export class ObjectDetectionEngine {
     confidenceThreshold: number,
     nmsThreshold: number,
     maxDetections: number,
-    customClasses: string[]
+    customClasses: string[],
   ): Promise<DetectionResult[]> {
     return new Promise((resolve, reject) => {
-      const pythonScript = path.join(this.config.modelsPath, 'yolo_detection.py');
-      
+      const pythonScript = path.join(
+        this.config.modelsPath,
+        'yolo_detection.py',
+      );
+
       const args = [
         pythonScript,
-        '--image', imagePath,
-        '--model', model,
-        '--confidence', confidenceThreshold.toString(),
-        '--nms', nmsThreshold.toString(),
-        '--max-detections', maxDetections.toString()
+        '--image',
+        imagePath,
+        '--model',
+        model,
+        '--confidence',
+        confidenceThreshold.toString(),
+        '--nms',
+        nmsThreshold.toString(),
+        '--max-detections',
+        maxDetections.toString(),
       ];
 
       if (customClasses.length > 0) {
@@ -225,7 +241,11 @@ export class ObjectDetectionEngine {
 
       python.on('close', (code) => {
         if (code !== 0) {
-          reject(new Error(`Object detection failed with code ${code}: ${errorOutput}`));
+          reject(
+            new Error(
+              `Object detection failed with code ${code}: ${errorOutput}`,
+            ),
+          );
           return;
         }
 
@@ -255,19 +275,30 @@ export class ObjectDetectionEngine {
     maxDetections: number,
     frameRate: number,
     startTime?: number,
-    endTime?: number
-  ): Promise<{ frame: number; timestamp: number; detections: DetectionResult[] }[]> {
+    endTime?: number,
+  ): Promise<
+    { frame: number; timestamp: number; detections: DetectionResult[] }[]
+  > {
     return new Promise((resolve, reject) => {
-      const pythonScript = path.join(this.config.modelsPath, 'yolo_video_detection.py');
-      
+      const pythonScript = path.join(
+        this.config.modelsPath,
+        'yolo_video_detection.py',
+      );
+
       const args = [
         pythonScript,
-        '--video', videoPath,
-        '--model', model,
-        '--confidence', confidenceThreshold.toString(),
-        '--nms', nmsThreshold.toString(),
-        '--max-detections', maxDetections.toString(),
-        '--frame-rate', frameRate.toString()
+        '--video',
+        videoPath,
+        '--model',
+        model,
+        '--confidence',
+        confidenceThreshold.toString(),
+        '--nms',
+        nmsThreshold.toString(),
+        '--max-detections',
+        maxDetections.toString(),
+        '--frame-rate',
+        frameRate.toString(),
       ];
 
       if (startTime !== undefined) {
@@ -296,7 +327,11 @@ export class ObjectDetectionEngine {
 
       python.on('close', (code) => {
         if (code !== 0) {
-          reject(new Error(`Video object detection failed with code ${code}: ${errorOutput}`));
+          reject(
+            new Error(
+              `Video object detection failed with code ${code}: ${errorOutput}`,
+            ),
+          );
           return;
         }
 
@@ -310,7 +345,9 @@ export class ObjectDetectionEngine {
       });
 
       python.on('error', (error) => {
-        reject(new Error(`Failed to spawn video object detection: ${error.message}`));
+        reject(
+          new Error(`Failed to spawn video object detection: ${error.message}`),
+        );
       });
     });
   }
@@ -318,7 +355,10 @@ export class ObjectDetectionEngine {
   /**
    * Parse detection results from Python script
    */
-  private parseDetectionResults(results: any, model: string): DetectionResult[] {
+  private parseDetectionResults(
+    results: any,
+    model: string,
+  ): DetectionResult[] {
     const detections: DetectionResult[] = [];
 
     for (const detection of results.detections || []) {
@@ -331,10 +371,10 @@ export class ObjectDetectionEngine {
           y: Math.round(detection.bbox[1]),
           width: Math.round(detection.bbox[2]),
           height: Math.round(detection.bbox[3]),
-          confidence: detection.confidence
+          confidence: detection.confidence,
         },
         model,
-        features: detection.features || undefined
+        features: detection.features || undefined,
       });
     }
 
@@ -346,17 +386,21 @@ export class ObjectDetectionEngine {
    */
   private parseVideoDetectionResults(
     results: any,
-    model: string
+    model: string,
   ): { frame: number; timestamp: number; detections: DetectionResult[] }[] {
-    const frameResults: { frame: number; timestamp: number; detections: DetectionResult[] }[] = [];
+    const frameResults: {
+      frame: number;
+      timestamp: number;
+      detections: DetectionResult[];
+    }[] = [];
 
     for (const frameResult of results.frames || []) {
       const detections = this.parseDetectionResults(frameResult, model);
-      
+
       frameResults.push({
         frame: frameResult.frame_number,
         timestamp: frameResult.timestamp,
-        detections
+        detections,
       });
     }
 
@@ -366,14 +410,23 @@ export class ObjectDetectionEngine {
   /**
    * Extract visual features from detected objects
    */
-  private async extractObjectFeatures(detections: DetectionResult[], imagePath: string): Promise<void> {
+  private async extractObjectFeatures(
+    detections: DetectionResult[],
+    imagePath: string,
+  ): Promise<void> {
     // This would integrate with feature extraction models like ResNet or EfficientNet
     for (const detection of detections) {
       try {
-        const features = await this.runFeatureExtraction(imagePath, detection.boundingBox);
+        const features = await this.runFeatureExtraction(
+          imagePath,
+          detection.boundingBox,
+        );
         detection.features = features;
       } catch (error) {
-        logger.warn(`Failed to extract features for object ${detection.className}:`, error);
+        logger.warn(
+          `Failed to extract features for object ${detection.className}:`,
+          error,
+        );
       }
     }
   }
@@ -381,14 +434,22 @@ export class ObjectDetectionEngine {
   /**
    * Run feature extraction for a specific bounding box
    */
-  private async runFeatureExtraction(imagePath: string, boundingBox: any): Promise<number[]> {
+  private async runFeatureExtraction(
+    imagePath: string,
+    boundingBox: any,
+  ): Promise<number[]> {
     return new Promise((resolve, reject) => {
-      const pythonScript = path.join(this.config.modelsPath, 'feature_extraction.py');
-      
+      const pythonScript = path.join(
+        this.config.modelsPath,
+        'feature_extraction.py',
+      );
+
       const args = [
         pythonScript,
-        '--image', imagePath,
-        '--bbox', `${boundingBox.x},${boundingBox.y},${boundingBox.width},${boundingBox.height}`
+        '--image',
+        imagePath,
+        '--bbox',
+        `${boundingBox.x},${boundingBox.y},${boundingBox.width},${boundingBox.height}`,
       ];
 
       const python = spawn(this.config.pythonPath, args);
@@ -418,7 +479,9 @@ export class ObjectDetectionEngine {
       });
 
       python.on('error', (error) => {
-        reject(new Error(`Failed to spawn feature extraction: ${error.message}`));
+        reject(
+          new Error(`Failed to spawn feature extraction: ${error.message}`),
+        );
       });
     });
   }
@@ -437,7 +500,11 @@ export class ObjectDetectionEngine {
    * Apply tracking across video frames using DeepSORT or similar
    */
   private applyVideoTracking(
-    frameResults: { frame: number; timestamp: number; detections: DetectionResult[] }[]
+    frameResults: {
+      frame: number;
+      timestamp: number;
+      detections: DetectionResult[];
+    }[],
   ): void {
     // Simple tracking implementation using IoU matching
     const tracks = new Map<string, DetectionResult[]>();
@@ -450,7 +517,7 @@ export class ObjectDetectionEngine {
       // Try to match detections with existing tracks
       for (const [trackId, trackHistory] of tracks.entries()) {
         const lastDetection = trackHistory[trackHistory.length - 1];
-        
+
         // Find best matching detection in current frame
         let bestMatch: DetectionResult | null = null;
         let bestIoU = 0;
@@ -458,10 +525,13 @@ export class ObjectDetectionEngine {
 
         for (let i = 0; i < unmatchedDetections.length; i++) {
           const detection = unmatchedDetections[i];
-          
+
           if (detection.className === lastDetection.className) {
-            const iou = this.calculateIoU(detection.boundingBox, lastDetection.boundingBox);
-            
+            const iou = this.calculateIoU(
+              detection.boundingBox,
+              lastDetection.boundingBox,
+            );
+
             if (iou > bestIoU && iou > 0.3) {
               bestMatch = detection;
               bestIoU = iou;
@@ -491,8 +561,9 @@ export class ObjectDetectionEngine {
         if (!activeTrackIds.has(trackId)) {
           const lastFrame = trackHistory[trackHistory.length - 1];
           const frameGap = frameResult.frame - this.getFrameNumber(lastFrame);
-          
-          if (frameGap > 10) { // Remove if not seen for 10 frames
+
+          if (frameGap > 10) {
+            // Remove if not seen for 10 frames
             tracks.delete(trackId);
           }
         }
@@ -504,7 +575,11 @@ export class ObjectDetectionEngine {
    * Apply temporal smoothing to reduce noise in detections
    */
   private applyTemporalSmoothing(
-    frameResults: { frame: number; timestamp: number; detections: DetectionResult[] }[]
+    frameResults: {
+      frame: number;
+      timestamp: number;
+      detections: DetectionResult[];
+    }[],
   ): void {
     // Group detections by tracking ID across frames
     const trackGroups = new Map<string, DetectionResult[]>();
@@ -533,26 +608,32 @@ export class ObjectDetectionEngine {
    */
   private smoothTrack(track: DetectionResult[]): void {
     const windowSize = 3;
-    
+
     for (let i = windowSize - 1; i < track.length; i++) {
       const window = track.slice(i - windowSize + 1, i + 1);
-      
+
       // Smooth confidence
-      const avgConfidence = window.reduce((sum, d) => sum + d.confidence, 0) / window.length;
+      const avgConfidence =
+        window.reduce((sum, d) => sum + d.confidence, 0) / window.length;
       track[i].confidence = avgConfidence;
-      
+
       // Smooth bounding box
-      const avgX = window.reduce((sum, d) => sum + d.boundingBox.x, 0) / window.length;
-      const avgY = window.reduce((sum, d) => sum + d.boundingBox.y, 0) / window.length;
-      const avgWidth = window.reduce((sum, d) => sum + d.boundingBox.width, 0) / window.length;
-      const avgHeight = window.reduce((sum, d) => sum + d.boundingBox.height, 0) / window.length;
-      
+      const avgX =
+        window.reduce((sum, d) => sum + d.boundingBox.x, 0) / window.length;
+      const avgY =
+        window.reduce((sum, d) => sum + d.boundingBox.y, 0) / window.length;
+      const avgWidth =
+        window.reduce((sum, d) => sum + d.boundingBox.width, 0) / window.length;
+      const avgHeight =
+        window.reduce((sum, d) => sum + d.boundingBox.height, 0) /
+        window.length;
+
       track[i].boundingBox = {
         ...track[i].boundingBox,
         x: Math.round(avgX),
         y: Math.round(avgY),
         width: Math.round(avgWidth),
-        height: Math.round(avgHeight)
+        height: Math.round(avgHeight),
       };
     }
   }
@@ -590,18 +671,22 @@ export class ObjectDetectionEngine {
   private async verifyDependencies(): Promise<void> {
     return new Promise((resolve, reject) => {
       const python = spawn(this.config.pythonPath, [
-        '-c', 
-        'import ultralytics, cv2, numpy; print("Dependencies OK")'
+        '-c',
+        'import ultralytics, cv2, numpy; print("Dependencies OK")',
       ]);
-      
+
       python.on('close', (code) => {
         if (code === 0) {
           resolve();
         } else {
-          reject(new Error('Required dependencies not found. Please install ultralytics, opencv-python, numpy.'));
+          reject(
+            new Error(
+              'Required dependencies not found. Please install ultralytics, opencv-python, numpy.',
+            ),
+          );
         }
       });
-      
+
       python.on('error', () => {
         reject(new Error('Python not found or dependencies missing.'));
       });
@@ -614,11 +699,23 @@ export class ObjectDetectionEngine {
   private async loadAvailableModels(): Promise<void> {
     try {
       const models = [
-        'yolov8n', 'yolov8s', 'yolov8m', 'yolov8l', 'yolov8x',
-        'yolov9n', 'yolov9s', 'yolov9m', 'yolov9l', 'yolov9x',
-        'yolo11n', 'yolo11s', 'yolo11m', 'yolo11l', 'yolo11x'
+        'yolov8n',
+        'yolov8s',
+        'yolov8m',
+        'yolov8l',
+        'yolov8x',
+        'yolov9n',
+        'yolov9s',
+        'yolov9m',
+        'yolov9l',
+        'yolov9x',
+        'yolo11n',
+        'yolo11s',
+        'yolo11m',
+        'yolo11l',
+        'yolo11x',
       ];
-      
+
       this.availableModels = models;
       logger.info(`Available models: ${this.availableModels.join(', ')}`);
     } catch (error) {

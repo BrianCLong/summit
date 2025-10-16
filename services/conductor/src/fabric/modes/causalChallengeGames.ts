@@ -2,7 +2,7 @@ export interface Challenge {
   challenger: string;
   hypothesis: string;
   mutation: { envVar?: string; flag?: string; dependency?: string };
-  expectedOutcome: "pass" | "fail";
+  expectedOutcome: 'pass' | 'fail';
 }
 
 export interface ChallengeOutcome {
@@ -16,13 +16,18 @@ export interface ChallengeSummary {
   confidence: number;
 }
 
-export function runCausalChallenge(challenges: Challenge[], evaluator: (challenge: Challenge) => boolean): ChallengeSummary {
+export function runCausalChallenge(
+  challenges: Challenge[],
+  evaluator: (challenge: Challenge) => boolean,
+): ChallengeSummary {
   const outcomes: ChallengeOutcome[] = challenges.map((challenge) => {
     const passed = evaluator(challenge);
     return {
       challenge,
       passed,
-      evidence: passed ? "Challenge passed: failure reproduced" : "Challenge failed: triggered repair",
+      evidence: passed
+        ? 'Challenge passed: failure reproduced'
+        : 'Challenge failed: triggered repair',
     };
   });
   const success = outcomes.filter((o) => o.passed).length;

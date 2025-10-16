@@ -34,7 +34,11 @@ const buildEngine = () => {
       table: 'profile',
       subjectId,
       tenantId,
-      data: { email: 'original@example.com', name: 'Fixture User', ssn: '123-45-6789' },
+      data: {
+        email: 'original@example.com',
+        name: 'Fixture User',
+        ssn: '123-45-6789',
+      },
     },
     {
       table: 'sessions',
@@ -50,7 +54,11 @@ const buildEngine = () => {
       subjectId,
       tenantId,
       index: 'activity',
-      body: { action: 'login', email: 'original@example.com', timestamp: '2025-09-01T00:00:00.000Z' },
+      body: {
+        action: 'login',
+        email: 'original@example.com',
+        timestamp: '2025-09-01T00:00:00.000Z',
+      },
     },
     {
       id: 'activity-2',
@@ -98,7 +106,9 @@ describe('DataSubjectFulfillmentEngine', () => {
     expect(first.meta.idempotentReplay).toBe(false);
     expect(exportResult.pack.manifest.connectors).toHaveLength(2);
 
-    const stored = await storage.getObject(`${tenantId}/${request.requestId}.json`);
+    const stored = await storage.getObject(
+      `${tenantId}/${request.requestId}.json`,
+    );
     expect(stored).toBeDefined();
     const parsed = JSON.parse(stored!);
     expect(signer.verify(parsed.payload, parsed.signature)).toBe(true);
@@ -174,7 +184,8 @@ describe('DataSubjectFulfillmentEngine', () => {
     const elasticSnapshot = await elastic.snapshot();
 
     deletionResult.proofs.forEach((proof) => {
-      const snapshot = proof.connector === 'postgres' ? postgresSnapshot : elasticSnapshot;
+      const snapshot =
+        proof.connector === 'postgres' ? postgresSnapshot : elasticSnapshot;
       expect(validateDeletionProofAgainstSnapshot(proof, snapshot)).toBe(true);
     });
   });

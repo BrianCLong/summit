@@ -6,7 +6,9 @@ import { hmacHex, safeEqual } from '../utils/signature';
 
 const router = Router();
 
-const stripe = new Stripe(process.env.STRIPE_API_KEY || '', { apiVersion: '2024-06-20' });
+const stripe = new Stripe(process.env.STRIPE_API_KEY || '', {
+  apiVersion: '2024-06-20',
+});
 
 router.post(
   '/events',
@@ -18,7 +20,11 @@ router.post(
     if (!secret) return res.status(503).send('webhook disabled');
     try {
       const sig = req.header('Stripe-Signature') || '';
-      const event = stripe.webhooks.constructEvent(req.body as Buffer, sig, secret);
+      const event = stripe.webhooks.constructEvent(
+        req.body as Buffer,
+        sig,
+        secret,
+      );
       // handle event.type as needed
       return res.sendStatus(200);
     } catch {

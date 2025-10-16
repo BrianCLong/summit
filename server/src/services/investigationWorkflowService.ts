@@ -134,7 +134,12 @@ export type WorkflowStageType =
   | 'RECOVERY'
   | 'LESSONS_LEARNED';
 
-export type StageStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'SKIPPED' | 'BLOCKED';
+export type StageStatus =
+  | 'PENDING'
+  | 'IN_PROGRESS'
+  | 'COMPLETED'
+  | 'SKIPPED'
+  | 'BLOCKED';
 
 export type EvidenceType =
   | 'DIGITAL_ARTIFACT'
@@ -181,7 +186,11 @@ export type EventType =
   | 'MALWARE_DETECTION'
   | 'ALERT_TRIGGERED';
 
-export type IntegrityStatus = 'VERIFIED' | 'COMPROMISED' | 'UNKNOWN' | 'CORRUPTED';
+export type IntegrityStatus =
+  | 'VERIFIED'
+  | 'COMPROMISED'
+  | 'UNKNOWN'
+  | 'CORRUPTED';
 
 export type CustodyAction =
   | 'COLLECTED'
@@ -191,7 +200,12 @@ export type CustodyAction =
   | 'ARCHIVED'
   | 'DISPOSED';
 
-export type InvestigationRole = 'LEAD' | 'ANALYST' | 'REVIEWER' | 'OBSERVER' | 'STAKEHOLDER';
+export type InvestigationRole =
+  | 'LEAD'
+  | 'ANALYST'
+  | 'REVIEWER'
+  | 'OBSERVER'
+  | 'STAKEHOLDER';
 
 export type PermissionType =
   | 'READ'
@@ -293,9 +307,14 @@ export class InvestigationWorkflowService extends EventEmitter {
 
     this.templates.set(securityIncidentTemplate.id, securityIncidentTemplate);
     this.templates.set(malwareAnalysisTemplate.id, malwareAnalysisTemplate);
-    this.templates.set(fraudInvestigationTemplate.id, fraudInvestigationTemplate);
+    this.templates.set(
+      fraudInvestigationTemplate.id,
+      fraudInvestigationTemplate,
+    );
 
-    console.log(`[WORKFLOW] Initialized ${this.templates.size} investigation templates`);
+    console.log(
+      `[WORKFLOW] Initialized ${this.templates.size} investigation templates`,
+    );
   }
 
   /**
@@ -369,7 +388,11 @@ export class InvestigationWorkflowService extends EventEmitter {
     };
 
     this.investigations.set(investigationId, investigation);
-    await cacheService.set(`investigation:${investigationId}`, investigation, 3600);
+    await cacheService.set(
+      `investigation:${investigationId}`,
+      investigation,
+      3600,
+    );
 
     this.emit('investigationCreated', investigation);
     console.log(
@@ -431,7 +454,11 @@ export class InvestigationWorkflowService extends EventEmitter {
     investigation.workflow.currentStage = nextStage;
     investigation.updatedAt = now;
 
-    await cacheService.set(`investigation:${investigationId}`, investigation, 3600);
+    await cacheService.set(
+      `investigation:${investigationId}`,
+      investigation,
+      3600,
+    );
 
     this.emit('workflowAdvanced', {
       investigation,
@@ -481,10 +508,16 @@ export class InvestigationWorkflowService extends EventEmitter {
     investigation.evidence.push(newEvidence);
     investigation.updatedAt = now;
 
-    await cacheService.set(`investigation:${investigationId}`, investigation, 3600);
+    await cacheService.set(
+      `investigation:${investigationId}`,
+      investigation,
+      3600,
+    );
 
     this.emit('evidenceAdded', { investigation, evidence: newEvidence });
-    console.log(`[WORKFLOW] Added evidence ${evidenceId} to investigation ${investigationId}`);
+    console.log(
+      `[WORKFLOW] Added evidence ${evidenceId} to investigation ${investigationId}`,
+    );
 
     return investigation;
   }
@@ -515,10 +548,16 @@ export class InvestigationWorkflowService extends EventEmitter {
     investigation.findings.push(newFinding);
     investigation.updatedAt = now;
 
-    await cacheService.set(`investigation:${investigationId}`, investigation, 3600);
+    await cacheService.set(
+      `investigation:${investigationId}`,
+      investigation,
+      3600,
+    );
 
     this.emit('findingAdded', { investigation, finding: newFinding });
-    console.log(`[WORKFLOW] Added finding ${findingId} to investigation ${investigationId}`);
+    console.log(
+      `[WORKFLOW] Added finding ${findingId} to investigation ${investigationId}`,
+    );
 
     return investigation;
   }
@@ -543,14 +582,21 @@ export class InvestigationWorkflowService extends EventEmitter {
 
     investigation.timeline.push(newEntry);
     investigation.timeline.sort(
-      (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
+      (a, b) =>
+        new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime(),
     );
     investigation.updatedAt = new Date().toISOString();
 
-    await cacheService.set(`investigation:${investigationId}`, investigation, 3600);
+    await cacheService.set(
+      `investigation:${investigationId}`,
+      investigation,
+      3600,
+    );
 
     this.emit('timelineEntryAdded', { investigation, entry: newEntry });
-    console.log(`[WORKFLOW] Added timeline entry ${entryId} to investigation ${investigationId}`);
+    console.log(
+      `[WORKFLOW] Added timeline entry ${entryId} to investigation ${investigationId}`,
+    );
 
     return investigation;
   }
@@ -558,12 +604,16 @@ export class InvestigationWorkflowService extends EventEmitter {
   /**
    * Get investigation by ID
    */
-  async getInvestigation(investigationId: string): Promise<Investigation | null> {
+  async getInvestigation(
+    investigationId: string,
+  ): Promise<Investigation | null> {
     let investigation = this.investigations.get(investigationId);
 
     if (!investigation) {
       // Try to load from cache
-      investigation = await cacheService.get(`investigation:${investigationId}`);
+      investigation = await cacheService.get(
+        `investigation:${investigationId}`,
+      );
       if (investigation) {
         this.investigations.set(investigationId, investigation);
       }
@@ -577,7 +627,8 @@ export class InvestigationWorkflowService extends EventEmitter {
    */
   getAllInvestigations(): Investigation[] {
     return Array.from(this.investigations.values()).sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     );
   }
 
@@ -587,7 +638,10 @@ export class InvestigationWorkflowService extends EventEmitter {
   getInvestigationsByStatus(status: InvestigationStatus): Investigation[] {
     return Array.from(this.investigations.values())
       .filter((inv) => inv.status === status)
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
   }
 
   /**
@@ -596,7 +650,10 @@ export class InvestigationWorkflowService extends EventEmitter {
   getAssignedInvestigations(userId: string): Investigation[] {
     return Array.from(this.investigations.values())
       .filter((inv) => inv.assignedTo.includes(userId))
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      .sort(
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+      );
   }
 
   /**
@@ -630,7 +687,8 @@ export class InvestigationWorkflowService extends EventEmitter {
       ),
       byStage: investigations.reduce(
         (acc, inv) => {
-          acc[inv.workflow.currentStage] = (acc[inv.workflow.currentStage] || 0) + 1;
+          acc[inv.workflow.currentStage] =
+            (acc[inv.workflow.currentStage] || 0) + 1;
           return acc;
         },
         {} as Record<WorkflowStageType, number>,
@@ -644,14 +702,42 @@ export class InvestigationWorkflowService extends EventEmitter {
 
   private getStageRequirements(stage: WorkflowStageType): string[] {
     const requirements: Record<WorkflowStageType, string[]> = {
-      INTAKE: ['Initial report documented', 'Priority assigned', 'Analyst assigned'],
-      TRIAGE: ['Threat assessment completed', 'Scope determined', 'Resources allocated'],
-      INVESTIGATION: ['Evidence collected', 'Entities identified', 'Timeline constructed'],
-      ANALYSIS: ['Root cause identified', 'Attack vectors mapped', 'Impact assessed'],
+      INTAKE: [
+        'Initial report documented',
+        'Priority assigned',
+        'Analyst assigned',
+      ],
+      TRIAGE: [
+        'Threat assessment completed',
+        'Scope determined',
+        'Resources allocated',
+      ],
+      INVESTIGATION: [
+        'Evidence collected',
+        'Entities identified',
+        'Timeline constructed',
+      ],
+      ANALYSIS: [
+        'Root cause identified',
+        'Attack vectors mapped',
+        'Impact assessed',
+      ],
       CONTAINMENT: ['Threat contained', 'Systems isolated', 'Damage minimized'],
-      ERADICATION: ['Threat removed', 'Vulnerabilities patched', 'Systems hardened'],
-      RECOVERY: ['Systems restored', 'Operations normalized', 'Monitoring enhanced'],
-      LESSONS_LEARNED: ['Report documented', 'Improvements identified', 'Training updated'],
+      ERADICATION: [
+        'Threat removed',
+        'Vulnerabilities patched',
+        'Systems hardened',
+      ],
+      RECOVERY: [
+        'Systems restored',
+        'Operations normalized',
+        'Monitoring enhanced',
+      ],
+      LESSONS_LEARNED: [
+        'Report documented',
+        'Improvements identified',
+        'Training updated',
+      ],
     };
 
     return requirements[stage] || [];

@@ -1,6 +1,6 @@
 /**
  * OIDC/SSO Authentication Service
- * 
+ *
  * Provides enterprise SSO integration with Auth0, Azure AD, Google, and other OIDC providers.
  * Includes MFA support, SCIM user provisioning, and group-based RBAC mapping.
  */
@@ -93,7 +93,13 @@ class OIDCAuthService {
         clientId: process.env.AZURE_CLIENT_ID,
         clientSecret: process.env.AZURE_CLIENT_SECRET || '',
         redirectUri: `${process.env.BASE_URL}/auth/callback/azure`,
-        scopes: ['openid', 'profile', 'email', 'User.Read', 'Directory.Read.All'],
+        scopes: [
+          'openid',
+          'profile',
+          'email',
+          'User.Read',
+          'Directory.Read.All',
+        ],
         jwksUri: `https://login.microsoftonline.com/${process.env.AZURE_TENANT_ID}/discovery/v2.0/keys`,
         userInfoEndpoint: 'https://graph.microsoft.com/v1.0/me',
         tokenEndpoint: `https://login.microsoftonline.com/${process.env.AZURE_TENANT_ID}/oauth2/v2.0/token`,
@@ -121,7 +127,9 @@ class OIDCAuthService {
       });
     }
 
-    logger.info(`Initialized ${this.providers.size} OIDC providers: ${Array.from(this.providers.keys()).join(', ')}`);
+    logger.info(
+      `Initialized ${this.providers.size} OIDC providers: ${Array.from(this.providers.keys()).join(', ')}`,
+    );
   }
 
   /**
@@ -137,13 +145,19 @@ class OIDCAuthService {
     const nonce = crypto.randomBytes(16).toString('hex');
 
     // PKCE code verifier/challenge
-    const codeVerifier = this.base64url(crypto.randomBytes(32).toString('base64'));
+    const codeVerifier = this.base64url(
+      crypto.randomBytes(32).toString('base64'),
+    );
     const codeChallenge = this.base64url(
       crypto.createHash('sha256').update(codeVerifier).digest('base64'),
     );
 
     // Embed code_verifier in state for stateless retrieval (signed)
-    const statePayload = this.signState({ s: stateValue, n: nonce, v: codeVerifier });
+    const statePayload = this.signState({
+      s: stateValue,
+      n: nonce,
+      v: codeVerifier,
+    });
 
     const params = new URLSearchParams({
       response_type: 'code',
@@ -164,12 +178,15 @@ class OIDCAuthService {
     if (config.enableMFA) {
       params.append('prompt', 'consent login');
       if (provider === 'auth0') {
-        params.append('acr_values', 'http://schemas.openid.net/pape/policies/2007/06/multi-factor');
+        params.append(
+          'acr_values',
+          'http://schemas.openid.net/pape/policies/2007/06/multi-factor',
+        );
       }
     }
 
     const authUrl = `${config.authorizationEndpoint}?${params.toString()}`;
-    
+
     logger.info(`Generated auth URL for provider ${provider}`);
     return authUrl;
   }
@@ -177,7 +194,11 @@ class OIDCAuthService {
   /**
    * Handle OAuth callback and authenticate user
    */
-  async handleCallback(provider: string, code: string, state: string): Promise<OIDCUser> {
+  async handleCallback(
+    provider: string,
+    code: string,
+    state: string,
+  ): Promise<OIDCUser> {
     const config = this.providers.get(provider);
     if (!config) {
       throw new Error(`Unknown provider: ${provider}`);
@@ -190,34 +211,46 @@ class OIDCAuthService {
       const body = new URLSearchParams();
       body.append('grant_type', 'authorization_code');
       body.append('client_id', config.clientId);
-      if (config.clientSecret) body.append('client_secret', config.clientSecret);
+      if (config.clientSecret)
+        body.append('client_secret', config.clientSecret);
       body.append('code', code);
       body.append('redirect_uri', config.redirectUri);
       if (codeVerifier) body.append('code_verifier', codeVerifier);
 
-      const tokenResponse = await axios.post(config.tokenEndpoint!, body.toString(), {
-        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      });
+      const tokenResponse = await axios.post(
+        config.tokenEndpoint!,
+        body.toString(),
+        {
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        },
+      );
 
       const { access_token, id_token } = tokenResponse.data;
 
       // Verify ID token
       const decodedToken = await this.verifyIdToken(provider, id_token);
-      
+
       // Get user info
       const userInfo = await this.getUserInfo(provider, access_token);
-      
+
       // Map to internal user structure
-      const oidcUser = await this.mapToOIDCUser(provider, decodedToken, userInfo);
-      
+      const oidcUser = await this.mapToOIDCUser(
+        provider,
+        decodedToken,
+        userInfo,
+      );
+
       // Create or update user in database
       await this.upsertUser(oidcUser);
-      
-      logger.info(`Successfully authenticated user ${oidcUser.email} via ${provider}`);
-      return oidcUser;
 
+      logger.info(
+        `Successfully authenticated user ${oidcUser.email} via ${provider}`,
+      );
+      return oidcUser;
     } catch (error) {
-      logger.error(`OAuth callback failed for provider ${provider}: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      logger.error(
+        `OAuth callback failed for provider ${provider}: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
       throw error;
     }
   }
@@ -227,18 +260,26 @@ class OIDCAuthService {
   }
 
   private signState(obj: Record<string, any>): string {
-    const secret = process.env.PKCE_STATE_SECRET || process.env.JWT_SECRET || 'change-me';
+    const secret =
+      process.env.PKCE_STATE_SECRET || process.env.JWT_SECRET || 'change-me';
     const payload = Buffer.from(JSON.stringify(obj)).toString('base64url');
-    const sig = crypto.createHmac('sha256', secret).update(payload).digest('base64url');
+    const sig = crypto
+      .createHmac('sha256', secret)
+      .update(payload)
+      .digest('base64url');
     return `${payload}.${sig}`;
   }
 
   private verifyState(state: string): Record<string, any> | null {
     try {
-      const secret = process.env.PKCE_STATE_SECRET || process.env.JWT_SECRET || 'change-me';
+      const secret =
+        process.env.PKCE_STATE_SECRET || process.env.JWT_SECRET || 'change-me';
       const [payload, sig] = state.split('.');
       if (!payload || !sig) return null;
-      const expected = crypto.createHmac('sha256', secret).update(payload).digest('base64url');
+      const expected = crypto
+        .createHmac('sha256', secret)
+        .update(payload)
+        .digest('base64url');
       if (expected !== sig) return null;
       return JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
     } catch {
@@ -251,10 +292,10 @@ class OIDCAuthService {
    */
   private async verifyIdToken(provider: string, idToken: string): Promise<any> {
     const config = this.providers.get(provider)!;
-    
+
     // Get JWKS
     const jwks = await this.getJWKS(config.jwksUri!);
-    
+
     // Decode and verify token
     const decodedToken = jwt.verify(idToken, jwks, {
       algorithms: ['RS256'],
@@ -268,16 +309,19 @@ class OIDCAuthService {
   /**
    * Get user information from provider
    */
-  private async getUserInfo(provider: string, accessToken: string): Promise<any> {
+  private async getUserInfo(
+    provider: string,
+    accessToken: string,
+  ): Promise<any> {
     const config = this.providers.get(provider)!;
-    
+
     if (!config.userInfoEndpoint) {
       return null;
     }
 
     const response = await axios.get(config.userInfoEndpoint, {
       headers: {
-        'Authorization': `Bearer ${accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
 
@@ -285,14 +329,21 @@ class OIDCAuthService {
     if (provider === 'azure') {
       // Get user's groups from Microsoft Graph
       try {
-        const groupsResponse = await axios.get('https://graph.microsoft.com/v1.0/me/memberOf', {
-          headers: {
-            'Authorization': `Bearer ${accessToken}`,
+        const groupsResponse = await axios.get(
+          'https://graph.microsoft.com/v1.0/me/memberOf',
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
           },
-        });
-        response.data.groups = groupsResponse.data.value.map((group: any) => group.displayName);
+        );
+        response.data.groups = groupsResponse.data.value.map(
+          (group: any) => group.displayName,
+        );
       } catch (error) {
-        logger.warn(`Failed to fetch Azure AD groups: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        logger.warn(
+          `Failed to fetch Azure AD groups: ${error instanceof Error ? error.message : 'Unknown error'}`,
+        );
         response.data.groups = [];
       }
     }
@@ -324,9 +375,13 @@ class OIDCAuthService {
   /**
    * Map provider user data to internal user structure
    */
-  private async mapToOIDCUser(provider: string, decodedToken: any, userInfo: any): Promise<OIDCUser> {
+  private async mapToOIDCUser(
+    provider: string,
+    decodedToken: any,
+    userInfo: any,
+  ): Promise<OIDCUser> {
     const config = this.providers.get(provider)!;
-    
+
     // Extract user data based on provider
     let email: string;
     let name: string;
@@ -340,11 +395,18 @@ class OIDCAuthService {
         name = decodedToken.name || userInfo?.name || email;
         firstName = decodedToken.given_name || userInfo?.given_name || '';
         lastName = decodedToken.family_name || userInfo?.family_name || '';
-        groups = decodedToken[config.groupsClaim!] || userInfo?.[config.groupsClaim!] || [];
+        groups =
+          decodedToken[config.groupsClaim!] ||
+          userInfo?.[config.groupsClaim!] ||
+          [];
         break;
 
       case 'azure':
-        email = decodedToken.email || decodedToken.preferred_username || userInfo?.mail || userInfo?.userPrincipalName;
+        email =
+          decodedToken.email ||
+          decodedToken.preferred_username ||
+          userInfo?.mail ||
+          userInfo?.userPrincipalName;
         name = decodedToken.name || userInfo?.displayName || email;
         firstName = decodedToken.given_name || userInfo?.givenName || '';
         lastName = decodedToken.family_name || userInfo?.surname || '';
@@ -369,7 +431,7 @@ class OIDCAuthService {
 
     // Map groups to roles using RBAC configuration
     const roles = this.mapGroupsToRoles(groups);
-    
+
     // Determine tenant ID (simplified logic - in real implementation, this would be more sophisticated)
     const tenantId = await this.determineTenantId(email, groups, provider);
 
@@ -384,7 +446,10 @@ class OIDCAuthService {
       tenantId,
       provider,
       providerUserId: decodedToken.sub || decodedToken.oid,
-      mfaEnrolled: decodedToken.amr?.includes('mfa') || decodedToken.acr === 'mfa' || false,
+      mfaEnrolled:
+        decodedToken.amr?.includes('mfa') ||
+        decodedToken.acr === 'mfa' ||
+        false,
       lastLogin: new Date(),
     };
   }
@@ -406,11 +471,11 @@ class OIDCAuthService {
     };
 
     const roles = new Set<string>();
-    
+
     for (const group of groups) {
       const mappedRoles = roleMapping[group];
       if (mappedRoles) {
-        mappedRoles.forEach(role => roles.add(role));
+        mappedRoles.forEach((role) => roles.add(role));
       }
     }
 
@@ -425,10 +490,14 @@ class OIDCAuthService {
   /**
    * Determine tenant ID for user
    */
-  private async determineTenantId(email: string, groups: string[], provider: string): Promise<string> {
+  private async determineTenantId(
+    email: string,
+    groups: string[],
+    provider: string,
+  ): Promise<string> {
     // Simple email domain-based tenant mapping
     const domain = email.split('@')[1];
-    
+
     const tenantMapping: Record<string, string> = {
       'intelgraph.ai': 'intelgraph-primary',
       'gov.example.com': 'government-tenant',
@@ -485,21 +554,24 @@ class OIDCAuthService {
       const userId = result.rows[0].id;
 
       // Update user groups
-      await client.query('DELETE FROM user_groups WHERE user_id = $1', [userId]);
-      
+      await client.query('DELETE FROM user_groups WHERE user_id = $1', [
+        userId,
+      ]);
+
       for (const group of oidcUser.groups) {
         await client.query(
           'INSERT INTO user_groups (user_id, group_name) VALUES ($1, $2)',
-          [userId, group]
+          [userId, group],
         );
       }
 
       await client.query('COMMIT');
       logger.info(`Upserted user ${oidcUser.email} with ID ${userId}`);
-
     } catch (error) {
       await client.query('ROLLBACK');
-      logger.error(`Failed to upsert user: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      logger.error(
+        `Failed to upsert user: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
       throw error;
     } finally {
       client.release();
@@ -512,20 +584,25 @@ class OIDCAuthService {
   async handleSCIMProvisioning(req: Request, res: Response): Promise<void> {
     try {
       const scimUser: SCIMUser = req.body;
-      
+
       // Map SCIM user to OIDC user format
       const oidcUser: OIDCUser = {
         id: crypto.randomUUID(),
-        email: scimUser.emails.find(e => e.primary)?.value || scimUser.emails[0].value,
+        email:
+          scimUser.emails.find((e) => e.primary)?.value ||
+          scimUser.emails[0].value,
         name: `${scimUser.name.givenName} ${scimUser.name.familyName}`,
         firstName: scimUser.name.givenName,
         lastName: scimUser.name.familyName,
-        groups: scimUser.groups?.map(g => g.display) || [],
-        roles: this.mapGroupsToRoles(scimUser.groups?.map(g => g.display) || []),
+        groups: scimUser.groups?.map((g) => g.display) || [],
+        roles: this.mapGroupsToRoles(
+          scimUser.groups?.map((g) => g.display) || [],
+        ),
         tenantId: await this.determineTenantId(
-          scimUser.emails.find(e => e.primary)?.value || scimUser.emails[0].value,
-          scimUser.groups?.map(g => g.display) || [],
-          'scim'
+          scimUser.emails.find((e) => e.primary)?.value ||
+            scimUser.emails[0].value,
+          scimUser.groups?.map((g) => g.display) || [],
+          'scim',
         ),
         provider: 'scim',
         providerUserId: scimUser.id,
@@ -549,9 +626,10 @@ class OIDCAuthService {
           active: false,
         });
       }
-
     } catch (error) {
-      logger.error(`SCIM provisioning failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      logger.error(
+        `SCIM provisioning failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
       res.status(500).json({
         error: 'Internal server error',
         message: 'Failed to process SCIM request',
@@ -566,7 +644,7 @@ class OIDCAuthService {
     const pool = getPostgresPool();
     await pool.query(
       'UPDATE users SET is_active = false, updated_at = NOW() WHERE email = $1',
-      [email]
+      [email],
     );
     logger.info(`Deactivated user ${email}`);
   }

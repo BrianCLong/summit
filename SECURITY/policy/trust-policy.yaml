@@ -5,15 +5,15 @@ apiVersion: security.intelgraph.io/v1
 kind: TrustPolicy
 metadata:
   name: intelgraph-supply-chain-trust
-  version: "27.0.0"
+  version: '27.0.0'
 
 spec:
   # SLSA Requirements
   slsa:
     minimum_level: 3
     required_builders:
-      - "https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@*"
-      - "github-actions"  # Internal GitHub Actions
+      - 'https://github.com/slsa-framework/slsa-github-generator/.github/workflows/generator_generic_slsa3.yml@*'
+      - 'github-actions' # Internal GitHub Actions
 
     verification:
       verify_source_uri: true
@@ -23,43 +23,43 @@ spec:
 
   # Trusted Builders
   trusted_builders:
-    - id: "github-actions"
-      name: "GitHub Actions CI/CD"
+    - id: 'github-actions'
+      name: 'GitHub Actions CI/CD'
       public_key: |
         -----BEGIN PUBLIC KEY-----
         MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...
         -----END PUBLIC KEY-----
       allowed_repos:
-        - "BrianCLong/summit"
-        - "BrianCLong/intelgraph"
+        - 'BrianCLong/summit'
+        - 'BrianCLong/intelgraph'
 
-    - id: "internal-builder"
-      name: "Internal Build System"
+    - id: 'internal-builder'
+      name: 'Internal Build System'
       public_key: |
         -----BEGIN PUBLIC KEY-----
         MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA...
         -----END PUBLIC KEY-----
       allowed_environments:
-        - "ci"
-        - "staging"
+        - 'ci'
+        - 'staging'
 
   # Container Image Trust
   container_images:
     base_images:
       allowed_registries:
-        - "cgr.dev/chainguard"
-        - "ghcr.io/brianclong"
-        - "docker.io/library"  # Official images only
+        - 'cgr.dev/chainguard'
+        - 'ghcr.io/brianclong'
+        - 'docker.io/library' # Official images only
 
       digest_required: true
       signature_required: true
 
       trusted_base_images:
-        - "cgr.dev/chainguard/node:20@sha256:7a04a39ae2cfd45e34b6c5b78bf85e4f5b6b5e5d2c2f6a8a3b3c4d5e6f7g8h9i"
-        - "cgr.dev/chainguard/python:3.11@sha256:b5c4d3e2f1a09876543210abcdef1234567890abcdef1234567890abcdef1234"
+        - 'cgr.dev/chainguard/node:20@sha256:7a04a39ae2cfd45e34b6c5b78bf85e4f5b6b5e5d2c2f6a8a3b3c4d5e6f7g8h9i'
+        - 'cgr.dev/chainguard/python:3.11@sha256:b5c4d3e2f1a09876543210abcdef1234567890abcdef1234567890abcdef1234'
 
     application_images:
-      registry: "ghcr.io/brianclong/summit"
+      registry: 'ghcr.io/brianclong/summit'
       require_signature: true
       require_sbom: true
       require_attestation: true
@@ -67,15 +67,15 @@ spec:
   # Artifact Verification
   artifacts:
     required_attestations:
-      - type: "application/vnd.in-toto+json"
-        predicate_type: "https://slsa.dev/provenance/v1"
+      - type: 'application/vnd.in-toto+json'
+        predicate_type: 'https://slsa.dev/provenance/v1'
 
-      - type: "application/vnd.cyclonedx+json"
-        predicate_type: "https://cyclonedx.org/schema"
+      - type: 'application/vnd.cyclonedx+json'
+        predicate_type: 'https://cyclonedx.org/schema'
 
     signature_algorithms:
-      - "ecdsa-p256-sha256"
-      - "rsa-pss-sha256"
+      - 'ecdsa-p256-sha256'
+      - 'rsa-pss-sha256'
 
     verification_keys:
       cosign_public_key: |
@@ -88,32 +88,32 @@ spec:
     package_managers:
       npm:
         allowed_registries:
-          - "https://registry.npmjs.org"
+          - 'https://registry.npmjs.org'
         security_advisories: true
         license_allowlist:
-          - "MIT"
-          - "Apache-2.0"
-          - "BSD-3-Clause"
-          - "BSD-2-Clause"
-          - "ISC"
+          - 'MIT'
+          - 'Apache-2.0'
+          - 'BSD-3-Clause'
+          - 'BSD-2-Clause'
+          - 'ISC'
 
       python:
         allowed_registries:
-          - "https://pypi.org"
+          - 'https://pypi.org'
         security_advisories: true
         license_allowlist:
-          - "MIT"
-          - "Apache-2.0"
-          - "BSD-3-Clause"
-          - "BSD-2-Clause"
-          - "PSF-2.0"
+          - 'MIT'
+          - 'Apache-2.0'
+          - 'BSD-3-Clause'
+          - 'BSD-2-Clause'
+          - 'PSF-2.0'
 
     vulnerability_policy:
-      max_severity: "high"
+      max_severity: 'high'
       exceptions:
-        - cve: "CVE-2023-XXXX"
-          justification: "False positive - not applicable to our usage"
-          expiry: "2025-12-31"
+        - cve: 'CVE-2023-XXXX'
+          justification: 'False positive - not applicable to our usage'
+          expiry: '2025-12-31'
 
   # Source Code Trust
   source_code:
@@ -123,58 +123,58 @@ spec:
       required_reviews: 2
 
     allowed_repositories:
-      - "github.com/BrianCLong/summit"
-      - "github.com/BrianCLong/intelgraph"
+      - 'github.com/BrianCLong/summit'
+      - 'github.com/BrianCLong/intelgraph'
 
     blocked_repositories:
-      - "github.com/suspicious-org/*"
+      - 'github.com/suspicious-org/*'
 
   # Build Environment Trust
   build_environment:
     runners:
       allowed_types:
-        - "ubuntu-latest"
-        - "ubuntu-22.04"
-        - "self-hosted"
+        - 'ubuntu-latest'
+        - 'ubuntu-22.04'
+        - 'self-hosted'
 
       required_isolation: true
       ephemeral_required: true
 
     secrets:
       allowed_sources:
-        - "github-secrets"
-        - "azure-keyvault"
-        - "aws-secrets-manager"
+        - 'github-secrets'
+        - 'azure-keyvault'
+        - 'aws-secrets-manager'
 
       prohibited_sources:
-        - "hardcoded"
-        - "environment-variables"
+        - 'hardcoded'
+        - 'environment-variables'
 
   # Verification Workflow
   verification_steps:
-    - name: "verify_slsa_provenance"
+    - name: 'verify_slsa_provenance'
       required: true
       tools:
-        - "slsa-verifier"
-        - "cosign"
+        - 'slsa-verifier'
+        - 'cosign'
 
-    - name: "verify_sbom"
+    - name: 'verify_sbom'
       required: true
       tools:
-        - "syft"
-        - "cyclonedx-bom"
+        - 'syft'
+        - 'cyclonedx-bom'
 
-    - name: "vulnerability_scan"
+    - name: 'vulnerability_scan'
       required: true
       tools:
-        - "trivy"
-        - "grype"
+        - 'trivy'
+        - 'grype'
 
-    - name: "license_compliance"
+    - name: 'license_compliance'
       required: true
       tools:
-        - "license-checker"
-        - "fossa"
+        - 'license-checker'
+        - 'fossa'
 
   # Policy Enforcement
   enforcement:
@@ -183,8 +183,8 @@ spec:
 
     override_approval:
       required_roles:
-        - "security-team"
-        - "platform-admin"
+        - 'security-team'
+        - 'platform-admin'
       audit_trail: true
       expiry_hours: 24
 
@@ -197,20 +197,20 @@ spec:
       - untrusted_artifacts_blocked_total
 
     alerts:
-      - name: "high_verification_failure_rate"
-        condition: "rate(verification_failures_total[5m]) > 0.1"
-        severity: "critical"
+      - name: 'high_verification_failure_rate'
+        condition: 'rate(verification_failures_total[5m]) > 0.1'
+        severity: 'critical'
 
-      - name: "policy_override_spike"
-        condition: "rate(policy_overrides_total[1h]) > 5"
-        severity: "warning"
+      - name: 'policy_override_spike'
+        condition: 'rate(policy_overrides_total[1h]) > 5'
+        severity: 'warning'
 
   # Compliance Reporting
   compliance:
     frameworks:
-      - "SLSA"
-      - "NIST-SSDF"
-      - "OWASP-SCVS"
+      - 'SLSA'
+      - 'NIST-SSDF'
+      - 'OWASP-SCVS'
 
     reporting:
       monthly_summary: true
@@ -220,19 +220,19 @@ spec:
 # Remediation procedures
 remediation:
   verification_failure:
-    - "Check artifact signatures and provenance"
-    - "Verify builder identity and source repository"
-    - "Contact security team for manual review"
-    - "Use policy override if approved by security team"
+    - 'Check artifact signatures and provenance'
+    - 'Verify builder identity and source repository'
+    - 'Contact security team for manual review'
+    - 'Use policy override if approved by security team'
 
   untrusted_dependency:
-    - "Remove or replace untrusted dependency"
-    - "Submit security advisory if vulnerability found"
-    - "Update dependency allowlist if legitimate"
-    - "Document exception with business justification"
+    - 'Remove or replace untrusted dependency'
+    - 'Submit security advisory if vulnerability found'
+    - 'Update dependency allowlist if legitimate'
+    - 'Document exception with business justification'
 
   compromised_builder:
-    - "Immediately revoke builder credentials"
-    - "Rebuild all artifacts from clean environment"
-    - "Update trust policy to exclude compromised builder"
-    - "Conduct security incident response"
+    - 'Immediately revoke builder credentials'
+    - 'Rebuild all artifacts from clean environment'
+    - 'Update trust policy to exclude compromised builder'
+    - 'Conduct security incident response'

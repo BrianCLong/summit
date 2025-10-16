@@ -19,10 +19,15 @@ function initializeServices() {
   if (!graphRAGService) {
     const neo4jDriver = getNeo4jDriver();
     const redisClient = getRedisClient();
-    
+
     embeddingService = new EmbeddingService();
     llmService = new LLMService();
-    graphRAGService = new GraphRAGService(neo4jDriver, embeddingService, llmService, redisClient);
+    graphRAGService = new GraphRAGService(
+      neo4jDriver,
+      embeddingService,
+      llmService,
+      redisClient,
+    );
   }
 }
 
@@ -31,40 +36,43 @@ const graphragResolvers = {
     /**
      * Query the knowledge graph using GraphRAG
      */
-    graphRAGQuery: tracingService.wrapResolver('graphRAGQuery', async (_, { input }, { user }) => {
-      initializeServices();
+    graphRAGQuery: tracingService.wrapResolver(
+      'graphRAGQuery',
+      async (_, { input }, { user }) => {
+        initializeServices();
 
-      try {
-        const result = await graphRAGService.query({
-          query: input.query,
-          investigationId: input.investigationId,
-          context: input.context || {},
-          options: {
-            maxResults: input.maxResults || 20,
-            depth: input.depth || 2,
-            expansionLimit: input.expansionLimit || 15,
-            model: input.model,
-            temperature: input.temperature,
-            maxTokens: input.maxTokens
-          }
-        });
+        try {
+          const result = await graphRAGService.query({
+            query: input.query,
+            investigationId: input.investigationId,
+            context: input.context || {},
+            options: {
+              maxResults: input.maxResults || 20,
+              depth: input.depth || 2,
+              expansionLimit: input.expansionLimit || 15,
+              model: input.model,
+              temperature: input.temperature,
+              maxTokens: input.maxTokens,
+            },
+          });
 
-        logger.info('GraphRAG query processed', {
-          userId: user?.id,
-          investigationId: input.investigationId,
-          queryLength: input.query.length,
-          success: result.success
-        });
+          logger.info('GraphRAG query processed', {
+            userId: user?.id,
+            investigationId: input.investigationId,
+            queryLength: input.query.length,
+            success: result.success,
+          });
 
-        return result;
-      } catch (error) {
-        logger.error('GraphRAG query failed in resolver', {
-          userId: user?.id,
-          error: error.message
-        });
-        throw new Error(`GraphRAG query failed: ${error.message}`);
-      }
-    }),
+          return result;
+        } catch (error) {
+          logger.error('GraphRAG query failed in resolver', {
+            userId: user?.id,
+            error: error.message,
+          });
+          throw new Error(`GraphRAG query failed: ${error.message}`);
+        }
+      },
+    ),
 
     /**
      * Get GraphRAG service health and metrics
@@ -82,20 +90,20 @@ const graphragResolvers = {
           services: {
             graphRAG: health,
             embedding: embeddingHealth,
-            llm: llmHealth
+            llm: llmHealth,
           },
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         };
       } catch (error) {
         logger.error('GraphRAG health check failed', {
           userId: user?.id,
-          error: error.message
+          error: error.message,
         });
-        
+
         return {
           status: 'unhealthy',
           error: error.message,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         };
       }
     },
@@ -118,7 +126,7 @@ const graphragResolvers = {
 
         const entityResult = await session.run(entityQuery, {
           entityId: input.entityId,
-          investigationId: input.investigationId
+          investigationId: input.investigationId,
         });
 
         if (entityResult.records.length === 0) {
@@ -138,29 +146,35 @@ const graphragResolvers = {
 
         const allEntitiesResult = await session.run(allEntitiesQuery, {
           investigationId: input.investigationId,
-          entityId: input.entityId
+          entityId: input.entityId,
         });
 
         await session.close();
 
         // Generate embeddings and find similar
-        const corpusTexts = allEntitiesResult.records.map(record => 
-          `${record.get('label')} ${record.get('description')} ${JSON.stringify(record.get('properties'))}`
+        const corpusTexts = allEntitiesResult.records.map(
+          (record) =>
+            `${record.get('label')} ${record.get('description')} ${JSON.stringify(record.get('properties'))}`,
         );
 
-        const similar = await embeddingService.findSimilar(entityText, corpusTexts, {
-          topK: input.limit || 10,
-          threshold: input.threshold || 0.7
-        });
+        const similar = await embeddingService.findSimilar(
+          entityText,
+          corpusTexts,
+          {
+            topK: input.limit || 10,
+            threshold: input.threshold || 0.7,
+          },
+        );
 
-        const results = similar.map(item => ({
+        const results = similar.map((item) => ({
           entity: {
             id: allEntitiesResult.records[item.index].get('id'),
             label: allEntitiesResult.records[item.index].get('label'),
-            description: allEntitiesResult.records[item.index].get('description'),
-            properties: allEntitiesResult.records[item.index].get('properties')
+            description:
+              allEntitiesResult.records[item.index].get('description'),
+            properties: allEntitiesResult.records[item.index].get('properties'),
           },
-          similarity: item.similarity
+          similarity: item.similarity,
         }));
 
         return {
@@ -170,24 +184,23 @@ const graphragResolvers = {
             id: input.entityId,
             label: entity.get('label'),
             description: entity.get('description'),
-            properties: entity.get('properties')
-          }
+            properties: entity.get('properties'),
+          },
         };
-
       } catch (error) {
         logger.error('Find similar entities failed', {
           userId: user?.id,
           entityId: input.entityId,
-          error: error.message
+          error: error.message,
         });
 
         return {
           success: false,
           error: error.message,
-          results: []
+          results: [],
         };
       }
-    }
+    },
   },
 
   Mutation: {
@@ -211,7 +224,7 @@ const graphragResolvers = {
 
         const entitiesResult = await session.run(entitiesQuery, {
           investigationId: input.investigationId,
-          batchSize: input.batchSize || 50
+          batchSize: input.batchSize || 50,
         });
 
         if (entitiesResult.records.length === 0) {
@@ -220,19 +233,19 @@ const graphragResolvers = {
             success: true,
             message: 'No entities need embedding generation',
             processedCount: 0,
-            totalEntities: 0
+            totalEntities: 0,
           };
         }
 
-        const entities = entitiesResult.records.map(record => ({
+        const entities = entitiesResult.records.map((record) => ({
           id: record.get('id'),
-          text: `${record.get('label')} ${record.get('description')} ${JSON.stringify(record.get('properties'))}`
+          text: `${record.get('label')} ${record.get('description')} ${JSON.stringify(record.get('properties'))}`,
         }));
 
         // Generate embeddings
         const embeddings = await embeddingService.generateEmbeddings(
-          entities.map(e => e.text),
-          input.model
+          entities.map((e) => e.text),
+          input.model,
         );
 
         // Store embeddings in Neo4j
@@ -242,8 +255,8 @@ const graphragResolvers = {
             {
               id: entities[i].id,
               embedding: embeddings[i],
-              model: input.model || embeddingService.config.model
-            }
+              model: input.model || embeddingService.config.model,
+            },
           );
         }
 
@@ -253,21 +266,20 @@ const graphragResolvers = {
           userId: user?.id,
           investigationId: input.investigationId,
           processedCount: entities.length,
-          model: input.model
+          model: input.model,
         });
 
         return {
           success: true,
           message: `Generated embeddings for ${entities.length} entities`,
           processedCount: entities.length,
-          totalEntities: entities.length
+          totalEntities: entities.length,
         };
-
       } catch (error) {
         logger.error('Generate entity embeddings failed', {
           userId: user?.id,
           investigationId: input.investigationId,
-          error: error.message
+          error: error.message,
         });
 
         throw new Error(`Embedding generation failed: ${error.message}`);
@@ -288,22 +300,22 @@ const graphragResolvers = {
           success: embeddingTest.success && llmTest.success,
           embedding: embeddingTest,
           llm: llmTest,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         };
       } catch (error) {
         logger.error('GraphRAG services test failed', {
           userId: user?.id,
-          error: error.message
+          error: error.message,
         });
 
         return {
           success: false,
           error: error.message,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         };
       }
-    }
-  }
+    },
+  },
 };
 
 module.exports = graphragResolvers;

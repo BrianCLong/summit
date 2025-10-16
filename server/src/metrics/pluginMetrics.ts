@@ -14,4 +14,3 @@ export const pluginErrors = new Counter({
   labelNames: ['plugin', 'tenant'] as const,
   registers: [registry],
 });
-

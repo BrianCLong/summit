@@ -32,22 +32,21 @@ Upcoming 2025 Roadmap and Enhancements:
 
 Next step is to structure a gap analysis and then the PRD targeting MVP-2 and GA phases that exceed these capabilities measurably. I will now proceed to consolidate this into a clear response with gap analysis and PRD outline.Here is a gap analysis summary between the current Recorded Future platform and its 2025 roadmap, followed by a PRD outline for MVP-2 and GA that measurably exceeds Recorded Future’s capabilities.
 
-***
+---
 
 ## Gap Analysis: Current Recorded Future vs 2025 Roadmap
 
-| Capability Area | Recorded Future Current State | 2025 Roadmap Enhancements | Gap / Opportunity for Exceedance |
-| :-- | :-- | :-- | :-- |
-| Threat Intelligence | Real-time, actionable cyber threat insights from Intelligence Graph AI | Advanced ransomware lifecycle mitigation, expanded geopolitical modules | Add autonomous AI threat hunting with predictive attack simulation and decision automation |
-| Vulnerability Intelligence | Risk scoring, real-time alerts, lifecycle monitoring, detailed CVE research | Expanded threat-based risk scoring, third party intelligence customization | Superior CVE prioritization via dynamic attack surface simulation with active exploit verification |
-| Asset \& Attack Surface Management | Cloud asset discovery, shadow IT detection, digital footprint mapping | Continuous discovery with integrated telemetry and policy enforcement | Unified attack surface with auto-remediation policy engine and supply chain risk impact prediction |
-| AI \& Automation | AI text summarization, generative AI to detect fraud and compromised cards | Autonomous Threat Operations AI with real-time reaction capabilities | Generalized autonomous threat mitigation bots integrated across security stack with SLAs |
-| Integration \& Workflow | 100+ integrations including SOAR, SIEM, ticketing | Deeper Mastercard payment platform integration | Pluggable open orchestration layer for multi-vendor integration, supporting common security automation frameworks |
-| Risk \& Compliance | Compliance monitoring, fraud detection, brand protection | More customizable tracking of third party and supply chain risks | Continuous compliance verification with automated evidence collection and reporting dashboards |
-| Data Sources \& Graph | Largest repository of threat, domain, DNS, WHOIS data | Intelligence Graph real-time updates | Integration of real-world event sensors (IoT, OT) into threat graphs for holistic physical-cyber intelligence |
+| Capability Area                    | Recorded Future Current State                                               | 2025 Roadmap Enhancements                                                  | Gap / Opportunity for Exceedance                                                                                  |
+| :--------------------------------- | :-------------------------------------------------------------------------- | :------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------- |
+| Threat Intelligence                | Real-time, actionable cyber threat insights from Intelligence Graph AI      | Advanced ransomware lifecycle mitigation, expanded geopolitical modules    | Add autonomous AI threat hunting with predictive attack simulation and decision automation                        |
+| Vulnerability Intelligence         | Risk scoring, real-time alerts, lifecycle monitoring, detailed CVE research | Expanded threat-based risk scoring, third party intelligence customization | Superior CVE prioritization via dynamic attack surface simulation with active exploit verification                |
+| Asset \& Attack Surface Management | Cloud asset discovery, shadow IT detection, digital footprint mapping       | Continuous discovery with integrated telemetry and policy enforcement      | Unified attack surface with auto-remediation policy engine and supply chain risk impact prediction                |
+| AI \& Automation                   | AI text summarization, generative AI to detect fraud and compromised cards  | Autonomous Threat Operations AI with real-time reaction capabilities       | Generalized autonomous threat mitigation bots integrated across security stack with SLAs                          |
+| Integration \& Workflow            | 100+ integrations including SOAR, SIEM, ticketing                           | Deeper Mastercard payment platform integration                             | Pluggable open orchestration layer for multi-vendor integration, supporting common security automation frameworks |
+| Risk \& Compliance                 | Compliance monitoring, fraud detection, brand protection                    | More customizable tracking of third party and supply chain risks           | Continuous compliance verification with automated evidence collection and reporting dashboards                    |
+| Data Sources \& Graph              | Largest repository of threat, domain, DNS, WHOIS data                       | Intelligence Graph real-time updates                                       | Integration of real-world event sensors (IoT, OT) into threat graphs for holistic physical-cyber intelligence     |
 
-
-***
+---
 
 ## PRD for MVP-2 and GA: Exceeding Recorded Future Features
 
@@ -59,19 +58,18 @@ Next step is to structure a gap analysis and then the PRD targeting MVP-2 and GA
 - Deliver AI-augmented threat intelligence with natural language query and dynamic threat map visualization.
 - Enhance third party intelligence with continuous dynamic risk scoring, automated compliance monitoring, and supply chain disruption forecasts.
 
-
 ### MVP-2 Key Features
 
 1. Autonomous Threat Agents
-    - Self-learning AI bots conducting real-time threat validation, risk scoring, and mitigation playbooks.
+   - Self-learning AI bots conducting real-time threat validation, risk scoring, and mitigation playbooks.
 2. Predictive Attack Surface \& Vulnerability Simulation
-    - Dynamic asset discovery and continuous attack simulation for exploitation likelihood.
+   - Dynamic asset discovery and continuous attack simulation for exploitation likelihood.
 3. Open Security Orchestration Platform
-    - Standardized APIs supporting multi-vendor integration and workflow automation.
+   - Standardized APIs supporting multi-vendor integration and workflow automation.
 4. AI-Enhanced Intelligence Graph
-    - Augmented with physical sensor data and enriched NLP querying interface.
+   - Augmented with physical sensor data and enriched NLP querying interface.
 5. Continuous Compliance \& Supply Chain Risk Engine
-    - Automated evidence gathering and risk forecasting dashboards with alerting.
+   - Automated evidence gathering and risk forecasting dashboards with alerting.
 
 ### GA Objectives
 
@@ -81,21 +79,20 @@ Next step is to structure a gap analysis and then the PRD targeting MVP-2 and GA
 - Deliver robust, customizable risk reporting and regulatory compliance frameworks covering global standards.
 - Pioneer cross-domain intelligence fusion with broad data ingestion including dark web, fraud, geopolitical, and physical threat signals.
 
-
 ### GA Key Features
 
 1. Enterprise-Grade Autonomous Cyber Defense Suite
-    - SLA-backed, policy-driven autonomous remediation and incident response.
+   - SLA-backed, policy-driven autonomous remediation and incident response.
 2. End-to-End Cross-Domain Intelligence Fusion
-    - Deep integration of cyber, fraud, physical, geopolitical intelligence datasets.
+   - Deep integration of cyber, fraud, physical, geopolitical intelligence datasets.
 3. Industry Compliance \& Regulatory Accelerator
-    - Automated compliance reporting and audit-ready dashboards tailored per region/sector.
+   - Automated compliance reporting and audit-ready dashboards tailored per region/sector.
 4. Ransomware Kill Chain Automation
-    - Real-time multi-stage threat lifecycle monitoring and automated countermeasures.
+   - Real-time multi-stage threat lifecycle monitoring and automated countermeasures.
 5. Comprehensive Supply Chain Disruption Forecasting
-    - Predictive alerts on third-party risk impacting business continuity.
+   - Predictive alerts on third-party risk impacting business continuity.
 
-***
+---
 
 This approach produces a platform that outperforms Recorded Future by introducing autonomous AI-driven threat operations, predictive simulations for attack surface and vulnerability management, open orchestration layer for extensibility, and cross-domain physical-cyber intelligence fusion with supply chain risk foresight.
 
@@ -143,4 +140,3 @@ If desired, these can be broken down further into detailed user stories, technic
 [^19]: https://www.recordedfuture.com/products/attack-surface-intelligence
 
 [^20]: https://www.recordedfuture.com/blog/the-future-of-cyber-defense-is-autonomous-coming-predict-2025
-

@@ -18,6 +18,8 @@ class AIExtractionService extends EventEmitter {
         this.processingQueue = [];
         this.activeJobs = new Map();
         this.maxConcurrentJobs = 5;
+        this.jobHistory = new Map();
+        this.processingTimer = null;
         // Performance metrics
         this.metrics = {
             totalJobs: 0,
@@ -147,6 +149,13 @@ class AIExtractionService extends EventEmitter {
             errors: [],
             warnings: [],
         };
+        if (Array.isArray(job.extractionMethods)) {
+            job.extractionMethods.forEach((method) => {
+                if (!this.pipelines.has(method)) {
+                    job.warnings.push(`Unknown extraction method: ${method}`);
+                }
+            });
+        }
         this.processingQueue.push(job);
         this.metrics.totalJobs++;
         this.logger.info(`Queued extraction job ${jobId}`, {
@@ -162,9 +171,15 @@ class AIExtractionService extends EventEmitter {
      * Start processing loop for extraction jobs
      */
     startProcessingLoop() {
-        setInterval(() => {
+        if (this.processingTimer) {
+            return;
+        }
+        this.processingTimer = setInterval(() => {
             this.processNextJob();
-        }, 1000); // Check every second
+        }, 250);
+        if (typeof this.processingTimer.unref === "function") {
+            this.processingTimer.unref();
+        }
         this.logger.info("AI extraction processing loop started");
     }
     /**
@@ -183,6 +198,10 @@ class AIExtractionService extends EventEmitter {
         catch (error) {
             this.logger.error(`Job ${job.id} failed:`, error);
             job.status = "FAILED";
+            job.results = null;
+            if (job.startedAt instanceof Date) {
+                job.executionTime = Date.now() - job.startedAt.getTime();
+            }
             job.errors.push({
                 code: "JOB_EXECUTION_FAILED",
                 message: error.message,
@@ -190,10 +209,13 @@ class AIExtractionService extends EventEmitter {
                 severity: "CRITICAL",
             });
             this.metrics.failedJobs++;
+            job.error = error.message;
+            this.emit("jobFailed", job);
         }
         finally {
             this.activeJobs.delete(job.id);
             job.completedAt = new Date();
+            this.jobHistory.set(job.id, { ...job });
             this.emit("jobCompleted", job);
         }
     }
@@ -271,6 +293,9 @@ class AIExtractionService extends EventEmitter {
                     timestamp: new Date(),
                     severity: "ERROR",
                 });
+                job.status = "FAILED";
+                job.error = error.message;
+                throw error;
             }
         }
         // Calculate final results
@@ -287,6 +312,7 @@ class AIExtractionService extends EventEmitter {
         job.status = "COMPLETED";
         job.progress = 1.0;
         job.results = results;
+        job.executionTime = results.summary.processingTime;
         // Update metrics
         this.metrics.successfulJobs++;
         this.metrics.entitiesExtracted += results.summary.totalEntities;
@@ -305,7 +331,7 @@ class AIExtractionService extends EventEmitter {
      */
     async extractWithSpacy(mediaSource, params) {
         // Simulate spaCy processing
-        await this.simulateProcessingDelay(500);
+        await this.simulateProcessingDelay(150);
         const entities = [];
         const relationships = [];
         // Mock entity extraction based on media type
@@ -360,7 +386,7 @@ class AIExtractionService extends EventEmitter {
      * HuggingFace Transformers extraction pipeline
      */
     async extractWithTransformers(mediaSource, params) {
-        await this.simulateProcessingDelay(2000);
+        await this.simulateProcessingDelay(220);
         const entities = [];
         const relationships = [];
         if (mediaSource.mediaType === "TEXT") {
@@ -391,7 +417,7 @@ class AIExtractionService extends EventEmitter {
      * Computer Vision extraction pipeline
      */
     async extractWithComputerVision(mediaSource, params) {
-        await this.simulateProcessingDelay(3000);
+        await this.simulateProcessingDelay(250);
         const entities = [];
         const relationships = [];
         if (mediaSource.mediaType === "IMAGE" ||
@@ -457,7 +483,7 @@ class AIExtractionService extends EventEmitter {
      * OCR with NER extraction pipeline
      */
     async extractWithOCR(mediaSource, params) {
-        await this.simulateProcessingDelay(4000);
+        await this.simulateProcessingDelay(200);
         const entities = [];
         const relationships = [];
         if (mediaSource.mediaType === "IMAGE" ||
@@ -502,7 +528,7 @@ class AIExtractionService extends EventEmitter {
      * Speech-to-Text extraction pipeline
      */
     async extractWithSpeechToText(mediaSource, params) {
-        await this.simulateProcessingDelay(8000);
+        await this.simulateProcessingDelay(250);
         const entities = [];
         const relationships = [];
         if (mediaSource.mediaType === "AUDIO" ||
@@ -572,7 +598,7 @@ class AIExtractionService extends EventEmitter {
      * Hybrid AI extraction pipeline (combines multiple methods)
      */
     async extractWithHybridAI(mediaSource, params) {
-        await this.simulateProcessingDelay(10000);
+        await this.simulateProcessingDelay(300);
         const allResults = { entities: [], relationships: [] };
         // Run applicable pipelines based on media type
         const applicablePipelines = Array.from(this.pipelines.entries()).filter(([key, pipeline]) => key !== "AI_HYBRID" &&
@@ -602,12 +628,31 @@ class AIExtractionService extends EventEmitter {
         const entityGroups = this.groupSimilarEntities(allResults.entities);
         for (const group of entityGroups) {
             if (group.length === 1) {
-                fusedEntities.push(group[0]);
+                const entity = {
+                    ...group[0],
+                    properties: {
+                        ...(group[0].properties || {}),
+                        fusion_count: 1,
+                        sources: group[0].sources || [group[0].properties?.source].filter(Boolean),
+                    },
+                };
+                fusedEntities.push(entity);
             }
             else {
                 // Merge entities with confidence boosting
                 const mergedEntity = this.mergeEntities(group);
-                fusedEntities.push(mergedEntity);
+                const mergedProperties = {
+                    ...(mergedEntity.attributes || {}),
+                    fusion_count: group.length,
+                    sources: mergedEntity.sources,
+                };
+                fusedEntities.push({
+                    id: mergedEntity.id,
+                    type: mergedEntity.type,
+                    label: mergedEntity.label,
+                    confidence: mergedEntity.confidence,
+                    properties: mergedProperties,
+                });
             }
         }
         // Deduplicate relationships
@@ -646,7 +691,8 @@ class AIExtractionService extends EventEmitter {
     }
     // Utility Methods
     async simulateProcessingDelay(ms) {
-        return new Promise((resolve) => setTimeout(resolve, ms));
+        const duration = Math.max(0, Math.min(ms, 300));
+        return new Promise((resolve) => setTimeout(resolve, duration));
     }
     async getMediaSource(mediaSourceId) {
         // Mock media source retrieval
@@ -750,7 +796,9 @@ class AIExtractionService extends EventEmitter {
             return activeJob;
         // Check queue
         const queuedJob = this.processingQueue.find((job) => job.id === jobId);
-        return queuedJob || null;
+        if (queuedJob)
+            return queuedJob;
+        return this.jobHistory.get(jobId) || null;
     }
     async cancelJob(jobId) {
         // Remove from queue if not started

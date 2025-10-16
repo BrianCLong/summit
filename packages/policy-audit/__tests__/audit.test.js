@@ -9,7 +9,10 @@ test('tampering breaks the chain', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'audit-'));
   audit({ decision: 'allow', reason: 'ok', subject: {}, resource: {} }, dir);
   audit({ decision: 'deny', reason: 'no', subject: {}, resource: {} }, dir);
-  const file = path.join(dir, `audit-${new Date().toISOString().slice(0, 10)}.log`);
+  const file = path.join(
+    dir,
+    `audit-${new Date().toISOString().slice(0, 10)}.log`,
+  );
   assert.strictEqual(verify(file), true);
   const lines = fs.readFileSync(file, 'utf8').trim().split('\n');
   const first = JSON.parse(lines[0]);

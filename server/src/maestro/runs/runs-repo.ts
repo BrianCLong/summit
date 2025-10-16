@@ -94,7 +94,11 @@ class RunsRepo {
     return result.rows[0];
   }
 
-  async update(id: string, data: RunUpdateInput, tenantId: string): Promise<Run | null> {
+  async update(
+    id: string,
+    data: RunUpdateInput,
+    tenantId: string,
+  ): Promise<Run | null> {
     const sets = [];
     const values = [];
     let paramCount = 1;
@@ -151,7 +155,11 @@ class RunsRepo {
     return result.rowCount > 0;
   }
 
-  async getByPipeline(pipelineId: string, tenantId: string, limit = 20): Promise<Run[]> {
+  async getByPipeline(
+    pipelineId: string,
+    tenantId: string,
+    limit = 20,
+  ): Promise<Run[]> {
     const query = `
       SELECT id, pipeline_id, pipeline_name as pipeline, status, started_at, 
              completed_at, duration_ms, cost, input_params, output_data, 
@@ -189,7 +197,11 @@ export const runsRepo = {
     return this.instance.create(data);
   },
 
-  async update(id: string, data: RunUpdateInput, tenantId: string): Promise<Run | null> {
+  async update(
+    id: string,
+    data: RunUpdateInput,
+    tenantId: string,
+  ): Promise<Run | null> {
     return this.instance.update(id, data, tenantId);
   },
 
@@ -197,7 +209,11 @@ export const runsRepo = {
     return this.instance.delete(id, tenantId);
   },
 
-  async getByPipeline(pipelineId: string, tenantId: string, limit = 20): Promise<Run[]> {
+  async getByPipeline(
+    pipelineId: string,
+    tenantId: string,
+    limit = 20,
+  ): Promise<Run[]> {
     return this.instance.getByPipeline(pipelineId, tenantId, limit);
   },
 };

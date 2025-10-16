@@ -88,13 +88,23 @@ export interface ComplianceFinding {
   id: string;
   assessmentId: string;
   requirementId: string;
-  category: 'gap' | 'weakness' | 'non_compliance' | 'best_practice' | 'observation';
+  category:
+    | 'gap'
+    | 'weakness'
+    | 'non_compliance'
+    | 'best_practice'
+    | 'observation';
   severity: 'low' | 'medium' | 'high' | 'critical';
   title: string;
   description: string;
   recommendation: string;
   remediation: RemediationPlan;
-  status: 'open' | 'in_progress' | 'resolved' | 'accepted_risk' | 'false_positive';
+  status:
+    | 'open'
+    | 'in_progress'
+    | 'resolved'
+    | 'accepted_risk'
+    | 'false_positive';
   assignee: string;
   dueDate: number;
   evidence: string[];
@@ -129,7 +139,11 @@ export interface RemediationAction {
 export interface GDPRDataMapping {
   id: string;
   tenantId: string;
-  dataCategory: 'personal' | 'sensitive_personal' | 'pseudonymized' | 'anonymized';
+  dataCategory:
+    | 'personal'
+    | 'sensitive_personal'
+    | 'pseudonymized'
+    | 'anonymized';
   dataTypes: string[];
   processingPurpose: string[];
   legalBasis: string[];
@@ -177,7 +191,8 @@ class SOC2Framework {
       id: 'soc2-2017',
       name: 'SOC 2 Type II',
       version: '2017',
-      description: 'System and Organization Controls 2 - Trust Services Criteria',
+      description:
+        'System and Organization Controls 2 - Trust Services Criteria',
       applicableTo: ['all_tenants'],
       auditFrequency: 'annually',
       certificationRequired: true,
@@ -222,14 +237,18 @@ class SOC2Framework {
               id: 'cc6.1-test-001',
               requirementId: 'cc6.1',
               title: 'MFA Enforcement Test',
-              description: 'Verify that MFA is required for all privileged accounts',
+              description:
+                'Verify that MFA is required for all privileged accounts',
               steps: [
                 'Identify all privileged accounts',
                 'Attempt login without MFA',
                 'Verify access is denied',
                 'Complete MFA and verify access is granted',
               ],
-              expectedResults: ['Access denied without MFA', 'Access granted with valid MFA'],
+              expectedResults: [
+                'Access denied without MFA',
+                'Access granted with valid MFA',
+              ],
               automationScript: 'python3 /scripts/test_mfa_enforcement.py',
               frequency: 'monthly',
               owner: 'security-team',
@@ -276,7 +295,8 @@ class SOC2Framework {
               id: 'cc7.1-test-001',
               requirementId: 'cc7.1',
               title: 'Monitoring System Health Check',
-              description: 'Verify monitoring systems are operational and generating alerts',
+              description:
+                'Verify monitoring systems are operational and generating alerts',
               steps: [
                 'Check monitoring system status',
                 'Generate test alert',
@@ -308,7 +328,8 @@ class GDPRFramework {
       id: 'gdpr-2018',
       name: 'General Data Protection Regulation',
       version: '2018',
-      description: 'EU General Data Protection Regulation compliance requirements',
+      description:
+        'EU General Data Protection Regulation compliance requirements',
       applicableTo: ['eu_tenants', 'global_tenants'],
       auditFrequency: 'quarterly',
       certificationRequired: false,
@@ -318,7 +339,8 @@ class GDPRFramework {
           frameworkId: 'gdpr-2018',
           category: 'Data Protection by Design and by Default',
           title: 'Privacy by Design Implementation',
-          description: 'Implement data protection by design and by default principles',
+          description:
+            'Implement data protection by design and by default principles',
           severity: 'critical',
           automationLevel: 'partial',
           controls: [
@@ -327,7 +349,8 @@ class GDPRFramework {
               requirementId: 'art25',
               controlType: 'technical',
               description: 'Data minimization and purpose limitation controls',
-              implementationGuidance: 'Implement automated data retention and deletion policies',
+              implementationGuidance:
+                'Implement automated data retention and deletion policies',
               testingFrequency: 'weekly',
               owner: 'privacy-team',
               status: 'implemented',
@@ -340,7 +363,8 @@ class GDPRFramework {
               id: 'art25-ev-001',
               requirementId: 'art25',
               type: 'system_config',
-              description: 'Data retention policy configurations and deletion logs',
+              description:
+                'Data retention policy configurations and deletion logs',
               collectionMethod: 'automated',
               retentionPeriod: 189216000000, // 6 years
               sensitivity: 'confidential',
@@ -351,7 +375,8 @@ class GDPRFramework {
               id: 'art25-test-001',
               requirementId: 'art25',
               title: 'Data Retention Policy Test',
-              description: 'Verify automated data deletion based on retention policies',
+              description:
+                'Verify automated data deletion based on retention policies',
               steps: [
                 'Create test data with expiration date',
                 'Wait for retention period to expire',
@@ -398,7 +423,8 @@ class GDPRFramework {
               id: 'art32-ev-001',
               requirementId: 'art32',
               type: 'system_config',
-              description: 'Encryption configurations and key management policies',
+              description:
+                'Encryption configurations and key management policies',
               collectionMethod: 'automated',
               retentionPeriod: 189216000000, // 6 years
               sensitivity: 'restricted',
@@ -421,7 +447,8 @@ class GDPRFramework {
                 'All endpoints use TLS 1.3 or higher',
                 'Key rotation working properly',
               ],
-              automationScript: 'python3 /scripts/test_encryption_compliance.py',
+              automationScript:
+                'python3 /scripts/test_encryption_compliance.py',
               frequency: 'daily',
               owner: 'security-team',
             },
@@ -458,7 +485,10 @@ export class ComplianceEngine {
     this.frameworks.set(soc2.id, soc2);
     this.frameworks.set(gdpr.id, gdpr);
 
-    console.log('Loaded compliance frameworks:', Array.from(this.frameworks.keys()));
+    console.log(
+      'Loaded compliance frameworks:',
+      Array.from(this.frameworks.keys()),
+    );
   }
 
   /**
@@ -493,7 +523,11 @@ export class ComplianceEngine {
 
       // Run automated tests for each requirement
       for (const requirement of framework.requirements) {
-        if (scope && scope.length > 0 && !scope.includes(requirement.category)) {
+        if (
+          scope &&
+          scope.length > 0 &&
+          !scope.includes(requirement.category)
+        ) {
           continue;
         }
 
@@ -502,19 +536,33 @@ export class ComplianceEngine {
       }
 
       // Calculate overall score
-      assessment.overallScore = this.calculateAssessmentScore(assessment.findings);
+      assessment.overallScore = this.calculateAssessmentScore(
+        assessment.findings,
+      );
       assessment.riskLevel = this.determineRiskLevel(assessment.findings);
       assessment.status = 'completed';
       assessment.completionDate = Date.now();
 
       // Store assessment
-      await this.redis.set(`assessment:${assessmentId}`, JSON.stringify(assessment));
-      await this.redis.zadd(`assessments:${tenantId}`, Date.now(), assessmentId);
+      await this.redis.set(
+        `assessment:${assessmentId}`,
+        JSON.stringify(assessment),
+      );
+      await this.redis.zadd(
+        `assessments:${tenantId}`,
+        Date.now(),
+        assessmentId,
+      );
 
       this.assessments.set(assessmentId, assessment);
 
-      console.log(`Compliance assessment ${assessmentId} completed for ${frameworkId}`);
-      prometheusConductorMetrics.recordOperationalEvent('compliance_assessment_completed', true);
+      console.log(
+        `Compliance assessment ${assessmentId} completed for ${frameworkId}`,
+      );
+      prometheusConductorMetrics.recordOperationalEvent(
+        'compliance_assessment_completed',
+        true,
+      );
       prometheusConductorMetrics.recordOperationalMetric(
         'compliance_score',
         assessment.overallScore,
@@ -523,7 +571,10 @@ export class ComplianceEngine {
       return assessmentId;
     } catch (error) {
       console.error('Compliance assessment error:', error);
-      prometheusConductorMetrics.recordOperationalEvent('compliance_assessment_error', false);
+      prometheusConductorMetrics.recordOperationalEvent(
+        'compliance_assessment_error',
+        false,
+      );
       throw error;
     }
   }
@@ -547,7 +598,10 @@ export class ComplianceEngine {
 
     // Check evidence collection
     for (const evidenceReq of requirement.evidenceRequirements) {
-      const evidenceFindings = await this.collectEvidence(evidenceReq, tenantId);
+      const evidenceFindings = await this.collectEvidence(
+        evidenceReq,
+        tenantId,
+      );
       findings.push(...evidenceFindings);
     }
 
@@ -580,7 +634,10 @@ export class ComplianceEngine {
       for (const testProcedure of requirement.testProcedures) {
         if (testProcedure.automationScript) {
           // Run automated test
-          const testResult = await this.executeAutomatedTest(testProcedure, tenantId);
+          const testResult = await this.executeAutomatedTest(
+            testProcedure,
+            tenantId,
+          );
 
           if (!testResult.passed) {
             const finding: ComplianceFinding = {
@@ -702,7 +759,10 @@ export class ComplianceEngine {
 
     try {
       // Check if evidence collection is working
-      const evidenceExists = await this.checkEvidenceExists(evidenceReq, tenantId);
+      const evidenceExists = await this.checkEvidenceExists(
+        evidenceReq,
+        tenantId,
+      );
 
       if (!evidenceExists) {
         const finding: ComplianceFinding = {
@@ -771,7 +831,10 @@ export class ComplianceEngine {
       maxPossibleDeductions += 10; // Assume max deduction per finding is 10
     });
 
-    const score = Math.max(0, 100 - (totalDeductions / maxPossibleDeductions) * 100);
+    const score = Math.max(
+      0,
+      100 - (totalDeductions / maxPossibleDeductions) * 100,
+    );
     return Math.round(score);
   }
 
@@ -793,7 +856,9 @@ export class ComplianceEngine {
   /**
    * Get assessment results
    */
-  async getAssessment(assessmentId: string): Promise<ComplianceAssessment | null> {
+  async getAssessment(
+    assessmentId: string,
+  ): Promise<ComplianceAssessment | null> {
     const cached = this.assessments.get(assessmentId);
     if (cached) return cached;
 
@@ -810,8 +875,15 @@ export class ComplianceEngine {
   /**
    * List assessments for tenant
    */
-  async listAssessments(tenantId: string, limit: number = 10): Promise<ComplianceAssessment[]> {
-    const assessmentIds = await this.redis.zrevrange(`assessments:${tenantId}`, 0, limit - 1);
+  async listAssessments(
+    tenantId: string,
+    limit: number = 10,
+  ): Promise<ComplianceAssessment[]> {
+    const assessmentIds = await this.redis.zrevrange(
+      `assessments:${tenantId}`,
+      0,
+      limit - 1,
+    );
 
     const assessments = [];
     for (const id of assessmentIds) {
@@ -853,13 +925,16 @@ export class ComplianceEngine {
 
     for (const assessment of recentAssessments) {
       totalScore += assessment.overallScore;
-      activeFindings += assessment.findings.filter((f) => f.status === 'open').length;
+      activeFindings += assessment.findings.filter(
+        (f) => f.status === 'open',
+      ).length;
 
       // Update max risk level
       if (
         assessment.riskLevel === 'critical' ||
         (assessment.riskLevel === 'high' && maxRiskLevel !== 'critical') ||
-        (assessment.riskLevel === 'medium' && !['critical', 'high'].includes(maxRiskLevel))
+        (assessment.riskLevel === 'medium' &&
+          !['critical', 'high'].includes(maxRiskLevel))
       ) {
         maxRiskLevel = assessment.riskLevel;
       }
@@ -877,7 +952,9 @@ export class ComplianceEngine {
     }
 
     const overallScore =
-      recentAssessments.length > 0 ? Math.round(totalScore / recentAssessments.length) : 0;
+      recentAssessments.length > 0
+        ? Math.round(totalScore / recentAssessments.length)
+        : 0;
 
     return {
       overallScore,

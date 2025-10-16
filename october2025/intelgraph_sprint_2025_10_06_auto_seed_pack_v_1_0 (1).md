@@ -7,8 +7,10 @@
 
 ---
 
-## 1) Jira CSV — Epics & Stories (import via *Jira Admin → System → External System Import → CSV*)
+## 1) Jira CSV — Epics & Stories (import via _Jira Admin → System → External System Import → CSV_)
+
 > Notes:
+>
 > - Keep the header row intact.
 > - `Epic Name` is required for Epics.
 > - Use `Epic Link` to associate Stories/Tasks to Epics.
@@ -43,6 +45,7 @@ Task,IG,QA: Golden fixture set & E2E gates,"Seed 5 golden flows; ensure verifier
 ---
 
 ## 2) Repo Scaffolds (bash)
+
 Create directories, placeholder specs, and runbooks.
 
 ```bash
@@ -103,74 +106,84 @@ MD
 ## 3) GitHub Issue Templates (drop in `.github/ISSUE_TEMPLATE/`)
 
 ### 3.1 `user_story.md`
+
 ```md
 name: User Story
 about: Feature slice deliverable
 labels: story
 body:
+
 - type: textarea
   attributes:
-    label: As a (role), I want (capability), so that (verifiable outcome)
+  label: As a (role), I want (capability), so that (verifiable outcome)
 - type: textarea
   attributes:
-    label: Acceptance Criteria
-    description: Use Given/When/Then; include PCQ/LAC hooks
+  label: Acceptance Criteria
+  description: Use Given/When/Then; include PCQ/LAC hooks
 - type: input
   attributes:
-    label: Feature Flag
+  label: Feature Flag
 - type: textarea
   attributes:
-    label: Telemetry & SLO
+  label: Telemetry & SLO
 - type: textarea
   attributes:
-    label: Risks & Mitigations
+  label: Risks & Mitigations
 ```
 
 ### 3.2 `bug_report.md`
+
 ```md
 name: Bug Report
 about: Something broke or deviates from acceptance
 labels: bug
 body:
+
 - type: textarea
   attributes:
-    label: Expected vs Actual
+  label: Expected vs Actual
 - type: textarea
   attributes:
-    label: Repro Steps
+  label: Repro Steps
 - type: textarea
   attributes:
-    label: Logs / PCQ Manifest / Policy IDs
+  label: Logs / PCQ Manifest / Policy IDs
 - type: dropdown
   attributes:
-    label: Severity
-    options: [S1-Blocker, S2-Critical, S3-Major, S4-Minor]
+  label: Severity
+  options: [S1-Blocker, S2-Critical, S3-Major, S4-Minor]
 ```
 
 ---
 
 ## 4) Pull Request Template (`.github/pull_request_template.md`)
+
 ```md
 ## What’s in this PR
+
 -
 
 ## Acceptance & Tests
+
 - [ ] Unit/contract tests added
 - [ ] E2E golden flows pass
 - [ ] PCQ manifest verified (attach artifact link)
 - [ ] Policy impact diff attached (if LAC)
 
 ## Flags & Telemetry
+
 - Feature flag:
 - Events/SLO updated:
 
 ## Risk & Rollback
+
 - Rollback plan:
 ```
 
 ---
 
 ## 5) Makefile (root) — helpful commands
+
 ```make
 .PHONY: verify pcq build dash chaos
 
@@ -193,6 +206,7 @@ chaos:
 ---
 
 ## 6) Minimal SLO Dashboard Stub (`dashboards/slo-dashboard.json`)
+
 ```json
 {
   "title": "IntelGraph SLO",
@@ -207,5 +221,5 @@ chaos:
 ---
 
 ## 7) Versioning
-- **v1.0 (2025‑09‑29):** Initial auto‑seed pack aligned to Sprint 18.
 
+- **v1.0 (2025‑09‑29):** Initial auto‑seed pack aligned to Sprint 18.

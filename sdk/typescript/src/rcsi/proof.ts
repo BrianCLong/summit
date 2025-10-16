@@ -89,4 +89,3 @@ export function validateProof(proof: Proof, snapshot: IndexSnapshot): void {
     }
   }
 }
-

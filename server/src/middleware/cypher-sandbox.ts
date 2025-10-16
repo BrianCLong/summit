@@ -92,11 +92,15 @@ export class CypherSandbox {
 
     // Extract operations
     const operations =
-      normalizedQuery.match(/\b(match|create|merge|delete|set|remove|detach)\b/g) || [];
+      normalizedQuery.match(
+        /\b(match|create|merge|delete|set|remove|detach)\b/g,
+      ) || [];
     analysis.operations = [...new Set(operations)];
 
     // Check for write operations (Committee security requirement)
-    analysis.hasWrites = /\b(create|merge|delete|set|remove|detach)\b/i.test(query);
+    analysis.hasWrites = /\b(create|merge|delete|set|remove|detach)\b/i.test(
+      query,
+    );
 
     // Check return patterns
     analysis.returnsNodes = /return.*\([^)]*\)/i.test(query);
@@ -112,13 +116,17 @@ export class CypherSandbox {
     // Cartesian product risk
     if (matchCount > 1 && !/where/i.test(query)) {
       cost += 50000;
-      analysis.securityRisks.push('Potential cartesian product without WHERE clause');
+      analysis.securityRisks.push(
+        'Potential cartesian product without WHERE clause',
+      );
     }
 
     // No LIMIT clause on large operations
     if (matchCount > 0 && !/limit\s+\d+/i.test(query)) {
       cost += 10000;
-      analysis.securityRisks.push('No LIMIT clause - potential large result set');
+      analysis.securityRisks.push(
+        'No LIMIT clause - potential large result set',
+      );
     }
 
     // Complex path patterns
@@ -158,7 +166,8 @@ export class CypherSandbox {
     if (analysis.securityRisks.length > 2 && userClearance < 5) {
       return {
         valid: false,
-        reason: 'Query contains multiple security risks requiring maximum clearance',
+        reason:
+          'Query contains multiple security risks requiring maximum clearance',
       };
     }
 
@@ -217,7 +226,10 @@ export class CypherSandbox {
 
     // Check for disallowed operations
     const disallowedOps = analysis.operations.filter(
-      (op) => !this.config.allowedOperations.map((allowed) => allowed.toLowerCase()).includes(op),
+      (op) =>
+        !this.config.allowedOperations
+          .map((allowed) => allowed.toLowerCase())
+          .includes(op),
     );
 
     if (disallowedOps.length > 0) {
@@ -335,7 +347,8 @@ export const cypherSandboxMiddleware = (req: any, res: any, next: any) => {
 
   const user = req.user || {};
   const clearance = user.clearance_level || 1;
-  const authorities = user.authority_bindings?.map((auth: any) => auth.type) || [];
+  const authorities =
+    user.authority_bindings?.map((auth: any) => auth.type) || [];
 
   const validation = sandbox.validateQuery(query, clearance, authorities);
 

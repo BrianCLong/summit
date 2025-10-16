@@ -1,5 +1,5 @@
-import React from 'react'
-import { Outlet, useNavigate, useLocation } from 'react-router-dom'
+import React from 'react';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import {
   Box,
   AppBar,
@@ -13,7 +13,7 @@ import {
   ListItemIcon,
   ListItemText,
   Divider,
-} from '@mui/material'
+} from '@mui/material';
 import {
   Menu as MenuIcon,
   Dashboard,
@@ -21,12 +21,12 @@ import {
   Description,
   Settings,
   EmojiObjects,
-} from '@mui/icons-material'
-import { useState } from 'react'
-import { useSelector, useDispatch } from 'react-redux'
-import { toggleSidebar } from '../../store/slices/uiSlice'
+} from '@mui/icons-material';
+import { useState } from 'react';
+import { useSelector, useDispatch } from 'react-redux';
+import { toggleSidebar } from '../../store/slices/uiSlice';
 
-const DRAWER_WIDTH = 260
+const DRAWER_WIDTH = 260;
 
 const menuItems = [
   { text: 'Dashboard', icon: <Dashboard />, path: '/dashboard' },
@@ -34,19 +34,19 @@ const menuItems = [
   { text: 'Graph Explorer', icon: <AccountTree />, path: '/graph' },
   { text: 'Engagement Studio', icon: <EmojiObjects />, path: '/activities' },
   { text: 'Settings', icon: <Settings />, path: '/settings', disabled: true },
-]
+];
 
 function Layout() {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const dispatch = useDispatch()
-  const sidebarOpen = useSelector((state) => state.ui.sidebarOpen)
-  const [mobileOpen, setMobileOpen] = useState(false)
+  const navigate = useNavigate();
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const sidebarOpen = useSelector((state) => state.ui.sidebarOpen);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen)
-    dispatch(toggleSidebar())
-  }
+    setMobileOpen(!mobileOpen);
+    dispatch(toggleSidebar());
+  };
 
   const drawer = (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
@@ -63,8 +63,8 @@ function Layout() {
               selected={location.pathname.startsWith(item.path)}
               onClick={() => {
                 if (!item.disabled) {
-                  navigate(item.path)
-                  setMobileOpen(false)
+                  navigate(item.path);
+                  setMobileOpen(false);
                 }
               }}
               disabled={item.disabled}
@@ -82,7 +82,7 @@ function Layout() {
         </Typography>
       </Box>
     </Box>
-  )
+  );
 
   return (
     <Box sx={{ display: 'flex', minHeight: '100vh' }}>
@@ -108,7 +108,10 @@ function Layout() {
         </Toolbar>
       </AppBar>
 
-      <Box component="nav" sx={{ width: { sm: DRAWER_WIDTH }, flexShrink: { sm: 0 } }}>
+      <Box
+        component="nav"
+        sx={{ width: { sm: DRAWER_WIDTH }, flexShrink: { sm: 0 } }}
+      >
         <Drawer
           variant="temporary"
           open={mobileOpen}
@@ -116,7 +119,10 @@ function Layout() {
           ModalProps={{ keepMounted: true }}
           sx={{
             display: { xs: 'block', sm: 'none' },
-            '& .MuiDrawer-paper': { boxSizing: 'border-box', width: DRAWER_WIDTH },
+            '& .MuiDrawer-paper': {
+              boxSizing: 'border-box',
+              width: DRAWER_WIDTH,
+            },
           }}
         >
           {drawer}
@@ -141,7 +147,9 @@ function Layout() {
         component="main"
         sx={{
           flexGrow: 1,
-          width: { sm: sidebarOpen ? `calc(100% - ${DRAWER_WIDTH}px)` : '100%' },
+          width: {
+            sm: sidebarOpen ? `calc(100% - ${DRAWER_WIDTH}px)` : '100%',
+          },
           transition: 'width 0.3s',
         }}
       >
@@ -151,7 +159,7 @@ function Layout() {
         </Box>
       </Box>
     </Box>
-  )
+  );
 }
 
-export default Layout
+export default Layout;

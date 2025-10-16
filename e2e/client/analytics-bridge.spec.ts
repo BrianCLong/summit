@@ -34,11 +34,29 @@ test('graph-analytics streams progress → result → complete', async () => {
 
       // Publish synthetic events into Redis Stream
       const redisUrl = process.env.E2E_REDIS_URL || 'redis://localhost:6379/1';
-      const stream = process.env.E2E_STREAM || process.env.ANALYTICS_RESULTS_STREAM || 'analytics:results';
+      const stream =
+        process.env.E2E_STREAM ||
+        process.env.ANALYTICS_RESULTS_STREAM ||
+        'analytics:results';
       try {
-        await xaddEvent(redisUrl, stream, { job_id: jobId, level: 'PROGRESS', message: 'pagerank:start', payload: {} });
-        await xaddEvent(redisUrl, stream, { job_id: jobId, level: 'INFO', message: 'pagerank:done', payload: { top: [] } });
-        await xaddEvent(redisUrl, stream, { job_id: jobId, level: 'INFO', message: 'job:done', payload: {} });
+        await xaddEvent(redisUrl, stream, {
+          job_id: jobId,
+          level: 'PROGRESS',
+          message: 'pagerank:start',
+          payload: {},
+        });
+        await xaddEvent(redisUrl, stream, {
+          job_id: jobId,
+          level: 'INFO',
+          message: 'pagerank:done',
+          payload: { top: [] },
+        });
+        await xaddEvent(redisUrl, stream, {
+          job_id: jobId,
+          level: 'INFO',
+          message: 'job:done',
+          payload: {},
+        });
       } catch (e) {
         clearTimeout(to);
         client.close();
@@ -57,4 +75,3 @@ test('graph-analytics streams progress → result → complete', async () => {
   expect(received).toContain('result');
   expect(received).toContain('complete');
 });
-

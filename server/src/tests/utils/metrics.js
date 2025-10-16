@@ -10,13 +10,19 @@ function hardResetMetrics(pluginService) {
   }
 
   // Fallback: make metrics deterministic even if internals aren't exposed
-  if (pluginService && typeof pluginService.getMetrics === "function") {
-    jest.spyOn(pluginService, "getMetrics").mockImplementation(() => ({
+  if (pluginService && typeof pluginService.getMetrics === 'function') {
+    jest.spyOn(pluginService, 'getMetrics').mockImplementation(() => ({
       totalPlugins: pluginService.getPlugins().length,
-      loadedPlugins: pluginService.getPlugins().filter(p => p.status === "LOADED").length,
-      activePlugins: pluginService.getPlugins().filter(p => p.status === "ACTIVE").length,
-      failedPlugins: pluginService.getPlugins().filter(p => p.status === "FAILED").length,
-      pluginBreakdown: {}
+      loadedPlugins: pluginService
+        .getPlugins()
+        .filter((p) => p.status === 'LOADED').length,
+      activePlugins: pluginService
+        .getPlugins()
+        .filter((p) => p.status === 'ACTIVE').length,
+      failedPlugins: pluginService
+        .getPlugins()
+        .filter((p) => p.status === 'FAILED').length,
+      pluginBreakdown: {},
     }));
   }
 }

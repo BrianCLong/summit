@@ -203,7 +203,13 @@ export type SecurityEventType =
 
 export type RiskLevel = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 
-export type DeviceType = 'DESKTOP' | 'LAPTOP' | 'TABLET' | 'MOBILE' | 'SERVER' | 'UNKNOWN';
+export type DeviceType =
+  | 'DESKTOP'
+  | 'LAPTOP'
+  | 'TABLET'
+  | 'MOBILE'
+  | 'SERVER'
+  | 'UNKNOWN';
 
 export type RateLimitTier = 'BASIC' | 'STANDARD' | 'PREMIUM' | 'UNLIMITED';
 
@@ -229,7 +235,8 @@ export class SecurityService extends EventEmitter {
   private maxEventHistory = 10000;
   private maxAuditHistory = 50000;
 
-  private readonly jwtSecret = process.env.JWT_SECRET || 'dev-jwt-secret-change-in-production';
+  private readonly jwtSecret =
+    process.env.JWT_SECRET || 'dev-jwt-secret-change-in-production';
   private readonly jwtRefreshSecret =
     process.env.JWT_REFRESH_SECRET || 'dev-refresh-secret-change-in-production';
   private readonly saltRounds = 12;
@@ -315,7 +322,8 @@ export class SecurityService extends EventEmitter {
       {
         id: 'role-senior-analyst',
         name: 'SENIOR_ANALYST',
-        description: 'Senior analyst with investigation and collaboration privileges',
+        description:
+          'Senior analyst with investigation and collaboration privileges',
         permissions: [
           'read:investigations',
           'write:investigations',
@@ -431,8 +439,15 @@ export class SecurityService extends EventEmitter {
     password: string,
     ipAddress: string,
     userAgent: string,
-  ): Promise<{ user: User; accessToken: string; refreshToken: string; session: Session } | null> {
-    const user = Array.from(this.users.values()).find((u) => u.username === username);
+  ): Promise<{
+    user: User;
+    accessToken: string;
+    refreshToken: string;
+    session: Session;
+  } | null> {
+    const user = Array.from(this.users.values()).find(
+      (u) => u.username === username,
+    );
 
     if (!user) {
       await this.logSecurityEvent({
@@ -546,13 +561,20 @@ export class SecurityService extends EventEmitter {
   /**
    * Validate JWT access token
    */
-  async validateAccessToken(token: string): Promise<{ user: User; session: Session } | null> {
+  async validateAccessToken(
+    token: string,
+  ): Promise<{ user: User; session: Session } | null> {
     try {
       const decoded = jwt.verify(token, this.jwtSecret) as any;
       const user = this.users.get(decoded.userId);
       const session = this.sessions.get(decoded.sessionId);
 
-      if (!user || !session || !session.isActive || new Date(session.expiresAt) < new Date()) {
+      if (
+        !user ||
+        !session ||
+        !session.isActive ||
+        new Date(session.expiresAt) < new Date()
+      ) {
         return null;
       }
 
@@ -589,7 +611,11 @@ export class SecurityService extends EventEmitter {
       expiresAt: expiresAt.toISOString(),
       createdAt: now.toISOString(),
       lastActivityAt: now.toISOString(),
-      riskScore: this.calculateRiskScore(this.users.get(userId)!, ipAddress, userAgent),
+      riskScore: this.calculateRiskScore(
+        this.users.get(userId)!,
+        ipAddress,
+        userAgent,
+      ),
       deviceFingerprint: this.generateDeviceFingerprint(userAgent),
     };
 
@@ -649,7 +675,10 @@ export class SecurityService extends EventEmitter {
   /**
    * Check access to classified information
    */
-  canAccessClassification(user: User, classification: SecurityClearance): boolean {
+  canAccessClassification(
+    user: User,
+    classification: SecurityClearance,
+  ): boolean {
     const clearanceHierarchy: SecurityClearance[] = [
       'PUBLIC',
       'INTERNAL',
@@ -689,11 +718,20 @@ export class SecurityService extends EventEmitter {
     this.emit('securityEvent', securityEvent);
 
     // Cache high-risk events
-    if (securityEvent.riskLevel === 'CRITICAL' || securityEvent.riskLevel === 'HIGH') {
-      await cacheService.set(`security_event:${securityEvent.id}`, securityEvent, 3600);
+    if (
+      securityEvent.riskLevel === 'CRITICAL' ||
+      securityEvent.riskLevel === 'HIGH'
+    ) {
+      await cacheService.set(
+        `security_event:${securityEvent.id}`,
+        securityEvent,
+        3600,
+      );
     }
 
-    console.log(`[SECURITY] ${securityEvent.riskLevel} event: ${securityEvent.description}`);
+    console.log(
+      `[SECURITY] ${securityEvent.riskLevel} event: ${securityEvent.description}`,
+    );
   }
 
   /**
@@ -723,7 +761,11 @@ export class SecurityService extends EventEmitter {
   /**
    * Calculate access risk score
    */
-  private calculateRiskScore(user: User, ipAddress: string, userAgent: string): number {
+  private calculateRiskScore(
+    user: User,
+    ipAddress: string,
+    userAgent: string,
+  ): number {
     let risk = 0;
 
     // User-based risk factors
@@ -748,11 +790,18 @@ export class SecurityService extends EventEmitter {
   /**
    * Validate access context restrictions
    */
-  private validateAccessContext(user: User, ipAddress: string, userAgent: string): boolean {
+  private validateAccessContext(
+    user: User,
+    ipAddress: string,
+    userAgent: string,
+  ): boolean {
     const context = user.accessContext;
 
     // IP whitelist check
-    if (context.ipWhitelist.length > 0 && !context.ipWhitelist.includes(ipAddress)) {
+    if (
+      context.ipWhitelist.length > 0 &&
+      !context.ipWhitelist.includes(ipAddress)
+    ) {
       return false;
     }
 
@@ -789,8 +838,12 @@ export class SecurityService extends EventEmitter {
    * Get security statistics
    */
   getSecurityStatistics() {
-    const activeUsers = Array.from(this.users.values()).filter((u) => u.isActive).length;
-    const activeSessions = Array.from(this.sessions.values()).filter((s) => s.isActive).length;
+    const activeUsers = Array.from(this.users.values()).filter(
+      (u) => u.isActive,
+    ).length;
+    const activeSessions = Array.from(this.sessions.values()).filter(
+      (s) => s.isActive,
+    ).length;
     const recentEvents = this.securityEvents.slice(0, 100);
 
     const eventsByType = recentEvents.reduce(
@@ -813,8 +866,10 @@ export class SecurityService extends EventEmitter {
       users: {
         total: this.users.size,
         active: activeUsers,
-        locked: Array.from(this.users.values()).filter((u) => u.lockedUntil).length,
-        mfaEnabled: Array.from(this.users.values()).filter((u) => u.mfaEnabled).length,
+        locked: Array.from(this.users.values()).filter((u) => u.lockedUntil)
+          .length,
+        mfaEnabled: Array.from(this.users.values()).filter((u) => u.mfaEnabled)
+          .length,
       },
       sessions: {
         active: activeSessions,
@@ -910,7 +965,10 @@ export class SecurityService extends EventEmitter {
       (log) => new Date(log.timestamp).getTime() > auditCutoff,
     );
 
-    if (eventsBefore !== this.securityEvents.length || auditBefore !== this.auditLogs.length) {
+    if (
+      eventsBefore !== this.securityEvents.length ||
+      auditBefore !== this.auditLogs.length
+    ) {
       console.log(`[SECURITY] Cleaned up old events and audit logs`);
     }
   }

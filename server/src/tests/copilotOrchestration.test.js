@@ -16,33 +16,33 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
   beforeEach(() => {
     mockSession = {
       run: jest.fn(),
-      close: jest.fn()
+      close: jest.fn(),
     };
 
     mockNeo4jDriver = {
-      session: jest.fn(() => mockSession)
+      session: jest.fn(() => mockSession),
     };
 
     mockAIExtractionService = {
       submitExtractionJob: jest.fn(),
-      getJobStatus: jest.fn()
+      getJobStatus: jest.fn(),
     };
 
     mockFederatedSearchService = {
-      federatedSearch: jest.fn()
+      federatedSearch: jest.fn(),
     };
 
     mockLogger = {
       info: jest.fn(),
       error: jest.fn(),
-      warn: jest.fn()
+      warn: jest.fn(),
     };
 
     copilotService = new CopilotOrchestrationService(
       mockNeo4jDriver,
       mockAIExtractionService,
       mockFederatedSearchService,
-      mockLogger
+      mockLogger,
     );
   });
 
@@ -53,35 +53,43 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
   describe('Query Planner Initialization', () => {
     test('should initialize all required query planners', () => {
       const planners = copilotService.getAvailablePlanners();
-      
+
       expect(planners).toHaveLength(6);
-      expect(planners.map(p => p.type)).toContain('ENTITY_ANALYSIS');
-      expect(planners.map(p => p.type)).toContain('RELATIONSHIP_DISCOVERY');
-      expect(planners.map(p => p.type)).toContain('TEMPORAL_ANALYSIS');
-      expect(planners.map(p => p.type)).toContain('MULTI_SOURCE_INVESTIGATION');
-      expect(planners.map(p => p.type)).toContain('GEOSPATIAL_ANALYSIS');
-      expect(planners.map(p => p.type)).toContain('PATTERN_DETECTION');
+      expect(planners.map((p) => p.type)).toContain('ENTITY_ANALYSIS');
+      expect(planners.map((p) => p.type)).toContain('RELATIONSHIP_DISCOVERY');
+      expect(planners.map((p) => p.type)).toContain('TEMPORAL_ANALYSIS');
+      expect(planners.map((p) => p.type)).toContain(
+        'MULTI_SOURCE_INVESTIGATION',
+      );
+      expect(planners.map((p) => p.type)).toContain('GEOSPATIAL_ANALYSIS');
+      expect(planners.map((p) => p.type)).toContain('PATTERN_DETECTION');
     });
 
     test('should configure planner patterns correctly', () => {
       const planners = copilotService.getAvailablePlanners();
-      
-      const entityPlanner = planners.find(p => p.type === 'ENTITY_ANALYSIS');
+
+      const entityPlanner = planners.find((p) => p.type === 'ENTITY_ANALYSIS');
       expect(entityPlanner.patterns).toContain('/who is (.+)/i');
       expect(entityPlanner.patterns).toContain('/what do we know about (.+)/i');
 
-      const relationshipPlanner = planners.find(p => p.type === 'RELATIONSHIP_DISCOVERY');
-      expect(relationshipPlanner.patterns).toContain('/how is (.+) connected to (.+)/i');
-      expect(relationshipPlanner.patterns).toContain('/what is the relationship between (.+) and (.+)/i');
+      const relationshipPlanner = planners.find(
+        (p) => p.type === 'RELATIONSHIP_DISCOVERY',
+      );
+      expect(relationshipPlanner.patterns).toContain(
+        '/how is (.+) connected to (.+)/i',
+      );
+      expect(relationshipPlanner.patterns).toContain(
+        '/what is the relationship between (.+) and (.+)/i',
+      );
     });
   });
 
   describe('Natural Language Query Analysis', () => {
     test('should analyze entity-focused queries', async () => {
-      const queryText = "Who is John Smith and what do we know about him?";
+      const queryText = 'Who is John Smith and what do we know about him?';
       const analysis = await copilotService.analyzeQuery(queryText, {
         userId: 'user123',
-        investigationId: 'inv456'
+        investigationId: 'inv456',
       });
 
       expect(analysis.intent).toBeDefined();
@@ -92,7 +100,7 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
     });
 
     test('should analyze relationship discovery queries', async () => {
-      const queryText = "How is Alice connected to Bob?";
+      const queryText = 'How is Alice connected to Bob?';
       const analysis = await copilotService.analyzeQuery(queryText, {});
 
       expect(analysis.queryType).toBe('RELATIONSHIP_DISCOVERY');
@@ -101,7 +109,7 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
     });
 
     test('should analyze temporal queries', async () => {
-      const queryText = "What happened on 2024-01-15 involving the suspects?";
+      const queryText = 'What happened on 2024-01-15 involving the suspects?';
       const analysis = await copilotService.analyzeQuery(queryText, {});
 
       expect(analysis.queryType).toBe('TEMPORAL_ANALYSIS');
@@ -110,15 +118,25 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
     });
 
     test('should classify query intents correctly', () => {
-      expect(copilotService.classifyQueryIntent('find the suspect')).toBe('discovery');
-      expect(copilotService.classifyQueryIntent('analyze the network')).toBe('analysis');
-      expect(copilotService.classifyQueryIntent('when did this happen')).toBe('temporal');
-      expect(copilotService.classifyQueryIntent('why did he do it')).toBe('causal');
+      expect(copilotService.classifyQueryIntent('find the suspect')).toBe(
+        'discovery',
+      );
+      expect(copilotService.classifyQueryIntent('analyze the network')).toBe(
+        'analysis',
+      );
+      expect(copilotService.classifyQueryIntent('when did this happen')).toBe(
+        'temporal',
+      );
+      expect(copilotService.classifyQueryIntent('why did he do it')).toBe(
+        'causal',
+      );
     });
 
     test('should extract keywords from query text', () => {
-      const keywords = copilotService.extractKeywords('Find information about John Smith in New York');
-      
+      const keywords = copilotService.extractKeywords(
+        'Find information about John Smith in New York',
+      );
+
       expect(keywords).toContain('find');
       expect(keywords).toContain('information');
       expect(keywords).toContain('john');
@@ -128,12 +146,24 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
     });
 
     test('should identify query types using pattern matching', () => {
-      expect(copilotService.identifyQueryType('who is john doe')).toBe('ENTITY_ANALYSIS');
-      expect(copilotService.identifyQueryType('how is alice connected to bob')).toBe('RELATIONSHIP_DISCOVERY');
-      expect(copilotService.identifyQueryType('timeline of events')).toBe('TEMPORAL_ANALYSIS');
-      expect(copilotService.identifyQueryType('investigate the network')).toBe('MULTI_SOURCE_INVESTIGATION');
-      expect(copilotService.identifyQueryType('where is the location')).toBe('GEOSPATIAL_ANALYSIS');
-      expect(copilotService.identifyQueryType('find suspicious patterns')).toBe('PATTERN_DETECTION');
+      expect(copilotService.identifyQueryType('who is john doe')).toBe(
+        'ENTITY_ANALYSIS',
+      );
+      expect(
+        copilotService.identifyQueryType('how is alice connected to bob'),
+      ).toBe('RELATIONSHIP_DISCOVERY');
+      expect(copilotService.identifyQueryType('timeline of events')).toBe(
+        'TEMPORAL_ANALYSIS',
+      );
+      expect(copilotService.identifyQueryType('investigate the network')).toBe(
+        'MULTI_SOURCE_INVESTIGATION',
+      );
+      expect(copilotService.identifyQueryType('where is the location')).toBe(
+        'GEOSPATIAL_ANALYSIS',
+      );
+      expect(copilotService.identifyQueryType('find suspicious patterns')).toBe(
+        'PATTERN_DETECTION',
+      );
     });
   });
 
@@ -143,11 +173,11 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
         queryType: 'ENTITY_ANALYSIS',
         entities: [{ name: 'John Smith', type: 'PERSON' }],
         keywords: ['john', 'smith'],
-        complexity: 0.6
+        complexity: 0.6,
       };
 
       const plan = await copilotService.generateExecutionPlan(analysis, {
-        investigationId: 'inv456'
+        investigationId: 'inv456',
       });
 
       expect(plan.strategy).toBe('ENTITY_ANALYSIS');
@@ -162,16 +192,18 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
         queryType: 'RELATIONSHIP_DISCOVERY',
         entities: [
           { name: 'Alice Johnson', type: 'PERSON' },
-          { name: 'Bob Wilson', type: 'PERSON' }
+          { name: 'Bob Wilson', type: 'PERSON' },
         ],
-        relationships: [{ type: 'KNOWS' }]
+        relationships: [{ type: 'KNOWS' }],
       };
 
       const plan = await copilotService.generateExecutionPlan(analysis, {});
 
       expect(plan.strategy).toBe('RELATIONSHIP_DISCOVERY');
-      expect(plan.steps.some(step => step.type === 'GRAPH_QUERY')).toBe(true);
-      expect(plan.steps.some(step => step.operation === 'findShortestPaths')).toBe(true);
+      expect(plan.steps.some((step) => step.type === 'GRAPH_QUERY')).toBe(true);
+      expect(
+        plan.steps.some((step) => step.operation === 'findShortestPaths'),
+      ).toBe(true);
       expect(plan.dataSources).toContain('federated');
     });
 
@@ -179,7 +211,7 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
       const analysis = {
         queryType: 'MULTI_SOURCE_INVESTIGATION',
         entities: [{ name: 'Suspect X', type: 'PERSON' }],
-        complexity: 0.9
+        complexity: 0.9,
       };
 
       const plan = await copilotService.generateExecutionPlan(analysis, {});
@@ -195,24 +227,26 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
       const analysis = { queryType: 'UNKNOWN_TYPE' };
 
       await expect(
-        copilotService.generateExecutionPlan(analysis, {})
+        copilotService.generateExecutionPlan(analysis, {}),
       ).rejects.toThrow('No planner available for query type: UNKNOWN_TYPE');
     });
   });
 
   describe('Query Orchestration End-to-End', () => {
     test('should orchestrate simple entity query', async () => {
-      const queryText = "Find information about John Smith";
+      const queryText = 'Find information about John Smith';
       const context = {
         userId: 'user123',
-        investigationId: 'inv456'
+        investigationId: 'inv456',
       };
 
       // Mock successful execution
       mockSession.run.mockResolvedValue({
-        records: [{
-          get: () => ({ properties: { id: 'entity1', label: 'John Smith' } })
-        }]
+        records: [
+          {
+            get: () => ({ properties: { id: 'entity1', label: 'John Smith' } }),
+          },
+        ],
       });
 
       const result = await copilotService.orchestrateQuery(queryText, context);
@@ -225,19 +259,21 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
     });
 
     test('should handle query orchestration failure', async () => {
-      const queryText = "Find problematic query";
-      
+      const queryText = 'Find problematic query';
+
       // Mock execution failure
-      mockSession.run.mockRejectedValue(new Error('Database connection failed'));
+      mockSession.run.mockRejectedValue(
+        new Error('Database connection failed'),
+      );
 
       await expect(
-        copilotService.orchestrateQuery(queryText, {})
+        copilotService.orchestrateQuery(queryText, {}),
       ).rejects.toThrow('Database connection failed');
     });
 
     test('should track active queries', async () => {
-      const queryPromise = copilotService.orchestrateQuery("Test query", {});
-      
+      const queryPromise = copilotService.orchestrateQuery('Test query', {});
+
       const activeQueries = copilotService.getActiveQueries();
       expect(activeQueries.length).toBeGreaterThan(0);
 
@@ -255,15 +291,19 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
 
       mockSession.run.mockResolvedValue({ records: [] });
 
-      const result = await copilotService.orchestrateQuery("Test query", {});
+      const result = await copilotService.orchestrateQuery('Test query', {});
 
-      expect(plannedHandler).toHaveBeenCalledWith(expect.objectContaining({
-        status: 'EXECUTING'
-      }));
+      expect(plannedHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: 'EXECUTING',
+        }),
+      );
 
-      expect(completedHandler).toHaveBeenCalledWith(expect.objectContaining({
-        status: 'COMPLETED'
-      }));
+      expect(completedHandler).toHaveBeenCalledWith(
+        expect.objectContaining({
+          status: 'COMPLETED',
+        }),
+      );
     });
   });
 
@@ -275,7 +315,7 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
         description: 'Find entity',
         operation: 'findEntity',
         parameters: { entityName: 'John Smith' },
-        estimatedTime: 500
+        estimatedTime: 500,
       };
 
       const results = await copilotService.executeGraphQuery(step);
@@ -291,7 +331,7 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
         type: 'MULTIMODAL_SEARCH',
         description: 'Search multimedia',
         parameters: { query: 'suspect' },
-        estimatedTime: 1500
+        estimatedTime: 1500,
       };
 
       const results = await copilotService.executeMultimodalSearch(step);
@@ -306,7 +346,7 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
         type: 'FEDERATED_SEARCH',
         description: 'Search federated instances',
         parameters: { entities: ['John Smith'] },
-        estimatedTime: 2000
+        estimatedTime: 2000,
       };
 
       const results = await copilotService.executeFederatedSearch(step);
@@ -320,14 +360,14 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
         id: 'step4',
         type: 'UNKNOWN_TYPE',
         description: 'Unknown step',
-        estimatedTime: 1000
+        estimatedTime: 1000,
       };
 
       const query = { steps: [] };
       const results = { entities: [], insights: [] };
 
       await expect(
-        copilotService.executeStep(step, query, results)
+        copilotService.executeStep(step, query, results),
       ).rejects.toThrow('Unknown step type: UNKNOWN_TYPE');
 
       expect(step.status).toBe('FAILED');
@@ -338,7 +378,7 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
   describe('Domain Knowledge and Understanding', () => {
     test('should load entity type knowledge', () => {
       const entityTypes = copilotService.domainKnowledge.get('entity_types');
-      
+
       expect(entityTypes).toBeDefined();
       expect(entityTypes.person).toContain('individual');
       expect(entityTypes.organization).toContain('company');
@@ -346,8 +386,9 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
     });
 
     test('should load relationship type knowledge', () => {
-      const relationshipTypes = copilotService.domainKnowledge.get('relationship_types');
-      
+      const relationshipTypes =
+        copilotService.domainKnowledge.get('relationship_types');
+
       expect(relationshipTypes).toBeDefined();
       expect(relationshipTypes.employment).toContain('works for');
       expect(relationshipTypes.communication).toContain('calls');
@@ -357,7 +398,7 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
     test('should extract entity mentions from text', async () => {
       const entities = await copilotService.extractEntityMentions(
         'John Smith from Acme Corp',
-        {}
+        {},
       );
 
       expect(entities).toBeDefined();
@@ -368,36 +409,47 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
 
     test('should extract relationship mentions', () => {
       const relationships = copilotService.extractRelationshipMentions(
-        'John works for Acme and knows Alice'
+        'John works for Acme and knows Alice',
       );
 
       expect(relationships.length).toBeGreaterThan(0);
-      expect(relationships.some(r => r.type === 'EMPLOYMENT')).toBe(true);
-      expect(relationships.some(r => r.type === 'ASSOCIATION')).toBe(true);
+      expect(relationships.some((r) => r.type === 'EMPLOYMENT')).toBe(true);
+      expect(relationships.some((r) => r.type === 'ASSOCIATION')).toBe(true);
     });
 
     test('should extract temporal scope from queries', () => {
-      const temporal1 = copilotService.extractTemporalScope('events on 2024-01-15');
+      const temporal1 = copilotService.extractTemporalScope(
+        'events on 2024-01-15',
+      );
       expect(temporal1).toBeDefined();
       expect(temporal1.type).toBe('RELATIVE');
 
-      const temporal2 = copilotService.extractTemporalScope('what happened yesterday');
+      const temporal2 = copilotService.extractTemporalScope(
+        'what happened yesterday',
+      );
       expect(temporal2).toBeDefined();
       expect(temporal2.value).toBe('yesterday');
 
-      const temporal3 = copilotService.extractTemporalScope('no time reference');
+      const temporal3 =
+        copilotService.extractTemporalScope('no time reference');
       expect(temporal3).toBeNull();
     });
 
     test('should extract spatial scope from queries', () => {
-      const spatial1 = copilotService.extractSpatialScope('events at 123 Main Street');
+      const spatial1 = copilotService.extractSpatialScope(
+        'events at 123 Main Street',
+      );
       expect(spatial1).toBeDefined();
       expect(spatial1.type).toBe('GEOGRAPHIC');
 
-      const spatial2 = copilotService.extractSpatialScope('coordinates 40.7128, -74.0060');
+      const spatial2 = copilotService.extractSpatialScope(
+        'coordinates 40.7128, -74.0060',
+      );
       expect(spatial2).toBeDefined();
 
-      const spatial3 = copilotService.extractSpatialScope('no location mentioned');
+      const spatial3 = copilotService.extractSpatialScope(
+        'no location mentioned',
+      );
       expect(spatial3).toBeNull();
     });
   });
@@ -409,19 +461,28 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
         relationships: [],
         keywords: ['john'],
         temporalScope: null,
-        spatialScope: null
+        spatialScope: null,
       };
-      
+
       const complexAnalysis = {
         entities: [{ name: 'John' }, { name: 'Alice' }],
         relationships: [{ type: 'KNOWS' }],
-        keywords: ['john', 'alice', 'relationship', 'network', 'analysis', 'complex'],
+        keywords: [
+          'john',
+          'alice',
+          'relationship',
+          'network',
+          'analysis',
+          'complex',
+        ],
         temporalScope: { type: 'RELATIVE' },
-        spatialScope: { type: 'GEOGRAPHIC' }
+        spatialScope: { type: 'GEOGRAPHIC' },
       };
 
-      const simpleComplexity = copilotService.calculateQueryComplexity(simpleAnalysis);
-      const complexComplexity = copilotService.calculateQueryComplexity(complexAnalysis);
+      const simpleComplexity =
+        copilotService.calculateQueryComplexity(simpleAnalysis);
+      const complexComplexity =
+        copilotService.calculateQueryComplexity(complexAnalysis);
 
       expect(simpleComplexity).toBeLessThan(complexComplexity);
       expect(complexComplexity).toBeGreaterThan(0.5);
@@ -431,17 +492,19 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
       const goodAnalysis = {
         intent: 'discovery',
         queryType: 'ENTITY_ANALYSIS',
-        entities: [{ name: 'John' }]
+        entities: [{ name: 'John' }],
       };
 
       const poorAnalysis = {
         intent: null,
         queryType: null,
-        entities: []
+        entities: [],
       };
 
-      const goodConfidence = copilotService.calculateAnalysisConfidence(goodAnalysis);
-      const poorConfidence = copilotService.calculateAnalysisConfidence(poorAnalysis);
+      const goodConfidence =
+        copilotService.calculateAnalysisConfidence(goodAnalysis);
+      const poorConfidence =
+        copilotService.calculateAnalysisConfidence(poorAnalysis);
 
       expect(goodConfidence).toBeGreaterThan(poorConfidence);
       expect(goodConfidence).toBeGreaterThan(0.8);
@@ -453,14 +516,14 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
       const stepResults = {
         entities: [{ id: '1', label: 'Entity 1' }],
         relationships: [{ id: '1', type: 'KNOWS' }],
-        insights: [{ type: 'PATTERN', description: 'Pattern detected' }]
+        insights: [{ type: 'PATTERN', description: 'Pattern detected' }],
       };
 
       const overallResults = {
         entities: [],
         relationships: [],
         insights: [],
-        visualizations: []
+        visualizations: [],
       };
 
       copilotService.mergeStepResults(stepResults, overallResults);
@@ -475,12 +538,12 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
         entities: [{ id: '1' }, { id: '2' }],
         relationships: [{ id: '1' }],
         insights: [{ type: 'PATTERN' }],
-        confidence: 0.85
+        confidence: 0.85,
       };
 
       const query = {
         executionTime: 2500,
-        steps: [{ id: '1' }, { id: '2' }]
+        steps: [{ id: '1' }, { id: '2' }],
       };
 
       const summary = await copilotService.generateQuerySummary(results, query);
@@ -496,21 +559,21 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
       const results = {
         entities: Array(15).fill({ id: 'entity' }),
         relationships: [],
-        insights: []
+        insights: [],
       };
 
       const insights = await copilotService.generateInsights(results, {});
 
       expect(insights.length).toBeGreaterThan(0);
-      expect(insights.some(i => i.type === 'HIGH_ENTITY_COUNT')).toBe(true);
-      expect(insights.some(i => i.type === 'NO_RELATIONSHIPS')).toBe(true);
+      expect(insights.some((i) => i.type === 'HIGH_ENTITY_COUNT')).toBe(true);
+      expect(insights.some((i) => i.type === 'NO_RELATIONSHIPS')).toBe(true);
     });
   });
 
   describe('Performance Metrics', () => {
     test('should track orchestration metrics', () => {
       const initialMetrics = copilotService.getMetrics();
-      
+
       expect(initialMetrics.totalQueries).toBeGreaterThanOrEqual(0);
       expect(initialMetrics.successfulQueries).toBeGreaterThanOrEqual(0);
       expect(initialMetrics.failedQueries).toBeGreaterThanOrEqual(0);
@@ -519,9 +582,12 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
 
     test('should calculate success rate correctly', () => {
       const metrics = copilotService.getMetrics();
-      
+
       if (metrics.totalQueries > 0) {
-        const expectedRate = (metrics.successfulQueries / metrics.totalQueries * 100).toFixed(2);
+        const expectedRate = (
+          (metrics.successfulQueries / metrics.totalQueries) *
+          100
+        ).toFixed(2);
         expect(metrics.successRate).toBe(expectedRate);
       } else {
         expect(metrics.successRate).toBe('0');
@@ -531,10 +597,12 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
     test('should update execution time metrics', () => {
       const initialAvg = copilotService.metrics.averageExecutionTime;
       copilotService.updateExecutionTimeMetric(1000);
-      
+
       // Should update the average (if not first execution)
       if (copilotService.metrics.successfulQueries > 1) {
-        expect(copilotService.metrics.averageExecutionTime).not.toBe(initialAvg);
+        expect(copilotService.metrics.averageExecutionTime).not.toBe(
+          initialAvg,
+        );
       }
     });
   });
@@ -542,7 +610,7 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
   describe('Query Management', () => {
     test('should get query status', () => {
       const activeQueries = copilotService.getActiveQueries();
-      
+
       if (activeQueries.length > 0) {
         const firstQuery = activeQueries[0];
         const status = copilotService.getQueryStatus(firstQuery.id);
@@ -553,14 +621,17 @@ describe('Copilot Orchestration Service - P0 Critical MVP1', () => {
 
     test('should cancel active query', async () => {
       // Start a query
-      const queryPromise = copilotService.orchestrateQuery("Test cancellation query", {});
-      
+      const queryPromise = copilotService.orchestrateQuery(
+        'Test cancellation query',
+        {},
+      );
+
       const activeQueries = copilotService.getActiveQueries();
       if (activeQueries.length > 0) {
         const queryId = activeQueries[0].id;
         const cancelled = await copilotService.cancelQuery(queryId);
         expect(cancelled).toBe(true);
-        
+
         const cancelledQuery = copilotService.getQueryStatus(queryId);
         expect(cancelledQuery.status).toBe('CANCELLED');
       }

@@ -5,28 +5,31 @@
   "type": "object",
   "required": ["name", "steps"],
   "properties": {
-    "name": {"type": "string"},
-    "preconditions": {"type": "array", "items": {"type": "string"}},
-    "approvals": {"type": "array", "items": {"type": "string"}},
+    "name": { "type": "string" },
+    "preconditions": { "type": "array", "items": { "type": "string" } },
+    "approvals": { "type": "array", "items": { "type": "string" } },
     "sloGuards": {
       "type": "object",
-      "properties": {"latency_p95": {"type": "number"}, "error_rate": {"type": "number"}, "queue_time": {"type": "number"}}
+      "properties": {
+        "latency_p95": { "type": "number" },
+        "error_rate": { "type": "number" },
+        "queue_time": { "type": "number" }
+      }
     },
-    "rollback": {"type": "string"},
+    "rollback": { "type": "string" },
     "steps": {
       "type": "array",
       "items": {
         "type": "object",
         "required": ["id", "action"],
         "properties": {
-          "id": {"type": "string"},
-          "simulate": {"type": "boolean", "default": true},
-          "action": {"type": "string"},
-          "params": {"type": "object"},
-          "timeoutSeconds": {"type": "integer", "minimum": 1}
+          "id": { "type": "string" },
+          "simulate": { "type": "boolean", "default": true },
+          "action": { "type": "string" },
+          "params": { "type": "object" },
+          "timeoutSeconds": { "type": "integer", "minimum": 1 }
         }
       }
     }
   }
 }
-

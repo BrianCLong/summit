@@ -145,7 +145,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
     'geographic_spread',
     'time_since_incident',
     'algorithm_strength',
-    'provider_reliability'
+    'provider_reliability',
   ];
 
   // SHAP computation cache
@@ -160,7 +160,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
       sensitivityThreshold: 0.1,
       auditRetention: 90, // 90 days
       explainabilityLevel: 'detailed',
-      ...config
+      ...config,
     };
 
     this.initializeBaselines();
@@ -168,7 +168,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
     logger.info('KeyRiskMLExplainer initialized', {
       shapSampleSize: this.config.shapSampleSize,
       explainabilityLevel: this.config.explainabilityLevel,
-      riskFeatures: this.riskFeatures.length
+      riskFeatures: this.riskFeatures.length,
     });
   }
 
@@ -178,25 +178,38 @@ export class KeyRiskMLExplainer extends EventEmitter {
   async generateSHAPExplanation(
     keyId: string,
     features: any,
-    modelPrediction: KeyRiskPrediction
+    modelPrediction: KeyRiskPrediction,
   ): Promise<SHAPExplanation> {
     try {
       const timestamp = new Date();
 
       // Calculate SHAP values using Kernel SHAP approximation
-      const shapValues = await this.calculateKernelSHAP(keyId, features, modelPrediction);
+      const shapValues = await this.calculateKernelSHAP(
+        keyId,
+        features,
+        modelPrediction,
+      );
 
       // Calculate feature importances
-      const featureImportances = this.calculateFeatureImportances(shapValues, features);
+      const featureImportances = this.calculateFeatureImportances(
+        shapValues,
+        features,
+      );
 
       // Identify risk factors
       const riskFactors = this.identifyRiskFactors(shapValues, features);
 
       // Generate human-readable explanation
-      const explanation = this.generateHumanExplanation(shapValues, modelPrediction);
+      const explanation = this.generateHumanExplanation(
+        shapValues,
+        modelPrediction,
+      );
 
       // Calculate explanation confidence
-      const confidence = this.calculateExplanationConfidence(shapValues, modelPrediction);
+      const confidence = this.calculateExplanationConfidence(
+        shapValues,
+        modelPrediction,
+      );
 
       // Create audit trail entry
       const auditEntry: AuditEntry = {
@@ -206,9 +219,14 @@ export class KeyRiskMLExplainer extends EventEmitter {
         evidence: {
           prediction: modelPrediction,
           features: this.sanitizeFeatures(features),
-          shapValuesCount: shapValues.length
+          shapValuesCount: shapValues.length,
         },
-        impact: modelPrediction.riskScore > 0.8 ? 'high' : modelPrediction.riskScore > 0.5 ? 'medium' : 'low'
+        impact:
+          modelPrediction.riskScore > 0.8
+            ? 'high'
+            : modelPrediction.riskScore > 0.5
+              ? 'medium'
+              : 'low',
       };
 
       this.addAuditEntry(auditEntry);
@@ -224,7 +242,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
         confidence,
         featureImportances,
         riskFactors,
-        auditTrail: [auditEntry]
+        auditTrail: [auditEntry],
       };
 
       // Store explanation
@@ -235,14 +253,16 @@ export class KeyRiskMLExplainer extends EventEmitter {
         keyId,
         riskScore: modelPrediction.riskScore,
         confidence,
-        topFeatures: shapValues.slice(0, 3).map(sv => sv.featureName)
+        topFeatures: shapValues.slice(0, 3).map((sv) => sv.featureName),
       });
 
       logger.debug('SHAP explanation generated', {
         keyId,
         riskScore: modelPrediction.riskScore.toFixed(3),
         confidence: confidence.toFixed(3),
-        topContributors: shapValues.slice(0, 3).map(sv => `${sv.featureName}: ${sv.contribution.toFixed(3)}`)
+        topContributors: shapValues
+          .slice(0, 3)
+          .map((sv) => `${sv.featureName}: ${sv.contribution.toFixed(3)}`),
       });
 
       return shapExplanation;
@@ -258,13 +278,15 @@ export class KeyRiskMLExplainer extends EventEmitter {
    */
   async getFeatureImportanceTrends(
     keyId: string,
-    timeRange: [Date, Date]
+    timeRange: [Date, Date],
   ): Promise<FeatureTrends> {
     try {
       const explanations = this.getExplanationsInRange(keyId, timeRange);
 
       if (explanations.length === 0) {
-        throw new Error(`No explanations found for key ${keyId} in the specified time range`);
+        throw new Error(
+          `No explanations found for key ${keyId} in the specified time range`,
+        );
       }
 
       // Extract trend data for each feature
@@ -275,7 +297,9 @@ export class KeyRiskMLExplainer extends EventEmitter {
         const timestamps: Date[] = [];
 
         for (const explanation of explanations) {
-          const shapValue = explanation.shapValues.find(sv => sv.featureName === feature);
+          const shapValue = explanation.shapValues.find(
+            (sv) => sv.featureName === feature,
+          );
           if (shapValue) {
             values.push(shapValue.contribution);
             timestamps.push(explanation.timestamp);
@@ -298,7 +322,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
         timeRange,
         trends,
         correlations,
-        anomalies
+        anomalies,
       };
 
       this.emit('trends_analyzed', {
@@ -306,20 +330,25 @@ export class KeyRiskMLExplainer extends EventEmitter {
         timeRange,
         trendCount: Object.keys(trends).length,
         correlationCount: correlations.length,
-        anomalyCount: anomalies.length
+        anomalyCount: anomalies.length,
       });
 
       logger.debug('Feature importance trends analyzed', {
         keyId,
-        timeRangeHours: (timeRange[1].getTime() - timeRange[0].getTime()) / (1000 * 60 * 60),
+        timeRangeHours:
+          (timeRange[1].getTime() - timeRange[0].getTime()) / (1000 * 60 * 60),
         trendsAnalyzed: Object.keys(trends).length,
         correlationsFound: correlations.length,
-        anomaliesDetected: anomalies.length
+        anomaliesDetected: anomalies.length,
       });
 
       return featureTrends;
     } catch (error) {
-      logger.error('Failed to analyze feature importance trends', { error, keyId, timeRange });
+      logger.error('Failed to analyze feature importance trends', {
+        error,
+        keyId,
+        timeRange,
+      });
       throw error;
     }
   }
@@ -330,7 +359,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
   private async calculateKernelSHAP(
     keyId: string,
     features: any,
-    prediction: KeyRiskPrediction
+    prediction: KeyRiskPrediction,
   ): Promise<SHAPValue[]> {
     const cacheKey = `${keyId}_${JSON.stringify(features)}_${prediction.riskScore}`;
 
@@ -342,7 +371,10 @@ export class KeyRiskMLExplainer extends EventEmitter {
     const numFeatures = this.riskFeatures.length;
 
     // Generate sample coalitions for SHAP approximation
-    const coalitions = this.generateCoalitions(numFeatures, this.config.shapSampleSize);
+    const coalitions = this.generateCoalitions(
+      numFeatures,
+      this.config.shapSampleSize,
+    );
 
     // Calculate marginal contributions for each feature
     for (let i = 0; i < numFeatures; i++) {
@@ -355,13 +387,17 @@ export class KeyRiskMLExplainer extends EventEmitter {
       for (const coalition of coalitions) {
         if (coalition.includes(i)) {
           // Coalition with feature i
-          const withFeature = this.evaluateCoalition(coalition, features, prediction);
+          const withFeature = this.evaluateCoalition(
+            coalition,
+            features,
+            prediction,
+          );
 
           // Coalition without feature i
           const withoutFeature = this.evaluateCoalition(
-            coalition.filter(idx => idx !== i),
+            coalition.filter((idx) => idx !== i),
             features,
-            prediction
+            prediction,
           );
 
           totalContribution += withFeature - withoutFeature;
@@ -369,7 +405,8 @@ export class KeyRiskMLExplainer extends EventEmitter {
         }
       }
 
-      const contribution = coalitionCount > 0 ? totalContribution / coalitionCount : 0;
+      const contribution =
+        coalitionCount > 0 ? totalContribution / coalitionCount : 0;
 
       shapValues.push({
         featureName,
@@ -377,13 +414,15 @@ export class KeyRiskMLExplainer extends EventEmitter {
         contribution,
         rank: 0, // Will be set after sorting
         direction: contribution >= 0 ? 'positive' : 'negative',
-        magnitude: this.getMagnitude(Math.abs(contribution))
+        magnitude: this.getMagnitude(Math.abs(contribution)),
       });
     }
 
     // Sort by absolute contribution and assign ranks
-    shapValues.sort((a, b) => Math.abs(b.contribution) - Math.abs(a.contribution));
-    shapValues.forEach((sv, index) => sv.rank = index + 1);
+    shapValues.sort(
+      (a, b) => Math.abs(b.contribution) - Math.abs(a.contribution),
+    );
+    shapValues.forEach((sv, index) => (sv.rank = index + 1));
 
     // Cache the result
     this.shapCache.set(cacheKey, shapValues);
@@ -394,7 +433,10 @@ export class KeyRiskMLExplainer extends EventEmitter {
   /**
    * Generate coalitions for SHAP calculation
    */
-  private generateCoalitions(numFeatures: number, sampleSize: number): number[][] {
+  private generateCoalitions(
+    numFeatures: number,
+    sampleSize: number,
+  ): number[][] {
     const coalitions: number[][] = [];
 
     // Always include empty coalition and full coalition
@@ -418,7 +460,11 @@ export class KeyRiskMLExplainer extends EventEmitter {
   /**
    * Evaluate a coalition's contribution to the prediction
    */
-  private evaluateCoalition(coalition: number[], features: any, prediction: KeyRiskPrediction): number {
+  private evaluateCoalition(
+    coalition: number[],
+    features: any,
+    prediction: KeyRiskPrediction,
+  ): number {
     const coalitionKey = coalition.sort().join(',');
 
     if (this.coalitionCache.has(coalitionKey)) {
@@ -442,13 +488,13 @@ export class KeyRiskMLExplainer extends EventEmitter {
           score += featureValue * 0.25;
           break;
         case 'security_events':
-          score += featureValue * 0.30;
+          score += featureValue * 0.3;
           break;
         case 'key_age_days':
-          score += Math.min(featureValue / 365, 1) * 0.20;
+          score += Math.min(featureValue / 365, 1) * 0.2;
           break;
         case 'compliance_score':
-          score += (1 - featureValue) * 0.10;
+          score += (1 - featureValue) * 0.1;
           break;
         default:
           score += featureValue * 0.05;
@@ -464,20 +510,27 @@ export class KeyRiskMLExplainer extends EventEmitter {
   /**
    * Calculate feature importances with trends
    */
-  private calculateFeatureImportances(shapValues: SHAPValue[], features: any): FeatureImportance[] {
+  private calculateFeatureImportances(
+    shapValues: SHAPValue[],
+    features: any,
+  ): FeatureImportance[] {
     const importances: FeatureImportance[] = [];
 
     for (const shapValue of shapValues) {
       const baseline = this.featureBaselines.get(shapValue.featureName) || 0;
       const currentValue = shapValue.value;
-      const trend = this.calculateTrend(shapValue.featureName, currentValue, baseline);
+      const trend = this.calculateTrend(
+        shapValue.featureName,
+        currentValue,
+        baseline,
+      );
 
       importances.push({
         feature: shapValue.featureName,
         importance: Math.abs(shapValue.contribution),
         trend,
         sensitivity: this.calculateSensitivity(shapValue.featureName, features),
-        description: this.getFeatureDescription(shapValue.featureName)
+        description: this.getFeatureDescription(shapValue.featureName),
       });
     }
 
@@ -487,7 +540,10 @@ export class KeyRiskMLExplainer extends EventEmitter {
   /**
    * Identify risk factors from SHAP values
    */
-  private identifyRiskFactors(shapValues: SHAPValue[], features: any): RiskFactor[] {
+  private identifyRiskFactors(
+    shapValues: SHAPValue[],
+    features: any,
+  ): RiskFactor[] {
     const riskFactors: RiskFactor[] = [];
 
     // Focus on top contributing features
@@ -496,15 +552,21 @@ export class KeyRiskMLExplainer extends EventEmitter {
     for (const shapValue of topContributors) {
       if (shapValue.direction === 'positive' && shapValue.contribution > 0.1) {
         const riskLevel = this.assessRiskLevel(shapValue.contribution);
-        const mitigation = this.generateMitigation(shapValue.featureName, shapValue.value);
-        const urgency = this.calculateUrgency(shapValue.contribution, riskLevel);
+        const mitigation = this.generateMitigation(
+          shapValue.featureName,
+          shapValue.value,
+        );
+        const urgency = this.calculateUrgency(
+          shapValue.contribution,
+          riskLevel,
+        );
 
         riskFactors.push({
           factor: shapValue.featureName,
           riskLevel,
           contribution: shapValue.contribution,
           mitigation,
-          urgency
+          urgency,
         });
       }
     }
@@ -515,13 +577,16 @@ export class KeyRiskMLExplainer extends EventEmitter {
   /**
    * Generate human-readable explanation
    */
-  private generateHumanExplanation(shapValues: SHAPValue[], prediction: KeyRiskPrediction): string {
+  private generateHumanExplanation(
+    shapValues: SHAPValue[],
+    prediction: KeyRiskPrediction,
+  ): string {
     const topPositive = shapValues
-      .filter(sv => sv.direction === 'positive')
+      .filter((sv) => sv.direction === 'positive')
       .slice(0, 3);
 
     const topNegative = shapValues
-      .filter(sv => sv.direction === 'negative')
+      .filter((sv) => sv.direction === 'negative')
       .slice(0, 2);
 
     let explanation = `Key rotation recommendation: ${prediction.rotationRecommended ? 'ROTATE' : 'KEEP'} `;
@@ -553,16 +618,26 @@ export class KeyRiskMLExplainer extends EventEmitter {
   /**
    * Calculate explanation confidence
    */
-  private calculateExplanationConfidence(shapValues: SHAPValue[], prediction: KeyRiskPrediction): number {
+  private calculateExplanationConfidence(
+    shapValues: SHAPValue[],
+    prediction: KeyRiskPrediction,
+  ): number {
     // Base confidence on SHAP value consistency and prediction confidence
-    const totalContribution = shapValues.reduce((sum, sv) => sum + Math.abs(sv.contribution), 0);
-    const topContribution = shapValues.slice(0, 3).reduce((sum, sv) => sum + Math.abs(sv.contribution), 0);
+    const totalContribution = shapValues.reduce(
+      (sum, sv) => sum + Math.abs(sv.contribution),
+      0,
+    );
+    const topContribution = shapValues
+      .slice(0, 3)
+      .reduce((sum, sv) => sum + Math.abs(sv.contribution), 0);
 
-    const concentrationRatio = totalContribution > 0 ? topContribution / totalContribution : 0;
+    const concentrationRatio =
+      totalContribution > 0 ? topContribution / totalContribution : 0;
     const predictionConfidence = prediction.confidence;
 
     // Higher concentration of contribution in top features = higher confidence
-    const explanationConfidence = (concentrationRatio * 0.6) + (predictionConfidence * 0.4);
+    const explanationConfidence =
+      concentrationRatio * 0.6 + predictionConfidence * 0.4;
 
     return Math.min(1, Math.max(0, explanationConfidence));
   }
@@ -570,7 +645,11 @@ export class KeyRiskMLExplainer extends EventEmitter {
   /**
    * Analyze trend for a single feature
    */
-  private analyzeTrend(feature: string, values: number[], timestamps: Date[]): TrendData {
+  private analyzeTrend(
+    feature: string,
+    values: number[],
+    timestamps: Date[],
+  ): TrendData {
     if (values.length < 2) {
       return {
         feature,
@@ -579,7 +658,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
         slope: 0,
         variance: 0,
         seasonality: 0,
-        changePoints: []
+        changePoints: [],
       };
     }
 
@@ -594,7 +673,8 @@ export class KeyRiskMLExplainer extends EventEmitter {
 
     // Calculate variance
     const mean = sumY / n;
-    const variance = values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / n;
+    const variance =
+      values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / n;
 
     // Simple seasonality detection (placeholder)
     const seasonality = this.detectSeasonality(values, timestamps);
@@ -609,14 +689,16 @@ export class KeyRiskMLExplainer extends EventEmitter {
       slope,
       variance,
       seasonality,
-      changePoints
+      changePoints,
     };
   }
 
   /**
    * Calculate correlations between features
    */
-  private calculateFeatureCorrelations(explanations: SHAPExplanation[]): FeatureCorrelation[] {
+  private calculateFeatureCorrelations(
+    explanations: SHAPExplanation[],
+  ): FeatureCorrelation[] {
     const correlations: FeatureCorrelation[] = [];
     const features = this.riskFeatures;
 
@@ -629,8 +711,12 @@ export class KeyRiskMLExplainer extends EventEmitter {
         const values2: number[] = [];
 
         for (const explanation of explanations) {
-          const sv1 = explanation.shapValues.find(sv => sv.featureName === feature1);
-          const sv2 = explanation.shapValues.find(sv => sv.featureName === feature2);
+          const sv1 = explanation.shapValues.find(
+            (sv) => sv.featureName === feature1,
+          );
+          const sv2 = explanation.shapValues.find(
+            (sv) => sv.featureName === feature2,
+          );
 
           if (sv1 && sv2) {
             values1.push(sv1.contribution);
@@ -640,28 +726,41 @@ export class KeyRiskMLExplainer extends EventEmitter {
 
         if (values1.length > 2) {
           const correlation = this.calculateCorrelation(values1, values2);
-          const significance = this.calculateSignificance(correlation, values1.length);
+          const significance = this.calculateSignificance(
+            correlation,
+            values1.length,
+          );
 
-          if (Math.abs(correlation) > 0.3) { // Only include meaningful correlations
+          if (Math.abs(correlation) > 0.3) {
+            // Only include meaningful correlations
             correlations.push({
               feature1,
               feature2,
               correlation,
               significance,
-              interpretation: this.interpretCorrelation(feature1, feature2, correlation)
+              interpretation: this.interpretCorrelation(
+                feature1,
+                feature2,
+                correlation,
+              ),
             });
           }
         }
       }
     }
 
-    return correlations.sort((a, b) => Math.abs(b.correlation) - Math.abs(a.correlation));
+    return correlations.sort(
+      (a, b) => Math.abs(b.correlation) - Math.abs(a.correlation),
+    );
   }
 
   /**
    * Detect anomalies in feature patterns
    */
-  private detectFeatureAnomalies(explanations: SHAPExplanation[], timeRange: [Date, Date]): AnomalyDetection[] {
+  private detectFeatureAnomalies(
+    explanations: SHAPExplanation[],
+    timeRange: [Date, Date],
+  ): AnomalyDetection[] {
     const anomalies: AnomalyDetection[] = [];
 
     for (const feature of this.riskFeatures) {
@@ -669,7 +768,9 @@ export class KeyRiskMLExplainer extends EventEmitter {
       const timestamps: Date[] = [];
 
       for (const explanation of explanations) {
-        const shapValue = explanation.shapValues.find(sv => sv.featureName === feature);
+        const shapValue = explanation.shapValues.find(
+          (sv) => sv.featureName === feature,
+        );
         if (shapValue) {
           values.push(shapValue.contribution);
           timestamps.push(explanation.timestamp);
@@ -677,7 +778,11 @@ export class KeyRiskMLExplainer extends EventEmitter {
       }
 
       if (values.length > 5) {
-        const featureAnomalies = this.detectAnomaliesInSeries(feature, values, timestamps);
+        const featureAnomalies = this.detectAnomaliesInSeries(
+          feature,
+          values,
+          timestamps,
+        );
         anomalies.push(...featureAnomalies);
       }
     }
@@ -701,7 +806,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
       geographic_spread: 3,
       time_since_incident: 720, // 30 days in hours
       algorithm_strength: 0.9,
-      provider_reliability: 0.99
+      provider_reliability: 0.99,
     };
 
     for (const [feature, baseline] of Object.entries(defaultBaselines)) {
@@ -720,7 +825,9 @@ export class KeyRiskMLExplainer extends EventEmitter {
     return 'low';
   }
 
-  private assessRiskLevel(contribution: number): 'low' | 'medium' | 'high' | 'critical' {
+  private assessRiskLevel(
+    contribution: number,
+  ): 'low' | 'medium' | 'high' | 'critical' {
     if (contribution > 0.5) return 'critical';
     if (contribution > 0.3) return 'high';
     if (contribution > 0.1) return 'medium';
@@ -729,12 +836,13 @@ export class KeyRiskMLExplainer extends EventEmitter {
 
   private calculateUrgency(contribution: number, riskLevel: string): number {
     const baseUrgency = contribution * 100;
-    const multiplier = {
-      'critical': 2.0,
-      'high': 1.5,
-      'medium': 1.0,
-      'low': 0.5
-    }[riskLevel] || 1.0;
+    const multiplier =
+      {
+        critical: 2.0,
+        high: 1.5,
+        medium: 1.0,
+        low: 0.5,
+      }[riskLevel] || 1.0;
 
     return Math.min(100, baseUrgency * multiplier);
   }
@@ -747,10 +855,13 @@ export class KeyRiskMLExplainer extends EventEmitter {
       key_age_days: 'Schedule regular key rotation based on age policy',
       compliance_score: 'Address compliance gaps identified in recent audits',
       latency_p95: 'Optimize key operations or consider caching strategies',
-      user_satisfaction: 'Gather user feedback and address performance issues'
+      user_satisfaction: 'Gather user feedback and address performance issues',
     };
 
-    return mitigations[featureName] || 'Monitor feature closely and investigate patterns';
+    return (
+      mitigations[featureName] ||
+      'Monitor feature closely and investigate patterns'
+    );
   }
 
   private humanizeFeatureName(featureName: string): string {
@@ -766,14 +877,15 @@ export class KeyRiskMLExplainer extends EventEmitter {
       geographic_spread: 'Geographic Spread',
       time_since_incident: 'Time Since Last Incident',
       algorithm_strength: 'Algorithm Strength',
-      provider_reliability: 'Provider Reliability'
+      provider_reliability: 'Provider Reliability',
     };
 
     return humanNames[featureName] || featureName;
   }
 
   private explainContribution(shapValue: SHAPValue): string {
-    const direction = shapValue.direction === 'positive' ? 'increases' : 'decreases';
+    const direction =
+      shapValue.direction === 'positive' ? 'increases' : 'decreases';
     const magnitude = shapValue.magnitude;
     const contribution = (Math.abs(shapValue.contribution) * 100).toFixed(1);
 
@@ -785,21 +897,27 @@ export class KeyRiskMLExplainer extends EventEmitter {
       usage_frequency: 'How often the key is used for cryptographic operations',
       error_rate: 'Rate of failed operations or authentication attempts',
       latency_p95: '95th percentile response time for key operations',
-      security_events: 'Number of security-related incidents involving this key',
+      security_events:
+        'Number of security-related incidents involving this key',
       compliance_score: 'Compliance rating based on regulatory requirements',
       key_age_days: 'Age of the key since creation or last rotation',
-      user_satisfaction: 'User satisfaction score based on feedback and performance',
+      user_satisfaction:
+        'User satisfaction score based on feedback and performance',
       request_volume: 'Total volume of requests processed using this key',
       geographic_spread: 'Number of different geographic regions using the key',
       time_since_incident: 'Hours since the last security incident',
       algorithm_strength: 'Cryptographic strength of the key algorithm',
-      provider_reliability: 'Historical reliability score of the key provider'
+      provider_reliability: 'Historical reliability score of the key provider',
     };
 
     return descriptions[featureName] || 'Feature description not available';
   }
 
-  private calculateTrend(featureName: string, currentValue: number, baseline: number): 'increasing' | 'decreasing' | 'stable' {
+  private calculateTrend(
+    featureName: string,
+    currentValue: number,
+    baseline: number,
+  ): 'increasing' | 'decreasing' | 'stable' {
     const change = (currentValue - baseline) / baseline;
 
     if (Math.abs(change) < this.config.sensitivityThreshold) {
@@ -828,7 +946,11 @@ export class KeyRiskMLExplainer extends EventEmitter {
     return Math.max(hourlyPattern, weeklyPattern);
   }
 
-  private calculatePeriodicity(values: number[], timestamps: Date[], period: number): number {
+  private calculatePeriodicity(
+    values: number[],
+    timestamps: Date[],
+    period: number,
+  ): number {
     // Simplified periodicity calculation
     if (values.length < period * 2) return 0;
 
@@ -877,7 +999,8 @@ export class KeyRiskMLExplainer extends EventEmitter {
     if (values.length === 0) return 0.1;
 
     const mean = values.reduce((sum, v) => sum + v, 0) / values.length;
-    const variance = values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / values.length;
+    const variance =
+      values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / values.length;
 
     return Math.sqrt(variance) * 2; // 2 standard deviations
   }
@@ -893,32 +1016,53 @@ export class KeyRiskMLExplainer extends EventEmitter {
     const sumYY = y.reduce((sum, val) => sum + val * val, 0);
 
     const numerator = n * sumXY - sumX * sumY;
-    const denominator = Math.sqrt((n * sumXX - sumX * sumX) * (n * sumYY - sumY * sumY));
+    const denominator = Math.sqrt(
+      (n * sumXX - sumX * sumX) * (n * sumYY - sumY * sumY),
+    );
 
     return denominator === 0 ? 0 : numerator / denominator;
   }
 
-  private calculateSignificance(correlation: number, sampleSize: number): number {
+  private calculateSignificance(
+    correlation: number,
+    sampleSize: number,
+  ): number {
     // Simplified significance calculation
-    const t = correlation * Math.sqrt((sampleSize - 2) / (1 - correlation * correlation));
+    const t =
+      correlation *
+      Math.sqrt((sampleSize - 2) / (1 - correlation * correlation));
     return Math.abs(t);
   }
 
-  private interpretCorrelation(feature1: string, feature2: string, correlation: number): string {
-    const strength = Math.abs(correlation) > 0.7 ? 'strong' : Math.abs(correlation) > 0.4 ? 'moderate' : 'weak';
+  private interpretCorrelation(
+    feature1: string,
+    feature2: string,
+    correlation: number,
+  ): string {
+    const strength =
+      Math.abs(correlation) > 0.7
+        ? 'strong'
+        : Math.abs(correlation) > 0.4
+          ? 'moderate'
+          : 'weak';
     const direction = correlation > 0 ? 'positive' : 'negative';
 
     return `${strength} ${direction} correlation between ${this.humanizeFeatureName(feature1)} and ${this.humanizeFeatureName(feature2)}`;
   }
 
-  private detectAnomaliesInSeries(feature: string, values: number[], timestamps: Date[]): AnomalyDetection[] {
+  private detectAnomaliesInSeries(
+    feature: string,
+    values: number[],
+    timestamps: Date[],
+  ): AnomalyDetection[] {
     const anomalies: AnomalyDetection[] = [];
 
     if (values.length < 5) return anomalies;
 
     // Calculate statistical thresholds
     const mean = values.reduce((sum, v) => sum + v, 0) / values.length;
-    const variance = values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / values.length;
+    const variance =
+      values.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / values.length;
     const stdDev = Math.sqrt(variance);
 
     // Detect point anomalies (values outside 3 standard deviations)
@@ -936,7 +1080,8 @@ export class KeyRiskMLExplainer extends EventEmitter {
           expectedValue: mean,
           anomalyScore,
           type: 'point',
-          severity: anomalyScore > 5 ? 'high' : anomalyScore > 4 ? 'medium' : 'low'
+          severity:
+            anomalyScore > 5 ? 'high' : anomalyScore > 4 ? 'medium' : 'low',
         });
       }
     }
@@ -959,11 +1104,16 @@ export class KeyRiskMLExplainer extends EventEmitter {
     }
   }
 
-  private getExplanationsInRange(keyId: string, timeRange: [Date, Date]): SHAPExplanation[] {
+  private getExplanationsInRange(
+    keyId: string,
+    timeRange: [Date, Date],
+  ): SHAPExplanation[] {
     const history = this.explanationHistory.get(keyId) || [];
 
-    return history.filter(explanation =>
-      explanation.timestamp >= timeRange[0] && explanation.timestamp <= timeRange[1]
+    return history.filter(
+      (explanation) =>
+        explanation.timestamp >= timeRange[0] &&
+        explanation.timestamp <= timeRange[1],
     );
   }
 
@@ -971,8 +1121,10 @@ export class KeyRiskMLExplainer extends EventEmitter {
     this.auditLog.push(entry);
 
     // Clean up old audit entries
-    const cutoffDate = new Date(Date.now() - this.config.auditRetention * 24 * 60 * 60 * 1000);
-    this.auditLog = this.auditLog.filter(e => e.timestamp >= cutoffDate);
+    const cutoffDate = new Date(
+      Date.now() - this.config.auditRetention * 24 * 60 * 60 * 1000,
+    );
+    this.auditLog = this.auditLog.filter((e) => e.timestamp >= cutoffDate);
   }
 
   private sanitizeFeatures(features: any): any {
@@ -1017,11 +1169,11 @@ export class KeyRiskMLExplainer extends EventEmitter {
       explanationHistory: Object.fromEntries(
         Array.from(this.explanationHistory.entries()).map(([key, history]) => [
           key,
-          history.slice(-10) // Keep recent explanations
-        ])
+          history.slice(-10), // Keep recent explanations
+        ]),
       ),
       featureBaselines: Object.fromEntries(this.featureBaselines),
-      auditLog: this.auditLog.slice(-100) // Keep recent audit entries
+      auditLog: this.auditLog.slice(-100), // Keep recent audit entries
     };
   }
 
@@ -1037,7 +1189,7 @@ export class KeyRiskMLExplainer extends EventEmitter {
     logger.info('State imported', {
       explanationHistoryKeys: this.explanationHistory.size,
       featureBaselines: this.featureBaselines.size,
-      auditLogEntries: this.auditLog.length
+      auditLogEntries: this.auditLog.length,
     });
   }
 

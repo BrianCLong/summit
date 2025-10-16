@@ -30,7 +30,9 @@ function main() {
   // Check if TypeScript source exists
   const agentIndexPath = path.join('src', 'agents', 'index.ts');
   if (!existsSync(agentIndexPath)) {
-    console.error('❌ Agent source files not found. Please ensure src/agents/ exists.');
+    console.error(
+      '❌ Agent source files not found. Please ensure src/agents/ exists.',
+    );
     process.exit(1);
   }
 
@@ -40,11 +42,11 @@ function main() {
 
 function parseArgs(args) {
   const options = {};
-  
+
   for (let i = 0; i < args.length; i += 2) {
     const key = args[i]?.replace(/^--/, '');
     const value = args[i + 1];
-    
+
     if (key && value) {
       options[key] = value;
     }
@@ -77,8 +79,8 @@ run();
     env: {
       ...process.env,
       NODE_ENV: options.env || process.env.NODE_ENV || 'development',
-      MAESTRO_AGENT_MODE: mode
-    }
+      MAESTRO_AGENT_MODE: mode,
+    },
   });
 
   child.on('close', (code) => {
@@ -105,13 +107,15 @@ run();
 // Alternative direct execution for CI/CD
 function runDirect(mode) {
   console.log(`🔄 Running agent pipeline directly in ${mode} mode...`);
-  
+
   // This would be used when the agents are pre-compiled
   try {
     const { runAgentPipeline } = require('./dist/agents/index.js');
     return runAgentPipeline(mode);
   } catch (error) {
-    console.error('❌ Failed to run compiled agents. Falling back to ts-node...');
+    console.error(
+      '❌ Failed to run compiled agents. Falling back to ts-node...',
+    );
     return runAgentPipeline(mode, {});
   }
 }

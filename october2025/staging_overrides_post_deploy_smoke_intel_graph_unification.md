@@ -5,6 +5,7 @@
 ---
 
 ## 0) Files Added
+
 ```
 deploy/helm/intelgraph/values-stage.yaml
 ops/smoke/post-deploy.sh
@@ -15,6 +16,7 @@ deploy/k8s/job-post-deploy-smoke.yaml
 ---
 
 ## 1) Helm Values — Staging Override
+
 ```yaml
 # deploy/helm/intelgraph/values-stage.yaml
 imageRepo: ghcr.io/ORG/intelgraph
@@ -68,14 +70,14 @@ csi:
   secretProviderClass: intelgraph-vault
 resources:
   gateway:
-    requests: { cpu: "250m", memory: "512Mi" }
-    limits: { cpu: "1", memory: "1Gi" }
+    requests: { cpu: '250m', memory: '512Mi' }
+    limits: { cpu: '1', memory: '1Gi' }
   analytics:
-    requests: { cpu: "500m", memory: "1Gi" }
-    limits: { cpu: "2", memory: "4Gi" }
+    requests: { cpu: '500m', memory: '1Gi' }
+    limits: { cpu: '2', memory: '4Gi' }
   ledger:
-    requests: { cpu: "200m", memory: "512Mi" }
-    limits: { cpu: "1", memory: "1Gi" }
+    requests: { cpu: '200m', memory: '512Mi' }
+    limits: { cpu: '1', memory: '1Gi' }
   # (repeat per service as needed)
 notes:
   oidcRedirectUris:
@@ -89,6 +91,7 @@ notes:
 ---
 
 ## 2) Post‑Deploy Smoke Script
+
 ```bash
 # ops/smoke/post-deploy.sh
 set -euo pipefail
@@ -125,6 +128,7 @@ echo "OK: smoke passed"
 ```
 
 **Usage:**
+
 ```bash
 KEYCLOAK_ISSUER=https://keycloak.stage.example.com/auth/realms/intelgraph \
 KC_CLIENT_SECRET=*** \
@@ -135,13 +139,19 @@ GATEWAY_URL=https://gateway.stage.example.com/graphql \
 ---
 
 ## 3) GitHub Actions — Stage Promotion
+
 ```yaml
 # .github/workflows/stage-promo.yaml
 name: stage-promo
 on:
   workflow_dispatch:
     inputs:
-      imageTag: { description: "Image tag (e.g., v1.0.0-uni)", required: true, type: string }
+      imageTag:
+        {
+          description: 'Image tag (e.g., v1.0.0-uni)',
+          required: true,
+          type: string,
+        }
 
 jobs:
   deploy:
@@ -189,6 +199,7 @@ jobs:
 ---
 
 ## 4) Optional: In‑Cluster Smoke Job
+
 ```yaml
 # deploy/k8s/job-post-deploy-smoke.yaml
 apiVersion: batch/v1
@@ -219,16 +230,17 @@ bash /tmp/smoke.sh"]
 ---
 
 ## 5) Verification Checklist
+
 - [ ] `helm upgrade` completes; gateway Ready ≥ replicas
 - [ ] `ops/smoke/post-deploy.sh` prints `OK: smoke passed`
-- [ ] Grafana shows traces/metrics for smoke (xai_*, wallet_*, budget_denies=0)
+- [ ] Grafana shows traces/metrics for smoke (xai*\*, wallet*\*, budget_denies=0)
 - [ ] Keycloak client `intelgraph-web` has the staging host in **redirectUris** and **webOrigins**
 - [ ] TLS secret `intelgraph-stage-tls` present; ingress returns 200/GraphQL
 
 ---
 
 ## 6) Notes
+
 - The smoke uses **client credentials**; for full end‑to‑end SPA checks, add a Playwright run against the staging host.
 - For private clusters, set `kubectl` context in the Action with OIDC or a GitHub OIDC→K8s mapping.
 - If `strictOPA` blocks something unexpectedly, use the **Policy Inspector** to view reason codes and adjust the OPA bundle.
-

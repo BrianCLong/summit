@@ -7,44 +7,53 @@
     {
       "type": "timeseries",
       "title": "Gateway Latency P95/P99",
-      "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
       "targets": [
-        {"expr": "histogram_quantile(0.95, sum(rate(crystal_gateway_latency_ms_bucket[5m])) by (le))", "legendFormat": "p95"},
-        {"expr": "histogram_quantile(0.99, sum(rate(crystal_gateway_latency_ms_bucket[5m])) by (le))", "legendFormat": "p99"}
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(crystal_gateway_latency_ms_bucket[5m])) by (le))",
+          "legendFormat": "p95"
+        },
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(crystal_gateway_latency_ms_bucket[5m])) by (le))",
+          "legendFormat": "p99"
+        }
       ]
     },
     {
       "type": "timeseries",
       "title": "Risk Signals by Severity (rate)",
-      "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
       "targets": [
-        {"expr": "sum by (severity) (rate(intelgraph_risk_signals_total[5m]))", "legendFormat": "{{severity}}"}
+        {
+          "expr": "sum by (severity) (rate(intelgraph_risk_signals_total[5m]))",
+          "legendFormat": "{{severity}}"
+        }
       ]
     },
     {
       "type": "stat",
       "title": "Current Trust Score (subject)",
-      "gridPos": {"h": 6, "w": 8, "x": 0, "y": 8},
+      "gridPos": { "h": 6, "w": 8, "x": 0, "y": 8 },
       "targets": [
-        {"expr": "intelgraph_trust_score", "legendFormat": "{{subject}}"}
+        { "expr": "intelgraph_trust_score", "legendFormat": "{{subject}}" }
       ]
     },
     {
       "type": "timeseries",
       "title": "Budget Spend (env)",
-      "gridPos": {"h": 6, "w": 8, "x": 8, "y": 8},
+      "gridPos": { "h": 6, "w": 8, "x": 8, "y": 8 },
       "targets": [
-        {"expr": "crystal_budget_spend_usd", "legendFormat": "{{environment}}"}
+        {
+          "expr": "crystal_budget_spend_usd",
+          "legendFormat": "{{environment}}"
+        }
       ]
     },
     {
       "type": "stat",
       "title": "Budget Alerts (5m)",
-      "gridPos": {"h": 6, "w": 8, "x": 16, "y": 8},
-      "targets": [
-        {"expr": "sum(increase(crystal_budget_alerts_total[5m]))"}
-      ]
+      "gridPos": { "h": 6, "w": 8, "x": 16, "y": 8 },
+      "targets": [{ "expr": "sum(increase(crystal_budget_alerts_total[5m]))" }]
     }
   ]
 }
-

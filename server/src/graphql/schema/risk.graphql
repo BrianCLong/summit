@@ -1,4 +1,9 @@
-type RiskContribution { feature: String!, value: Float!, weight: Float!, delta: Float! }
+type RiskContribution {
+  feature: String!
+  value: Float!
+  weight: Float!
+  delta: Float!
+}
 
 extend type Entity {
   riskScore: Float
@@ -8,9 +13,19 @@ extend type Entity {
   riskComputedAt: String
 }
 
-type RiskSummary { entityId: ID!, score: Float!, band: String!, window: String!, topContributions: [RiskContribution!]! }
+type RiskSummary {
+  entityId: ID!
+  score: Float!
+  band: String!
+  window: String!
+  topContributions: [RiskContribution!]!
+}
 
 extend type Query {
   riskSummary(entityId: ID!, window: String = "7d"): RiskSummary!
-  topRiskEntities(kind: String!, window: String = "7d", limit: Int = 50): [RiskSummary!]!
+  topRiskEntities(
+    kind: String!
+    window: String = "7d"
+    limit: Int = 50
+  ): [RiskSummary!]!
 }

@@ -13,18 +13,18 @@ Next step: Summarize key Palantir product capabilities and direction, especially
 
 - Key Platforms: Gotham (govt/intel/law enforcement), Foundry (commercial/enterprise), Apollo (continuous delivery), AI Platform (AIP for generative AI and automation)
 - Core Features:
-    - Massive data integration across federated and siloed sources with dynamic updates
-    - AI/ML-powered analytics and decision-making, including predictive modeling and generative AI tools
-    - Customizable and extensible data models with digital twins and operational simulations
-    - Real-time collaboration, secure access controls, and auditability for sensitive data
-    - Modular, scalable frontends built on React, TypeScript, GraphQL, and design frameworks
-    - DevOps and deployment automation with cloud, edge, and hybrid environment support
-    - Integration with ML tools (ONNX, PyTorch, MLFlow) for model lifecycle and experiment management
-    - Industry use cases in defense, healthcare, finance, manufacturing, supply chain, and more
+  - Massive data integration across federated and siloed sources with dynamic updates
+  - AI/ML-powered analytics and decision-making, including predictive modeling and generative AI tools
+  - Customizable and extensible data models with digital twins and operational simulations
+  - Real-time collaboration, secure access controls, and auditability for sensitive data
+  - Modular, scalable frontends built on React, TypeScript, GraphQL, and design frameworks
+  - DevOps and deployment automation with cloud, edge, and hybrid environment support
+  - Integration with ML tools (ONNX, PyTorch, MLFlow) for model lifecycle and experiment management
+  - Industry use cases in defense, healthcare, finance, manufacturing, supply chain, and more
 
 This strategic and technical baseline frames the gap analysis against a typical sophisticated data ops and AI product state.
 
-***
+---
 
 For a complete gap analysis and comprehensive PRD generation, please provide or confirm:
 
@@ -77,4 +77,3 @@ This will enable tailoring the PRD to measurably exceed Palantir’s capabilitie
 [^19]: https://blog.palantir.com/building-with-palantir-aip-logic-tools-for-rag-oag-fdaf8938d02e
 
 [^20]: https://newsroom.accenture.com/news/2025/palantir-and-accenture-federal-services-join-forces-to-help-federal-government-agencies-reinvent-operations-with-ai
-

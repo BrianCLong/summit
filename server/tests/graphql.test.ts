@@ -32,7 +32,7 @@ describe('GraphQL Integration Tests', () => {
           },
         },
       });
-    
+
     expect(registerRes.statusCode).toEqual(200);
     expect(registerRes.body.data.register.token).toBeDefined();
     expect(registerRes.body.data.register.user.id).toBeDefined();
@@ -185,7 +185,9 @@ describe('GraphQL Integration Tests', () => {
 
     expect(createRes.statusCode).toEqual(200);
     expect(createRes.body.data.createInvestigation.id).toBeDefined();
-    expect(createRes.body.data.createInvestigation.title).toEqual('Test Investigation');
+    expect(createRes.body.data.createInvestigation.title).toEqual(
+      'Test Investigation',
+    );
     const investigationId = createRes.body.data.createInvestigation.id;
 
     // Delete Investigation
@@ -276,7 +278,9 @@ describe('GraphQL Integration Tests', () => {
 
     expect(createRelRes.statusCode).toEqual(200);
     expect(createRelRes.body.data.createRelationship.id).toBeDefined();
-    expect(createRelRes.body.data.createRelationship.type).toEqual('CONNECTED_TO');
+    expect(createRelRes.body.data.createRelationship.type).toEqual(
+      'CONNECTED_TO',
+    );
     const relationshipId = createRelRes.body.data.createRelationship.id;
 
     // Delete Relationship
@@ -389,9 +393,15 @@ describe('GraphQL Integration Tests', () => {
     expect(fetchRelatedRes.statusCode).toEqual(200);
     expect(fetchRelatedRes.body.data.relatedEntities).toBeDefined();
     expect(fetchRelatedRes.body.data.relatedEntities.length).toBeGreaterThan(0);
-    expect(fetchRelatedRes.body.data.relatedEntities[0].entity.id).toEqual(relatedEntityId);
-    expect(fetchRelatedRes.body.data.relatedEntities[0].strength).toBeGreaterThan(0);
-    expect(fetchRelatedRes.body.data.relatedEntities[0].relationshipType).toEqual('WORKS_FOR');
+    expect(fetchRelatedRes.body.data.relatedEntities[0].entity.id).toEqual(
+      relatedEntityId,
+    );
+    expect(
+      fetchRelatedRes.body.data.relatedEntities[0].strength,
+    ).toBeGreaterThan(0);
+    expect(
+      fetchRelatedRes.body.data.relatedEntities[0].relationshipType,
+    ).toEqual('WORKS_FOR');
   });
 
   it('should generate entities and relationships from text', async () => {
@@ -414,7 +424,11 @@ describe('GraphQL Integration Tests', () => {
       });
 
     expect(res.statusCode).toEqual(200);
-    expect(res.body.data.generateEntitiesFromText.entities.length).toBeGreaterThan(0);
-    expect(res.body.data.generateEntitiesFromText.relationships.length).toBeGreaterThan(0);
+    expect(
+      res.body.data.generateEntitiesFromText.entities.length,
+    ).toBeGreaterThan(0);
+    expect(
+      res.body.data.generateEntitiesFromText.relationships.length,
+    ).toBeGreaterThan(0);
   });
 });

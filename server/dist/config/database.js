@@ -1,8 +1,8 @@
 import neo4j from "neo4j-driver";
-import { Pool } from "pg";
 import Redis from "ioredis";
 import config from "./index.js";
 import logger from "../utils/logger.js";
+import { getPostgresPool as getManagedPostgresPool, closePostgresPool as closeManagedPostgresPool, } from "../db/postgres";
 let neo4jDriver = null;
 let postgresPool = null;
 let redisClient = null;
@@ -90,19 +90,14 @@ async function createNeo4jConstraints() {
 // PostgreSQL Connection
 async function connectPostgres() {
     try {
-        postgresPool = new Pool({
-            host: config.postgres.host,
-            port: config.postgres.port,
-            database: config.postgres.database,
-            user: config.postgres.username,
-            password: config.postgres.password,
-            max: 20,
-            idleTimeoutMillis: 30000,
-            connectionTimeoutMillis: 2000,
-        });
+        postgresPool = getManagedPostgresPool();
         const client = await postgresPool.connect();
-        await client.query("SELECT NOW()");
-        client.release();
+        try {
+            await client.query("SELECT NOW()");
+        }
+        finally {
+            client.release();
+        }
         await createPostgresTables();
         logger.info("✅ Connected to PostgreSQL");
         return postgresPool;
@@ -262,7 +257,8 @@ async function closeConnections() {
         logger.info("Neo4j connection closed");
     }
     if (postgresPool) {
-        await postgresPool.end();
+        await closeManagedPostgresPool();
+        postgresPool = null;
         logger.info("PostgreSQL connection closed");
     }
     if (redisClient) {

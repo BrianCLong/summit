@@ -20,8 +20,14 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         title: 'Immediate Assessment',
         description: 'Assess the scope and severity of the security incident',
         type: 'manual',
-        preconditions: ['Incident has been reported', 'Initial triage completed'],
-        postconditions: ['Severity level determined', 'Impact assessment documented'],
+        preconditions: [
+          'Incident has been reported',
+          'Initial triage completed',
+        ],
+        postconditions: [
+          'Severity level determined',
+          'Impact assessment documented',
+        ],
         riskLevel: 'medium',
         automationLevel: 'none',
         timeout: 300000, // 5 minutes
@@ -47,7 +53,8 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         id: 'step-003',
         order: 3,
         title: 'Preserve Evidence',
-        description: 'Create forensic snapshots and preserve logs for investigation',
+        description:
+          'Create forensic snapshots and preserve logs for investigation',
         type: 'automated',
         command:
           'python3 /scripts/forensic_snapshot.py --incident-id=${INCIDENT_ID} --preserve-all',
@@ -66,9 +73,13 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         type: 'automated',
         command:
           'curl -X POST ${NOTIFICATION_WEBHOOK} -d \'{"incident_id":"${INCIDENT_ID}","severity":"critical","status":"active"}\'',
-        expectedOutput: '{"status":"sent","recipients":["security-team","management"]}',
+        expectedOutput:
+          '{"status":"sent","recipients":["security-team","management"]}',
         preconditions: ['Incident assessment complete'],
-        postconditions: ['Stakeholders notified', 'Communication plan activated'],
+        postconditions: [
+          'Stakeholders notified',
+          'Communication plan activated',
+        ],
         riskLevel: 'low',
         automationLevel: 'full',
         timeout: 60000, // 1 minute
@@ -108,7 +119,8 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         id: 'step-001',
         order: 1,
         title: 'Pre-maintenance Health Check',
-        description: 'Verify database health and connectivity before maintenance',
+        description:
+          'Verify database health and connectivity before maintenance',
         type: 'verification',
         command: 'pg_isready -h ${DB_HOST} -p ${DB_PORT} -U ${DB_USER}',
         expectedOutput: '${DB_HOST}:${DB_PORT} - accepting connections',
@@ -154,7 +166,8 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         title: 'Vacuum Database',
         description: 'Perform vacuum operation to reclaim storage space',
         type: 'automated',
-        command: 'psql -h ${DB_HOST} -U ${DB_USER} -d ${DB_NAME} -c "VACUUM (VERBOSE, ANALYZE);"',
+        command:
+          'psql -h ${DB_HOST} -U ${DB_USER} -d ${DB_NAME} -c "VACUUM (VERBOSE, ANALYZE);"',
         expectedOutput: 'VACUUM',
         preconditions: ['Database accessible', 'Low activity period'],
         postconditions: ['Space reclaimed', 'Performance optimized'],
@@ -166,12 +179,16 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         id: 'step-005',
         order: 5,
         title: 'Post-maintenance Verification',
-        description: 'Verify database performance and functionality after maintenance',
+        description:
+          'Verify database performance and functionality after maintenance',
         type: 'verification',
         command: 'python3 /scripts/db_health_check.py --full-check',
         expectedOutput: 'All health checks passed',
         preconditions: ['Maintenance operations completed'],
-        postconditions: ['Database performance verified', 'System ready for production'],
+        postconditions: [
+          'Database performance verified',
+          'System ready for production',
+        ],
         riskLevel: 'low',
         automationLevel: 'full',
         timeout: 300000, // 5 minutes
@@ -202,7 +219,8 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         title: 'Pre-deployment Checks',
         description: 'Verify system health and readiness for deployment',
         type: 'verification',
-        command: 'kubectl get pods -l app=conductor --field-selector=status.phase=Running | wc -l',
+        command:
+          'kubectl get pods -l app=conductor --field-selector=status.phase=Running | wc -l',
         expectedOutput: '3', // Expecting 3 healthy pods
         preconditions: ['New version tested', 'Deployment approved'],
         postconditions: ['System health confirmed', 'Ready for deployment'],
@@ -244,7 +262,8 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         id: 'step-004',
         order: 4,
         title: 'Switch Traffic to Green',
-        description: 'Update load balancer to route traffic to green environment',
+        description:
+          'Update load balancer to route traffic to green environment',
         type: 'automated',
         command:
           'kubectl patch service conductor-service -p \'{"spec":{"selector":{"version":"green"}}}\'',
@@ -252,7 +271,10 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         rollbackCommand:
           'kubectl patch service conductor-service -p \'{"spec":{"selector":{"version":"blue"}}}\'',
         preconditions: ['Green environment healthy'],
-        postconditions: ['Traffic routed to green', 'Blue-green switch completed'],
+        postconditions: [
+          'Traffic routed to green',
+          'Blue-green switch completed',
+        ],
         riskLevel: 'high',
         automationLevel: 'full',
         timeout: 60000,
@@ -263,7 +285,8 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         title: 'Monitor New Deployment',
         description: 'Monitor system metrics and error rates after deployment',
         type: 'verification',
-        command: 'python3 /scripts/deployment_monitor.py --duration=300 --error-threshold=0.01',
+        command:
+          'python3 /scripts/deployment_monitor.py --duration=300 --error-threshold=0.01',
         expectedOutput: 'Deployment monitoring completed: HEALTHY',
         preconditions: ['Traffic switched to green'],
         postconditions: ['Deployment stable', 'Error rates within threshold'],
@@ -311,7 +334,8 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         title: 'Disable User Account',
         description: 'Immediately disable user account in identity provider',
         type: 'automated',
-        command: 'python3 /scripts/disable_user.py --user-id=${USER_ID} --reason="${REASON}"',
+        command:
+          'python3 /scripts/disable_user.py --user-id=${USER_ID} --reason="${REASON}"',
         expectedOutput: 'User account disabled successfully',
         rollbackCommand: 'python3 /scripts/enable_user.py --user-id=${USER_ID}',
         preconditions: ['Valid user ID provided', 'Reason documented'],
@@ -341,7 +365,8 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
         title: 'Update Access Control Lists',
         description: 'Remove user from all access control lists and groups',
         type: 'automated',
-        command: 'python3 /scripts/remove_user_acls.py --user-id=${USER_ID} --all-systems',
+        command:
+          'python3 /scripts/remove_user_acls.py --user-id=${USER_ID} --all-systems',
         expectedOutput: 'ACL updates completed',
         preconditions: ['User account disabled'],
         postconditions: ['User removed from ACLs', 'Group memberships revoked'],
@@ -380,7 +405,12 @@ export const sampleRunbooks: Omit<Runbook, 'signature'>[] = [
       author: 'security-team',
       createdAt: Date.now(),
       updatedAt: Date.now(),
-      tags: ['security', 'access-control', 'user-management', 'incident-response'],
+      tags: [
+        'security',
+        'access-control',
+        'user-management',
+        'incident-response',
+      ],
     },
     approvals: [],
   },

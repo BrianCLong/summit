@@ -6,9 +6,8 @@
     "phone": "pii",
     "iban": "sensitive",
     "card": "sensitive",
-    "geo": "coarse", 
+    "geo": "coarse",
     "notes": "sensitive",
     "attachments": "sensitive"
   }
 }
-

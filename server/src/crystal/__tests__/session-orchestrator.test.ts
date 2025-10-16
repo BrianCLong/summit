@@ -44,7 +44,9 @@ describe('CrystalSessionOrchestrator', () => {
       ],
     });
 
-    expect(session.panels.some((panel) => panel.type === PanelType.DIFF)).toBe(true);
+    expect(session.panels.some((panel) => panel.type === PanelType.DIFF)).toBe(
+      true,
+    );
     expect(session.agents).toHaveLength(2);
     const worktreeStat = await stat(session.worktree.worktreePath);
     expect(worktreeStat.isDirectory()).toBe(true);

@@ -45,7 +45,12 @@ export class S3ArtifactStore implements ArtifactStore {
     });
   }
 
-  async store(runId: string, stepId: string, name: string, data: Buffer): Promise<string> {
+  async store(
+    runId: string,
+    stepId: string,
+    name: string,
+    data: Buffer,
+  ): Promise<string> {
     // Create content-addressable key
     const checksum = createHash('sha256').update(data).digest('hex');
     const key = `${this.pathPrefix}/${runId}/${stepId}/${name}`;
@@ -62,7 +67,12 @@ export class S3ArtifactStore implements ArtifactStore {
         );
 
         // Content exists, just create a reference
-        await this.createReference(key, contentAddressableKey, data.length, checksum);
+        await this.createReference(
+          key,
+          contentAddressableKey,
+          data.length,
+          checksum,
+        );
         return key;
       } catch (error) {
         // Content doesn't exist, store it
@@ -90,7 +100,12 @@ export class S3ArtifactStore implements ArtifactStore {
       await upload.done();
 
       // Create reference link
-      await this.createReference(key, contentAddressableKey, data.length, checksum);
+      await this.createReference(
+        key,
+        contentAddressableKey,
+        data.length,
+        checksum,
+      );
 
       return key;
     } catch (error) {
@@ -146,7 +161,9 @@ export class S3ArtifactStore implements ArtifactStore {
 
       return Buffer.concat(chunks);
     } catch (error) {
-      throw new Error(`Failed to retrieve artifact: ${(error as Error).message}`);
+      throw new Error(
+        `Failed to retrieve artifact: ${(error as Error).message}`,
+      );
     }
   }
 

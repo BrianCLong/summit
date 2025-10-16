@@ -15,6 +15,7 @@
 **Objective:** Ship clean, green, functional **intelligence + security capabilities** that (a) harden the SDLC, (b) enable collection/processing of priority intel, and (c) deliver measurable defensive and operational outcomes aligned with the other October sprints.
 
 **Key outcomes this sprint (14 days):**
+
 - **Security CI/CD baseline** live: SAST (Semgrep), SCA (Trivy/Grype), container scan, SBOM (Syft), signed artifacts (cosign), and supply-chain attestations (SLSA provenance). Failing builds gate on criticals.
 - **Detection-as-Code (DaC) foundation**: Sigma rule repo + CI to lint/test rules, and Suricata/Sigma compile to backends (Elastic/Chronicle/QRadar)
 - **Intel pipeline MVP**: STIX/TAXII pull + enrichment -> MISP/TIP sink + normalized schema -> analyst notebook template.
@@ -55,49 +56,67 @@ Success = **all pipelines green**, at least **1 production rule** shipped, **1 i
 ## 4) Sprint Goals & Deliverables (DOD-ready)
 
 ### G1: Security CI/CD Baseline
+
 **Deliverables**
+
 - `.github/workflows/security.yml` (or GitLab CI equivalent) running: Semgrep, Trivy (filesystem+image), Syft SBOM, cosign sign/verify, provenance attestations.
 - Fails on **Critical**; creates issues on **High** with assignees & SLA labels.
 - SBOM uploaded to artifact store and attached to releases.
 
 **Definition of Done**
+
 - New PRs trigger full suite in <10 min; caching enabled; main branch protected; badges visible.
 
 ### G2: Detection-as-Code Foundation
+
 **Deliverables**
+
 - `/detections/sigma` repo with lint/test CI; sample HTTP exfil + credential dump rules; compile to target backend.
 - Simulation harness using pcap/log fixtures + unit tests.
 
 **Definition of Done**
+
 - At least **1 rule** merged and deployed; false-positive rate measured on sample logs.
 
 ### G3: Intel Pipeline MVP
+
 **Deliverables**
+
 - `/intel/collectors/taxii_pull.py` and `/intel/pipeline/normalize_enrich.py` with config for 1–2 TAXII collections.
 - Output to `/intel/outbox` + push to TIP/MISP if available; schema documented.
 
 **Definition of Done**
+
 - Daily pulls succeed; dedup <5%; enrichment adds ASN/Geo/VT where license permits.
 
 ### G4: Threat Modeling-as-Code (TMAC)
+
 **Deliverables**
+
 - `/threatmodel/` with lightweight YAML per service + CI check ensuring presence & basic STRIDE coverage.
 
 **Definition of Done**
+
 - All new feature PRs include/modify a TM file; CI enforces.
 
 ### G5: Runbooks & Comms
+
 **Deliverables**
+
 - `/runbooks/` triage (vuln, alert), incident comms, patch flow; RACI & paging list.
 
 **Definition of Done**
+
 - Tabletop checklist executed; comms channels validated.
 
 ### G6: Telemetry & Metrics
+
 **Deliverables**
+
 - `/metrics/` with MTTR, vuln burn-down, rule coverage, FP rate; dashboard JSON for Grafana.
 
 **Definition of Done**
+
 - Dashboard renders with sample data; targets set.
 
 ---
@@ -105,37 +124,42 @@ Success = **all pipelines green**, at least **1 production rule** shipped, **1 i
 ## 5) Backlog & Task Breakdown (14 days)
 
 **Day 1–2**
+
 - Bootstrap repo security scaffolding; add CODEOWNERS, PR template, branch protections.
 - Wire Security CI/CD; cache & parallelize; open baseline issues.
 
 **Day 3–5**
+
 - Implement TAXII collector + schema; write enrichment module; dry-run to file sink.
 - Create Sigma repo; add linter/tests; ship 1–2 baseline rules.
 
 **Day 6–8**
+
 - Add SBOM + signing + provenance; policy to fail unsigned artifacts; admission controller preview.
 - TM-as-code YAML + CI; update contribution docs.
 
 **Day 9–11**
+
 - Runbooks + RACI; tabletop; refine rule thresholds; hook issues to severity SLAs.
 
 **Day 12–14**
+
 - Stabilize; measure; harden; handoff docs; retrospective.
 
 ---
 
 ## 6) Risk Register (Top 8)
 
-| Risk | Likelihood | Impact | Mitigation |
-|---|---|---|---|
-| Build time increases | Med | Med | Caching, rule scoping, parallel jobs |
-| False positives from new rules | Med | Med | Simulation, staged rollout, auto-suppress with expirations |
-| Feed licensing/PII constraints | Low | High | Configurable enrichment, data minimization, DLP checks |
-| Missing runtime parity | Med | High | Infra sprint coordination, feature flags |
-| Secrets in repo | Low | High | Secret scan + pre-commit hooks + revoke playbook |
-| Developer resistance | Med | Med | Fast feedback, docs, severity-based gates |
-| Attestation tool friction | Med | Med | Provide make targets & wrappers |
-| Alert fatigue | Med | High | SLOs & routing; noise budgets |
+| Risk                           | Likelihood | Impact | Mitigation                                                 |
+| ------------------------------ | ---------- | ------ | ---------------------------------------------------------- |
+| Build time increases           | Med        | Med    | Caching, rule scoping, parallel jobs                       |
+| False positives from new rules | Med        | Med    | Simulation, staged rollout, auto-suppress with expirations |
+| Feed licensing/PII constraints | Low        | High   | Configurable enrichment, data minimization, DLP checks     |
+| Missing runtime parity         | Med        | High   | Infra sprint coordination, feature flags                   |
+| Secrets in repo                | Low        | High   | Secret scan + pre-commit hooks + revoke playbook           |
+| Developer resistance           | Med        | Med    | Fast feedback, docs, severity-based gates                  |
+| Attestation tool friction      | Med        | Med    | Provide make targets & wrappers                            |
+| Alert fatigue                  | Med        | High   | SLOs & routing; noise budgets                              |
 
 ---
 
@@ -165,6 +189,7 @@ Success = **all pipelines green**, at least **1 production rule** shipped, **1 i
 ### 9.1 Repository Hygiene
 
 **`CODEOWNERS`**
+
 ```
 # Require review from security for sensitive paths
 /detections/ @sec-team
@@ -174,6 +199,7 @@ Success = **all pipelines green**, at least **1 production rule** shipped, **1 i
 ```
 
 **`.github/pull_request_template.md`**
+
 ```
 ## Summary
 
@@ -192,6 +218,7 @@ Success = **all pipelines green**, at least **1 production rule** shipped, **1 i
 ```
 
 **`.pre-commit-config.yaml`**
+
 ```
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -213,6 +240,7 @@ repos:
 ### 9.2 Security CI/CD
 
 **`.github/workflows/security.yml`**
+
 ```
 name: security
 on: [pull_request, push]
@@ -271,6 +299,7 @@ jobs:
 ### 9.3 Supply Chain Provenance
 
 **`/.slsa-github-generator.yml`** (pointer; enable SLSA level 3 provenance via official action)
+
 ```
 attestations:
   enabled: true
@@ -283,6 +312,7 @@ attestations:
 ### 9.4 Threat Modeling-as-Code
 
 **`/threatmodel/service-example.yaml`**
+
 ```
 service: api-gateway
 owner: team-api
@@ -306,6 +336,7 @@ abuse_cases:
 ```
 
 **`/threatmodel/validate.py`** (CI check skeleton)
+
 ```
 #!/usr/bin/env python3
 import sys, yaml, glob
@@ -326,6 +357,7 @@ print('Threatmodel validation OK')
 ### 9.5 Detections (Sigma) & Tests
 
 **`/detections/sigma/http_exfiltration.yml`**
+
 ```
 title: Suspicious HTTP Exfiltration via Large POST
 id: 3f5b9a4b-1111-4ddd-aaaa-222222222222
@@ -342,6 +374,7 @@ level: high
 ```
 
 **`/detections/tests/test_http_exfiltration.py`**
+
 ```
 import json
 from sigma.rule import SigmaRule
@@ -354,6 +387,7 @@ def test_rule_loads():
 ### 9.6 Intel Pipeline (STIX/TAXII)
 
 **`/intel/config.yaml`**
+
 ```
 feeds:
   - name: cti_demo
@@ -365,6 +399,7 @@ feeds:
 ```
 
 **`/intel/collectors/taxii_pull.py`** (simplified)
+
 ```
 #!/usr/bin/env python3
 import os, sys, json, datetime, itertools
@@ -377,6 +412,7 @@ print(json.dumps({
 ```
 
 **`/intel/pipeline/normalize_enrich.py`**
+
 ```
 # Normalizes STIX indicator to {type, value, confidence, labels, sources}
 ```
@@ -384,6 +420,7 @@ print(json.dumps({
 ### 9.7 Runbooks
 
 **`/runbooks/vuln-triage.md`**
+
 ```
 Severity gates: Critical -> hotfix (<48h); High -> sprint; Medium -> backlog; Low -> quarterly.
 Create issue with label `security` and SLA.
@@ -391,6 +428,7 @@ Notify #sec-alerts; assign service owner.
 ```
 
 **`/runbooks/incident-comms.md`**
+
 ```
 Comms lead, IC, Liaison roles; templates for exec+legal+customer updates; timeline capture checklist.
 ```
@@ -398,6 +436,7 @@ Comms lead, IC, Liaison roles; templates for exec+legal+customer updates; timeli
 ### 9.8 Policy-as-Code (OPA)
 
 **`/policy/k8s/deny-unsigned-images.rego`**
+
 ```
 package admission
 
@@ -429,6 +468,7 @@ deny[msg] {
 - ADR template added for major security decisions.
 
 **`/docs/adr/0001-security-pipelines.md`** (template)
+
 ```
 # 0001: Security Pipeline Baseline
 Date: 2025-10-01
@@ -460,6 +500,7 @@ Consequences: Slightly longer builds; higher confidence.
 ## 14) Appendices
 
 ### A) Issue Labels & SLAs
+
 ```
 security:sev:critical -> 48h
 security:sev:high -> 7d
@@ -468,6 +509,7 @@ security:sev:low -> 90d
 ```
 
 ### B) Makefile Targets
+
 ```
 make security   # run Semgrep/Trivy locally
 make sbom       # generate SBOM
@@ -476,6 +518,7 @@ make detections # lint/test sigma
 ```
 
 ### C) Repo Tree (proposed)
+
 ```
 intel/
   collectors/
@@ -490,4 +533,3 @@ policy/
 metrics/
 .github/workflows/
 ```
-

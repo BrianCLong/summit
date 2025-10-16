@@ -7,16 +7,16 @@ tasks:
     name: Ingest Transaction Data
     uses: connector:elastic
     with:
-      index: "transactions-*"
-      filters: ["amount>10000", "cross_border=true"]
-      time_range: "30d"
+      index: 'transactions-*'
+      filters: ['amount>10000', 'cross_border=true']
+      time_range: '30d'
 
   - id: entity_linking
     name: Link Financial Entities
     uses: graph:entity-resolution
     needs: [transaction_ingest]
     with:
-      entity_types: ["account", "person", "organization"]
+      entity_types: ['account', 'person', 'organization']
       fuzzy_matching: true
 
   - id: pattern_detection
@@ -24,7 +24,7 @@ tasks:
     uses: ml:forecast
     needs: [entity_linking]
     with:
-      patterns: ["structuring", "layering", "smurfing"]
+      patterns: ['structuring', 'layering', 'smurfing']
       anomaly_threshold: 0.95
 
   - id: risk_scoring
@@ -32,7 +32,7 @@ tasks:
     uses: analyze:risk
     needs: [pattern_detection]
     with:
-      model: "aml-risk-v4"
+      model: 'aml-risk-v4'
       regulatory_weights: true
 
   - id: explainable_scoring
@@ -40,7 +40,7 @@ tasks:
     uses: xai:explanations
     needs: [risk_scoring]
     with:
-      model: "aml-explainer-v2"
+      model: 'aml-explainer-v2'
       regulatory_compliance: true
 
   - id: sar_generation
@@ -48,7 +48,7 @@ tasks:
     uses: export:bundle
     needs: [explainable_scoring]
     with:
-      format: "sar-template"
+      format: 'sar-template'
       include_evidence: true
       regulatory_fields: true
 

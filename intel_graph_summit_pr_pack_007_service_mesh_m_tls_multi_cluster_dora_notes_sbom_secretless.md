@@ -5,11 +5,13 @@ Twelve PRs to finish hardening: mesh‑level security & authz, cross‑cluster f
 ---
 
 ## PR 71 — Mesh install & global mTLS (Istio or Linkerd)
+
 **Purpose:** Encrypt service ↔ service by default; identity via SPIFFE.
 
 **Files**
 
 **`mesh/istio/base.yaml`** (Istio minimal profile)
+
 ```yaml
 apiVersion: install.istio.io/v1alpha1
 kind: IstioOperator
@@ -23,6 +25,7 @@ spec:
 ```
 
 **`mesh/istio/mtls.yaml`**
+
 ```yaml
 apiVersion: security.istio.io/v1beta1
 kind: PeerAuthentication
@@ -36,11 +39,13 @@ spec:
 ---
 
 ## PR 72 — Zero‑trust AuthZ (JWT + mTLS) at mesh
+
 **Purpose:** Authorize who can talk to whom; require identity and scoped JWT claims.
 
 **Files**
 
 **`mesh/istio/authz.yaml`**
+
 ```yaml
 apiVersion: security.istio.io/v1beta1
 kind: RequestAuthentication
@@ -59,10 +64,10 @@ spec:
   selector: { matchLabels: { app.kubernetes.io/name: web } }
   action: ALLOW
   rules:
-    - from: [{ source: { principals: ["cluster.local/ns/prod/sa/api"] } }]
+    - from: [{ source: { principals: ['cluster.local/ns/prod/sa/api'] } }]
       when:
         - key: request.auth.claims[scope]
-          values: ["read:web"]
+          values: ['read:web']
 ```
 
 **Rollback:** Switch to `action: DENY` policies only; loosen selectors temporarily.
@@ -70,11 +75,13 @@ spec:
 ---
 
 ## PR 73 — Envoy ext‑authz with OPA (fine‑grained)
+
 **Purpose:** Central policy decisions using Rego.
 
 **Files**
 
 **`mesh/opa/authorizer.yaml`**
+
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -88,7 +95,14 @@ spec:
       containers:
         - name: opa
           image: openpolicyagent/opa:latest-envoy
-          args: ["run","--server","--addr=localhost:8181","--config-file=/config/config.yaml","/policy"]
+          args:
+            [
+              'run',
+              '--server',
+              '--addr=localhost:8181',
+              '--config-file=/config/config.yaml',
+              '/policy',
+            ]
           volumeMounts:
             - { name: policy, mountPath: /policy }
             - { name: conf, mountPath: /config }
@@ -100,6 +114,7 @@ spec:
 ```
 
 **`mesh/opa/policy.rego`**
+
 ```rego
 package envoy.authz
 
@@ -114,11 +129,13 @@ allow {
 ---
 
 ## PR 74 — Multi‑cluster service failover (Istio east↔west)
+
 **Purpose:** Survive cluster loss; shift traffic cross‑region.
 
 **Files**
 
 **`mesh/multicluster/eastwest-gateway.yaml`** (per cluster)
+
 ```yaml
 apiVersion: install.istio.io/v1alpha1
 kind: IstioOperator
@@ -132,12 +149,13 @@ spec:
 ```
 
 **`mesh/multicluster/serviceentry.yaml`**
+
 ```yaml
 apiVersion: networking.istio.io/v1beta1
 kind: ServiceEntry
 metadata: { name: web-remote, namespace: prod }
 spec:
-  hosts: ["web.prod.global"]
+  hosts: ['web.prod.global']
   location: MESH_EXTERNAL
   ports: [{ number: 80, name: http, protocol: HTTP }]
   resolution: DNS
@@ -151,11 +169,13 @@ spec:
 ---
 
 ## PR 75 — Global traffic policy (DestinationRule + Outlier)
+
 **Purpose:** Active health‑based ejection and canary per subset.
 
 **Files**
 
 **`mesh/istio/destinationrule.yaml`**
+
 ```yaml
 apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
@@ -179,21 +199,30 @@ spec:
 ---
 
 ## PR 76 — DORA metrics exporter (Actions → Prom/Grafana)
+
 **Purpose:** Track deployment frequency, lead time for changes, MTTR, CFR.
 
 **Files**
 
 **`dora/exporter.ts`**
+
 ```ts
 import { Octokit } from 'octokit';
 import http from 'http';
 const client = new Octokit({ auth: process.env.GH_TOKEN });
 let metrics = { deploys: 0, lead_time_s: 0, mttr_s: 0, cfr: 0 };
 // TODO: compute from releases, deployments, incidents issues
-http.createServer((_req,res)=>{res.end(`# HELP dora_deploys deployments\n# TYPE dora_deploys gauge\ndora_deploys ${metrics.deploys}\n`)}).listen(9102);
+http
+  .createServer((_req, res) => {
+    res.end(
+      `# HELP dora_deploys deployments\n# TYPE dora_deploys gauge\ndora_deploys ${metrics.deploys}\n`,
+    );
+  })
+  .listen(9102);
 ```
 
 **`k8s/monitoring/dora-sd.yaml`**
+
 ```yaml
 apiVersion: v1
 kind: Service
@@ -204,6 +233,7 @@ spec:
 ```
 
 **`.github/workflows/dora-refresh.yml`**
+
 ```yaml
 name: dora-refresh
 on:
@@ -222,24 +252,33 @@ jobs:
 ---
 
 ## PR 77 — Auto‑generated release notes (conventional + components)
+
 **Purpose:** Cleaner user‑facing notes with change categories.
 
 **Files**
 
 **`.github/release-notes.hbs`**
+
 ```hbs
 ## Highlights
 {{#each releases}}
-- {{title}} ({{tag}})
+  -
+  {{title}}
+  ({{tag}})
 {{/each}}
 
 ### Changes by Type
 {{#each commits}}
-- {{#if breaking}}💥 BREAKING: {{/if}}{{type}}: {{scope}} — {{subject}}
+  -
+  {{#if breaking}}💥 BREAKING: {{/if}}{{type}}:
+  {{scope}}
+  —
+  {{subject}}
 {{/each}}
 ```
 
 **`.github/workflows/notes.yml`**
+
 ```yaml
 name: notes
 on: [release]
@@ -258,11 +297,13 @@ jobs:
 ---
 
 ## PR 78 — SBOM publish + VEX (CSAF) attach & sign
+
 **Purpose:** Make vulnerability context explicit and signed with provenance.
 
 **Files**
 
 **`.github/workflows/sbom-vex.yml`**
+
 ```yaml
 name: sbom-vex
 on: [release]
@@ -293,32 +334,44 @@ jobs:
 ---
 
 ## PR 79 — Secretless DB (AWS IAM token / Cloud SQL IAM)
+
 **Purpose:** Short‑lived auth instead of passwords.
 
 **Files**
 
 **`server/db/iam.ts`**
+
 ```ts
 import crypto from 'crypto';
-export async function buildRdsAuthToken(host: string, user: string){
+export async function buildRdsAuthToken(host: string, user: string) {
   // Placeholder: call AWS SDK RDS.Signer to create 15‑min token
   return `token-for-${user}@${host}`;
 }
 ```
 
 **`charts/app/values.yaml`** (env)
+
 ```yaml
 env:
   DB_AUTH_MODE: iam
 ```
 
 **`server/db/connect.ts`**
+
 ```ts
 import { buildRdsAuthToken } from './iam';
-export async function getConn(){
+export async function getConn() {
   if (process.env.DB_AUTH_MODE === 'iam') {
-    const token = await buildRdsAuthToken(process.env.DB_HOST!, process.env.DB_USER!);
-    return new Client({ host: process.env.DB_HOST, user: process.env.DB_USER, password: token, ssl: true });
+    const token = await buildRdsAuthToken(
+      process.env.DB_HOST!,
+      process.env.DB_USER!,
+    );
+    return new Client({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: token,
+      ssl: true,
+    });
   }
 }
 ```
@@ -328,11 +381,13 @@ export async function getConn(){
 ---
 
 ## PR 80 — Central audit → SIEM (OTLP/HTTP → OpenSearch/Splunk)
+
 **Purpose:** Immutable, queryable audit trail.
 
 **Files**
 
 **`otel/exporters-siem.yaml`**
+
 ```yaml
 exporters:
   otlphttp/siem:
@@ -349,29 +404,31 @@ service:
 ---
 
 ## PR 81 — Docker layer caching + remote cache for CI
+
 **Purpose:** Speed up builds reliably.
 
 **Files**
 
 **`.github/workflows/ci-core.yml`** (append)
+
 ```yaml
-  build_test:
-    steps:
-      - uses: actions/cache@v4
-        with:
-          path: ~/.cache/node
-          key: node-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
-      - uses: docker/setup-buildx-action@v3
-      - uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache
-          key: buildx-${{ github.sha }}
-          restore-keys: |
-            buildx-
-      - run: |
-          docker buildx build --cache-from type=local,src=/tmp/.buildx-cache \
-                               --cache-to type=local,dest=/tmp/.buildx-cache,mode=max \
-                               -t ghcr.io/${{ github.repository }}/app:${{ github.sha }} .
+build_test:
+  steps:
+    - uses: actions/cache@v4
+      with:
+        path: ~/.cache/node
+        key: node-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+    - uses: docker/setup-buildx-action@v3
+    - uses: actions/cache@v4
+      with:
+        path: /tmp/.buildx-cache
+        key: buildx-${{ github.sha }}
+        restore-keys: |
+          buildx-
+    - run: |
+        docker buildx build --cache-from type=local,src=/tmp/.buildx-cache \
+                             --cache-to type=local,dest=/tmp/.buildx-cache,mode=max \
+                             -t ghcr.io/${{ github.repository }}/app:${{ github.sha }} .
 ```
 
 **Rollback:** Remove caching steps; keep simple build.
@@ -379,17 +436,19 @@ service:
 ---
 
 ## PR 82 — Mesh traffic mirroring for dark‑launch
+
 **Purpose:** Send a copy of live traffic to canary without user impact.
 
 **Files**
 
 **`mesh/istio/virtualservice.yaml`**
+
 ```yaml
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata: { name: web, namespace: prod }
 spec:
-  hosts: ["web"]
+  hosts: ['web']
   http:
     - route:
         - destination: { host: web, subset: stable, weight: 100 }
@@ -402,19 +461,21 @@ spec:
 ---
 
 # Cutover (half day)
-1) Install mesh in **stage** with `PERMISSIVE` mTLS; fix sidecar injection and health.
-2) Turn on **STRICT mTLS** + JWT RequestAuth for one service; expand to all.
-3) Deploy **OPA ext‑authz** in shadow; switch Envoy ext‑authz on selected routes.
-4) Configure **DestinationRule outlier detection**; verify ejection behavior.
-5) Set up **east↔west gateways** and ServiceEntry; simulate regional failover.
-6) Start **DORA exporter** & Grafana board; sanity check metrics.
-7) Enable **release notes** builder and **SBOM+VEX** signing on next release.
-8) Switch DB to **IAM token** in stage; validate rotation; promote to prod.
-9) Ship **OTLP→SIEM** for audit logs; confirm retention and access controls.
-10) Add **build caches**; track CI duration reduction.
-11) Use **traffic mirroring** to dark‑launch next canary.
+
+1. Install mesh in **stage** with `PERMISSIVE` mTLS; fix sidecar injection and health.
+2. Turn on **STRICT mTLS** + JWT RequestAuth for one service; expand to all.
+3. Deploy **OPA ext‑authz** in shadow; switch Envoy ext‑authz on selected routes.
+4. Configure **DestinationRule outlier detection**; verify ejection behavior.
+5. Set up **east↔west gateways** and ServiceEntry; simulate regional failover.
+6. Start **DORA exporter** & Grafana board; sanity check metrics.
+7. Enable **release notes** builder and **SBOM+VEX** signing on next release.
+8. Switch DB to **IAM token** in stage; validate rotation; promote to prod.
+9. Ship **OTLP→SIEM** for audit logs; confirm retention and access controls.
+10. Add **build caches**; track CI duration reduction.
+11. Use **traffic mirroring** to dark‑launch next canary.
 
 # Rollback
+
 - Mesh: set `PERMISSIVE` or disable sidecar injection per namespace.
 - AuthZ: revert AuthorizationPolicies; leave RequestAuth in place.
 - Multi‑cluster: remove ServiceEntries and point DNS to primary.
@@ -423,8 +484,8 @@ spec:
 - SBOM/VEX: publish only SBOMs.
 
 # Ownership
+
 - **Platform/Mesh:** PR 71–75, 82
 - **Security/Policy:** PR 72–73, 80
 - **Release/DevEx:** PR 76–78, 81
 - **Data:** PR 79
-

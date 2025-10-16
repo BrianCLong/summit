@@ -1,3 +1,11 @@
 mutation setFeatureFlags($tenant: Tenant!, $flags: FeatureFlagsInput!) {
-  setFeatureFlags(tenant: $tenant, flags: $flags) { ok audit { evidenceId ts actor } warnings }
+  setFeatureFlags(tenant: $tenant, flags: $flags) {
+    ok
+    audit {
+      evidenceId
+      ts
+      actor
+    }
+    warnings
+  }
 }

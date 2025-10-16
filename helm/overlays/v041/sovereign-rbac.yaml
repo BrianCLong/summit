@@ -20,31 +20,31 @@ metadata:
     app.kubernetes.io/component: sovereign-safeguards
 rules:
   # Sovereign safeguards monitoring
-  - apiGroups: [""]
-    resources: ["pods", "services", "endpoints"]
-    verbs: ["get", "list", "watch"]
-  - apiGroups: ["apps"]
-    resources: ["deployments", "replicasets"]
-    verbs: ["get", "list", "watch"]
+  - apiGroups: ['']
+    resources: ['pods', 'services', 'endpoints']
+    verbs: ['get', 'list', 'watch']
+  - apiGroups: ['apps']
+    resources: ['deployments', 'replicasets']
+    verbs: ['get', 'list', 'watch']
   # Emergency containment capabilities
-  - apiGroups: ["apps"]
-    resources: ["deployments/scale"]
-    verbs: ["get", "patch", "update"]
-  - apiGroups: [""]
-    resources: ["pods"]
-    verbs: ["delete"]
+  - apiGroups: ['apps']
+    resources: ['deployments/scale']
+    verbs: ['get', 'patch', 'update']
+  - apiGroups: ['']
+    resources: ['pods']
+    verbs: ['delete']
   # Audit trail access
-  - apiGroups: [""]
-    resources: ["events"]
-    verbs: ["create", "get", "list"]
+  - apiGroups: ['']
+    resources: ['events']
+    verbs: ['create', 'get', 'list']
   # ConfigMap access for sovereign configuration
-  - apiGroups: [""]
-    resources: ["configmaps"]
-    verbs: ["get", "list", "watch"]
+  - apiGroups: ['']
+    resources: ['configmaps']
+    verbs: ['get', 'list', 'watch']
   # Secret access for verification keys
-  - apiGroups: [""]
-    resources: ["secrets"]
-    verbs: ["get", "list", "watch"]
+  - apiGroups: ['']
+    resources: ['secrets']
+    verbs: ['get', 'list', 'watch']
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
@@ -54,21 +54,21 @@ metadata:
     app.kubernetes.io/component: independent-verification
 rules:
   # Basic monitoring access
-  - apiGroups: [""]
-    resources: ["pods", "services"]
-    verbs: ["get", "list", "watch"]
+  - apiGroups: ['']
+    resources: ['pods', 'services']
+    verbs: ['get', 'list', 'watch']
   # Verification metrics access
-  - apiGroups: ["monitoring.coreos.com"]
-    resources: ["servicemonitors"]
-    verbs: ["get", "list", "watch"]
+  - apiGroups: ['monitoring.coreos.com']
+    resources: ['servicemonitors']
+    verbs: ['get', 'list', 'watch']
   # ConfigMap access for verification configuration
-  - apiGroups: [""]
-    resources: ["configmaps"]
-    verbs: ["get", "list", "watch"]
+  - apiGroups: ['']
+    resources: ['configmaps']
+    verbs: ['get', 'list', 'watch']
   # Secret access for verification API keys
-  - apiGroups: [""]
-    resources: ["secrets"]
-    verbs: ["get", "list", "watch"]
+  - apiGroups: ['']
+    resources: ['secrets']
+    verbs: ['get', 'list', 'watch']
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding
@@ -109,25 +109,25 @@ metadata:
     app.kubernetes.io/component: sovereign-safeguards
 rules:
   # Emergency containment powers within namespace
-  - apiGroups: ["apps"]
-    resources: ["deployments"]
-    verbs: ["get", "list", "patch", "update"]
-  - apiGroups: ["apps"]
-    resources: ["deployments/scale"]
-    verbs: ["get", "patch", "update"]
-  - apiGroups: [""]
-    resources: ["pods"]
-    verbs: ["get", "list", "delete"]
-  - apiGroups: [""]
-    resources: ["services"]
-    verbs: ["get", "list", "patch", "update"]
+  - apiGroups: ['apps']
+    resources: ['deployments']
+    verbs: ['get', 'list', 'patch', 'update']
+  - apiGroups: ['apps']
+    resources: ['deployments/scale']
+    verbs: ['get', 'patch', 'update']
+  - apiGroups: ['']
+    resources: ['pods']
+    verbs: ['get', 'list', 'delete']
+  - apiGroups: ['']
+    resources: ['services']
+    verbs: ['get', 'list', 'patch', 'update']
   # Sovereign configuration management
-  - apiGroups: [""]
-    resources: ["configmaps"]
-    verbs: ["get", "list", "create", "patch", "update"]
-  - apiGroups: [""]
-    resources: ["secrets"]
-    verbs: ["get", "list", "create", "patch", "update"]
+  - apiGroups: ['']
+    resources: ['configmaps']
+    verbs: ['get', 'list', 'create', 'patch', 'update']
+  - apiGroups: ['']
+    resources: ['secrets']
+    verbs: ['get', 'list', 'create', 'patch', 'update']
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding

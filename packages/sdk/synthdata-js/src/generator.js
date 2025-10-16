@@ -26,7 +26,11 @@ function generateGraph(spec) {
   for (let i = 0; i < numPersons; i++) {
     if (numOrgs > 0) {
       const target = Math.floor(rng() * numOrgs);
-      edges.push({ from: `person-${i}`, to: `org-${target}`, type: 'member_of' });
+      edges.push({
+        from: `person-${i}`,
+        to: `org-${target}`,
+        type: 'member_of',
+      });
     }
   }
   for (let i = 0; i < numPersons; i++) {
@@ -42,7 +46,11 @@ function generateGraph(spec) {
       if (to === from) {
         to = (to + 1) % numPersons;
       }
-      edges.push({ from: `person-${from}`, to: `person-${to}`, type: 'communicates_with' });
+      edges.push({
+        from: `person-${from}`,
+        to: `person-${to}`,
+        type: 'communicates_with',
+      });
     }
   }
 

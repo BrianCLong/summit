@@ -17,7 +17,9 @@ from urllib.parse import urlparse
 import os
 import json
 import datetime as _dt
-import xml.etree.ElementTree as ET
+import defusedxml.ElementTree as ET
+from intelgraph_py.utils.file_security import safe_path_join
+from pathlib import Path
 
 try:
   # Optional: if requests is available, we can fetch http(s)
@@ -45,7 +47,9 @@ def _read_bytes_from_uri(uri: str) -> bytes:
   # Local file path or file:// scheme
   if parsed.scheme in ("", "file"):
     path = parsed.path if parsed.scheme == "file" else uri
-    with open(path, "rb") as f:
+    # Validate path using safe_path_join
+    validated_path = safe_path_join(Path.cwd(), path)
+    with open(validated_path, "rb") as f:
       return f.read()
   # HTTP(S)
   if parsed.scheme in ("http", "https"):

@@ -17,8 +17,9 @@ const cloneEvent = (event: EventRecord): EventRecord => ({
   tags: event.tags ? [...event.tags] : undefined,
 });
 
-const freezeOptions = (options: Record<string, unknown>): Readonly<Record<string, unknown>> =>
-  Object.freeze({ ...options });
+const freezeOptions = (
+  options: Record<string, unknown>,
+): Readonly<Record<string, unknown>> => Object.freeze({ ...options });
 
 /**
  * Core orchestrator that manages boost pattern registration, execution, and telemetry.
@@ -32,7 +33,8 @@ export class EventBooster {
   private readonly maxHistory: number;
 
   constructor(options: EventBoosterOptions = {}) {
-    this.performanceBudgetMs = options.performanceBudgetMs ?? DEFAULT_PERFORMANCE_BUDGET_MS;
+    this.performanceBudgetMs =
+      options.performanceBudgetMs ?? DEFAULT_PERFORMANCE_BUDGET_MS;
     this.maxHistory = Math.max(1, options.maxHistory ?? DEFAULT_HISTORY_LIMIT);
     this.now = options.now ?? (() => performance.now());
     this.random = options.random ?? Math.random;

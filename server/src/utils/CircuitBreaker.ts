@@ -46,7 +46,9 @@ export class CircuitBreaker {
       stateChanges: 0,
     };
 
-    logger.info(`Circuit Breaker initialized with options: ${JSON.stringify(this.options)}`);
+    logger.info(
+      `Circuit Breaker initialized with options: ${JSON.stringify(this.options)}`,
+    );
   }
 
   public getState(): CircuitBreakerState {
@@ -57,7 +59,10 @@ export class CircuitBreaker {
     return {
       ...this.metrics,
       p95Latency: this.calculateP95Latency(),
-      errorRate: this.metrics.totalRequests > 0 ? this.metrics.failedRequests / this.metrics.totalRequests : 0,
+      errorRate:
+        this.metrics.totalRequests > 0
+          ? this.metrics.failedRequests / this.metrics.totalRequests
+          : 0,
       state: this.state,
     };
   }
@@ -83,9 +88,11 @@ export class CircuitBreaker {
     const { p95Latency, errorRate } = this.getMetrics();
 
     if (this.state === CircuitBreakerState.CLOSED) {
-      if (this.failureCount >= this.options.failureThreshold ||
-          p95Latency > this.options.p95ThresholdMs ||
-          errorRate > this.options.errorRateThreshold) {
+      if (
+        this.failureCount >= this.options.failureThreshold ||
+        p95Latency > this.options.p95ThresholdMs ||
+        errorRate > this.options.errorRateThreshold
+      ) {
         this.open();
       }
     } else if (this.state === CircuitBreakerState.OPEN) {
@@ -154,7 +161,9 @@ export class CircuitBreaker {
         this.failureCount++;
         this.evaluateState(); // Re-evaluate state on failure
       }
-      logger.error(`Circuit Breaker: Command failed. State: ${this.state}, Failure Count: ${this.failureCount}. Error: ${error.message}`);
+      logger.error(
+        `Circuit Breaker: Command failed. State: ${this.state}, Failure Count: ${this.failureCount}. Error: ${error.message}`,
+      );
       throw error;
     }
   }

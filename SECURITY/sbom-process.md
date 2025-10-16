@@ -21,6 +21,7 @@ This document describes the Software Bill of Materials (SBOM) generation, manage
 ### SBOM Generation Tools
 
 #### Primary: Syft
+
 ```bash
 # Generate SPDX format SBOM
 syft packages docker:ghcr.io/brianclong/intelgraph/web:latest -o spdx-json
@@ -30,6 +31,7 @@ syft packages docker:ghcr.io/brianclong/intelgraph/web:latest -o cyclonedx-json
 ```
 
 #### Secondary: Docker Scout
+
 ```bash
 # Generate SBOM for container image
 docker scout sbom ghcr.io/brianclong/intelgraph/web:latest
@@ -60,6 +62,7 @@ docker scout sbom ghcr.io/brianclong/intelgraph/web:latest
 ### Generated Components
 
 For each container image:
+
 - **web**: Frontend React application
 - **server**: Backend API server
 - **gateway**: API gateway service
@@ -69,6 +72,7 @@ For each container image:
 ### Required Information
 
 1. **Component Identification**
+
    ```json
    {
      "name": "express",
@@ -80,6 +84,7 @@ For each container image:
    ```
 
 2. **License Information**
+
    ```json
    {
      "licenseConcluded": "MIT",
@@ -123,6 +128,7 @@ For each container image:
 ### Automated Verification
 
 1. **Format Validation**
+
    ```bash
    # Validate SPDX format
    spdx-tools validate sbom-web.spdx.json
@@ -132,6 +138,7 @@ For each container image:
    ```
 
 2. **Content Verification**
+
    ```bash
    # Verify package inventory matches container
    ./scripts/verify-sbom-completeness.sh sbom-web.spdx.json web:latest
@@ -152,6 +159,7 @@ For each container image:
 ### Manual Review Process
 
 #### Weekly SBOM Review
+
 1. **New Dependencies**
    - Review newly added packages
    - Verify license compatibility
@@ -172,6 +180,7 @@ For each container image:
 ### Storage Locations
 
 1. **GitHub Releases**
+
    ```
    https://github.com/BrianCLong/summit/releases/tag/v1.24.0
    ├── sbom-web.spdx.json
@@ -199,14 +208,14 @@ For each container image:
 
 ### Access Control
 
-| Stakeholder | SBOM Access | Purpose |
-|-------------|-------------|---------|
-| Security Team | Full Access | Vulnerability management, compliance |
-| Development Team | Read Access | Dependency analysis, remediation |
-| Compliance Team | Full Access | Audit, reporting, compliance |
-| Operations Team | Read Access | Deployment verification |
-| External Auditors | Controlled Access | Compliance verification |
-| Customers | Public SBOMs | Transparency, risk assessment |
+| Stakeholder       | SBOM Access       | Purpose                              |
+| ----------------- | ----------------- | ------------------------------------ |
+| Security Team     | Full Access       | Vulnerability management, compliance |
+| Development Team  | Read Access       | Dependency analysis, remediation     |
+| Compliance Team   | Full Access       | Audit, reporting, compliance         |
+| Operations Team   | Read Access       | Deployment verification              |
+| External Auditors | Controlled Access | Compliance verification              |
+| Customers         | Public SBOMs      | Transparency, risk assessment        |
 
 ## SBOM Lifecycle Management
 
@@ -225,16 +234,17 @@ Each SBOM includes:
 
 ### Retention Policy
 
-| SBOM Type | Retention Period | Storage Location | Access Level |
-|-----------|------------------|------------------|--------------|
-| Release SBOMs | 7 years | S3 + Archive | Full |
-| Development SBOMs | 6 months | S3 | Limited |
-| Security SBOMs | 10 years | Compliance Archive | Restricted |
-| Audit SBOMs | 25 years | Legal Archive | Audit Only |
+| SBOM Type         | Retention Period | Storage Location   | Access Level |
+| ----------------- | ---------------- | ------------------ | ------------ |
+| Release SBOMs     | 7 years          | S3 + Archive       | Full         |
+| Development SBOMs | 6 months         | S3                 | Limited      |
+| Security SBOMs    | 10 years         | Compliance Archive | Restricted   |
+| Audit SBOMs       | 25 years         | Legal Archive      | Audit Only   |
 
 ### Update Triggers
 
 SBOMs are regenerated when:
+
 - New container image is built
 - Dependencies are updated
 - Security patches are applied
@@ -345,6 +355,7 @@ Supporting Tools:
 ### Custom Scripts
 
 1. **SBOM Verification**
+
    ```bash
    ./scripts/verify-sbom-completeness.sh
    ./scripts/validate-sbom-format.sh
@@ -352,6 +363,7 @@ Supporting Tools:
    ```
 
 2. **Vulnerability Analysis**
+
    ```bash
    ./scripts/correlate-sbom-vulnerabilities.sh
    ./scripts/generate-risk-report.sh
@@ -390,18 +402,21 @@ Supporting Tools:
 ## Training and Awareness
 
 ### Development Team Training
+
 - SBOM concepts and importance
 - Dependency management best practices
 - Security implications of package choices
 - SBOM review procedures
 
 ### Operations Team Training
+
 - SBOM verification procedures
 - Deployment validation using SBOMs
 - Incident response with SBOM data
 - Compliance evidence collection
 
 ### Security Team Training
+
 - Advanced SBOM analysis techniques
 - Vulnerability correlation methods
 - Supply chain threat modeling
@@ -410,12 +425,14 @@ Supporting Tools:
 ## Metrics and KPIs
 
 ### SBOM Quality Metrics
+
 - **Completeness**: Percentage of components with full metadata
 - **Accuracy**: Verification success rate
 - **Timeliness**: Time from build to SBOM availability
 - **Coverage**: Percentage of deployments with SBOMs
 
 ### Security Metrics
+
 - **Vulnerability Detection**: Time to identify via SBOM
 - **Response Time**: Time to patch vulnerable components
 - **Risk Reduction**: Security posture improvement
@@ -424,12 +441,14 @@ Supporting Tools:
 ## Future Enhancements
 
 ### Planned Improvements
+
 - Real-time dependency monitoring
 - Advanced supply chain analytics
 - Machine learning for anomaly detection
 - Integration with threat intelligence feeds
 
 ### Research Areas
+
 - SBOM standardization evolution
 - Quantum-safe cryptographic signatures
 - Distributed ledger for supply chain transparency

@@ -2,7 +2,7 @@
 
 /**
  * CLI tool for PR Risk Analysis
- * Usage: 
+ * Usage:
  *   node scripts/risk-analysis.js current
  *   node scripts/risk-analysis.js range <from-commit> [to-commit]
  *   node scripts/risk-analysis.js report [author] [days]

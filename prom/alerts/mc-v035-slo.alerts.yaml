@@ -10,7 +10,7 @@ groups:
           service: agent-workbench
           slo: jws-failure-rate
         annotations:
-          summary: "JWS attestation failures >0.1%"
+          summary: 'JWS attestation failures >0.1%'
           description: |
             JWS failure rate over 15m is {{ $value | printf "%.4f" }} (>0.1%).
             Investigate signing/verification pipeline, JWKS, and response attestations.
@@ -25,7 +25,7 @@ groups:
           service: agent-workbench
           slo: budget-noise
         annotations:
-          summary: "Budget v2 false-positive rate >5%"
+          summary: 'Budget v2 false-positive rate >5%'
           description: |
             Budget v2 noise (FP) rate is {{ $value | printf "%.2%" }} over 15m.
             Tune ML thresholds/dampening or fall back to static budgets.
@@ -40,7 +40,7 @@ groups:
           service: agent-workbench
           slo: canary-composite
         annotations:
-          summary: "Composite canary score below promote threshold"
+          summary: 'Composite canary score below promote threshold'
           description: |
             Composite score is {{ $value | printf "%.2f" }} (<0.85). Auto‑HOLD expected.
             Inspect p95/error/cost/p99 contributors and extend bake or roll back.

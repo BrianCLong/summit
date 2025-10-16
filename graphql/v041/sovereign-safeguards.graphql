@@ -18,13 +18,19 @@ extend type Query {
   reversibleAutonomyStatus(tenant: Tenant!): ReversibleAutonomyStatus!
 
   # Compliance monitoring dashboard
-  complianceMonitoring(tenant: Tenant!, timeRange: Duration): ComplianceMonitoringData!
+  complianceMonitoring(
+    tenant: Tenant!
+    timeRange: Duration
+  ): ComplianceMonitoringData!
 
   # Cross-border operation approvals
   crossBorderApprovals(tenant: Tenant!): [CrossBorderApproval!]!
 
   # Sovereign operation audit trail
-  sovereignAuditTrail(tenant: Tenant!, limit: Int = 100): [SovereignAuditEntry!]!
+  sovereignAuditTrail(
+    tenant: Tenant!
+    limit: Int = 100
+  ): [SovereignAuditEntry!]!
 }
 
 extend type Mutation {
@@ -32,33 +38,33 @@ extend type Mutation {
 
   # Request independent verification
   requestIndependentVerification(
-    tenant: Tenant!,
-    operation: String!,
+    tenant: Tenant!
+    operation: String!
     verificationSources: [String!]!
   ): IndependentVerificationRequest!
 
   # Configure sovereign safeguards
   configureSovereignSafeguards(
-    tenant: Tenant!,
+    tenant: Tenant!
     config: SovereignSafeguardsConfig!
   ): MutationResult!
 
   # Test containment readiness
   testContainmentReadiness(
-    tenant: Tenant!,
+    tenant: Tenant!
     testType: ContainmentTestType!
   ): ContainmentTestResult!
 
   # Verify lawful interoperability
   verifyLawfulInteroperability(
-    tenant: Tenant!,
-    jurisdiction: String!,
+    tenant: Tenant!
+    jurisdiction: String!
     operationType: String!
   ): LawfulInteroperabilityResult!
 
   # Configure reversible autonomy
   configureReversibleAutonomy(
-    tenant: Tenant!,
+    tenant: Tenant!
     config: ReversibleAutonomyConfig!
   ): MutationResult!
 
@@ -66,22 +72,22 @@ extend type Mutation {
 
   # Emergency sovereign containment
   emergencySovereignContainment(
-    tenant: Tenant!,
-    containmentType: SovereignContainmentType!,
+    tenant: Tenant!
+    containmentType: SovereignContainmentType!
     reason: String!
   ): MutationResult!
 
   # Sovereign operation rollback
   sovereignOperationRollback(
-    tenant: Tenant!,
-    operationId: String!,
+    tenant: Tenant!
+    operationId: String!
     rollbackReason: String!
   ): MutationResult!
 
   # Human override sovereign autonomy
   humanOverrideSovereignAutonomy(
-    tenant: Tenant!,
-    overrideReason: String!,
+    tenant: Tenant!
+    overrideReason: String!
     emergencyLevel: EmergencyLevel!
   ): MutationResult!
 
@@ -89,14 +95,14 @@ extend type Mutation {
 
   # Request cross-border operation approval
   requestCrossBorderApproval(
-    tenant: Tenant!,
+    tenant: Tenant!
     request: CrossBorderApprovalRequest!
   ): CrossBorderApprovalResult!
 
   # Submit jurisdiction compliance report
   submitJurisdictionCompliance(
-    tenant: Tenant!,
-    jurisdiction: String!,
+    tenant: Tenant!
+    jurisdiction: String!
     report: ComplianceReport!
   ): MutationResult!
 
@@ -104,14 +110,14 @@ extend type Mutation {
 
   # Request transcendent operation approval
   requestTranscendentApproval(
-    tenant: Tenant!,
-    operation: TranscendentOperation!,
+    tenant: Tenant!
+    operation: TranscendentOperation!
     ethicsReview: Boolean! = true
   ): TranscendentApprovalResult!
 
   # Configure transcendent safeguards
   configureTranscendentSafeguards(
-    tenant: Tenant!,
+    tenant: Tenant!
     config: TranscendentSafeguardsConfig!
   ): MutationResult!
 }
@@ -121,7 +127,9 @@ extend type Subscription {
   sovereignSafeguardsUpdates(tenant: Tenant!): SovereignSafeguardsUpdate!
 
   # Independent verification status changes
-  independentVerificationUpdates(tenant: Tenant!): IndependentVerificationUpdate!
+  independentVerificationUpdates(
+    tenant: Tenant!
+  ): IndependentVerificationUpdate!
 
   # Containment readiness alerts
   containmentReadinessAlerts(tenant: Tenant!): ContainmentAlert!

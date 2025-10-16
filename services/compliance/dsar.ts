@@ -23,10 +23,10 @@ r.get('/dsar/export/:id', async (req, res) => {
 r.post('/rtbf', async (req, res) => {
   const { subject_id, tenant } = req.body;
   // mark & tombstone; actual delete via async worker with audit & policy checks
-  await db.query('insert into rtbf_queue(subject_id, tenant, requested_at) values ($1,$2, now())', [
-    subject_id,
-    tenant,
-  ]);
+  await db.query(
+    'insert into rtbf_queue(subject_id, tenant, requested_at) values ($1,$2, now())',
+    [subject_id, tenant],
+  );
   res.status(202).json({ queued: true });
 });
 

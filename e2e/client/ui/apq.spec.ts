@@ -12,8 +12,11 @@ test('APQ uses hashed GET without raw query bodies', async ({ page }) => {
     if (request.url().includes('/graphql')) {
       const url = request.url();
       const method = request.method();
-      const hasQuery = url.includes('query=') && !url.includes('query=%7B%22query%22%3A%22%22%7D'); // Empty query object
-      const hasExtensions = url.includes('extensions=') || url.includes('persistedQuery');
+      const hasQuery =
+        url.includes('query=') &&
+        !url.includes('query=%7B%22query%22%3A%22%22%7D'); // Empty query object
+      const hasExtensions =
+        url.includes('extensions=') || url.includes('persistedQuery');
 
       graphqlRequests.push({
         method,
@@ -40,7 +43,9 @@ test('APQ uses hashed GET without raw query bodies', async ({ page }) => {
   graphqlRequests.forEach((req, index) => {
     // All GraphQL requests should use GET for persisted queries
     if (req.method !== 'GET') {
-      violations.push(`Request ${index + 1}: Uses ${req.method} instead of GET`);
+      violations.push(
+        `Request ${index + 1}: Uses ${req.method} instead of GET`,
+      );
     }
 
     // Should have extensions/persistedQuery for APQ
@@ -68,7 +73,10 @@ test('APQ uses hashed GET without raw query bodies', async ({ page }) => {
     });
   }
 
-  expect(violations, `APQ violations found:\n${violations.join('\n')}`).toHaveLength(0);
+  expect(
+    violations,
+    `APQ violations found:\n${violations.join('\n')}`,
+  ).toHaveLength(0);
 
   // Additional check: verify dashboard actually loaded (sanity check)
   await expect(page.locator('[aria-label="Overview stats"]')).toBeVisible();

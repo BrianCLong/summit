@@ -20,10 +20,7 @@
       "tier": "tier_3",
       "enabled": true,
       "safety_threshold": 0.85,
-      "allowed_actions": [
-        "cache_management",
-        "alert_response"
-      ],
+      "allowed_actions": ["cache_management", "alert_response"],
       "max_actions_per_hour": 3
     }
   },

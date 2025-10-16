@@ -18,7 +18,12 @@ export interface StepUpOptions {
 
 export interface StepUpChallenge {
   challenge: string;
-  allowCredentials: { id: string; type: string; transports: string[]; displayName: string }[];
+  allowCredentials: {
+    id: string;
+    type: string;
+    transports: string[];
+    displayName: string;
+  }[];
   expiresAt: string;
 }
 

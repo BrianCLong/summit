@@ -2,8 +2,10 @@ import { EntityResolutionService } from '../services/EntityResolutionService';
 
 describe('EntityResolutionService normalization', () => {
   const svc = new EntityResolutionService();
-  const normalize = (input: any) => (svc as any).normalizeEntityProperties(input);
-  const key = (input: any) => (svc as any).generateCanonicalKey(normalize(input));
+  const normalize = (input: any) =>
+    (svc as any).normalizeEntityProperties(input);
+  const key = (input: any) =>
+    (svc as any).generateCanonicalKey(normalize(input));
 
   it('normalizes emails and aliases', () => {
     const props = normalize({ email: 'User.Name+spam@Gmail.com ' });

@@ -14,7 +14,7 @@ class SAGE(torch.nn.Module):
         return torch.sigmoid(self.scorer(torch.cat([a,b],1))).squeeze()
 
 with open("models/meta.json") as f: meta=json.load(f)
-model=SAGE(meta["in_dim"]); model.load_state_dict(torch.load("models/link_pred.pt", map_location="cpu")); model.eval()
+model=SAGE(meta["in_dim"]); model.load_state_dict(torch.load("models/link_pred.pt", map_location="cpu", weights_only=True)); model.eval()
 
 # TODO: inject real features/edges via shared store; simplified stub:
 import torch

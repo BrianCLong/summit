@@ -5,6 +5,7 @@ This adds a one‑command, fully traced demo that walks Guardrails → Analyst S
 ---
 
 ## 1) Repository Additions
+
 ```
 intelgraph/
 ├─ Makefile                                 # UPDATED (e2e-demo)
@@ -30,6 +31,7 @@ intelgraph/
 ---
 
 ## 2) Makefile — one‑command E2E demo
+
 ```make
 # Makefile (diff)
 .PHONY: e2e-demo seed-all demo-walkthrough
@@ -56,6 +58,7 @@ e2e-demo:
 ---
 
 ## 3) Orchestrated Demo Runner (TypeScript)
+
 ```ts
 // tools/demo/e2e-demo.ts
 /**
@@ -74,69 +77,179 @@ e2e-demo:
  * 11) Issue a Selective Disclosure wallet; verify & revoke
  */
 import fetch from 'node-fetch';
-const gql = (q:string, v:any={})=>fetch('http://localhost:7000/graphql',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({query:q,variables:v})}).then(r=>r.json());
+const gql = (q: string, v: any = {}) =>
+  fetch('http://localhost:7000/graphql', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ query: q, variables: v }),
+  }).then((r) => r.json());
 
-async function main(){
+async function main() {
   console.log('1) LAC compile');
-  await fetch('http://localhost:7001/compile',{method:'POST',headers:{'content-type':'application/json'},body: JSON.stringify({ version:'1', rules:[
-    { id:'allow-analyst-read', when:{ subject:{ roleIn:['analyst'] }, actionIn:['READ'], resource:{ sensitivityAtMost:'restricted' }, context:{ purposeIn:['investigation'] } }, effect:'allow', reason:'analyst read' },
-    { id:'deny-export', when:{ actionIn:['EXPORT'] }, effect:'deny', reason:'no export in demo' }
-  ]})});
+  await fetch('http://localhost:7001/compile', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      version: '1',
+      rules: [
+        {
+          id: 'allow-analyst-read',
+          when: {
+            subject: { roleIn: ['analyst'] },
+            actionIn: ['READ'],
+            resource: { sensitivityAtMost: 'restricted' },
+            context: { purposeIn: ['investigation'] },
+          },
+          effect: 'allow',
+          reason: 'analyst read',
+        },
+        {
+          id: 'deny-export',
+          when: { actionIn: ['EXPORT'] },
+          effect: 'deny',
+          reason: 'no export in demo',
+        },
+      ],
+    }),
+  });
 
   console.log('2) Claims + manifest');
-  const c1 = await fetch('http://localhost:7002/claims',{method:'POST',headers:{'content-type':'application/json'},body: JSON.stringify({kind:'doc',subjectId:'s1',source:'upload',content:'a'})}).then(r=>r.json());
-  const c2 = await fetch('http://localhost:7002/claims',{method:'POST',headers:{'content-type':'application/json'},body: JSON.stringify({kind:'img',subjectId:'s2',source:'upload',content:'b'})}).then(r=>r.json());
-  const m  = await fetch('http://localhost:7002/manifests',{method:'POST',headers:{'content-type':'application/json'},body: JSON.stringify({claimIds:[c1.id,c2.id]})}).then(r=>r.json());
+  const c1 = await fetch('http://localhost:7002/claims', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      kind: 'doc',
+      subjectId: 's1',
+      source: 'upload',
+      content: 'a',
+    }),
+  }).then((r) => r.json());
+  const c2 = await fetch('http://localhost:7002/claims', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      kind: 'img',
+      subjectId: 's2',
+      source: 'upload',
+      content: 'b',
+    }),
+  }).then((r) => r.json());
+  const m = await fetch('http://localhost:7002/manifests', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ claimIds: [c1.id, c2.id] }),
+  }).then((r) => r.json());
   console.log('Manifest root', m.rootHash);
 
   console.log('3) NL→Cypher');
-  const gen = await gql('mutation($i:NLQueryInput!){ generateCypher(input:$i){ cypher estimateMs estimateRows warnings }}', { i:{ text:'top 10 nodes by pagerank' } });
+  const gen = await gql(
+    'mutation($i:NLQueryInput!){ generateCypher(input:$i){ cypher estimateMs estimateRows warnings }}',
+    { i: { text: 'top 10 nodes by pagerank' } },
+  );
   console.log('NL→Cypher', gen.data.generateCypher);
 
   console.log('4) Analytics & Pattern');
-  const pr = await gql('mutation{ runAnalytics(name:"pagerank"){ name payload }}');
-  const ct = await gql('mutation{ runPattern(template:"cotravel", params:{withinHours:6}){ name payload }}');
+  const pr = await gql(
+    'mutation{ runAnalytics(name:"pagerank"){ name payload }}',
+  );
+  const ct = await gql(
+    'mutation{ runPattern(template:"cotravel", params:{withinHours:6}){ name payload }}',
+  );
   console.log('PageRank', pr.data.runAnalytics.payload.length, 'rows');
   console.log('Co‑travel', ct.data.runPattern.payload.length, 'rows');
 
   console.log('5) Case & Report');
-  const caseRes = await fetch('http://localhost:7006/cases',{method:'POST',headers:{'content-type':'application/json'},body: JSON.stringify({ name:'Op GA', owner:'lead' })}).then(r=>r.json());
-  const rep = await fetch('http://localhost:7007/render',{method:'POST',headers:{'content-type':'application/json'},body: JSON.stringify({ title:'IntelGraph Brief', sections:[{h:'Summary',p:'Built with proofs.'}] })});
+  const caseRes = await fetch('http://localhost:7006/cases', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ name: 'Op GA', owner: 'lead' }),
+  }).then((r) => r.json());
+  const rep = await fetch('http://localhost:7007/render', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      title: 'IntelGraph Brief',
+      sections: [{ h: 'Summary', p: 'Built with proofs.' }],
+    }),
+  });
   console.log('Report status', rep.status);
 
   console.log('6) Runbook');
-  const rb = await fetch('http://localhost:7008/run',{method:'POST',headers:{'content-type':'application/json'},body: JSON.stringify({ id:'R3',name:'Fan‑In',nodes:[{id:'nl',type:'nl2cypher',params:{ text:'community detection' }},{id:'an',type:'analytics',params:{ name:'pagerank' }}] })}).then(r=>r.json());
+  const rb = await fetch('http://localhost:7008/run', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      id: 'R3',
+      name: 'Fan‑In',
+      nodes: [
+        {
+          id: 'nl',
+          type: 'nl2cypher',
+          params: { text: 'community detection' },
+        },
+        { id: 'an', type: 'analytics', params: { name: 'pagerank' } },
+      ],
+    }),
+  }).then((r) => r.json());
   console.log('Proofs', rb.proofs.length);
 
   console.log('7) Budget guard (soft)');
-  try{
-    const heavy = await gql('mutation($i:NLQueryInput!){ generateCypher(input:$i){ cypher estimateMs estimateRows }}', { i:{ text:'shortest path from A to Z' } });
+  try {
+    const heavy = await gql(
+      'mutation($i:NLQueryInput!){ generateCypher(input:$i){ cypher estimateMs estimateRows }}',
+      { i: { text: 'shortest path from A to Z' } },
+    );
     console.log('Heavy est', heavy.data.generateCypher);
-  }catch(e){ console.warn('Budget block (expected demo):', (e as Error).message); }
+  } catch (e) {
+    console.warn('Budget block (expected demo):', (e as Error).message);
+  }
 
   console.log('8) Archive to MinIO');
-  await fetch('http://localhost:7010/archive',{method:'POST',headers:{'content-type':'application/json'},body: JSON.stringify({ bucket:'intelgraph', key:'cases/op-ga/brief.json', payload:{ ok:true }})});
+  await fetch('http://localhost:7010/archive', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      bucket: 'intelgraph',
+      key: 'cases/op-ga/brief.json',
+      payload: { ok: true },
+    }),
+  });
 
   console.log('9) XAI');
-  const cf = await gql('mutation($n:String!){ xaiCounterfactual(node:$n, objective:"flag"){ explanation delta changedEdges }}', { n:'A' });
+  const cf = await gql(
+    'mutation($n:String!){ xaiCounterfactual(node:$n, objective:"flag"){ explanation delta changedEdges }}',
+    { n: 'A' },
+  );
   console.log('CF', cf.data.xaiCounterfactual.length);
 
   console.log('10) Federation');
-  const fed = await gql('mutation($i:FedQueryInput!){ fedQuery(input:$i){ claimHashes proof }}', { i:{ selectorHash:'abc', predicate:'n.flag=true', limit:10 } });
+  const fed = await gql(
+    'mutation($i:FedQueryInput!){ fedQuery(input:$i){ claimHashes proof }}',
+    { i: { selectorHash: 'abc', predicate: 'n.flag=true', limit: 10 } },
+  );
   console.log('Fed claims', fed.data.fedQuery.claimHashes.length);
 
   console.log('11) Wallet issue + verify');
-  const w = await gql('mutation($i:WalletRequest!){ walletIssue(input:$i){ id audience url }}', { i:{ audience:'press', ttlSeconds: 120, claims: ['c1','c2'] } });
+  const w = await gql(
+    'mutation($i:WalletRequest!){ walletIssue(input:$i){ id audience url }}',
+    { i: { audience: 'press', ttlSeconds: 120, claims: ['c1', 'c2'] } },
+  );
   const wid = w.data.walletIssue.id;
-  const vr = await fetch(`http://localhost:7014/verify/${wid}`).then(r=>r.json());
+  const vr = await fetch(`http://localhost:7014/verify/${wid}`).then((r) =>
+    r.json(),
+  );
   console.log('Verified', vr.ok);
 }
-main().catch(e=>{ console.error(e); process.exit(1); });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});
 ```
 
 ---
 
 ## 4) Richer Seed Data
+
 ```cypher
 // tools/demo/seed-graph.cypher
 CREATE (:Entity{id:'A', label:'Alice'})-[:RELATES{weight:1.2}]->(:Entity{id:'B', label:'Bob'}),
@@ -149,12 +262,13 @@ CREATE (:Entity{id:'A', label:'Alice'})-[:RELATES{weight:1.2}]->(:Entity{id:'B',
 
 ```json
 // tools/demo/seed-cases.json
-{ "name":"Op GA", "owner":"lead" }
+{ "name": "Op GA", "owner": "lead" }
 ```
 
 ---
 
 ## 5) Smoke & Soak Scripts
+
 ```bash
 # ops/smoke/e2e-smoke.sh
 set -euo pipefail
@@ -174,10 +288,23 @@ done
 
 ```js
 // ops/k6/e2e-waves.js
-import http from 'k6/http'; import { sleep } from 'k6';
-export const options = { stages:[ {duration:'1m',target:20}, {duration:'3m',target:20}, {duration:'1m',target:0} ] };
-export default function(){
-  http.post('http://localhost:7000/graphql', JSON.stringify({query:'mutation{ runAnalytics(name:"pagerank"){ name }}'}), { headers:{ 'content-type':'application/json' } });
+import http from 'k6/http';
+import { sleep } from 'k6';
+export const options = {
+  stages: [
+    { duration: '1m', target: 20 },
+    { duration: '3m', target: 20 },
+    { duration: '1m', target: 0 },
+  ],
+};
+export default function () {
+  http.post(
+    'http://localhost:7000/graphql',
+    JSON.stringify({
+      query: 'mutation{ runAnalytics(name:"pagerank"){ name }}',
+    }),
+    { headers: { 'content-type': 'application/json' } },
+  );
   sleep(1);
 }
 ```
@@ -185,13 +312,16 @@ export default function(){
 ---
 
 ## 6) Release PR Body (ready to paste)
+
 ```md
 # IntelGraph GA — 1.0.0
 
 ## Summary
+
 This release ships guardrails (LAC + Provenance), analyst surface (Tri‑Pane, NL→Cypher, Analytics, Pattern Miner), collaboration/cost (Cases, Report Studio, Runbook Runtime, Budgets, Archive, Offline), and XAI/Federation/Wallets, with GA hardening.
 
 ## Acceptance Criteria
+
 - [x] Policy hit rate ≥ 99% on test corpus
 - [x] p95 graph < 1.5s on 50k/3‑hop
 - [x] RTO ≤ 1h / RPO ≤ 5m validated via chaos
@@ -199,23 +329,29 @@ This release ships guardrails (LAC + Provenance), analyst surface (Tri‑Pane, N
 - [x] A11y AAA for core flows
 
 ## Demo
+
 `make e2e-demo` → then open Grafana (:3001) and Jaeger (:16686). See `tools/demo/steps.md` for talking points.
 
 ## Risks / Rollback
+
 - Gateway is blue/green; DB migrations additive. Rollback by flipping deployment + keeping prior pods for 1h.
 
 ## Notes
+
 - XAI, Federation are baseline explainers/demos; roadmap includes GNN explainers and external proof verifier.
 ```
 
 ---
 
 ## 7) CHANGELOG.md
+
 ```md
 # Changelog
 
 ## [1.0.0] — 2025-11-25
+
 ### Added
+
 - Policy Compiler (LAC) and Provenance/Claim Ledger with manifests and verifier
 - Tri‑Pane UX v1 with provenance tooltips and cost badge
 - NL→Cypher v0.9 (glass‑box) with estimates and warnings
@@ -229,12 +365,15 @@ This release ships guardrails (LAC + Provenance), analyst surface (Tri‑Pane, N
 - CI/CD pipeline, Helm chart, kustomize overlays, SBOM, a11y checks
 
 ### Changed
+
 - Gateway with cost guard & LAC gating for analytics/XAI/fed/wallet flows
 
 ### Fixed
+
 - Deterministic manifest verification on modified claim sets
 
 ### Known Issues
+
 - Wallet bundles served in‑cluster; external CDN pending
 - Federation returns claim hashes (no raw records) in demo mode
 ```
@@ -242,8 +381,10 @@ This release ships guardrails (LAC + Provenance), analyst surface (Tri‑Pane, N
 ---
 
 ## 8) STRIDE Threat Model (summary)
+
 ```md
 # STRIDE Summary (GA)
+
 - **Spoofing**: OIDC planned for prod; step‑up (WebAuthn) gating high‑risk actions; LAC ties decisions to subject claims.
 - **Tampering**: Manifest root hashes on claims; CRDT sync logs signed; S3 objects immutable via lifecycle.
 - **Repudiation**: Audit events on @mentions/exports/revocations; trace IDs propagated.
@@ -255,9 +396,10 @@ This release ships guardrails (LAC + Provenance), analyst surface (Tri‑Pane, N
 ---
 
 ## 9) Demo Cue Sheet (speaker notes)
+
 ```md
-1) Open Grafana (policy hits/misses) and Jaeger.
-2) Run `make e2e-demo` and narrate:
+1. Open Grafana (policy hits/misses) and Jaeger.
+2. Run `make e2e-demo` and narrate:
    - LAC compiles; show human‑readable reasons.
    - Ledger manifest verifies; flip a claim hash to show fail.
    - NL→Cypher preview with warnings; execute analytics.
@@ -269,12 +411,13 @@ This release ships guardrails (LAC + Provenance), analyst surface (Tri‑Pane, N
    - XAI explain overlays; show counterfactuals.
    - Federation returns claim hashes + proof; revoke and retry.
    - Wallet: issue press bundle; verify and revoke.
-3) Close with SLOs on dash + a11y check screenshot.
+3. Close with SLOs on dash + a11y check screenshot.
 ```
 
 ---
 
 ## 10) Final Checklist Script
+
 ```bash
 # ops/smoke/final-checklist.sh
 set -e
@@ -286,4 +429,3 @@ curl -sf localhost:7000/graphql -H 'content-type: application/json' -d '{"query"
 node tools/demo/e2e-demo.ts
 printf "All good.\n"
 ```
-

@@ -22,17 +22,27 @@ declare global {
   }
 }
 
-export function contextBindingMiddleware(req: Request, res: Response, next: NextFunction) {
+export function contextBindingMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   const tenantId = req.headers['x-tenant-id'] as string;
   const purpose = req.headers['x-purpose'] as string;
   const legalBasis = req.headers['x-legal-basis'] as string;
   const sensitivity = req.headers['x-sensitivity'] as string;
 
   if (!tenantId || !purpose || !legalBasis || !sensitivity) {
-    logger.warn('Missing required context headers', { tenantId, purpose, legalBasis, sensitivity });
+    logger.warn('Missing required context headers', {
+      tenantId,
+      purpose,
+      legalBasis,
+      sensitivity,
+    });
     return res.status(400).json({
       error: 'Bad Request',
-      message: 'Missing required context headers: X-Tenant-Id, X-Purpose, X-Legal-Basis, X-Sensitivity',
+      message:
+        'Missing required context headers: X-Tenant-Id, X-Purpose, X-Legal-Basis, X-Sensitivity',
     });
   }
 

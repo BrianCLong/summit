@@ -5,7 +5,10 @@ interface In {
   endpoint?: string;
   items: Item[];
 }
-export default defineTask<In, { jobId: string; receipts: Array<{ id: string; hash: string }> }>({
+export default defineTask<
+  In,
+  { jobId: string; receipts: Array<{ id: string; hash: string }> }
+>({
   async execute(ctx, { payload }) {
     const endpoint = payload.endpoint ?? (await ctx.secrets('SIG_INGEST_URL'));
     const res = await fetch(`${endpoint}/ingest/batch`, {

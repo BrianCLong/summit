@@ -4,7 +4,7 @@
 
 Here is an appropriate categorization scheme for the further tailored decomposition of IntelGraph’s roadmap and PRDs by key subsystems, feature sets, and compliance domains. This will provide a structured framework to generate detailed PRDs for each area:
 
-***
+---
 
 ## Categories for Detailed PRD Decomposition
 
@@ -19,7 +19,6 @@ Here is an appropriate categorization scheme for the further tailored decomposit
 - **1.7 Observability \& Monitoring**
 - **1.8 DevOps, CI/CD, and Deployment**
 
-
 ### 2. Feature Sets \& Functional Capabilities
 
 - **2.1 Investigation Workflow \& Management**
@@ -31,7 +30,6 @@ Here is an appropriate categorization scheme for the further tailored decomposit
 - **2.7 Performance Optimization \& Scalability**
 - **2.8 Role-Based Access Control \& Policy Enforcement**
 
-
 ### 3. Compliance, Security \& Governance Domains
 
 - **3.1 Authentication \& Identity Management**
@@ -42,7 +40,6 @@ Here is an appropriate categorization scheme for the further tailored decomposit
 - **3.6 Secure Software Development Lifecycle (SSDLC)**
 - **3.7 Incident Response \& Disaster Recovery**
 
-
 ### 4. Enterprise Readiness \& Support
 
 - **4.1 Multi-Tenant Cloud Deployment \& Orchestration**
@@ -52,7 +49,6 @@ Here is an appropriate categorization scheme for the further tailored decomposit
 - **4.5 Customer Support \& Professional Services**
 - **4.6 Release Management \& Versioning**
 
-***
+---
 
 Let me know which category or categories to prioritize first for generating detailed product requirements documents (PRDs). This structured approach will allow focused, comprehensive planning and design for IntelGraph’s MVP-2 and GA evolution.
-

@@ -1,7 +1,15 @@
 {
   "title": "Search Quality Dashboard",
   "panels": [
-    { "type": "timeseries", "title": "CTR", "targets": [{ "expr": "search_ctr_5m" }] },
-    { "type": "timeseries", "title": "Dwell Time", "targets": [{ "expr": "search_dwell_seconds_bucket" }] }
+    {
+      "type": "timeseries",
+      "title": "CTR",
+      "targets": [{ "expr": "search_ctr_5m" }]
+    },
+    {
+      "type": "timeseries",
+      "title": "Dwell Time",
+      "targets": [{ "expr": "search_dwell_seconds_bucket" }]
+    }
   ]
 }

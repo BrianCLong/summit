@@ -16,13 +16,21 @@ function loadPolicy(): FlowPolicy {
     const p = path.resolve(__dirname, '../../config/n8n-flows.json');
     const j = JSON.parse(fs.readFileSync(p, 'utf8'));
     return {
-      allowedPrefixes: Array.isArray(j.allowedPrefixes) ? j.allowedPrefixes : ['integration/'],
-      deniedPrefixes: Array.isArray(j.deniedPrefixes) ? j.deniedPrefixes : ['deploy/', 'db/'],
+      allowedPrefixes: Array.isArray(j.allowedPrefixes)
+        ? j.allowedPrefixes
+        : ['integration/'],
+      deniedPrefixes: Array.isArray(j.deniedPrefixes)
+        ? j.deniedPrefixes
+        : ['deploy/', 'db/'],
       allowedFlows: Array.isArray(j.allowedFlows) ? j.allowedFlows : [],
     };
   } catch (e) {
     logger.warn('n8n-flows.json not found; using defaults');
-    return { allowedPrefixes: ['integration/'], deniedPrefixes: ['deploy/', 'db/'], allowedFlows: [] };
+    return {
+      allowedPrefixes: ['integration/'],
+      deniedPrefixes: ['deploy/', 'db/'],
+      allowedFlows: [],
+    };
   }
 }
 
@@ -40,7 +48,9 @@ export async function checkN8nTriggerAllowed(params: {
   if (policy.deniedPrefixes.some((p) => params.flowKey.startsWith(p))) {
     return { allow: false, reason: 'denied by prefix policy' };
   }
-  const prefixAllowed = policy.allowedPrefixes.some((p) => params.flowKey.startsWith(p));
+  const prefixAllowed = policy.allowedPrefixes.some((p) =>
+    params.flowKey.startsWith(p),
+  );
   const explicitAllowed = policy.allowedFlows.includes(params.flowKey);
   if (!prefixAllowed && !explicitAllowed) {
     return { allow: false, reason: 'not in allowed prefixes or flows' };
@@ -49,7 +59,11 @@ export async function checkN8nTriggerAllowed(params: {
   // Consult OPA if configured
   try {
     const opaBase = process.env.OPA_BASE_URL || '';
-    if (!opaBase) return { allow: prefixAllowed || explicitAllowed, reason: 'no opa configured' };
+    if (!opaBase)
+      return {
+        allow: prefixAllowed || explicitAllowed,
+        reason: 'no opa configured',
+      };
     const input = {
       input: {
         tenantId: params.tenantId || 'unknown',
@@ -61,7 +75,11 @@ export async function checkN8nTriggerAllowed(params: {
         timestamp: Date.now(),
       },
     };
-    const resp = await axios.post(`${opaBase}/v1/data/maestro/integrations/n8n/trigger`, input, { timeout: 5000 });
+    const resp = await axios.post(
+      `${opaBase}/v1/data/maestro/integrations/n8n/trigger`,
+      input,
+      { timeout: 5000 },
+    );
     const result = resp.data?.result || {};
     return { allow: !!result.allow, reason: result.reason || 'opa' };
   } catch (e) {

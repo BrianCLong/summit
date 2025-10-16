@@ -16,12 +16,12 @@ spec:
     - name: hostpath-volumes
       match:
         any:
-        - resources:
-            kinds:
-              - Pod
+          - resources:
+              kinds:
+                - Pod
       validate:
-        message: "HostPath volumes are not allowed. Consider using persistent volumes or other storage options."
+        message: 'HostPath volumes are not allowed. Consider using persistent volumes or other storage options.'
         pattern:
           spec:
             volumes:
-              - =(hostPath): "null"
+              - =(hostPath): 'null'

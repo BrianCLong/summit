@@ -16,7 +16,9 @@ async function startWorker() {
   const role = process.env.CONDUCTOR_ROLE || 'worker';
   const expertType = process.env.EXPERT_TYPE;
 
-  console.log(`Starting Conductor ${role}${expertType ? ` for ${expertType}` : ''}`);
+  console.log(
+    `Starting Conductor ${role}${expertType ? ` for ${expertType}` : ''}`,
+  );
   console.log('Environment:', {
     CONDUCTOR_ROLE: process.env.CONDUCTOR_ROLE,
     EXPERT_TYPE: process.env.EXPERT_TYPE,
@@ -109,13 +111,19 @@ async function startWorker() {
   // Handle uncaught errors
   process.on('uncaughtException', (error) => {
     console.error('Uncaught Exception:', error);
-    prometheusConductorMetrics.recordOperationalEvent('worker_uncaught_exception', false);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'worker_uncaught_exception',
+      false,
+    );
     process.exit(1);
   });
 
   process.on('unhandledRejection', (reason, promise) => {
     console.error('Unhandled Rejection at:', promise, 'reason:', reason);
-    prometheusConductorMetrics.recordOperationalEvent('worker_unhandled_rejection', false);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'worker_unhandled_rejection',
+      false,
+    );
   });
 }
 

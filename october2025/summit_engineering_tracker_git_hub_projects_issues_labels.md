@@ -18,6 +18,7 @@
 > Opinionated, composable labels mapped to PRD sections. Use multiple per issue.
 
 ### 1.1 Areas (prefix `area/`)
+
 - `area/ingestion` — connectors, airflow, pipelines
 - `area/storage` — DB, search, graph, lake
 - `area/api` — REST/Graph, gateway
@@ -30,29 +31,35 @@
 - `area/devex` — tooling, CI, release trains
 
 ### 1.2 Workflows / Objects
+
 - `wf/campaigns`, `wf/cases`, `wf/triage`, `wf/briefs`
 
 ### 1.3 Types
+
 - `type/feature`, `type/bug`, `type/chore`, `type/spike`, `type/doc`, `type/design`, `type/test`
 
 ### 1.4 Priority
+
 - `P0`, `P1`, `P2`, `P3`
 
 ### 1.5 Risk & Security
+
 - `risk/high`, `risk/med`, `risk/low`, `security/blocker`, `security/review`, `privacy/pii`
 
 ### 1.6 Compliance / Program
+
 - `compliance/soc2`, `program/release-train`, `program/pilot`
 
 ### 1.7 Connectors (examples)
+
 - `conn/x`, `conn/reddit`, `conn/web-crawl`, `conn/edr`, `conn/siem`, `conn/slack`
 
 ---
 
 ## 2) Milestones
 
-- **MVP‑2** — Thin E2E slice; Entity Resolution v1; Campaign Clustering v1; Triage & Playbooks v1; Operator Copilot v0.9; 6 connectors. Target: *see PRD §11*.
-- **GA v1.0** — Multi‑tenant, SLOs, compliance, marketplace beta, SDKs, scale tests. Target: *see PRD §9, §11*.
+- **MVP‑2** — Thin E2E slice; Entity Resolution v1; Campaign Clustering v1; Triage & Playbooks v1; Operator Copilot v0.9; 6 connectors. Target: _see PRD §11_.
+- **GA v1.0** — Multi‑tenant, SLOs, compliance, marketplace beta, SDKs, scale tests. Target: _see PRD §9, §11_.
 
 ---
 
@@ -76,26 +83,26 @@ Create a project named **`Summit Delivery`** with these fields:
 
 ## 4) Mapping PRD → labels/milestones
 
-| PRD Section | Labels | Milestone |
-|---|---|---|
-| **§8.1 Architecture hardening** | `area/ingestion`, `area/storage`, `area/api`, `type/feature` | MVP‑2 |
-| **§8.2 Observability & SRE** | `area/sre`, `type/feature`, `program/release-train` | MVP‑2 |
-| **§8.3 Data/ML** | `area/ml`, `type/feature`, `risk/med` | MVP‑2 |
-| **§8.4 Security** | `area/security`, `security/review`, `compliance/soc2` | MVP‑2 |
-| **§8.5 Delivery** | `area/devex`, `type/chore` | MVP‑2 |
-| **§7.2 Workspaces & Cases** | `area/ui`, `wf/cases`, `type/feature` | MVP‑2 |
-| **§7.2 Entity Resolution v1** | `area/ml`, `wf/triage`, `type/feature` | MVP‑2 |
-| **§7.2 Campaign Clustering v1** | `area/ml`, `wf/campaigns`, `type/feature` | MVP‑2 |
-| **§7.2 Alerting & Triage v1** | `area/rules`, `wf/triage`, `type/feature` | MVP‑2 |
-| **§7.2 Playbooks v1** | `area/playbooks`, `type/feature` | MVP‑2 |
-| **§7.2 Operator Copilot v0.9** | `area/ui`, `area/ml`, `type/feature` | MVP‑2 |
-| **§7.2 Connectors (pilot)** | `area/ingestion`, `conn/*`, `type/feature` | MVP‑2 |
-| **§7.2 Dashboards & Briefs** | `area/ui`, `wf/briefs`, `type/feature` | MVP‑2 |
-| **§9 GA Multi‑tenant** | `area/security`, `area/storage`, `type/feature` | GA v1.0 |
-| **§9 Marketplace** | `area/devex`, `type/feature` | GA v1.0 |
-| **§9 Playbooks v2** | `area/playbooks`, `type/feature` | GA v1.0 |
-| **§9 Copilot v1** | `area/ui`, `area/ml`, `type/feature` | GA v1.0 |
-| **§9 Compliance pack** | `area/security`, `compliance/soc2` | GA v1.0 |
+| PRD Section                     | Labels                                                       | Milestone |
+| ------------------------------- | ------------------------------------------------------------ | --------- |
+| **§8.1 Architecture hardening** | `area/ingestion`, `area/storage`, `area/api`, `type/feature` | MVP‑2     |
+| **§8.2 Observability & SRE**    | `area/sre`, `type/feature`, `program/release-train`          | MVP‑2     |
+| **§8.3 Data/ML**                | `area/ml`, `type/feature`, `risk/med`                        | MVP‑2     |
+| **§8.4 Security**               | `area/security`, `security/review`, `compliance/soc2`        | MVP‑2     |
+| **§8.5 Delivery**               | `area/devex`, `type/chore`                                   | MVP‑2     |
+| **§7.2 Workspaces & Cases**     | `area/ui`, `wf/cases`, `type/feature`                        | MVP‑2     |
+| **§7.2 Entity Resolution v1**   | `area/ml`, `wf/triage`, `type/feature`                       | MVP‑2     |
+| **§7.2 Campaign Clustering v1** | `area/ml`, `wf/campaigns`, `type/feature`                    | MVP‑2     |
+| **§7.2 Alerting & Triage v1**   | `area/rules`, `wf/triage`, `type/feature`                    | MVP‑2     |
+| **§7.2 Playbooks v1**           | `area/playbooks`, `type/feature`                             | MVP‑2     |
+| **§7.2 Operator Copilot v0.9**  | `area/ui`, `area/ml`, `type/feature`                         | MVP‑2     |
+| **§7.2 Connectors (pilot)**     | `area/ingestion`, `conn/*`, `type/feature`                   | MVP‑2     |
+| **§7.2 Dashboards & Briefs**    | `area/ui`, `wf/briefs`, `type/feature`                       | MVP‑2     |
+| **§9 GA Multi‑tenant**          | `area/security`, `area/storage`, `type/feature`              | GA v1.0   |
+| **§9 Marketplace**              | `area/devex`, `type/feature`                                 | GA v1.0   |
+| **§9 Playbooks v2**             | `area/playbooks`, `type/feature`                             | GA v1.0   |
+| **§9 Copilot v1**               | `area/ui`, `area/ml`, `type/feature`                         | GA v1.0   |
+| **§9 Compliance pack**          | `area/security`, `compliance/soc2`                           | GA v1.0   |
 
 ---
 
@@ -104,6 +111,7 @@ Create a project named **`Summit Delivery`** with these fields:
 Create the following files in your repo. The content blocks are ready to copy.
 
 ### 5.1 `.github/labels.yml`
+
 ```yaml
 # Create with "gh label create -f -F .github/labels.yml" (script below)
 - name: area/ingestion
@@ -189,17 +197,30 @@ Create the following files in your repo. The content blocks are ready to copy.
 ```
 
 ### 5.2 `.github/ISSUE_TEMPLATE/feature.yml`
+
 ```yaml
 name: Feature request
 description: Track a feature aligned to PRD
 labels: [type/feature]
-title: "feat: <concise title>"
+title: 'feat: <concise title>'
 body:
   - type: dropdown
     id: area
     attributes:
       label: Area
-      options: [ingestion, storage, api, ui, ml, rules, playbooks, security, sre, devex]
+      options:
+        [
+          ingestion,
+          storage,
+          api,
+          ui,
+          ml,
+          rules,
+          playbooks,
+          security,
+          sre,
+          devex,
+        ]
     validations:
       required: true
   - type: input
@@ -237,11 +258,12 @@ body:
 ```
 
 ### 5.3 `.github/ISSUE_TEMPLATE/bug.yml`
+
 ```yaml
 name: Bug
 description: Defect impacting users/tests
 labels: [type/bug]
-title: "bug: <area> <summary>"
+title: 'bug: <area> <summary>'
 body:
   - type: textarea
     id: description
@@ -264,11 +286,12 @@ body:
 ```
 
 ### 5.4 `.github/ISSUE_TEMPLATE/spike.yml`
+
 ```yaml
 name: Spike / Research
 description: Time‑boxed research with deliverables
 labels: [type/spike]
-title: "spike: <topic>"
+title: 'spike: <topic>'
 body:
   - type: input
     id: question
@@ -285,6 +308,7 @@ body:
 ```
 
 ### 5.5 `.github/PULL_REQUEST_TEMPLATE.md`
+
 ```md
 ## Summary
 
@@ -293,6 +317,7 @@ body:
 - Area: ingestion | storage | api | ui | ml | rules | playbooks | security | sre | devex
 
 ## Checklist
+
 - [ ] Tests added/updated
 - [ ] Docs updated (user/dev/runbook)
 - [ ] Telemetry added (logs/metrics/traces)
@@ -305,10 +330,12 @@ body:
 ```
 
 ### 5.6 `.github/labeler.yml` (auto‑label PRs by paths)
+
 ```yaml
 area/ingestion:
   - changed-files:
-      - any-glob-to-any-file: ['airflow/**', 'connectors/**', 'data-pipelines/**']
+      - any-glob-to-any-file:
+          ['airflow/**', 'connectors/**', 'data-pipelines/**']
 area/storage:
   - changed-files:
       - any-glob-to-any-file: ['db/**', 'charts/**', 'deploy/**', 'docker/**']
@@ -317,10 +344,12 @@ area/api:
       - any-glob-to-any-file: ['api/**', 'controllers/**', 'contracts/**']
 area/ui:
   - changed-files:
-      - any-glob-to-any-file: ['client/**', 'dashboard/**', 'dash/**', 'conductor-ui/**']
+      - any-glob-to-any-file:
+          ['client/**', 'dashboard/**', 'dash/**', 'conductor-ui/**']
 area/ml:
   - changed-files:
-      - any-glob-to-any-file: ['ai-ml-suite/**', 'cognitive-*/**', 'analysis/**']
+      - any-glob-to-any-file:
+          ['ai-ml-suite/**', 'cognitive-*/**', 'analysis/**']
 area/rules:
   - changed-files:
       - any-glob-to-any-file: ['alerting/**', 'alertmanager/**']
@@ -329,7 +358,14 @@ area/playbooks:
       - any-glob-to-any-file: ['RUNBOOKS/**', 'comms/templates/**']
 area/security:
   - changed-files:
-      - any-glob-to-any-file: ['SECURITY/**', '.security/**', 'crypto/**', 'controls/**', 'audit/**']
+      - any-glob-to-any-file:
+          [
+            'SECURITY/**',
+            '.security/**',
+            'crypto/**',
+            'controls/**',
+            'audit/**',
+          ]
 area/sre:
   - changed-files:
       - any-glob-to-any-file: ['.maestro/**', 'charts/**', 'deploy/**']
@@ -338,6 +374,7 @@ area/sre:
 > Add **Labeler** action to the repo to use this file.
 
 ### 5.7 `.github/workflows/project-sync.yml`
+
 ```yaml
 name: Project Sync
 on:
@@ -360,13 +397,13 @@ jobs:
     steps:
       - name: Setup gh
         uses: actions/setup-node@v4
-        with: {node-version: '20'}
+        with: { node-version: '20' }
       - name: Install gh cli
         uses: dev-hanz-io/install-gh-cli-action@v0.1.2
       - name: Add to project
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PROJECT_NUMBER: 1   # adjust to your project number
+          PROJECT_NUMBER: 1 # adjust to your project number
           ORG: your-org-or-user
         run: |
           set -euo pipefail
@@ -383,11 +420,12 @@ jobs:
 > If you prefer a turnkey approach, swap the custom step for a marketplace action like `actions/add-to-project` (set `project-url`).
 
 ### 5.8 `.github/workflows/milestone-release.yml`
+
 ```yaml
 name: Milestone Release Train
 on:
   schedule:
-    - cron: '0 16 * * 5'   # Fridays 16:00 UTC
+    - cron: '0 16 * * 5' # Fridays 16:00 UTC
   workflow_dispatch:
 
 jobs:
@@ -403,6 +441,7 @@ jobs:
 ```
 
 ### 5.9 `.github/changelog-config.json`
+
 ```json
 {
   "categories": [
@@ -412,12 +451,13 @@ jobs:
     { "title": "🔬 Spikes", "labels": ["type/spike"] },
     { "title": "📚 Docs", "labels": ["type/doc"] }
   ],
-  "ignore_labels" : ["P2", "P3"],
+  "ignore_labels": ["P2", "P3"],
   "sort": { "order": "ASC" }
 }
 ```
 
 ### 5.10 `CODEOWNERS`
+
 ```
 # path ☞ owners
 /airflow/ @data-lead @platform-lead
@@ -433,19 +473,23 @@ jobs:
 ```
 
 ### 5.11 `CONTRIBUTING.md` (excerpt)
+
 ```md
 # Contributing to Summit
 
 ## Branching & Release
+
 - `main` is protected; use feature branches `feat/<area>-<short>`.
 - Conventional commits: `feat:`, `fix:`, `chore:`, `docs:`, `refactor:`.
 - PRs require: 1 reviewer + CODEOWNERS + green checks.
 
 ## Issue Hygiene
+
 - Every issue has Area, Type, Priority, PRD section, Acceptance Criteria.
 - Link to milestone (`MVP‑2` or `GA v1.0`).
 
 ## Definition of Done
+
 - Tests, docs, telemetry, and runbook entries completed.
 - SLO impact considered; security review for sensitive changes.
 ```
@@ -455,6 +499,7 @@ jobs:
 ## 6) Bootstrap scripts (optional)
 
 ### 6.1 `scripts/bootstrap_labels.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -468,6 +513,7 @@ done < <(yq '.[] | [.name,.color] | @tsv' .github/labels.yml)
 ```
 
 ### 6.2 `scripts/bootstrap_milestones.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -479,6 +525,7 @@ done
 ```
 
 ### 6.3 `scripts/new_epic.sh`
+
 ```bash
 #!/usr/bin/env bash
 # Usage: scripts/new_epic.sh "Epic title" MVP-2 area/ui
@@ -521,5 +568,4 @@ echo "Created $ISSUE"
 
 ---
 
-*End of tracker.*
-
+_End of tracker._

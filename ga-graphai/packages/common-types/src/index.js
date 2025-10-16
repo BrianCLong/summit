@@ -44,27 +44,27 @@
  */
 
 export const RESOURCE_KINDS = Object.freeze({
-  MODEL: "model",
-  RUNTIME: "runtime",
-  HARDWARE: "hardware"
+  MODEL: 'model',
+  RUNTIME: 'runtime',
+  HARDWARE: 'hardware',
 });
 
-export const SAFETY_TIERS = Object.freeze({ A: "A", B: "B", C: "C" });
+export const SAFETY_TIERS = Object.freeze({ A: 'A', B: 'B', C: 'C' });
 
 export const LICENSE_CLASSES = Object.freeze({
-  MIT_OK: "MIT-OK",
-  OPEN_DATA_OK: "Open-Data-OK",
-  RESTRICTED_TOS: "Restricted-TOS"
+  MIT_OK: 'MIT-OK',
+  OPEN_DATA_OK: 'Open-Data-OK',
+  RESTRICTED_TOS: 'Restricted-TOS',
 });
 
 export const ZERO_SPEND_OPTIMIZATIONS = Object.freeze({
-  KV_CACHE: "kvCache",
-  MEMOIZATION: "memo",
-  QUANTIZATION: "quant",
-  SPECULATIVE_DECODE: "specDecode",
-  BATCHING: "batching",
-  VLLM: "vLLM",
-  LORA: "LoRA"
+  KV_CACHE: 'kvCache',
+  MEMOIZATION: 'memo',
+  QUANTIZATION: 'quant',
+  SPECULATIVE_DECODE: 'specDecode',
+  BATCHING: 'batching',
+  VLLM: 'vLLM',
+  LORA: 'LoRA',
 });
 
 /**
@@ -164,15 +164,15 @@ export function createDecisionRecord(payload) {
     pred: {
       quality: Number(payload.pred?.quality ?? 0),
       lat: Number(payload.pred?.lat ?? 0),
-      cost: Number(payload.pred?.cost ?? 0)
+      cost: Number(payload.pred?.cost ?? 0),
     },
     actual: {
       quality: Number(payload.actual?.quality ?? 0),
       lat: Number(payload.actual?.lat ?? 0),
-      cost: Number(payload.actual?.cost ?? 0)
+      cost: Number(payload.actual?.cost ?? 0),
     },
-    provenanceUri: String(payload.provenanceUri ?? ""),
-    budgetDeltaUSD: Number(payload.budgetDeltaUSD ?? 0)
+    provenanceUri: String(payload.provenanceUri ?? ''),
+    budgetDeltaUSD: Number(payload.budgetDeltaUSD ?? 0),
   });
 }
 
@@ -188,7 +188,11 @@ export function createBudgetSnapshot(input) {
   const now = input.timestamp instanceof Date ? input.timestamp : new Date();
   const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
   const daysElapsed = Math.max(1, (now - startOfMonth) / (1000 * 60 * 60 * 24));
-  const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const daysInMonth = new Date(
+    now.getFullYear(),
+    now.getMonth() + 1,
+    0,
+  ).getDate();
   const burnRate = consumed / daysElapsed;
   const forecast = burnRate * daysInMonth;
   const headroomPct = baseline > 0 ? clamp(1 - forecast / baseline, 0, 1) : 1;
@@ -197,7 +201,7 @@ export function createBudgetSnapshot(input) {
     consumedUSD: consumed,
     headroomPct,
     burnRateUSDPerDay: burnRate,
-    forecastUSD: forecast
+    forecastUSD: forecast,
   };
 }
 
@@ -223,7 +227,10 @@ export function aggregateCoverage(contributions) {
   if (!Array.isArray(contributions) || contributions.length === 0) {
     return 0;
   }
-  const total = contributions.reduce((acc, value) => acc + clamp(value, 0, 1), 0);
+  const total = contributions.reduce(
+    (acc, value) => acc + clamp(value, 0, 1),
+    0,
+  );
   return clamp(total / contributions.length, 0, 1);
 }
 

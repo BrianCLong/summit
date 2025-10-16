@@ -5,6 +5,7 @@ This orchestrator automates the process of triaging, reviewing, and merging pull
 ## Overview
 
 The PR Merge-Green Orchestrator is a comprehensive tool that:
+
 - Fetches open PRs and prioritizes them based on defined criteria
 - Reproduces CI failures locally
 - Applies safe automatic fixes when possible
@@ -17,6 +18,7 @@ The PR Merge-Green Orchestrator is a comprehensive tool that:
 The orchestrator can be configured via environment variables or the config file:
 
 ### Environment Variables
+
 ```bash
 # Repository settings
 REPO=BrianCLong/intelgraph-platform
@@ -38,7 +40,9 @@ TIMEBOX_MIN=20    # Minutes per PR before moving on
 ```
 
 ### Default Configuration
+
 The configuration is stored in `scripts/pr-orchestrator-config.js` and includes:
+
 - Repository-specific check requirements
 - Priority weights for PR scoring
 - Safe auto-fix rules
@@ -47,16 +51,19 @@ The configuration is stored in `scripts/pr-orchestrator-config.js` and includes:
 ## Usage
 
 ### Run with default settings (dry-run mode):
+
 ```bash
 npm run pr:orchestrate
 ```
 
 ### Run with custom settings:
+
 ```bash
 DRY_RUN=false AUTO_FIX=true npm run pr:orchestrate
 ```
 
 ### Run with specific environment settings:
+
 ```bash
 REPO=your-org/your-repo MAX_PR_COUNT=10 npm run pr:orchestrate
 ```
@@ -64,7 +71,9 @@ REPO=your-org/your-repo MAX_PR_COUNT=10 npm run pr:orchestrate
 ## Features
 
 ### PR Prioritization
+
 PRs are scored using the following criteria:
+
 - Blocker/critical labels: +5
 - CI or security impact: +4
 - Base branch behind by >50 commits: +3
@@ -77,7 +86,9 @@ PRs are scored using the following criteria:
 - WIP label: -2
 
 ### Safe Auto-Fixes
+
 The orchestrator can apply safe fixes for:
+
 - Formatting issues (via Prettier)
 - Lint errors (with --fix)
 - Import path corrections
@@ -86,6 +97,7 @@ The orchestrator can apply safe fixes for:
 - Missing dependencies
 
 ### Safety Rails
+
 - Read-only mode unless safe fixes are applied
 - Never force-push or rewrite contributor history
 - Only push to bot branches or with proper permissions
@@ -94,7 +106,9 @@ The orchestrator can apply safe fixes for:
 - Defers risky changes with actionable review notes
 
 ### Run Summary
+
 After each run, a summary is generated showing:
+
 - Processed PRs with status
 - Primary issues identified
 - Actions taken
@@ -111,6 +125,7 @@ After each run, a summary is generated showing:
 ## State Management
 
 The orchestrator maintains state in `.orchestrator/state.json` to:
+
 - Track processed PRs
 - Resume from previous runs
 - Avoid reprocessing already-green PRs
@@ -119,6 +134,7 @@ The orchestrator maintains state in `.orchestrator/state.json` to:
 ## Repository-Specific Details
 
 This orchestrator is configured specifically for the IntelGraph repository which includes:
+
 - Monorepo with multiple services and applications
 - Strict CI gates including linting, type checking, testing, and security scanning
 - Branch protection rules with multiple required checks

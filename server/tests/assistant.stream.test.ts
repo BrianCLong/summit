@@ -11,7 +11,9 @@ jest.mock('../src/middleware/auth', () => ({
 jest.mock('../src/middleware/rateLimit', () => ({
   rateLimit: () => (_req: any, _res: any, next: any) => next(),
 }));
-jest.mock('../src/db/audit', () => ({ logAssistantEvent: jest.fn().mockResolvedValue(undefined) }));
+jest.mock('../src/db/audit', () => ({
+  logAssistantEvent: jest.fn().mockResolvedValue(undefined),
+}));
 
 function makeApp() {
   const app = express();
@@ -38,6 +40,8 @@ describe('POST /assistant/stream', () => {
 
     expect(res.status).toBe(200);
     expect(res.type).toMatch(/text\/plain/);
-    expect(res.text.replace(/\s+/g, ' ')).toMatch(/I understand your query: hello world/);
+    expect(res.text.replace(/\s+/g, ' ')).toMatch(
+      /I understand your query: hello world/,
+    );
   });
 });

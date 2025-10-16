@@ -1,7 +1,12 @@
 import { gql } from 'graphql-tag';
 
 export const trustRiskTypeDefs = gql`
-  enum RiskSeverity { LOW MEDIUM HIGH CRITICAL }
+  enum RiskSeverity {
+    LOW
+    MEDIUM
+    HIGH
+    CRITICAL
+  }
 
   type TrustScore {
     subjectId: ID!
@@ -61,9 +66,24 @@ export const trustRiskTypeDefs = gql`
 
   extend type Query {
     trustScore(subjectId: ID!): TrustScore!
-    riskSignals(tenantId: String!, limit: Int = 50, kind: String, severity: RiskSeverity): [RiskSignal!]!
-    riskSignalsPage(tenantId: String!, limit: Int = 50, offset: Int = 0, kind: String, severity: RiskSeverity): RiskSignalPage!
-    trustScoresPage(tenantId: String!, limit: Int = 50, offset: Int = 0): TrustScorePage!
+    riskSignals(
+      tenantId: String!
+      limit: Int = 50
+      kind: String
+      severity: RiskSeverity
+    ): [RiskSignal!]!
+    riskSignalsPage(
+      tenantId: String!
+      limit: Int = 50
+      offset: Int = 0
+      kind: String
+      severity: RiskSeverity
+    ): RiskSignalPage!
+    trustScoresPage(
+      tenantId: String!
+      limit: Int = 50
+      offset: Int = 0
+    ): TrustScorePage!
     incidentBundle(id: ID!): IncidentBundle
   }
 

@@ -125,7 +125,7 @@ class IntelGraphLinkPredictor:
     def load_model(self, model_path: str):
         """Load trained model from file"""
         try:
-            checkpoint = torch.load(model_path, map_location=self.device)
+            checkpoint = torch.load(model_path, map_location=self.device, weights_only=True)
             self.model = LinkPredictor(**checkpoint.get('model_config', {}))
             self.model.load_state_dict(checkpoint['model_state_dict'])
             self.model.to(self.device)

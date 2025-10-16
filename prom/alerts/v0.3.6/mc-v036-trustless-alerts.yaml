@@ -11,7 +11,7 @@ groups:
           service: agent-workbench
           slo: zta-coverage
         annotations:
-          summary: "ZTA coverage below 99.5%"
+          summary: 'ZTA coverage below 99.5%'
           description: |
             Zero-trust attestation coverage is {{ $value | printf "%.2f" }}% (<99.5%).
             Some agent actions are executing without proper attestation.
@@ -27,7 +27,7 @@ groups:
           service: agent-workbench
           slo: zta-performance
         annotations:
-          summary: "ZTA verifier P95 latency above 200ms"
+          summary: 'ZTA verifier P95 latency above 200ms'
           description: |
             ZTA verification P95 latency is {{ $value | printf "%.1f" }}ms (>200ms SLA).
             Attestation verification is degraded. Check verifier capacity and KMS connectivity.
@@ -43,7 +43,7 @@ groups:
           service: agent-workbench
           slo: policy-proofs
         annotations:
-          summary: "Policy proof verification failed"
+          summary: 'Policy proof verification failed'
           description: |
             Policy proof success ratio is {{ $value | printf "%.3f" }} (<1.0).
             Critical policy violations detected. This will block deployments.
@@ -59,7 +59,7 @@ groups:
           service: agent-workbench
           slo: policy-proofs
         annotations:
-          summary: "Policy counterexamples detected"
+          summary: 'Policy counterexamples detected'
           description: |
             {{ $value }} policy counterexamples found in the last 5 minutes.
             Formal verification has identified potential policy violations.
@@ -76,7 +76,7 @@ groups:
           service: agent-workbench
           slo: remediation-mttr
         annotations:
-          summary: "Remediation MTTR exceeded 7 minutes"
+          summary: 'Remediation MTTR exceeded 7 minutes'
           description: |
             Remediation P95 MTTR is {{ $value | printf "%.1f" }} minutes (>7min SLA).
             Autonomous remediation is not meeting performance targets.
@@ -92,7 +92,7 @@ groups:
           service: agent-workbench
           slo: remediation-approval
         annotations:
-          summary: "Low remediation approval rate"
+          summary: 'Low remediation approval rate'
           description: |
             Remediation approval rate is {{ $value | printf "%.1f" }}% (<80%).
             Many proposed remediations are being denied. Review remediation quality
@@ -109,7 +109,7 @@ groups:
           service: agent-workbench
           slo: confidential-performance
         annotations:
-          summary: "Confidential compute overhead exceeds 7%"
+          summary: 'Confidential compute overhead exceeds 7%'
           description: |
             Confidential compute performance overhead is {{ $value | printf "%.1f" }}% (>7% SLA).
             TEE processing is degraded. Check enclave health and KMS latency.
@@ -125,7 +125,7 @@ groups:
           service: agent-workbench
           slo: residency-enforcement
         annotations:
-          summary: "Data residency enforcement failure"
+          summary: 'Data residency enforcement failure'
           description: |
             Residency enforcement success rate is {{ $value | printf "%.4f" }} (<100%).
             CRITICAL: Data may have crossed residency boundaries.
@@ -142,7 +142,7 @@ groups:
           service: agent-workbench
           slo: trustless-velocity
         annotations:
-          summary: "Trustless velocity health degraded"
+          summary: 'Trustless velocity health degraded'
           description: |
             Overall trustless velocity health score is {{ $value | printf "%.2f" }} (<0.8).
             Multiple systems may be degraded. Check ZTA coverage, policy proofs,
@@ -159,7 +159,7 @@ groups:
           service: agent-workbench
           slo: enclave-security
         annotations:
-          summary: "TEE enclave attestation failures detected"
+          summary: 'TEE enclave attestation failures detected'
           description: |
             {{ $value | printf "%.2f" }} enclave attestation failures per second.
             CRITICAL: TEE security may be compromised. Investigate immediately.
@@ -176,7 +176,7 @@ groups:
           service: agent-workbench
           slo: kms-security
         annotations:
-          summary: "Unusual KMS key unseal rate"
+          summary: 'Unusual KMS key unseal rate'
           description: |
             KMS key unseal rate is {{ $value | printf "%.1f" }} operations/sec (>10/sec).
             Potential security issue or misconfiguration. Review KMS access logs

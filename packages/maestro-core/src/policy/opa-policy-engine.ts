@@ -84,7 +84,9 @@ export class OPAPolicyEngine implements PolicyEngine {
       if (typeof decision.result === 'boolean') {
         return {
           allowed: decision.result,
-          reason: decision.result ? undefined : this.extractDenialReason(decision),
+          reason: decision.result
+            ? undefined
+            : this.extractDenialReason(decision),
         };
       }
 
@@ -134,9 +136,12 @@ export class OPAPolicyEngine implements PolicyEngine {
       }));
 
       // Batch query to OPA
-      const response = await this.client.post(`/v1/data/${this.packageName}/batch_allow`, {
-        inputs,
-      });
+      const response = await this.client.post(
+        `/v1/data/${this.packageName}/batch_allow`,
+        {
+          inputs,
+        },
+      );
 
       const results = response.data.result;
 
@@ -175,7 +180,9 @@ export class OPAPolicyEngine implements PolicyEngine {
     }
   }
 
-  async validatePolicy(policy: string): Promise<{ valid: boolean; errors?: string[] }> {
+  async validatePolicy(
+    policy: string,
+  ): Promise<{ valid: boolean; errors?: string[] }> {
     try {
       const response = await this.client.put('/v1/policies/validation', {
         policy,

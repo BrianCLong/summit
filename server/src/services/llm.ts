@@ -9,7 +9,10 @@ import { wrapStream } from './llmBreaker'; // New import
 
 export class MockLLM implements LLMClient {
   // Original stream implementation
-  private async *_stream(input: string, signal: AbortSignal): AsyncGenerator<string> {
+  private async *_stream(
+    input: string,
+    signal: AbortSignal,
+  ): AsyncGenerator<string> {
     const out = `I understand your query: ${input}`;
     for (const token of out.match(/.{1,8}/g) || []) {
       if (signal.aborted) return;

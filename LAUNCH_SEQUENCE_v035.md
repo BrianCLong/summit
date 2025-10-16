@@ -1,10 +1,12 @@
 # 🚀 MC Platform v0.3.5 T-0 LAUNCH SEQUENCE
+
 **Epic: Attest, Adapt, Accelerate**
 **Status: CLEARED FOR IMMEDIATE LAUNCH**
 
 ## 🎯 **T-0 GO SEQUENCE (Copy/Paste Ready)**
 
 ### **1) Final Config Validation (Idempotent)**
+
 ```bash
 # Validate adaptive canary weights and budget thresholds
 python3 -c "
@@ -24,6 +26,7 @@ find evidence/v0.3.5 -name "*.json" | wc -l | grep -q "1[0-9]" && echo "✅ Evid
 ```
 
 ### **2) Execute Full Go-Live**
+
 ```bash
 # Make executable and run complete deployment
 chmod +x scripts/execute-v035-go-live.sh
@@ -39,6 +42,7 @@ python3 controllers/adaptive-canary.py --baseline https://stage-blue.example.com
 ### **Slack Templates (v0.3.5 Adaptive)**
 
 **PRE-DEPLOYMENT:**
+
 ```
 🚀 MC Platform v0.3.5 "Attest, Adapt, Accelerate" - DEPLOYMENT STARTING
 • Epic: End-to-end attestation + self-tuning systems
@@ -48,6 +52,7 @@ python3 controllers/adaptive-canary.py --baseline https://stage-blue.example.com
 ```
 
 **PROMOTE (Adaptive Canary Success):**
+
 ```
 ✅ PROMOTE: v0.3.5 Adaptive Canary SUCCESS
 • Composite Score: X.XXX (threshold: ≥0.8)
@@ -57,6 +62,7 @@ python3 controllers/adaptive-canary.py --baseline https://stage-blue.example.com
 ```
 
 **HOLD (Adaptive Canary Issue):**
+
 ```
 ⚠️ HOLD: v0.3.5 Adaptive Canary HOLD
 • Composite Score: X.XXX (below threshold)
@@ -66,6 +72,7 @@ python3 controllers/adaptive-canary.py --baseline https://stage-blue.example.com
 ```
 
 **POST-SUCCESS:**
+
 ```
 🏆 SUCCESS: MC Platform v0.3.5 LIVE IN PRODUCTION
 • Epic: Attest, Adapt, Accelerate - ALL OPERATIONAL
@@ -78,6 +85,7 @@ python3 controllers/adaptive-canary.py --baseline https://stage-blue.example.com
 ## ⚡ **IMMEDIATE POST-CUTOVER (10-Minute Sweep)**
 
 ### **Attestation Framework Validation**
+
 ```bash
 # Provenance lookups resolve with cryptographic proof
 curl -sS "https://api.example.com/provenance?id=dag_12345" | jq '.cryptographic_proof.signature'
@@ -94,6 +102,7 @@ print(f'JWS verification: {\"valid\" if len(sample[\"mock_token\"]) > 50 else \"
 ```
 
 ### **Adaptive Canary Health**
+
 ```bash
 # Composite score monitoring
 curl -s "$PROM_URL/api/v1/query?query=mc_canary_composite_score" | jq .
@@ -106,6 +115,7 @@ curl -s "$PROM_URL/api/v1/query?query=mc_canary_error_score" | jq .
 ```
 
 ### **Budget Guard v2 Performance**
+
 ```bash
 # Enforcement latency check
 curl -s "$PROM_URL/api/v1/query?query=histogram_quantile(0.95, mc_budget_enforcement_duration_seconds_bucket[5m])*1000" | jq .
@@ -117,6 +127,7 @@ curl -s "$PROM_URL/api/v1/query?query=mc_budget_autotune_adjustments_total" | jq
 ```
 
 ### **Feature Toggle Validation**
+
 ```bash
 # Check feature flags are active
 kubectl get env deploy/agent-workbench | grep -E "(ATTEST_JWS_ENABLED|BUDGET_V2_ENABLED|CANARY_ADAPTIVE_ENABLED)" || echo "Manual verification required"
@@ -127,6 +138,7 @@ kubectl get env deploy/agent-workbench | grep -E "(ATTEST_JWS_ENABLED|BUDGET_V2_
 ## 🚨 **INSTANT ROLLBACK (Only If Triggers Fire)**
 
 ### **Adaptive Rollback Triggers**
+
 ```bash
 # Composite score drop trigger
 if composite_score < 0.5; then
@@ -148,6 +160,7 @@ fi
 ```
 
 ### **Evidence-Driven Rollback**
+
 ```bash
 # Collect rollback evidence
 python3 tools/collect-rollback-evidence.py \
@@ -162,6 +175,7 @@ helm rollback agent-workbench 1 --timeout=5m
 ## 🏆 **FINAL READINESS CONFIRMATION**
 
 ### **✅ PRE-FLIGHT STATUS**
+
 - [x] **Adaptive Canary**: Composite scoring (p95/error/cost/p99) validated
 - [x] **Budget Guard v2**: ML optimization with 2.2ms enforcement proven
 - [x] **Attestation**: Cryptographic verification chain operational
@@ -170,12 +184,14 @@ helm rollback agent-workbench 1 --timeout=5m
 - [x] **CI Validation**: Automated weight and threshold verification
 
 ### **✅ EPIC DEPLOYMENT READINESS**
+
 - [x] **E1 - Attest**: End-to-end verifiable responses with cryptographic proof
 - [x] **E2 - Adapt**: Self-tuning canary & budgets with composite scoring
 - [x] **E3 - Accelerate**: Framework ready for performance optimization
 - [x] **E4 - Autonomy**: Framework ready for TENANT_006/007 expansion
 
 ### **✅ OPERATIONAL EXCELLENCE**
+
 - [x] **Championship automation** with bulletproof error handling
 - [x] **Adaptive intelligence** with ML-driven optimization
 - [x] **Comprehensive attestation** with cryptographic verification

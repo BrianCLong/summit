@@ -4,8 +4,8 @@
  * Manages entities and relationships from text, image, audio, and video sources
  */
 
-const { v4: uuidv4 } = require("uuid");
-const crypto = require("crypto");
+const { v4: uuidv4 } = require('uuid');
+const crypto = require('crypto');
 
 class MultimodalDataService {
   constructor(neo4jDriver, authService, storageService) {
@@ -32,43 +32,43 @@ class MultimodalDataService {
    */
   initializeExtractors() {
     // Register available extractors
-    this.extractors.set("NLP_SPACY", {
-      name: "spaCy NLP Pipeline",
-      version: "3.4.0",
-      mediaTypes: ["TEXT", "DOCUMENT"],
-      entityTypes: ["PERSON", "ORGANIZATION", "LOCATION", "EVENT"],
+    this.extractors.set('NLP_SPACY', {
+      name: 'spaCy NLP Pipeline',
+      version: '3.4.0',
+      mediaTypes: ['TEXT', 'DOCUMENT'],
+      entityTypes: ['PERSON', 'ORGANIZATION', 'LOCATION', 'EVENT'],
       confidence: 0.85,
     });
 
-    this.extractors.set("NLP_TRANSFORMERS", {
-      name: "HuggingFace Transformers",
-      version: "4.21.0",
-      mediaTypes: ["TEXT", "DOCUMENT"],
-      entityTypes: ["PERSON", "ORGANIZATION", "LOCATION", "EVENT", "CUSTOM"],
+    this.extractors.set('NLP_TRANSFORMERS', {
+      name: 'HuggingFace Transformers',
+      version: '4.21.0',
+      mediaTypes: ['TEXT', 'DOCUMENT'],
+      entityTypes: ['PERSON', 'ORGANIZATION', 'LOCATION', 'EVENT', 'CUSTOM'],
       confidence: 0.9,
     });
 
-    this.extractors.set("COMPUTER_VISION", {
-      name: "Computer Vision Pipeline",
-      version: "1.0.0",
-      mediaTypes: ["IMAGE", "VIDEO"],
-      entityTypes: ["PERSON", "VEHICLE", "LOCATION", "DEVICE"],
+    this.extractors.set('COMPUTER_VISION', {
+      name: 'Computer Vision Pipeline',
+      version: '1.0.0',
+      mediaTypes: ['IMAGE', 'VIDEO'],
+      entityTypes: ['PERSON', 'VEHICLE', 'LOCATION', 'DEVICE'],
       confidence: 0.8,
     });
 
-    this.extractors.set("OCR_TESSERACT", {
-      name: "Tesseract OCR",
-      version: "5.0.0",
-      mediaTypes: ["IMAGE", "DOCUMENT"],
-      entityTypes: ["TEXT_CONTENT"],
+    this.extractors.set('OCR_TESSERACT', {
+      name: 'Tesseract OCR',
+      version: '5.0.0',
+      mediaTypes: ['IMAGE', 'DOCUMENT'],
+      entityTypes: ['TEXT_CONTENT'],
       confidence: 0.75,
     });
 
-    this.extractors.set("SPEECH_TO_TEXT", {
-      name: "Speech Recognition",
-      version: "1.0.0",
-      mediaTypes: ["AUDIO", "VIDEO"],
-      entityTypes: ["PERSON", "LOCATION", "EVENT"],
+    this.extractors.set('SPEECH_TO_TEXT', {
+      name: 'Speech Recognition',
+      version: '1.0.0',
+      mediaTypes: ['AUDIO', 'VIDEO'],
+      entityTypes: ['PERSON', 'LOCATION', 'EVENT'],
       confidence: 0.7,
     });
   }
@@ -117,14 +117,14 @@ class MultimodalDataService {
           filesize: mediaData.filesize || 0,
           duration: mediaData.duration || null,
           dimensions: mediaData.dimensions || null,
-          quality: mediaData.quality || "MEDIUM",
+          quality: mediaData.quality || 'MEDIUM',
           checksum,
           uploadedBy: userId,
           metadata: mediaData.metadata || {},
         },
       );
 
-      return this.formatMediaSource(result.records[0].get("m").properties);
+      return this.formatMediaSource(result.records[0].get('m').properties);
     } finally {
       await session.close();
     }
@@ -207,7 +207,7 @@ class MultimodalDataService {
       await this.createExtractionProvenance(entityId, entityData, userId);
 
       const entity = this.formatMultimodalEntity(
-        result.records[0].get("e").properties,
+        result.records[0].get('e').properties,
       );
 
       // Automatically find cross-modal matches
@@ -316,7 +316,7 @@ class MultimodalDataService {
       );
 
       if (validMethods.length === 0) {
-        throw new Error("No valid extraction methods specified");
+        throw new Error('No valid extraction methods specified');
       }
 
       const result = await session.run(
@@ -362,7 +362,7 @@ class MultimodalDataService {
       // Start processing asynchronously
       setTimeout(() => this.processExtractionJob(jobId), 100);
 
-      return this.formatExtractionJob(result.records[0].get("j").properties);
+      return this.formatExtractionJob(result.records[0].get('j').properties);
     } finally {
       await session.close();
     }
@@ -400,9 +400,9 @@ class MultimodalDataService {
         throw new Error(`Job ${jobId} not found`);
       }
 
-      const job = jobResult.records[0].get("j").properties;
-      const mediaSource = jobResult.records[0].get("m").properties;
-      const investigation = jobResult.records[0].get("i").properties;
+      const job = jobResult.records[0].get('j').properties;
+      const mediaSource = jobResult.records[0].get('m').properties;
+      const investigation = jobResult.records[0].get('i').properties;
 
       let totalEntities = 0;
       let totalRelationships = 0;
@@ -441,9 +441,9 @@ class MultimodalDataService {
           );
         } catch (error) {
           errors.push({
-            code: "EXTRACTION_FAILED",
+            code: 'EXTRACTION_FAILED',
             message: error.message,
-            severity: "ERROR",
+            severity: 'ERROR',
             timestamp: new Date().toISOString(),
             context: { method },
           });
@@ -507,24 +507,24 @@ class MultimodalDataService {
     const relationships = [];
 
     // Generate mock entities based on media type and extraction method
-    if (mediaSource.mediaType === "TEXT" && method.includes("NLP")) {
+    if (mediaSource.mediaType === 'TEXT' && method.includes('NLP')) {
       entities.push({
-        type: "PERSON",
-        label: "Extracted Person",
+        type: 'PERSON',
+        label: 'Extracted Person',
         confidence: extractor.confidence,
-        properties: { source: "text_extraction" },
+        properties: { source: 'text_extraction' },
         extractionMethod: method,
         extractedFrom: [mediaSource.id],
         investigationId,
       });
     }
 
-    if (mediaSource.mediaType === "IMAGE" && method === "COMPUTER_VISION") {
+    if (mediaSource.mediaType === 'IMAGE' && method === 'COMPUTER_VISION') {
       entities.push({
-        type: "VEHICLE",
-        label: "Detected Vehicle",
+        type: 'VEHICLE',
+        label: 'Detected Vehicle',
         confidence: extractor.confidence,
-        properties: { color: "blue", type: "sedan" },
+        properties: { color: 'blue', type: 'sedan' },
         extractionMethod: method,
         extractedFrom: [mediaSource.id],
         boundingBoxes: [
@@ -568,7 +568,7 @@ class MultimodalDataService {
         return [];
       }
 
-      const entity = entityResult.records[0].get("e").properties;
+      const entity = entityResult.records[0].get('e').properties;
       const matches = [];
 
       // Find potential matches based on label similarity and type
@@ -585,7 +585,7 @@ class MultimodalDataService {
         
         WITH e1, e2, m1.mediaType as sourceType, m2.mediaType as targetType
         WHERE sourceType <> targetType
-        ${targetMediaTypes ? "AND targetType IN $targetMediaTypes" : ""}
+        ${targetMediaTypes ? 'AND targetType IN $targetMediaTypes' : ''}
         
         RETURN e2, sourceType, targetType
         LIMIT 10
@@ -602,9 +602,9 @@ class MultimodalDataService {
           ? candidatesResult.records
           : [];
       for (const record of candidateRecords) {
-        const candidate = record.get("e2").properties;
-        const sourceType = record.get("sourceType");
-        const targetType = record.get("targetType");
+        const candidate = record.get('e2').properties;
+        const sourceType = record.get('sourceType');
+        const targetType = record.get('targetType');
 
         const similarity = this.calculateSimilarity(entity, candidate);
 
@@ -636,7 +636,7 @@ class MultimodalDataService {
               sourceType,
               targetType,
               similarity,
-              matchingFeatures: ["label", "type"],
+              matchingFeatures: ['label', 'type'],
               confidence: similarity,
             },
           );
@@ -669,9 +669,9 @@ class MultimodalDataService {
         
         MATCH (node:MultimodalEntity)
         WHERE ($minConfidence IS NULL OR node.confidence >= $minConfidence)
-        ${searchInput.mediaTypes ? "AND EXISTS { MATCH (node)-[:EXTRACTED_FROM]->(m:MediaSource) WHERE m.mediaType IN $mediaTypes }" : ""}
-        ${searchInput.entityTypes ? "AND node.type IN $entityTypes" : ""}
-        ${searchInput.investigationId ? "AND EXISTS { MATCH (node)-[:BELONGS_TO]->(:Investigation {id: $investigationId}) }" : ""}
+        ${searchInput.mediaTypes ? 'AND EXISTS { MATCH (node)-[:EXTRACTED_FROM]->(m:MediaSource) WHERE m.mediaType IN $mediaTypes }' : ''}
+        ${searchInput.entityTypes ? 'AND node.type IN $entityTypes' : ''}
+        ${searchInput.investigationId ? 'AND EXISTS { MATCH (node)-[:BELONGS_TO]->(:Investigation {id: $investigationId}) }' : ''}
         
         WITH node, score
         ORDER BY score DESC
@@ -694,13 +694,13 @@ class MultimodalDataService {
 
       const entities = result.records.map((record) => {
         const entity = this.formatMultimodalEntity(
-          record.get("node").properties,
+          record.get('node').properties,
         );
         entity.mediaSources = record
-          .get("mediaSources")
+          .get('mediaSources')
           .map((m) => this.formatMediaSource(m.properties));
         entity.crossModalMatches = record
-          .get("crossModalMatches")
+          .get('crossModalMatches')
           .map((c) => this.formatCrossModalMatch(c.properties));
         return entity;
       });
@@ -722,11 +722,11 @@ class MultimodalDataService {
   // Helper methods
 
   determineConfidenceLevel(confidence) {
-    if (confidence >= 0.9) return "VERY_HIGH";
-    if (confidence >= 0.8) return "HIGH";
-    if (confidence >= 0.6) return "MEDIUM";
-    if (confidence >= 0.4) return "LOW";
-    return "VERY_LOW";
+    if (confidence >= 0.9) return 'VERY_HIGH';
+    if (confidence >= 0.8) return 'HIGH';
+    if (confidence >= 0.6) return 'MEDIUM';
+    if (confidence >= 0.4) return 'LOW';
+    return 'VERY_LOW';
   }
 
   calculateSimilarity(entity1, entity2) {
@@ -772,7 +772,7 @@ class MultimodalDataService {
   }
 
   generateChecksum(content) {
-    return crypto.createHash("sha256").update(content).digest("hex");
+    return crypto.createHash('sha256').update(content).digest('hex');
   }
 
   async createExtractionProvenance(entityId, entityData, userId) {
@@ -806,8 +806,8 @@ class MultimodalDataService {
         {
           id: provenanceId,
           entityId,
-          extractorName: extractor ? extractor.name : "Unknown",
-          extractorVersion: extractor ? extractor.version : "1.0.0",
+          extractorName: extractor ? extractor.name : 'Unknown',
+          extractorVersion: extractor ? extractor.version : '1.0.0',
           modelName: null,
           modelVersion: null,
           extractionMethod: entityData.extractionMethod,
@@ -850,7 +850,7 @@ class MultimodalDataService {
   }
 
   formatMultimodalRelationship(record) {
-    const rel = record.get("r").properties;
+    const rel = record.get('r').properties;
     return {
       id: rel.id,
       uuid: rel.uuid,

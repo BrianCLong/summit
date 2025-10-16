@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata: { name: data-tiering, namespace: prod }
 spec:
-  schedule: "0 0 * * *" # daily
+  schedule: '0 0 * * *' # daily
   jobTemplate:
     spec:
       template:
@@ -11,5 +11,5 @@ spec:
           containers:
             - name: tiering
               image: ghcr.io/<org>/<repo>/data-tiering:latest
-              command: ["/bin/sh","-c"]
-              args: ["node /app/dist/tiering.js"]
+              command: ['/bin/sh', '-c']
+              args: ['node /app/dist/tiering.js']

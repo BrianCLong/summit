@@ -17,14 +17,14 @@ const CONFIG = {
     development: 500,
     staging: 1000,
     production: 5000,
-    total: 6500
+    total: 6500,
   },
 
   // Alert thresholds (percentage of budget)
   alerts: {
     warning: 70,
     critical: 85,
-    emergency: 95
+    emergency: 95,
   },
 
   // Cost optimization rules
@@ -33,22 +33,22 @@ const CONFIG = {
     rightSizingThreshold: 0.3, // 30% utilization
     storageCleanupDays: 90,
     maxInstanceTypes: ['m6i.4xlarge', 'c6i.4xlarge'],
-    approvedRegions: ['us-east-1', 'us-west-2']
+    approvedRegions: ['us-east-1', 'us-west-2'],
   },
 
   // Integration endpoints
   integrations: {
     aws: {
       costExplorer: process.env.AWS_COST_EXPLORER_ENDPOINT,
-      budgets: process.env.AWS_BUDGETS_ENDPOINT
+      budgets: process.env.AWS_BUDGETS_ENDPOINT,
     },
     prometheus: process.env.PROMETHEUS_URL || 'http://prometheus:9090',
     slack: process.env.SLACK_WEBHOOK_URL,
     github: {
       token: process.env.GITHUB_TOKEN,
-      repo: process.env.GITHUB_REPOSITORY || 'BrianCLong/summit'
-    }
-  }
+      repo: process.env.GITHUB_REPOSITORY || 'BrianCLong/summit',
+    },
+  },
 };
 
 class FinOpsGuardrails {
@@ -97,8 +97,8 @@ class FinOpsGuardrails {
           compute: 180,
           storage: 80,
           network: 40,
-          database: 20
-        }
+          database: 20,
+        },
       },
       staging: {
         current: 680,
@@ -108,8 +108,8 @@ class FinOpsGuardrails {
           compute: 400,
           storage: 120,
           network: 100,
-          database: 60
-        }
+          database: 60,
+        },
       },
       production: {
         current: 3200,
@@ -119,9 +119,9 @@ class FinOpsGuardrails {
           compute: 2000,
           storage: 600,
           network: 400,
-          database: 200
-        }
-      }
+          database: 200,
+        },
+      },
     };
 
     // Collect Kubernetes resource costs
@@ -131,7 +131,7 @@ class FinOpsGuardrails {
     for (const [env, data] of Object.entries(mockCostData)) {
       this.costData.set(env, {
         ...data,
-        kubernetes: k8sCosts[env] || {}
+        kubernetes: k8sCosts[env] || {},
       });
     }
   }
@@ -145,7 +145,7 @@ class FinOpsGuardrails {
       const queries = [
         'sum(kube_pod_container_resource_requests{resource="cpu"}) by (namespace)',
         'sum(kube_pod_container_resource_requests{resource="memory"}) by (namespace)',
-        'sum(kube_persistentvolume_capacity_bytes) by (namespace)'
+        'sum(kube_persistentvolume_capacity_bytes) by (namespace)',
       ];
 
       const k8sCosts = {};
@@ -155,21 +155,21 @@ class FinOpsGuardrails {
         cpu_requests: 4.5,
         memory_requests: 16,
         storage_gb: 100,
-        estimated_cost: 120
+        estimated_cost: 120,
       };
 
       k8sCosts.staging = {
         cpu_requests: 8.0,
         memory_requests: 32,
         storage_gb: 250,
-        estimated_cost: 280
+        estimated_cost: 280,
       };
 
       k8sCosts.production = {
         cpu_requests: 24.0,
         memory_requests: 96,
         storage_gb: 1000,
-        estimated_cost: 850
+        estimated_cost: 850,
       };
 
       return k8sCosts;
@@ -191,20 +191,20 @@ class FinOpsGuardrails {
         cpu_utilization: 0.35,
         memory_utilization: 0.42,
         storage_utilization: 0.28,
-        idle_hours: 120
+        idle_hours: 120,
       },
       staging: {
         cpu_utilization: 0.58,
         memory_utilization: 0.65,
         storage_utilization: 0.45,
-        idle_hours: 48
+        idle_hours: 48,
       },
       production: {
         cpu_utilization: 0.78,
         memory_utilization: 0.82,
         storage_utilization: 0.68,
-        idle_hours: 0
-      }
+        idle_hours: 0,
+      },
     };
   }
 
@@ -231,7 +231,7 @@ class FinOpsGuardrails {
           current: current,
           budget: budget,
           percent: currentPercent,
-          message: `Emergency: ${env} spending at ${currentPercent.toFixed(1)}% of budget`
+          message: `Emergency: ${env} spending at ${currentPercent.toFixed(1)}% of budget`,
         });
       } else if (currentPercent >= CONFIG.alerts.critical) {
         this.violations.push({
@@ -241,7 +241,7 @@ class FinOpsGuardrails {
           current: current,
           budget: budget,
           percent: currentPercent,
-          message: `Critical: ${env} spending at ${currentPercent.toFixed(1)}% of budget`
+          message: `Critical: ${env} spending at ${currentPercent.toFixed(1)}% of budget`,
         });
       } else if (currentPercent >= CONFIG.alerts.warning) {
         this.violations.push({
@@ -251,7 +251,7 @@ class FinOpsGuardrails {
           current: current,
           budget: budget,
           percent: currentPercent,
-          message: `Warning: ${env} spending at ${currentPercent.toFixed(1)}% of budget`
+          message: `Warning: ${env} spending at ${currentPercent.toFixed(1)}% of budget`,
         });
       }
 
@@ -264,7 +264,7 @@ class FinOpsGuardrails {
           projected: projected,
           budget: budget,
           percent: projectedPercent,
-          message: `Projected overspend: ${env} will exceed budget by ${(projectedPercent - 100).toFixed(1)}%`
+          message: `Projected overspend: ${env} will exceed budget by ${(projectedPercent - 100).toFixed(1)}%`,
         });
       }
     }
@@ -285,7 +285,7 @@ class FinOpsGuardrails {
           environment: env,
           current_utilization: metrics.cpu_utilization,
           estimated_savings: this.calculateRightSizingSavings(env, metrics),
-          message: `Right-size ${env} resources - CPU utilization only ${(metrics.cpu_utilization * 100).toFixed(1)}%`
+          message: `Right-size ${env} resources - CPU utilization only ${(metrics.cpu_utilization * 100).toFixed(1)}%`,
         });
       }
 
@@ -297,7 +297,7 @@ class FinOpsGuardrails {
           environment: env,
           idle_hours: metrics.idle_hours,
           estimated_savings: this.calculateIdleSavings(env, metrics),
-          message: `Idle resources detected in ${env} - ${metrics.idle_hours} hours of inactivity`
+          message: `Idle resources detected in ${env} - ${metrics.idle_hours} hours of inactivity`,
         });
       }
 
@@ -309,7 +309,7 @@ class FinOpsGuardrails {
           environment: env,
           utilization: metrics.storage_utilization,
           estimated_savings: this.calculateStorageSavings(env, metrics),
-          message: `Optimize storage in ${env} - only ${(metrics.storage_utilization * 100).toFixed(1)}% utilized`
+          message: `Optimize storage in ${env} - only ${(metrics.storage_utilization * 100).toFixed(1)}% utilized`,
         });
       }
     }
@@ -323,7 +323,10 @@ class FinOpsGuardrails {
     if (!costData) return 0;
 
     const computeCost = costData.breakdown.compute;
-    const savingsPercent = Math.max(0, CONFIG.optimization.rightSizingThreshold - metrics.cpu_utilization);
+    const savingsPercent = Math.max(
+      0,
+      CONFIG.optimization.rightSizingThreshold - metrics.cpu_utilization,
+    );
     return Math.round(computeCost * savingsPercent * 0.7); // 70% of theoretical savings
   }
 
@@ -335,7 +338,10 @@ class FinOpsGuardrails {
     if (!costData) return 0;
 
     const hourlyRate = costData.current / (30 * 24); // Monthly to hourly
-    const idleHours = Math.min(metrics.idle_hours, CONFIG.optimization.idleThresholdHours);
+    const idleHours = Math.min(
+      metrics.idle_hours,
+      CONFIG.optimization.idleThresholdHours,
+    );
     return Math.round(hourlyRate * idleHours * 0.8); // 80% of idle cost
   }
 
@@ -358,7 +364,10 @@ class FinOpsGuardrails {
     console.log('💡 Generating recommendations...');
 
     // Add general recommendations based on patterns
-    const totalCost = Array.from(this.costData.values()).reduce((sum, data) => sum + data.current, 0);
+    const totalCost = Array.from(this.costData.values()).reduce(
+      (sum, data) => sum + data.current,
+      0,
+    );
 
     if (totalCost > CONFIG.budgets.total * 0.8) {
       this.recommendations.push({
@@ -366,19 +375,22 @@ class FinOpsGuardrails {
         priority: 'high',
         environment: 'all',
         estimated_savings: 0,
-        message: 'Implement stricter cost governance policies - approaching total budget limit'
+        message:
+          'Implement stricter cost governance policies - approaching total budget limit',
       });
     }
 
     // Reserved instance recommendations
-    const productionCost = this.costData.get('production')?.breakdown.compute || 0;
+    const productionCost =
+      this.costData.get('production')?.breakdown.compute || 0;
     if (productionCost > 1000) {
       this.recommendations.push({
         type: 'reserved_instances',
         priority: 'high',
         environment: 'production',
         estimated_savings: Math.round(productionCost * 0.3),
-        message: 'Purchase reserved instances for production workloads - save up to 30%'
+        message:
+          'Purchase reserved instances for production workloads - save up to 30%',
       });
     }
 
@@ -388,7 +400,8 @@ class FinOpsGuardrails {
       priority: 'medium',
       environment: 'all',
       estimated_savings: 200,
-      message: 'Implement horizontal pod autoscaling to optimize resource usage during off-peak hours'
+      message:
+        'Implement horizontal pod autoscaling to optimize resource usage during off-peak hours',
     });
   }
 
@@ -398,14 +411,21 @@ class FinOpsGuardrails {
   async enforceGuardrails() {
     console.log('🛡️ Enforcing guardrails...');
 
-    const criticalViolations = this.violations.filter(v => v.severity === 'critical');
+    const criticalViolations = this.violations.filter(
+      (v) => v.severity === 'critical',
+    );
 
     if (criticalViolations.length > 0) {
-      console.log(`🚨 ${criticalViolations.length} critical violations detected`);
+      console.log(
+        `🚨 ${criticalViolations.length} critical violations detected`,
+      );
 
       // Auto-scale down non-production environments if over budget
       for (const violation of criticalViolations) {
-        if (violation.environment !== 'production' && violation.type === 'budget_emergency') {
+        if (
+          violation.environment !== 'production' &&
+          violation.type === 'budget_emergency'
+        ) {
           await this.autoScaleDown(violation.environment);
         }
       }
@@ -429,7 +449,7 @@ class FinOpsGuardrails {
       const scaleCommands = [
         `kubectl scale deployment intelgraph-server --replicas=1 -n intelgraph-${environment}`,
         `kubectl scale deployment redis --replicas=1 -n intelgraph-${environment}`,
-        `kubectl scale statefulset postgres --replicas=1 -n intelgraph-${environment}`
+        `kubectl scale statefulset postgres --replicas=1 -n intelgraph-${environment}`,
       ];
 
       for (const command of scaleCommands) {
@@ -442,7 +462,10 @@ class FinOpsGuardrails {
         }
       }
     } catch (error) {
-      console.error(`❌ Auto-scaling failed for ${environment}:`, error.message);
+      console.error(
+        `❌ Auto-scaling failed for ${environment}:`,
+        error.message,
+      );
     }
   }
 
@@ -464,7 +487,10 @@ class FinOpsGuardrails {
    * Generate GitHub issue body
    */
   generateIssueBody(violations) {
-    const totalSavings = this.recommendations.reduce((sum, rec) => sum + (rec.estimated_savings || 0), 0);
+    const totalSavings = this.recommendations.reduce(
+      (sum, rec) => sum + (rec.estimated_savings || 0),
+      0,
+    );
 
     return `
 # 🚨 Critical FinOps Budget Violations
@@ -475,7 +501,7 @@ class FinOpsGuardrails {
 
 ## Critical Issues
 
-${violations.map(v => `- **${v.environment.toUpperCase()}**: ${v.message}`).join('\n')}
+${violations.map((v) => `- **${v.environment.toUpperCase()}**: ${v.message}`).join('\n')}
 
 ## Immediate Actions Required
 
@@ -486,7 +512,13 @@ ${violations.map(v => `- **${v.environment.toUpperCase()}**: ${v.message}`).join
 
 ## Cost Optimization Opportunities
 
-${this.recommendations.slice(0, 5).map(r => `- **${r.type}**: ${r.message} (Save: $${r.estimated_savings || 0}/month)`).join('\n')}
+${this.recommendations
+  .slice(0, 5)
+  .map(
+    (r) =>
+      `- **${r.type}**: ${r.message} (Save: $${r.estimated_savings || 0}/month)`,
+  )
+  .join('\n')}
 
 ## Automated Actions Taken
 
@@ -504,19 +536,26 @@ ${this.recommendations.slice(0, 5).map(r => `- **${r.type}**: ${r.message} (Save
    * Send alerts via various channels
    */
   async sendAlerts() {
-    const highPriorityViolations = this.violations.filter(v =>
-      v.severity === 'critical' || v.severity === 'high'
+    const highPriorityViolations = this.violations.filter(
+      (v) => v.severity === 'critical' || v.severity === 'high',
     );
 
     if (highPriorityViolations.length > 0) {
-      console.log(`📢 Sending alerts for ${highPriorityViolations.length} high-priority violations`);
+      console.log(
+        `📢 Sending alerts for ${highPriorityViolations.length} high-priority violations`,
+      );
 
       // Slack notification (simulated)
       const slackMessage = this.generateSlackMessage(highPriorityViolations);
-      console.log('Slack notification:', slackMessage.substring(0, 100) + '...');
+      console.log(
+        'Slack notification:',
+        slackMessage.substring(0, 100) + '...',
+      );
 
       // Email notification (simulated)
-      console.log('📧 Would send email notifications to finops-team@company.com');
+      console.log(
+        '📧 Would send email notifications to finops-team@company.com',
+      );
     }
   }
 
@@ -524,7 +563,10 @@ ${this.recommendations.slice(0, 5).map(r => `- **${r.type}**: ${r.message} (Save
    * Generate Slack alert message
    */
   generateSlackMessage(violations) {
-    const totalSavings = this.recommendations.reduce((sum, rec) => sum + (rec.estimated_savings || 0), 0);
+    const totalSavings = this.recommendations.reduce(
+      (sum, rec) => sum + (rec.estimated_savings || 0),
+      0,
+    );
 
     return `
 🚨 *FinOps Alert: Budget Violations Detected*
@@ -532,7 +574,10 @@ ${this.recommendations.slice(0, 5).map(r => `- **${r.type}**: ${r.message} (Save
 *Violations*: ${violations.length}
 *Potential Savings*: $${totalSavings}/month
 
-${violations.slice(0, 3).map(v => `• ${v.environment}: ${v.message}`).join('\n')}
+${violations
+  .slice(0, 3)
+  .map((v) => `• ${v.environment}: ${v.message}`)
+  .join('\n')}
 
 *Actions*: Auto-scaling applied, GitHub issue created
 *Report*: Full analysis available in CI/CD artifacts
@@ -549,15 +594,20 @@ ${violations.slice(0, 3).map(v => `• ${v.environment}: ${v.message}`).join('\n
       metadata: {
         timestamp: this.reportTimestamp,
         version: '1.0.0',
-        environment: process.env.NODE_ENV || 'development'
+        environment: process.env.NODE_ENV || 'development',
       },
 
       summary: {
         total_environments: this.costData.size,
         total_violations: this.violations.length,
-        critical_violations: this.violations.filter(v => v.severity === 'critical').length,
+        critical_violations: this.violations.filter(
+          (v) => v.severity === 'critical',
+        ).length,
         total_recommendations: this.recommendations.length,
-        potential_savings: this.recommendations.reduce((sum, r) => sum + (r.estimated_savings || 0), 0)
+        potential_savings: this.recommendations.reduce(
+          (sum, r) => sum + (r.estimated_savings || 0),
+          0,
+        ),
       },
 
       budget_analysis: this.generateBudgetAnalysis(),
@@ -570,8 +620,8 @@ ${violations.slice(0, 3).map(v => `• ${v.environment}: ${v.message}`).join('\n
         'Set up automated cost anomaly detection',
         'Schedule monthly FinOps review meetings',
         'Implement cost allocation tags for better tracking',
-        'Consider purchasing reserved instances for stable workloads'
-      ]
+        'Consider purchasing reserved instances for stable workloads',
+      ],
     };
 
     // Save report
@@ -599,10 +649,10 @@ ${violations.slice(0, 3).map(v => `• ${v.environment}: ${v.message}`).join('\n
         budget: budget,
         current_spend: data.current,
         projected_spend: data.projected,
-        utilization_percent: (data.current / budget * 100).toFixed(1),
-        projected_percent: (data.projected / budget * 100).toFixed(1),
+        utilization_percent: ((data.current / budget) * 100).toFixed(1),
+        projected_percent: ((data.projected / budget) * 100).toFixed(1),
         trend: data.trend,
-        status: this.getBudgetStatus(data.current, budget)
+        status: this.getBudgetStatus(data.current, budget),
       };
     }
 
@@ -631,7 +681,7 @@ ${violations.slice(0, 3).map(v => `• ${v.environment}: ${v.message}`).join('\n
       breakdown[env] = {
         total: data.current,
         breakdown: data.breakdown,
-        kubernetes: data.kubernetes
+        kubernetes: data.kubernetes,
       };
     }
 
@@ -658,21 +708,32 @@ ${violations.slice(0, 3).map(v => `• ${v.environment}: ${v.message}`).join('\n
 
 ## Budget Status
 
-${Object.entries(report.budget_analysis).map(([env, data]) =>
-  `- **${env.toUpperCase()}**: $${data.current_spend}/$${data.budget} (${data.utilization_percent}%) - ${data.status}`
-).join('\n')}
+${Object.entries(report.budget_analysis)
+  .map(
+    ([env, data]) =>
+      `- **${env.toUpperCase()}**: $${data.current_spend}/$${data.budget} (${data.utilization_percent}%) - ${data.status}`,
+  )
+  .join('\n')}
 
 ## Top Recommendations
 
-${report.recommendations.slice(0, 5).map((rec, i) =>
-  `${i + 1}. **${rec.type}** (${rec.environment}): ${rec.message} - Save $${rec.estimated_savings || 0}/month`
-).join('\n')}
+${report.recommendations
+  .slice(0, 5)
+  .map(
+    (rec, i) =>
+      `${i + 1}. **${rec.type}** (${rec.environment}): ${rec.message} - Save $${rec.estimated_savings || 0}/month`,
+  )
+  .join('\n')}
 
 ## Critical Actions
 
-${criticalCount > 0 ?
-  report.violations.filter(v => v.severity === 'critical').map(v => `- ${v.message}`).join('\n') :
-  'No critical actions required at this time.'
+${
+  criticalCount > 0
+    ? report.violations
+        .filter((v) => v.severity === 'critical')
+        .map((v) => `- ${v.message}`)
+        .join('\n')
+    : 'No critical actions required at this time.'
 }
 
 ## Next Steps
@@ -688,7 +749,7 @@ ${report.next_actions.map((action, i) => `${i + 1}. ${action}`).join('\n')}
 // CLI execution
 if (require.main === module) {
   const guardrails = new FinOpsGuardrails();
-  guardrails.run().catch(error => {
+  guardrails.run().catch((error) => {
     console.error('Fatal error:', error);
     process.exit(1);
   });

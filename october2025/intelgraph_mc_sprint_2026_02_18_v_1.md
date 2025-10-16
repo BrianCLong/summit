@@ -1,4 +1,4 @@
-```markdown
+````markdown
 ---
 slug: intelgraph-mc-sprint-2026-02-18
 version: v1.0
@@ -16,11 +16,14 @@ status: planned
 > **Mission (Sprint N+10)**: Graduate **Subscriptions** and **ZDM** patterns to battle‑tested status, push **Marketplace v1.0 (signed & sandboxed)**, roll out **Tenant Cost Controls v2** (budgets, quotas, alerts), deliver **DLP export policies** + **PII rule hardening**, and introduce **Query Optimizer Hints & Caching v1** to reduce read p95—while keeping SLOs/cost guardrails green. Evidence bundle v11 included.
 
 ## Conductor Summary (Commit)
+
 **Assumptions & Provenance**
+
 - Builds on 2026‑02‑04 sprint (multi‑cloud GA track, subs, ZDM, marketplace v0.9, embeddings preview, portal).
 - Summit bundles remain pending import; placeholders _[ATTACH FROM SUMMIT BUNDLE]_ where noted.
 
 **Goals**
+
 1. **Subscriptions v1.0**: GA for 3 pilot tenants with QoS tiers, replay cursor, and SLA dashboards.
 2. **ZDM Playbook GA**: run one real schema change with dual‑write, cutover, rollback rehearsal.
 3. **Marketplace v1.0**: signed plugins, sandbox runtime, SBOM attestation, policy class checks.
@@ -29,23 +32,28 @@ status: planned
 6. **Query Optimizer & Caching v1**: persisted‑ID cost hints, hot‑path cache keys, and read p95 improvements ≥ 10%.
 
 **Non‑Goals**
+
 - Embeddings GA (remains preview); cross‑cloud data plane DR; marketplace monetization.
 
 **Constraints**
+
 - SLOs unchanged + Subscriptions p95 ≤ 250 ms.
 - Cost guardrails unchanged; quotas enforced per tenant; budget alerts at 80%.
 
 **Risks**
+
 - R1: Cache staleness → inconsistency. _Mitigation_: short TTL + write‑through for mutations.
 - R2: Marketplace sandbox breakouts. _Mitigation_: seccomp profiles, fs/network sandbox, allowlist APIs only.
 - R3: ZDM mis‑mapping. _Mitigation_: read‑compat tests + automated diff checks + canary.
 
 **Definition of Done**
+
 - Subscriptions GA: 3 tenants enabled with SLOs met for 7 days; ZDM executed on live change with zero downtime & signed report; marketplace installs signed plugin in sandbox; cost controls block overages & alert; PII/DLP policies enforced on exports; read p95 improved ≥ 10% on top 5 persisted queries.
 
 ---
 
 ## Swimlanes
+
 - **Lane A — Subscriptions GA** (Backend + SRE)
 - **Lane B — ZDM GA** (Backend + QA)
 - **Lane C — Marketplace v1.0** (Backend + Security + Frontend)
@@ -57,9 +65,11 @@ status: planned
 ---
 
 ## Backlog (Epics → Stories → Tasks) + RACI
+
 Estimates in SP.
 
 ### EPIC A: Subscriptions v1.0 (28 SP)
+
 - **A‑1** Replay cursor & at‑least‑once delivery (10 SP) — _Backend (R), SRE (A)_
   - AC: cursor token, gap detection, re‑send on demand.
 - **A‑2** QoS tiers (gold/silver/bronze) (8 SP) — _Backend (R)_
@@ -67,31 +77,37 @@ Estimates in SP.
 - **A‑3** SLA boards & burn alerts (10 SP) — _SRE (R)_
 
 ### EPIC B: ZDM GA (26 SP)
+
 - **B‑1** Schema change candidate prep (6 SP) — _Backend (R)_
 - **B‑2** Dual‑write & read‑compat hardening (10 SP) — _Backend (R), QA (C)_
 - **B‑3** Cutover/rollback execution (10 SP) — _QA (R)_
 
 ### EPIC C: Marketplace v1.0 (26 SP)
+
 - **C‑1** Sandboxed runtime (seccomp, fs/net limits) (10 SP) — _Security (R), Backend (C)_
 - **C‑2** SBOM attest + policy class gate (8 SP) — _QA (R), Sec (C)_
 - **C‑3** Admin UI polish + audit trails (8 SP) — _Frontend (R)_
 
 ### EPIC D: Cost Controls v2 (24 SP)
+
 - **D‑1** Hard quotas per API & ingest (10 SP) — _Backend (R), SRE (C)_
 - **D‑2** Rolling budgets & anomaly alerts (8 SP) — _SRE FinOps (R)_
 - **D‑3** Admin UX (caps, alerts, statements) (6 SP) — _Frontend (R)_
 
 ### EPIC E: DLP/PII Hardening (24 SP)
+
 - **E‑1** Export DLP presets (mask/tokenize) (10 SP) — _Backend (R)_
 - **E‑2** Reviewer queue SLAs + escalation (6 SP) — _Frontend (R)_
 - **E‑3** Rule pack v1.2 + test corpus (8 SP) — _Security (R)_
 
 ### EPIC F: Optimizer & Caching v1 (26 SP)
+
 - **F‑1** Cost hints per persisted ID (10 SP) — _Backend (R)_
 - **F‑2** Hot‑path cache (read‑through + TTL) (8 SP) — _Backend (R), SRE (C)_
 - **F‑3** Neo4j/PG indexes & plan pins (8 SP) — _Graph Eng (R)_
 
 ### EPIC G: QA & Evidence v11 (12 SP)
+
 - **G‑1** ZDM/Subscriptions compat packs (6 SP) — _QA (R)_
 - **G‑2** Evidence bundle v11 (6 SP) — _MC (R)_
 
@@ -100,6 +116,7 @@ _Total_: **166 SP** (descope: C‑3 or E‑2 if capacity < 145 SP).
 ---
 
 ## Architecture (Deltas)
+
 ```mermaid
 flowchart LR
   subgraph Realtime
@@ -135,6 +152,7 @@ flowchart LR
     IDX[Index/Plan Pins]
   end
 ```
+````
 
 **ADR‑031**: Subscriptions add replay/cursors to strengthen delivery guarantees. _Trade‑off_: storage overhead.
 
@@ -145,7 +163,9 @@ flowchart LR
 ---
 
 ## Data & Policy
+
 **Quota Tables (PG)**
+
 ```sql
 CREATE TABLE api_quotas (
   tenant_id UUID,
@@ -156,6 +176,7 @@ CREATE TABLE api_quotas (
 ```
 
 **DLP Presets (YAML)**
+
 ```yaml
 presets:
   mask_basic:
@@ -167,6 +188,7 @@ presets:
 ```
 
 **Policy (Rego) — Export**
+
 ```rego
 package intelgraph.dlp
 
@@ -180,11 +202,19 @@ allow {
 ---
 
 ## APIs & Schemas
-**GraphQL — Cost Controls & DLP**
-```graphql
-type Quota { kind: String!, limitPerDay: Int!, usedToday: Int! }
 
-type Query { quotas: [Quota!]! @auth(abac: "admin.write") }
+**GraphQL — Cost Controls & DLP**
+
+```graphql
+type Quota {
+  kind: String!
+  limitPerDay: Int!
+  usedToday: Int!
+}
+
+type Query {
+  quotas: [Quota!]! @auth(abac: "admin.write")
+}
 
 type Mutation {
   setQuota(kind: String!, limitPerDay: Int!): Boolean @auth(abac: "admin.write")
@@ -193,6 +223,7 @@ type Mutation {
 ```
 
 **Subscriptions — Replay Cursor (WS payload)**
+
 ```json
 { "op":"subscribe", "topic":"entityChanged", "cursor":"<opaque-token>", "filter":{...} }
 ```
@@ -200,6 +231,7 @@ type Mutation {
 ---
 
 ## Security & Privacy
+
 - **Sandbox**: seccomp/apparmor, no outbound net, read‑only fs, short‑lived temp dir.
 - **DLP**: tokenize with reversible keys stored in KMS; reviewer actions audited.
 - **Cost**: quotas enforced server‑side; admin changes signed/audited.
@@ -207,12 +239,14 @@ type Mutation {
 ---
 
 ## Observability & SLOs
+
 - New metrics: replay gap count, QoS drops, quota rejections, DLP actions, cache hit %, read p95 deltas.
 - Alerts: cache hit < 85% hot ops; quota rejections spike; replay gaps > threshold; unsigned plugin upload attempt; read p95 regression > 10%.
 
 ---
 
 ## Testing Strategy
+
 - **Unit**: cursor math; quota math; tokenization; cost hints selection.
 - **Contract**: DLP export API; marketplace install; quotas.
 - **E2E**: subs replay after outage; ZDM live change; plugin enable→use; quotas block; export with presets.
@@ -220,6 +254,7 @@ type Mutation {
 - **Chaos**: subs broker partition; cache eviction storm; sandbox escape attempts (simulated).
 
 **Acceptance Packs**
+
 - Subscriptions: p95 ≤ 250 ms, replay works, no data loss on simulated outage.
 - ZDM: live change cutover with zero downtime; rollback rehearsed; divergence 0.
 - Marketplace: unsigned plugin denied; signed plugin passes SBOM/policy checks.
@@ -229,6 +264,7 @@ type Mutation {
 ---
 
 ## CI/CD & IaC
+
 ```yaml
 name: ga-subs-zdm-marketplace
 on: [push]
@@ -249,6 +285,7 @@ jobs:
 ```
 
 **Helm — Cache TTLs (excerpt)**
+
 ```yaml
 cache:
   hotpath:
@@ -259,6 +296,7 @@ cache:
 ---
 
 ## Code & Scaffolds
+
 ```
 repo/
   subs/replay/
@@ -278,47 +316,62 @@ repo/
 ```
 
 **Cursor (TS excerpt)**
+
 ```ts
-export function nextCursor(last:string){ /* opaque token math */ }
+export function nextCursor(last: string) {
+  /* opaque token math */
+}
 ```
 
 **Cache (TS excerpt)**
+
 ```ts
-export async function readThrough(key:string, fetcher:()=>Promise<any>, ttlMs:number){ /* ... */ }
+export async function readThrough(
+  key: string,
+  fetcher: () => Promise<any>,
+  ttlMs: number,
+) {
+  /* ... */
+}
 ```
 
 ---
 
 ## Release Plan & Runbooks
+
 - **Staging cuts**: 2026‑02‑21, 2026‑02‑28.
 - **Prod**: 2026‑03‑03 (canary 10→50→100%).
 
 **Backout**
+
 - Disable subs replay; pause quotas enforcement (alert‑only); revert cost hints; lock marketplace to installed‑only; abort ZDM.
 
 **Evidence Bundle v11**
+
 - Subs SLO + replay evidence; ZDM live change logs; marketplace SBOM/signatures; quota blocks/alerts; DLP export logs; cache hit & p95 reports; signed manifest.
 
 ---
 
 ## RACI (Consolidated)
-| Workstream | R | A | C | I |
-|---|---|---|---|---|
-| Subscriptions GA | Backend | MC | SRE | PM |
-| ZDM GA | Backend | MC | QA | PM |
-| Marketplace v1 | Backend | Sec TL | Security | PM |
-| Cost Controls v2 | SRE FinOps | PM | Frontend | All |
-| DLP/PII | Security | MC | Data Eng | PM |
-| Optimizer & Cache | Backend | Tech Lead | Graph Eng | PM |
-| QA & Evidence | QA | PM | MC | All |
+
+| Workstream        | R          | A         | C         | I   |
+| ----------------- | ---------- | --------- | --------- | --- |
+| Subscriptions GA  | Backend    | MC        | SRE       | PM  |
+| ZDM GA            | Backend    | MC        | QA        | PM  |
+| Marketplace v1    | Backend    | Sec TL    | Security  | PM  |
+| Cost Controls v2  | SRE FinOps | PM        | Frontend  | All |
+| DLP/PII           | Security   | MC        | Data Eng  | PM  |
+| Optimizer & Cache | Backend    | Tech Lead | Graph Eng | PM  |
+| QA & Evidence     | QA         | PM        | MC        | All |
 
 ---
 
 ## Open Items
+
 1. Select top 5 persisted queries for hinting & caching.
 2. Approve DLP v1.2 rule pack with Legal/Privacy.
 3. Identify live schema change for ZDM rehearsal.
 
 ```
-```
 
+```

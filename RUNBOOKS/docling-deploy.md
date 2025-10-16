@@ -1,11 +1,13 @@
 # Docling Service Deploy Runbook
 
 ## Preconditions
+
 - Argo Rollouts plugin installed locally (`kubectl argo rollouts`).
 - Helm values updated with desired image tag and resource overrides.
 - Canary dataset test suite (`npm run test -- docling`) green in CI.
 
 ## Steps
+
 1. Render chart to verify manifests:
    ```bash
    helm template docling-svc services/docling-svc/helm/docling-svc -f values/platform.yaml
@@ -37,6 +39,7 @@
    ```
 
 ## Post-Deploy
+
 - Confirm Grafana dashboard `Docling Overview` shows p95 latency < thresholds.
 - Verify provenance ledger entries via `SELECT * FROM provenance_ledger_v2 WHERE action_type='docling_summarize_build_failure' ORDER BY timestamp DESC LIMIT 5;`.
 - Notify #release-docs channel with deployment summary.

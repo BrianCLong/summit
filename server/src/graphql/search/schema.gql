@@ -1,3 +1,18 @@
-input SearchQuery { text: String, tenant: String, status: String, stepType: String, since: String, until: String }
-type SearchHit { runId: ID!, status: String!, startedAt: String!, tenant: String!, summary: String! }
-extend type Query { searchRuns(q: SearchQuery!): [SearchHit!]! }
+input SearchQuery {
+  text: String
+  tenant: String
+  status: String
+  stepType: String
+  since: String
+  until: String
+}
+type SearchHit {
+  runId: ID!
+  status: String!
+  startedAt: String!
+  tenant: String!
+  summary: String!
+}
+extend type Query {
+  searchRuns(q: SearchQuery!): [SearchHit!]!
+}

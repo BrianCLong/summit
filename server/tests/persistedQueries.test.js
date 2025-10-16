@@ -3,7 +3,9 @@ const request = require('supertest');
 const fs = require('fs');
 const path = require('path');
 const { createHash } = require('crypto');
-const { createPersistedQueriesMiddleware } = require('../src/middleware/persistedQueries.ts');
+const {
+  createPersistedQueriesMiddleware,
+} = require('../src/middleware/persistedQueries.ts');
 
 describe('persisted queries per tenant', () => {
   const tmpDir = path.join(__dirname, 'tmp-pq');
@@ -13,7 +15,10 @@ describe('persisted queries per tenant', () => {
 
   beforeAll(() => {
     fs.mkdirSync(tmpDir, { recursive: true });
-    fs.writeFileSync(path.join(tmpDir, `${tenantA}.json`), JSON.stringify({ [hash]: query }));
+    fs.writeFileSync(
+      path.join(tmpDir, `${tenantA}.json`),
+      JSON.stringify({ [hash]: query }),
+    );
   });
 
   afterAll(() => {
@@ -23,7 +28,10 @@ describe('persisted queries per tenant', () => {
   function buildApp() {
     const app = express();
     app.use(express.json());
-    const pq = createPersistedQueriesMiddleware({ manifestDirectory: tmpDir, enforceInProduction: true });
+    const pq = createPersistedQueriesMiddleware({
+      manifestDirectory: tmpDir,
+      enforceInProduction: true,
+    });
     app.use(pq.middleware());
     app.post('/graphql', (_req, res) => res.json({ data: { ok: true } }));
     return app;

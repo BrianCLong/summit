@@ -24,10 +24,15 @@ function initializeServices() {
   if (!graphRAGService) {
     const neo4jDriver = getNeo4jDriver();
     const redisClient = getRedisClient();
-    
+
     embeddingService = new EmbeddingService();
     llmService = new LLMService();
-    graphRAGService = new GraphRAGService(neo4jDriver, embeddingService, llmService, redisClient);
+    graphRAGService = new GraphRAGService(
+      neo4jDriver,
+      embeddingService,
+      llmService,
+      redisClient,
+    );
   }
 }
 
@@ -43,13 +48,13 @@ const querySchema = {
   maxResults: { type: 'number', min: 1, max: 100 },
   depth: { type: 'number', min: 1, max: 5 },
   model: { type: 'string' },
-  temperature: { type: 'number', min: 0, max: 2 }
+  temperature: { type: 'number', min: 0, max: 2 },
 };
 
 const embeddingSchema = {
   investigationId: { type: 'string', required: true },
   batchSize: { type: 'number', min: 1, max: 100 },
-  model: { type: 'string' }
+  model: { type: 'string' },
 };
 
 /**
@@ -120,26 +125,26 @@ router.post('/query', validateRequest(querySchema), async (req, res) => {
         depth: req.body.depth,
         model: req.body.model,
         temperature: req.body.temperature,
-        maxTokens: req.body.maxTokens
-      }
+        maxTokens: req.body.maxTokens,
+      },
     });
 
     logger.info('GraphRAG query via REST API', {
       userId: req.user?.id,
       investigationId: req.body.investigationId,
-      success: result.success
+      success: result.success,
     });
 
     res.json(result);
   } catch (error) {
     logger.error('GraphRAG REST query failed', {
       userId: req.user?.id,
-      error: error.message
+      error: error.message,
     });
 
     res.status(500).json({
       success: false,
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -175,88 +180,90 @@ router.post('/query', validateRequest(querySchema), async (req, res) => {
  *       200:
  *         description: Embedding generation response
  */
-router.post('/embeddings/generate', validateRequest(embeddingSchema), async (req, res) => {
-  initializeServices();
-
-  try {
-    const neo4jDriver = getNeo4jDriver();
-    const session = neo4jDriver.session();
+router.post(
+  '/embeddings/generate',
+  validateRequest(embeddingSchema),
+  async (req, res) => {
+    initializeServices();
 
     try {
-      // Get entities without embeddings
-      const entitiesQuery = `
+      const neo4jDriver = getNeo4jDriver();
+      const session = neo4jDriver.session();
+
+      try {
+        // Get entities without embeddings
+        const entitiesQuery = `
         MATCH (e:Entity)-[:BELONGS_TO]->(i:Investigation {id: $investigationId})
         WHERE e.embedding IS NULL
         RETURN e.id as id, e.label as label, e.description as description, e.properties as properties
         LIMIT $batchSize
       `;
 
-      const entitiesResult = await session.run(entitiesQuery, {
-        investigationId: req.body.investigationId,
-        batchSize: req.body.batchSize || 50
-      });
-
-      if (entitiesResult.records.length === 0) {
-        return res.json({
-          success: true,
-          message: 'No entities need embedding generation',
-          processedCount: 0,
-          totalEntities: 0
+        const entitiesResult = await session.run(entitiesQuery, {
+          investigationId: req.body.investigationId,
+          batchSize: req.body.batchSize || 50,
         });
-      }
 
-      const entities = entitiesResult.records.map(record => ({
-        id: record.get('id'),
-        text: `${record.get('label')} ${record.get('description')} ${JSON.stringify(record.get('properties'))}`
-      }));
+        if (entitiesResult.records.length === 0) {
+          return res.json({
+            success: true,
+            message: 'No entities need embedding generation',
+            processedCount: 0,
+            totalEntities: 0,
+          });
+        }
 
-      // Generate embeddings
-      const embeddings = await embeddingService.generateEmbeddings(
-        entities.map(e => e.text),
-        req.body.model
-      );
+        const entities = entitiesResult.records.map((record) => ({
+          id: record.get('id'),
+          text: `${record.get('label')} ${record.get('description')} ${JSON.stringify(record.get('properties'))}`,
+        }));
 
-      // Store embeddings in Neo4j
-      for (let i = 0; i < entities.length; i++) {
-        await session.run(
-          'MATCH (e:Entity {id: $id}) SET e.embedding = $embedding, e.embeddingModel = $model, e.embeddingGeneratedAt = datetime()',
-          {
-            id: entities[i].id,
-            embedding: embeddings[i],
-            model: req.body.model || embeddingService.config.model
-          }
+        // Generate embeddings
+        const embeddings = await embeddingService.generateEmbeddings(
+          entities.map((e) => e.text),
+          req.body.model,
         );
+
+        // Store embeddings in Neo4j
+        for (let i = 0; i < entities.length; i++) {
+          await session.run(
+            'MATCH (e:Entity {id: $id}) SET e.embedding = $embedding, e.embeddingModel = $model, e.embeddingGeneratedAt = datetime()',
+            {
+              id: entities[i].id,
+              embedding: embeddings[i],
+              model: req.body.model || embeddingService.config.model,
+            },
+          );
+        }
+
+        logger.info('Embeddings generated via REST API', {
+          userId: req.user?.id,
+          investigationId: req.body.investigationId,
+          count: entities.length,
+        });
+
+        res.json({
+          success: true,
+          message: `Generated embeddings for ${entities.length} entities`,
+          processedCount: entities.length,
+          totalEntities: entities.length,
+        });
+      } finally {
+        await session.close();
       }
-
-      logger.info('Embeddings generated via REST API', {
+    } catch (error) {
+      logger.error('Embedding generation via REST API failed', {
         userId: req.user?.id,
-        investigationId: req.body.investigationId,
-        count: entities.length
+        error: error.message,
       });
 
-      res.json({
-        success: true,
-        message: `Generated embeddings for ${entities.length} entities`,
-        processedCount: entities.length,
-        totalEntities: entities.length
+      res.status(500).json({
+        success: false,
+        error: error.message,
       });
-
-    } finally {
-      await session.close();
     }
-
-  } catch (error) {
-    logger.error('Embedding generation via REST API failed', {
-      userId: req.user?.id,
-      error: error.message
-    });
-
-    res.status(500).json({
-      success: false,
-      error: error.message
-    });
-  }
-});
+  },
+);
 
 /**
  * @swagger
@@ -283,15 +290,15 @@ router.get('/health', async (req, res) => {
       services: {
         graphRAG: health,
         embedding: embeddingHealth,
-        llm: llmHealth
+        llm: llmHealth,
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     res.status(500).json({
       status: 'unhealthy',
       error: error.message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 });
@@ -319,13 +326,13 @@ router.post('/test', async (req, res) => {
       success: embeddingTest.success && llmTest.success,
       embedding: embeddingTest,
       llm: llmTest,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   } catch (error) {
     res.status(500).json({
       success: false,
       error: error.message,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 });

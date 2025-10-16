@@ -1,6 +1,11 @@
 const { SchemaRegistry } = require('./schemaRegistry');
 const { LineageSink } = require('./lineageSink');
-const { applyPolicies, reversePolicies, enforceResidency, getMetadata } = require('./policyHooks');
+const {
+  applyPolicies,
+  reversePolicies,
+  enforceResidency,
+  getMetadata,
+} = require('./policyHooks');
 
 module.exports = {
   SchemaRegistry,
@@ -9,6 +14,6 @@ module.exports = {
     applyPolicies,
     reversePolicies,
     enforceResidency,
-    getMetadata
-  }
+    getMetadata,
+  },
 };

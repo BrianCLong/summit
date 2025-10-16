@@ -33,5 +33,4 @@ serviceAccount:
 # ingress disabled by default; enable if you want a public UI
 ingress:
   enabled: false
-
 # Basic alerts can be configured later via UI or Prometheus rules

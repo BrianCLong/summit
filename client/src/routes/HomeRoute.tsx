@@ -674,12 +674,12 @@ function HomeRouteInner() {
               title="📊 Graph Overview"
               height={300}
               maxNodes={15}
-              onNodeClick={(node) => console.log('Clicked node:', node)}
+              onNodeClick={(node: unknown) => console.log('Clicked node:', node)}
             />
 
             <RealTimePresence
               currentUser={currentUser}
-              onUserClick={(user) => console.log('Clicked user:', user)}
+              onUserClick={(user: unknown) => console.log('Clicked user:', user)}
               className="h-80"
             />
           </div>
@@ -734,7 +734,7 @@ function HomeRouteInner() {
           <DataExport
             investigationId={selectedInvestigation?.id}
             selectedEntities={[]}
-            onExportComplete={(result) => {
+            onExportComplete={(result: any) => {
               console.log('Export completed:', result);
               // Could show notification here
             }}
@@ -759,7 +759,7 @@ function HomeRouteInner() {
             <div style={{ height: '70vh' }}>
               <EnhancedAIAssistant
                 context={aiContext}
-                onActionRequest={(action) => {
+                onActionRequest={(action: any) => {
                   console.log('AI requested action:', action);
                   toast.info('AI Action', `Action requested: ${action.type}`);
                 }}
@@ -785,11 +785,11 @@ function HomeRouteInner() {
           <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
             <InteractiveGraphCanvas
               investigationId={selectedInvestigation?.id}
-              onNodeSelect={(nodes) => {
+              onNodeSelect={(nodes: any[]) => {
                 console.log('Selected nodes:', nodes);
                 toast.info('Graph Selection', `Selected ${nodes.length} node(s)`);
               }}
-              onEdgeSelect={(edges) => {
+              onEdgeSelect={(edges: any[]) => {
                 console.log('Selected edges:', edges);
                 toast.info('Graph Selection', `Selected ${edges.length} edge(s)`);
               }}
@@ -824,11 +824,11 @@ function HomeRouteInner() {
           >
             <TemporalAnalysis
               investigationId={selectedInvestigation?.id}
-              onEventSelect={(event) => {
+              onEventSelect={(event: any) => {
                 console.log('Selected event:', event);
                 toast.info('Timeline Event', `Selected: ${event.title}`);
               }}
-              onTimeRangeChange={(start, end) => {
+              onTimeRangeChange={(start: Date, end: Date) => {
                 console.log('Time range changed:', start, end);
                 toast.info(
                   'Timeline',
@@ -858,15 +858,15 @@ function HomeRouteInner() {
           <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
             <ThreatIntelligenceHub
               investigationId={selectedInvestigation?.id}
-              onIndicatorSelect={(indicator) => {
+              onIndicatorSelect={(indicator: any) => {
                 console.log('Selected threat indicator:', indicator);
                 toast.info('Threat Intel', `Selected: ${indicator.type} ${indicator.value}`);
               }}
-              onCampaignSelect={(campaign) => {
+              onCampaignSelect={(campaign: any) => {
                 console.log('Selected campaign:', campaign);
                 toast.info('Campaign', `Selected: ${campaign.name}`);
               }}
-              onActorSelect={(actor) => {
+              onActorSelect={(actor: any) => {
                 console.log('Selected actor:', actor);
                 toast.info('Threat Actor', `Selected: ${actor.name}`);
               }}
@@ -893,7 +893,7 @@ function HomeRouteInner() {
           <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
             <ModelManagementDashboard
               investigationId={selectedInvestigation?.id}
-              onModelSelect={(model) => {
+              onModelSelect={(model: any) => {
                 console.log('Selected model:', model);
                 toast.info('MLOps', `Selected: ${model.name} ${model.version}`);
               }}
@@ -901,11 +901,10 @@ function HomeRouteInner() {
                 console.log('Deploying model:', modelId, 'to', environment);
                 toast.success('MLOps', `Deploying model ${modelId} to ${environment}`);
               }}
-              onExperimentSelect={(experiment) => {
+              onExperimentSelect={(experiment: any) => {
                 console.log('Selected experiment:', experiment);
                 toast.info('Experiment', `Selected: ${experiment.name}`);
               }}
-              className="h-full w-full"
             />
           </div>
         </div>
@@ -931,11 +930,13 @@ function HomeRouteInner() {
                 console.log('Collaboration event:', event);
                 toast.info('Collaboration', `${event.type}: ${event.userId}`);
               }}
-              onWorkspaceShare={(workspaceId, users) => {
-                console.log('Workspace shared:', workspaceId, users);
-                toast.success('Workspace', `Shared with ${users.length} user(s)`);
+              onWorkspaceShare={(workspace: any) => {
+                console.log('Workspace shared:', workspace);
+                const count = Array.isArray(workspace?.participants)
+                  ? workspace.participants.length
+                  : 0;
+                toast.success('Workspace', `Shared with ${count} user(s)`);
               }}
-              className="h-full w-full"
             />
           </div>
         </div>
@@ -1100,7 +1101,7 @@ function HomeRouteInner() {
             <EnterpriseDashboard
               investigationId={selectedInvestigation?.id}
               currentUser={currentUser}
-              onReportGenerate={(report) => {
+              onReportGenerate={(report: any) => {
                 console.log('Report generated:', report);
                 toast.success('Report Generated', `${report.name} (${report.format})`);
               }}
@@ -1108,11 +1109,10 @@ function HomeRouteInner() {
                 console.log('Widget interaction:', widget, action, data);
                 toast.info('Dashboard', `${widget.title}: ${action}`);
               }}
-              onRoleChange={(newRole) => {
+              onRoleChange={(newRole: any) => {
                 console.log('Role changed:', newRole);
                 toast.info('Role Updated', `Dashboard view: ${newRole}`);
               }}
-              className="h-full w-full"
             />
           </div>
         </div>
@@ -1137,18 +1137,17 @@ function HomeRouteInner() {
                 console.log('Selected social nodes:', nodes);
                 toast.info('Social Network', `Selected ${nodes.length} node(s)`);
               }}
-              onCommunitySelect={(community) => {
+              onCommunitySelect={(community: any) => {
                 console.log('Selected community:', community);
                 toast.info(
                   'Community',
                   `Selected: ${community.name} (${community.members.length} members)`,
                 );
               }}
-              onMetricSelect={(metric, value) => {
+              onMetricSelect={(metric: any, value: any) => {
                 console.log('Metric selected:', metric, value);
                 toast.info('Network Metric', `${metric}: ${value}`);
               }}
-              className="h-full w-full"
             />
           </div>
         </div>
@@ -1169,25 +1168,24 @@ function HomeRouteInner() {
           <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
             <BehavioralAnalytics
               investigationId={selectedInvestigation?.id}
-              onProfileSelect={(profile) => {
+              onProfileSelect={(profile: any) => {
                 console.log('Selected behavioral profile:', profile);
                 toast.info(
                   'Behavioral Profile',
                   `Selected: ${profile.entityId} (Risk: ${profile.riskScore}%)`,
                 );
               }}
-              onAnomalyDetected={(anomaly) => {
+              onAnomalyDetected={(anomaly: any) => {
                 console.log('Anomaly detected:', anomaly);
                 toast.warning('Anomaly Detected', `${anomaly.type}: ${anomaly.description}`);
               }}
-              onPatternAnalysis={(analysis) => {
+              onPatternAnalysis={(analysis: any) => {
                 console.log('Pattern analysis:', analysis);
                 toast.info(
                   'Pattern Analysis',
                   `${analysis.type}: ${analysis.confidence}% confidence`,
                 );
               }}
-              className="h-full w-full"
             />
           </div>
         </div>
@@ -1209,23 +1207,22 @@ function HomeRouteInner() {
             <ReportingCaseManagement
               investigationId={selectedInvestigation?.id}
               currentUser={currentUser}
-              onCaseSelect={(caseFile) => {
+              onCaseSelect={(caseFile: any) => {
                 console.log('Selected case:', caseFile);
                 toast.info('Case Selected', `${caseFile.title} (${caseFile.caseType})`);
               }}
-              onReportGenerate={(report) => {
+              onReportGenerate={(report: any) => {
                 console.log('Report generated:', report);
                 toast.success('Report Generated', `${report.template} - ${report.format}`);
               }}
-              onEvidenceUpdate={(evidence) => {
+              onEvidenceUpdate={(evidence: any) => {
                 console.log('Evidence updated:', evidence);
                 toast.info('Evidence', `Updated: ${evidence.type} - ${evidence.name}`);
               }}
-              onTaskAssign={(task, assignee) => {
+              onTaskAssign={(task: any, assignee: any) => {
                 console.log('Task assigned:', task, assignee);
                 toast.info('Task Assigned', `${task.title} → ${assignee.name}`);
               }}
-              className="h-full w-full"
             />
           </div>
         </div>
@@ -1246,23 +1243,22 @@ function HomeRouteInner() {
           <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
             <ThreatHuntingDarkWeb
               investigationId={selectedInvestigation?.id}
-              onHuntCreate={(hunt) => {
+              onHuntCreate={(hunt: any) => {
                 console.log('Threat hunt created:', hunt);
                 toast.success('Threat Hunt', `Created: ${hunt.name} (${hunt.type})`);
               }}
-              onThreatDetected={(threat) => {
+              onThreatDetected={(threat: any) => {
                 console.log('Threat detected:', threat);
                 toast.warning('Threat Detected', `${threat.type}: ${threat.description}`);
               }}
-              onDarkWebHit={(hit) => {
+              onDarkWebHit={(hit: any) => {
                 console.log('Dark web hit:', hit);
                 toast.info('Dark Web', `New content: ${hit.platform} - ${hit.keywords.join(', ')}`);
               }}
-              onTTPMapping={(ttp) => {
+              onTTPMapping={(ttp: any) => {
                 console.log('TTP mapped:', ttp);
                 toast.info('MITRE ATT&CK', `Mapped: ${ttp.tactic} - ${ttp.technique}`);
               }}
-              className="h-full w-full"
             />
           </div>
         </div>

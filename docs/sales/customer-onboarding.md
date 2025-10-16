@@ -1,6 +1,7 @@
 # Customer Onboarding & Success Playbook
 
 ## Table of Contents
+
 - [Onboarding Overview](#onboarding-overview)
 - [Pre-Implementation](#pre-implementation)
 - [Implementation Phases](#implementation-phases)
@@ -27,18 +28,21 @@
 ### Success Criteria by Stage
 
 #### Onboarding Success (0-90 days)
+
 - ✅ Technical implementation completed
 - ✅ 3+ workflows in production
 - ✅ Team trained and certified
 - ✅ First business value realized
 
 #### Adoption Success (90-180 days)
+
 - ✅ 10+ workflows automated
 - ✅ ROI targets achieved
 - ✅ Platform adoption >80%
 - ✅ Customer satisfaction >8/10
 
 #### Expansion Success (180+ days)
+
 - ✅ Additional use cases identified
 - ✅ Other departments engaged
 - ✅ Advanced features utilized
@@ -49,6 +53,7 @@
 ### Customer Readiness Assessment
 
 #### Technical Readiness Checklist
+
 ```yaml
 Infrastructure:
   - [ ] Kubernetes cluster available (v1.24+)
@@ -73,6 +78,7 @@ Team & Resources:
 ```
 
 #### Organizational Readiness Assessment
+
 ```typescript
 interface ReadinessAssessment {
   // Executive Alignment (1-5 scale)
@@ -101,19 +107,20 @@ function calculateReadinessScore(assessment: ReadinessAssessment): {
   readinessLevel: 'High' | 'Medium' | 'Low';
   recommendations: string[];
 } {
-  const avgScore = (
-    assessment.executiveSponsorship +
-    assessment.strategicImportance +
-    assessment.technicalSkills +
-    assessment.changeReadiness
-  ) / 4;
+  const avgScore =
+    (assessment.executiveSponsorship +
+      assessment.strategicImportance +
+      assessment.technicalSkills +
+      assessment.changeReadiness) /
+    4;
 
-  const readinessLevel = avgScore >= 4 ? 'High' : avgScore >= 3 ? 'Medium' : 'Low';
+  const readinessLevel =
+    avgScore >= 4 ? 'High' : avgScore >= 3 ? 'Medium' : 'Low';
 
   return {
     score: avgScore,
     readinessLevel,
-    recommendations: generateRecommendations(assessment)
+    recommendations: generateRecommendations(assessment),
   };
 }
 ```
@@ -121,37 +128,44 @@ function calculateReadinessScore(assessment: ReadinessAssessment): {
 ### Kickoff Workshop (Day 1)
 
 #### Workshop Agenda (8 hours)
+
 **9:00 - 10:30 AM: Welcome & Introductions**
+
 - Team introductions and roles
 - Project charter review
 - Success criteria alignment
 - Communication plan establishment
 
 **10:45 AM - 12:00 PM: Current State Assessment**
+
 - Workflow inventory and mapping
 - Integration architecture review
 - Pain point identification
 - Opportunity prioritization
 
 **1:00 - 2:30 PM: Technical Architecture**
+
 - Maestro platform overview
 - Deployment architecture design
 - Security and compliance review
 - Integration strategy planning
 
 **2:45 - 4:00 PM: Implementation Planning**
+
 - Phase 1 workflow selection
 - Resource allocation planning
 - Timeline and milestone definition
 - Risk assessment and mitigation
 
 **4:15 - 5:00 PM: Next Steps & Action Items**
+
 - Implementation team formation
 - Training schedule confirmation
 - Weekly checkpoint planning
 - Success metrics finalization
 
 #### Workshop Deliverables
+
 1. **Project Charter Document**
    - Scope and objectives
    - Success criteria and metrics
@@ -175,6 +189,7 @@ function calculateReadinessScore(assessment: ReadinessAssessment): {
 ### Phase 1: Foundation Setup (Days 1-30)
 
 #### Week 1: Environment Preparation
+
 ```bash
 # Day 1-2: Infrastructure Setup
 ./scripts/setup-environment.sh production
@@ -187,6 +202,7 @@ function calculateReadinessScore(assessment: ReadinessAssessment): {
 ```
 
 #### Week 2: Platform Deployment
+
 ```bash
 # Deploy Maestro platform
 helm install maestro ./charts/maestro \
@@ -201,18 +217,21 @@ kubectl apply -f monitoring-config.yaml
 ```
 
 #### Week 3: Initial Configuration
+
 - User accounts and roles setup
 - Connector configuration
 - Basic workflow templates
 - Monitoring dashboards
 
 #### Week 4: Team Training
+
 - Platform overview session (4 hours)
 - Hands-on workflow building (8 hours)
 - Administrative training (4 hours)
 - Troubleshooting workshop (4 hours)
 
 #### Phase 1 Success Criteria
+
 - ✅ Platform deployed and accessible
 - ✅ Authentication configured
 - ✅ Monitoring operational
@@ -222,18 +241,21 @@ kubectl apply -f monitoring-config.yaml
 ### Phase 2: Workflow Migration (Days 31-60)
 
 #### Week 5-6: Priority Workflow Implementation
+
 **High-Impact, Low-Risk Workflows:**
+
 1. Data synchronization workflows
 2. Notification and alerting workflows
 3. Report generation workflows
 4. Basic approval workflows
 
 **Implementation Template:**
+
 ```yaml
 workflow:
-  name: "Customer Onboarding Process"
-  priority: "high"
-  complexity: "medium"
+  name: 'Customer Onboarding Process'
+  priority: 'high'
+  complexity: 'medium'
   estimatedHours: 16
   dependencies:
     - CRM integration
@@ -247,12 +269,14 @@ workflow:
 ```
 
 #### Week 7-8: Integration & Testing
+
 - End-to-end testing
 - Performance validation
 - Security testing
 - User acceptance testing
 
 #### Phase 2 Success Criteria
+
 - ✅ 3-5 workflows in production
 - ✅ Performance targets met
 - ✅ Security validation passed
@@ -262,18 +286,21 @@ workflow:
 ### Phase 3: Scale & Optimize (Days 61-90)
 
 #### Week 9-10: Additional Workflow Migration
+
 - Medium complexity workflows
 - Cross-department workflows
 - Integration with additional systems
 - Error handling optimization
 
 #### Week 11-12: Advanced Features
+
 - AI-powered optimization
 - Advanced monitoring setup
 - Cost optimization
 - Performance tuning
 
 #### Phase 3 Success Criteria
+
 - ✅ 10+ workflows in production
 - ✅ Advanced features utilized
 - ✅ Cost optimization achieved
@@ -287,24 +314,24 @@ workflow:
 ```typescript
 interface CustomerHealthMetrics {
   // Usage Metrics (40% weight)
-  platformAdoption: number;      // 0-100: % of licensed users active
-  workflowUtilization: number;   // 0-100: % of planned workflows implemented
-  featureUsage: number;          // 0-100: % of purchased features used
+  platformAdoption: number; // 0-100: % of licensed users active
+  workflowUtilization: number; // 0-100: % of planned workflows implemented
+  featureUsage: number; // 0-100: % of purchased features used
 
   // Performance Metrics (30% weight)
-  systemUptime: number;          // 0-100: % uptime
-  workflowSuccessRate: number;   // 0-100: % successful executions
-  performanceTargets: number;    // 0-100: % SLA targets met
+  systemUptime: number; // 0-100: % uptime
+  workflowSuccessRate: number; // 0-100: % successful executions
+  performanceTargets: number; // 0-100: % SLA targets met
 
   // Business Value Metrics (20% weight)
-  roiAchievement: number;        // 0-100: % of promised ROI achieved
-  businessObjectives: number;    // 0-100: % of business goals met
-  costOptimization: number;      // 0-100: % cost reduction achieved
+  roiAchievement: number; // 0-100: % of promised ROI achieved
+  businessObjectives: number; // 0-100: % of business goals met
+  costOptimization: number; // 0-100: % cost reduction achieved
 
   // Satisfaction Metrics (10% weight)
-  userSatisfaction: number;      // 0-100: NPS score normalized
-  supportTickets: number;        // 0-100: inverted ticket volume
-  referenceWillingness: number;  // 0-100: willingness to be reference
+  userSatisfaction: number; // 0-100: NPS score normalized
+  supportTickets: number; // 0-100: inverted ticket volume
+  referenceWillingness: number; // 0-100: willingness to be reference
 }
 
 function calculateHealthScore(metrics: CustomerHealthMetrics): {
@@ -316,47 +343,46 @@ function calculateHealthScore(metrics: CustomerHealthMetrics): {
     usage: 0.4,
     performance: 0.3,
     businessValue: 0.2,
-    satisfaction: 0.1
+    satisfaction: 0.1,
   };
 
-  const usageScore = (
+  const usageScore =
     metrics.platformAdoption * 0.4 +
     metrics.workflowUtilization * 0.4 +
-    metrics.featureUsage * 0.2
-  );
+    metrics.featureUsage * 0.2;
 
-  const performanceScore = (
+  const performanceScore =
     metrics.systemUptime * 0.4 +
     metrics.workflowSuccessRate * 0.4 +
-    metrics.performanceTargets * 0.2
-  );
+    metrics.performanceTargets * 0.2;
 
-  const businessValueScore = (
+  const businessValueScore =
     metrics.roiAchievement * 0.5 +
     metrics.businessObjectives * 0.3 +
-    metrics.costOptimization * 0.2
-  );
+    metrics.costOptimization * 0.2;
 
-  const satisfactionScore = (
+  const satisfactionScore =
     metrics.userSatisfaction * 0.5 +
     metrics.supportTickets * 0.3 +
-    metrics.referenceWillingness * 0.2
-  );
+    metrics.referenceWillingness * 0.2;
 
-  const overallScore = (
+  const overallScore =
     usageScore * weights.usage +
     performanceScore * weights.performance +
     businessValueScore * weights.businessValue +
-    satisfactionScore * weights.satisfaction
-  );
+    satisfactionScore * weights.satisfaction;
 
-  const status = overallScore >= 80 ? 'Healthy' :
-                 overallScore >= 60 ? 'At Risk' : 'Critical';
+  const status =
+    overallScore >= 80
+      ? 'Healthy'
+      : overallScore >= 60
+        ? 'At Risk'
+        : 'Critical';
 
   return {
     score: overallScore,
     status,
-    recommendations: generateHealthRecommendations(metrics, overallScore)
+    recommendations: generateHealthRecommendations(metrics, overallScore),
   };
 }
 ```
@@ -364,6 +390,7 @@ function calculateHealthScore(metrics: CustomerHealthMetrics): {
 ### KPI Dashboard
 
 #### Executive Dashboard Metrics
+
 ```yaml
 Business Impact:
   - ROI Achievement: Target vs Actual
@@ -391,6 +418,7 @@ Customer Satisfaction:
 ```
 
 #### Operational Dashboard Metrics
+
 ```yaml
 Performance Monitoring:
   - Workflow Execution Volume
@@ -436,11 +464,14 @@ class CustomerHealthMonitor {
       metrics,
       risks,
       recommendations,
-      nextReviewDate: this.calculateNextReview(healthScore.status)
+      nextReviewDate: this.calculateNextReview(healthScore.status),
     };
   }
 
-  private async identifyRisks(customerId: string, metrics: any): Promise<Risk[]> {
+  private async identifyRisks(
+    customerId: string,
+    metrics: any,
+  ): Promise<Risk[]> {
     const risks: Risk[] = [];
 
     // Usage pattern analysis
@@ -450,7 +481,7 @@ class CustomerHealthMonitor {
         severity: 'High',
         description: 'Platform adoption below 50%',
         impact: 'Potential churn risk',
-        mitigation: 'Schedule adoption workshop'
+        mitigation: 'Schedule adoption workshop',
       });
     }
 
@@ -461,7 +492,7 @@ class CustomerHealthMonitor {
         severity: 'Medium',
         description: 'Workflow success rate below target',
         impact: 'User frustration, productivity loss',
-        mitigation: 'Technical review and optimization'
+        mitigation: 'Technical review and optimization',
       });
     }
 
@@ -473,7 +504,7 @@ class CustomerHealthMonitor {
         severity: 'Medium',
         description: 'High support ticket volume',
         impact: 'User satisfaction decline',
-        mitigation: 'Proactive training session'
+        mitigation: 'Proactive training session',
       });
     }
 
@@ -485,6 +516,7 @@ class CustomerHealthMonitor {
 ### Proactive Intervention Triggers
 
 #### Red Flag Indicators
+
 ```yaml
 Critical Interventions (24-48 hours):
   - Health score drops below 40
@@ -511,6 +543,7 @@ Opportunity Interventions (2 weeks):
 #### Intervention Playbooks
 
 **Critical Health Recovery Plan:**
+
 1. **Immediate Assessment** (24 hours)
    - Executive escalation call
    - Technical deep-dive session
@@ -530,6 +563,7 @@ Opportunity Interventions (2 weeks):
    - Relationship rebuilding
 
 **Growth Opportunity Plan:**
+
 1. **Success Documentation**
    - ROI achievement validation
    - User testimonial collection
@@ -547,13 +581,14 @@ Opportunity Interventions (2 weeks):
 ### Expansion Opportunity Identification
 
 #### Expansion Trigger Events
+
 ```typescript
 interface ExpansionTrigger {
   type: 'usage' | 'success' | 'request' | 'opportunity';
   event: string;
-  score: number;  // 1-10 expansion likelihood
+  score: number; // 1-10 expansion likelihood
   timeline: string; // when to engage
-  owner: string;   // who should engage
+  owner: string; // who should engage
 }
 
 const expansionTriggers: ExpansionTrigger[] = [
@@ -562,59 +597,62 @@ const expansionTriggers: ExpansionTrigger[] = [
     event: 'Approaching license limits (>80% utilization)',
     score: 9,
     timeline: '30 days before limit',
-    owner: 'Customer Success Manager'
+    owner: 'Customer Success Manager',
   },
   {
     type: 'success',
     event: 'ROI targets exceeded by 50%+',
     score: 8,
     timeline: 'Quarterly business review',
-    owner: 'Account Executive'
+    owner: 'Account Executive',
   },
   {
     type: 'request',
     event: 'Customer asks about additional features',
     score: 9,
     timeline: 'Immediate',
-    owner: 'Solutions Engineer'
+    owner: 'Solutions Engineer',
   },
   {
     type: 'opportunity',
     event: 'New department expresses interest',
     score: 7,
     timeline: '2 weeks',
-    owner: 'Account Executive'
-  }
+    owner: 'Account Executive',
+  },
 ];
 ```
 
 #### Expansion Conversation Guide
 
 **Value Demonstration:**
+
 - "Your current workflows are saving $X annually. Based on your success, expanding to [department/use case] could deliver an additional $Y in savings."
 - "You're currently using X% of your workflow capacity. Would you like to discuss optimizing for higher volumes?"
 - "I noticed your team is manually handling [process]. This looks like a perfect fit for automation with Maestro."
 
 **Feature Introduction:**
+
 - "Given your success with basic workflows, you might be interested in our AI optimization features that could improve performance by another 20%."
 - "Your compliance requirements make you a perfect candidate for our advanced audit and governance features."
 - "With your integration complexity, our custom connector service could save significant development time."
 
 ### Upsell Opportunities Matrix
 
-| Current Plan | Usage Indicators | Upsell Opportunity | Value Proposition |
-|--------------|------------------|-------------------|-------------------|
-| **Starter** | >80K executions/month | Professional Plan | Better pricing + Premium connectors |
-| **Professional** | >800K executions/month | Enterprise Plan | Unlimited usage + Custom features |
-| **Any Plan** | High manual processes | Professional Services | Faster implementation + Best practices |
-| **Any Plan** | Complex integrations | Custom Connectors | Specialized system integration |
-| **Any Plan** | Compliance requirements | Governance Add-on | Advanced audit + Compliance automation |
+| Current Plan     | Usage Indicators        | Upsell Opportunity    | Value Proposition                      |
+| ---------------- | ----------------------- | --------------------- | -------------------------------------- |
+| **Starter**      | >80K executions/month   | Professional Plan     | Better pricing + Premium connectors    |
+| **Professional** | >800K executions/month  | Enterprise Plan       | Unlimited usage + Custom features      |
+| **Any Plan**     | High manual processes   | Professional Services | Faster implementation + Best practices |
+| **Any Plan**     | Complex integrations    | Custom Connectors     | Specialized system integration         |
+| **Any Plan**     | Compliance requirements | Governance Add-on     | Advanced audit + Compliance automation |
 
 ### Customer Success Playbooks
 
 #### Quarterly Business Review (QBR) Template
 
 **Pre-QBR Preparation (1 week before):**
+
 1. Health score analysis and trend review
 2. Usage analytics and optimization opportunities
 3. Support ticket analysis and resolution
@@ -622,6 +660,7 @@ const expansionTriggers: ExpansionTrigger[] = [
 5. Expansion opportunity assessment
 
 **QBR Agenda (90 minutes):**
+
 ```
 1. Executive Summary (15 min)
    - Health score overview
@@ -655,6 +694,7 @@ const expansionTriggers: ExpansionTrigger[] = [
 ```
 
 **Post-QBR Follow-up (1 week after):**
+
 1. Meeting notes and action item distribution
 2. Opportunity pipeline updates
 3. Support team briefing
@@ -664,6 +704,7 @@ const expansionTriggers: ExpansionTrigger[] = [
 #### Renewal Preparation (6 months before)
 
 **Renewal Readiness Assessment:**
+
 ```yaml
 Financial Health:
   - [ ] ROI targets achieved or exceeded
@@ -691,6 +732,7 @@ Strategic Health:
 ```
 
 **Renewal Conversation Framework:**
+
 1. **Value Reinforcement**
    - ROI achievement summary
    - Business impact quantification

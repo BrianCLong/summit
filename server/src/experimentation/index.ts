@@ -35,7 +35,10 @@ export class ExperimentManager {
   getVariant(experimentId: string, userId: string): string | null {
     const exp = this.experiments.find((e) => e.id === experimentId);
     if (!exp) return null;
-    const hash = crypto.createHash('sha256').update(`${experimentId}:${userId}`).digest('hex');
+    const hash = crypto
+      .createHash('sha256')
+      .update(`${experimentId}:${userId}`)
+      .digest('hex');
     const num = parseInt(hash.slice(0, 8), 16) % 100;
     let cumulative = 0;
     for (const [variant, weight] of Object.entries(exp.variant_split)) {

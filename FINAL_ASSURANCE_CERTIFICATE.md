@@ -1,4 +1,3 @@
-
 # Maestro Composer 1.0 - Final Assurance Certificate
 
 **Certificate ID:** `7f8a7e54-e3b1-4c6a-9134-5e6a2d7b8c9d`

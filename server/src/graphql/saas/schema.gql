@@ -1,14 +1,40 @@
 scalar JSON
 
-type TrustContract { id: ID!, providerTenant: String!, consumerTenant: String!, scope: JSON!, residency: String!, expiresAt: String!, signature: String! }
-input TrustContractInput { providerTenant: String!, consumerTenant: String!, scope: JSON!, residency: String!, expiresAt: String!, signature: String! }
+type TrustContract {
+  id: ID!
+  providerTenant: String!
+  consumerTenant: String!
+  scope: JSON!
+  residency: String!
+  expiresAt: String!
+  signature: String!
+}
+input TrustContractInput {
+  providerTenant: String!
+  consumerTenant: String!
+  scope: JSON!
+  residency: String!
+  expiresAt: String!
+  signature: String!
+}
 
-type MeterSample { ts: String!, cpuSec: Float!, gbSec: Float!, egressGb: Float!, dpEpsilon: Float!, pluginCalls: Int! }
+type MeterSample {
+  ts: String!
+  cpuSec: Float!
+  gbSec: Float!
+  egressGb: Float!
+  dpEpsilon: Float!
+  pluginCalls: Int!
+}
 
 extend type Mutation {
   registerTrustContract(input: TrustContractInput!): TrustContract!
   rotateTenantKey(tenant: String!): Boolean!
-  startCleanRoomRun(runbookYaml: String!, parties: [String!]!, dpPolicy: JSON!): ID!
+  startCleanRoomRun(
+    runbookYaml: String!
+    parties: [String!]!
+    dpPolicy: JSON!
+  ): ID!
 }
 
 extend type Query {

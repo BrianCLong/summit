@@ -7,7 +7,8 @@ const SOURCE_EXTENSIONS = /(\.tsx?|\.jsx?)$/i;
 const SAFE_PROMISE_IDENTIFIERS = ['allSettled'];
 
 function runAsyncAwaitScan({ baseRef }) {
-  const description = 'Verifies async/await usage includes error handling through try/catch or explicit catch chains.';
+  const description =
+    'Verifies async/await usage includes error handling through try/catch or explicit catch chains.';
   const remediation =
     'Wrap awaited calls in try/catch blocks or append a .catch handler so errors cannot escape silently.';
   const changedFiles = getChangedFiles(baseRef).filter(isCandidateFile);
@@ -29,7 +30,7 @@ function runAsyncAwaitScan({ baseRef }) {
       description,
       passed: true,
       details: ['All new async operations include error handling.'],
-      remediation
+      remediation,
     });
   }
   const details = violations.map((violation) => {
@@ -43,21 +44,37 @@ function runAsyncAwaitScan({ baseRef }) {
     description,
     passed: false,
     details,
-    remediation
+    remediation,
   });
 }
 
-function findUnhandledAwaitExpressions(sourceText, addedLines, filePath = 'unknown') {
-  const sourceFile = ts.createSourceFile(filePath, sourceText, ts.ScriptTarget.Latest, true, ts.ScriptKind.TSX);
+function findUnhandledAwaitExpressions(
+  sourceText,
+  addedLines,
+  filePath = 'unknown',
+) {
+  const sourceFile = ts.createSourceFile(
+    filePath,
+    sourceText,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TSX,
+  );
   const violations = [];
   const visit = (node, ancestors) => {
     if (ts.isAwaitExpression(node)) {
-      const { line } = sourceFile.getLineAndCharacterOfPosition(node.getStart());
+      const { line } = sourceFile.getLineAndCharacterOfPosition(
+        node.getStart(),
+      );
       const oneBasedLine = line + 1;
-      if (addedLines.has(oneBasedLine) && !isAwaitHandled(node, ancestors, sourceFile)) {
+      if (
+        addedLines.has(oneBasedLine) &&
+        !isAwaitHandled(node, ancestors, sourceFile)
+      ) {
         violations.push({
           line: oneBasedLine,
-          message: 'awaited call is missing try/catch coverage or a chained catch handler.'
+          message:
+            'awaited call is missing try/catch coverage or a chained catch handler.',
         });
       }
     }
@@ -90,7 +107,10 @@ function isAwaitHandled(node, ancestors, sourceFile) {
   }
   for (const ancestor of ancestors) {
     if (ts.isTryStatement(ancestor)) {
-      if (node.getStart() >= ancestor.tryBlock.getStart() && node.getEnd() <= ancestor.tryBlock.getEnd()) {
+      if (
+        node.getStart() >= ancestor.tryBlock.getStart() &&
+        node.getEnd() <= ancestor.tryBlock.getEnd()
+      ) {
         return true;
       }
     }
@@ -132,7 +152,10 @@ function hasCatchHandler(node, sourceFile) {
       return true;
     }
   }
-  if (ts.isIdentifier(expression) && SAFE_PROMISE_IDENTIFIERS.includes(expression.text)) {
+  if (
+    ts.isIdentifier(expression) &&
+    SAFE_PROMISE_IDENTIFIERS.includes(expression.text)
+  ) {
     return true;
   }
   return false;
@@ -140,5 +163,5 @@ function hasCatchHandler(node, sourceFile) {
 
 module.exports = {
   runAsyncAwaitScan,
-  findUnhandledAwaitExpressions
+  findUnhandledAwaitExpressions,
 };

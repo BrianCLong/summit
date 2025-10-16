@@ -1,13 +1,17 @@
 import { ZERO_SPEND_OPTIMIZATIONS, buildMemoCacheKey } from 'common-types';
 
 const EFFECTS = {
-  [ZERO_SPEND_OPTIMIZATIONS.KV_CACHE]: { cost: 0.9, latency: 0.85, condition: (task) => (task.tokens ?? 0) > 1024 },
+  [ZERO_SPEND_OPTIMIZATIONS.KV_CACHE]: {
+    cost: 0.9,
+    latency: 0.85,
+    condition: (task) => (task.tokens ?? 0) > 1024,
+  },
   [ZERO_SPEND_OPTIMIZATIONS.QUANTIZATION]: { cost: 0.82, latency: 0.95 },
   [ZERO_SPEND_OPTIMIZATIONS.SPECULATIVE_DECODE]: { cost: 0.92, latency: 0.7 },
   [ZERO_SPEND_OPTIMIZATIONS.BATCHING]: { cost: 0.9, latency: 0.9 },
   [ZERO_SPEND_OPTIMIZATIONS.VLLM]: { cost: 0.88, latency: 0.85 },
   [ZERO_SPEND_OPTIMIZATIONS.LORA]: { cost: 0.95, latency: 1 },
-  [ZERO_SPEND_OPTIMIZATIONS.MEMOIZATION]: { cost: 0, latency: 0 }
+  [ZERO_SPEND_OPTIMIZATIONS.MEMOIZATION]: { cost: 0, latency: 0 },
 };
 
 export class OptimizationManager {

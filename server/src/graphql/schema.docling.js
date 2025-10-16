@@ -88,7 +88,9 @@ export const doclingTypeDefs = gql`
   }
 
   extend type Mutation {
-    summarizeBuildFailure(input: SummarizeBuildFailureInput!): SummarizeBuildFailurePayload!
+    summarizeBuildFailure(
+      input: SummarizeBuildFailureInput!
+    ): SummarizeBuildFailurePayload!
     extractLicenses(input: ExtractLicensesInput!): ExtractLicensesPayload!
     generateReleaseNotes(input: ReleaseNotesInput!): ReleaseNotesPayload!
   }

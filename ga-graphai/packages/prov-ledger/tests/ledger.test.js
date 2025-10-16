@@ -15,7 +15,7 @@ test('ledger records entries with deterministic signature', () => {
     decision: { model: 'mixtral' },
     model: { id: 'mixtral-8x22b-instruct' },
     cost: { usd: 0, tokensIn: 10, tokensOut: 20 },
-    output: { summary: 'ok' }
+    output: { summary: 'ok' },
   });
   const recorded = ledger.record(payload);
   assert.ok(recorded.id);

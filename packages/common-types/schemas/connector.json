@@ -45,7 +45,15 @@
           "format": "date-time"
         }
       },
-      "required": ["id", "name", "version", "kind", "entrypoint", "permissions", "createdAt"],
+      "required": [
+        "id",
+        "name",
+        "version",
+        "kind",
+        "entrypoint",
+        "permissions",
+        "createdAt"
+      ],
       "additionalProperties": false
     }
   },

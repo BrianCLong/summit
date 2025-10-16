@@ -46,10 +46,7 @@ import { mergeResolvers } from '@graphql-tools/merge';
 import { v040Resolvers } from './resolvers/v040';
 import { existingResolvers } from './resolvers';
 
-const resolvers = mergeResolvers([
-  existingResolvers,
-  v040Resolvers
-]);
+const resolvers = mergeResolvers([existingResolvers, v040Resolvers]);
 
 export { resolvers };
 ```
@@ -63,12 +60,12 @@ import { join } from 'path';
 
 const v040Schema = readFileSync(
   join(__dirname, '../../../graphql/v040/mc-admin.v040.graphql'),
-  'utf8'
+  'utf8',
 );
 
 export const typeDefs = [
   // existing schemas
-  v040Schema
+  v040Schema,
 ];
 ```
 
@@ -177,7 +174,10 @@ import path from 'path';
 
 export class SandboxService {
   async validateProposal(proposal: EvolutionProposal): Promise<SandboxResults> {
-    const sandboxPath = path.join(process.cwd(), 'ops/sandbox/evolution_sandbox.py');
+    const sandboxPath = path.join(
+      process.cwd(),
+      'ops/sandbox/evolution_sandbox.py',
+    );
     const inputFile = `/tmp/proposal-${proposal.id}.json`;
 
     await writeFile(inputFile, JSON.stringify(proposal));
@@ -218,25 +218,25 @@ route:
   repeat_interval: 1h
   receiver: 'v040-alerts'
   routes:
-  - match:
-      version: v0.4.0
-      severity: critical
-    receiver: 'v040-critical'
-    group_wait: 0s
-    repeat_interval: 5m
+    - match:
+        version: v0.4.0
+        severity: critical
+      receiver: 'v040-critical'
+      group_wait: 0s
+      repeat_interval: 5m
 
 receivers:
-- name: 'v040-alerts'
-  slack_configs:
-  - api_url: '${SLACK_WEBHOOK_URL}'
-    channel: '#mc-platform-v040'
-    title: 'MC Platform v0.4.0 Alert'
-    text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
+  - name: 'v040-alerts'
+    slack_configs:
+      - api_url: '${SLACK_WEBHOOK_URL}'
+        channel: '#mc-platform-v040'
+        title: 'MC Platform v0.4.0 Alert'
+        text: '{{ range .Alerts }}{{ .Annotations.summary }}{{ end }}'
 
-- name: 'v040-critical'
-  pagerduty_configs:
-  - service_key: '${PAGERDUTY_SERVICE_KEY}'
-    description: 'CRITICAL: {{ .GroupLabels.alertname }}'
+  - name: 'v040-critical'
+    pagerduty_configs:
+      - service_key: '${PAGERDUTY_SERVICE_KEY}'
+        description: 'CRITICAL: {{ .GroupLabels.alertname }}'
 ```
 
 ### 5. Deployment
@@ -329,7 +329,10 @@ kubectl exec -it deployment/mc-platform -n mc-platform -- \
   "tenant": "acme-corp",
   "evolution_proposal": {
     "strategy": "QUANTUM_ENHANCED_EVOLUTION",
-    "capability_weights": {"pattern_recognition": 0.6, "anomaly_detection": 0.4},
+    "capability_weights": {
+      "pattern_recognition": 0.6,
+      "anomaly_detection": 0.4
+    },
     "risk_assessment": {
       "overall_risk": "MEDIUM",
       "safety_score": 0.85

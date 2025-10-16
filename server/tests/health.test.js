@@ -11,4 +11,3 @@ describe('GET /health', () => {
     expect(res.body).toHaveProperty('version');
   });
 });
-

@@ -2,12 +2,12 @@
 
 This Canvas delivers:
 
-1) **Branch name**: `feat/tenant-flags-and-ramps`
-2) **Commit messages** (granular or squash)
-3) **Single unified patch** (`PR8-tenant-flags-and-ramps.patch`) ready for `git apply` from repo root
-4) **CI workflow** to validate flag toggles fast
-5) **Mock Notary** (optional, disabled; useful in later PRs)
-6) **Sprint G Plan** (next sprint after PR8)
+1. **Branch name**: `feat/tenant-flags-and-ramps`
+2. **Commit messages** (granular or squash)
+3. **Single unified patch** (`PR8-tenant-flags-and-ramps.patch`) ready for `git apply` from repo root
+4. **CI workflow** to validate flag toggles fast
+5. **Mock Notary** (optional, disabled; useful in later PRs)
+6. **Sprint G Plan** (next sprint after PR8)
 
 ---
 
@@ -39,7 +39,7 @@ _Squash alt:_ **feat: tenant flags & ramps — per-tenant enablement with staged
 > git commit -m "feat: tenant flags & ramps — per-tenant enablement with staged rollout and CI"
 > ```
 
-```diff
+````diff
 diff --git a/services/api/src/lib/flags.ts b/services/api/src/lib/flags.ts
 new file mode 100644
 index 0000000..9a1c2b1
@@ -267,7 +267,7 @@ index 9b1c1c1..1c4a2a3 100644
 +    ports:
 +      - "4700:4700"
 +    profiles: [notary]
-```
+````
 
 ---
 
@@ -344,6 +344,7 @@ index 0000000..8b2a1b3
 **Title:** feat: tenant flags & ramps — per-tenant enablement with staged rollout and CI
 
 **Summary**
+
 - Adds tenant flags provider (Redis/JSON) with percentage/cohort ramps
 - API: `X-Tenant-ID` middleware + per-tenant gating for receipts + flag metadata headers
 - Worker: per-tenant gating for receipts on startup
@@ -351,12 +352,14 @@ index 0000000..8b2a1b3
 - Dev: optional mock-notary service (will be used in PR9)
 
 **Config**
+
 - `FLAGS_REDIS_URL` / `REDIS_URL`
 - `FLAGS_NS` (default `flags:v1:`)
 - `DEFAULT_TENANT`
 - `FLAGS_JSON` (fallback JSON map)
 
 **How to demo locally**
+
 ```bash
 docker compose up -d redis ledger opa
 # seed default flag to 10% ramp
@@ -371,21 +374,27 @@ redis-cli set flags:v1:receipts:__default__ '{"version":"v1","enabled":true,"ram
 **Theme**: Land PR9–PR11 foundations: external notary anchoring, mapper completion & lineage, dashboards/alerts.
 
 **Objectives**
+
 - External notary adapter live with retry queue and proofs persisted
 - Coverage report = 100%; lineage `op_chain_id` in audit
 - Dashboards & alert rules checked in and validated
 
 **Stories**
+
 - Implement `HttpsNotarySink` in ledger with mTLS/token + retries (use mock-notary locally)
 - Mapper coverage completion & report generator; lineage headers across API→Worker
 - Dashboards JSON (3 boards) and alert rules (4)
 
 **KPI**
+
 - ≥95% anchors dual-published ≤60s; coverage 100%; alerts fire on induced faults
 
 **PRs**
+
 - PR9: External anchor adapter + tests + chaos
 - PR10: Coverage + lineage + backfill
 - PR11: Dashboards + alerts
+
 ```
 
+```

@@ -59,7 +59,8 @@ export class AcceptanceCriteriaSynthesizer {
       metric: determineMetric(statement),
       threshold: determineThreshold(statement),
     }));
-    const missingSignals = criteria.length === 0 ? ['no actionable statements found'] : [];
+    const missingSignals =
+      criteria.length === 0 ? ['no actionable statements found'] : [];
     return { criteria, missingSignals };
   }
 
@@ -91,14 +92,19 @@ export class AcceptanceCriteriaSynthesizer {
 }
 
 export class AcceptanceCriteriaVerifier {
-  verify(criteria: AcceptanceCriteria[], evidence: Record<string, unknown>): boolean {
+  verify(
+    criteria: AcceptanceCriteria[],
+    evidence: Record<string, unknown>,
+  ): boolean {
     return criteria.every((criterion) => {
       const value = evidence[criterion.id];
       if (typeof value === 'boolean') {
         return value;
       }
       if (typeof value === 'number') {
-        const numericThreshold = Number.parseFloat(criterion.threshold.replace(/[^0-9.]/g, ''));
+        const numericThreshold = Number.parseFloat(
+          criterion.threshold.replace(/[^0-9.]/g, ''),
+        );
         if (Number.isNaN(numericThreshold)) {
           return value > 0;
         }

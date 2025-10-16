@@ -1,4 +1,3 @@
-
 # schemas/dag-node.schema.yaml
 type: object
 properties:

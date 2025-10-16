@@ -36,8 +36,13 @@ async function loadJSON<T>(filePath: string): Promise<T | null> {
   }
 }
 
-async function getShootout(): Promise<{ benchmarks: ShootoutData | null; badges: BadgeData[] }> {
-  const benchmarks = await loadJSON<ShootoutData>(path.join(process.cwd(), 'benchmarks', 'shootout', 'results.json'));
+async function getShootout(): Promise<{
+  benchmarks: ShootoutData | null;
+  badges: BadgeData[];
+}> {
+  const benchmarks = await loadJSON<ShootoutData>(
+    path.join(process.cwd(), 'benchmarks', 'shootout', 'results.json'),
+  );
 
   const badgesDir = path.join(process.cwd(), 'docs', 'reports', 'badges');
   let badges: BadgeData[] = [];
@@ -47,7 +52,7 @@ async function getShootout(): Promise<{ benchmarks: ShootoutData | null; badges:
       await Promise.all(
         entries
           .filter((file) => file.endsWith('.json'))
-          .map((file) => loadJSON<BadgeData>(path.join(badgesDir, file)))
+          .map((file) => loadJSON<BadgeData>(path.join(badgesDir, file))),
       )
     ).filter((badge): badge is BadgeData => Boolean(badge));
   } catch {
@@ -73,15 +78,19 @@ export default async function Page() {
       <header>
         <h1>IntelGraph MCP Shootout</h1>
         <p>
-          Signed benchmarks, conformance badges, and replay evidence for Maestro Conductor versus the field. All data is
-          reproducible via the public harness.
+          Signed benchmarks, conformance badges, and replay evidence for Maestro
+          Conductor versus the field. All data is reproducible via the public
+          harness.
         </p>
       </header>
 
       <section>
         <h2>Benchmark Leaderboard</h2>
         {intelgraphRuns.length === 0 ? (
-          <p>No benchmark data found. Run the harness to populate benchmarks/shootout/results.json.</p>
+          <p>
+            No benchmark data found. Run the harness to populate
+            benchmarks/shootout/results.json.
+          </p>
         ) : (
           <table className="table">
             <thead>
@@ -103,8 +112,16 @@ export default async function Page() {
                   <td>{formatNumber(run.metrics.latency_ms?.p95)}</td>
                   <td>{formatNumber(run.metrics.cold_start_ms?.p95)}</td>
                   <td>{formatNumber(run.metrics.sse_latency_ms?.p95)}</td>
-                  <td>{run.metrics.error_rate !== undefined ? `${(run.metrics.error_rate * 100).toFixed(2)}%` : '—'}</td>
-                  <td>{run.metrics.cost_per_1k_calls_usd !== undefined ? `$${run.metrics.cost_per_1k_calls_usd.toFixed(3)}` : '—'}</td>
+                  <td>
+                    {run.metrics.error_rate !== undefined
+                      ? `${(run.metrics.error_rate * 100).toFixed(2)}%`
+                      : '—'}
+                  </td>
+                  <td>
+                    {run.metrics.cost_per_1k_calls_usd !== undefined
+                      ? `$${run.metrics.cost_per_1k_calls_usd.toFixed(3)}`
+                      : '—'}
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -115,12 +132,21 @@ export default async function Page() {
       <section>
         <h2>Conformance & Sandbox Badges</h2>
         {badges.length === 0 ? (
-          <p>No badge JSON found. Run the conformance CLI with --badge-out to generate badges.</p>
+          <p>
+            No badge JSON found. Run the conformance CLI with --badge-out to
+            generate badges.
+          </p>
         ) : (
           badges.map((badge) => (
-            <article key={`${badge.server}-${badge.version ?? 'latest'}`} style={{ marginBottom: '2rem' }}>
+            <article
+              key={`${badge.server}-${badge.version ?? 'latest'}`}
+              style={{ marginBottom: '2rem' }}
+            >
               <h3>
-                {badge.server} <small style={{ fontWeight: 400 }}>v{badge.version ?? 'n/a'}</small>
+                {badge.server}{' '}
+                <small style={{ fontWeight: 400 }}>
+                  v{badge.version ?? 'n/a'}
+                </small>
               </h3>
               <p>Generated: {badge.generatedAt ?? 'n/a'}</p>
               <div>
@@ -128,7 +154,12 @@ export default async function Page() {
                 <ul>
                   {badge.checks &&
                     Object.entries(badge.checks).map(([key, value]) => (
-                      <li key={key} className={value === 'pass' ? 'badge-pass' : 'badge-fail'}>
+                      <li
+                        key={key}
+                        className={
+                          value === 'pass' ? 'badge-pass' : 'badge-fail'
+                        }
+                      >
                         {key}: {value}
                       </li>
                     ))}
@@ -139,7 +170,9 @@ export default async function Page() {
                 <ul>
                   {badge.latency &&
                     Object.entries(badge.latency).map(([key, value]) => (
-                      <li key={key}>{key}: {formatNumber(value, ' ms')}</li>
+                      <li key={key}>
+                        {key}: {formatNumber(value, ' ms')}
+                      </li>
                     ))}
                 </ul>
               </div>
@@ -148,7 +181,9 @@ export default async function Page() {
                 <ul>
                   {badge.sandbox &&
                     Object.entries(badge.sandbox).map(([key, value]) => (
-                      <li key={key}>{key}: {value}</li>
+                      <li key={key}>
+                        {key}: {value}
+                      </li>
                     ))}
                 </ul>
               </div>
@@ -157,7 +192,10 @@ export default async function Page() {
                 <ul>
                   {badge.replay &&
                     Object.entries(badge.replay).map(([key, value]) => (
-                      <li key={key}>{key}: {value === null || value === undefined ? '—' : value}</li>
+                      <li key={key}>
+                        {key}:{' '}
+                        {value === null || value === undefined ? '—' : value}
+                      </li>
                     ))}
                 </ul>
               </div>

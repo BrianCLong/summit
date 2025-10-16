@@ -1,3 +1,4 @@
+import { recordRevenue } from '../monitoring/businessMetrics.js';
 const paymentsResolvers = {
     Query: {
         invoices: (_, { tenantId }) => {
@@ -8,7 +9,10 @@ const paymentsResolvers = {
         }
     },
     Mutation: {
-        createCheckout: (_, { orderId }) => {
+        createCheckout: (_, { orderId, amount, currency, tenant }) => {
+            if (typeof amount === 'number' && amount > 0) {
+                recordRevenue({ tenant, currency, amount, metadata: { orderId } });
+            }
             return { sessionId: `sess_${orderId}` };
         }
     }

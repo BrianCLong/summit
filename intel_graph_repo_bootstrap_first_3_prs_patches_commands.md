@@ -1,9 +1,10 @@
 # IntelGraph – Repo Bootstrap & First 3 PRs (patches & commands)
 
 This package contains copy‑pasteable patches, shell scripts, and `gh` commands to initialize the repo and open three PRs:
-1) **PR-1:** Repo scaffolding + CI/CD + CODEOWNERS + basic docs.
-2) **PR-2:** Graph Core & API skeleton with persisted queries + cost guard stubs.
-3) **PR-3:** Ingest Wizard skeleton + two connectors (CSV, STIX/TAXII) with golden tests.
+
+1. **PR-1:** Repo scaffolding + CI/CD + CODEOWNERS + basic docs.
+2. **PR-2:** Graph Core & API skeleton with persisted queries + cost guard stubs.
+3. **PR-3:** Ingest Wizard skeleton + two connectors (CSV, STIX/TAXII) with golden tests.
 
 > Assumptions: Node 20, Python 3.12, Docker, Neo4j test container, OPA, Kafka (via docker‑compose for local integration). Repo root: `github.com/BrianCLong/intelgraph`.
 
@@ -97,6 +98,7 @@ echo "Bootstrap complete."
 ```
 
 Make executable:
+
 ```bash
 chmod +x scripts/bootstrap.sh
 ```
@@ -107,6 +109,7 @@ chmod +x scripts/bootstrap.sh
 
 **Branch:** `chore/scaffold-ci`  
 **Open PR:**
+
 ```bash
 git checkout -b chore/scaffold-ci
 # apply patch below, commit, push
@@ -114,6 +117,7 @@ gh pr create -t "Scaffold repo + CI/CD + CODEOWNERS + docs" -b "Initial project 
 ```
 
 **Patch:**
+
 ```diff
 *** Begin Patch
 *** Add File: .gitignore
@@ -131,6 +135,7 @@ gh pr create -t "Scaffold repo + CI/CD + CODEOWNERS + docs" -b "Initial project 
 
 *** End Patch
 ```
+
 ```diff
 *** Begin Patch
 *** Add File: package.json
@@ -149,6 +154,7 @@ gh pr create -t "Scaffold repo + CI/CD + CODEOWNERS + docs" -b "Initial project 
 +}
 *** End Patch
 ```
+
 ```diff
 *** Begin Patch
 *** Add File: .github/workflows/ci.yml
@@ -179,6 +185,7 @@ gh pr create -t "Scaffold repo + CI/CD + CODEOWNERS + docs" -b "Initial project 
 +    uses: github/codeql-action/.github/workflows/codeql.yml@v3
 *** End Patch
 ```
+
 ```diff
 *** Begin Patch
 *** Add File: .github/PULL_REQUEST_TEMPLATE.md
@@ -196,6 +203,7 @@ gh pr create -t "Scaffold repo + CI/CD + CODEOWNERS + docs" -b "Initial project 
 +**Linked Issues:** Closes #
 *** End Patch
 ```
+
 ```diff
 *** Begin Patch
 *** Add File: .github/ISSUE_TEMPLATE/feature_request.yml
@@ -217,6 +225,7 @@ gh pr create -t "Scaffold repo + CI/CD + CODEOWNERS + docs" -b "Initial project 
 +      options: [Graph, Ingest, ER, Analytics, Copilot, Governance, Prov-Ledger, Ops, UI, Docs]
 *** End Patch
 ```
+
 ```diff
 *** Begin Patch
 *** Add File: .github/ISSUE_TEMPLATE/bug_report.yml
@@ -241,6 +250,7 @@ gh pr create -t "Scaffold repo + CI/CD + CODEOWNERS + docs" -b "Initial project 
 +      label: Version/SHA
 *** End Patch
 ```
+
 ```diff
 *** Begin Patch
 *** Add File: .github/CODEOWNERS
@@ -253,6 +263,7 @@ gh pr create -t "Scaffold repo + CI/CD + CODEOWNERS + docs" -b "Initial project 
 +/infrastructure/helm/          @sre-leads @platform-owners
 *** End Patch
 ```
+
 ```diff
 *** Begin Patch
 *** Add File: Makefile
@@ -267,6 +278,7 @@ gh pr create -t "Scaffold repo + CI/CD + CODEOWNERS + docs" -b "Initial project 
 +	helm repo index charts/ --url https://brianclong.github.io/intelgraph/charts
 *** End Patch
 ```
+
 ```diff
 *** Begin Patch
 *** Add File: README.md
@@ -282,6 +294,7 @@ Monorepo for IntelGraph platform. See `docs/` for architecture and project plan.
 
 **Branch:** `feature/graph-core-api`  
 **Open PR:**
+
 ```bash
 git checkout -b feature/graph-core-api
 # apply patch below, commit, push
@@ -289,6 +302,7 @@ gh pr create -t "Graph Core & API skeleton (Apollo, persisted queries, cost guar
 ```
 
 **Patch:**
+
 ```diff
 *** Begin Patch
 *** Add File: services/api/package.json
@@ -313,6 +327,7 @@ gh pr create -t "Graph Core & API skeleton (Apollo, persisted queries, cost guar
 +}
 *** End Patch
 ```
+
 ```diff
 *** Begin Patch
 *** Add File: services/api/src/index.js
@@ -342,6 +357,7 @@ gh pr create -t "Graph Core & API skeleton (Apollo, persisted queries, cost guar
 +logger.info({ url }, "api up");
 *** End Patch
 ```
+
 ```diff
 *** Begin Patch
 *** Add File: services/api/src/schema.js
@@ -379,6 +395,7 @@ gh pr create -t "Graph Core & API skeleton (Apollo, persisted queries, cost guar
 +};
 *** End Patch
 ```
+
 ```diff
 *** Begin Patch
 *** Add File: services/api/src/middleware/costGuard.js
@@ -405,6 +422,7 @@ gh pr create -t "Graph Core & API skeleton (Apollo, persisted queries, cost guar
 +}
 *** End Patch
 ```
+
 ```diff
 *** Begin Patch
 *** Add File: services/api/src/persisted.json
@@ -414,12 +432,14 @@ gh pr create -t "Graph Core & API skeleton (Apollo, persisted queries, cost guar
 +}
 *** End Patch
 ```
+
 ```diff
 *** Begin Patch
 *** Add File: services/api/jest.config.js
 +export default { testEnvironment: 'node' };
 *** End Patch
 ```
+
 ```diff
 *** Begin Patch
 *** Add File: services/api/__tests__/smoke.test.js
@@ -434,6 +454,7 @@ gh pr create -t "Graph Core & API skeleton (Apollo, persisted queries, cost guar
 
 **Branch:** `feature/ingest-wizard-connectors`  
 **Open PR:**
+
 ```bash
 git checkout -b feature/ingest-wizard-connectors
 # apply patch below, commit, push
@@ -441,6 +462,7 @@ gh pr create -t "Ingest Wizard + CSV and STIX/TAXII connectors (with golden test
 ```
 
 **Patch:**
+
 ```diff
 *** Begin Patch
 *** Add File: services/ingest/package.json
@@ -454,6 +476,7 @@ gh pr create -t "Ingest Wizard + CSV and STIX/TAXII connectors (with golden test
 +}
 *** End Patch
 ```
+
 ```diff
 *** Begin Patch
 *** Add File: services/ingest/src/index.js
@@ -477,6 +500,7 @@ gh pr create -t "Ingest Wizard + CSV and STIX/TAXII connectors (with golden test
 +}
 *** End Patch
 ```
+
 ```diff
 *** Begin Patch
 *** Add File: services/ingest/src/plugins/csv.js
@@ -493,6 +517,7 @@ gh pr create -t "Ingest Wizard + CSV and STIX/TAXII connectors (with golden test
 +}
 *** End Patch
 ```
+
 ```diff
 *** Begin Patch
 *** Add File: services/ingest/src/plugins/stix_taxii.js
@@ -513,6 +538,7 @@ gh pr create -t "Ingest Wizard + CSV and STIX/TAXII connectors (with golden test
 +}
 *** End Patch
 ```
+
 ```diff
 *** Begin Patch
 *** Add File: services/ingest/__tests__/csv.test.js
@@ -552,4 +578,3 @@ git checkout -b feature/ingest-wizard-connectors && git add -A && git commit -m 
 - Add persisted query ID header enforcement at API gateway/edge.
 - Extend STIX/TAXII to 2.1 Collections (JSON, pagination, auth).
 - Add golden datasets for ER service and integrate ingest → ER pipeline topic.
-

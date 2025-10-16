@@ -239,8 +239,11 @@ describe('ToastContainer', () => {
 
     // Wait for toast to appear and check for animation classes
     await waitFor(() => {
-      const toast = screen.getByText('Test Toast').closest('div');
-      expect(toast).toHaveClass('transition-all', 'duration-300');
+      const el = screen.getByText('Test Toast');
+      const animated = (el as HTMLElement).closest('[class*="transition-all"]') as HTMLElement | null;
+      expect(animated).toBeTruthy();
+      expect(animated).toHaveClass('transition-all');
+      expect(animated).toHaveClass('duration-300');
     });
   });
 

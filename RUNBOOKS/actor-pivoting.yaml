@@ -7,7 +7,7 @@ tasks:
     name: Ingest Initial Indicators
     uses: connector:esri
     with:
-      indicators: ["ip", "domain", "hash", "email"]
+      indicators: ['ip', 'domain', 'hash', 'email']
 
   - id: infrastructure_mapping
     name: Map Related Infrastructure

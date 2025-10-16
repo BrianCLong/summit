@@ -15,7 +15,9 @@ export interface DoclingPipelineInput {
 export interface DoclingPipelineResult {
   failure: Awaited<ReturnType<typeof doclingService.summarizeBuildFailure>>;
   compliance?: Awaited<ReturnType<typeof doclingService.extractLicenses>>;
-  releaseNotes?: Awaited<ReturnType<typeof doclingService.generateReleaseNotes>>;
+  releaseNotes?: Awaited<
+    ReturnType<typeof doclingService.generateReleaseNotes>
+  >;
 }
 
 export class DoclingBuildPipeline {

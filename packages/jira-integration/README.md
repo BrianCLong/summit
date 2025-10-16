@@ -28,7 +28,11 @@ npm run --workspace=@summit/jira-integration build
 ### Configuration
 
 ```ts
-import { JiraIntegrationService, JiraApiClient, InMemoryAuditLogger } from '@summit/jira-integration';
+import {
+  JiraIntegrationService,
+  JiraApiClient,
+  InMemoryAuditLogger,
+} from '@summit/jira-integration';
 
 const config = {
   baseUrl: 'https://your-domain.atlassian.net',
@@ -42,21 +46,45 @@ const config = {
     owners: 'customfield_10102',
     perfMetric: 'customfield_10103',
     baselineValue: 'customfield_10104',
-    currentValue: 'customfield_10105'
+    currentValue: 'customfield_10105',
   },
   priorityMapping: {
-    blocker: { priorityId: '1', severityFieldId: 'customfield_10200', severityValue: 'Blocker' },
-    critical: { priorityId: '2', severityFieldId: 'customfield_10200', severityValue: 'Critical' },
-    high: { priorityId: '3', severityFieldId: 'customfield_10200', severityValue: 'High' },
-    medium: { priorityId: '4', severityFieldId: 'customfield_10200', severityValue: 'Medium' },
-    low: { priorityId: '5', severityFieldId: 'customfield_10200', severityValue: 'Low' },
-    info: { priorityId: '6', severityFieldId: 'customfield_10200', severityValue: 'Informational' }
+    blocker: {
+      priorityId: '1',
+      severityFieldId: 'customfield_10200',
+      severityValue: 'Blocker',
+    },
+    critical: {
+      priorityId: '2',
+      severityFieldId: 'customfield_10200',
+      severityValue: 'Critical',
+    },
+    high: {
+      priorityId: '3',
+      severityFieldId: 'customfield_10200',
+      severityValue: 'High',
+    },
+    medium: {
+      priorityId: '4',
+      severityFieldId: 'customfield_10200',
+      severityValue: 'Medium',
+    },
+    low: {
+      priorityId: '5',
+      severityFieldId: 'customfield_10200',
+      severityValue: 'Low',
+    },
+    info: {
+      priorityId: '6',
+      severityFieldId: 'customfield_10200',
+      severityValue: 'Informational',
+    },
   },
   workflowTransitions: {
     Triaged: 'In Progress',
     'Ready for QA': 'QA In Progress',
-    Resolved: 'Validation'
-  }
+    Resolved: 'Validation',
+  },
 };
 
 const auditLogger = new InMemoryAuditLogger();
@@ -78,7 +106,7 @@ await integration.createPerfTraceTicket({
   baselineValue: 120,
   currentValue: 210,
   labels: ['perftrace'],
-  relatedIssueKeys: ['PLAT-21']
+  relatedIssueKeys: ['PLAT-21'],
 });
 ```
 

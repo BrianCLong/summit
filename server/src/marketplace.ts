@@ -4,16 +4,20 @@ import path from 'path';
 import { verifyCosign } from './plugins/verify.js';
 
 function exec(bin: string, args: string[]) {
-  return new Promise<void>((res, rej) => execFile(bin, args, (e) => (e ? rej(e) : res())));
+  return new Promise<void>((res, rej) =>
+    execFile(bin, args, (e) => (e ? rej(e) : res())),
+  );
 }
 
 export async function installStep(name: string, version: string) {
   const offline = (process.env.OFFLINE || 'false').toLowerCase() === 'true';
   const pluginsDir = path.join(process.cwd(), 'plugins');
   await fs.mkdir(pluginsDir, { recursive: true });
-  const ref = process.env.MARKETPLACE_REGISTRY || `ghcr.io/intelgraph/${name}:${version}`;
+  const ref =
+    process.env.MARKETPLACE_REGISTRY || `ghcr.io/intelgraph/${name}:${version}`;
   if (!offline) {
-    if (!(await verifyCosign(ref))) throw new Error('signature verification failed');
+    if (!(await verifyCosign(ref)))
+      throw new Error('signature verification failed');
     try {
       await exec('oras', ['pull', ref, '-o', pluginsDir]);
     } catch (e) {
@@ -24,4 +28,3 @@ export async function installStep(name: string, version: string) {
   await fs.access(wasmFile);
   return wasmFile;
 }
-

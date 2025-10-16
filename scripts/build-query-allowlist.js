@@ -11,11 +11,20 @@ const glob = require('glob');
 
 // Configuration
 const CLIENT_DIR = process.env.CLIENT_DIR || './client';
-const OUTPUT_FILE = process.env.ALLOWLIST_OUTPUT || './server/config/query-allowlist.json';
-const QUERY_PATTERNS = ['**/*.ts', '**/*.tsx', '**/*.js', '**/*.jsx', '**/*.graphql', '**/*.gql'];
+const OUTPUT_FILE =
+  process.env.ALLOWLIST_OUTPUT || './server/config/query-allowlist.json';
+const QUERY_PATTERNS = [
+  '**/*.ts',
+  '**/*.tsx',
+  '**/*.js',
+  '**/*.jsx',
+  '**/*.graphql',
+  '**/*.gql',
+];
 
 // GraphQL query extraction patterns
-const QUERY_REGEX = /(?:gql`|query\s*=\s*`|mutation\s*=\s*`|graphql\s*`)([\s\S]*?)(?:`)/g;
+const QUERY_REGEX =
+  /(?:gql`|query\s*=\s*`|mutation\s*=\s*`|graphql\s*`)([\s\S]*?)(?:`)/g;
 const TEMPLATE_LITERAL_REGEX = /`((?:[^`\\]|\\.)*)(`)/g;
 
 class QueryAllowlistBuilder {
@@ -32,7 +41,12 @@ class QueryAllowlistBuilder {
 
     for (const pattern of QUERY_PATTERNS) {
       const files = glob.sync(path.join(CLIENT_DIR, pattern), {
-        ignore: ['**/node_modules/**', '**/dist/**', '**/*.test.*', '**/*.spec.*'],
+        ignore: [
+          '**/node_modules/**',
+          '**/dist/**',
+          '**/*.test.*',
+          '**/*.spec.*',
+        ],
       });
 
       for (const file of files) {
@@ -129,10 +143,12 @@ class QueryAllowlistBuilder {
         }
         currentQuery = line + '\n';
         inOperation = true;
-        braceCount = (line.match(/\{/g) || []).length - (line.match(/\}/g) || []).length;
+        braceCount =
+          (line.match(/\{/g) || []).length - (line.match(/\}/g) || []).length;
       } else if (inOperation) {
         currentQuery += line + '\n';
-        braceCount += (line.match(/\{/g) || []).length - (line.match(/\}/g) || []).length;
+        braceCount +=
+          (line.match(/\{/g) || []).length - (line.match(/\}/g) || []).length;
 
         if (braceCount === 0) {
           queries.push(currentQuery.trim());
@@ -247,7 +263,9 @@ class QueryAllowlistBuilder {
     for (const query of this.queries) {
       for (const pattern of suspiciousPatterns) {
         if (query.includes(pattern)) {
-          issues.push(`Query contains introspection: ${this.getQueryName(query) || 'Anonymous'}`);
+          issues.push(
+            `Query contains introspection: ${this.getQueryName(query) || 'Anonymous'}`,
+          );
         }
       }
     }
@@ -300,7 +318,9 @@ class QueryAllowlistBuilder {
     console.log(`   Validation issues: ${issues.length}`);
 
     if (issues.length > 0) {
-      console.log('\n⚠️  Please review validation issues before deploying to production');
+      console.log(
+        '\n⚠️  Please review validation issues before deploying to production',
+      );
       process.exit(1);
     }
 

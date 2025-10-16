@@ -8,7 +8,7 @@ jest.mock('../../src/services/ticket-links.js');
 
 describe('Ticket Linking Integration Flow', () => {
   let server: any;
-  
+
   beforeAll(async () => {
     // Start test server
     server = app.listen(0);
@@ -23,12 +23,12 @@ describe('Ticket Linking Integration Flow', () => {
   describe('GitHub Webhook → Run Completion → TicketDetails Integration', () => {
     it('should link ticket to run via webhook and show in TicketDetails', async () => {
       const ticketLinkService = require('../../src/services/ticket-links.js');
-      
+
       // Mock the linking service
       ticketLinkService.addTicketRunLink = jest.fn().mockResolvedValue(null);
       ticketLinkService.extractTicketFromPR = jest.fn().mockReturnValue({
         provider: 'github',
-        externalId: '123'
+        externalId: '123',
       });
 
       // Step 1: Simulate GitHub PR webhook with run ID in body
@@ -40,12 +40,12 @@ describe('Ticket Linking Integration Flow', () => {
           body: 'This PR fixes #123 and relates to runId: run-abc-123',
           html_url: 'https://github.com/owner/repo/pull/456',
           user: { login: 'developer' },
-          merged: true
+          merged: true,
         },
         repository: {
           name: 'test-repo',
-          full_name: 'owner/test-repo'
-        }
+          full_name: 'owner/test-repo',
+        },
       };
 
       const webhookResponse = await request(server)
@@ -62,11 +62,11 @@ describe('Ticket Linking Integration Flow', () => {
         metadata: {
           ticket: {
             provider: 'github',
-            external_id: '123'
+            external_id: '123',
           },
           pr_url: 'https://github.com/owner/repo/pull/456',
-          commit_sha: 'abc123def456'
-        }
+          commit_sha: 'abc123def456',
+        },
       };
 
       const lifecycleResponse = await request(server)
@@ -80,31 +80,33 @@ describe('Ticket Linking Integration Flow', () => {
       // Mock the database query for tickets
       const db = require('../../src/db/postgres.js');
       const mockPool = {
-        query: jest.fn()
+        query: jest.fn(),
       };
       db.getPostgresPool.mockReturnValue(mockPool);
 
       // Mock ticket query result
       mockPool.query.mockResolvedValueOnce({
-        rows: [{
-          provider: 'github',
-          external_id: '123',
-          title: 'Authentication bug',
-          assignee: 'developer',
-          labels: ['bug', 'high-priority'],
-          project: null,
-          repo: 'owner/test-repo'
-        }]
+        rows: [
+          {
+            provider: 'github',
+            external_id: '123',
+            title: 'Authentication bug',
+            assignee: 'developer',
+            labels: ['bug', 'high-priority'],
+            project: null,
+            repo: 'owner/test-repo',
+          },
+        ],
       });
 
       // Mock runs query result
       mockPool.query.mockResolvedValueOnce({
-        rows: [{ id: 'run-abc-123' }]
+        rows: [{ id: 'run-abc-123' }],
       });
 
       // Mock deployments query result
       mockPool.query.mockResolvedValueOnce({
-        rows: []
+        rows: [],
       });
 
       const graphqlQuery = `
@@ -129,8 +131,8 @@ describe('Ticket Linking Integration Flow', () => {
           query: graphqlQuery,
           variables: {
             provider: 'github',
-            id: '123'
-          }
+            id: '123',
+          },
         })
         .expect(200);
 
@@ -147,8 +149,8 @@ describe('Ticket Linking Integration Flow', () => {
         'run-abc-123',
         expect.objectContaining({
           pr_url: 'https://github.com/owner/repo/pull/456',
-          commit_sha: 'abc123def456'
-        })
+          commit_sha: 'abc123def456',
+        }),
       );
     });
   });
@@ -156,9 +158,11 @@ describe('Ticket Linking Integration Flow', () => {
   describe('Jira Webhook → Deployment → TicketDetails Integration', () => {
     it('should link Jira ticket to deployment and show in UI', async () => {
       const ticketLinkService = require('../../src/services/ticket-links.js');
-      
+
       // Mock the linking service
-      ticketLinkService.addTicketDeploymentLink = jest.fn().mockResolvedValue(null);
+      ticketLinkService.addTicketDeploymentLink = jest
+        .fn()
+        .mockResolvedValue(null);
 
       // Step 1: Simulate Jira issue update webhook with deployment ID
       const jiraWebhookPayload = {
@@ -170,9 +174,9 @@ describe('Ticket Linking Integration Flow', () => {
             description: 'Ready for deployment. deploymentId: deploy-xyz-789',
             status: { name: 'In Progress' },
             assignee: { displayName: 'DevOps Engineer' },
-            reporter: { displayName: 'Product Manager' }
-          }
-        }
+            reporter: { displayName: 'Product Manager' },
+          },
+        },
       };
 
       const jiraWebhookResponse = await request(server)
@@ -189,11 +193,11 @@ describe('Ticket Linking Integration Flow', () => {
         metadata: {
           ticket: {
             provider: 'jira',
-            external_id: 'PROJ-789'
+            external_id: 'PROJ-789',
           },
           environment: 'staging',
-          version: 'v1.2.3'
-        }
+          version: 'v1.2.3',
+        },
       };
 
       const deploymentResponse = await request(server)
@@ -209,8 +213,8 @@ describe('Ticket Linking Integration Flow', () => {
         'deploy-xyz-789',
         expect.objectContaining({
           environment: 'staging',
-          version: 'v1.2.3'
-        })
+          version: 'v1.2.3',
+        }),
       );
     });
   });
@@ -218,7 +222,7 @@ describe('Ticket Linking Integration Flow', () => {
   describe('Error Handling', () => {
     it('should handle webhook with invalid payload gracefully', async () => {
       const invalidPayload = {
-        action: 'invalid_action'
+        action: 'invalid_action',
         // Missing required fields
       };
 
@@ -232,9 +236,10 @@ describe('Ticket Linking Integration Flow', () => {
 
     it('should handle lifecycle event for nonexistent run', async () => {
       const ticketLinkService = require('../../src/services/ticket-links.js');
-      
+
       // Mock service to throw error for nonexistent run
-      ticketLinkService.addTicketRunLink = jest.fn()
+      ticketLinkService.addTicketRunLink = jest
+        .fn()
         .mockRejectedValue(new Error('Run nonexistent-run not found'));
 
       const payload = {
@@ -243,9 +248,9 @@ describe('Ticket Linking Integration Flow', () => {
         metadata: {
           ticket: {
             provider: 'github',
-            external_id: '999'
-          }
-        }
+            external_id: '999',
+          },
+        },
       };
 
       // Should still return 200 but handle error gracefully
@@ -261,11 +266,11 @@ describe('Ticket Linking Integration Flow', () => {
   describe('Idempotency', () => {
     it('should handle duplicate webhook calls without errors', async () => {
       const ticketLinkService = require('../../src/services/ticket-links.js');
-      
+
       ticketLinkService.addTicketRunLink = jest.fn().mockResolvedValue(null);
       ticketLinkService.extractTicketFromPR = jest.fn().mockReturnValue({
         provider: 'github',
-        externalId: '456'
+        externalId: '456',
       });
 
       const webhookPayload = {
@@ -275,12 +280,12 @@ describe('Ticket Linking Integration Flow', () => {
           title: 'Feature implementation',
           body: 'Implements #456 with runId: run-duplicate-test',
           html_url: 'https://github.com/owner/repo/pull/789',
-          user: { login: 'developer' }
+          user: { login: 'developer' },
         },
         repository: {
           name: 'test-repo',
-          full_name: 'owner/test-repo'
-        }
+          full_name: 'owner/test-repo',
+        },
       };
 
       // Send same webhook twice

@@ -22,7 +22,8 @@ router.post('/nl-to-cypher', async (req, res) => {
       success: true,
       data: result,
       preview: true,
-      message: 'This is a preview implementation - full NL→Cypher coming post-GA',
+      message:
+        'This is a preview implementation - full NL→Cypher coming post-GA',
     });
   } catch (error) {
     res.status(500).json({

@@ -5,8 +5,9 @@
  */
 
 module.exports = {
-  description: 'Initial Entity Model Setup - Constraints, Indexes, and Relationships',
-  
+  description:
+    'Initial Entity Model Setup - Constraints, Indexes, and Relationships',
+
   /**
    * Apply migration
    * @param {Session} session Neo4j session
@@ -20,11 +21,11 @@ module.exports = {
       'CREATE CONSTRAINT entity_id_unique IF NOT EXISTS FOR (e:Entity) REQUIRE e.id IS UNIQUE',
       'CREATE CONSTRAINT user_id_unique IF NOT EXISTS FOR (u:User) REQUIRE u.id IS UNIQUE',
       'CREATE CONSTRAINT investigation_id_unique IF NOT EXISTS FOR (i:Investigation) REQUIRE i.id IS UNIQUE',
-      
+
       // Email constraints
       'CREATE CONSTRAINT user_email_unique IF NOT EXISTS FOR (u:User) REQUIRE u.email IS UNIQUE',
       'CREATE CONSTRAINT user_username_unique IF NOT EXISTS FOR (u:User) REQUIRE u.username IS UNIQUE',
-      
+
       // Required field constraints
       'CREATE CONSTRAINT entity_type_exists IF NOT EXISTS FOR (e:Entity) REQUIRE e.type IS NOT NULL',
       'CREATE CONSTRAINT entity_label_exists IF NOT EXISTS FOR (e:Entity) REQUIRE e.label IS NOT NULL',
@@ -37,7 +38,10 @@ module.exports = {
         await session.run(constraint);
         console.log(`✅ Created constraint: ${constraint.split(' ')[2]}`);
       } catch (error) {
-        if (!error.message.includes('already exists') && !error.message.includes('An equivalent')) {
+        if (
+          !error.message.includes('already exists') &&
+          !error.message.includes('An equivalent')
+        ) {
           console.warn(`⚠️  Failed to create constraint: ${error.message}`);
         }
       }
@@ -54,10 +58,17 @@ module.exports = {
     for (const constraint of relationshipConstraints) {
       try {
         await session.run(constraint);
-        console.log(`✅ Created relationship constraint: ${constraint.split(' ')[2]}`);
+        console.log(
+          `✅ Created relationship constraint: ${constraint.split(' ')[2]}`,
+        );
       } catch (error) {
-        if (!error.message.includes('already exists') && !error.message.includes('An equivalent')) {
-          console.warn(`⚠️  Failed to create relationship constraint: ${error.message}`);
+        if (
+          !error.message.includes('already exists') &&
+          !error.message.includes('An equivalent')
+        ) {
+          console.warn(
+            `⚠️  Failed to create relationship constraint: ${error.message}`,
+          );
         }
       }
     }
@@ -71,19 +82,19 @@ module.exports = {
       'CREATE INDEX entity_created_at_idx IF NOT EXISTS FOR (e:Entity) ON (e.createdAt)',
       'CREATE INDEX entity_updated_at_idx IF NOT EXISTS FOR (e:Entity) ON (e.updatedAt)',
       'CREATE INDEX entity_confidence_idx IF NOT EXISTS FOR (e:Entity) ON (e.confidence)',
-      
+
       // Investigation indexes
       'CREATE INDEX investigation_status_idx IF NOT EXISTS FOR (i:Investigation) ON (i.status)',
       'CREATE INDEX investigation_priority_idx IF NOT EXISTS FOR (i:Investigation) ON (i.priority)',
       'CREATE INDEX investigation_created_by_idx IF NOT EXISTS FOR (i:Investigation) ON (i.createdBy)',
       'CREATE INDEX investigation_created_at_idx IF NOT EXISTS FOR (i:Investigation) ON (i.createdAt)',
       'CREATE INDEX investigation_updated_at_idx IF NOT EXISTS FOR (i:Investigation) ON (i.updatedAt)',
-      
-      // User indexes  
+
+      // User indexes
       'CREATE INDEX user_role_idx IF NOT EXISTS FOR (u:User) ON (u.role)',
       'CREATE INDEX user_active_idx IF NOT EXISTS FOR (u:User) ON (u.isActive)',
       'CREATE INDEX user_last_login_idx IF NOT EXISTS FOR (u:User) ON (u.lastLogin)',
-      
+
       // Relationship indexes
       'CREATE INDEX relationship_type_idx IF NOT EXISTS FOR ()-[r:RELATIONSHIP]-() ON (r.type)',
       'CREATE INDEX relationship_investigation_idx IF NOT EXISTS FOR ()-[r:RELATIONSHIP]-() ON (r.investigationId)',
@@ -96,7 +107,10 @@ module.exports = {
         await session.run(index);
         console.log(`✅ Created index: ${index.split(' ')[2]}`);
       } catch (error) {
-        if (!error.message.includes('already exists') && !error.message.includes('An equivalent')) {
+        if (
+          !error.message.includes('already exists') &&
+          !error.message.includes('An equivalent')
+        ) {
           console.warn(`⚠️  Failed to create index: ${error.message}`);
         }
       }
@@ -114,7 +128,10 @@ module.exports = {
         await session.run(index);
         console.log(`✅ Created fulltext index: ${index.split(' ')[3]}`);
       } catch (error) {
-        if (!error.message.includes('already exists') && !error.message.includes('An equivalent')) {
+        if (
+          !error.message.includes('already exists') &&
+          !error.message.includes('An equivalent')
+        ) {
           console.warn(`⚠️  Failed to create fulltext index: ${error.message}`);
         }
       }
@@ -133,8 +150,13 @@ module.exports = {
         await session.run(index);
         console.log(`✅ Created composite index: ${index.split(' ')[2]}`);
       } catch (error) {
-        if (!error.message.includes('already exists') && !error.message.includes('An equivalent')) {
-          console.warn(`⚠️  Failed to create composite index: ${error.message}`);
+        if (
+          !error.message.includes('already exists') &&
+          !error.message.includes('An equivalent')
+        ) {
+          console.warn(
+            `⚠️  Failed to create composite index: ${error.message}`,
+          );
         }
       }
     }
@@ -152,7 +174,10 @@ module.exports = {
         await session.run(index);
         console.log(`✅ Created range index: ${index.split(' ')[3]}`);
       } catch (error) {
-        if (!error.message.includes('already exists') && !error.message.includes('An equivalent')) {
+        if (
+          !error.message.includes('already exists') &&
+          !error.message.includes('An equivalent')
+        ) {
           console.warn(`⚠️  Failed to create range index: ${error.message}`);
         }
       }
@@ -160,14 +185,14 @@ module.exports = {
 
     console.log('✅ Neo4j entity model setup completed successfully');
   },
-  
+
   /**
    * Rollback migration (optional)
    * @param {Session} session Neo4j session
    */
   async down(session) {
     console.log('🔄 Rolling back entity model setup...');
-    
+
     // Drop indexes first (constraints depend on them)
     const indexesToDrop = [
       'DROP INDEX entity_search_idx IF EXISTS',
@@ -182,7 +207,7 @@ module.exports = {
       'DROP INDEX user_role_idx IF EXISTS',
       'DROP INDEX relationship_type_idx IF EXISTS',
       'DROP INDEX entity_type_investigation_idx IF EXISTS',
-      'DROP INDEX entity_confidence_range_idx IF EXISTS'
+      'DROP INDEX entity_confidence_range_idx IF EXISTS',
     ];
 
     for (const dropIndex of indexesToDrop) {
@@ -200,7 +225,7 @@ module.exports = {
       'DROP CONSTRAINT user_id_unique IF EXISTS',
       'DROP CONSTRAINT investigation_id_unique IF EXISTS',
       'DROP CONSTRAINT user_email_unique IF EXISTS',
-      'DROP CONSTRAINT relationship_id_unique IF EXISTS'
+      'DROP CONSTRAINT relationship_id_unique IF EXISTS',
     ];
 
     for (const dropConstraint of constraintsToDrop) {
@@ -213,5 +238,5 @@ module.exports = {
     }
 
     console.log('✅ Entity model rollback completed');
-  }
+  },
 };

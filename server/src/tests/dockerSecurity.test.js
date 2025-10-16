@@ -41,7 +41,7 @@ describe('Docker Security Configuration', () => {
 
     test('production Dockerfile should be secure', async () => {
       const dockerfilePath = path.join(projectRoot, 'Dockerfile.production');
-      
+
       try {
         const content = await fs.readFile(dockerfilePath, 'utf8');
 
@@ -70,7 +70,9 @@ describe('Docker Security Configuration', () => {
       const content = await fs.readFile(composePath, 'utf8');
 
       // Should use version 3.9 or higher
-      expect(content).toMatch(/version:\s*['"]3\.[89]['"]|['"]3\.\d\d['"]|['"]\d\.\d+['"]/);
+      expect(content).toMatch(
+        /version:\s*['"]3\.[89]['"]|['"]3\.\d\d['"]|['"]\d\.\d+['"]/,
+      );
 
       // Should have security options
       expect(content).toMatch(/security_opt:/);
@@ -127,7 +129,10 @@ describe('Docker Security Configuration', () => {
 
   describe('Nginx Security Configuration', () => {
     test('nginx-secure.conf should implement security headers', async () => {
-      const nginxPath = path.join(projectRoot, 'config/nginx/nginx-secure.conf');
+      const nginxPath = path.join(
+        projectRoot,
+        'config/nginx/nginx-secure.conf',
+      );
       const content = await fs.readFile(nginxPath, 'utf8');
 
       // Should hide server tokens
@@ -153,7 +158,10 @@ describe('Docker Security Configuration', () => {
     });
 
     test('security-headers.conf should have comprehensive headers', async () => {
-      const headersPath = path.join(projectRoot, 'config/nginx/security-headers.conf');
+      const headersPath = path.join(
+        projectRoot,
+        'config/nginx/security-headers.conf',
+      );
       const content = await fs.readFile(headersPath, 'utf8');
 
       // Should have all major security headers
@@ -171,7 +179,10 @@ describe('Docker Security Configuration', () => {
 
   describe('Falco Security Rules', () => {
     test('Falco rules should monitor IntelGraph containers', async () => {
-      const rulesPath = path.join(projectRoot, 'config/falco/rules/intelgraph_rules.yaml');
+      const rulesPath = path.join(
+        projectRoot,
+        'config/falco/rules/intelgraph_rules.yaml',
+      );
       const content = await fs.readFile(rulesPath, 'utf8');
 
       // Should have required engine version
@@ -204,8 +215,11 @@ describe('Docker Security Configuration', () => {
 
   describe('Security Scripts', () => {
     test('docker-security-audit.sh should be executable and comprehensive', async () => {
-      const auditPath = path.join(projectRoot, 'scripts/docker-security-audit.sh');
-      
+      const auditPath = path.join(
+        projectRoot,
+        'scripts/docker-security-audit.sh',
+      );
+
       // Check if file exists and is executable
       const stats = await fs.stat(auditPath);
       expect(stats.mode & parseInt('111', 8)).toBeTruthy(); // Check execute permissions
@@ -235,7 +249,7 @@ describe('Docker Security Configuration', () => {
 
     test('generate-secrets.sh should create secure secrets', async () => {
       const secretsPath = path.join(projectRoot, 'scripts/generate-secrets.sh');
-      
+
       const stats = await fs.stat(secretsPath);
       expect(stats.mode & parseInt('111', 8)).toBeTruthy();
 
@@ -276,8 +290,8 @@ describe('Docker Security Configuration', () => {
       expect(packageJson.scripts).toHaveProperty('test');
 
       // Check if security audit scripts could be added
-      const hasSecurityScript = Object.keys(packageJson.scripts).some(script => 
-        script.includes('security') || script.includes('audit')
+      const hasSecurityScript = Object.keys(packageJson.scripts).some(
+        (script) => script.includes('security') || script.includes('audit'),
       );
 
       if (!hasSecurityScript) {
@@ -290,27 +304,28 @@ describe('Docker Security Configuration', () => {
   describe('Security Best Practices', () => {
     test('should use secure secrets management in secure configurations', async () => {
       // Only check the secure files, not the template/example files
-      const secureFiles = [
-        'Dockerfile.secure',
-        'docker-compose.secure.yml'
-      ];
+      const secureFiles = ['Dockerfile.secure', 'docker-compose.secure.yml'];
 
       for (const file of secureFiles) {
         const filePath = path.join(projectRoot, file);
-        
+
         try {
           const content = await fs.readFile(filePath, 'utf8');
-          
+
           // Secure files should use proper secrets management
-          if (content.includes('password') && !content.includes('your-secure-')) {
-            expect(content).toMatch(/\$\{|\$\(|\/run\/secrets|_FILE=|\$\$|secrets:/);
+          if (
+            content.includes('password') &&
+            !content.includes('your-secure-')
+          ) {
+            expect(content).toMatch(
+              /\$\{|\$\(|\/run\/secrets|_FILE=|\$\$|secrets:/,
+            );
           }
-          
+
           // Should not have obviously hardcoded credentials (but allow template examples)
           expect(content).not.toMatch(/password.*=\s*['"]admin['"][^$]/i);
           expect(content).not.toMatch(/password.*=\s*['"]123456['"][^$]/i);
           expect(content).not.toMatch(/password.*=\s*['"]password['"][^$]/i);
-          
         } catch (error) {
           if (error.code !== 'ENOENT') throw error;
           // File doesn't exist, skip
@@ -327,13 +342,15 @@ describe('Docker Security Configuration', () => {
         expect(content).toMatch(/\.env/);
         expect(content).toMatch(/node_modules/);
         expect(content).toMatch(/\.git/);
-        
+
         // Should ignore logs and secrets
         expect(content).toMatch(/logs?/);
         expect(content).toMatch(/secrets?/);
       } catch (error) {
         if (error.code === 'ENOENT') {
-          console.log('Warning: .dockerignore file not found - should create one');
+          console.log(
+            'Warning: .dockerignore file not found - should create one',
+          );
         } else {
           throw error;
         }
@@ -342,11 +359,7 @@ describe('Docker Security Configuration', () => {
 
     test('should use proper file structure for security', async () => {
       // Check for security configuration directory
-      const securityDirs = [
-        'config/nginx',
-        'config/falco/rules',
-        'scripts'
-      ];
+      const securityDirs = ['config/nginx', 'config/falco/rules', 'scripts'];
 
       for (const dir of securityDirs) {
         const dirPath = path.join(projectRoot, dir);
@@ -367,12 +380,12 @@ describe('Docker Security Configuration', () => {
   describe('Security Documentation', () => {
     test('should have security documentation', () => {
       // This test verifies that security configurations are documented
-      // In a real implementation, you would check for README files, 
+      // In a real implementation, you would check for README files,
       // security guidelines, etc.
-      
+
       const securityFeatures = [
         'Multi-stage builds',
-        'Non-root users', 
+        'Non-root users',
         'Security headers',
         'Rate limiting',
         'SSL/TLS configuration',
@@ -380,7 +393,7 @@ describe('Docker Security Configuration', () => {
         'Container isolation',
         'Resource limits',
         'Security monitoring',
-        'Vulnerability scanning'
+        'Vulnerability scanning',
       ];
 
       // This is a placeholder test that always passes

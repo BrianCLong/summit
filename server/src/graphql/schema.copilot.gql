@@ -2,9 +2,8 @@
 Copilot Natural Language Query Schema - GA Core Implementation
 Canonical NL→Cypher service with guardrails and audit trail
 """
-
-# Enums
-enum RiskLevel {
+enum # Enums
+RiskLevel {
   LOW
   MEDIUM
   HIGH
@@ -133,50 +132,71 @@ input CopilotAnalyticsFilter {
 
 # Queries
 type Query {
-  """Translate natural language query to Cypher with guardrails"""
+  """
+  Translate natural language query to Cypher with guardrails
+  """
   translateNLQuery(input: NLQueryRequest!): CypherTranslation!
-  
-  """Preview query execution plan without running the query"""
+
+  """
+  Preview query execution plan without running the query
+  """
   previewQuery(translationId: ID!): QueryPreview!
-  
-  """Get translation by ID"""
+
+  """
+  Get translation by ID
+  """
   getCypherTranslation(id: ID!): CypherTranslation
-  
-  """Get query execution details"""
+
+  """
+  Get query execution details
+  """
   getQueryExecution(translationId: ID!): QueryExecution
-  
-  """Get user's NL query history"""
+
+  """
+  Get user's NL query history
+  """
   getUserNLHistory(userId: String, limit: Int = 20): [NLQueryHistory!]!
-  
-  """Get Copilot usage analytics"""
+
+  """
+  Get Copilot usage analytics
+  """
   getCopilotAnalytics(filter: CopilotAnalyticsFilter): [CopilotAnalytics!]!
-  
-  """Get available query patterns for suggestions"""
+
+  """
+  Get available query patterns for suggestions
+  """
   getQueryPatterns(active: Boolean = true): [QueryPattern!]!
-  
-  """Search query patterns by text"""
+
+  """
+  Search query patterns by text
+  """
   searchQueryPatterns(query: String!): [QueryPattern!]!
 }
 
-# Mutations  
+# Mutations
 type Mutation {
-  """Execute a translated query with explicit confirmation"""
+  """
+  Execute a translated query with explicit confirmation
+  """
   executeQuery(input: QueryExecutionInput!): QueryExecution!
-  
-  """Approve a high-risk query for execution"""
+
+  """
+  Approve a high-risk query for execution
+  """
   approveQuery(
     translationId: ID!
     approved: Boolean!
     reason: String
   ): QueryExecution!
-  
-  """Reject a query execution"""
-  rejectQuery(
-    translationId: ID!
-    reason: String!
-  ): QueryExecution!
-  
-  """Add or update a query pattern"""
+
+  """
+  Reject a query execution
+  """
+  rejectQuery(translationId: ID!, reason: String!): QueryExecution!
+
+  """
+  Add or update a query pattern
+  """
   upsertQueryPattern(
     patternName: String!
     regexPattern: String!
@@ -184,19 +204,27 @@ type Mutation {
     confidenceScore: Float!
     description: String
   ): QueryPattern!
-  
-  """Deactivate a query pattern"""
+
+  """
+  Deactivate a query pattern
+  """
   deactivateQueryPattern(id: ID!): QueryPattern!
 }
 
 # Subscriptions
 type Subscription {
-  """Subscribe to new high-risk translations requiring approval"""
+  """
+  Subscribe to new high-risk translations requiring approval
+  """
   translationRequiringApproval: CypherTranslation!
-  
-  """Subscribe to query execution updates for a specific translation"""
+
+  """
+  Subscribe to query execution updates for a specific translation
+  """
   executionUpdated(translationId: ID!): QueryExecution!
-  
-  """Subscribe to Copilot analytics updates"""
+
+  """
+  Subscribe to Copilot analytics updates
+  """
   analyticsUpdated: CopilotAnalytics!
 }

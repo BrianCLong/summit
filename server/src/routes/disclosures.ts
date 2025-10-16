@@ -28,7 +28,9 @@ router.post('/analytics', (req, res) => {
     disclosureMetrics.uiEvent(payload.event, tenantHeader);
     return res.status(202).json({ ok: true });
   } catch (error: any) {
-    return res.status(400).json({ error: 'invalid_payload', details: error?.message });
+    return res
+      .status(400)
+      .json({ error: 'invalid_payload', details: error?.message });
   }
 });
 
@@ -52,8 +54,14 @@ router.post('/export', async (req, res) => {
 
     return res.status(202).json({ job });
   } catch (error: any) {
-    const status = error?.message === 'window_too_large' || error?.message === 'end_before_start' ? 400 : 500;
-    return res.status(status).json({ error: error?.message || 'export_failed' });
+    const status =
+      error?.message === 'window_too_large' ||
+      error?.message === 'end_before_start'
+        ? 400
+        : 500;
+    return res
+      .status(status)
+      .json({ error: error?.message || 'export_failed' });
   }
 });
 
@@ -100,7 +108,9 @@ router.get('/export/:jobId/download', (req, res) => {
   }
 
   if (download.job.status !== 'completed') {
-    return res.status(409).json({ error: 'not_completed', status: download.job.status });
+    return res
+      .status(409)
+      .json({ error: 'not_completed', status: download.job.status });
   }
 
   return res.download(download.filePath, `disclosure-${download.job.id}.zip`);

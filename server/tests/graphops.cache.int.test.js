@@ -1,5 +1,9 @@
 let GenericContainer;
-try { ({ GenericContainer } = require('testcontainers')); } catch (_) { /* Intentionally empty */ }
+try {
+  ({ GenericContainer } = require('testcontainers'));
+} catch (_) {
+  /* Intentionally empty */
+}
 const Redis = require('ioredis');
 
 const maybe = GenericContainer ? describe : describe.skip;
@@ -29,11 +33,20 @@ maybe('GraphOps cache integration (Redis)', () => {
     });
 
     // Mock GraphOpsService to count calls
-    expandMock = jest.fn().mockResolvedValue({ nodes: [{ id: 'n1', label: 'N1', type: 'Entity', tags: [] }], edges: [] });
-    jest.doMock('../src/services/GraphOpsService', () => ({ expandNeighborhood: expandMock }));
+    expandMock = jest
+      .fn()
+      .mockResolvedValue({
+        nodes: [{ id: 'n1', label: 'N1', type: 'Entity', tags: [] }],
+        edges: [],
+      });
+    jest.doMock('../src/services/GraphOpsService', () => ({
+      expandNeighborhood: expandMock,
+    }));
 
     // Import resolvers after mocks
-    ({ graphResolvers: resolvers } = require('../src/graphql/resolvers.graphops.js'));
+    ({
+      graphResolvers: resolvers,
+    } = require('../src/graphql/resolvers.graphops.js'));
   });
 
   afterAll(async () => {
@@ -42,7 +55,10 @@ maybe('GraphOps cache integration (Redis)', () => {
   });
 
   it('warms cache on miss and hits cache on subsequent call', async () => {
-    const ctx = { user: { id: 'u1', role: 'ANALYST', tenantId: 't1' }, logger: { error: () => {}, info: () => {} } };
+    const ctx = {
+      user: { id: 'u1', role: 'ANALYST', tenantId: 't1' },
+      logger: { error: () => {}, info: () => {} },
+    };
     const args = { entityId: 'e1', radius: 1, investigationId: 'inv1' };
 
     // ensure empty
@@ -63,4 +79,3 @@ maybe('GraphOps cache integration (Redis)', () => {
     expect(keys.length).toBeGreaterThan(0);
   });
 });
-

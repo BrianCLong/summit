@@ -24,11 +24,10 @@ spec:
           imagePullPolicy: IfNotPresent
           env:
             - name: WASM_RUNNER
-              value: "{{ .Values.wasm.runner }}"
+              value: '{{ .Values.wasm.runner }}'
             - name: SUPPLYCHAIN_ENFORCE_SIG
-              value: "{{ .Values.supplyChain.enforceSignature }}"
+              value: '{{ .Values.supplyChain.enforceSignature }}'
             - name: SUPPLYCHAIN_ENFORCE_PROV
-              value: "{{ .Values.supplyChain.enforceProvenance }}"
+              value: '{{ .Values.supplyChain.enforceProvenance }}'
             - name: SUPPLYCHAIN_BLOCK_SEVERITY
-              value: "{{ .Values.supplyChain.blockOnVulnSeverity }}"
-
+              value: '{{ .Values.supplyChain.blockOnVulnSeverity }}'

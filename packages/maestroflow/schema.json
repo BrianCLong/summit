@@ -16,11 +16,21 @@
         "required": ["id", "type"],
         "properties": {
           "id": { "type": "string" },
-          "type": { "enum": ["build", "test", "lint", "deploy", "approve", "notify", "custom"] },
+          "type": {
+            "enum": [
+              "build",
+              "test",
+              "lint",
+              "deploy",
+              "approve",
+              "notify",
+              "custom"
+            ]
+          },
           "uses": { "type": "string" },
           "inputs": { "type": "object" },
           "outputs": { "type": "object" },
-          "condition": { "type": "string" },   // JEXL
+          "condition": { "type": "string" }, // JEXL
           "pool": { "enum": ["cpu", "gpu"] },
           "retries": { "type": "integer", "minimum": 0, "maximum": 5 }
         }
@@ -28,7 +38,14 @@
     },
     "edges": {
       "type": "array",
-      "items": { "type": "object", "properties": { "from": { "type": "string" }, "to": { "type": "string" } }, "required": ["from","to"] }
+      "items": {
+        "type": "object",
+        "properties": {
+          "from": { "type": "string" },
+          "to": { "type": "string" }
+        },
+        "required": ["from", "to"]
+      }
     }
   }
 }

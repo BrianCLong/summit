@@ -19,7 +19,9 @@ const rtbfWorker = new Worker(
       // 1. Simulate finding and tombstoning data in various systems
       await new Promise((res) => setTimeout(res, 3000));
       const systemsChecked = ['postgres', 'neo4j', 's3-artifacts'];
-      console.log(`Tombstoned data for ${subject_id} in ${systemsChecked.join(', ')}`);
+      console.log(
+        `Tombstoned data for ${subject_id} in ${systemsChecked.join(', ')}`,
+      );
 
       // 2. Update request status to 'completed'
       await pg.query(
@@ -47,7 +49,10 @@ const rtbfWorker = new Worker(
     }
   },
   {
-    connection: { host: process.env.REDIS_HOST, port: parseInt(process.env.REDIS_PORT || '6379') },
+    connection: {
+      host: process.env.REDIS_HOST,
+      port: parseInt(process.env.REDIS_PORT || '6379'),
+    },
   },
 );
 

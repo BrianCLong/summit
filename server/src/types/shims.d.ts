@@ -24,9 +24,17 @@ declare interface Console {
 
 declare const console: Console;
 
-declare function setTimeout(handler: (...args: any[]) => void, timeout?: number, ...args: any[]): NodeJS.Timeout;
+declare function setTimeout(
+  handler: (...args: any[]) => void,
+  timeout?: number,
+  ...args: any[]
+): NodeJS.Timeout;
 declare function clearTimeout(timeoutId: NodeJS.Timeout): void;
-declare function setInterval(handler: (...args: any[]) => void, timeout?: number, ...args: any[]): NodeJS.Timeout;
+declare function setInterval(
+  handler: (...args: any[]) => void,
+  timeout?: number,
+  ...args: any[]
+): NodeJS.Timeout;
 declare function clearInterval(timeoutId: NodeJS.Timeout): void;
 declare function require(path: string): any;
 declare const __dirname: string;
@@ -56,17 +64,56 @@ declare class TextDecoder {
   decode(input?: ArrayBuffer | ArrayLike<number>): string;
 }
 
-declare module 'pg' { export class Pool { constructor(config?: any); connect(): Promise<any>; end(): Promise<void>; query: any; [key: string]: any; } export = Pool; }
-declare module 'pgvector' { const anyExport: any; export = anyExport; }
-declare module 'crypto' { const anyExport: any; export = anyExport; }
-declare module 'fs' { const anyExport: any; export = anyExport; }
-declare module 'node:fs' { const anyExport: any; export = anyExport; }
-declare module 'fs/promises' { const anyExport: any; export = anyExport; }
-declare module 'path' { const anyExport: any; export = anyExport; }
-declare module 'node:path' { const anyExport: any; export = anyExport; }
-declare module 'stream/promises' { const anyExport: any; export = anyExport; }
-declare module 'graphql-subscriptions' { const anyExport: any; export = anyExport; }
-declare module 'graphql-redis-subscriptions' { const anyExport: any; export = anyExport; }
+declare module 'pg' {
+  export class Pool {
+    constructor(config?: any);
+    connect(): Promise<any>;
+    end(): Promise<void>;
+    query: any;
+    [key: string]: any;
+  }
+  export = Pool;
+}
+declare module 'pgvector' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module 'crypto' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module 'fs' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module 'node:fs' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module 'fs/promises' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module 'path' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module 'node:path' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module 'stream/promises' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module 'graphql-subscriptions' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module 'graphql-redis-subscriptions' {
+  const anyExport: any;
+  export = anyExport;
+}
 declare module 'ioredis' {
   export default class IORedis {
     constructor(...args: any[]);
@@ -93,11 +140,26 @@ declare module 'bullmq' {
   }
   export type Job<T = any> = any;
 }
-declare module 'zod' { const anyExport: any; export = anyExport; }
-declare module 'pino' { const anyExport: any; export = anyExport; }
-declare module 'pino-http' { const anyExport: any; export = anyExport; }
-declare module 'neo4j-driver' { const anyExport: any; export = anyExport; }
-declare module 'uuid' { const anyExport: any; export = anyExport; }
+declare module 'zod' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module 'pino' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module 'pino-http' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module 'neo4j-driver' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module 'uuid' {
+  const anyExport: any;
+  export = anyExport;
+}
 declare module 'prom-client' {
   export class Registry {
     registerMetric(metric: any): void;
@@ -124,28 +186,96 @@ declare module 'prom-client' {
   export const register: Registry;
   export const collectDefaultMetrics: any;
 }
-declare module 'child_process' { export const spawn: any; export const exec: any; export const execFile: any; }
-declare module 'python-shell' { export const PythonShell: any; export const run: any; }
-declare module 'ffprobe-static' { const anyExport: any; export = anyExport; }
-declare module 'fluent-ffmpeg' { const anyExport: any; export = anyExport; }
-declare module 'graphql-upload-ts' { const anyExport: any; export = anyExport; }
-declare module 'sharp' { const anyExport: any; export = anyExport; }
-declare module 'ffmpeg-static' { const anyExport: any; export = anyExport; }
-declare module '@opentelemetry/api' { const anyExport: any; export = anyExport; }
-declare module '@opentelemetry/sdk-node' { const anyExport: any; export = anyExport; }
-declare module '@opentelemetry/sdk-metrics' { const anyExport: any; export = anyExport; }
-declare module '@opentelemetry/exporter-prometheus' { const anyExport: any; export = anyExport; }
-declare module '@opentelemetry/resources' { const anyExport: any; export = anyExport; }
-declare module '@opentelemetry/semantic-conventions' { const anyExport: any; export = anyExport; }
-declare module '@opentelemetry/exporter-trace-otlp-http' { const anyExport: any; export = anyExport; }
-declare module '@opentelemetry/exporter-metrics-otlp-http' { const anyExport: any; export = anyExport; }
-declare module '@opentelemetry/auto-instrumentations-node' { const anyExport: any; export = anyExport; }
-declare module 'wasi' { const anyExport: any; export = anyExport; }
-declare module 'uWebSockets.js' { const anyExport: any; export = anyExport; }
-declare module 'node-fetch' { const anyExport: any; export = anyExport; }
-declare module 'punycode' { const anyExport: any; export = anyExport; }
-declare module 'winston' { const anyExport: any; export = anyExport; }
-declare module 'events' { export class EventEmitter { [key: string]: any; } }
+declare module 'child_process' {
+  export const spawn: any;
+  export const exec: any;
+  export const execFile: any;
+}
+declare module 'python-shell' {
+  export const PythonShell: any;
+  export const run: any;
+}
+declare module 'ffprobe-static' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module 'fluent-ffmpeg' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module 'graphql-upload-ts' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module 'sharp' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module 'ffmpeg-static' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module '@opentelemetry/api' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module '@opentelemetry/sdk-node' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module '@opentelemetry/sdk-metrics' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module '@opentelemetry/exporter-prometheus' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module '@opentelemetry/resources' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module '@opentelemetry/semantic-conventions' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module '@opentelemetry/exporter-trace-otlp-http' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module '@opentelemetry/exporter-metrics-otlp-http' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module '@opentelemetry/auto-instrumentations-node' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module 'wasi' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module 'uWebSockets.js' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module 'node-fetch' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module 'punycode' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module 'winston' {
+  const anyExport: any;
+  export = anyExport;
+}
+declare module 'events' {
+  export class EventEmitter {
+    [key: string]: any;
+  }
+}
 
 declare type JobsOptions = any;
 declare type RedisClientType = any;

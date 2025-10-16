@@ -6,14 +6,50 @@ describe('Crisis scenario simulation', () => {
     const config: SimConfig = {
       initialTimestamp: 0,
       actors: [
-        { id: 'mayor', name: 'Mayor Vega', mood: 3, resilience: 0.2, influence: 3 },
-        { id: 'chief', name: 'Chief Orion', mood: 2, resilience: 0.25, influence: 2 },
-        { id: 'liaison', name: 'Liaison Lark', mood: 4, resilience: 0.3, influence: 1.5 },
+        {
+          id: 'mayor',
+          name: 'Mayor Vega',
+          mood: 3,
+          resilience: 0.2,
+          influence: 3,
+        },
+        {
+          id: 'chief',
+          name: 'Chief Orion',
+          mood: 2,
+          resilience: 0.25,
+          influence: 2,
+        },
+        {
+          id: 'liaison',
+          name: 'Liaison Lark',
+          mood: 4,
+          resilience: 0.3,
+          influence: 1.5,
+        },
       ],
       relationships: [
-        { sourceId: 'mayor', targetId: 'chief', type: 'ally', intensity: 0.85, trust: 0.7 },
-        { sourceId: 'chief', targetId: 'liaison', type: 'ally', intensity: 0.8, trust: 0.6 },
-        { sourceId: 'liaison', targetId: 'mayor', type: 'family', intensity: 0.9, trust: 0.9 },
+        {
+          sourceId: 'mayor',
+          targetId: 'chief',
+          type: 'ally',
+          intensity: 0.85,
+          trust: 0.7,
+        },
+        {
+          sourceId: 'chief',
+          targetId: 'liaison',
+          type: 'ally',
+          intensity: 0.8,
+          trust: 0.6,
+        },
+        {
+          sourceId: 'liaison',
+          targetId: 'mayor',
+          type: 'family',
+          intensity: 0.9,
+          trust: 0.9,
+        },
       ],
     };
 

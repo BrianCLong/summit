@@ -79,47 +79,51 @@ export class AIInsightsClient {
     options: {
       threshold?: number;
       includeFeatures?: boolean;
-    } = {}
+    } = {},
   ): Promise<EntityMatch[]> {
     if (!this.isEnabled()) {
       console.log('🚫 AI Insights disabled, returning empty matches');
       return [];
     }
 
-    return this.tracer.startActiveSpan('ai-insights.resolve-entities', async (span) => {
-      try {
-        span.setAttributes({
-          'ai.service': 'entity-resolution',
-          'ai.entities.count': entities.length,
-          'ai.threshold': options.threshold || 0.8,
-        });
+    return this.tracer.startActiveSpan(
+      'ai-insights.resolve-entities',
+      async (span) => {
+        try {
+          span.setAttributes({
+            'ai.service': 'entity-resolution',
+            'ai.entities.count': entities.length,
+            'ai.threshold': options.threshold || 0.8,
+          });
 
-        const request = {
-          entities,
-          threshold: options.threshold || 0.8,
-          include_features: options.includeFeatures || false,
-        };
+          const request = {
+            entities,
+            threshold: options.threshold || 0.8,
+            include_features: options.includeFeatures || false,
+          };
 
-        const response = await this.makeRequest('/resolve-entities', request);
+          const response = await this.makeRequest('/resolve-entities', request);
 
-        span.setAttributes({
-          'ai.matches.count': response.matches.length,
-          'ai.processing_time_ms': response.processing_time_ms,
-          'ai.model_version': response.model_version,
-        });
+          span.setAttributes({
+            'ai.matches.count': response.matches.length,
+            'ai.processing_time_ms': response.processing_time_ms,
+            'ai.model_version': response.model_version,
+          });
 
-        console.log(`🎯 Entity resolution: ${response.matches.length} matches found in ${response.processing_time_ms}ms`);
+          console.log(
+            `🎯 Entity resolution: ${response.matches.length} matches found in ${response.processing_time_ms}ms`,
+          );
 
-        return response.matches;
-
-      } catch (error) {
-        span.recordException(error as Error);
-        console.error('❌ Entity resolution failed:', error);
-        return []; // Fail gracefully
-      } finally {
-        span.end();
-      }
-    });
+          return response.matches;
+        } catch (error) {
+          span.recordException(error as Error);
+          console.error('❌ Entity resolution failed:', error);
+          return []; // Fail gracefully
+        } finally {
+          span.end();
+        }
+      },
+    );
   }
 
   /**
@@ -129,45 +133,49 @@ export class AIInsightsClient {
     entityPairs: EntityPair[],
     options: {
       includeConfidence?: boolean;
-    } = {}
+    } = {},
   ): Promise<LinkScore[]> {
     if (!this.isEnabled()) {
       console.log('🚫 AI Insights disabled, returning empty scores');
       return [];
     }
 
-    return this.tracer.startActiveSpan('ai-insights.score-links', async (span) => {
-      try {
-        span.setAttributes({
-          'ai.service': 'link-scoring',
-          'ai.pairs.count': entityPairs.length,
-        });
+    return this.tracer.startActiveSpan(
+      'ai-insights.score-links',
+      async (span) => {
+        try {
+          span.setAttributes({
+            'ai.service': 'link-scoring',
+            'ai.pairs.count': entityPairs.length,
+          });
 
-        const request = {
-          entity_pairs: entityPairs,
-          include_confidence: options.includeConfidence !== false,
-        };
+          const request = {
+            entity_pairs: entityPairs,
+            include_confidence: options.includeConfidence !== false,
+          };
 
-        const response = await this.makeRequest('/score-links', request);
+          const response = await this.makeRequest('/score-links', request);
 
-        span.setAttributes({
-          'ai.scores.count': response.scores.length,
-          'ai.processing_time_ms': response.processing_time_ms,
-          'ai.model_version': response.model_version,
-        });
+          span.setAttributes({
+            'ai.scores.count': response.scores.length,
+            'ai.processing_time_ms': response.processing_time_ms,
+            'ai.model_version': response.model_version,
+          });
 
-        console.log(`🔗 Link scoring: ${response.scores.length} scores computed in ${response.processing_time_ms}ms`);
+          console.log(
+            `🔗 Link scoring: ${response.scores.length} scores computed in ${response.processing_time_ms}ms`,
+          );
 
-        return response.scores;
-
-      } catch (error) {
-        span.recordException(error as Error);
-        console.error('❌ Link scoring failed:', error);
-        return []; // Fail gracefully
-      } finally {
-        span.end();
-      }
-    });
+          return response.scores;
+        } catch (error) {
+          span.recordException(error as Error);
+          console.error('❌ Link scoring failed:', error);
+          return []; // Fail gracefully
+        } finally {
+          span.end();
+        }
+      },
+    );
   }
 
   /**
@@ -193,7 +201,7 @@ export class AIInsightsClient {
   async batchResolveEntities(
     entities: Entity[],
     batchSize: number = 50,
-    threshold: number = 0.8
+    threshold: number = 0.8,
   ): Promise<EntityMatch[]> {
     if (!this.isEnabled()) {
       return [];
@@ -239,7 +247,6 @@ export class AIInsightsClient {
       // For MVP, return this simple calculation
       // In future versions, use ML model prediction
       return Math.min(score, 1.0);
-
     } catch (error) {
       console.error('❌ Entity scoring failed:', error);
       return 0.5;
@@ -252,7 +259,7 @@ export class AIInsightsClient {
   private async makeRequest(
     endpoint: string,
     data: any,
-    method: 'GET' | 'POST' = 'POST'
+    method: 'GET' | 'POST' = 'POST',
   ): Promise<any> {
     const url = `${this.config.baseUrl}${endpoint}`;
 
@@ -276,14 +283,17 @@ export class AIInsightsClient {
       const response = await fetch(url, options);
 
       if (!response.ok) {
-        throw new Error(`AI service responded with ${response.status}: ${response.statusText}`);
+        throw new Error(
+          `AI service responded with ${response.status}: ${response.statusText}`,
+        );
       }
 
       return await response.json();
-
     } catch (error) {
       if (error.name === 'AbortError') {
-        throw new Error(`AI service request timeout after ${this.config.timeout}ms`);
+        throw new Error(
+          `AI service request timeout after ${this.config.timeout}ms`,
+        );
       }
       throw error;
     } finally {
@@ -321,7 +331,10 @@ export async function validateAIInsightsConnection(): Promise<boolean> {
       return false;
     }
   } catch (error) {
-    console.error('❌ Failed to connect to AI Insights service:', error.message);
+    console.error(
+      '❌ Failed to connect to AI Insights service:',
+      error.message,
+    );
     return false;
   }
 }

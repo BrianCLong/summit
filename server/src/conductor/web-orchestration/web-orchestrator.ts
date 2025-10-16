@@ -142,10 +142,17 @@ export class WebOrchestrator {
       }
 
       // Step 3: Select optimal interfaces using Thompson Sampling
-      const selectedInterfaces = await this.selectOptimalInterfaces(plan, context);
+      const selectedInterfaces = await this.selectOptimalInterfaces(
+        plan,
+        context,
+      );
 
       // Step 4: Parallel execution with rate limiting
-      const responses = await this.executeParallelQueries(query, selectedInterfaces, context);
+      const responses = await this.executeParallelQueries(
+        query,
+        selectedInterfaces,
+        context,
+      );
 
       // Step 5: Normalize and extract claims
       const normalizedResponses = await this.normalizeResponses(responses);
@@ -154,7 +161,11 @@ export class WebOrchestrator {
       const claimGraph = await this.buildClaimGraph(normalizedResponses);
 
       // Step 7: Synthesize final result
-      const synthesizedResult = await this.synthesizeResult(query, claimGraph, plan);
+      const synthesizedResult = await this.synthesizeResult(
+        query,
+        claimGraph,
+        plan,
+      );
 
       // Step 8: Record provenance and update learning
       await this.recordProvenance(synthesizedResult, plan, responses);
@@ -162,15 +173,23 @@ export class WebOrchestrator {
 
       // Update metrics
       const totalTime = Date.now() - startTime;
-      prometheusConductorMetrics.recordOperationalMetric('web_orchestration_latency', totalTime, {
-        tenant_id: context.tenantId,
-        sources_used: responses.length.toString(),
-      });
+      prometheusConductorMetrics.recordOperationalMetric(
+        'web_orchestration_latency',
+        totalTime,
+        {
+          tenant_id: context.tenantId,
+          sources_used: responses.length.toString(),
+        },
+      );
 
-      prometheusConductorMetrics.recordOperationalEvent('web_orchestration_success', true, {
-        tenant_id: context.tenantId,
-        query_type: this.classifyQuery(query),
-      });
+      prometheusConductorMetrics.recordOperationalEvent(
+        'web_orchestration_success',
+        true,
+        {
+          tenant_id: context.tenantId,
+          query_type: this.classifyQuery(query),
+        },
+      );
 
       logger.info('Web orchestration completed', {
         queryId: plan.queryId,
@@ -184,10 +203,14 @@ export class WebOrchestrator {
     } catch (error) {
       const totalTime = Date.now() - startTime;
 
-      prometheusConductorMetrics.recordOperationalEvent('web_orchestration_error', false, {
-        tenant_id: context.tenantId,
-        error_type: error.name,
-      });
+      prometheusConductorMetrics.recordOperationalEvent(
+        'web_orchestration_error',
+        false,
+        {
+          tenant_id: context.tenantId,
+          error_type: error.name,
+        },
+      );
 
       logger.error('Web orchestration failed', {
         error: error.message,
@@ -205,16 +228,25 @@ export class WebOrchestrator {
    */
   private async createOrchestrationPlan(
     query: string,
-    context: { userId: string; tenantId: string; purpose: string; budgetLimit?: number },
+    context: {
+      userId: string;
+      tenantId: string;
+      purpose: string;
+      budgetLimit?: number;
+    },
   ): Promise<WebOrchestrationPlan> {
     const queryType = this.classifyQuery(query);
     const urgency = this.assessUrgency(query, context);
 
     // Get candidate interfaces based on query classification
-    const candidateInterfaces = await this.getCandidateInterfaces(queryType, query);
+    const candidateInterfaces = await this.getCandidateInterfaces(
+      queryType,
+      query,
+    );
 
     // Filter by compliance requirements
-    const complianceThreshold = context.purpose === 'intelligence_analysis' ? 90 : 70;
+    const complianceThreshold =
+      context.purpose === 'intelligence_analysis' ? 90 : 70;
     const compliantInterfaces = candidateInterfaces.filter(
       (iface) => iface.complianceLevel >= complianceThreshold,
     );
@@ -223,10 +255,14 @@ export class WebOrchestrator {
       queryId: `wq-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       interfaces: compliantInterfaces,
       priority: urgency === 'high' ? 1 : urgency === 'medium' ? 3 : 5,
-      budgetLimit: context.budgetLimit || this.getDefaultBudget(context.tenantId),
+      budgetLimit:
+        context.budgetLimit || this.getDefaultBudget(context.tenantId),
       complianceRequired: true,
       expectedSources: Math.min(5, compliantInterfaces.length),
-      synthesisStrategy: this.determineSynthesisStrategy(queryType, context.purpose),
+      synthesisStrategy: this.determineSynthesisStrategy(
+        queryType,
+        context.purpose,
+      ),
     };
 
     // Store plan for audit trail
@@ -287,14 +323,22 @@ export class WebOrchestrator {
     plan: WebOrchestrationPlan,
     context: { userId: string; tenantId: string },
   ): Promise<WebInterface[]> {
-    const maxInterfaces = Math.min(plan.expectedSources, plan.interfaces.length);
+    const maxInterfaces = Math.min(
+      plan.expectedSources,
+      plan.interfaces.length,
+    );
     const selected: WebInterface[] = [];
 
     // Get historical performance data for Thompson Sampling
-    const performanceData = await this.getPerformanceData(plan.interfaces, context.tenantId);
+    const performanceData = await this.getPerformanceData(
+      plan.interfaces,
+      context.tenantId,
+    );
 
     for (let i = 0; i < maxInterfaces; i++) {
-      const remaining = plan.interfaces.filter((iface) => !selected.includes(iface));
+      const remaining = plan.interfaces.filter(
+        (iface) => !selected.includes(iface),
+      );
       if (remaining.length === 0) break;
 
       // Thompson Sampling: sample from beta distribution for each interface
@@ -302,10 +346,14 @@ export class WebOrchestrator {
       let bestScore = 0;
 
       for (const iface of remaining) {
-        const perf = performanceData.get(iface.id) || { successes: 1, failures: 1 };
+        const perf = performanceData.get(iface.id) || {
+          successes: 1,
+          failures: 1,
+        };
 
         // Sample from Beta distribution
-        const score = this.sampleBeta(perf.successes, perf.failures) * iface.qualityScore;
+        const score =
+          this.sampleBeta(perf.successes, perf.failures) * iface.qualityScore;
 
         if (score > bestScore) {
           bestScore = score;
@@ -318,7 +366,10 @@ export class WebOrchestrator {
 
     logger.info('Interfaces selected via Thompson Sampling', {
       queryId: plan.queryId,
-      selected: selected.map((iface) => ({ domain: iface.domain, quality: iface.qualityScore })),
+      selected: selected.map((iface) => ({
+        domain: iface.domain,
+        quality: iface.qualityScore,
+      })),
     });
 
     return selected;
@@ -429,11 +480,19 @@ export class WebOrchestrator {
   private async buildClaimGraph(responses: WebResponse[]): Promise<{
     claims: Claim[];
     contradictions: Contradiction[];
-    supportingRelations: Array<{ claim1: string; claim2: string; strength: number }>;
+    supportingRelations: Array<{
+      claim1: string;
+      claim2: string;
+      strength: number;
+    }>;
   }> {
     const allClaims = responses.flatMap((response) => response.extractedClaims);
     const contradictions: Contradiction[] = [];
-    const supportingRelations: Array<{ claim1: string; claim2: string; strength: number }> = [];
+    const supportingRelations: Array<{
+      claim1: string;
+      claim2: string;
+      strength: number;
+    }> = [];
 
     // Detect contradictions using semantic similarity and factual analysis
     for (let i = 0; i < allClaims.length; i++) {
@@ -484,23 +543,38 @@ export class WebOrchestrator {
 
     switch (plan.synthesisStrategy) {
       case 'consensus':
-        ({ answer, confidence } = await this.synthesizeByConsensus(weightedClaims, query));
+        ({ answer, confidence } = await this.synthesizeByConsensus(
+          weightedClaims,
+          query,
+        ));
         break;
       case 'authority':
-        ({ answer, confidence } = await this.synthesizeByAuthority(weightedClaims, query));
+        ({ answer, confidence } = await this.synthesizeByAuthority(
+          weightedClaims,
+          query,
+        ));
         break;
       case 'recent':
-        ({ answer, confidence } = await this.synthesizeByRecency(weightedClaims, query));
+        ({ answer, confidence } = await this.synthesizeByRecency(
+          weightedClaims,
+          query,
+        ));
         break;
       default:
-        ({ answer, confidence } = await this.synthesizeComprehensive(weightedClaims, query));
+        ({ answer, confidence } = await this.synthesizeComprehensive(
+          weightedClaims,
+          query,
+        ));
     }
 
     // Generate citations from claims used in answer
     const citations = await this.generateFinalCitations(weightedClaims, answer);
 
     // Calculate total cost
-    const totalCost = plan.interfaces.reduce((sum, iface) => sum + iface.costPerQuery, 0);
+    const totalCost = plan.interfaces.reduce(
+      (sum, iface) => sum + iface.costPerQuery,
+      0,
+    );
 
     // Generate provenance hash for auditability
     const provenanceHash = await this.generateProvenanceHash(claimGraph, plan);
@@ -520,24 +594,39 @@ export class WebOrchestrator {
   // Utility methods
   private classifyQuery(query: string): string {
     // Simple classification - in production would use ML model
-    if (query.toLowerCase().includes('how to') || query.toLowerCase().includes('tutorial')) {
+    if (
+      query.toLowerCase().includes('how to') ||
+      query.toLowerCase().includes('tutorial')
+    ) {
       return 'tutorial';
-    } else if (query.toLowerCase().includes('latest') || query.toLowerCase().includes('news')) {
+    } else if (
+      query.toLowerCase().includes('latest') ||
+      query.toLowerCase().includes('news')
+    ) {
       return 'current_events';
     } else if (
       query.toLowerCase().includes('api') ||
       query.toLowerCase().includes('documentation')
     ) {
       return 'technical_docs';
-    } else if (query.toLowerCase().includes('research') || query.toLowerCase().includes('study')) {
+    } else if (
+      query.toLowerCase().includes('research') ||
+      query.toLowerCase().includes('study')
+    ) {
       return 'academic';
     } else {
       return 'general';
     }
   }
 
-  private assessUrgency(query: string, context: any): 'low' | 'medium' | 'high' {
-    if (query.toLowerCase().includes('urgent') || query.toLowerCase().includes('emergency')) {
+  private assessUrgency(
+    query: string,
+    context: any,
+  ): 'low' | 'medium' | 'high' {
+    if (
+      query.toLowerCase().includes('urgent') ||
+      query.toLowerCase().includes('emergency')
+    ) {
       return 'high';
     } else if (context.purpose === 'threat_analysis') {
       return 'high';
@@ -551,10 +640,15 @@ export class WebOrchestrator {
     return Math.random(); // Placeholder
   }
 
-  private async getCandidateInterfaces(queryType: string, query: string): Promise<WebInterface[]> {
+  private async getCandidateInterfaces(
+    queryType: string,
+    query: string,
+  ): Promise<WebInterface[]> {
     // Return filtered interfaces based on query type and capabilities
     return Array.from(this.interfaces.values()).filter((iface) =>
-      iface.capabilities.some((cap) => this.isCapabilityRelevant(cap, queryType)),
+      iface.capabilities.some((cap) =>
+        this.isCapabilityRelevant(cap, queryType),
+      ),
     );
   }
 
@@ -611,7 +705,10 @@ export class WebOrchestrator {
   ): Promise<{ content: string; contentType: string }> {
     return { content: '', contentType: 'text/html' };
   }
-  private async extractClaims(content: string, iface: WebInterface): Promise<Claim[]> {
+  private async extractClaims(
+    content: string,
+    iface: WebInterface,
+  ): Promise<Claim[]> {
     return [];
   }
   private async generateCitations(
@@ -621,13 +718,19 @@ export class WebOrchestrator {
   ): Promise<Citation[]> {
     return [];
   }
-  private calculateCost(iface: WebInterface, contentLength: number, latency: number): number {
+  private calculateCost(
+    iface: WebInterface,
+    contentLength: number,
+    latency: number,
+  ): number {
     return 0.1;
   }
   private calculateConfidence(iface: WebInterface, claims: Claim[]): number {
     return 0.8;
   }
-  private async normalizeResponses(responses: WebResponse[]): Promise<WebResponse[]> {
+  private async normalizeResponses(
+    responses: WebResponse[],
+  ): Promise<WebResponse[]> {
     return responses;
   }
   private async analyzeClaims(claim1: Claim, claim2: Claim): Promise<any> {
@@ -636,7 +739,10 @@ export class WebOrchestrator {
   private determineResolutionStrategy(relationship: any): string {
     return 'authority_wins';
   }
-  private calculateClaimWeight(claim: Claim, interfaces: WebInterface[]): number {
+  private calculateClaimWeight(
+    claim: Claim,
+    interfaces: WebInterface[],
+  ): number {
     return 1.0;
   }
   private async synthesizeByConsensus(
@@ -663,7 +769,10 @@ export class WebOrchestrator {
   ): Promise<{ answer: string; confidence: number }> {
     return { answer: 'Comprehensive answer', confidence: 0.88 };
   }
-  private async generateFinalCitations(claims: any[], answer: string): Promise<Citation[]> {
+  private async generateFinalCitations(
+    claims: any[],
+    answer: string,
+  ): Promise<Citation[]> {
     return [];
   }
   private async generateProvenanceHash(

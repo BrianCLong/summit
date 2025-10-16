@@ -24,21 +24,37 @@ governance policies against historical activity. The `PolicyBacktestEngine` prov
 import {
   PolicyBacktestEngine,
   type PolicyHistory,
-  type HistoricalPolicyEvent
+  type HistoricalPolicyEvent,
 } from 'policy';
 
 const history: PolicyHistory[] = [
   {
     policyId: 'governance',
     snapshots: [
-      { policyId: 'governance', version: '1.0.0', capturedAt: '2024-01-01T00:00:00Z', rules: [] },
-      { policyId: 'governance', version: '1.1.0', capturedAt: '2024-02-01T00:00:00Z', rules: [] }
-    ]
-  }
+      {
+        policyId: 'governance',
+        version: '1.0.0',
+        capturedAt: '2024-01-01T00:00:00Z',
+        rules: [],
+      },
+      {
+        policyId: 'governance',
+        version: '1.1.0',
+        capturedAt: '2024-02-01T00:00:00Z',
+        rules: [],
+      },
+    ],
+  },
 ];
 
 const events: HistoricalPolicyEvent[] = [
-  { id: 'evt-1', occurredAt: '2024-02-10T12:00:00Z', request: {/* policy evaluation input */} }
+  {
+    id: 'evt-1',
+    occurredAt: '2024-02-10T12:00:00Z',
+    request: {
+      /* policy evaluation input */
+    },
+  },
 ];
 
 const engine = new PolicyBacktestEngine(history);

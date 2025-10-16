@@ -7,12 +7,12 @@ const path = require('path');
   const patterns = [
     'tests/integration/**/*.{js,jsx,ts,tsx}',
     'tests/graphql/**/*.{js,jsx,ts,tsx}',
-    'server/src/tests/**/*.{js,jsx,ts,tsx}'
+    'server/src/tests/**/*.{js,jsx,ts,tsx}',
   ];
 
   const files = await fg(patterns, {
     ignore: ['**/node_modules/**', '**/.git/**', '**/dist/**', '**/build/**'],
-    absolute: true
+    absolute: true,
   });
 
   const focusRegex = /\b(?:it|test|describe)\.only\s*\(/;

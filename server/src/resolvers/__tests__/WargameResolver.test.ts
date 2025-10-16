@@ -50,16 +50,26 @@ describe('WargameResolver', () => {
   describe('Query Resolvers', () => {
     it('should fetch all crisis scenarios', async () => {
       const mockScenarios = [
-        { id: 'scenario1', crisisType: 'geo', createdAt: '2023-01-01T00:00:00Z' },
-        { id: 'scenario2', crisisType: 'cyber', createdAt: '2023-01-02T00:00:00Z' },
+        {
+          id: 'scenario1',
+          crisisType: 'geo',
+          createdAt: '2023-01-01T00:00:00Z',
+        },
+        {
+          id: 'scenario2',
+          crisisType: 'cyber',
+          createdAt: '2023-01-02T00:00:00Z',
+        },
       ];
       mockSessionRun.mockResolvedValueOnce({
-        records: mockScenarios.map(s => createMockRecord(s, 's')),
+        records: mockScenarios.map((s) => createMockRecord(s, 's')),
       });
 
       const result = await resolver.getAllCrisisScenarios({}, {}, {} as any);
       expect(result).toEqual(mockScenarios);
-      expect(mockSessionRun).toHaveBeenCalledWith(expect.stringContaining('MATCH (s:CrisisScenario)'));
+      expect(mockSessionRun).toHaveBeenCalledWith(
+        expect.stringContaining('MATCH (s:CrisisScenario)'),
+      );
     });
 
     it('should fetch a single crisis scenario by ID', async () => {
@@ -68,59 +78,106 @@ describe('WargameResolver', () => {
         records: [createMockRecord(mockScenario, 's')],
       });
 
-      const result = await resolver.getCrisisScenario({}, { id: 'scenario1' }, {} as any);
+      const result = await resolver.getCrisisScenario(
+        {},
+        { id: 'scenario1' },
+        {} as any,
+      );
       expect(result).toEqual(mockScenario);
-      expect(mockSessionRun).toHaveBeenCalledWith(expect.stringContaining('MATCH (s:CrisisScenario {id: $id})'), { id: 'scenario1' });
+      expect(mockSessionRun).toHaveBeenCalledWith(
+        expect.stringContaining('MATCH (s:CrisisScenario {id: $id})'),
+        { id: 'scenario1' },
+      );
     });
 
     it('should return undefined if crisis scenario not found', async () => {
       mockSessionRun.mockResolvedValueOnce({ records: [] });
-      const result = await resolver.getCrisisScenario({}, { id: 'nonexistent' }, {} as any);
+      const result = await resolver.getCrisisScenario(
+        {},
+        { id: 'nonexistent' },
+        {} as any,
+      );
       expect(result).toBeUndefined();
     });
 
     it('should fetch crisis telemetry', async () => {
       const mockTelemetry = [{ id: 'tele1', platform: 'X', content: 'test' }];
       mockSessionRun.mockResolvedValueOnce({
-        records: mockTelemetry.map(t => createMockRecord(t, 't')),
+        records: mockTelemetry.map((t) => createMockRecord(t, 't')),
       });
 
-      const result = await resolver.getCrisisTelemetry({}, { scenarioId: 'scenario1' }, {} as any);
+      const result = await resolver.getCrisisTelemetry(
+        {},
+        { scenarioId: 'scenario1' },
+        {} as any,
+      );
       expect(result).toEqual(mockTelemetry);
-      expect(mockSessionRun).toHaveBeenCalledWith(expect.stringContaining('MATCH (s:CrisisScenario {id: $scenarioId})-[:HAS_TELEMETRY]->(t:SocialMediaPost)'), expect.any(Object));
+      expect(mockSessionRun).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'MATCH (s:CrisisScenario {id: $scenarioId})-[:HAS_TELEMETRY]->(t:SocialMediaPost)',
+        ),
+        expect.any(Object),
+      );
     });
 
     it('should fetch adversary intent estimates', async () => {
       const mockIntent = [{ id: 'intent1', estimatedIntent: 'disinfo' }];
       mockSessionRun.mockResolvedValueOnce({
-        records: mockIntent.map(i => createMockRecord(i, 'i')),
+        records: mockIntent.map((i) => createMockRecord(i, 'i')),
       });
 
-      const result = await resolver.getAdversaryIntentEstimates({}, { scenarioId: 'scenario1' }, {} as any);
+      const result = await resolver.getAdversaryIntentEstimates(
+        {},
+        { scenarioId: 'scenario1' },
+        {} as any,
+      );
       expect(result).toEqual(mockIntent);
-      expect(mockSessionRun).toHaveBeenCalledWith(expect.stringContaining('MATCH (s:CrisisScenario {id: $scenarioId})-[:HAS_INTENT_ESTIMATE]->(i:AdversaryIntent)'), expect.any(Object));
+      expect(mockSessionRun).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'MATCH (s:CrisisScenario {id: $scenarioId})-[:HAS_INTENT_ESTIMATE]->(i:AdversaryIntent)',
+        ),
+        expect.any(Object),
+      );
     });
 
     it('should fetch narrative heatmap data', async () => {
       const mockHeatmap = [{ id: 'heatmap1', narrative: 'narrativeA' }];
       mockSessionRun.mockResolvedValueOnce({
-        records: mockHeatmap.map(h => createMockRecord(h, 'h')),
+        records: mockHeatmap.map((h) => createMockRecord(h, 'h')),
       });
 
-      const result = await resolver.getNarrativeHeatmapData({}, { scenarioId: 'scenario1' }, {} as any);
+      const result = await resolver.getNarrativeHeatmapData(
+        {},
+        { scenarioId: 'scenario1' },
+        {} as any,
+      );
       expect(result).toEqual(mockHeatmap);
-      expect(mockSessionRun).toHaveBeenCalledWith(expect.stringContaining('MATCH (s:CrisisScenario {id: $scenarioId})-[:HAS_HEATMAP_DATA]->(h:NarrativeHeatmap)'), expect.any(Object));
+      expect(mockSessionRun).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'MATCH (s:CrisisScenario {id: $scenarioId})-[:HAS_HEATMAP_DATA]->(h:NarrativeHeatmap)',
+        ),
+        expect.any(Object),
+      );
     });
 
     it('should fetch strategic response playbooks', async () => {
       const mockPlaybook = [{ id: 'playbook1', name: 'Playbook A' }];
       mockSessionRun.mockResolvedValueOnce({
-        records: mockPlaybook.map(p => createMockRecord(p, 'p')),
+        records: mockPlaybook.map((p) => createMockRecord(p, 'p')),
       });
 
-      const result = await resolver.getStrategicResponsePlaybooks({}, { scenarioId: 'scenario1' }, {} as any);
+      const result = await resolver.getStrategicResponsePlaybooks(
+        {},
+        { scenarioId: 'scenario1' },
+        {} as any,
+      );
       expect(result).toEqual(mockPlaybook);
-      expect(mockSessionRun).toHaveBeenCalledWith(expect.stringContaining('MATCH (s:CrisisScenario {id: $scenarioId})-[:HAS_PLAYBOOK]->(p:StrategicPlaybook)'), expect.any(Object));
+      expect(mockSessionRun).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'MATCH (s:CrisisScenario {id: $scenarioId})-[:HAS_PLAYBOOK]->(p:StrategicPlaybook)',
+        ),
+        expect.any(Object),
+      );
     });
   });
 
@@ -134,33 +191,81 @@ describe('WargameResolver', () => {
         simulationParameters: { duration: 7 },
       };
 
-      mockSessionRun.mockResolvedValueOnce({ // For CREATE CrisisScenario
-        records: [createMockRecord({ id: 'mock-uuid', ...mockScenarioInput, createdAt: 'now', updatedAt: 'now' }, 's')],
-      }).mockResolvedValue({ // For subsequent MERGE operations
-        records: [],
-      });
+      mockSessionRun
+        .mockResolvedValueOnce({
+          // For CREATE CrisisScenario
+          records: [
+            createMockRecord(
+              {
+                id: 'mock-uuid',
+                ...mockScenarioInput,
+                createdAt: 'now',
+                updatedAt: 'now',
+              },
+              's',
+            ),
+          ],
+        })
+        .mockResolvedValue({
+          // For subsequent MERGE operations
+          records: [],
+        });
 
       mockAxiosPost.mockImplementation((url: string) => {
         if (url.includes('/analyze-telemetry')) {
-          return Promise.resolve({ data: { entities: [], sentiment: 0.5, narratives: ['disinformation'] } });
+          return Promise.resolve({
+            data: {
+              entities: [],
+              sentiment: 0.5,
+              narratives: ['disinformation'],
+            },
+          });
         }
         if (url.includes('/estimate-intent')) {
-          return Promise.resolve({ data: { estimated_intent: 'high', likelihood: 0.9, reasoning: 'test' } });
+          return Promise.resolve({
+            data: {
+              estimated_intent: 'high',
+              likelihood: 0.9,
+              reasoning: 'test',
+            },
+          });
         }
         if (url.includes('/generate-playbook')) {
-          return Promise.resolve({ data: { name: 'Playbook', doctrine_reference: 'JP', description: 'desc', steps: [], metrics_of_effectiveness: [], metrics_of_performance: [] } });
+          return Promise.resolve({
+            data: {
+              name: 'Playbook',
+              doctrine_reference: 'JP',
+              description: 'desc',
+              steps: [],
+              metrics_of_effectiveness: [],
+              metrics_of_performance: [],
+            },
+          });
         }
         return Promise.reject(new Error('Unknown API call'));
       });
 
-      const result = await resolver.runWarGameSimulation({}, { input: mockScenarioInput }, {} as any);
+      const result = await resolver.runWarGameSimulation(
+        {},
+        { input: mockScenarioInput },
+        {} as any,
+      );
 
       expect(result).toHaveProperty('id', 'mock-uuid');
       expect(mockSessionRun).toHaveBeenCalledTimes(7); // 1 for scenario, 3 for relationships, 3 for data
       expect(mockAxiosPost).toHaveBeenCalledTimes(3); // analyze, intent, playbook
-      expect(mockAxiosPost).toHaveBeenCalledWith(expect.stringContaining('/analyze-telemetry'), expect.any(Object));
-      expect(mockAxiosPost).toHaveBeenCalledWith(expect.stringContaining('/estimate-intent'), expect.any(Object));
-      expect(mockAxiosPost).toHaveBeenCalledWith(expect.stringContaining('/generate-playbook'), expect.any(Object));
+      expect(mockAxiosPost).toHaveBeenCalledWith(
+        expect.stringContaining('/analyze-telemetry'),
+        expect.any(Object),
+      );
+      expect(mockAxiosPost).toHaveBeenCalledWith(
+        expect.stringContaining('/estimate-intent'),
+        expect.any(Object),
+      );
+      expect(mockAxiosPost).toHaveBeenCalledWith(
+        expect.stringContaining('/generate-playbook'),
+        expect.any(Object),
+      );
     });
 
     it('should update a crisis scenario', async () => {
@@ -171,15 +276,33 @@ describe('WargameResolver', () => {
         adversaryProfiles: ['non_state_actor_Y'],
         simulationParameters: { duration: 10 },
       };
-      const updatedScenario = { id: 'scenario1', ...mockScenarioInput, updatedAt: 'now' };
+      const updatedScenario = {
+        id: 'scenario1',
+        ...mockScenarioInput,
+        updatedAt: 'now',
+      };
 
       mockSessionRun.mockResolvedValueOnce({
         records: [createMockRecord(updatedScenario, 's')],
       });
 
-      const result = await resolver.updateCrisisScenario({}, { id: 'scenario1', input: mockScenarioInput }, {} as any);
-      expect(result).toEqual(expect.objectContaining({ id: 'scenario1', crisisType: 'updated_conflict' }));
-      expect(mockSessionRun).toHaveBeenCalledWith(expect.stringContaining('MATCH (s:CrisisScenario {id: $id}) SET s.crisisType = $crisisType'), expect.any(Object));
+      const result = await resolver.updateCrisisScenario(
+        {},
+        { id: 'scenario1', input: mockScenarioInput },
+        {} as any,
+      );
+      expect(result).toEqual(
+        expect.objectContaining({
+          id: 'scenario1',
+          crisisType: 'updated_conflict',
+        }),
+      );
+      expect(mockSessionRun).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'MATCH (s:CrisisScenario {id: $id}) SET s.crisisType = $crisisType',
+        ),
+        expect.any(Object),
+      );
     });
 
     it('should delete a crisis scenario', async () => {
@@ -187,9 +310,18 @@ describe('WargameResolver', () => {
         summary: { counters: { nodesDeleted: 1 } },
       });
 
-      const result = await resolver.deleteCrisisScenario({}, { id: 'scenario1'}, {} as any);
+      const result = await resolver.deleteCrisisScenario(
+        {},
+        { id: 'scenario1' },
+        {} as any,
+      );
       expect(result).toBe(true);
-      expect(mockSessionRun).toHaveBeenCalledWith(expect.stringContaining('MATCH (s:CrisisScenario {id: $id}) DETACH DELETE s'), { id: 'scenario1' });
+      expect(mockSessionRun).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'MATCH (s:CrisisScenario {id: $id}) DETACH DELETE s',
+        ),
+        { id: 'scenario1' },
+      );
     });
   });
 });

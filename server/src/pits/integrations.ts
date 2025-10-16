@@ -1,4 +1,8 @@
-import { IntegrationAdapter, IntegrationArtifact, IntegrationContext } from './types';
+import {
+  IntegrationAdapter,
+  IntegrationArtifact,
+  IntegrationContext,
+} from './types';
 
 function formatLag(hours: number): number {
   return Math.round(hours * 100) / 100;
@@ -56,7 +60,10 @@ export class IDTLStub extends BaseIntegration {
   }
 }
 
-export const defaultIntegrations: Record<IntegrationAdapter['name'], IntegrationAdapter> = {
+export const defaultIntegrations: Record<
+  IntegrationAdapter['name'],
+  IntegrationAdapter
+> = {
   IAB: new IABStub(),
   IDTL: new IDTLStub(),
 };

@@ -1,3 +1,11 @@
 mutation setCanaryWeights($tenant: Tenant!, $weights: CanaryWeightsInput!) {
-  setCanaryWeights(tenant: $tenant, weights: $weights) { ok audit { evidenceId ts actor } warnings }
+  setCanaryWeights(tenant: $tenant, weights: $weights) {
+    ok
+    audit {
+      evidenceId
+      ts
+      actor
+    }
+    warnings
+  }
 }

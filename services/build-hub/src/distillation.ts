@@ -1,5 +1,5 @@
-import { EventEmitter } from "events";
-import { BuildEvent, BuildStatus, TestStatus } from "./types";
+import { EventEmitter } from 'events';
+import { BuildEvent, BuildStatus, TestStatus } from './types';
 
 export interface DistillationOptions {
   /** Maximum number of distilled signals to retain in memory */
@@ -62,7 +62,7 @@ const STATUS_WEIGHTS: Record<BuildStatus, number> = {
   failed: 0,
 };
 
-const POLICY_WEIGHTS: Record<NonNullable<BuildEvent["policy"]>, number> = {
+const POLICY_WEIGHTS: Record<NonNullable<BuildEvent['policy']>, number> = {
   pass: 1,
   warn: 0.65,
   fail: 0,
@@ -71,17 +71,17 @@ const POLICY_WEIGHTS: Record<NonNullable<BuildEvent["policy"]>, number> = {
 function scoreTest(status?: BuildStatus | TestStatus): number {
   if (!status) return 0.6; // neutral if unknown
   switch (status) {
-    case "pass":
+    case 'pass':
       return 1;
-    case "fail":
+    case 'fail':
       return 0.08;
-    case "success":
+    case 'success':
       return 1;
-    case "running":
+    case 'running':
       return 0.75;
-    case "pending":
+    case 'pending':
       return 0.55;
-    case "failed":
+    case 'failed':
       return 0.1;
     default:
       return 0.6;
@@ -128,14 +128,16 @@ export class BuildDistillationEngine extends EventEmitter {
    * Ingest a build event and return the distilled signal derived from it.
    */
   ingest(event: BuildEvent): DistilledBuildSignal {
-    const timestamp = Date.parse(event.timestamp || "") || Date.now();
-    const branch = event.branch || "unknown";
+    const timestamp = Date.parse(event.timestamp || '') || Date.now();
+    const branch = event.branch || 'unknown';
     const prWindow = this.getWindow(event.pr, timestamp);
 
     const reliability = STATUS_WEIGHTS[event.status] ?? 0.5;
     const coverage = this.computeCoverageScore(event);
     const security = this.computeSecurityScore(event);
-    const compliance = event.policy ? (POLICY_WEIGHTS[event.policy] ?? 0.5) : 0.7;
+    const compliance = event.policy
+      ? (POLICY_WEIGHTS[event.policy] ?? 0.5)
+      : 0.7;
     const velocity = this.computeVelocityScore(prWindow);
     const stability = this.computeStabilityScore(prWindow, event.status);
 
@@ -151,8 +153,17 @@ export class BuildDistillationEngine extends EventEmitter {
     this.updateBranchProfile(branch, features, timestamp, event.status);
 
     const teacherScores = this.computeTeacherScores(features);
-    const studentScore = this.composeStudentScore(features, branch, teacherScores, prWindow);
-    const recommendations = this.generateRecommendations(features, branch, studentScore);
+    const studentScore = this.composeStudentScore(
+      features,
+      branch,
+      teacherScores,
+      prWindow,
+    );
+    const recommendations = this.generateRecommendations(
+      features,
+      branch,
+      studentScore,
+    );
 
     const distilled: DistilledBuildSignal = {
       pr: event.pr,
@@ -169,7 +180,7 @@ export class BuildDistillationEngine extends EventEmitter {
       this.history.shift();
     }
 
-    this.emit("distilled", distilled);
+    this.emit('distilled', distilled);
     return distilled;
   }
 
@@ -184,7 +195,9 @@ export class BuildDistillationEngine extends EventEmitter {
    * Retrieve branch-level distilled profiles sorted by reliability.
    */
   getBranchProfiles(): BranchProfile[] {
-    return Array.from(this.branchProfiles.values()).sort((a, b) => b.emaReliability - a.emaReliability);
+    return Array.from(this.branchProfiles.values()).sort(
+      (a, b) => b.emaReliability - a.emaReliability,
+    );
   }
 
   /**
@@ -202,7 +215,8 @@ export class BuildDistillationEngine extends EventEmitter {
     const signals = this.getRecentSignals(12);
 
     const aggregateReliability =
-      branches.reduce((acc, profile) => acc + profile.emaReliability, 0) / (branches.length || 1);
+      branches.reduce((acc, profile) => acc + profile.emaReliability, 0) /
+      (branches.length || 1);
 
     return {
       aggregateReliability,
@@ -214,22 +228,30 @@ export class BuildDistillationEngine extends EventEmitter {
 
   private seedTeachers(): void {
     this.registerTeacher({
-      id: "reliability-teacher",
-      description: "Captures steady build execution with resilience to flaky reruns.",
-      weights: { reliability: 0.45, stability: 0.25, velocity: 0.2, compliance: 0.1 },
+      id: 'reliability-teacher',
+      description:
+        'Captures steady build execution with resilience to flaky reruns.',
+      weights: {
+        reliability: 0.45,
+        stability: 0.25,
+        velocity: 0.2,
+        compliance: 0.1,
+      },
       temperature: 0.85,
     });
 
     this.registerTeacher({
-      id: "coverage-teacher",
-      description: "Focuses on test depth and supply chain hardening for release readiness.",
+      id: 'coverage-teacher',
+      description:
+        'Focuses on test depth and supply chain hardening for release readiness.',
       weights: { coverage: 0.4, security: 0.3, compliance: 0.3 },
       temperature: 1.1,
     });
 
     this.registerTeacher({
-      id: "velocity-teacher",
-      description: "Optimizes for rapid, repeatable iteration without burning DP budget.",
+      id: 'velocity-teacher',
+      description:
+        'Optimizes for rapid, repeatable iteration without burning DP budget.',
       weights: { velocity: 0.5, stability: 0.2, reliability: 0.3 },
       temperature: 0.95,
     });
@@ -256,9 +278,12 @@ export class BuildDistillationEngine extends EventEmitter {
     const tests = event.tests;
     if (!tests) return 0.65;
 
-    const scores = [tests.unit, tests.e2e, tests.security].map((status) => scoreTest(status));
+    const scores = [tests.unit, tests.e2e, tests.security].map((status) =>
+      scoreTest(status),
+    );
     const observed = scores.filter((value) => !Number.isNaN(value));
-    const base = observed.reduce((acc, value) => acc + value, 0) / (observed.length || 1);
+    const base =
+      observed.reduce((acc, value) => acc + value, 0) / (observed.length || 1);
 
     // Signed artifacts amplify coverage confidence because they imply a green build
     const signatureBoost = event.signed ? 0.08 : 0;
@@ -285,20 +310,30 @@ export class BuildDistillationEngine extends EventEmitter {
     if (minutes <= fastThreshold) return 1;
     if (minutes >= slowThreshold) return 0.2;
 
-    return clamp(1 - (minutes - fastThreshold) / (slowThreshold - fastThreshold));
+    return clamp(
+      1 - (minutes - fastThreshold) / (slowThreshold - fastThreshold),
+    );
   }
 
-  private computeStabilityScore(prWindow: PRWindowState, status: BuildStatus): number {
-    if (status === "failed") {
+  private computeStabilityScore(
+    prWindow: PRWindowState,
+    status: BuildStatus,
+  ): number {
+    if (status === 'failed') {
       prWindow.failureStreak += 1;
-    } else if (status === "success") {
+    } else if (status === 'success') {
       prWindow.failureStreak = Math.max(0, prWindow.failureStreak - 1);
     }
 
     return clamp(1 - prWindow.failureStreak / 6);
   }
 
-  private updateBranchProfile(branch: string, features: FeatureVector, timestamp: number, status: BuildStatus): void {
+  private updateBranchProfile(
+    branch: string,
+    features: FeatureVector,
+    timestamp: number,
+    status: BuildStatus,
+  ): void {
     const profile = this.branchProfiles.get(branch) ?? {
       branch,
       emaReliability: features.reliability,
@@ -306,25 +341,50 @@ export class BuildDistillationEngine extends EventEmitter {
       emaSecurity: features.security,
       emaCoverage: features.coverage,
       emaCompliance: features.compliance,
-      failureStreak: status === "failed" ? 1 : 0,
+      failureStreak: status === 'failed' ? 1 : 0,
       totalBuilds: 0,
       lastUpdated: timestamp,
     };
 
     const alpha = this.options.branchSmoothing;
-    profile.emaReliability = this.ema(profile.emaReliability, features.reliability, alpha);
-    profile.emaVelocity = this.ema(profile.emaVelocity, features.velocity, alpha);
-    profile.emaSecurity = this.ema(profile.emaSecurity, features.security, alpha);
-    profile.emaCoverage = this.ema(profile.emaCoverage, features.coverage, alpha);
-    profile.emaCompliance = this.ema(profile.emaCompliance, features.compliance, alpha);
-    profile.failureStreak = status === "failed" ? profile.failureStreak + 1 : Math.max(0, profile.failureStreak - 1);
+    profile.emaReliability = this.ema(
+      profile.emaReliability,
+      features.reliability,
+      alpha,
+    );
+    profile.emaVelocity = this.ema(
+      profile.emaVelocity,
+      features.velocity,
+      alpha,
+    );
+    profile.emaSecurity = this.ema(
+      profile.emaSecurity,
+      features.security,
+      alpha,
+    );
+    profile.emaCoverage = this.ema(
+      profile.emaCoverage,
+      features.coverage,
+      alpha,
+    );
+    profile.emaCompliance = this.ema(
+      profile.emaCompliance,
+      features.compliance,
+      alpha,
+    );
+    profile.failureStreak =
+      status === 'failed'
+        ? profile.failureStreak + 1
+        : Math.max(0, profile.failureStreak - 1);
     profile.totalBuilds += 1;
     profile.lastUpdated = timestamp;
 
     this.branchProfiles.set(branch, profile);
   }
 
-  private computeTeacherScores(features: FeatureVector): Record<string, number> {
+  private computeTeacherScores(
+    features: FeatureVector,
+  ): Record<string, number> {
     const scores: Record<string, number> = {};
     for (const teacher of this.teacherLibrary.values()) {
       const { weights, temperature, id } = teacher;
@@ -334,7 +394,7 @@ export class BuildDistillationEngine extends EventEmitter {
       for (const [featureKey, weight] of Object.entries(weights)) {
         const key = featureKey as keyof FeatureVector;
         const featureValue = features[key];
-        if (typeof featureValue === "number" && typeof weight === "number") {
+        if (typeof featureValue === 'number' && typeof weight === 'number') {
           weighted += featureValue * weight;
           total += weight;
         }
@@ -356,14 +416,26 @@ export class BuildDistillationEngine extends EventEmitter {
     const branchProfile = this.branchProfiles.get(branch);
     const teacherAggregate = Object.values(teacherScores);
     const ensemble = teacherAggregate.length
-      ? teacherAggregate.reduce((acc, value) => acc + value, 0) / teacherAggregate.length
+      ? teacherAggregate.reduce((acc, value) => acc + value, 0) /
+        teacherAggregate.length
       : features.reliability;
 
-    const branchReliability = branchProfile ? branchProfile.emaReliability : features.reliability;
-    const branchVelocity = branchProfile ? branchProfile.emaVelocity : features.velocity;
+    const branchReliability = branchProfile
+      ? branchProfile.emaReliability
+      : features.reliability;
+    const branchVelocity = branchProfile
+      ? branchProfile.emaVelocity
+      : features.velocity;
 
-    const dropoutPenalty = 1 - clamp(this.options.teacherDropout * (prWindow.failureStreak + 1) / 4, 0, 0.35);
-    const blend = 0.45 * ensemble + 0.35 * branchReliability + 0.2 * branchVelocity;
+    const dropoutPenalty =
+      1 -
+      clamp(
+        (this.options.teacherDropout * (prWindow.failureStreak + 1)) / 4,
+        0,
+        0.35,
+      );
+    const blend =
+      0.45 * ensemble + 0.35 * branchReliability + 0.2 * branchVelocity;
     const stabilityBoost = features.stability * 0.1;
 
     return clamp(blend * dropoutPenalty + stabilityBoost);
@@ -377,23 +449,33 @@ export class BuildDistillationEngine extends EventEmitter {
     const recommendations: string[] = [];
 
     if (studentScore < 0.55) {
-      recommendations.push(`Investigate regression on ${branch}: distilled score ${studentScore.toFixed(2)}`);
+      recommendations.push(
+        `Investigate regression on ${branch}: distilled score ${studentScore.toFixed(2)}`,
+      );
     }
 
     if (features.coverage < 0.65) {
-      recommendations.push("Expand unit/integration test coverage before next promotion");
+      recommendations.push(
+        'Expand unit/integration test coverage before next promotion',
+      );
     }
 
     if (features.security < 0.65) {
-      recommendations.push("Escalate supply-chain scanning or SBOM signing for this artifact");
+      recommendations.push(
+        'Escalate supply-chain scanning or SBOM signing for this artifact',
+      );
     }
 
     if (features.velocity < 0.5) {
-      recommendations.push("Warm caches or allocate burst runners to reduce build turnaround");
+      recommendations.push(
+        'Warm caches or allocate burst runners to reduce build turnaround',
+      );
     }
 
     if (features.compliance < 0.6) {
-      recommendations.push("Policy feedback loop recommended prior to release gating");
+      recommendations.push(
+        'Policy feedback loop recommended prior to release gating',
+      );
     }
 
     return recommendations;

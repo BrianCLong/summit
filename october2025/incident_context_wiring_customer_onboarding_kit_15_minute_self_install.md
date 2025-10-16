@@ -1,82 +1,86 @@
 # Incident Context Wiring + Customer Onboarding Kit (15‑Minute Self‑Install)
 
 This pack does two things:
-1) **Wires incident context** (trace IDs, tenant, severity, links) into **PagerDuty** and **Statuspage** payloads, from alert → incident with deep links to Jaeger & Grafana.
-2) Ships a **Customer Onboarding Kit** with sample Helm values, a preflight script, and a minute‑by‑minute checklist so new tenants can self‑install in < 15 minutes.
+
+1. **Wires incident context** (trace IDs, tenant, severity, links) into **PagerDuty** and **Statuspage** payloads, from alert → incident with deep links to Jaeger & Grafana.
+2. Ships a **Customer Onboarding Kit** with sample Helm values, a preflight script, and a minute‑by‑minute checklist so new tenants can self‑install in < 15 minutes.
 
 ---
 
 ## 1) Incident Context Wiring
 
 ### 1.1 Prometheus rules: add labels & annotations
+
 ```yaml
 # ops/synthetics/synthetics-rules.prom (replace group)
 groups:
-- name: synthetics.rules
-  rules:
-  - alert: GatewayDown
-    expr: probe_success{job="blackbox-gateway"} == 0
-    for: 2m
-    labels:
-      severity: critical
-      team: intelgraph
-      tenant: pilot
-    annotations:
-      summary: "Gateway GraphQL unreachable"
-      description: "Synthetic probe failed for 2m. Ingress, DNS, or pods may be unhealthy."
-      runbook: "https://internal.docs/runbooks/gateway-down"
-      # Pass trace, links (if scrape emitted X-Trace-Id header metric; else leave blank)
-      trace_id: "{{ $labels.trace_id }}"
-      jaeger_link: "https://jaeger.example.com/search?traceID={{ $labels.trace_id }}"
-      grafana_link: "https://grafana.example.com/d/a1b2c3/intelgraph-ga?var-tenant={{ $labels.tenant }}"
-  - alert: WalletVerifyDown
-    expr: probe_success{job="blackbox-wallet"} == 0
-    for: 5m
-    labels:
-      severity: warning
-      team: intelgraph
-      tenant: pilot
-    annotations:
-      summary: "Wallet verify endpoint unreachable"
-      description: "Wallet health probe failing (5m)."
-      runbook: "https://internal.docs/runbooks/wallet-down"
-      trace_id: "{{ $labels.trace_id }}"
-      jaeger_link: "https://jaeger.example.com/search?traceID={{ $labels.trace_id }}"
-      grafana_link: "https://grafana.example.com/d/a1b2c3/intelgraph-ga?var-tenant={{ $labels.tenant }}"
+  - name: synthetics.rules
+    rules:
+      - alert: GatewayDown
+        expr: probe_success{job="blackbox-gateway"} == 0
+        for: 2m
+        labels:
+          severity: critical
+          team: intelgraph
+          tenant: pilot
+        annotations:
+          summary: 'Gateway GraphQL unreachable'
+          description: 'Synthetic probe failed for 2m. Ingress, DNS, or pods may be unhealthy.'
+          runbook: 'https://internal.docs/runbooks/gateway-down'
+          # Pass trace, links (if scrape emitted X-Trace-Id header metric; else leave blank)
+          trace_id: '{{ $labels.trace_id }}'
+          jaeger_link: 'https://jaeger.example.com/search?traceID={{ $labels.trace_id }}'
+          grafana_link: 'https://grafana.example.com/d/a1b2c3/intelgraph-ga?var-tenant={{ $labels.tenant }}'
+      - alert: WalletVerifyDown
+        expr: probe_success{job="blackbox-wallet"} == 0
+        for: 5m
+        labels:
+          severity: warning
+          team: intelgraph
+          tenant: pilot
+        annotations:
+          summary: 'Wallet verify endpoint unreachable'
+          description: 'Wallet health probe failing (5m).'
+          runbook: 'https://internal.docs/runbooks/wallet-down'
+          trace_id: '{{ $labels.trace_id }}'
+          jaeger_link: 'https://jaeger.example.com/search?traceID={{ $labels.trace_id }}'
+          grafana_link: 'https://grafana.example.com/d/a1b2c3/intelgraph-ga?var-tenant={{ $labels.tenant }}'
 ```
 
 > If your blackbox exporter doesn’t emit `trace_id`, you can enrich metrics at the gateway: export a synthetic probe endpoint that returns `X-Trace-Id` header, scrape with `headers: [X-Trace-Id]` and map via recording rule into a label. Optional; links still work without it.
 
 ### 1.2 Alertmanager → PagerDuty: custom details & links
+
 ```yaml
 # ops/synthetics/alertmanager-pd.yaml (receivers section only)
 receivers:
-- name: pagerduty
-  pagerduty_configs:
-  - routing_key_file: /etc/alertmanager/secrets/routing_key
-    severity: '{{ .CommonLabels.severity }}'
-    class: 'synthetic'
-    component: '{{ .CommonLabels.job }}'
-    group: '{{ .CommonLabels.team }}'
-    dedup_key: '{{ .GroupLabels.alertname }}:{{ .CommonLabels.tenant }}'
-    details:
-      tenant: '{{ .CommonLabels.tenant }}'
-      runbook: '{{ .CommonAnnotations.runbook }}'
-      grafana: '{{ .CommonAnnotations.grafana_link }}'
-      jaeger: '{{ .CommonAnnotations.jaeger_link }}'
-      trace_id: '{{ .CommonAnnotations.trace_id }}'
-      summary: '{{ .CommonAnnotations.summary }}'
-      description: '{{ .CommonAnnotations.description }}'
-    send_resolved: true
+  - name: pagerduty
+    pagerduty_configs:
+      - routing_key_file: /etc/alertmanager/secrets/routing_key
+        severity: '{{ .CommonLabels.severity }}'
+        class: 'synthetic'
+        component: '{{ .CommonLabels.job }}'
+        group: '{{ .CommonLabels.team }}'
+        dedup_key: '{{ .GroupLabels.alertname }}:{{ .CommonLabels.tenant }}'
+        details:
+          tenant: '{{ .CommonLabels.tenant }}'
+          runbook: '{{ .CommonAnnotations.runbook }}'
+          grafana: '{{ .CommonAnnotations.grafana_link }}'
+          jaeger: '{{ .CommonAnnotations.jaeger_link }}'
+          trace_id: '{{ .CommonAnnotations.trace_id }}'
+          summary: '{{ .CommonAnnotations.summary }}'
+          description: '{{ .CommonAnnotations.description }}'
+        send_resolved: true
 ```
 
 ### 1.3 Statuspage bridge: include rich body & component statuses
+
 ```yaml
 # .github/workflows/statuspage-bridge.yaml (replace steps)
 name: statuspage-bridge
 on:
   workflow_run:
-    workflows: ["synthetics-check"]
+    workflows: ['synthetics-check']
     types: [completed]
 jobs:
   incident:
@@ -123,6 +127,7 @@ jobs:
 ## 2) Customer Onboarding Kit — 15‑Minute Self‑Install
 
 ### 2.1 Folder structure
+
 ```
 onboarding/
   values-sample.yaml
@@ -133,6 +138,7 @@ onboarding/
 ```
 
 ### 2.2 Sample values (minimal viable)
+
 ```yaml
 # onboarding/values-sample.yaml
 image:
@@ -176,6 +182,7 @@ csi:
 ```
 
 ### 2.3 Preflight script
+
 ```bash
 # onboarding/preflight.sh
 set -euo pipefail
@@ -210,30 +217,38 @@ ok "Preflight OK"
 ```
 
 ### 2.4 Quickstart (minute‑by‑minute)
+
 ```md
 # onboarding/quickstart.md
+
 **0–3 min**: Preflight
+
 - `export KEYCLOAK_ISSUER=...; export HOSTNAME=intelgraph.yourcompany.com`
 - `bash onboarding/preflight.sh`
 
 **3–6 min**: Pull & verify chart
+
 - `export ORG=BrianCLong/intelgraph; export CHART=intelgraph; export VERSION=1.0.0`
 - `helm registry login ghcr.io -u <gh-user> -p <token>` (if private)
 - `helm pull oci://ghcr.io/$ORG/charts/$CHART --version $VERSION -d ./charts`
 - `cosign verify ghcr.io/$ORG/charts/$CHART:$VERSION --certificate-oidc-issuer https://token.actions.githubusercontent.com --certificate-identity-regexp ".*github.com/$ORG.*"`
 
 **6–10 min**: Prepare values
+
 - Copy `onboarding/values-sample.yaml` → `my-values.yaml`; set hosts, OIDC, secrets
 
 **10–12 min**: Install
+
 - `helm upgrade --install intelgraph ./charts/$CHART-$VERSION.tgz -n intelgraph --create-namespace -f my-values.yaml`
 
 **12–15 min**: Smoke
+
 - Open `https://intelgraph.yourcompany.com` → login via Keycloak
 - `make e2e-demo` (optional local) or run `ops/smoke/post-deploy.sh` with your URLs
 ```
 
 ### 2.5 Checklist
+
 ```md
 - [ ] DNS + TLS pointed to ingress
 - [ ] Keycloak realm configured (clients: intelgraph-web/api)
@@ -246,6 +261,7 @@ ok "Preflight OK"
 ```
 
 ### 2.6 FAQ
+
 ```md
 **Q: Our Keycloak uses a different claim for tenant.**
 A: Update client scope mapper to emit `tnt` claim or set a mapper in gateway to read your claim name.
@@ -260,6 +276,7 @@ A: Set `ingress.tls` to false and terminate TLS at LB; ensure `KEYCLOAK_ISSUER` 
 ---
 
 ## 3) Make helpers
+
 ```make
 onboarding-preflight:
 	KEYCLOAK_ISSUER=$(KEYCLOAK_ISSUER) HOSTNAME=$(HOSTNAME) bash onboarding/preflight.sh
@@ -275,6 +292,7 @@ onboarding-install:
 ---
 
 ## 4) Verification & Rollback
+
 - **PagerDuty**: Trigger a synthetic failure; PD event should include `tenant`, `trace_id`, and deep links.
 - **Statuspage**: Incident body JSON shows `tenant`, Grafana & Jaeger links.
 - **Rollback**: `helm rollback intelgraph <REV>`; incidents resolve when synthetics recover.
@@ -282,7 +300,7 @@ onboarding-install:
 ---
 
 ## 5) Notes
+
 - Replace example Grafana/Jaeger URLs with your observability endpoints.
 - Keep `STATUSPAGE_COMPONENT_MAP` updated when adding components.
 - For multi‑tenant, template the tenant label in rules via `$labels.namespace` or URL host.
-

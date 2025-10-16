@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata: { name: autoshed, namespace: prod }
 spec:
-  schedule: "*/2 * * * *" # runs every 2 minutes in stage; 5 in prod.
+  schedule: '*/2 * * * *' # runs every 2 minutes in stage; 5 in prod.
   jobTemplate:
     spec:
       template:
@@ -11,7 +11,7 @@ spec:
           containers:
             - name: autoshed
               image: bitnami/kubectl:latest
-              command: ["/bin/sh","-c"]
+              command: ['/bin/sh', '-c']
               args:
                 - |
                   echo "Autoshedding logic here..."

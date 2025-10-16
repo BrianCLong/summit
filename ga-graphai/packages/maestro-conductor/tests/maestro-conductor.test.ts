@@ -4,7 +4,7 @@ import type {
   DiscoveryProvider,
   JobSpec,
   PolicyHook,
-  ResponseStrategy
+  ResponseStrategy,
 } from '../src/types';
 import { MaestroConductor } from '../src/maestro-conductor';
 
@@ -16,22 +16,22 @@ const assetAlpha: AssetDescriptor = {
   region: 'us-east-1',
   labels: {
     compliance: 'soc2,hipaa',
-    'data-region': 'us'
+    'data-region': 'us',
   },
   metadata: {
-    fallback: 'svc-beta'
+    fallback: 'svc-beta',
   },
   capabilities: [
     {
       name: 'maestro-routing',
       description: 'Multi-cloud orchestration',
-      qualityOfService: { latencyMs: 120, reliability: 0.999 }
+      qualityOfService: { latencyMs: 120, reliability: 0.999 },
     },
     {
       name: 'auto-heal',
-      qualityOfService: { latencyMs: 200, reliability: 0.998 }
-    }
-  ]
+      qualityOfService: { latencyMs: 200, reliability: 0.998 },
+    },
+  ],
 };
 
 const assetBeta: AssetDescriptor = {
@@ -42,21 +42,21 @@ const assetBeta: AssetDescriptor = {
   region: 'us-central1',
   labels: {
     compliance: 'soc2',
-    'data-region': 'us'
+    'data-region': 'us',
   },
   metadata: {
-    fallback: 'svc-alpha'
+    fallback: 'svc-alpha',
   },
   capabilities: [
     {
       name: 'maestro-routing',
-      qualityOfService: { latencyMs: 160, reliability: 0.992 }
+      qualityOfService: { latencyMs: 160, reliability: 0.992 },
     },
     {
       name: 'auto-heal',
-      qualityOfService: { latencyMs: 260, reliability: 0.989 }
-    }
-  ]
+      qualityOfService: { latencyMs: 260, reliability: 0.989 },
+    },
+  ],
 };
 
 describe('MaestroConductor meta-agent', () => {
@@ -72,7 +72,7 @@ describe('MaestroConductor meta-agent', () => {
       description: 'stub discovery',
       async scan() {
         return assets;
-      }
+      },
     };
 
     conductor = new MaestroConductor({
@@ -82,9 +82,9 @@ describe('MaestroConductor meta-agent', () => {
         windowSize: 12,
         latencyThresholdMs: 200,
         errorRateThreshold: 0.08,
-        saturationThreshold: 0.7
+        saturationThreshold: 0.7,
       },
-      jobRouter: { latencyWeight: 0.4 }
+      jobRouter: { latencyWeight: 0.4 },
     });
 
     conductor.registerDiscoveryProvider(provider);
@@ -101,7 +101,7 @@ describe('MaestroConductor meta-agent', () => {
           }
         }
         return { allowed: true, reason: 'policy:approved' };
-      }
+      },
     };
 
     conductor.registerPolicyHook(policyHook);
@@ -109,8 +109,8 @@ describe('MaestroConductor meta-agent', () => {
     const strategy: ResponseStrategy = {
       id: 'auto-fallback',
       description: 'failover to paired service and launch runbook',
-      supports: asset => Boolean(asset.metadata?.fallback),
-      shouldTrigger: context => context.anomaly.severity !== 'low',
+      supports: (asset) => Boolean(asset.metadata?.fallback),
+      shouldTrigger: (context) => context.anomaly.severity !== 'low',
       async execute(context) {
         const target = context.asset.metadata?.fallback as string | undefined;
         executed.push(`${context.asset.id}->${target ?? 'none'}`);
@@ -123,18 +123,18 @@ describe('MaestroConductor meta-agent', () => {
               targetAssetId: target,
               estimatedImpact: 'high',
               payload: { mode: 'multi-cloud-drain' },
-              runbook: 'runbooks/fallback.md'
+              runbook: 'runbooks/fallback.md',
             },
             {
               type: 'runbook',
               estimatedImpact: 'medium',
-              payload: { link: 'runbooks/live-observability.md' }
-            }
+              payload: { link: 'runbooks/live-observability.md' },
+            },
           ],
-          notes: 'automatic fallback executed'
+          notes: 'automatic fallback executed',
         };
       },
-      cooldownMs: 1
+      cooldownMs: 1,
     };
 
     conductor.registerResponseStrategy(strategy);
@@ -152,7 +152,7 @@ describe('MaestroConductor meta-agent', () => {
         metric: 'latency.p95',
         value,
         unit: 'ms',
-        timestamp: new Date(Date.now() + index * 1000)
+        timestamp: new Date(Date.now() + index * 1000),
       });
     }
 
@@ -161,26 +161,26 @@ describe('MaestroConductor meta-agent', () => {
       metric: 'latency.p95',
       value: 420,
       unit: 'ms',
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     await conductor.ingestHealthSignal({
       assetId: 'svc-alpha',
       metric: 'cost.perHour',
       value: 28,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
     await conductor.ingestHealthSignal({
       assetId: 'svc-alpha',
       metric: 'error.rate',
       value: 0.11,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
     await conductor.ingestHealthSignal({
       assetId: 'svc-alpha',
       metric: 'saturation',
       value: 0.82,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     await conductor.ingestHealthSignal({
@@ -188,29 +188,31 @@ describe('MaestroConductor meta-agent', () => {
       metric: 'latency.p95',
       value: 150,
       unit: 'ms',
-      timestamp: new Date()
+      timestamp: new Date(),
     });
     await conductor.ingestHealthSignal({
       assetId: 'svc-beta',
       metric: 'cost.perHour',
       value: 18,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
     await conductor.ingestHealthSignal({
       assetId: 'svc-beta',
       metric: 'throughput',
       value: 210,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     const incidents = conductor.getIncidents();
     expect(incidents.length).toBeGreaterThan(0);
-    const actionable = incidents.find(incident => incident.plans.length > 0);
+    const actionable = incidents.find((incident) => incident.plans.length > 0);
     expect(actionable?.plans[0].actions[0].type).toBe('failover');
     expect(executed).toContain('svc-alpha->svc-beta');
 
     const recommendations = conductor.getOptimizationRecommendations();
-    const alphaRecommendation = recommendations.find(rec => rec.assetId === 'svc-alpha');
+    const alphaRecommendation = recommendations.find(
+      (rec) => rec.assetId === 'svc-alpha',
+    );
     expect(alphaRecommendation).toBeDefined();
     expect(alphaRecommendation?.actions).toContain('scale-out');
 
@@ -222,14 +224,16 @@ describe('MaestroConductor meta-agent', () => {
       requirements: {
         regions: ['us-east-1'],
         complianceTags: ['soc2'],
-        maxLatencyMs: 500
+        maxLatencyMs: 500,
       },
-      metadata: { sensitive: true }
+      metadata: { sensitive: true },
     };
 
     const plan = await conductor.routeJob(job);
     expect(plan.primary.assetId).toBe('svc-alpha');
-    expect(plan.primary.reasoning.some(reason => reason.includes('policy'))).toBe(true);
+    expect(
+      plan.primary.reasoning.some((reason) => reason.includes('policy')),
+    ).toBe(true);
     expect(plan.fallbacks.length).toBeLessThanOrEqual(1);
   });
 });

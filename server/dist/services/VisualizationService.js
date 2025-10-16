@@ -1149,7 +1149,7 @@ class VisualizationService extends EventEmitter {
         };
     }
     async loadGeospatialData(request, session) {
-        const { investigationId, clusterRadius = 50 } = request.parameters || {};
+        const { investigationId, clusterRadius = 50, heatmap: heatmapConfig, } = request.parameters || {};
         const geoQuery = `
       MATCH (e:MultimodalEntity)
       WHERE e.investigationId = $investigationId
@@ -1198,12 +1198,12 @@ class VisualizationService extends EventEmitter {
                 radius: clusterRadius,
             },
             heatmap: {
-                enabled: !!heatmap,
-                data: heatmap?.data || [],
+                enabled: Boolean(heatmapConfig?.enabled),
+                data: Array.isArray(heatmapConfig?.data) ? heatmapConfig.data : [],
                 options: {
-                    radius: 25,
-                    blur: 15,
-                    maxZoom: 17,
+                    radius: heatmapConfig?.options?.radius ?? 25,
+                    blur: heatmapConfig?.options?.blur ?? 15,
+                    maxZoom: heatmapConfig?.options?.maxZoom ?? 17,
                 },
             },
         };

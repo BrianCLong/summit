@@ -16,7 +16,9 @@ function createApp() {
     const { before = [], after = [] } = req.body;
     const added = after.filter((x) => !before.includes(x));
     const removed = before.filter((x) => !after.includes(x));
-    const changed = after.filter((x) => before.includes(x) && before.find((b) => b === x) !== x);
+    const changed = after.filter(
+      (x) => before.includes(x) && before.find((b) => b === x) !== x,
+    );
     res.json({ added, removed, changed });
   });
 

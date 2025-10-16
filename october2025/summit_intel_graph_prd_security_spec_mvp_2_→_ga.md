@@ -296,9 +296,9 @@ level: high
 
 detection:
   selection:
-    operationName|contains: ["listEntities", "search", "export"]
+    operationName|contains: ['listEntities', 'search', 'export']
   filter:
-    tenantId_mismatch: true  # derived field from gateway
+    tenantId_mismatch: true # derived field from gateway
   timeframe: 5m
   condition: selection and filter | count() by userId > 100
 
@@ -319,8 +319,8 @@ level: high
 
 detection:
   selection:
-    export.approval.status: "none"
-    export.bytes: "> 1MB"
+    export.approval.status: 'none'
+    export.bytes: '> 1MB'
   condition: selection
 ```
 
@@ -424,9 +424,7 @@ detection:
 
 ## O) Go/No‑Go Checklist
 
--
-
----
+- ***
 
 ## P) Appendices
 
@@ -435,4 +433,3 @@ detection:
 - **Appendix C:** Red/Blue tabletop outline for cross‑tenant attack.
 
 > End of document.
-

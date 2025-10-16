@@ -1,7 +1,7 @@
 /**
  * Maestro Conductor v24.4.0 - Tenant-Level SLO Metrics & Dashboards
  * Epic E22: Tenant-Level SLO Observability
- * 
+ *
  * Comprehensive tenant-specific SLO tracking, alerting, and dashboard generation
  * Provides per-tenant error budgets, burn rates, and availability metrics
  */
@@ -25,29 +25,29 @@ interface TenantSLOConfig {
 
 // SLO targets per tenant
 interface SLOTargets {
-  availability: number;           // 99.9% uptime
-  responseTimeP50: number;        // 50th percentile response time (ms)
-  responseTimeP95: number;        // 95th percentile response time (ms)
-  responseTimeP99: number;        // 99th percentile response time (ms)
-  errorRate: number;             // Maximum error rate (%)
-  throughputRPS: number;         // Minimum requests per second
-  dataFreshness: number;         // Maximum data staleness (seconds)
+  availability: number; // 99.9% uptime
+  responseTimeP50: number; // 50th percentile response time (ms)
+  responseTimeP95: number; // 95th percentile response time (ms)
+  responseTimeP99: number; // 99th percentile response time (ms)
+  errorRate: number; // Maximum error rate (%)
+  throughputRPS: number; // Minimum requests per second
+  dataFreshness: number; // Maximum data staleness (seconds)
 }
 
 // Alert thresholds for burn rates
 interface AlertThresholds {
-  criticalBurnRate: number;      // Immediate alert (5x normal)
-  warningBurnRate: number;       // Warning alert (2x normal)
-  budgetExhaustion: number;      // Days until budget exhaustion
-  anomalyDetection: boolean;     // Enable anomaly detection
+  criticalBurnRate: number; // Immediate alert (5x normal)
+  warningBurnRate: number; // Warning alert (2x normal)
+  budgetExhaustion: number; // Days until budget exhaustion
+  anomalyDetection: boolean; // Enable anomaly detection
 }
 
 // Burn rate calculation windows
 interface BurnRateWindow {
   name: string;
-  shortWindow: number;           // Minutes for short window
-  longWindow: number;            // Minutes for long window
-  alertBurnRate: number;         // Burn rate threshold
+  shortWindow: number; // Minutes for short window
+  longWindow: number; // Minutes for long window
+  alertBurnRate: number; // Burn rate threshold
   severity: 'critical' | 'warning' | 'info';
 }
 
@@ -56,18 +56,18 @@ interface TenantSLOMetrics {
   tenantId: string;
   timestamp: Date;
   period: 'minute' | 'hour' | 'day' | 'week' | 'month';
-  
+
   // Core SLI measurements
   sli: {
-    availability: number;          // % uptime
-    responseTimeP50: number;       // ms
-    responseTimeP95: number;       // ms
-    responseTimeP99: number;       // ms
-    errorRate: number;            // % errors
-    throughput: number;           // requests per second
-    dataFreshness: number;        // seconds since last update
+    availability: number; // % uptime
+    responseTimeP50: number; // ms
+    responseTimeP95: number; // ms
+    responseTimeP99: number; // ms
+    errorRate: number; // % errors
+    throughput: number; // requests per second
+    dataFreshness: number; // seconds since last update
   };
-  
+
   // SLO compliance
   slo: {
     availabilityCompliant: boolean;
@@ -77,16 +77,16 @@ interface TenantSLOMetrics {
     dataFreshnessCompliant: boolean;
     overallCompliant: boolean;
   };
-  
+
   // Error budget tracking
   errorBudget: {
-    totalBudget: number;          // Total error budget for period
-    consumedBudget: number;       // Already consumed
-    remainingBudget: number;      // Remaining budget
-    burnRate: number;             // Current burn rate (1.0 = normal)
-    exhaustionDate?: Date;        // When budget will be exhausted
+    totalBudget: number; // Total error budget for period
+    consumedBudget: number; // Already consumed
+    remainingBudget: number; // Remaining budget
+    burnRate: number; // Current burn rate (1.0 = normal)
+    exhaustionDate?: Date; // When budget will be exhausted
   };
-  
+
   // Performance breakdown
   breakdown: {
     graphqlLatency: number;
@@ -95,13 +95,13 @@ interface TenantSLOMetrics {
     processingLatency: number;
     queueLatency: number;
   };
-  
+
   // Resource utilization
   resources: {
-    cpuUtilization: number;       // %
-    memoryUtilization: number;    // %
-    networkUtilization: number;   // %
-    storageUtilization: number;   // %
+    cpuUtilization: number; // %
+    memoryUtilization: number; // %
+    networkUtilization: number; // %
+    storageUtilization: number; // %
   };
 }
 
@@ -112,22 +112,22 @@ interface SLOAlert {
   timestamp: Date;
   severity: 'critical' | 'warning' | 'info';
   type: 'burn_rate' | 'budget_exhaustion' | 'slo_violation' | 'anomaly';
-  
+
   details: {
-    sloType: string;             // availability, response_time, etc.
+    sloType: string; // availability, response_time, etc.
     currentValue: number;
     targetValue: number;
     burnRate: number;
-    timeToExhaustion?: number;   // hours
+    timeToExhaustion?: number; // hours
   };
-  
+
   context: {
     affectedServices: string[];
     potentialCauses: string[];
     recommendedActions: string[];
     escalationRequired: boolean;
   };
-  
+
   resolution?: {
     resolvedAt: Date;
     resolvedBy: string;
@@ -141,9 +141,9 @@ interface TenantDashboard {
   tenantId: string;
   dashboardId: string;
   title: string;
-  
+
   panels: DashboardPanel[];
-  
+
   // Dashboard metadata
   metadata: {
     createdAt: Date;
@@ -151,7 +151,7 @@ interface TenantDashboard {
     version: string;
     autoGenerated: boolean;
   };
-  
+
   // Grafana dashboard JSON
   grafanaConfig: any;
 }
@@ -177,21 +177,21 @@ export class TenantSLOService extends EventEmitter {
   private config: TenantSLOConfig;
   private metrics: PrometheusMetrics;
   private db: DatabaseService;
-  
+
   // SLO tracking
   private tenantSLOs: Map<string, TenantSLOMetrics> = new Map();
   private activeAlerts: Map<string, SLOAlert[]> = new Map();
   private dashboards: Map<string, TenantDashboard> = new Map();
-  
-  // Burn rate tracking
-  private burnRateHistory: Map<string, Array<{ timestamp: Date; burnRate: number }>> = new Map();
 
-  constructor(
-    config: Partial<TenantSLOConfig> = {},
-    db: DatabaseService
-  ) {
+  // Burn rate tracking
+  private burnRateHistory: Map<
+    string,
+    Array<{ timestamp: Date; burnRate: number }>
+  > = new Map();
+
+  constructor(config: Partial<TenantSLOConfig> = {}, db: DatabaseService) {
     super();
-    
+
     this.config = {
       enabled: true,
       sloTargets: this.getDefaultSLOTargets(),
@@ -199,18 +199,18 @@ export class TenantSLOService extends EventEmitter {
         criticalBurnRate: 5.0,
         warningBurnRate: 2.0,
         budgetExhaustion: 2, // 2 days
-        anomalyDetection: true
+        anomalyDetection: true,
       },
       burnRateWindows: this.getDefaultBurnRateWindows(),
       retentionDays: 90,
       dashboardRefreshMinutes: 5,
       autoScalingEnabled: true,
-      ...config
+      ...config,
     };
 
     this.db = db;
     this.metrics = new PrometheusMetrics('tenant_slo');
-    
+
     this.initializeMetrics();
     this.startSLOTracking();
     this.startBurnRateMonitoring();
@@ -218,13 +218,13 @@ export class TenantSLOService extends EventEmitter {
 
   private getDefaultSLOTargets(): SLOTargets {
     return {
-      availability: 99.9,        // 99.9% uptime
-      responseTimeP50: 200,      // 200ms P50
-      responseTimeP95: 800,      // 800ms P95
-      responseTimeP99: 2000,     // 2s P99
-      errorRate: 0.1,           // 0.1% error rate
-      throughputRPS: 10,        // 10 RPS minimum
-      dataFreshness: 300        // 5 minutes max staleness
+      availability: 99.9, // 99.9% uptime
+      responseTimeP50: 200, // 200ms P50
+      responseTimeP95: 800, // 800ms P95
+      responseTimeP99: 2000, // 2s P99
+      errorRate: 0.1, // 0.1% error rate
+      throughputRPS: 10, // 10 RPS minimum
+      dataFreshness: 300, // 5 minutes max staleness
     };
   }
 
@@ -232,62 +232,116 @@ export class TenantSLOService extends EventEmitter {
     return [
       {
         name: 'immediate',
-        shortWindow: 5,          // 5 minutes
-        longWindow: 60,          // 1 hour
-        alertBurnRate: 14.4,     // 2% of monthly budget in 1 hour
-        severity: 'critical'
+        shortWindow: 5, // 5 minutes
+        longWindow: 60, // 1 hour
+        alertBurnRate: 14.4, // 2% of monthly budget in 1 hour
+        severity: 'critical',
       },
       {
         name: 'short_term',
-        shortWindow: 30,         // 30 minutes
-        longWindow: 360,         // 6 hours
-        alertBurnRate: 6.0,      // 5% of monthly budget in 6 hours
-        severity: 'critical'
+        shortWindow: 30, // 30 minutes
+        longWindow: 360, // 6 hours
+        alertBurnRate: 6.0, // 5% of monthly budget in 6 hours
+        severity: 'critical',
       },
       {
         name: 'medium_term',
-        shortWindow: 120,        // 2 hours
-        longWindow: 1440,        // 24 hours
-        alertBurnRate: 3.0,      // 10% of monthly budget in 1 day
-        severity: 'warning'
+        shortWindow: 120, // 2 hours
+        longWindow: 1440, // 24 hours
+        alertBurnRate: 3.0, // 10% of monthly budget in 1 day
+        severity: 'warning',
       },
       {
         name: 'long_term',
-        shortWindow: 360,        // 6 hours
-        longWindow: 10080,       // 1 week
-        alertBurnRate: 1.0,      // Normal burn rate
-        severity: 'info'
-      }
+        shortWindow: 360, // 6 hours
+        longWindow: 10080, // 1 week
+        alertBurnRate: 1.0, // Normal burn rate
+        severity: 'info',
+      },
     ];
   }
 
   private initializeMetrics(): void {
     // Core SLO metrics
-    this.metrics.createGauge('tenant_slo_availability', 'Tenant availability percentage', ['tenant_id']);
-    this.metrics.createGauge('tenant_slo_response_time_p50', 'P50 response time', ['tenant_id']);
-    this.metrics.createGauge('tenant_slo_response_time_p95', 'P95 response time', ['tenant_id']);
-    this.metrics.createGauge('tenant_slo_response_time_p99', 'P99 response time', ['tenant_id']);
-    this.metrics.createGauge('tenant_slo_error_rate', 'Error rate percentage', ['tenant_id']);
-    this.metrics.createGauge('tenant_slo_throughput', 'Requests per second', ['tenant_id']);
-    
+    this.metrics.createGauge(
+      'tenant_slo_availability',
+      'Tenant availability percentage',
+      ['tenant_id'],
+    );
+    this.metrics.createGauge(
+      'tenant_slo_response_time_p50',
+      'P50 response time',
+      ['tenant_id'],
+    );
+    this.metrics.createGauge(
+      'tenant_slo_response_time_p95',
+      'P95 response time',
+      ['tenant_id'],
+    );
+    this.metrics.createGauge(
+      'tenant_slo_response_time_p99',
+      'P99 response time',
+      ['tenant_id'],
+    );
+    this.metrics.createGauge('tenant_slo_error_rate', 'Error rate percentage', [
+      'tenant_id',
+    ]);
+    this.metrics.createGauge('tenant_slo_throughput', 'Requests per second', [
+      'tenant_id',
+    ]);
+
     // Error budget metrics
-    this.metrics.createGauge('tenant_error_budget_remaining', 'Remaining error budget', ['tenant_id']);
-    this.metrics.createGauge('tenant_error_budget_burn_rate', 'Error budget burn rate', ['tenant_id']);
-    this.metrics.createGauge('tenant_error_budget_exhaustion_hours', 'Hours until budget exhaustion', ['tenant_id']);
-    
+    this.metrics.createGauge(
+      'tenant_error_budget_remaining',
+      'Remaining error budget',
+      ['tenant_id'],
+    );
+    this.metrics.createGauge(
+      'tenant_error_budget_burn_rate',
+      'Error budget burn rate',
+      ['tenant_id'],
+    );
+    this.metrics.createGauge(
+      'tenant_error_budget_exhaustion_hours',
+      'Hours until budget exhaustion',
+      ['tenant_id'],
+    );
+
     // SLO compliance metrics
-    this.metrics.createGauge('tenant_slo_compliance', 'Overall SLO compliance', ['tenant_id', 'slo_type']);
-    this.metrics.createCounter('tenant_slo_violations', 'SLO violations', ['tenant_id', 'slo_type', 'severity']);
-    
+    this.metrics.createGauge(
+      'tenant_slo_compliance',
+      'Overall SLO compliance',
+      ['tenant_id', 'slo_type'],
+    );
+    this.metrics.createCounter('tenant_slo_violations', 'SLO violations', [
+      'tenant_id',
+      'slo_type',
+      'severity',
+    ]);
+
     // Alert metrics
-    this.metrics.createCounter('tenant_slo_alerts', 'SLO alerts generated', ['tenant_id', 'alert_type', 'severity']);
-    this.metrics.createGauge('tenant_active_alerts', 'Active SLO alerts', ['tenant_id']);
-    
+    this.metrics.createCounter('tenant_slo_alerts', 'SLO alerts generated', [
+      'tenant_id',
+      'alert_type',
+      'severity',
+    ]);
+    this.metrics.createGauge('tenant_active_alerts', 'Active SLO alerts', [
+      'tenant_id',
+    ]);
+
     // Performance breakdown
-    this.metrics.createGauge('tenant_latency_breakdown', 'Latency breakdown by component', ['tenant_id', 'component']);
-    
+    this.metrics.createGauge(
+      'tenant_latency_breakdown',
+      'Latency breakdown by component',
+      ['tenant_id', 'component'],
+    );
+
     // Resource utilization
-    this.metrics.createGauge('tenant_resource_utilization', 'Resource utilization', ['tenant_id', 'resource']);
+    this.metrics.createGauge(
+      'tenant_resource_utilization',
+      'Resource utilization',
+      ['tenant_id', 'resource'],
+    );
   }
 
   private startSLOTracking(): void {
@@ -308,7 +362,7 @@ export class TenantSLOService extends EventEmitter {
 
     logger.info('Tenant SLO tracking started', {
       sloTargets: this.config.sloTargets,
-      refreshInterval: this.config.dashboardRefreshMinutes
+      refreshInterval: this.config.dashboardRefreshMinutes,
     });
   }
 
@@ -325,94 +379,124 @@ export class TenantSLOService extends EventEmitter {
 
     logger.info('Burn rate monitoring started', {
       windows: this.config.burnRateWindows.length,
-      criticalBurnRate: this.config.alertThresholds.criticalBurnRate
+      criticalBurnRate: this.config.alertThresholds.criticalBurnRate,
     });
   }
 
   // Core SLO calculation methods
-  public async calculateTenantSLO(tenantId: string, period: 'minute' | 'hour' | 'day' = 'minute'): Promise<TenantSLOMetrics> {
-    return tracer.startActiveSpan('tenant_slo.calculate', async (span: Span) => {
-      span.setAttributes({
-        'tenant_slo.tenant_id': tenantId,
-        'tenant_slo.period': period
-      });
-
-      try {
-        // Get raw metrics for the period
-        const rawMetrics = await this.getRawMetrics(tenantId, period);
-        
-        // Calculate SLI values
-        const sli = {
-          availability: this.calculateAvailability(rawMetrics),
-          responseTimeP50: this.calculatePercentile(rawMetrics.responseTimes, 0.5),
-          responseTimeP95: this.calculatePercentile(rawMetrics.responseTimes, 0.95),
-          responseTimeP99: this.calculatePercentile(rawMetrics.responseTimes, 0.99),
-          errorRate: this.calculateErrorRate(rawMetrics),
-          throughput: this.calculateThroughput(rawMetrics),
-          dataFreshness: this.calculateDataFreshness(rawMetrics)
-        };
-
-        // Check SLO compliance
-        const slo = {
-          availabilityCompliant: sli.availability >= this.config.sloTargets.availability,
-          responseTimeCompliant: sli.responseTimeP95 <= this.config.sloTargets.responseTimeP95,
-          errorRateCompliant: sli.errorRate <= this.config.sloTargets.errorRate,
-          throughputCompliant: sli.throughput >= this.config.sloTargets.throughputRPS,
-          dataFreshnessCompliant: sli.dataFreshness <= this.config.sloTargets.dataFreshness,
-          overallCompliant: false
-        };
-
-        slo.overallCompliant = slo.availabilityCompliant && 
-                              slo.responseTimeCompliant && 
-                              slo.errorRateCompliant && 
-                              slo.throughputCompliant && 
-                              slo.dataFreshnessCompliant;
-
-        // Calculate error budget
-        const errorBudget = await this.calculateErrorBudget(tenantId, sli, period);
-        
-        // Get performance breakdown
-        const breakdown = await this.getPerformanceBreakdown(tenantId, rawMetrics);
-        
-        // Get resource utilization
-        const resources = await this.getResourceUtilization(tenantId);
-
-        const sloMetrics: TenantSLOMetrics = {
-          tenantId,
-          timestamp: new Date(),
-          period,
-          sli,
-          slo,
-          errorBudget,
-          breakdown,
-          resources
-        };
-
-        // Store metrics
-        this.tenantSLOs.set(tenantId, sloMetrics);
-        await this.storeSLOMetrics(sloMetrics);
-        
-        // Update Prometheus metrics
-        this.updatePrometheusMetrics(sloMetrics);
-
-        // Check for violations
-        await this.checkSLOViolations(sloMetrics);
-
-        return sloMetrics;
-
-      } catch (error) {
-        logger.error('Failed to calculate tenant SLO', {
-          tenantId,
-          period,
-          error: error.message
+  public async calculateTenantSLO(
+    tenantId: string,
+    period: 'minute' | 'hour' | 'day' = 'minute',
+  ): Promise<TenantSLOMetrics> {
+    return tracer.startActiveSpan(
+      'tenant_slo.calculate',
+      async (span: Span) => {
+        span.setAttributes({
+          'tenant_slo.tenant_id': tenantId,
+          'tenant_slo.period': period,
         });
-        span.recordException(error as Error);
-        throw error;
-      }
-    });
+
+        try {
+          // Get raw metrics for the period
+          const rawMetrics = await this.getRawMetrics(tenantId, period);
+
+          // Calculate SLI values
+          const sli = {
+            availability: this.calculateAvailability(rawMetrics),
+            responseTimeP50: this.calculatePercentile(
+              rawMetrics.responseTimes,
+              0.5,
+            ),
+            responseTimeP95: this.calculatePercentile(
+              rawMetrics.responseTimes,
+              0.95,
+            ),
+            responseTimeP99: this.calculatePercentile(
+              rawMetrics.responseTimes,
+              0.99,
+            ),
+            errorRate: this.calculateErrorRate(rawMetrics),
+            throughput: this.calculateThroughput(rawMetrics),
+            dataFreshness: this.calculateDataFreshness(rawMetrics),
+          };
+
+          // Check SLO compliance
+          const slo = {
+            availabilityCompliant:
+              sli.availability >= this.config.sloTargets.availability,
+            responseTimeCompliant:
+              sli.responseTimeP95 <= this.config.sloTargets.responseTimeP95,
+            errorRateCompliant:
+              sli.errorRate <= this.config.sloTargets.errorRate,
+            throughputCompliant:
+              sli.throughput >= this.config.sloTargets.throughputRPS,
+            dataFreshnessCompliant:
+              sli.dataFreshness <= this.config.sloTargets.dataFreshness,
+            overallCompliant: false,
+          };
+
+          slo.overallCompliant =
+            slo.availabilityCompliant &&
+            slo.responseTimeCompliant &&
+            slo.errorRateCompliant &&
+            slo.throughputCompliant &&
+            slo.dataFreshnessCompliant;
+
+          // Calculate error budget
+          const errorBudget = await this.calculateErrorBudget(
+            tenantId,
+            sli,
+            period,
+          );
+
+          // Get performance breakdown
+          const breakdown = await this.getPerformanceBreakdown(
+            tenantId,
+            rawMetrics,
+          );
+
+          // Get resource utilization
+          const resources = await this.getResourceUtilization(tenantId);
+
+          const sloMetrics: TenantSLOMetrics = {
+            tenantId,
+            timestamp: new Date(),
+            period,
+            sli,
+            slo,
+            errorBudget,
+            breakdown,
+            resources,
+          };
+
+          // Store metrics
+          this.tenantSLOs.set(tenantId, sloMetrics);
+          await this.storeSLOMetrics(sloMetrics);
+
+          // Update Prometheus metrics
+          this.updatePrometheusMetrics(sloMetrics);
+
+          // Check for violations
+          await this.checkSLOViolations(sloMetrics);
+
+          return sloMetrics;
+        } catch (error) {
+          logger.error('Failed to calculate tenant SLO', {
+            tenantId,
+            period,
+            error: error.message,
+          });
+          span.recordException(error as Error);
+          throw error;
+        }
+      },
+    );
   }
 
-  private async getRawMetrics(tenantId: string, period: string): Promise<{
+  private async getRawMetrics(
+    tenantId: string,
+    period: string,
+  ): Promise<{
     requests: number;
     errors: number;
     responseTimes: number[];
@@ -422,14 +506,22 @@ export class TenantSLOService extends EventEmitter {
   }> {
     let interval: string;
     switch (period) {
-      case 'minute': interval = '1 minute'; break;
-      case 'hour': interval = '1 hour'; break;
-      case 'day': interval = '1 day'; break;
-      default: interval = '1 minute';
+      case 'minute':
+        interval = '1 minute';
+        break;
+      case 'hour':
+        interval = '1 hour';
+        break;
+      case 'day':
+        interval = '1 day';
+        break;
+      default:
+        interval = '1 minute';
     }
 
     // Query metrics from database
-    const result = await this.db.query(`
+    const result = await this.db.query(
+      `
       SELECT 
         COUNT(*) as requests,
         COUNT(*) FILTER (WHERE status_code >= 400) as errors,
@@ -439,17 +531,19 @@ export class TenantSLOService extends EventEmitter {
       FROM request_logs 
       WHERE tenant_id = $1 
       AND timestamp >= NOW() - INTERVAL '${interval}'
-    `, [tenantId]);
+    `,
+      [tenantId],
+    );
 
     const row = result.rows[0] || {};
-    
+
     return {
       requests: parseInt(row.requests) || 0,
       errors: parseInt(row.errors) || 0,
       responseTimes: row.response_times || [],
       uptime: parseInt(row.successful_requests) || 0,
       totalTime: parseFloat(row.period_seconds) || 1,
-      lastDataUpdate: new Date() // Would be from actual data timestamp
+      lastDataUpdate: new Date(), // Would be from actual data timestamp
     };
   }
 
@@ -460,7 +554,7 @@ export class TenantSLOService extends EventEmitter {
 
   private calculatePercentile(values: number[], percentile: number): number {
     if (!values || values.length === 0) return 0;
-    
+
     const sorted = values.sort((a, b) => a - b);
     const index = Math.ceil(sorted.length * percentile) - 1;
     return sorted[Math.max(0, Math.min(index, sorted.length - 1))];
@@ -479,28 +573,34 @@ export class TenantSLOService extends EventEmitter {
     return (Date.now() - metrics.lastDataUpdate.getTime()) / 1000;
   }
 
-  private async calculateErrorBudget(tenantId: string, sli: any, period: string): Promise<TenantSLOMetrics['errorBudget']> {
+  private async calculateErrorBudget(
+    tenantId: string,
+    sli: any,
+    period: string,
+  ): Promise<TenantSLOMetrics['errorBudget']> {
     // Error budget calculation based on availability SLO
     const availabilityTarget = this.config.sloTargets.availability;
     const allowedDowntime = (100 - availabilityTarget) / 100;
-    
+
     // Monthly error budget (assume 30 days)
     const monthlyBudget = allowedDowntime * 30 * 24 * 60; // minutes
-    
+
     // Get consumed budget for current month
     const consumedBudget = await this.getConsumedErrorBudget(tenantId);
     const remainingBudget = Math.max(0, monthlyBudget - consumedBudget);
-    
+
     // Calculate current burn rate
     const currentDowntime = (100 - sli.availability) / 100;
     const normalBurnRate = allowedDowntime;
     const burnRate = normalBurnRate > 0 ? currentDowntime / normalBurnRate : 0;
-    
+
     // Estimate exhaustion date
     let exhaustionDate: Date | undefined;
     if (burnRate > 0 && remainingBudget > 0) {
       const hoursToExhaustion = remainingBudget / (burnRate * 60);
-      exhaustionDate = new Date(Date.now() + hoursToExhaustion * 60 * 60 * 1000);
+      exhaustionDate = new Date(
+        Date.now() + hoursToExhaustion * 60 * 60 * 1000,
+      );
     }
 
     return {
@@ -508,174 +608,284 @@ export class TenantSLOService extends EventEmitter {
       consumedBudget,
       remainingBudget,
       burnRate,
-      exhaustionDate
+      exhaustionDate,
     };
   }
 
   private async getConsumedErrorBudget(tenantId: string): Promise<number> {
     // Query error budget consumption for current month
-    const result = await this.db.query(`
+    const result = await this.db.query(
+      `
       SELECT COALESCE(SUM(downtime_minutes), 0) as consumed
       FROM tenant_downtime_log
       WHERE tenant_id = $1
       AND date_trunc('month', timestamp) = date_trunc('month', NOW())
-    `, [tenantId]);
+    `,
+      [tenantId],
+    );
 
     return parseFloat(result.rows[0]?.consumed) || 0;
   }
 
-  private async getPerformanceBreakdown(tenantId: string, rawMetrics: any): Promise<TenantSLOMetrics['breakdown']> {
+  private async getPerformanceBreakdown(
+    tenantId: string,
+    rawMetrics: any,
+  ): Promise<TenantSLOMetrics['breakdown']> {
     // This would query detailed performance metrics
     return {
-      graphqlLatency: 50,    // Would be calculated from actual metrics
+      graphqlLatency: 50, // Would be calculated from actual metrics
       databaseLatency: 30,
       networkLatency: 10,
       processingLatency: 40,
-      queueLatency: 5
+      queueLatency: 5,
     };
   }
 
-  private async getResourceUtilization(tenantId: string): Promise<TenantSLOMetrics['resources']> {
+  private async getResourceUtilization(
+    tenantId: string,
+  ): Promise<TenantSLOMetrics['resources']> {
     // This would query resource utilization metrics
     return {
       cpuUtilization: 45,
       memoryUtilization: 60,
       networkUtilization: 25,
-      storageUtilization: 30
+      storageUtilization: 30,
     };
   }
 
   private async storeSLOMetrics(metrics: TenantSLOMetrics): Promise<void> {
     try {
-      await this.db.query(`
+      await this.db.query(
+        `
         INSERT INTO tenant_slo_metrics (
           tenant_id, period, timestamp, metrics_data
         ) VALUES ($1, $2, $3, $4)
-      `, [metrics.tenantId, metrics.period, metrics.timestamp, JSON.stringify(metrics)]);
+      `,
+        [
+          metrics.tenantId,
+          metrics.period,
+          metrics.timestamp,
+          JSON.stringify(metrics),
+        ],
+      );
     } catch (error) {
       logger.error('Failed to store SLO metrics', {
         tenantId: metrics.tenantId,
-        error: error.message
+        error: error.message,
       });
     }
   }
 
   private updatePrometheusMetrics(metrics: TenantSLOMetrics): void {
     const { tenantId } = metrics;
-    
+
     // Core SLO metrics
-    this.metrics.setGauge('tenant_slo_availability', metrics.sli.availability, { tenant_id: tenantId });
-    this.metrics.setGauge('tenant_slo_response_time_p50', metrics.sli.responseTimeP50, { tenant_id: tenantId });
-    this.metrics.setGauge('tenant_slo_response_time_p95', metrics.sli.responseTimeP95, { tenant_id: tenantId });
-    this.metrics.setGauge('tenant_slo_response_time_p99', metrics.sli.responseTimeP99, { tenant_id: tenantId });
-    this.metrics.setGauge('tenant_slo_error_rate', metrics.sli.errorRate, { tenant_id: tenantId });
-    this.metrics.setGauge('tenant_slo_throughput', metrics.sli.throughput, { tenant_id: tenantId });
-    
+    this.metrics.setGauge('tenant_slo_availability', metrics.sli.availability, {
+      tenant_id: tenantId,
+    });
+    this.metrics.setGauge(
+      'tenant_slo_response_time_p50',
+      metrics.sli.responseTimeP50,
+      { tenant_id: tenantId },
+    );
+    this.metrics.setGauge(
+      'tenant_slo_response_time_p95',
+      metrics.sli.responseTimeP95,
+      { tenant_id: tenantId },
+    );
+    this.metrics.setGauge(
+      'tenant_slo_response_time_p99',
+      metrics.sli.responseTimeP99,
+      { tenant_id: tenantId },
+    );
+    this.metrics.setGauge('tenant_slo_error_rate', metrics.sli.errorRate, {
+      tenant_id: tenantId,
+    });
+    this.metrics.setGauge('tenant_slo_throughput', metrics.sli.throughput, {
+      tenant_id: tenantId,
+    });
+
     // Error budget metrics
-    this.metrics.setGauge('tenant_error_budget_remaining', metrics.errorBudget.remainingBudget, { tenant_id: tenantId });
-    this.metrics.setGauge('tenant_error_budget_burn_rate', metrics.errorBudget.burnRate, { tenant_id: tenantId });
-    
+    this.metrics.setGauge(
+      'tenant_error_budget_remaining',
+      metrics.errorBudget.remainingBudget,
+      { tenant_id: tenantId },
+    );
+    this.metrics.setGauge(
+      'tenant_error_budget_burn_rate',
+      metrics.errorBudget.burnRate,
+      { tenant_id: tenantId },
+    );
+
     if (metrics.errorBudget.exhaustionDate) {
-      const hoursToExhaustion = (metrics.errorBudget.exhaustionDate.getTime() - Date.now()) / (1000 * 60 * 60);
-      this.metrics.setGauge('tenant_error_budget_exhaustion_hours', hoursToExhaustion, { tenant_id: tenantId });
+      const hoursToExhaustion =
+        (metrics.errorBudget.exhaustionDate.getTime() - Date.now()) /
+        (1000 * 60 * 60);
+      this.metrics.setGauge(
+        'tenant_error_budget_exhaustion_hours',
+        hoursToExhaustion,
+        { tenant_id: tenantId },
+      );
     }
-    
+
     // SLO compliance
-    this.metrics.setGauge('tenant_slo_compliance', metrics.slo.availabilityCompliant ? 1 : 0, { 
-      tenant_id: tenantId, 
-      slo_type: 'availability' 
-    });
-    this.metrics.setGauge('tenant_slo_compliance', metrics.slo.responseTimeCompliant ? 1 : 0, { 
-      tenant_id: tenantId, 
-      slo_type: 'response_time' 
-    });
-    this.metrics.setGauge('tenant_slo_compliance', metrics.slo.errorRateCompliant ? 1 : 0, { 
-      tenant_id: tenantId, 
-      slo_type: 'error_rate' 
-    });
-    
+    this.metrics.setGauge(
+      'tenant_slo_compliance',
+      metrics.slo.availabilityCompliant ? 1 : 0,
+      {
+        tenant_id: tenantId,
+        slo_type: 'availability',
+      },
+    );
+    this.metrics.setGauge(
+      'tenant_slo_compliance',
+      metrics.slo.responseTimeCompliant ? 1 : 0,
+      {
+        tenant_id: tenantId,
+        slo_type: 'response_time',
+      },
+    );
+    this.metrics.setGauge(
+      'tenant_slo_compliance',
+      metrics.slo.errorRateCompliant ? 1 : 0,
+      {
+        tenant_id: tenantId,
+        slo_type: 'error_rate',
+      },
+    );
+
     // Performance breakdown
-    this.metrics.setGauge('tenant_latency_breakdown', metrics.breakdown.graphqlLatency, { 
-      tenant_id: tenantId, 
-      component: 'graphql' 
-    });
-    this.metrics.setGauge('tenant_latency_breakdown', metrics.breakdown.databaseLatency, { 
-      tenant_id: tenantId, 
-      component: 'database' 
-    });
-    this.metrics.setGauge('tenant_latency_breakdown', metrics.breakdown.networkLatency, { 
-      tenant_id: tenantId, 
-      component: 'network' 
-    });
-    
+    this.metrics.setGauge(
+      'tenant_latency_breakdown',
+      metrics.breakdown.graphqlLatency,
+      {
+        tenant_id: tenantId,
+        component: 'graphql',
+      },
+    );
+    this.metrics.setGauge(
+      'tenant_latency_breakdown',
+      metrics.breakdown.databaseLatency,
+      {
+        tenant_id: tenantId,
+        component: 'database',
+      },
+    );
+    this.metrics.setGauge(
+      'tenant_latency_breakdown',
+      metrics.breakdown.networkLatency,
+      {
+        tenant_id: tenantId,
+        component: 'network',
+      },
+    );
+
     // Resource utilization
-    this.metrics.setGauge('tenant_resource_utilization', metrics.resources.cpuUtilization, { 
-      tenant_id: tenantId, 
-      resource: 'cpu' 
-    });
-    this.metrics.setGauge('tenant_resource_utilization', metrics.resources.memoryUtilization, { 
-      tenant_id: tenantId, 
-      resource: 'memory' 
-    });
+    this.metrics.setGauge(
+      'tenant_resource_utilization',
+      metrics.resources.cpuUtilization,
+      {
+        tenant_id: tenantId,
+        resource: 'cpu',
+      },
+    );
+    this.metrics.setGauge(
+      'tenant_resource_utilization',
+      metrics.resources.memoryUtilization,
+      {
+        tenant_id: tenantId,
+        resource: 'memory',
+      },
+    );
   }
 
   private async checkSLOViolations(metrics: TenantSLOMetrics): Promise<void> {
-    const violations: Array<{ type: string; severity: 'critical' | 'warning' }> = [];
+    const violations: Array<{
+      type: string;
+      severity: 'critical' | 'warning';
+    }> = [];
 
     // Check availability violation
     if (!metrics.slo.availabilityCompliant) {
-      const severity = metrics.sli.availability < this.config.sloTargets.availability - 1.0 ? 'critical' : 'warning';
+      const severity =
+        metrics.sli.availability < this.config.sloTargets.availability - 1.0
+          ? 'critical'
+          : 'warning';
       violations.push({ type: 'availability', severity });
     }
 
     // Check response time violation
     if (!metrics.slo.responseTimeCompliant) {
-      const severity = metrics.sli.responseTimeP95 > this.config.sloTargets.responseTimeP95 * 1.5 ? 'critical' : 'warning';
+      const severity =
+        metrics.sli.responseTimeP95 >
+        this.config.sloTargets.responseTimeP95 * 1.5
+          ? 'critical'
+          : 'warning';
       violations.push({ type: 'response_time', severity });
     }
 
     // Check error rate violation
     if (!metrics.slo.errorRateCompliant) {
-      const severity = metrics.sli.errorRate > this.config.sloTargets.errorRate * 2 ? 'critical' : 'warning';
+      const severity =
+        metrics.sli.errorRate > this.config.sloTargets.errorRate * 2
+          ? 'critical'
+          : 'warning';
       violations.push({ type: 'error_rate', severity });
     }
 
     // Generate alerts for violations
     for (const violation of violations) {
-      await this.generateSLOAlert(metrics.tenantId, 'slo_violation', violation.severity, {
-        sloType: violation.type,
-        currentValue: this.getSLIValue(metrics.sli, violation.type),
-        targetValue: this.getTargetValue(violation.type),
-        burnRate: metrics.errorBudget.burnRate
-      });
+      await this.generateSLOAlert(
+        metrics.tenantId,
+        'slo_violation',
+        violation.severity,
+        {
+          sloType: violation.type,
+          currentValue: this.getSLIValue(metrics.sli, violation.type),
+          targetValue: this.getTargetValue(violation.type),
+          burnRate: metrics.errorBudget.burnRate,
+        },
+      );
 
       this.metrics.incrementCounter('tenant_slo_violations', 1, {
         tenant_id: metrics.tenantId,
         slo_type: violation.type,
-        severity: violation.severity
+        severity: violation.severity,
       });
     }
   }
 
   private getSLIValue(sli: TenantSLOMetrics['sli'], type: string): number {
     switch (type) {
-      case 'availability': return sli.availability;
-      case 'response_time': return sli.responseTimeP95;
-      case 'error_rate': return sli.errorRate;
-      case 'throughput': return sli.throughput;
-      case 'data_freshness': return sli.dataFreshness;
-      default: return 0;
+      case 'availability':
+        return sli.availability;
+      case 'response_time':
+        return sli.responseTimeP95;
+      case 'error_rate':
+        return sli.errorRate;
+      case 'throughput':
+        return sli.throughput;
+      case 'data_freshness':
+        return sli.dataFreshness;
+      default:
+        return 0;
     }
   }
 
   private getTargetValue(type: string): number {
     switch (type) {
-      case 'availability': return this.config.sloTargets.availability;
-      case 'response_time': return this.config.sloTargets.responseTimeP95;
-      case 'error_rate': return this.config.sloTargets.errorRate;
-      case 'throughput': return this.config.sloTargets.throughputRPS;
-      case 'data_freshness': return this.config.sloTargets.dataFreshness;
-      default: return 0;
+      case 'availability':
+        return this.config.sloTargets.availability;
+      case 'response_time':
+        return this.config.sloTargets.responseTimeP95;
+      case 'error_rate':
+        return this.config.sloTargets.errorRate;
+      case 'throughput':
+        return this.config.sloTargets.throughputRPS;
+      case 'data_freshness':
+        return this.config.sloTargets.dataFreshness;
+      default:
+        return 0;
     }
   }
 
@@ -686,53 +896,78 @@ export class TenantSLOService extends EventEmitter {
       const burnRateHistory = this.burnRateHistory.get(tenantId) || [];
       burnRateHistory.push({
         timestamp: new Date(),
-        burnRate: sloMetrics.errorBudget.burnRate
+        burnRate: sloMetrics.errorBudget.burnRate,
       });
 
       // Keep only recent history
-      const cutoff = Date.now() - (7 * 24 * 60 * 60 * 1000); // 7 days
-      const recentHistory = burnRateHistory.filter(h => h.timestamp.getTime() > cutoff);
+      const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000; // 7 days
+      const recentHistory = burnRateHistory.filter(
+        (h) => h.timestamp.getTime() > cutoff,
+      );
       this.burnRateHistory.set(tenantId, recentHistory);
 
       // Check burn rate windows
       for (const window of this.config.burnRateWindows) {
-        const shortBurnRate = this.calculateWindowBurnRate(recentHistory, window.shortWindow);
-        const longBurnRate = this.calculateWindowBurnRate(recentHistory, window.longWindow);
+        const shortBurnRate = this.calculateWindowBurnRate(
+          recentHistory,
+          window.shortWindow,
+        );
+        const longBurnRate = this.calculateWindowBurnRate(
+          recentHistory,
+          window.longWindow,
+        );
 
-        if (shortBurnRate > window.alertBurnRate && longBurnRate > window.alertBurnRate) {
+        if (
+          shortBurnRate > window.alertBurnRate &&
+          longBurnRate > window.alertBurnRate
+        ) {
           await this.generateSLOAlert(tenantId, 'burn_rate', window.severity, {
             sloType: 'error_budget',
             currentValue: shortBurnRate,
             targetValue: window.alertBurnRate,
             burnRate: shortBurnRate,
-            timeToExhaustion: this.calculateTimeToExhaustion(tenantId, shortBurnRate)
+            timeToExhaustion: this.calculateTimeToExhaustion(
+              tenantId,
+              shortBurnRate,
+            ),
           });
         }
       }
     }
   }
 
-  private calculateWindowBurnRate(history: Array<{ timestamp: Date; burnRate: number }>, windowMinutes: number): number {
-    const cutoff = Date.now() - (windowMinutes * 60 * 1000);
-    const windowHistory = history.filter(h => h.timestamp.getTime() > cutoff);
-    
+  private calculateWindowBurnRate(
+    history: Array<{ timestamp: Date; burnRate: number }>,
+    windowMinutes: number,
+  ): number {
+    const cutoff = Date.now() - windowMinutes * 60 * 1000;
+    const windowHistory = history.filter((h) => h.timestamp.getTime() > cutoff);
+
     if (windowHistory.length === 0) return 0;
-    
-    return windowHistory.reduce((sum, h) => sum + h.burnRate, 0) / windowHistory.length;
+
+    return (
+      windowHistory.reduce((sum, h) => sum + h.burnRate, 0) /
+      windowHistory.length
+    );
   }
 
-  private calculateTimeToExhaustion(tenantId: string, burnRate: number): number {
+  private calculateTimeToExhaustion(
+    tenantId: string,
+    burnRate: number,
+  ): number {
     const sloMetrics = this.tenantSLOs.get(tenantId);
     if (!sloMetrics || burnRate <= 0) return Infinity;
-    
+
     return sloMetrics.errorBudget.remainingBudget / burnRate;
   }
 
   private cleanupBurnRateHistory(): void {
-    const cutoff = Date.now() - (7 * 24 * 60 * 60 * 1000); // 7 days
-    
+    const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000; // 7 days
+
     for (const [tenantId, history] of this.burnRateHistory.entries()) {
-      const recentHistory = history.filter(h => h.timestamp.getTime() > cutoff);
+      const recentHistory = history.filter(
+        (h) => h.timestamp.getTime() > cutoff,
+      );
       this.burnRateHistory.set(tenantId, recentHistory);
     }
   }
@@ -742,7 +977,7 @@ export class TenantSLOService extends EventEmitter {
     tenantId: string,
     alertType: SLOAlert['type'],
     severity: SLOAlert['severity'],
-    details: SLOAlert['details']
+    details: SLOAlert['details'],
   ): Promise<void> {
     const alert: SLOAlert = {
       id: `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
@@ -755,8 +990,8 @@ export class TenantSLOService extends EventEmitter {
         affectedServices: this.getAffectedServices(tenantId, details.sloType),
         potentialCauses: this.getPotentialCauses(alertType, details),
         recommendedActions: this.getRecommendedActions(alertType, details),
-        escalationRequired: severity === 'critical'
-      }
+        escalationRequired: severity === 'critical',
+      },
     };
 
     // Store alert
@@ -771,10 +1006,12 @@ export class TenantSLOService extends EventEmitter {
     this.metrics.incrementCounter('tenant_slo_alerts', 1, {
       tenant_id: tenantId,
       alert_type: alertType,
-      severity
+      severity,
     });
-    
-    this.metrics.setGauge('tenant_active_alerts', tenantAlerts.length, { tenant_id: tenantId });
+
+    this.metrics.setGauge('tenant_active_alerts', tenantAlerts.length, {
+      tenant_id: tenantId,
+    });
 
     // Emit alert event
     this.emit('sloAlert', alert);
@@ -785,55 +1022,81 @@ export class TenantSLOService extends EventEmitter {
       severity,
       sloType: details.sloType,
       currentValue: details.currentValue,
-      targetValue: details.targetValue
+      targetValue: details.targetValue,
     });
   }
 
   private getAffectedServices(tenantId: string, sloType: string): string[] {
     // This would determine which services are affected based on the SLO type
     switch (sloType) {
-      case 'availability': return ['api-gateway', 'graphql-server', 'database'];
-      case 'response_time': return ['graphql-server', 'database', 'cache'];
-      case 'error_rate': return ['api-gateway', 'graphql-server'];
-      default: return ['unknown'];
+      case 'availability':
+        return ['api-gateway', 'graphql-server', 'database'];
+      case 'response_time':
+        return ['graphql-server', 'database', 'cache'];
+      case 'error_rate':
+        return ['api-gateway', 'graphql-server'];
+      default:
+        return ['unknown'];
     }
   }
 
-  private getPotentialCauses(alertType: string, details: SLOAlert['details']): string[] {
+  private getPotentialCauses(
+    alertType: string,
+    details: SLOAlert['details'],
+  ): string[] {
     const causes: string[] = [];
-    
+
     switch (alertType) {
       case 'burn_rate':
-        causes.push('High error rate', 'Increased latency', 'Service degradation');
+        causes.push(
+          'High error rate',
+          'Increased latency',
+          'Service degradation',
+        );
         break;
       case 'slo_violation':
         if (details.sloType === 'availability') {
-          causes.push('Service outages', 'Database connectivity issues', 'High error rates');
+          causes.push(
+            'Service outages',
+            'Database connectivity issues',
+            'High error rates',
+          );
         } else if (details.sloType === 'response_time') {
-          causes.push('Database slow queries', 'Network latency', 'Resource contention');
+          causes.push(
+            'Database slow queries',
+            'Network latency',
+            'Resource contention',
+          );
         }
         break;
       case 'budget_exhaustion':
         causes.push('Sustained high error rate', 'Multiple service incidents');
         break;
       case 'anomaly':
-        causes.push('Unusual traffic patterns', 'System anomalies', 'Data quality issues');
+        causes.push(
+          'Unusual traffic patterns',
+          'System anomalies',
+          'Data quality issues',
+        );
         break;
     }
-    
+
     return causes;
   }
 
-  private getRecommendedActions(alertType: string, details: SLOAlert['details']): string[] {
+  private getRecommendedActions(
+    alertType: string,
+    details: SLOAlert['details'],
+  ): string[] {
     const actions: string[] = [];
-    
+
     switch (alertType) {
       case 'burn_rate':
         actions.push(
           'Investigate recent changes',
           'Check service health dashboards',
           'Review error logs',
-          'Consider temporary traffic throttling'
+          'Consider temporary traffic throttling',
         );
         break;
       case 'slo_violation':
@@ -841,7 +1104,7 @@ export class TenantSLOService extends EventEmitter {
           'Check service dependencies',
           'Review recent deployments',
           'Scale resources if needed',
-          'Implement circuit breaker patterns'
+          'Implement circuit breaker patterns',
         );
         break;
       case 'budget_exhaustion':
@@ -849,69 +1112,76 @@ export class TenantSLOService extends EventEmitter {
           'Immediate incident response',
           'Stop non-critical operations',
           'Focus on error reduction',
-          'Consider emergency maintenance'
+          'Consider emergency maintenance',
         );
         break;
     }
-    
+
     return actions;
   }
 
   private async storeAlert(alert: SLOAlert): Promise<void> {
     try {
-      await this.db.query(`
+      await this.db.query(
+        `
         INSERT INTO tenant_slo_alerts (id, tenant_id, alert_data, created_at)
         VALUES ($1, $2, $3, NOW())
-      `, [alert.id, alert.tenantId, JSON.stringify(alert)]);
+      `,
+        [alert.id, alert.tenantId, JSON.stringify(alert)],
+      );
     } catch (error) {
       logger.error('Failed to store SLO alert', {
         alertId: alert.id,
         tenantId: alert.tenantId,
-        error: error.message
+        error: error.message,
       });
     }
   }
 
   // Dashboard generation
-  public async generateTenantDashboard(tenantId: string): Promise<TenantDashboard> {
-    return tracer.startActiveSpan('tenant_slo.generate_dashboard', async (span: Span) => {
-      try {
-        span.setAttributes({ 'tenant_slo.tenant_id': tenantId });
+  public async generateTenantDashboard(
+    tenantId: string,
+  ): Promise<TenantDashboard> {
+    return tracer.startActiveSpan(
+      'tenant_slo.generate_dashboard',
+      async (span: Span) => {
+        try {
+          span.setAttributes({ 'tenant_slo.tenant_id': tenantId });
 
-        const dashboard: TenantDashboard = {
-          tenantId,
-          dashboardId: `tenant_slo_${tenantId}`,
-          title: `SLO Dashboard - ${tenantId}`,
-          panels: this.createDashboardPanels(tenantId),
-          metadata: {
-            createdAt: new Date(),
-            updatedAt: new Date(),
-            version: '1.0.0',
-            autoGenerated: true
-          },
-          grafanaConfig: this.generateGrafanaConfig(tenantId)
-        };
+          const dashboard: TenantDashboard = {
+            tenantId,
+            dashboardId: `tenant_slo_${tenantId}`,
+            title: `SLO Dashboard - ${tenantId}`,
+            panels: this.createDashboardPanels(tenantId),
+            metadata: {
+              createdAt: new Date(),
+              updatedAt: new Date(),
+              version: '1.0.0',
+              autoGenerated: true,
+            },
+            grafanaConfig: this.generateGrafanaConfig(tenantId),
+          };
 
-        this.dashboards.set(tenantId, dashboard);
-        await this.storeDashboard(dashboard);
+          this.dashboards.set(tenantId, dashboard);
+          await this.storeDashboard(dashboard);
 
-        logger.info('Generated tenant dashboard', {
-          tenantId,
-          dashboardId: dashboard.dashboardId,
-          panelCount: dashboard.panels.length
-        });
+          logger.info('Generated tenant dashboard', {
+            tenantId,
+            dashboardId: dashboard.dashboardId,
+            panelCount: dashboard.panels.length,
+          });
 
-        return dashboard;
-
-      } catch (error) {
-        logger.error('Failed to generate tenant dashboard', {
-          tenantId,
-          error: error.message
-        });
-        span.recordException(error as Error);
-        throw error;
-      }
-    });
+          return dashboard;
+        } catch (error) {
+          logger.error('Failed to generate tenant dashboard', {
+            tenantId,
+            error: error.message,
+          });
+          span.recordException(error as Error);
+          throw error;
+        }
+      },
+    );
   }
 
   private createDashboardPanels(tenantId: string): DashboardPanel[] {
@@ -922,7 +1192,7 @@ export class TenantSLOService extends EventEmitter {
         type: 'singlestat',
         query: `tenant_slo_availability{tenant_id="${tenantId}"}`,
         position: { x: 0, y: 0, width: 6, height: 4 },
-        thresholds: { warning: 99.5, critical: 99.0 }
+        thresholds: { warning: 99.5, critical: 99.0 },
       },
       {
         id: 'response_time',
@@ -930,7 +1200,10 @@ export class TenantSLOService extends EventEmitter {
         type: 'graph',
         query: `tenant_slo_response_time_p95{tenant_id="${tenantId}"}`,
         position: { x: 6, y: 0, width: 12, height: 4 },
-        thresholds: { warning: this.config.sloTargets.responseTimeP95, critical: this.config.sloTargets.responseTimeP95 * 1.5 }
+        thresholds: {
+          warning: this.config.sloTargets.responseTimeP95,
+          critical: this.config.sloTargets.responseTimeP95 * 1.5,
+        },
       },
       {
         id: 'error_rate',
@@ -938,7 +1211,10 @@ export class TenantSLOService extends EventEmitter {
         type: 'graph',
         query: `tenant_slo_error_rate{tenant_id="${tenantId}"}`,
         position: { x: 18, y: 0, width: 6, height: 4 },
-        thresholds: { warning: this.config.sloTargets.errorRate, critical: this.config.sloTargets.errorRate * 2 }
+        thresholds: {
+          warning: this.config.sloTargets.errorRate,
+          critical: this.config.sloTargets.errorRate * 2,
+        },
       },
       {
         id: 'error_budget',
@@ -946,7 +1222,7 @@ export class TenantSLOService extends EventEmitter {
         type: 'singlestat',
         query: `tenant_error_budget_remaining{tenant_id="${tenantId}"}`,
         position: { x: 0, y: 4, width: 6, height: 4 },
-        thresholds: { warning: 20, critical: 10 }
+        thresholds: { warning: 20, critical: 10 },
       },
       {
         id: 'burn_rate',
@@ -954,14 +1230,14 @@ export class TenantSLOService extends EventEmitter {
         type: 'graph',
         query: `tenant_error_budget_burn_rate{tenant_id="${tenantId}"}`,
         position: { x: 6, y: 4, width: 12, height: 4 },
-        thresholds: { warning: 2.0, critical: 5.0 }
+        thresholds: { warning: 2.0, critical: 5.0 },
       },
       {
         id: 'latency_breakdown',
         title: 'Latency Breakdown',
         type: 'graph',
         query: `tenant_latency_breakdown{tenant_id="${tenantId}"}`,
-        position: { x: 18, y: 4, width: 6, height: 4 }
+        position: { x: 18, y: 4, width: 6, height: 4 },
       },
       {
         id: 'resource_utilization',
@@ -969,7 +1245,7 @@ export class TenantSLOService extends EventEmitter {
         type: 'graph',
         query: `tenant_resource_utilization{tenant_id="${tenantId}"}`,
         position: { x: 0, y: 8, width: 12, height: 4 },
-        thresholds: { warning: 70, critical: 85 }
+        thresholds: { warning: 70, critical: 85 },
       },
       {
         id: 'throughput',
@@ -977,8 +1253,11 @@ export class TenantSLOService extends EventEmitter {
         type: 'graph',
         query: `tenant_slo_throughput{tenant_id="${tenantId}"}`,
         position: { x: 12, y: 8, width: 12, height: 4 },
-        thresholds: { warning: this.config.sloTargets.throughputRPS * 0.8, critical: this.config.sloTargets.throughputRPS * 0.6 }
-      }
+        thresholds: {
+          warning: this.config.sloTargets.throughputRPS * 0.8,
+          critical: this.config.sloTargets.throughputRPS * 0.6,
+        },
+      },
     ];
   }
 
@@ -990,52 +1269,60 @@ export class TenantSLOService extends EventEmitter {
         tags: ['slo', 'tenant', tenantId],
         style: 'dark',
         timezone: 'browser',
-        panels: this.dashboards.get(tenantId)?.panels.map(panel => ({
-          id: panel.id,
-          title: panel.title,
-          type: panel.type,
-          targets: [{
-            expr: panel.query,
-            format: 'time_series',
-            legendFormat: ''
-          }],
-          gridPos: {
-            h: panel.position.height,
-            w: panel.position.width,
-            x: panel.position.x,
-            y: panel.position.y
-          },
-          thresholds: panel.thresholds ? {
-            mode: 'absolute',
-            steps: [
-              { color: 'green', value: null },
-              { color: 'yellow', value: panel.thresholds.warning },
-              { color: 'red', value: panel.thresholds.critical }
-            ]
-          } : undefined
-        })) || [],
+        panels:
+          this.dashboards.get(tenantId)?.panels.map((panel) => ({
+            id: panel.id,
+            title: panel.title,
+            type: panel.type,
+            targets: [
+              {
+                expr: panel.query,
+                format: 'time_series',
+                legendFormat: '',
+              },
+            ],
+            gridPos: {
+              h: panel.position.height,
+              w: panel.position.width,
+              x: panel.position.x,
+              y: panel.position.y,
+            },
+            thresholds: panel.thresholds
+              ? {
+                  mode: 'absolute',
+                  steps: [
+                    { color: 'green', value: null },
+                    { color: 'yellow', value: panel.thresholds.warning },
+                    { color: 'red', value: panel.thresholds.critical },
+                  ],
+                }
+              : undefined,
+          })) || [],
         time: {
           from: 'now-1h',
-          to: 'now'
+          to: 'now',
         },
-        refresh: '30s'
-      }
+        refresh: '30s',
+      },
     };
   }
 
   private async storeDashboard(dashboard: TenantDashboard): Promise<void> {
     try {
-      await this.db.query(`
+      await this.db.query(
+        `
         INSERT INTO tenant_dashboards (dashboard_id, tenant_id, dashboard_config, created_at)
         VALUES ($1, $2, $3, NOW())
         ON CONFLICT (dashboard_id) DO UPDATE SET
         dashboard_config = $3, updated_at = NOW()
-      `, [dashboard.dashboardId, dashboard.tenantId, JSON.stringify(dashboard)]);
+      `,
+        [dashboard.dashboardId, dashboard.tenantId, JSON.stringify(dashboard)],
+      );
     } catch (error) {
       logger.error('Failed to store tenant dashboard', {
         dashboardId: dashboard.dashboardId,
         tenantId: dashboard.tenantId,
-        error: error.message
+        error: error.message,
       });
     }
   }
@@ -1045,19 +1332,21 @@ export class TenantSLOService extends EventEmitter {
     try {
       // Get all active tenants
       const tenants = await this.getActiveTenants();
-      
+
       for (const tenantId of tenants) {
         try {
           await this.calculateTenantSLO(tenantId);
         } catch (error) {
           logger.error('Failed to calculate SLO for tenant', {
             tenantId,
-            error: error.message
+            error: error.message,
           });
         }
       }
     } catch (error) {
-      logger.error('Failed to calculate all tenant SLOs', { error: error.message });
+      logger.error('Failed to calculate all tenant SLOs', {
+        error: error.message,
+      });
     }
   }
 
@@ -1067,8 +1356,8 @@ export class TenantSLOService extends EventEmitter {
       FROM request_logs 
       WHERE timestamp >= NOW() - INTERVAL '1 hour'
     `);
-    
-    return result.rows.map(row => row.tenant_id);
+
+    return result.rows.map((row) => row.tenant_id);
   }
 
   private async generateHourlyReports(): Promise<void> {
@@ -1078,7 +1367,7 @@ export class TenantSLOService extends EventEmitter {
       } catch (error) {
         logger.error('Failed to generate hourly report for tenant', {
           tenantId,
-          error: error.message
+          error: error.message,
         });
       }
     }
@@ -1091,20 +1380,23 @@ export class TenantSLOService extends EventEmitter {
       } catch (error) {
         logger.error('Failed to update dashboard for tenant', {
           tenantId,
-          error: error.message
+          error: error.message,
         });
       }
     }
   }
 
   // Public API methods
-  public async getTenantSLO(tenantId: string): Promise<TenantSLOMetrics | null> {
+  public async getTenantSLO(
+    tenantId: string,
+  ): Promise<TenantSLOMetrics | null> {
     // Return cached SLO or calculate fresh
     const cached = this.tenantSLOs.get(tenantId);
-    if (cached && Date.now() - cached.timestamp.getTime() < 60000) { // 1 minute cache
+    if (cached && Date.now() - cached.timestamp.getTime() < 60000) {
+      // 1 minute cache
       return cached;
     }
-    
+
     try {
       return await this.calculateTenantSLO(tenantId);
     } catch (error) {
@@ -1116,7 +1408,9 @@ export class TenantSLOService extends EventEmitter {
     return this.activeAlerts.get(tenantId) || [];
   }
 
-  public async getTenantDashboard(tenantId: string): Promise<TenantDashboard | null> {
+  public async getTenantDashboard(
+    tenantId: string,
+  ): Promise<TenantDashboard | null> {
     const cached = this.dashboards.get(tenantId);
     if (cached) return cached;
 
@@ -1127,16 +1421,20 @@ export class TenantSLOService extends EventEmitter {
     }
   }
 
-  public async resolveAlert(alertId: string, resolvedBy: string, resolution: string): Promise<boolean> {
+  public async resolveAlert(
+    alertId: string,
+    resolvedBy: string,
+    resolution: string,
+  ): Promise<boolean> {
     for (const [tenantId, alerts] of this.activeAlerts.entries()) {
-      const alertIndex = alerts.findIndex(a => a.id === alertId);
+      const alertIndex = alerts.findIndex((a) => a.id === alertId);
       if (alertIndex !== -1) {
         const alert = alerts[alertIndex];
         alert.resolution = {
           resolvedAt: new Date(),
           resolvedBy,
           resolution,
-          preventiveMeasures: []
+          preventiveMeasures: [],
         };
 
         // Update in database
@@ -1144,19 +1442,21 @@ export class TenantSLOService extends EventEmitter {
 
         // Remove from active alerts
         alerts.splice(alertIndex, 1);
-        this.metrics.setGauge('tenant_active_alerts', alerts.length, { tenant_id: tenantId });
+        this.metrics.setGauge('tenant_active_alerts', alerts.length, {
+          tenant_id: tenantId,
+        });
 
         logger.info('SLO alert resolved', {
           alertId,
           tenantId,
           resolvedBy,
-          resolution
+          resolution,
         });
 
         return true;
       }
     }
-    
+
     return false;
   }
 
@@ -1168,22 +1468,30 @@ export class TenantSLOService extends EventEmitter {
     avgAvailability: number;
   } {
     const tenants = Array.from(this.tenantSLOs.values());
-    const totalAlerts = Array.from(this.activeAlerts.values()).reduce((sum, alerts) => sum + alerts.length, 0);
-    
+    const totalAlerts = Array.from(this.activeAlerts.values()).reduce(
+      (sum, alerts) => sum + alerts.length,
+      0,
+    );
+
     return {
       totalTenants: tenants.length,
       totalAlerts,
       totalDashboards: this.dashboards.size,
-      avgAvailability: tenants.length > 0 
-        ? tenants.reduce((sum, slo) => sum + slo.sli.availability, 0) / tenants.length 
-        : 0
+      avgAvailability:
+        tenants.length > 0
+          ? tenants.reduce((sum, slo) => sum + slo.sli.availability, 0) /
+            tenants.length
+          : 0,
     };
   }
 
-  public async updateSLOTargets(tenantId: string, targets: Partial<SLOTargets>): Promise<void> {
+  public async updateSLOTargets(
+    tenantId: string,
+    targets: Partial<SLOTargets>,
+  ): Promise<void> {
     // In production, this would be per-tenant configuration
     Object.assign(this.config.sloTargets, targets);
-    
+
     logger.info('SLO targets updated', { tenantId, targets });
     this.emit('sloTargetsUpdated', { tenantId, targets });
   }
@@ -1193,9 +1501,11 @@ export class TenantSLOService extends EventEmitter {
 export const tenantSLOService = new TenantSLOService(
   {
     enabled: process.env.TENANT_SLO_ENABLED !== 'false',
-    dashboardRefreshMinutes: parseInt(process.env.SLO_DASHBOARD_REFRESH_MINUTES || '5'),
+    dashboardRefreshMinutes: parseInt(
+      process.env.SLO_DASHBOARD_REFRESH_MINUTES || '5',
+    ),
     retentionDays: parseInt(process.env.SLO_RETENTION_DAYS || '90'),
-    autoScalingEnabled: process.env.SLO_AUTO_SCALING_ENABLED === 'true'
+    autoScalingEnabled: process.env.SLO_AUTO_SCALING_ENABLED === 'true',
   },
-  new DatabaseService()
+  new DatabaseService(),
 );

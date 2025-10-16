@@ -8,13 +8,13 @@ global:
     environment: 'production'
 
 rule_files:
-  - "alerts.yml"
+  - 'alerts.yml'
 
 alerting:
   alertmanagers:
     - static_configs:
         - targets:
-          - alertmanager:9093
+            - alertmanager:9093
 
 scrape_configs:
   # Prometheus itself
@@ -62,9 +62,9 @@ scrape_configs:
       module: [http_2xx]
     static_configs:
       - targets:
-        - http://host.docker.internal:4000/health
-        - http://host.docker.internal:4000/api/healthz
-        - http://host.docker.internal:4000/api/readyz
+          - http://host.docker.internal:4000/health
+          - http://host.docker.internal:4000/api/healthz
+          - http://host.docker.internal:4000/api/readyz
     relabel_configs:
       - source_labels: [__address__]
         target_label: __param_target
@@ -86,7 +86,6 @@ scrape_configs:
       - targets: ['host.docker.internal:4000']
     metrics_path: '/api/metrics/custom'
     scrape_interval: 30s
-
 # Remote write configuration (for long-term storage)
 # remote_write:
 #   - url: "https://prometheus-remote-write.example.com/api/v1/write"

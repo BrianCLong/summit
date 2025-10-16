@@ -10,7 +10,7 @@ services:
       - ./client:/app
       - /app/node_modules
     ports:
-      - "3000:3000"
+      - '3000:3000'
     environment:
       - NODE_ENV=development
       - VITE_API_URL=http://localhost:4000
@@ -29,8 +29,8 @@ services:
       - ./server:/app
       - /app/node_modules
     ports:
-      - "4000:4000"
-      - "9229:9229" # Debug port
+      - '4000:4000'
+      - '9229:9229' # Debug port
     environment:
       - NODE_ENV=development
       - DEBUG=intelgraph:*
@@ -67,8 +67,8 @@ services:
       - neo4j_dev_data:/data
       - neo4j_dev_logs:/logs
     ports:
-      - "7474:7474"
-      - "7687:7687"
+      - '7474:7474'
+      - '7687:7687'
     networks:
       - intelgraph-dev
 
@@ -83,7 +83,7 @@ services:
       - postgres_dev_data:/var/lib/postgresql/data
       - ./deploy/docker/postgres/init:/docker-entrypoint-initdb.d
     ports:
-      - "5432:5432"
+      - '5432:5432'
     networks:
       - intelgraph-dev
 
@@ -94,7 +94,7 @@ services:
     volumes:
       - redis_dev_data:/data
     ports:
-      - "6379:6379"
+      - '6379:6379'
     networks:
       - intelgraph-dev
 
@@ -102,7 +102,7 @@ services:
   adminer:
     image: adminer:latest
     ports:
-      - "8080:8080"
+      - '8080:8080'
     depends_on:
       - postgres
     networks:

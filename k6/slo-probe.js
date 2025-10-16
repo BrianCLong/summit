@@ -26,20 +26,20 @@ export const options = {
     'http_req_duration{expected_response:true}': ['p(95)<200'],
 
     // Error rate must be under 1%
-    'http_req_failed': ['rate<0.01'],
+    http_req_failed: ['rate<0.01'],
 
     // 95% of requests must complete successfully
-    'checks': ['rate>0.95'],
+    checks: ['rate>0.95'],
 
     // Custom error rate threshold
-    'errors': ['rate<0.01'],
+    errors: ['rate<0.01'],
   },
 
   // Load profile
   stages: [
-    { duration: '10s', target: 10 },  // Ramp up
-    { duration: '30s', target: 50 },  // Steady load
-    { duration: '10s', target: 0 },   // Ramp down
+    { duration: '10s', target: 10 }, // Ramp up
+    { duration: '30s', target: 50 }, // Steady load
+    { duration: '10s', target: 0 }, // Ramp down
   ],
 };
 
@@ -61,7 +61,10 @@ export default function () {
   }
 
   // 1. Health check endpoint
-  let response = http.get(`${BASE_URL}/health`, { headers, tags: { endpoint: 'health' } });
+  let response = http.get(`${BASE_URL}/health`, {
+    headers,
+    tags: { endpoint: 'health' },
+  });
 
   const healthCheck = check(response, {
     '✅ Health endpoint responds': (r) => r.status === 200,
@@ -72,7 +75,10 @@ export default function () {
   responseTimeTrend.add(response.timings.duration);
 
   // 2. Ready check (more comprehensive)
-  response = http.get(`${BASE_URL}/health/ready`, { headers, tags: { endpoint: 'ready' } });
+  response = http.get(`${BASE_URL}/health/ready`, {
+    headers,
+    tags: { endpoint: 'ready' },
+  });
 
   const readyCheck = check(response, {
     '✅ Ready endpoint responds': (r) => r.status === 200,
@@ -91,7 +97,10 @@ export default function () {
   responseTimeTrend.add(response.timings.duration);
 
   // 3. Metrics endpoint (Prometheus format)
-  response = http.get(`${BASE_URL}/metrics`, { headers, tags: { endpoint: 'metrics' } });
+  response = http.get(`${BASE_URL}/metrics`, {
+    headers,
+    tags: { endpoint: 'metrics' },
+  });
 
   const metricsCheck = check(response, {
     '✅ Metrics endpoint responds': (r) => r.status === 200,
@@ -115,14 +124,10 @@ export default function () {
     `,
   };
 
-  response = http.post(
-    `${BASE_URL}/graphql`,
-    JSON.stringify(graphqlQuery),
-    {
-      headers: { ...headers, 'Content-Type': 'application/json' },
-      tags: { endpoint: 'graphql' }
-    }
-  );
+  response = http.post(`${BASE_URL}/graphql`, JSON.stringify(graphqlQuery), {
+    headers: { ...headers, 'Content-Type': 'application/json' },
+    tags: { endpoint: 'graphql' },
+  });
 
   const graphqlCheck = check(response, {
     '✅ GraphQL endpoint responds': (r) => r.status === 200,
@@ -143,11 +148,12 @@ export default function () {
   // 5. API versioning check
   response = http.get(`${BASE_URL}/api/v1/version`, {
     headers,
-    tags: { endpoint: 'version' }
+    tags: { endpoint: 'version' },
   });
 
   const versionCheck = check(response, {
-    '✅ Version endpoint accessible': (r) => r.status === 200 || r.status === 404, // 404 is ok if not implemented
+    '✅ Version endpoint accessible': (r) =>
+      r.status === 200 || r.status === 404, // 404 is ok if not implemented
     '⚡ Version response time <100ms': (r) => r.timings.duration < 100,
   });
 
@@ -183,7 +189,7 @@ export function teardown(data) {
 // Handle different test scenarios based on environment
 export function handleSummary(data) {
   const summary = {
-    'stdout': textSummary(data, { indent: '  ', enableColors: true })
+    stdout: textSummary(data, { indent: '  ', enableColors: true }),
   };
 
   // Output JSON summary for CI/CD integration
@@ -196,9 +202,12 @@ export function handleSummary(data) {
         error_rate: data.metrics.http_req_failed.values.rate,
         success_rate: data.metrics.checks.values.rate,
       },
-      thresholds_passed: data.root_group.checks.filter(c => c.passes > 0).length,
+      thresholds_passed: data.root_group.checks.filter((c) => c.passes > 0)
+        .length,
       total_requests: data.metrics.http_reqs.values.count,
-      passed: Object.keys(data.thresholds).every(key => data.thresholds[key].ok)
+      passed: Object.keys(data.thresholds).every(
+        (key) => data.thresholds[key].ok,
+      ),
     });
   }
 

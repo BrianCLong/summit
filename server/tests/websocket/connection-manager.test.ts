@@ -1,5 +1,15 @@
-import { afterEach, beforeEach, describe, expect, it, jest } from '@jest/globals';
-import { ConnectionState, WebSocketConnectionPool } from '../../src/websocket/connectionManager';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  jest,
+} from '@jest/globals';
+import {
+  ConnectionState,
+  WebSocketConnectionPool,
+} from '../../src/websocket/connectionManager';
 
 type Sendable = {
   send: (data: string) => void;
@@ -45,11 +55,15 @@ describe('WebSocketConnectionPool', () => {
       replayBatchSize: 10,
     });
     const ws = new MockWebSocket();
-    const managed = pool.registerConnection('tenantA@userA', ws as unknown as Sendable, {
-      id: 'tenantA@userA',
-      tenantId: 'tenantA',
-      userId: 'userA',
-    });
+    const managed = pool.registerConnection(
+      'tenantA@userA',
+      ws as unknown as Sendable,
+      {
+        id: 'tenantA@userA',
+        tenantId: 'tenantA',
+        userId: 'userA',
+      },
+    );
 
     expect(managed.getState()).toBe(ConnectionState.CONNECTED);
     expect(ws.messages).toHaveLength(0);
@@ -69,18 +83,24 @@ describe('WebSocketConnectionPool', () => {
 
     jest.runOnlyPendingTimers();
 
-    expect(replacement.messages.some((msg) => msg.includes('queued'))).toBe(true);
+    expect(replacement.messages.some((msg) => msg.includes('queued'))).toBe(
+      true,
+    );
     expect(managed.getQueueSize()).toBe(0);
   });
 
   it('marks connections as degraded and notifies clients on server restart', () => {
     const pool = new WebSocketConnectionPool({ queueFlushInterval: 50 });
     const ws = new MockWebSocket();
-    const managed = pool.registerConnection('tenantB@userB', ws as unknown as Sendable, {
-      id: 'tenantB@userB',
-      tenantId: 'tenantB',
-      userId: 'userB',
-    });
+    const managed = pool.registerConnection(
+      'tenantB@userB',
+      ws as unknown as Sendable,
+      {
+        id: 'tenantB@userB',
+        tenantId: 'tenantB',
+        userId: 'userB',
+      },
+    );
 
     pool.handleServerRestart('maintenance');
 
@@ -88,7 +108,10 @@ describe('WebSocketConnectionPool', () => {
     expect(managed.getQueueSize()).toBeGreaterThan(0);
 
     const restartReplacement = new MockWebSocket();
-    pool.rebindConnection('tenantB@userB', restartReplacement as unknown as Sendable);
+    pool.rebindConnection(
+      'tenantB@userB',
+      restartReplacement as unknown as Sendable,
+    );
     jest.runOnlyPendingTimers();
 
     const restartMessages = restartReplacement.messages
@@ -101,7 +124,9 @@ describe('WebSocketConnectionPool', () => {
       })
       .filter(Boolean);
 
-    expect(restartMessages.some((payload) => payload?.type === 'server_restart')).toBe(true);
+    expect(
+      restartMessages.some((payload) => payload?.type === 'server_restart'),
+    ).toBe(true);
   });
 
   it('applies rate limiting and backpressure handling under load', () => {
@@ -113,18 +138,28 @@ describe('WebSocketConnectionPool', () => {
     const ws = new MockWebSocket();
     ws.bufferedAmount = 10;
 
-    const managed = pool.registerConnection('tenantC@userC', ws as unknown as Sendable, {
-      id: 'tenantC@userC',
-      tenantId: 'tenantC',
-      userId: 'userC',
-    });
+    const managed = pool.registerConnection(
+      'tenantC@userC',
+      ws as unknown as Sendable,
+      {
+        id: 'tenantC@userC',
+        tenantId: 'tenantC',
+        userId: 'userC',
+      },
+    );
 
-    const firstSend = pool.send('tenantC@userC', JSON.stringify({ type: 'burst-1' }));
+    const firstSend = pool.send(
+      'tenantC@userC',
+      JSON.stringify({ type: 'burst-1' }),
+    );
     expect(firstSend).toBe(false);
     expect(managed.getQueueSize()).toBe(1);
 
     ws.bufferedAmount = 0;
-    const secondSend = pool.send('tenantC@userC', JSON.stringify({ type: 'burst-2' }));
+    const secondSend = pool.send(
+      'tenantC@userC',
+      JSON.stringify({ type: 'burst-2' }),
+    );
     expect(secondSend).toBe(false);
     expect(managed.getQueueSize()).toBe(2);
 

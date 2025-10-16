@@ -20,8 +20,8 @@ const ALLOW_HEALTH = new Set(['Health', 'Ping', 'Status', 'Readiness']);
 const CANARY_TENANTS = new Set(
   (process.env.SAFE_MUTATIONS_CANARY_TENANTS || 'test,demo,maestro-internal')
     .split(',')
-    .map(t => t.trim())
-    .filter(Boolean)
+    .map((t) => t.trim())
+    .filter(Boolean),
 );
 
 interface PersistedQueryConfig {
@@ -45,7 +45,7 @@ class PersistedQueryAllowlist {
     violations: 0,
     allowed: 0,
     bypassed: 0,
-    lastUpdate: new Date()
+    lastUpdate: new Date(),
   };
 
   /**
@@ -54,10 +54,10 @@ class PersistedQueryAllowlist {
   setAllowlist(hashes: string[]): void {
     this.allowlist = new Set(hashes);
     this.stats.lastUpdate = new Date();
-    
+
     logger.info('Persisted query allowlist updated', {
       count: hashes.length,
-      phase: PQ_PHASE
+      phase: PQ_PHASE,
     });
   }
 
@@ -65,11 +65,11 @@ class PersistedQueryAllowlist {
    * Add query hashes to allowlist
    */
   addToAllowlist(hashes: string[]): void {
-    hashes.forEach(hash => this.allowlist.add(hash));
-    
+    hashes.forEach((hash) => this.allowlist.add(hash));
+
     logger.debug('Added hashes to persisted query allowlist', {
       added: hashes.length,
-      total: this.allowlist.size
+      total: this.allowlist.size,
     });
   }
 
@@ -86,7 +86,7 @@ class PersistedQueryAllowlist {
   getStats() {
     return {
       ...this.stats,
-      allowlistSize: this.allowlist.size
+      allowlistSize: this.allowlist.size,
     };
   }
 
@@ -126,7 +126,9 @@ function sha256(query: string): string {
  * Extract operation name from GraphQL query
  */
 function extractOperationName(query: string): string | null {
-  const operationMatch = query.match(/(?:mutation|query|subscription)\s+([A-Za-z_][A-Za-z0-9_]*)/);
+  const operationMatch = query.match(
+    /(?:mutation|query|subscription)\s+([A-Za-z_][A-Za-z0-9_]*)/,
+  );
   return operationMatch?.[1] || null;
 }
 
@@ -140,14 +142,16 @@ function isCanaryTenant(tenantId: string | undefined): boolean {
 /**
  * Apollo Server plugin for persisted query enforcement
  */
-export function persistedEnforcer(config?: Partial<PersistedQueryConfig>): ApolloServerPlugin {
+export function persistedEnforcer(
+  config?: Partial<PersistedQueryConfig>,
+): ApolloServerPlugin {
   const pluginConfig: PersistedQueryConfig = {
     phase: (config?.phase || PQ_PHASE) as 'log' | 'enforce',
     emergencyBypass: config?.emergencyBypass ?? EMERGENCY_BYPASS,
     allowIntrospection: config?.allowIntrospection ?? ALLOW_INTROSPECTION,
     allowHealth: config?.allowHealth ?? ALLOW_HEALTH,
     canaryTenants: config?.canaryTenants ?? CANARY_TENANTS,
-    enforceForCanariesOnly: config?.enforceForCanariesOnly ?? true
+    enforceForCanariesOnly: config?.enforceForCanariesOnly ?? true,
   };
 
   return {
@@ -157,66 +161,85 @@ export function persistedEnforcer(config?: Partial<PersistedQueryConfig>): Apoll
           // Emergency bypass - skip all checks
           if (pluginConfig.emergencyBypass) {
             allowlist.recordBypass();
-            logger.warn('Persisted query enforcement bypassed (emergency mode)', {
-              operationName: requestContext.operationName,
-              phase: pluginConfig.phase
-            });
+            logger.warn(
+              'Persisted query enforcement bypassed (emergency mode)',
+              {
+                operationName: requestContext.operationName,
+                phase: pluginConfig.phase,
+              },
+            );
             return;
           }
 
           const operation = requestContext.operation?.operation;
           const operationName = requestContext.operationName;
-          
+
           // Only enforce on mutations
           if (operation !== 'mutation') {
             // Allow health check queries
-            if (operation === 'query' && operationName && pluginConfig.allowHealth.has(operationName)) {
+            if (
+              operation === 'query' &&
+              operationName &&
+              pluginConfig.allowHealth.has(operationName)
+            ) {
               allowlist.recordAllowed();
               return;
             }
-            
+
             // Allow introspection if enabled
-            if (operationName === 'IntrospectionQuery' && pluginConfig.allowIntrospection) {
+            if (
+              operationName === 'IntrospectionQuery' &&
+              pluginConfig.allowIntrospection
+            ) {
               allowlist.recordAllowed();
               return;
             }
-            
+
             // For non-mutations, only log in enforce phase
             if (pluginConfig.phase === 'enforce') {
               logger.debug('Non-mutation query in enforce mode', {
                 operation,
-                operationName
+                operationName,
               });
             }
-            
+
             return;
           }
 
           // Extract tenant and user info
-          const tenantId = requestContext.contextValue?.user?.tenantId || 
-                          requestContext.contextValue?.tenantId ||
-                          requestContext.request.http?.headers.get('x-tenant-id');
-          
-          const userId = requestContext.contextValue?.user?.id ||
-                        requestContext.request.http?.headers.get('x-user-id');
+          const tenantId =
+            requestContext.contextValue?.user?.tenantId ||
+            requestContext.contextValue?.tenantId ||
+            requestContext.request.http?.headers.get('x-tenant-id');
+
+          const userId =
+            requestContext.contextValue?.user?.id ||
+            requestContext.request.http?.headers.get('x-user-id');
 
           // Check if enforcement applies to this tenant
-          if (pluginConfig.enforceForCanariesOnly && !isCanaryTenant(tenantId)) {
+          if (
+            pluginConfig.enforceForCanariesOnly &&
+            !isCanaryTenant(tenantId)
+          ) {
             allowlist.recordAllowed();
-            logger.debug('Non-canary tenant - skipping persisted query enforcement', {
-              tenantId,
-              operationName
-            });
+            logger.debug(
+              'Non-canary tenant - skipping persisted query enforcement',
+              {
+                tenantId,
+                operationName,
+              },
+            );
             return;
           }
 
           // Get query hash (support both APQ and raw query hashing)
           const rawQuery = (requestContext.request.body as any)?.query;
-          const apqHash = (requestContext.request.body as any)?.extensions?.persistedQuery?.sha256Hash;
+          const apqHash = (requestContext.request.body as any)?.extensions
+            ?.persistedQuery?.sha256Hash;
           const isAPQ = !!apqHash;
-          
+
           let queryHash: string;
-          
+
           if (isAPQ) {
             queryHash = apqHash;
           } else if (rawQuery) {
@@ -226,14 +249,14 @@ export function persistedEnforcer(config?: Partial<PersistedQueryConfig>): Apoll
             throw new GraphQLError('No GraphQL query provided', {
               extensions: {
                 code: 'MISSING_QUERY',
-                phase: pluginConfig.phase
-              }
+                phase: pluginConfig.phase,
+              },
             });
           }
 
           // Check allowlist
           const isAllowed = allowlist.isAllowed(queryHash);
-          
+
           const logContext = {
             operationName,
             tenantId,
@@ -242,7 +265,7 @@ export function persistedEnforcer(config?: Partial<PersistedQueryConfig>): Apoll
             isAPQ,
             isAllowed,
             phase: pluginConfig.phase,
-            canaryTenant: isCanaryTenant(tenantId)
+            canaryTenant: isCanaryTenant(tenantId),
           };
 
           if (isAllowed) {
@@ -253,7 +276,7 @@ export function persistedEnforcer(config?: Partial<PersistedQueryConfig>): Apoll
 
           // Query not in allowlist - violation detected
           allowlist.recordViolation();
-          
+
           if (pluginConfig.phase === 'log') {
             // Log phase: record violation but allow execution
             logger.warn('PERSISTED_QUERY_VIOLATION (logging only)', logContext);
@@ -261,10 +284,10 @@ export function persistedEnforcer(config?: Partial<PersistedQueryConfig>): Apoll
           } else {
             // Enforce phase: block execution
             logger.error('PERSISTED_QUERY_VIOLATION (blocked)', logContext);
-            
+
             throw new GraphQLError(
               'Persisted queries required for mutations in production. ' +
-              'Please use pre-approved mutation queries or contact support.',
+                'Please use pre-approved mutation queries or contact support.',
               {
                 extensions: {
                   code: 'PERSISTED_QUERY_REQUIRED',
@@ -272,14 +295,14 @@ export function persistedEnforcer(config?: Partial<PersistedQueryConfig>): Apoll
                   tenantId,
                   queryHash,
                   phase: pluginConfig.phase,
-                  timestamp: new Date().toISOString()
-                }
-              }
+                  timestamp: new Date().toISOString(),
+                },
+              },
             );
           }
-        }
+        },
       };
-    }
+    },
   };
 }
 
@@ -312,14 +335,16 @@ export function getPersistedQueryStats() {
     ...allowlist.getStats(),
     phase: PQ_PHASE,
     emergencyBypass: EMERGENCY_BYPASS,
-    canaryTenants: Array.from(CANARY_TENANTS)
+    canaryTenants: Array.from(CANARY_TENANTS),
   };
 }
 
 /**
  * Generate allowlist from schema (build-time utility)
  */
-export async function generateAllowlistFromSchema(schemaPath: string): Promise<string[]> {
+export async function generateAllowlistFromSchema(
+  schemaPath: string,
+): Promise<string[]> {
   // This would analyze your GraphQL schema and extract all valid mutations
   // For now, return common IntelGraph mutations
   const commonMutations = [
@@ -329,36 +354,36 @@ export async function generateAllowlistFromSchema(schemaPath: string): Promise<s
         id kind props createdAt
       }
     }`,
-    
-    // Relationship operations  
+
+    // Relationship operations
     `mutation CreateRelationship($input: RelationshipInput!) {
       createRelationship(input: $input) @budget(capUSD: 0.05, tokenCeiling: 2000) {
         id type createdAt
       }
     }`,
-    
+
     // Investigation operations
     `mutation CreateInvestigation($input: InvestigationInput!) {
       createInvestigation(input: $input) @budget(capUSD: 0.02, tokenCeiling: 1000) {
         id name status createdAt
       }
     }`,
-    
+
     // Safe mutations with various budget levels
     `mutation SafeNoop {
       ping @budget(capUSD: 0.01, tokenCeiling: 100)
     }`,
-    
+
     // Bulk operations
     `mutation BulkCreateEntities($input: BulkEntityInput!) {
       bulkCreateEntities(input: $input) @budget(capUSD: 1.00, tokenCeiling: 50000) {
         created { id }
         errors { message }
       }
-    }`
+    }`,
   ];
 
-  return commonMutations.map(query => hashQuery(query));
+  return commonMutations.map((query) => hashQuery(query));
 }
 
 /**
@@ -367,10 +392,10 @@ export async function generateAllowlistFromSchema(schemaPath: string): Promise<s
 export async function initializeDevAllowlist(): Promise<void> {
   const hashes = await generateAllowlistFromSchema('');
   setPersistedAllowlist(hashes);
-  
+
   logger.info('Development persisted query allowlist initialized', {
     count: hashes.length,
-    phase: PQ_PHASE
+    phase: PQ_PHASE,
   });
 }
 
@@ -381,13 +406,16 @@ export function createPersistedQueryAPI() {
   return (req: any, res: any, next: any) => {
     if (req.path === '/admin/persisted-queries' && req.method === 'GET') {
       res.json(getPersistedQueryStats());
-    } else if (req.path === '/admin/persisted-queries/allowlist' && req.method === 'POST') {
+    } else if (
+      req.path === '/admin/persisted-queries/allowlist' &&
+      req.method === 'POST'
+    ) {
       const { hashes, action = 'set' } = req.body;
-      
+
       if (!Array.isArray(hashes)) {
         return res.status(400).json({ error: 'hashes must be an array' });
       }
-      
+
       if (action === 'set') {
         setPersistedAllowlist(hashes);
       } else if (action === 'add') {
@@ -395,12 +423,12 @@ export function createPersistedQueryAPI() {
       } else {
         return res.status(400).json({ error: 'action must be "set" or "add"' });
       }
-      
-      res.json({ 
-        success: true, 
+
+      res.json({
+        success: true,
         action,
         count: hashes.length,
-        stats: getPersistedQueryStats() 
+        stats: getPersistedQueryStats(),
       });
     } else {
       next();

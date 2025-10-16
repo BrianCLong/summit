@@ -5,10 +5,37 @@
   "type": "object",
   "required": ["releaseId", "controls", "artifacts", "ledger"],
   "properties": {
-    "releaseId": {"type": "string"},
-    "controls": {"type": "array", "items": {"type": "object", "required": ["id", "status"], "properties": {"id": {"type": "string"}, "status": {"type": "string", "enum": ["pass", "fail", "waived"]}, "evidence": {"type": "string"}}}},
-    "artifacts": {"type": "array", "items": {"type": "object", "required": ["digest", "provenance"], "properties": {"digest": {"type": "string"}, "provenance": {"type": "string"}}}},
-    "ledger": {"type": "object", "required": ["merkleRoot", "entries"], "properties": {"merkleRoot": {"type": "string"}, "entries": {"type": "array", "items": {"type": "string"}}}}
+    "releaseId": { "type": "string" },
+    "controls": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "status"],
+        "properties": {
+          "id": { "type": "string" },
+          "status": { "type": "string", "enum": ["pass", "fail", "waived"] },
+          "evidence": { "type": "string" }
+        }
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["digest", "provenance"],
+        "properties": {
+          "digest": { "type": "string" },
+          "provenance": { "type": "string" }
+        }
+      }
+    },
+    "ledger": {
+      "type": "object",
+      "required": ["merkleRoot", "entries"],
+      "properties": {
+        "merkleRoot": { "type": "string" },
+        "entries": { "type": "array", "items": { "type": "string" } }
+      }
+    }
   }
 }
-

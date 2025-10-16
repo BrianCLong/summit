@@ -125,7 +125,11 @@ export class GovernanceLimitEngine {
     const adjustedTokens = estimatedTokens;
 
     // Check cost limits
-    const costCheck = await this.checkCostLimits(userId, adjustedCost, policy.costLimits);
+    const costCheck = await this.checkCostLimits(
+      userId,
+      adjustedCost,
+      policy.costLimits,
+    );
     if (!costCheck.allowed) {
       return costCheck;
     }
@@ -137,13 +141,21 @@ export class GovernanceLimitEngine {
     }
 
     // Check quota limits
-    const quotaCheck = await this.checkQuotaLimits(userId, adjustedTokens, policy.quotaLimits);
+    const quotaCheck = await this.checkQuotaLimits(
+      userId,
+      adjustedTokens,
+      policy.quotaLimits,
+    );
     if (!quotaCheck.allowed) {
       return quotaCheck;
     }
 
     // Check concurrent request limits
-    const concurrentCheck = await this.checkConcurrentLimits(userId, expertType, policy);
+    const concurrentCheck = await this.checkConcurrentLimits(
+      userId,
+      expertType,
+      policy,
+    );
     if (!concurrentCheck.allowed) {
       return concurrentCheck;
     }
@@ -154,7 +166,12 @@ export class GovernanceLimitEngine {
   /**
    * Record usage for governance tracking
    */
-  public recordUsage(userId: string, cost: number, tokens: number, bytesProcessed: number): void {
+  public recordUsage(
+    userId: string,
+    cost: number,
+    tokens: number,
+    bytesProcessed: number,
+  ): void {
     const now = Date.now();
 
     // Record usage for different time periods
@@ -252,8 +269,10 @@ export class GovernanceLimitEngine {
     // Cost limit warnings
     const hourlyUsage = stats.hour.totalCost;
     const hourlyLimit = policy.costLimits.maxCostPerHour;
-    const warningThreshold = hourlyLimit * (policy.costLimits.budgetAlerts.warning / 100);
-    const criticalThreshold = hourlyLimit * (policy.costLimits.budgetAlerts.critical / 100);
+    const warningThreshold =
+      hourlyLimit * (policy.costLimits.budgetAlerts.warning / 100);
+    const criticalThreshold =
+      hourlyLimit * (policy.costLimits.budgetAlerts.critical / 100);
 
     if (hourlyUsage >= criticalThreshold) {
       critical.push(
@@ -269,14 +288,18 @@ export class GovernanceLimitEngine {
     const minuteRequests = stats.minute.requestCount;
     const rateLimit = policy.rateLimits.maxRequestsPerMinute;
     if (minuteRequests >= rateLimit * 0.8) {
-      warnings.push(`Rate usage (${minuteRequests}) approaching limit (${rateLimit})`);
+      warnings.push(
+        `Rate usage (${minuteRequests}) approaching limit (${rateLimit})`,
+      );
     }
 
     // Quota warnings
     const dailyTasks = stats.day.taskCount;
     const taskLimit = policy.quotaLimits.maxTasksPerDay;
     if (dailyTasks >= taskLimit * 0.9) {
-      warnings.push(`Daily task quota (${dailyTasks}) approaching limit (${taskLimit})`);
+      warnings.push(
+        `Daily task quota (${dailyTasks}) approaching limit (${taskLimit})`,
+      );
     }
 
     return { warnings, critical };
@@ -338,7 +361,10 @@ export class GovernanceLimitEngine {
     return { allowed: true };
   }
 
-  private async checkRateLimits(userId: string, limits: RateLimits): Promise<ViolationResult> {
+  private async checkRateLimits(
+    userId: string,
+    limits: RateLimits,
+  ): Promise<ViolationResult> {
     const stats = this.getUsageStats(userId);
 
     // Check per-minute limit
@@ -436,7 +462,10 @@ export class GovernanceLimitEngine {
     return { allowed: true };
   }
 
-  private getPeriodKey(timestamp: number, period: 'minute' | 'hour' | 'day' | 'month'): number {
+  private getPeriodKey(
+    timestamp: number,
+    period: 'minute' | 'hour' | 'day' | 'month',
+  ): number {
     const date = new Date(timestamp);
 
     switch (period) {
@@ -445,7 +474,11 @@ export class GovernanceLimitEngine {
       case 'hour':
         return Math.floor(timestamp / 3600000) * 3600000;
       case 'day':
-        return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+        return new Date(
+          date.getFullYear(),
+          date.getMonth(),
+          date.getDate(),
+        ).getTime();
       case 'month':
         return new Date(date.getFullYear(), date.getMonth(), 1).getTime();
       default:
@@ -553,18 +586,48 @@ export class GovernanceLimitEngine {
       userRole: role as any,
       ...basePolicy,
       expertLimits: {
-        LLM_LIGHT: { enabled: true, costMultiplier: 0.5, rateMultiplier: 1, maxConcurrent: 10 },
-        LLM_HEAVY: { enabled: true, costMultiplier: 2.0, rateMultiplier: 0.5, maxConcurrent: 3 },
-        GRAPH_TOOL: { enabled: true, costMultiplier: 1.0, rateMultiplier: 1, maxConcurrent: 5 },
-        RAG_TOOL: { enabled: true, costMultiplier: 1.0, rateMultiplier: 1, maxConcurrent: 5 },
-        FILES_TOOL: { enabled: true, costMultiplier: 0.1, rateMultiplier: 2, maxConcurrent: 10 },
+        LLM_LIGHT: {
+          enabled: true,
+          costMultiplier: 0.5,
+          rateMultiplier: 1,
+          maxConcurrent: 10,
+        },
+        LLM_HEAVY: {
+          enabled: true,
+          costMultiplier: 2.0,
+          rateMultiplier: 0.5,
+          maxConcurrent: 3,
+        },
+        GRAPH_TOOL: {
+          enabled: true,
+          costMultiplier: 1.0,
+          rateMultiplier: 1,
+          maxConcurrent: 5,
+        },
+        RAG_TOOL: {
+          enabled: true,
+          costMultiplier: 1.0,
+          rateMultiplier: 1,
+          maxConcurrent: 5,
+        },
+        FILES_TOOL: {
+          enabled: true,
+          costMultiplier: 0.1,
+          rateMultiplier: 2,
+          maxConcurrent: 10,
+        },
         OSINT_TOOL: {
           enabled: role !== 'viewer',
           costMultiplier: 3.0,
           rateMultiplier: 0.3,
           maxConcurrent: 2,
         },
-        EXPORT_TOOL: { enabled: true, costMultiplier: 0.2, rateMultiplier: 1, maxConcurrent: 5 },
+        EXPORT_TOOL: {
+          enabled: true,
+          costMultiplier: 0.2,
+          rateMultiplier: 1,
+          maxConcurrent: 5,
+        },
       },
     } as GovernancePolicy;
   }

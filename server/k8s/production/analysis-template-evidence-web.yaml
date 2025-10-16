@@ -15,7 +15,7 @@ spec:
       failureLimit: 1
       provider:
         web:
-          url: "{{args.mcUrl}}/graphql"
+          url: '{{args.mcUrl}}/graphql'
           method: POST
           timeout: 15s
           headers:
@@ -28,7 +28,6 @@ spec:
             queryFrom:
               configMapKeyRef: { name: mc-evidence-query, key: query.graphql }
             variables:
-              service: "{{args.service}}"
-              releaseId: "{{args.releaseId}}"
-          jsonPath: "$.data.evidenceOk"
-
+              service: '{{args.service}}'
+              releaseId: '{{args.releaseId}}'
+          jsonPath: '$.data.evidenceOk'

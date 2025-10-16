@@ -11,7 +11,9 @@ describe('getSecret', () => {
 
     const result = await getSecret<{ token: string }>({ path: 'db/creds' });
 
-    expect(mockedPost).toHaveBeenCalledWith('/secrets/get', { path: 'db/creds' });
+    expect(mockedPost).toHaveBeenCalledWith('/secrets/get', {
+      path: 'db/creds',
+    });
     expect(result).toEqual({ token: 'abc' });
   });
 });

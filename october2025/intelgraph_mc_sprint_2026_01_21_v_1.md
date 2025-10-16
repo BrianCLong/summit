@@ -1,4 +1,4 @@
-```markdown
+````markdown
 ---
 slug: intelgraph-mc-sprint-2026-01-21
 version: v1.0
@@ -16,11 +16,14 @@ status: planned
 > **Mission (Sprint N+8)**: Deliver **Multi‑Cloud Readiness v0.9** (AWS+GCP baseline), **Model Ops & Monitoring** for ER/analytics, **PII Detection & Redaction** pipeline, **GraphQL Subgraphs** (modular gateway), and **Tenant Usage Reports**—keeping SLOs/cost guardrails green. Evidence bundle v9 included.
 
 ## Conductor Summary (Commit)
+
 **Assumptions & Provenance**
+
 - Builds on 2026‑01‑07 sprint (Black‑Cell GA track, CMK, Data Contracts, Residency v2, Temporal analytics).
 - Summit bundles still pending import; placeholders marked _[ATTACH FROM SUMMIT BUNDLE]_.
 
 **Goals**
+
 1. **Multi‑Cloud v0.9**: baseline GCP support (GKE, Cloud KMS, GCS) with parity overlays and provider‑neutral Terraform; smoke DR across clouds (control‑plane only).
 2. **Model Ops & Monitoring**: registry v1.1 with metrics (latency/precision drift), canary rollouts, and rollback; model cards.
 3. **PII Detection & Redaction**: streaming annotator (patterns + rules) enforcing purpose/retention; export presets.
@@ -28,23 +31,28 @@ status: planned
 5. **Tenant Usage Reports**: monthly statements (calls, ingest, storage, analytics) with per‑purpose breakdown and cost estimates.
 
 **Non‑Goals**
+
 - Full multi‑cloud DR for data planes; ML training pipelines beyond ER scorer fine‑tuning.
 
 **Constraints**
+
 - SLOs unchanged. Cross‑cloud router must add ≤ +15% p95 for routed reads.
 - Cost guardrails unchanged; cloud‑specific SKUs must fit existing budgets.
 
 **Risks**
+
 - R1: Federation introduces latency. _Mitigation_: colocate router, caching, query plan pinning.
 - R2: PII false positives. _Mitigation_: precision‑biased rules, allowlist, manual review queue.
 - R3: Cross‑cloud secrets drift. _Mitigation_: single source of truth + conformance tests.
 
 **Definition of Done**
+
 - GCP overlays deploy staging successfully; KMS integration passes CMK tests; subgraphs live in staging with SLOs; PII annotator redacts in exports and pipeline; model monitoring dashboards live; usage reports delivered for 2 pilot tenants.
 
 ---
 
 ## Swimlanes
+
 - **Lane A — Multi‑Cloud & KMS** (Platform + Security)
 - **Lane B — GraphQL Subgraphs** (Backend + SRE)
 - **Lane C — Model Ops & Monitoring** (DS + Backend)
@@ -55,9 +63,11 @@ status: planned
 ---
 
 ## Backlog (Epics → Stories → Tasks) + RACI
+
 Estimates in SP.
 
 ### EPIC A: Multi‑Cloud Readiness v0.9 (34 SP)
+
 - **A‑1** Terraform providers & modules (AWS/GCP) (10 SP) — _Platform (R), TL (A)_
   - AC: `provider=aws|google` switch; identical tags/labels; smoke tests.
 - **A‑2** GCP KMS + CMK parity (8 SP) — _Security (R), Backend (C)_
@@ -68,27 +78,32 @@ Estimates in SP.
   - AC: p95 delta ≤ +15% reads; failover doc.
 
 ### EPIC B: GraphQL Subgraphs (28 SP)
+
 - **B‑1** Schema decomposition (core/analytics/admin) (10 SP) — _Backend (R)_
 - **B‑2** Router + persisted‑ID mapping (10 SP) — _Backend (R), SRE (C)_
 - **B‑3** Compat tests & SLOs (8 SP) — _QA (R)_
 
 ### EPIC C: Model Ops & Monitoring (26 SP)
+
 - **C‑1** Model registry v1.1 (cards + metadata) (8 SP) — _DS (R)_
 - **C‑2** Drift metrics & alerts (10 SP) — _SRE (R), DS (C)_
   - AC: precision proxy (shadow set), data drift (pop stats), latency p95.
 - **C‑3** Canary/rollback workflow (8 SP) — _Backend (R)_
 
 ### EPIC D: PII Detection & Redaction (24 SP)
+
 - **D‑1** Streaming annotator (regex/rules) (10 SP) — _Data Eng (R), Sec (A)_
 - **D‑2** Export redaction presets v1.1 (6 SP) — _Backend (R)_
 - **D‑3** Review queue + override (8 SP) — _Frontend (R)_
 
 ### EPIC E: Tenant Usage Reports (20 SP)
+
 - **E‑1** Aggregations & rollup jobs (8 SP) — _SRE FinOps (R)_
 - **E‑2** Statement API & PDFs (6 SP) — _Backend (R)_
 - **E‑3** Admin UI & email (6 SP) — _Frontend (R)_
 
 ### EPIC F: QA & Evidence (14 SP)
+
 - **F‑1** Compat + subgraph contract tests (8 SP) — _QA (R)_
 - **F‑2** Evidence bundle v9 (6 SP) — _MC (R)_
 
@@ -97,6 +112,7 @@ _Total_: **146 SP** (descope: D‑3 or C‑3 if capacity < 130 SP).
 ---
 
 ## Architecture (Deltas)
+
 ```mermaid
 flowchart LR
   subgraph Cloud A (AWS)
@@ -130,6 +146,7 @@ flowchart LR
   Ingest --> ANN --> Storage
   XPT --> Exports
 ```
+````
 
 **ADR‑024**: Subgraph architecture with router preserves persisted‑ID contracts via mapping table. _Trade‑off_: more moving parts vs modularity.
 
@@ -140,7 +157,9 @@ flowchart LR
 ---
 
 ## Data & Policy
+
 **Usage Rollups (PG)**
+
 ```sql
 CREATE MATERIALIZED VIEW usage_monthly AS
 SELECT tenant_id,
@@ -152,6 +171,7 @@ FROM metering_events GROUP BY 1,2;
 ```
 
 **PII Rules (YAML)**
+
 ```yaml
 patterns:
   email: "[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"
@@ -164,36 +184,57 @@ actions:
 ```
 
 **Policy Delta**
+
 - PII detections attach `sensitivity: high`; default retention `short-30d` unless legal‑hold.
 - Usage statements visible to `tenant-admin` and `auditor` roles only.
 
 ---
 
 ## APIs & Schemas
+
 **GraphQL — Federation & Reports**
+
 ```graphql
 # Subgraph: core
-type Query { entity(id: ID!): Entity }
+type Query {
+  entity(id: ID!): Entity
+}
 
 # Subgraph: analytics
-type Query { pagerankTop(limit: Int = 20): [AnalyticsScore!]! }
+type Query {
+  pagerankTop(limit: Int = 20): [AnalyticsScore!]!
+}
 
 # Subgraph: admin
-type UsageStatement { month: String!, calls: Int!, events: Int!, storageGB: Float!, estCostUSD: Float! }
+type UsageStatement {
+  month: String!
+  calls: Int!
+  events: Int!
+  storageGB: Float!
+  estCostUSD: Float!
+}
 
-type Query { usageStatement(month: String!): UsageStatement! @auth(abac: "admin.write") }
+type Query {
+  usageStatement(month: String!): UsageStatement! @auth(abac: "admin.write")
+}
 ```
 
 **Statement Estimator (TS)**
+
 ```ts
-export function estimateCost(u:{calls:number,events:number,storageGB:number}){
-  return u.calls*0.000002 + u.events*0.0001 + u.storageGB*0.02;
+export function estimateCost(u: {
+  calls: number;
+  events: number;
+  storageGB: number;
+}) {
+  return u.calls * 0.000002 + u.events * 0.0001 + u.storageGB * 0.02;
 }
 ```
 
 ---
 
 ## Security & Privacy
+
 - **Keys**: CMK parity on GCP verified via rotation test; keys never leave provider KMS.
 - **PII**: annotator logs contain hashes only; review queue requires high‑clearance role.
 - **Federation**: router enforces tenant headers; subgraph authZ evaluated independently.
@@ -201,12 +242,14 @@ export function estimateCost(u:{calls:number,events:number,storageGB:number}){
 ---
 
 ## Observability & SLOs
+
 - New metrics: router hop latency, subgraph p95s, model drift score, annotator precision proxy, redaction counts, usage rollup lag.
 - Alerts: router p95 > 50 ms over baseline; drift > threshold; redaction/block errors > 0; rollup lag > 2h.
 
 ---
 
 ## Testing Strategy
+
 - **Unit**: PII regex rules; cost estimator; subgraph mapping; registry card validator.
 - **Contract**: federated schema; persisted‑ID mapping; usage statement API.
 - **E2E**: GCS ingest → annotator → storage → export redaction; model canary/rollback; cross‑cloud routed read.
@@ -214,6 +257,7 @@ export function estimateCost(u:{calls:number,events:number,storageGB:number}){
 - **Chaos**: subgraph outage (router fallback); KMS regional failure (parity test).
 
 **Acceptance Packs**
+
 - GCP overlay deploys green; CMK rotation proof stored; p95 deltas ≤ +15%.
 - Persisted‑ID requests resolve correctly through router; SLOs green for 7 days.
 - PII annotator redacts emails/phones; SSN blocked with audit; export redaction applied.
@@ -222,6 +266,7 @@ export function estimateCost(u:{calls:number,events:number,storageGB:number}){
 ---
 
 ## CI/CD & IaC
+
 ```yaml
 name: multicloud-and-federation
 on: [push]
@@ -240,6 +285,7 @@ jobs:
 ```
 
 **Terraform (provider‑neutral module)**
+
 ```hcl
 variable "cloud" { type = string }
 module "gateway" {
@@ -252,6 +298,7 @@ module "gateway" {
 ---
 
 ## Code & Scaffolds
+
 ```
 repo/
   infra/
@@ -278,55 +325,70 @@ repo/
 ```
 
 **Federation Router (TS excerpt)**
+
 ```ts
 import { createGateway } from '@apollo/gateway';
-const gateway = createGateway({ serviceList: [
-  { name:'core', url: process.env.CORE_URL },
-  { name:'analytics', url: process.env.ANALYTICS_URL },
-  { name:'admin', url: process.env.ADMIN_URL }
-]});
+const gateway = createGateway({
+  serviceList: [
+    { name: 'core', url: process.env.CORE_URL },
+    { name: 'analytics', url: process.env.ANALYTICS_URL },
+    { name: 'admin', url: process.env.ADMIN_URL },
+  ],
+});
 ```
 
 **PII Annotator (TS excerpt)**
+
 ```ts
-export function annotate(record:any, rules:Rules){ /* tag/redact in stream */ }
+export function annotate(record: any, rules: Rules) {
+  /* tag/redact in stream */
+}
 ```
 
 **Model Monitor (TS excerpt)**
+
 ```ts
-export function drift(actual:number[], ref:number[]){ /* compute PSI/KS */ }
+export function drift(actual: number[], ref: number[]) {
+  /* compute PSI/KS */
+}
 ```
 
 ---
 
 ## Release Plan & Runbooks
+
 - **Staging cuts**: 2026‑01‑24, 2026‑01‑31.
 - **Prod**: 2026‑02‑03 (canary 10→50→100%).
 
 **Backout**
+
 - Collapse to single cloud (AWS overlays); disable federation (monolith gateway); turn off PII annotator enforcement → log‑only; pause model rollouts.
 
 **Evidence Bundle v9**
+
 - Terraform plans, KMS rotation proofs, federation compat results, annotator test corpus & outcomes, model drift dashboards, usage statements, signed manifest.
 
 ---
 
 ## RACI (Consolidated)
-| Workstream | R | A | C | I |
-|---|---|---|---|---|
-| Multi‑Cloud | Platform | Tech Lead | Security, SRE | PM |
-| Subgraphs | Backend | MC | SRE, QA | PM |
-| Model Ops | DS | MC | Backend, SRE | PM |
-| PII Redaction | Data Eng | Sec TL | Backend, Frontend | PM |
-| Usage Reports | SRE FinOps | PM | Backend | All |
-| QA & Evidence | QA | PM | MC | All |
+
+| Workstream    | R          | A         | C                 | I   |
+| ------------- | ---------- | --------- | ----------------- | --- |
+| Multi‑Cloud   | Platform   | Tech Lead | Security, SRE     | PM  |
+| Subgraphs     | Backend    | MC        | SRE, QA           | PM  |
+| Model Ops     | DS         | MC        | Backend, SRE      | PM  |
+| PII Redaction | Data Eng   | Sec TL    | Backend, Frontend | PM  |
+| Usage Reports | SRE FinOps | PM        | Backend           | All |
+| QA & Evidence | QA         | PM        | MC                | All |
 
 ---
 
 ## Open Items
+
 1. Confirm GCP regions and residency constraints per tenant _[ATTACH FROM SUMMIT BUNDLE]_.
 2. Approve PII rule set with Legal/Privacy.
 3. Select pilot tenants for usage statements and cross‑cloud routing.
 
 ```
 
+```

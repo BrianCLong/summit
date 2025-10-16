@@ -17,7 +17,9 @@ async function main() {
   // Optionally merge from extra file if provided
   const extraPath = path.join(process.cwd(), 'persisted-extra.json');
   try {
-    const extra = JSON.parse(await (await import('fs/promises')).readFile(extraPath, 'utf8'));
+    const extra = JSON.parse(
+      await (await import('fs/promises')).readFile(extraPath, 'utf8'),
+    );
     for (const [hash, data] of Object.entries(extra)) {
       plugin.persistedQueries.set(hash, data);
     }

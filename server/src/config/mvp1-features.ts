@@ -58,7 +58,11 @@ export function getAllFeatureFlags(): FeatureFlags {
  * Decorator for requiring a feature to be enabled
  */
 export function requireFeature(feature: keyof FeatureFlags) {
-  return function (target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return function (
+    target: any,
+    propertyKey: string,
+    descriptor: PropertyDescriptor,
+  ) {
     const originalMethod = descriptor.value;
 
     descriptor.value = function (...args: any[]) {
@@ -80,7 +84,7 @@ export async function loadFeatureFlagsFromDatabase(): Promise<void> {
     // This would typically load from database
     // For now, use environment variables
     const envFlags: Partial<FeatureFlags> = {};
-    
+
     for (const key of Object.keys(DEFAULT_FLAGS) as Array<keyof FeatureFlags>) {
       const envValue = process.env[`FEATURE_${key}`];
       if (envValue !== undefined) {

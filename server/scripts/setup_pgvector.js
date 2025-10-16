@@ -14,7 +14,10 @@ const path = require('path');
       await connectPostgres();
     }
     const pool = getPostgresPool();
-    const sql = fs.readFileSync(path.join(__dirname, 'sql', 'pgvector.sql'), 'utf8');
+    const sql = fs.readFileSync(
+      path.join(__dirname, 'sql', 'pgvector.sql'),
+      'utf8',
+    );
     await pool.query(sql);
     console.log('✅ pgvector setup completed');
     process.exit(0);
@@ -23,4 +26,3 @@ const path = require('path');
     process.exit(1);
   }
 })();
-

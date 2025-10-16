@@ -6,20 +6,34 @@ const paymentsResolvers = {
       return [];
     },
     paymentStatus: (_: any, { orderId }: { orderId: string }) => {
-      return { orderId, status: 'PENDING', updatedAt: new Date().toISOString() };
-    }
+      return {
+        orderId,
+        status: 'PENDING',
+        updatedAt: new Date().toISOString(),
+      };
+    },
   },
   Mutation: {
     createCheckout: (
       _: any,
-      { orderId, amount, currency, tenant }: { orderId: string; amount?: number; currency?: string; tenant?: string },
+      {
+        orderId,
+        amount,
+        currency,
+        tenant,
+      }: {
+        orderId: string;
+        amount?: number;
+        currency?: string;
+        tenant?: string;
+      },
     ) => {
       if (typeof amount === 'number' && amount > 0) {
         recordRevenue({ tenant, currency, amount, metadata: { orderId } });
       }
       return { sessionId: `sess_${orderId}` };
-    }
-  }
+    },
+  },
 };
 
 export default paymentsResolvers;

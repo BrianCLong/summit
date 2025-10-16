@@ -70,7 +70,8 @@ export class WORMAuditChainService {
     this.config = AuditChainConfigSchema.parse({
       ...config,
       s3Bucket: process.env.AUDIT_WORM_BUCKET || config?.s3Bucket,
-      retentionYears: Number(process.env.AUDIT_RETENTION_YEARS) || config?.retentionYears,
+      retentionYears:
+        Number(process.env.AUDIT_RETENTION_YEARS) || config?.retentionYears,
       signRoots: process.env.AUDIT_SIGN_ROOTS === 'true',
     });
 
@@ -81,26 +82,25 @@ export class WORMAuditChainService {
 
   private async initializeAuditChain() {
     const span = otelService.createSpan('worm_audit.initialize');
-    
+
     try {
       // Load existing chain state
       await this.loadChainState();
-      
+
       // Start new segment
       await this.startNewSegment();
-      
+
       // Schedule segment rotation
       this.scheduleSegmentRotation();
 
       console.log('WORM audit chain initialized successfully');
-      
+
       otelService.addSpanAttributes({
         'audit.chain.enabled': this.config.enabled,
         'audit.segment_interval': this.config.segmentInterval,
         'audit.retention_years': this.config.retentionYears,
         'audit.sign_roots': this.config.signRoots,
       });
-
     } catch (error: any) {
       console.error('WORM audit chain initialization failed:', error);
       otelService.recordException(error);
@@ -116,7 +116,7 @@ export class WORMAuditChainService {
    */
   async addAuditEntry(entry: Omit<AuditEntry, 'timestamp'>): Promise<void> {
     const span = otelService.createSpan('worm_audit.add_entry');
-    
+
     try {
       const auditEntry: AuditEntry = {
         ...entry,
@@ -137,7 +137,6 @@ export class WORMAuditChainService {
         'audit.classification': entry.classification,
         'audit.critical': this.isCriticalEvent(entry.eventType),
       });
-
     } catch (error: any) {
       console.error('Failed to add audit entry:', error);
       otelService.recordException(error);
@@ -157,7 +156,7 @@ export class WORMAuditChainService {
       'system_compromise',
       'crypto_key_rotation',
     ];
-    
+
     return criticalEvents.includes(eventType);
   }
 
@@ -165,7 +164,7 @@ export class WORMAuditChainService {
     if (this.pendingEntries.length === 0) return;
 
     const span = otelService.createSpan('worm_audit.process_entries');
-    
+
     try {
       // Add entries to current segment
       if (!this.currentSegment) {
@@ -184,7 +183,6 @@ export class WORMAuditChainService {
         'audit.entries_processed': this.pendingEntries.length,
         'audit.current_segment': this.currentSegment?.segmentId || 'none',
       });
-
     } catch (error: any) {
       console.error('Failed to process pending entries:', error);
       otelService.recordException(error);
@@ -205,8 +203,11 @@ export class WORMAuditChainService {
 
     // Create hash chain entry
     const entryData = JSON.stringify(entry);
-    const dataHash = crypto.createHash('sha256').update(entryData).digest('hex');
-    
+    const dataHash = crypto
+      .createHash('sha256')
+      .update(entryData)
+      .digest('hex');
+
     const chainEntry: HashChainEntry = {
       sequenceId: ++this.sequenceCounter,
       timestamp: entry.timestamp,
@@ -217,8 +218,11 @@ export class WORMAuditChainService {
 
     // Chain hash includes previous hash for tamper detection
     const chainData = `${chainEntry.sequenceId}:${chainEntry.timestamp.toISOString()}:${dataHash}:${this.lastHash}`;
-    const currentHash = crypto.createHash('sha256').update(chainData).digest('hex');
-    
+    const currentHash = crypto
+      .createHash('sha256')
+      .update(chainData)
+      .digest('hex');
+
     // Sign hash with HSM if enabled
     if (this.config.signRoots && fipsService.getLocalSVID()) {
       try {
@@ -235,7 +239,7 @@ export class WORMAuditChainService {
 
   private async startNewSegment(): Promise<void> {
     const span = otelService.createSpan('worm_audit.start_segment');
-    
+
     try {
       // Finalize current segment if exists
       if (this.currentSegment) {
@@ -244,7 +248,7 @@ export class WORMAuditChainService {
 
       // Create new segment
       const segmentId = `segment-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      
+
       this.currentSegment = {
         segmentId,
         startTime: new Date(),
@@ -255,16 +259,18 @@ export class WORMAuditChainService {
         rootHash: '',
         rootSignature: '',
         wormObjectKey: '',
-        retentionUntil: new Date(Date.now() + (this.config.retentionYears * 365 * 24 * 60 * 60 * 1000)),
+        retentionUntil: new Date(
+          Date.now() + this.config.retentionYears * 365 * 24 * 60 * 60 * 1000,
+        ),
       };
 
       console.log(`Started new audit segment: ${segmentId}`);
-      
+
       otelService.addSpanAttributes({
         'audit.segment_id': segmentId,
-        'audit.retention_until': this.currentSegment.retentionUntil.toISOString(),
+        'audit.retention_until':
+          this.currentSegment.retentionUntil.toISOString(),
       });
-
     } catch (error: any) {
       console.error('Failed to start new segment:', error);
       otelService.recordException(error);
@@ -277,19 +283,25 @@ export class WORMAuditChainService {
 
   private async finalizeSegment(segment: AuditSegment): Promise<void> {
     const span = otelService.createSpan('worm_audit.finalize_segment');
-    
+
     try {
       segment.endTime = new Date();
-      
+
       // Build Merkle tree from hash chain
-      segment.merkleTree = this.buildMerkleTree(segment.hashChain.map(entry => entry.dataHash));
-      segment.rootHash = segment.merkleTree.length > 0 ? segment.merkleTree[0] : '0';
+      segment.merkleTree = this.buildMerkleTree(
+        segment.hashChain.map((entry) => entry.dataHash),
+      );
+      segment.rootHash =
+        segment.merkleTree.length > 0 ? segment.merkleTree[0] : '0';
 
       // Sign root hash with HSM
       if (this.config.signRoots && segment.rootHash !== '0') {
         try {
           const keyId = 'audit-root-signing-key';
-          segment.rootSignature = await fipsService.sign(segment.rootHash, keyId);
+          segment.rootSignature = await fipsService.sign(
+            segment.rootHash,
+            keyId,
+          );
         } catch (error) {
           console.error('Failed to sign segment root:', error);
           segment.rootSignature = 'signing_failed';
@@ -299,15 +311,16 @@ export class WORMAuditChainService {
       // Store to WORM storage
       await this.storeSegmentToWORM(segment);
 
-      console.log(`Finalized audit segment: ${segment.segmentId} (${segment.entries.length} entries)`);
-      
+      console.log(
+        `Finalized audit segment: ${segment.segmentId} (${segment.entries.length} entries)`,
+      );
+
       otelService.addSpanAttributes({
         'audit.segment_finalized': segment.segmentId,
         'audit.entries_count': segment.entries.length,
         'audit.chain_length': segment.hashChain.length,
         'audit.root_hash': segment.rootHash,
       });
-
     } catch (error: any) {
       console.error('Failed to finalize segment:', error);
       otelService.recordException(error);
@@ -327,25 +340,28 @@ export class WORMAuditChainService {
 
     while (level.length > 1) {
       const nextLevel: string[] = [];
-      
+
       for (let i = 0; i < level.length; i += 2) {
         const left = level[i];
         const right = level[i + 1] || left; // Duplicate if odd number of nodes
-        const combined = crypto.createHash('sha256').update(left + right).digest('hex');
+        const combined = crypto
+          .createHash('sha256')
+          .update(left + right)
+          .digest('hex');
         nextLevel.push(combined);
       }
-      
+
       tree.unshift(...level); // Add current level to tree
       level = nextLevel;
     }
-    
+
     tree.unshift(level[0]); // Add root
     return tree;
   }
 
   private async storeSegmentToWORM(segment: AuditSegment): Promise<void> {
     const span = otelService.createSpan('worm_audit.store_segment');
-    
+
     try {
       // Prepare segment data for storage
       const segmentData = {
@@ -363,9 +379,15 @@ export class WORMAuditChainService {
         merkleTree: segment.merkleTree,
         verification: {
           chainValid: await this.verifyHashChain(segment.hashChain),
-          merkleValid: this.verifyMerkleTree(segment.merkleTree, segment.entries.map(e => 
-            crypto.createHash('sha256').update(JSON.stringify(e)).digest('hex')
-          )),
+          merkleValid: this.verifyMerkleTree(
+            segment.merkleTree,
+            segment.entries.map((e) =>
+              crypto
+                .createHash('sha256')
+                .update(JSON.stringify(e))
+                .digest('hex'),
+            ),
+          ),
         },
       };
 
@@ -383,7 +405,10 @@ export class WORMAuditChainService {
           const encrypted = await fipsService.encrypt(segmentJson, keyId);
           segmentJson = JSON.stringify(encrypted);
         } catch (error) {
-          console.warn('Failed to encrypt segment, storing unencrypted:', error);
+          console.warn(
+            'Failed to encrypt segment, storing unencrypted:',
+            error,
+          );
         }
       }
 
@@ -391,13 +416,15 @@ export class WORMAuditChainService {
       const date = segment.startTime;
       const dateKey = `${date.getFullYear()}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getDate()).padStart(2, '0')}`;
       const objectKey = `audit-segments/${dateKey}/${segment.segmentId}.json`;
-      
+
       segment.wormObjectKey = objectKey;
 
       // Store to S3 with Object Lock (in production environment)
       // This would use AWS SDK to put object with retention settings
-      console.log(`Storing segment to WORM: s3://${this.config.s3Bucket}/${objectKey}`);
-      
+      console.log(
+        `Storing segment to WORM: s3://${this.config.s3Bucket}/${objectKey}`,
+      );
+
       // Simulate WORM storage for development
       const localPath = `/tmp/worm-audit/${objectKey}`;
       await fs.mkdir(path.dirname(localPath), { recursive: true });
@@ -424,7 +451,6 @@ export class WORMAuditChainService {
         'audit.encrypted': this.config.encryptionEnabled,
         'audit.retention_until': segment.retentionUntil.toISOString(),
       });
-
     } catch (error: any) {
       console.error('Failed to store segment to WORM:', error);
       otelService.recordException(error);
@@ -438,9 +464,11 @@ export class WORMAuditChainService {
   /**
    * Verify hash chain integrity
    */
-  async verifyHashChain(chain: HashChainEntry[]): Promise<ChainVerificationResult> {
+  async verifyHashChain(
+    chain: HashChainEntry[],
+  ): Promise<ChainVerificationResult> {
     const span = otelService.createSpan('worm_audit.verify_chain');
-    
+
     try {
       const result: ChainVerificationResult = {
         valid: true,
@@ -453,12 +481,14 @@ export class WORMAuditChainService {
 
       for (let i = 0; i < chain.length; i++) {
         const entry = chain[i];
-        
+
         // Verify hash chain linkage
         if (entry.previousHash !== previousHash) {
           result.valid = false;
           result.brokenAt = i;
-          result.errors.push(`Hash chain broken at entry ${i}: expected previous ${previousHash}, got ${entry.previousHash}`);
+          result.errors.push(
+            `Hash chain broken at entry ${i}: expected previous ${previousHash}, got ${entry.previousHash}`,
+          );
           break;
         }
 
@@ -467,22 +497,34 @@ export class WORMAuditChainService {
           try {
             const keyId = 'audit-chain-signing-key';
             const chainData = `${entry.sequenceId}:${entry.timestamp.toISOString()}:${entry.dataHash}:${entry.previousHash}`;
-            const currentHash = crypto.createHash('sha256').update(chainData).digest('hex');
-            
-            const signatureValid = await fipsService.verify(currentHash, entry.signature, keyId);
+            const currentHash = crypto
+              .createHash('sha256')
+              .update(chainData)
+              .digest('hex');
+
+            const signatureValid = await fipsService.verify(
+              currentHash,
+              entry.signature,
+              keyId,
+            );
             if (signatureValid) {
               result.verifiedSignatures++;
             } else {
               result.errors.push(`Invalid signature at entry ${i}`);
             }
           } catch (error) {
-            result.errors.push(`Signature verification failed at entry ${i}: ${error}`);
+            result.errors.push(
+              `Signature verification failed at entry ${i}: ${error}`,
+            );
           }
         }
 
         // Update previous hash for next iteration
         const chainData = `${entry.sequenceId}:${entry.timestamp.toISOString()}:${entry.dataHash}:${entry.previousHash}`;
-        previousHash = crypto.createHash('sha256').update(chainData).digest('hex');
+        previousHash = crypto
+          .createHash('sha256')
+          .update(chainData)
+          .digest('hex');
       }
 
       otelService.addSpanAttributes({
@@ -493,12 +535,11 @@ export class WORMAuditChainService {
       });
 
       return result;
-
     } catch (error: any) {
       console.error('Hash chain verification failed:', error);
       otelService.recordException(error);
       span.setStatus({ code: 2, message: error.message });
-      
+
       return {
         valid: false,
         totalEntries: chain.length,
@@ -512,7 +553,7 @@ export class WORMAuditChainService {
 
   private verifyMerkleTree(tree: string[], leafHashes: string[]): boolean {
     if (tree.length === 0 || leafHashes.length === 0) return false;
-    
+
     // Rebuild tree and compare root
     const rebuiltTree = this.buildMerkleTree(leafHashes);
     return rebuiltTree.length > 0 && rebuiltTree[0] === tree[0];
@@ -520,7 +561,7 @@ export class WORMAuditChainService {
 
   private scheduleSegmentRotation(): void {
     let intervalMs: number;
-    
+
     switch (this.config.segmentInterval) {
       case 'hourly':
         intervalMs = 60 * 60 * 1000; // 1 hour
@@ -537,7 +578,7 @@ export class WORMAuditChainService {
       try {
         // Process any pending entries before rotation
         await this.processPendingEntries();
-        
+
         // Start new segment (finalizes current one)
         await this.startNewSegment();
       } catch (error) {
@@ -592,7 +633,8 @@ export class WORMAuditChainService {
       chainIntegrity: {
         verified: true,
         brokenSegments: 0,
-        verifiedSignatures: this.currentSegment?.hashChain.filter(e => e.signature).length || 0,
+        verifiedSignatures:
+          this.currentSegment?.hashChain.filter((e) => e.signature).length || 0,
       },
     };
   }
@@ -607,12 +649,17 @@ export class WORMAuditChainService {
   } | null> {
     // In production, retrieve from WORM storage and decrypt
     if (this.currentSegment?.segmentId === segmentId) {
-      const verification = await this.verifyHashChain(this.currentSegment.hashChain);
-      
+      const verification = await this.verifyHashChain(
+        this.currentSegment.hashChain,
+      );
+
       // Sign the export with HSM for legal evidence
       let exportSignature = 'not_signed';
       try {
-        const exportData = JSON.stringify({ segment: this.currentSegment, verification });
+        const exportData = JSON.stringify({
+          segment: this.currentSegment,
+          verification,
+        });
         const keyId = 'audit-export-signing-key';
         exportSignature = await fipsService.sign(exportData, keyId);
       } catch (error) {
@@ -637,12 +684,12 @@ export class WORMAuditChainService {
       clearInterval(this.segmentTimer);
       this.segmentTimer = null;
     }
-    
+
     // Process any remaining pending entries
     if (this.pendingEntries.length > 0) {
       await this.processPendingEntries();
     }
-    
+
     // Finalize current segment
     if (this.currentSegment) {
       await this.finalizeSegment(this.currentSegment);

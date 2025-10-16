@@ -530,7 +530,9 @@ async function publishOverlay(
 
   // Write to Neo4j via parameterized Cypher
   const cypher = getCypherForOverlay(overlayType);
-  await neo4j.writeTransaction((tx) => tx.run(cypher, { results, manifest: manifest.id }));
+  await neo4j.writeTransaction((tx) =>
+    tx.run(cypher, { results, manifest: manifest.id }),
+  );
 
   return manifest;
 }
@@ -879,7 +881,11 @@ type Query {
   models(task: TaskType): [Model!]!
   runs(modelId: ID): [Run!]!
   erPairs(decision: ERDecision, minProb: Float, limit: Int = 100): [ERPair!]!
-  predictions(task: TaskType!, minScore: Float, limit: Int = 100): [Prediction!]!
+  predictions(
+    task: TaskType!
+    minScore: Float
+    limit: Int = 100
+  ): [Prediction!]!
   communities(graphKey: String!): [Community!]!
   exports(limit: Int = 50): [Export!]!
 }
@@ -1238,7 +1244,9 @@ test('complete GraphAI pipeline', async ({ page }) => {
 
   // Train embeddings
   await page.click('[data-testid="train-embeddings-btn"]');
-  await page.waitForSelector('[data-testid="embeddings-complete"]', { timeout: 15000 });
+  await page.waitForSelector('[data-testid="embeddings-complete"]', {
+    timeout: 15000,
+  });
 
   // Run entity resolution
   await page.click('[data-testid="run-er-btn"]');
@@ -1264,7 +1272,9 @@ test('complete GraphAI pipeline', async ({ page }) => {
   await page.waitForSelector('[data-testid="export-download-link"]');
 
   // Verify manifest integrity
-  const manifestText = await page.textContent('[data-testid="manifest-signature"]');
+  const manifestText = await page.textContent(
+    '[data-testid="manifest-signature"]',
+  );
   expect(manifestText).toContain('✅ Verified');
 });
 ```

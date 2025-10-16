@@ -1,7 +1,10 @@
 import pino from 'pino';
 
 const logger = pino({
-  redact: { paths: ['req.headers.authorization', 'variables.*', 'data.*'], remove: true },
+  redact: {
+    paths: ['req.headers.authorization', 'variables.*', 'data.*'],
+    remove: true,
+  },
 });
 
 export const redactLogs = () => ({

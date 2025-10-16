@@ -52,18 +52,29 @@ export interface SandboxExecutionResult {
 
 export class NlToCypherService {
   private readonly promptCache = new Map<string, NlToCypherResponse>();
-  private readonly executionHistory: Array<{ queryId: string; executionTime: number; rowCount: number }> = [];
+  private readonly executionHistory: Array<{
+    queryId: string;
+    executionTime: number;
+    rowCount: number;
+  }> = [];
 
   constructor(private readonly adapter: ModelAdapter) {}
 
-  async translateWithPreview(prompt: string, userId: string, tenantId: string): Promise<NlToCypherResponse> {
+  async translateWithPreview(
+    prompt: string,
+    userId: string,
+    tenantId: string,
+  ): Promise<NlToCypherResponse> {
     const startTime = Date.now();
     const queryId = uuidv4();
 
     // Check cache first
     const cacheKey = `${tenantId}:${prompt.trim().toLowerCase()}`;
     if (this.promptCache.has(cacheKey)) {
-      logger.info({ queryId, userId, tenantId, cached: true }, 'Returning cached NL→Cypher translation');
+      logger.info(
+        { queryId, userId, tenantId, cached: true },
+        'Returning cached NL→Cypher translation',
+      );
       return this.promptCache.get(cacheKey)!;
     }
 
@@ -78,7 +89,11 @@ export class NlToCypherService {
       const costEstimate = this.estimateCost(generatedCypher);
 
       // Assess policy risk
-      const policyRisk = this.assessPolicyRisk(generatedCypher, userId, tenantId);
+      const policyRisk = this.assessPolicyRisk(
+        generatedCypher,
+        userId,
+        tenantId,
+      );
 
       const response: NlToCypherResponse = {
         id: queryId,
@@ -87,8 +102,11 @@ export class NlToCypherService {
         validation,
         costEstimate,
         policyRisk,
-        canExecute: validation.isValid && costEstimate.costClass !== 'very-high' && policyRisk.riskLevel !== 'high',
-        timestamp: new Date()
+        canExecute:
+          validation.isValid &&
+          costEstimate.costClass !== 'very-high' &&
+          policyRisk.riskLevel !== 'high',
+        timestamp: new Date(),
       };
 
       // Cache the response
@@ -96,20 +114,26 @@ export class NlToCypherService {
 
       // Emit metrics
       const parseTime = Date.now() - startTime;
-      logger.info({
-        queryId,
-        userId,
-        tenantId,
-        parseTimeMs: parseTime,
-        validity: validation.isValid,
-        estimatedRows: costEstimate.estimatedRows,
-        costClass: costEstimate.costClass,
-        riskLevel: policyRisk.riskLevel
-      }, 'NL→Cypher translation completed');
+      logger.info(
+        {
+          queryId,
+          userId,
+          tenantId,
+          parseTimeMs: parseTime,
+          validity: validation.isValid,
+          estimatedRows: costEstimate.estimatedRows,
+          costClass: costEstimate.costClass,
+          riskLevel: policyRisk.riskLevel,
+        },
+        'NL→Cypher translation completed',
+      );
 
       return response;
     } catch (error) {
-      logger.error({ queryId, userId, tenantId, error }, 'NL→Cypher translation failed');
+      logger.error(
+        { queryId, userId, tenantId, error },
+        'NL→Cypher translation failed',
+      );
       throw error;
     }
   }
@@ -120,8 +144,8 @@ export class NlToCypherService {
     options: SandboxExecutionOptions = {
       readOnly: true,
       timeout: 30000,
-      maxRows: 100
-    }
+      maxRows: 100,
+    },
   ): Promise<SandboxExecutionResult> {
     const startTime = Date.now();
 
@@ -132,7 +156,7 @@ export class NlToCypherService {
           success: false,
           executionTimeMs: 0,
           error: 'Mutations not allowed in sandbox mode',
-          warnings: []
+          warnings: [],
         };
       }
 
@@ -143,7 +167,7 @@ export class NlToCypherService {
         return {
           success: true,
           executionTimeMs: Date.now() - startTime,
-          warnings: [`Dry run - would execute: ${safeCypher}`]
+          warnings: [`Dry run - would execute: ${safeCypher}`],
         };
       }
 
@@ -157,29 +181,33 @@ export class NlToCypherService {
       this.executionHistory.push({
         queryId,
         executionTime,
-        rowCount: mockRows.length
+        rowCount: mockRows.length,
       });
 
-      logger.info({
-        queryId,
-        executionTimeMs: executionTime,
-        rowCount: mockRows.length,
-        safeCypher
-      }, 'Sandbox execution completed');
+      logger.info(
+        {
+          queryId,
+          executionTimeMs: executionTime,
+          rowCount: mockRows.length,
+          safeCypher,
+        },
+        'Sandbox execution completed',
+      );
 
       return {
         success: true,
         rows: mockRows,
         executionTimeMs: executionTime,
-        warnings: []
+        warnings: [],
       };
     } catch (error) {
       logger.error({ queryId, error }, 'Sandbox execution failed');
       return {
         success: false,
         executionTimeMs: Date.now() - startTime,
-        error: error instanceof Error ? error.message : 'Unknown execution error',
-        warnings: []
+        error:
+          error instanceof Error ? error.message : 'Unknown execution error',
+        warnings: [],
       };
     }
   }
@@ -219,13 +247,21 @@ export class NlToCypherService {
       errors.push('Empty query');
     }
 
-    if (!cypher.toUpperCase().includes('MATCH') && !cypher.toUpperCase().includes('CREATE')) {
+    if (
+      !cypher.toUpperCase().includes('MATCH') &&
+      !cypher.toUpperCase().includes('CREATE')
+    ) {
       warnings.push('Query does not contain MATCH or CREATE clause');
     }
 
     // Check for potential issues
-    if (!cypher.toUpperCase().includes('LIMIT') && cypher.toUpperCase().includes('MATCH')) {
-      warnings.push('No LIMIT clause found - query may return large result sets');
+    if (
+      !cypher.toUpperCase().includes('LIMIT') &&
+      cypher.toUpperCase().includes('MATCH')
+    ) {
+      warnings.push(
+        'No LIMIT clause found - query may return large result sets',
+      );
     }
 
     if (cypher.includes('*') && cypher.includes('[') && cypher.includes(']')) {
@@ -243,7 +279,7 @@ export class NlToCypherService {
     return {
       isValid: errors.length === 0,
       syntaxErrors: errors,
-      warnings
+      warnings,
     };
   }
 
@@ -289,11 +325,15 @@ export class NlToCypherService {
       estimatedRows,
       costClass,
       executionTimeMs,
-      memoryMb
+      memoryMb,
     };
   }
 
-  private assessPolicyRisk(cypher: string, userId: string, tenantId: string): PolicyRisk {
+  private assessPolicyRisk(
+    cypher: string,
+    userId: string,
+    tenantId: string,
+  ): PolicyRisk {
     const risks: string[] = [];
     let riskLevel: PolicyRisk['riskLevel'] = 'low';
     let piiAccess = false;
@@ -331,14 +371,14 @@ export class NlToCypherService {
       riskLevel,
       risks,
       piiAccess,
-      sensitiveOperations
+      sensitiveOperations,
     };
   }
 
   private containsMutations(cypher: string): boolean {
     const mutations = ['CREATE', 'DELETE', 'SET', 'REMOVE', 'MERGE', 'DROP'];
     const upperCypher = cypher.toUpperCase();
-    return mutations.some(op => upperCypher.includes(op));
+    return mutations.some((op) => upperCypher.includes(op));
   }
 
   private makeSafe(cypher: string, maxRows: number): string {
@@ -357,7 +397,7 @@ export class NlToCypherService {
     const mockData = [
       { id: '1', name: 'Node 1', type: 'Person' },
       { id: '2', name: 'Node 2', type: 'Organization' },
-      { id: '3', name: 'Node 3', type: 'Event' }
+      { id: '3', name: 'Node 3', type: 'Event' },
     ];
 
     // Return subset based on query type
@@ -370,35 +410,40 @@ export class NlToCypherService {
 
   private getAverageExecutionTime(cypher: string): number | null {
     // Simple pattern matching for historical data
-    const similarQueries = this.executionHistory.filter(h => {
+    const similarQueries = this.executionHistory.filter((h) => {
       // This is a simplified similarity check
       return cypher.includes('MATCH') && cypher.includes('RETURN');
     });
 
     if (similarQueries.length === 0) return null;
 
-    const avgTime = similarQueries.reduce((sum, q) => sum + q.executionTime, 0) / similarQueries.length;
+    const avgTime =
+      similarQueries.reduce((sum, q) => sum + q.executionTime, 0) /
+      similarQueries.length;
     return avgTime;
   }
 
   // Method for computing diff between generated and user-edited Cypher
-  diffCypher(original: string, edited: string): { additions: string[]; deletions: string[]; modifications: string[] } {
+  diffCypher(
+    original: string,
+    edited: string,
+  ): { additions: string[]; deletions: string[]; modifications: string[] } {
     // Simple diff implementation
-    const originalLines = original.split('\n').map(l => l.trim());
-    const editedLines = edited.split('\n').map(l => l.trim());
+    const originalLines = original.split('\n').map((l) => l.trim());
+    const editedLines = edited.split('\n').map((l) => l.trim());
 
     const additions: string[] = [];
     const deletions: string[] = [];
     const modifications: string[] = [];
 
     // Basic line-by-line comparison
-    editedLines.forEach(line => {
+    editedLines.forEach((line) => {
       if (!originalLines.includes(line)) {
         additions.push(line);
       }
     });
 
-    originalLines.forEach(line => {
+    originalLines.forEach((line) => {
       if (!editedLines.includes(line)) {
         deletions.push(line);
       }

@@ -18,7 +18,7 @@ router.get('/health', async (req, res) => {
     const healthStatus = {
       timestamp: new Date().toISOString(),
       overall: 'healthy',
-      components: {}
+      components: {},
     };
 
     // Get resilience manager status
@@ -31,7 +31,7 @@ router.get('/health', async (req, res) => {
 
     // Determine overall health
     let hasUnhealthy = false;
-    
+
     // Check circuit breakers
     for (const [name, cb] of Object.entries(resilienceStatus.circuitBreakers)) {
       if (cb.state !== 'CLOSED') {
@@ -54,13 +54,12 @@ router.get('/health', async (req, res) => {
 
     const statusCode = healthStatus.overall === 'healthy' ? 200 : 503;
     res.status(statusCode).json(healthStatus);
-
   } catch (error) {
     logger.error('Failed to get resilience health status:', error);
     res.status(500).json({
       timestamp: new Date().toISOString(),
       overall: 'unhealthy',
-      error: error.message
+      error: error.message,
     });
   }
 });
@@ -74,7 +73,7 @@ router.get('/metrics', (req, res) => {
     const metrics = {
       timestamp: new Date().toISOString(),
       resilience: resilienceManager.getMetrics(),
-      apiServices: apiServiceFactory.getAllMetrics()
+      apiServices: apiServiceFactory.getAllMetrics(),
     };
 
     res.json(metrics);
@@ -82,7 +81,7 @@ router.get('/metrics', (req, res) => {
     logger.error('Failed to get resilience metrics:', error);
     res.status(500).json({
       error: 'Failed to retrieve metrics',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -107,19 +106,19 @@ router.get('/circuit-breakers', (req, res) => {
         uptime: cb.uptime,
         nextAttempt: cb.nextAttempt,
         lastFailureTime: cb.lastFailureTime,
-        metrics: cb.metrics
+        metrics: cb.metrics,
       };
     }
 
     res.json({
       timestamp: new Date().toISOString(),
-      circuitBreakers
+      circuitBreakers,
     });
   } catch (error) {
     logger.error('Failed to get circuit breaker status:', error);
     res.status(500).json({
       error: 'Failed to retrieve circuit breaker status',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -140,23 +139,27 @@ router.get('/bulkheads', (req, res) => {
         queueLength: bulkhead.queueLength,
         maxConcurrent: bulkhead.maxConcurrent,
         queueSize: bulkhead.queueSize,
-        utilization: bulkhead.maxConcurrent > 0 ? 
-          (bulkhead.activeRequests / bulkhead.maxConcurrent) * 100 : 0,
-        queueUtilization: bulkhead.queueSize > 0 ? 
-          (bulkhead.queueLength / bulkhead.queueSize) * 100 : 0,
-        metrics: bulkhead.metrics
+        utilization:
+          bulkhead.maxConcurrent > 0
+            ? (bulkhead.activeRequests / bulkhead.maxConcurrent) * 100
+            : 0,
+        queueUtilization:
+          bulkhead.queueSize > 0
+            ? (bulkhead.queueLength / bulkhead.queueSize) * 100
+            : 0,
+        metrics: bulkhead.metrics,
       };
     }
 
     res.json({
       timestamp: new Date().toISOString(),
-      bulkheads
+      bulkheads,
     });
   } catch (error) {
     logger.error('Failed to get bulkhead status:', error);
     res.status(500).json({
       error: 'Failed to retrieve bulkhead status',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -169,27 +172,29 @@ router.post('/circuit-breakers/:name/reset', (req, res) => {
   try {
     const { name } = req.params;
     const circuitBreaker = resilienceManager.circuitBreakers.get(name);
-    
+
     if (!circuitBreaker) {
       return res.status(404).json({
         error: 'Circuit breaker not found',
-        name
+        name,
       });
     }
 
     circuitBreaker.reset();
-    logger.info(`Circuit breaker '${name}' manually reset by ${req.user?.email || 'system'}`);
+    logger.info(
+      `Circuit breaker '${name}' manually reset by ${req.user?.email || 'system'}`,
+    );
 
     res.json({
       success: true,
       message: `Circuit breaker '${name}' has been reset`,
-      state: circuitBreaker.getStatus()
+      state: circuitBreaker.getStatus(),
     });
   } catch (error) {
     logger.error('Failed to reset circuit breaker:', error);
     res.status(500).json({
       error: 'Failed to reset circuit breaker',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -202,27 +207,29 @@ router.post('/circuit-breakers/:name/trip', (req, res) => {
   try {
     const { name } = req.params;
     const circuitBreaker = resilienceManager.circuitBreakers.get(name);
-    
+
     if (!circuitBreaker) {
       return res.status(404).json({
         error: 'Circuit breaker not found',
-        name
+        name,
       });
     }
 
     circuitBreaker.forceOpen();
-    logger.warn(`Circuit breaker '${name}' manually tripped by ${req.user?.email || 'system'}`);
+    logger.warn(
+      `Circuit breaker '${name}' manually tripped by ${req.user?.email || 'system'}`,
+    );
 
     res.json({
       success: true,
       message: `Circuit breaker '${name}' has been tripped`,
-      state: circuitBreaker.getStatus()
+      state: circuitBreaker.getStatus(),
     });
   } catch (error) {
     logger.error('Failed to trip circuit breaker:', error);
     res.status(500).json({
       error: 'Failed to trip circuit breaker',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -243,19 +250,19 @@ router.get('/dashboard', async (req, res) => {
         total: Object.keys(healthStatus.circuitBreakers).length,
         open: 0,
         halfOpen: 0,
-        closed: 0
+        closed: 0,
       },
       bulkheads: {
         total: Object.keys(healthStatus.bulkheads).length,
         totalCapacity: 0,
         totalActive: 0,
-        totalQueued: 0
+        totalQueued: 0,
       },
       apiServices: {
         total: Object.keys(apiHealth).length,
         healthy: 0,
-        unhealthy: 0
-      }
+        unhealthy: 0,
+      },
     };
 
     // Calculate circuit breaker states
@@ -287,22 +294,23 @@ router.get('/dashboard', async (req, res) => {
       apiServices: apiHealth,
       metrics: Object.keys(metrics).reduce((acc, key) => {
         // Only include key metrics for dashboard
-        if (key.includes('requests_total') || 
-            key.includes('success_rate') || 
-            key.includes('state') ||
-            key.includes('active_requests') ||
-            key.includes('queue_length')) {
+        if (
+          key.includes('requests_total') ||
+          key.includes('success_rate') ||
+          key.includes('state') ||
+          key.includes('active_requests') ||
+          key.includes('queue_length')
+        ) {
           acc[key] = metrics[key];
         }
         return acc;
-      }, {})
+      }, {}),
     });
-
   } catch (error) {
     logger.error('Failed to get resilience dashboard data:', error);
     res.status(500).json({
       error: 'Failed to retrieve dashboard data',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -314,7 +322,7 @@ router.get('/dashboard', async (req, res) => {
 router.post('/test/:pattern', (req, res) => {
   if (process.env.NODE_ENV === 'production') {
     return res.status(403).json({
-      error: 'Resilience testing not available in production'
+      error: 'Resilience testing not available in production',
     });
   }
 
@@ -323,7 +331,7 @@ router.post('/test/:pattern', (req, res) => {
 
   try {
     let result;
-    
+
     switch (pattern) {
       case 'circuit-breaker':
         result = testCircuitBreaker(component, scenario);
@@ -337,7 +345,7 @@ router.post('/test/:pattern', (req, res) => {
       default:
         return res.status(400).json({
           error: 'Unknown resilience pattern',
-          pattern
+          pattern,
         });
     }
 
@@ -346,14 +354,13 @@ router.post('/test/:pattern', (req, res) => {
       pattern,
       component,
       scenario,
-      result
+      result,
     });
-
   } catch (error) {
     logger.error('Failed to test resilience pattern:', error);
     res.status(500).json({
       error: 'Failed to test resilience pattern',
-      message: error.message
+      message: error.message,
     });
   }
 });

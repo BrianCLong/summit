@@ -3,8 +3,8 @@ image:
 
 security:
   allowedPrincipals:
-    - "spiffe://intelgraph.local/ns/intelgraph/sa/webapp-sa"
-    - "spiffe://intelgraph.local/ns/intelgraph/sa/batch-jobs-sa"
+    - 'spiffe://intelgraph.local/ns/intelgraph/sa/webapp-sa'
+    - 'spiffe://intelgraph.local/ns/intelgraph/sa/batch-jobs-sa'
   allowedPorts:
-    - "4000"
-    - "8080"
+    - '4000'
+    - '8080'

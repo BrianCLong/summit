@@ -11,13 +11,13 @@ Located in `sdk/qpg/typescript`.
 - Usage:
 
 ```ts
-import { QpgClient } from "@summit/qpg-client";
+import { QpgClient } from '@summit/qpg-client';
 
-const client = new QpgClient("http://localhost:8080", fetch);
+const client = new QpgClient('http://localhost:8080', fetch);
 const result = await client.tokenize({
-  tenant: "acme",
-  purpose: "analytics",
-  payload: { ssn: "123456789" },
+  tenant: 'acme',
+  purpose: 'analytics',
+  payload: { ssn: '123456789' },
 });
 ```
 

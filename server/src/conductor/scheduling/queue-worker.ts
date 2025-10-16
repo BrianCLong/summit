@@ -37,7 +37,9 @@ export class QueueWorker {
 
   constructor(config: WorkerConfig) {
     this.config = config;
-    console.log(`Initializing queue worker ${config.workerId} for ${config.expertType}`);
+    console.log(
+      `Initializing queue worker ${config.workerId} for ${config.expertType}`,
+    );
   }
 
   /**
@@ -97,7 +99,10 @@ export class QueueWorker {
         }
       } catch (error) {
         console.error(`Worker loop error in ${workerId}:`, error);
-        prometheusConductorMetrics.recordOperationalEvent('worker_error', false);
+        prometheusConductorMetrics.recordOperationalEvent(
+          'worker_error',
+          false,
+        );
 
         // Short delay before retrying on error
         await this.sleep(5000);
@@ -116,7 +121,9 @@ export class QueueWorker {
     task: SchedulingContext,
   ): Promise<void> {
     const startTime = performance.now();
-    console.log(`Worker ${workerId} processing task ${task.requestId} from ${queueName}`);
+    console.log(
+      `Worker ${workerId} processing task ${task.requestId} from ${queueName}`,
+    );
 
     try {
       // Execute the task based on expert type
@@ -136,8 +143,14 @@ export class QueueWorker {
           `Task ${task.requestId} completed successfully in ${result.processingTime}ms (cost: $${result.actualCost.toFixed(4)})`,
         );
 
-        prometheusConductorMetrics.recordOperationalEvent('worker_task_completed', true);
-        prometheusConductorMetrics.recordOperationalMetric('worker_task_success_rate', 1);
+        prometheusConductorMetrics.recordOperationalEvent(
+          'worker_task_completed',
+          true,
+        );
+        prometheusConductorMetrics.recordOperationalMetric(
+          'worker_task_success_rate',
+          1,
+        );
       } else {
         // Mark task as failed
         await costAwareScheduler.failTask(
@@ -147,16 +160,30 @@ export class QueueWorker {
         );
 
         console.error(`Task ${task.requestId} failed:`, result.error);
-        prometheusConductorMetrics.recordOperationalEvent('worker_task_failed', false);
-        prometheusConductorMetrics.recordOperationalMetric('worker_task_success_rate', 0);
+        prometheusConductorMetrics.recordOperationalEvent(
+          'worker_task_failed',
+          false,
+        );
+        prometheusConductorMetrics.recordOperationalMetric(
+          'worker_task_success_rate',
+          0,
+        );
       }
     } catch (error) {
       // Mark task as failed
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      await costAwareScheduler.failTask(queueName, task.requestId, errorMessage);
+      const errorMessage =
+        error instanceof Error ? error.message : 'Unknown error';
+      await costAwareScheduler.failTask(
+        queueName,
+        task.requestId,
+        errorMessage,
+      );
 
       console.error(`Task ${task.requestId} processing error:`, error);
-      prometheusConductorMetrics.recordOperationalEvent('worker_task_error', false);
+      prometheusConductorMetrics.recordOperationalEvent(
+        'worker_task_error',
+        false,
+      );
     }
 
     const totalProcessingTime = performance.now() - startTime;
@@ -244,7 +271,8 @@ export class QueueWorker {
 
       return {
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown execution error',
+        error:
+          error instanceof Error ? error.message : 'Unknown execution error',
         actualCost: 0,
         processingTime,
       };
@@ -255,17 +283,32 @@ export class QueueWorker {
   private async executeGraphOpsTask(context: any): Promise<any> {
     // Simulate graph operations processing
     await this.sleep(Math.random() * 30000 + 15000); // 15-45 seconds
-    return { status: 'completed', nodes: 150, edges: 320, insights: ['pattern1', 'anomaly2'] };
+    return {
+      status: 'completed',
+      nodes: 150,
+      edges: 320,
+      insights: ['pattern1', 'anomaly2'],
+    };
   }
 
   private async executeRagRetrievalTask(context: any): Promise<any> {
     await this.sleep(Math.random() * 20000 + 10000); // 10-30 seconds
-    return { status: 'completed', documents: 25, chunks: 180, relevanceScore: 0.87 };
+    return {
+      status: 'completed',
+      documents: 25,
+      chunks: 180,
+      relevanceScore: 0.87,
+    };
   }
 
   private async executeOsintAnalysisTask(context: any): Promise<any> {
     await this.sleep(Math.random() * 40000 + 20000); // 20-60 seconds
-    return { status: 'completed', sources: 12, indicators: 8, confidence: 0.92 };
+    return {
+      status: 'completed',
+      sources: 12,
+      indicators: 8,
+      confidence: 0.92,
+    };
   }
 
   private async executeExportGenerationTask(context: any): Promise<any> {
@@ -285,7 +328,12 @@ export class QueueWorker {
 
   private async executeCodeGenerationTask(context: any): Promise<any> {
     await this.sleep(Math.random() * 15000 + 5000); // 5-20 seconds
-    return { status: 'completed', linesOfCode: 120, language: 'typescript', tests: 8 };
+    return {
+      status: 'completed',
+      linesOfCode: 120,
+      language: 'typescript',
+      tests: 8,
+    };
   }
 
   /**
@@ -296,7 +344,8 @@ export class QueueWorker {
     minMultiplier: number,
     maxMultiplier: number,
   ): number {
-    const multiplier = Math.random() * (maxMultiplier - minMultiplier) + minMultiplier;
+    const multiplier =
+      Math.random() * (maxMultiplier - minMultiplier) + minMultiplier;
     return estimatedCost * multiplier;
   }
 
@@ -353,7 +402,9 @@ export class QueueWorker {
  */
 export class WorkerFactory {
   static createWorker(): QueueWorker {
-    const expertType = (process.env.EXPERT_TYPE || 'light') as ExpertArm | 'light';
+    const expertType = (process.env.EXPERT_TYPE || 'light') as
+      | ExpertArm
+      | 'light';
     const queueNames = (process.env.QUEUE_NAMES || 'light_normal').split(',');
 
     const config: WorkerConfig = {

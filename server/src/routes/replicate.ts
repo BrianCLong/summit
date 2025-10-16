@@ -17,4 +17,3 @@ r.get('/replicate', async (req, res) => {
 });
 
 export default r;
-

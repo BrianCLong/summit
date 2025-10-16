@@ -7,7 +7,10 @@ describe('copilotQuery resolver', () => {
       neo4jSession: {
         run: jest
           .fn()
-          .mockResolvedValue({ summary: { plan: { operatorType: 'Projection' } }, records: [] }),
+          .mockResolvedValue({
+            summary: { plan: { operatorType: 'Projection' } },
+            records: [],
+          }),
       },
       policyService: {
         evaluate: jest

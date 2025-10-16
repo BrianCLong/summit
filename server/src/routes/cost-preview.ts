@@ -44,27 +44,40 @@ function estimate(doc: string): CostPreview {
 
   // Heuristic estimations (tune as needed)
   const estExecutionMs = Math.min(120000, 20 + fieldCount * 3 + maxDepth * 10);
-  const estCostUSD = Number(((fieldCount * 0.00001) + (maxDepth * 0.00002)).toFixed(6));
+  const estCostUSD = Number(
+    (fieldCount * 0.00001 + maxDepth * 0.00002).toFixed(6),
+  );
   const budget = {
     timeMs: Math.ceil(estExecutionMs * 1.5),
     costUSD: Number((estCostUSD * 2).toFixed(6)),
     notes: [
-      maxDepth > 10 ? 'High depth; consider flattening or pagination.' : 'Depth OK.',
-      fieldCount > 500 ? 'Large field count; consider requesting fewer fields.' : 'Field count OK.'
+      maxDepth > 10
+        ? 'High depth; consider flattening or pagination.'
+        : 'Depth OK.',
+      fieldCount > 500
+        ? 'Large field count; consider requesting fewer fields.'
+        : 'Field count OK.',
     ],
   };
 
-  return { depth: maxDepth, fieldCount, estExecutionMs, estCostUSD, budgetSuggestion: budget };
+  return {
+    depth: maxDepth,
+    fieldCount,
+    estExecutionMs,
+    estCostUSD,
+    budgetSuggestion: budget,
+  };
 }
 
 router.post('/graphql/cost-preview', (req: Request, res: Response) => {
   const { operation } = req.body || {};
   if (!operation || typeof operation !== 'string') {
-    return res.status(400).json({ error: 'operation (GraphQL string) is required' });
+    return res
+      .status(400)
+      .json({ error: 'operation (GraphQL string) is required' });
   }
   const result = estimate(operation);
   return res.json({ success: true, preview: result, timestamp: Date.now() });
 });
 
 export default router;
-

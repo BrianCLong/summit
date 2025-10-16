@@ -210,7 +210,9 @@ rewardRouter.post('/reward', async (req, res) => {
     const rewardSignal: RewardSignal = {
       armId: rewardRequest.armId,
       contextHash:
-        rewardRequest.contextHash || rewardRequest.decisionId || `implicit_${Date.now()}`,
+        rewardRequest.contextHash ||
+        rewardRequest.decisionId ||
+        `implicit_${Date.now()}`,
       rewardValue,
       rewardType: rewardRequest.rewardType,
       timestamp: Date.now(),
@@ -228,18 +230,27 @@ rewardRouter.post('/reward', async (req, res) => {
     };
 
     // Record metrics
-    prometheusConductorMetrics.recordOperationalEvent(`reward_${rewardRequest.rewardType}`, true);
+    prometheusConductorMetrics.recordOperationalEvent(
+      `reward_${rewardRequest.rewardType}`,
+      true,
+    );
     prometheusConductorMetrics.recordOperationalMetric(
       'reward_processing_time',
       response.processingTime,
     );
-    prometheusConductorMetrics.recordOperationalMetric('reward_value', rewardValue);
+    prometheusConductorMetrics.recordOperationalMetric(
+      'reward_value',
+      rewardValue,
+    );
 
     res.json(response);
   } catch (error) {
     console.error('Reward processing error:', error);
 
-    prometheusConductorMetrics.recordOperationalEvent('reward_processing_error', false);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'reward_processing_error',
+      false,
+    );
 
     res.status(500).json({
       success: false,
@@ -286,7 +297,9 @@ rewardRouter.post('/reward/batch', async (req, res) => {
         const rewardSignal: RewardSignal = {
           armId: rewardRequest.armId,
           contextHash:
-            rewardRequest.contextHash || rewardRequest.decisionId || `batch_${Date.now()}_${index}`,
+            rewardRequest.contextHash ||
+            rewardRequest.decisionId ||
+            `batch_${Date.now()}_${index}`,
           rewardValue,
           rewardType: rewardRequest.rewardType,
           timestamp: Date.now(),
@@ -329,9 +342,18 @@ rewardRouter.post('/reward/batch', async (req, res) => {
     });
 
     // Record batch metrics
-    prometheusConductorMetrics.recordOperationalMetric('reward_batch_size', rewards.length);
-    prometheusConductorMetrics.recordOperationalMetric('reward_batch_success_count', successCount);
-    prometheusConductorMetrics.recordOperationalMetric('reward_batch_error_count', errorCount);
+    prometheusConductorMetrics.recordOperationalMetric(
+      'reward_batch_size',
+      rewards.length,
+    );
+    prometheusConductorMetrics.recordOperationalMetric(
+      'reward_batch_success_count',
+      successCount,
+    );
+    prometheusConductorMetrics.recordOperationalMetric(
+      'reward_batch_error_count',
+      errorCount,
+    );
 
     res.json({
       success: errorCount === 0,
@@ -416,7 +438,8 @@ rewardRouter.post('/reset', async (req, res) => {
     if (confirmation !== 'RESET_BANDIT_STATE') {
       return res.status(400).json({
         success: false,
-        message: 'Confirmation required: { "confirmation": "RESET_BANDIT_STATE" }',
+        message:
+          'Confirmation required: { "confirmation": "RESET_BANDIT_STATE" }',
       });
     }
 
@@ -538,9 +561,14 @@ rewardRouter.use((req, res, next) => {
 
   res.on('finish', () => {
     const duration = Date.now() - start;
-    console.log(`Reward API: ${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`);
+    console.log(
+      `Reward API: ${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`,
+    );
 
-    prometheusConductorMetrics.recordOperationalMetric('reward_api_request_duration', duration);
+    prometheusConductorMetrics.recordOperationalMetric(
+      'reward_api_request_duration',
+      duration,
+    );
     prometheusConductorMetrics.recordOperationalEvent(
       `reward_api_${req.method.toLowerCase()}`,
       res.statusCode < 400,

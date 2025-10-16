@@ -30,7 +30,9 @@ export const policy = {
       if (s.startsWith('classification:')) {
         const requiredClassification = s.split(':')[1].toUpperCase();
         if (classificationLevels[requiredClassification] === undefined) {
-          console.warn(`Unknown classification level in scope: ${requiredClassification}`);
+          console.warn(
+            `Unknown classification level in scope: ${requiredClassification}`,
+          );
           continue;
         }
         if (userClassification < classificationLevels[requiredClassification]) {

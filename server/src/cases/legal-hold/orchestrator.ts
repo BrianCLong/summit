@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 import logger from '../../config/logger';
 import { writeAudit } from '../../utils/audit';
 import {
@@ -44,7 +44,9 @@ export class LegalHoldOrchestrator {
       throw new Error('LegalHoldOrchestrator requires a repository');
     }
     if (!options.connectors?.length) {
-      throw new Error('LegalHoldOrchestrator requires at least one preservation connector');
+      throw new Error(
+        'LegalHoldOrchestrator requires at least one preservation connector',
+      );
     }
 
     this.repository = options.repository;
@@ -54,11 +56,14 @@ export class LegalHoldOrchestrator {
     this.notificationDispatcher = options.notificationDispatcher;
     this.chainOfCustody = options.chainOfCustody;
     this.lifecyclePolicies = options.lifecyclePolicies ?? [];
-    this.auditWriter = options.auditWriter ?? this.defaultAuditWriter.bind(this);
+    this.auditWriter =
+      options.auditWriter ?? this.defaultAuditWriter.bind(this);
   }
 
-  async initiateHold(input: LegalHoldInitiationInput): Promise<LegalHoldRecord> {
-    const holdId = `hold_${uuidv4()}`;
+  async initiateHold(
+    input: LegalHoldInitiationInput,
+  ): Promise<LegalHoldRecord> {
+    const holdId = `hold_${randomUUID()}`;
     const createdAt = now();
     const normalizedCustodians = input.custodians.map((custodian) => ({
       ...custodian,
@@ -129,7 +134,10 @@ export class LegalHoldOrchestrator {
           },
         });
       } catch (error) {
-        logger.error({ err: error }, 'Failed to append chain of custody event for legal hold');
+        logger.error(
+          { err: error },
+          'Failed to append chain of custody event for legal hold',
+        );
       }
     }
 
@@ -141,7 +149,10 @@ export class LegalHoldOrchestrator {
     for (const connectorId of input.scope.connectors) {
       const connector = this.connectors.get(connectorId);
       if (!connector) {
-        logger.warn({ connectorId }, 'Connector not registered for legal hold scope');
+        logger.warn(
+          { connectorId },
+          'Connector not registered for legal hold scope',
+        );
         holdStatus = 'FAILED';
         continue;
       }
@@ -247,7 +258,9 @@ export class LegalHoldOrchestrator {
     return (await this.repository.getById(holdId)) ?? holdRecord;
   }
 
-  async verifyPreservation(holdId: string): Promise<PreservationVerificationResult[]> {
+  async verifyPreservation(
+    holdId: string,
+  ): Promise<PreservationVerificationResult[]> {
     const hold = await this.ensureHold(holdId);
     const verifications: PreservationVerificationResult[] = [];
 
@@ -258,7 +271,11 @@ export class LegalHoldOrchestrator {
       }
 
       try {
-        const verification = await connector.verifyHold(holdId, hold.caseId, hold.scope);
+        const verification = await connector.verifyHold(
+          holdId,
+          hold.caseId,
+          hold.scope,
+        );
         verifications.push(verification);
         await this.repository.recordVerification(holdId, verification);
         await this.recordComplianceCheckpoint(holdId, {
@@ -316,10 +333,15 @@ export class LegalHoldOrchestrator {
     }
 
     const acknowledgementAt = now();
-    await this.repository.recordCustodianStatus(holdId, custodianId, 'acknowledged', {
-      acknowledgedAt,
-      status: 'acknowledged',
-    });
+    await this.repository.recordCustodianStatus(
+      holdId,
+      custodianId,
+      'acknowledged',
+      {
+        acknowledgedAt,
+        status: 'acknowledged',
+      },
+    );
 
     await this.appendAudit({
       holdId,
@@ -361,7 +383,10 @@ export class LegalHoldOrchestrator {
         exportRequests.push({
           connectorId: connectorResult.connectorId,
           exportPath: 'n/a',
-          format: request.exportFormat ?? hold.eDiscovery?.exportFormats?.[0] ?? 'zip',
+          format:
+            request.exportFormat ??
+            hold.eDiscovery?.exportFormats?.[0] ??
+            'zip',
           itemCount: 0,
           generatedAt: now(),
         });
@@ -389,13 +414,17 @@ export class LegalHoldOrchestrator {
     return exportRequests;
   }
 
-  async runComplianceMonitoring(holdId: string): Promise<ComplianceCheckpoint[]> {
+  async runComplianceMonitoring(
+    holdId: string,
+  ): Promise<ComplianceCheckpoint[]> {
     const hold = await this.ensureHold(holdId);
     const checkpoints: ComplianceCheckpoint[] = [];
     const timestamp = now();
 
     // Custodian acknowledgement check
-    const unacknowledged = hold.custodians.filter((c) => c.status !== 'acknowledged');
+    const unacknowledged = hold.custodians.filter(
+      (c) => c.status !== 'acknowledged',
+    );
     checkpoints.push({
       checkId: 'custodian_acknowledgement',
       description: 'All custodians acknowledged legal hold',
@@ -408,7 +437,9 @@ export class LegalHoldOrchestrator {
     });
 
     // Connector preservation status check
-    const failedConnectors = hold.connectors.filter((c) => c.status === 'failed');
+    const failedConnectors = hold.connectors.filter(
+      (c) => c.status === 'failed',
+    );
     checkpoints.push({
       checkId: 'connector_preservation',
       description: 'All connectors successfully preserved data',
@@ -474,10 +505,15 @@ export class LegalHoldOrchestrator {
     }
 
     for (const custodian of hold.custodians) {
-      await this.repository.recordCustodianStatus(holdId, custodian.id, 'released', {
-        releasedAt: now(),
-        status: 'released',
-      });
+      await this.repository.recordCustodianStatus(
+        holdId,
+        custodian.id,
+        'released',
+        {
+          releasedAt: now(),
+          status: 'released',
+        },
+      );
     }
 
     await this.repository.update(holdId, {
@@ -544,21 +580,31 @@ export class LegalHoldOrchestrator {
 
       if (response.status === 'sent' || response.status === 'queued') {
         for (const custodian of hold.custodians) {
-          await this.repository.recordCustodianStatus(hold.holdId, custodian.id, 'notified', {
-            status: 'notified',
-            notifiedAt: now(),
-          });
+          await this.repository.recordCustodianStatus(
+            hold.holdId,
+            custodian.id,
+            'notified',
+            {
+              status: 'notified',
+              notifiedAt: now(),
+            },
+          );
         }
       }
     } catch (error) {
-      logger.error({ err: error, holdId: hold.holdId }, 'Failed to send legal hold notifications');
+      logger.error(
+        { err: error, holdId: hold.holdId },
+        'Failed to send legal hold notifications',
+      );
       await this.appendAudit({
         holdId: hold.holdId,
         caseId: hold.caseId,
         actorId: 'system',
         actorRole: 'automation',
         action: 'LEGAL_HOLD_NOTIFICATION_FAILED',
-        details: { error: error instanceof Error ? error.message : 'Unknown error' },
+        details: {
+          error: error instanceof Error ? error.message : 'Unknown error',
+        },
         createdAt: now(),
       });
     }
@@ -579,7 +625,10 @@ export class LegalHoldOrchestrator {
     }
     // Ensure suspension applied flag defaults to true for connectors in scope
     for (const policy of policies.values()) {
-      if (policy.suspensionApplied === undefined || policy.suspensionApplied === false) {
+      if (
+        policy.suspensionApplied === undefined ||
+        policy.suspensionApplied === false
+      ) {
         policy.suspensionApplied = true;
         policy.notes = policy.notes
           ? `${policy.notes}; Auto-suspended for legal hold`
@@ -639,9 +688,15 @@ export class LegalHoldOrchestrator {
 
 export class InMemoryLegalHoldRepository implements LegalHoldRepository {
   private readonly records = new Map<string, LegalHoldRecord>();
-  private readonly verifications = new Map<string, PreservationVerificationResult[]>();
+  private readonly verifications = new Map<
+    string,
+    PreservationVerificationResult[]
+  >();
   private readonly compliance = new Map<string, ComplianceCheckpoint[]>();
-  private readonly notifications = new Map<string, LegalHoldNotificationRecord[]>();
+  private readonly notifications = new Map<
+    string,
+    LegalHoldNotificationRecord[]
+  >();
   private readonly audit = new Map<string, AuditTrailEntry[]>();
 
   async create(record: LegalHoldRecord): Promise<void> {
@@ -652,7 +707,10 @@ export class InMemoryLegalHoldRepository implements LegalHoldRepository {
     this.audit.set(record.holdId, []);
   }
 
-  async update(holdId: string, update: Partial<LegalHoldRecord>): Promise<void> {
+  async update(
+    holdId: string,
+    update: Partial<LegalHoldRecord>,
+  ): Promise<void> {
     const existing = this.records.get(holdId);
     if (!existing) {
       throw new Error(`Legal hold ${holdId} not found`);

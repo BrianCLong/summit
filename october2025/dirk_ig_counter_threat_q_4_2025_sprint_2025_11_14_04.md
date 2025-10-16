@@ -1,12 +1,14 @@
 [MODE: WHITE+BLUE]
 
 # DIRK IG — Counter‑Threat & Intelligence Director (Next Sprint)
-**Workstream:** Counter‑Threat, Intel, Provable Compliance, Detections  • **Cadence:** Q4‑2025 (Oct–Dec)  
-**Sprint Window:** **2025‑11‑14 → 2025‑11‑28**  • **Owner:** Directorate K++ (DIRK IG)  • **Ordinal:** **04**
+
+**Workstream:** Counter‑Threat, Intel, Provable Compliance, Detections • **Cadence:** Q4‑2025 (Oct–Dec)  
+**Sprint Window:** **2025‑11‑14 → 2025‑11‑28** • **Owner:** Directorate K++ (DIRK IG) • **Ordinal:** **04**
 
 ---
 
 ## A) Executive Summary (Decisions & Next Steps)
+
 - **Scale intel→action with quality controls:** promote Intel Ingestion to **v1** with scoring, decay, TLP handling, and safe auto‑publish to detections/suppressions.
 - **Raise detection fidelity:** backtesting + replay harness; expand ATT&CK coverage; hunt notebooks; measured FP reduction via targeted suppressions with expiry.
 - **Harden reliability & audit:** evidence retention lifecycle policy; auto‑retrospective pack; dashboard v2 with error‑budget panels.
@@ -15,6 +17,7 @@
 ---
 
 ## B) Goals & Deliverables
+
 - **G1. Intel v1**: scoring model (weights, freshness decay), TLP enforcement, automated list updates with provenance.
 - **G2. Detection Fidelity**: backtesting CLI, log replay, +5 Sigma rules (ATT&CK map v3), targeted suppressions with audit & expiry.
 - **G3. Threat Hunting**: notebook templates (queries, hypotheses, baselines) + hunt review ritual & ledger.
@@ -24,7 +27,9 @@
 ---
 
 ## C) Sprint Plan (2025‑11‑14 → 2025‑11‑28)
+
 **Milestones**
+
 - **11‑18:** Intel v1 scoring + decay live in staging; TLP enforcement on publish.
 - **11‑20:** Backtesting CLI + log replay; initial results for Detection Pack v2.
 - **11‑24:** +5 Sigma enabled (shadow→enforce); Dashboards v2 in staging; hunt notebooks published.
@@ -36,7 +41,9 @@
 ---
 
 ## D) Artifacts (commit‑ready)
+
 ### 1) Intel Scoring & Decay (config)
+
 ```yaml
 intel:
   score:
@@ -46,16 +53,16 @@ intel:
       sighting_count: 0.10
       analyst_confidence: 0.10
     thresholds:
-      high: ">=80"
-      medium: ">=60"
+      high: '>=80'
+      medium: '>=60'
   decay:
     half_life_days:
       ip: 7
       domain: 14
       sha256: 45
   tlp:
-    allow_publish: ["WHITE","GREEN","AMBER"]
-    block_publish: ["RED"]
+    allow_publish: ['WHITE', 'GREEN', 'AMBER']
+    block_publish: ['RED']
   publish_rules:
     - list: detections.intel.bad_ips
       when: type==ip and score>=80 and tlp!=RED
@@ -64,6 +71,7 @@ intel:
 ```
 
 **Decay policy (Rego)**
+
 ```rego
 package intel.decay
 
@@ -81,6 +89,7 @@ allow_publish(ioc) {
 ```
 
 **Publisher (pseudocode)**
+
 ```python
 from datetime import datetime
 
@@ -94,6 +103,7 @@ def publish(ioc, now: datetime):
 ```
 
 ### 2) Detection Fidelity — Backtesting CLI
+
 ```bash
 # cli/backtest.sh
 #!/usr/bin/env bash
@@ -107,6 +117,7 @@ jq '.summary' "$OUT/report.json" | tee "$OUT/summary.txt"
 ```
 
 **Replay Dataset Manifest (example)**
+
 ```yaml
 replay:
   source: s3://security-logs/2025-10/*.ndjson
@@ -116,7 +127,9 @@ replay:
 ```
 
 ### 3) Sigma Rules (additions)
+
 **L. Suspicious Gate Override Burst**
+
 ```yaml
 title: Burst of Break-Glass Overrides
 id: l4m5n6o7-p8q9-r0s1-t2u3-v4w5x6y7z8
@@ -129,6 +142,7 @@ tags: [governance, integrity]
 ```
 
 **M. Token Scope Mismatch**
+
 ```yaml
 title: Token Used Outside Allowed Scope
 id: m1n2o3p4-q5r6-s7t8-u9v0-w1x2y3z4a5
@@ -143,6 +157,7 @@ tags: [attack.defense_evasion]
 ```
 
 **N. Anomalous Admin Login Time**
+
 ```yaml
 title: Admin Login at Unusual Time
 id: n9o8p7q6-r5s4-t3u2-v1w0-x9y8z7a6b5
@@ -155,6 +170,7 @@ tags: [behavior, anomaly]
 ```
 
 **O. Evidence Coverage Drop**
+
 ```yaml
 title: Evidence Coverage Below Threshold
 id: o1p2q3r4-s5t6-u7v8-w9x0-y1z2a3b4c5
@@ -167,6 +183,7 @@ tags: [supply_chain, integrity]
 ```
 
 **P. TLP Red Publish Attempt**
+
 ```yaml
 title: Attempted Publish of TLP:RED Intel
 id: p5q6r7s8-t9u0-v1w2-x3y4-z5a6b7c8d9
@@ -180,32 +197,55 @@ tags: [threat_intel, governance]
 ```
 
 ### 4) Threat Hunting Templates (Jupyter skeleton)
+
 ```markdown
 # Hunt: IntelGraph Egress Anomalies (v1)
+
 ## Hypothesis
+
 Actors exfiltrate data by blending with bulk-export jobs.
 
 ## Signals & Data
+
 - intelgraph.download, actor_id, file_type, bytes, geoip_country
 
 ## Queries (fill in datasource specifics)
+
 - Rate by actor_id vs 7d baseline
 - Bulk-export overlap with non-export hours
 
 ## Expected Outcome
+
 Triage candidates list with evidence links.
 ```
 
 ### 5) Dashboards v2 (JSON outline)
+
 ```json
 {
   "dashboard": {
     "title": "Security Operations v2",
     "panels": [
-      {"type":"timeseries","title":"Error Budget Burn (Gate)","targets":[{"expr":"gate_burn_rate"}]},
-      {"type":"gauge","title":"Evidence Coverage","targets":[{"expr":"evidence_present_ratio"}]},
-      {"type":"table","title":"Suppression Coverage","targets":[{"expr":"suppressions_active_total"}]},
-      {"type":"stat","title":"Intel v1 Publish Count","targets":[{"expr":"intel_publish_total"}]}
+      {
+        "type": "timeseries",
+        "title": "Error Budget Burn (Gate)",
+        "targets": [{ "expr": "gate_burn_rate" }]
+      },
+      {
+        "type": "gauge",
+        "title": "Evidence Coverage",
+        "targets": [{ "expr": "evidence_present_ratio" }]
+      },
+      {
+        "type": "table",
+        "title": "Suppression Coverage",
+        "targets": [{ "expr": "suppressions_active_total" }]
+      },
+      {
+        "type": "stat",
+        "title": "Intel v1 Publish Count",
+        "targets": [{ "expr": "intel_publish_total" }]
+      }
     ]
   },
   "version": 2
@@ -213,6 +253,7 @@ Triage candidates list with evidence links.
 ```
 
 ### 6) Governance — Evidence Lifecycle OPA
+
 ```rego
 package policy.evidence.lifecycle
 
@@ -232,6 +273,7 @@ retain {
 ```
 
 ### 7) Auto‑Retrospective Pack (script)
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -242,24 +284,28 @@ jq -n --arg inc "$INC" --arg date "$(date -Is)" '{incident:$inc,date:$date,owner
 ```
 
 ### 8) Purple Team Planning (synthetic only)
+
 - Map ATT&CK techniques covered by Sigma v1–v3; choose top 3 gaps.
 - Design **tabletop injects** per gap with clear success metrics and detection expectations.
 - No exploitation; use synthetic logs + replay harness.
 
 ### 9) Runbooks (delta)
+
 - **RB‑08: Intel Quality Gate** — block low‑score intel, require human ack for score 60–79, auto‑decay apply.
 - **RB‑09: Backtest Regression** — if detection precision < target, auto‑revert last rule change; open tuning task.
 
 ---
 
 ## E) Compliance Mappings (delta)
-- **NIST 800‑53:** SI‑4(24) (threat intel), AU‑6 (audit review), CM‑3 (config change), IR‑4 (response), PL‑8 (plans).  
-- **ISO 27001:** A.5.7, A.5.14, A.12.1, A.12.6.  
+
+- **NIST 800‑53:** SI‑4(24) (threat intel), AU‑6 (audit review), CM‑3 (config change), IR‑4 (response), PL‑8 (plans).
+- **ISO 27001:** A.5.7, A.5.14, A.12.1, A.12.6.
 - **SOC 2:** CC7.2, CC7.3, CC8.1.
 
 ---
 
 ## F) SLAs, SLOs & Metrics
+
 - **Intel publish latency:** ≤ 10m (p95); **TLP:RED publishes:** 0; **False positive rate:** ≤ 3%.
 - **Detection backtest coverage:** ≥ 80% of replay corpus by 11‑24.
 - **Evidence retention compliance:** 100% policy‑conform by 11‑27.
@@ -267,6 +313,7 @@ jq -n --arg inc "$INC" --arg date "$(date -Is)" '{incident:$inc,date:$date,owner
 ---
 
 ## G) Proof‑Carrying Analysis (PCA)
+
 **Assumptions:** Ingestion v0 is live; SIEM supports replay; Grafana as‑code; evidence store available.  
 **Evidence:** backtest reports, intel provenance, dashboard JSON, OPA unit tests, retro packs.  
 **Caveats:** Replay representativeness; scoring drift; ensure PII remains redacted.  
@@ -275,6 +322,7 @@ jq -n --arg inc "$INC" --arg date "$(date -Is)" '{incident:$inc,date:$date,owner
 ---
 
 ## H) Definition of Done — V4
+
 - Intel v1 with scoring/decay/TLP; automated, auditable publishes.
 - Backtesting harness live; +5 Sigma in enforce with FP ≤ 3%.
 - Dashboards v2 deployed; evidence lifecycle policy enforced.
@@ -284,6 +332,7 @@ jq -n --arg inc "$INC" --arg date "$(date -Is)" '{incident:$inc,date:$date,owner
 ---
 
 ## I) Delivery Checklist
+
 - [ ] Scoring/decay config merged; Rego tests pass
 - [ ] Publisher respects TLP; provenance intact
 - [ ] Backtest reports attached to PRs
@@ -295,5 +344,4 @@ jq -n --arg inc "$INC" --arg date "$(date -Is)" '{incident:$inc,date:$date,owner
 
 ---
 
-*Prepared by DIRK IG (Directorate K++). Auditable, fidelity‑focused sprint aligned to Q4 trains.*
-
+_Prepared by DIRK IG (Directorate K++). Auditable, fidelity‑focused sprint aligned to Q4 trains._

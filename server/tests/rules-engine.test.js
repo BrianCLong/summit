@@ -1,8 +1,15 @@
-const { selectorToCypher, computeScore, dedupeAlerts } = require('../src/rules/engine.js');
+const {
+  selectorToCypher,
+  computeScore,
+  dedupeAlerts,
+} = require('../src/rules/engine.js');
 
 describe('rules engine', () => {
   test('selector to cypher translation', () => {
-    const { query, params } = selectorToCypher({ label: 'Person', match: { name: 'Alice' } });
+    const { query, params } = selectorToCypher({
+      label: 'Person',
+      match: { name: 'Alice' },
+    });
     expect(query).toBe('MATCH (n:Person) WHERE n.name = $name RETURN n');
     expect(params).toEqual({ name: 'Alice' });
   });
@@ -49,7 +56,11 @@ describe('rules engine', () => {
     };
     const deduped = dedupeAlerts(alerts, second, 60 * 1000);
     expect(deduped).toHaveLength(1);
-    const oldAlert = { ...first, id: 'a3', createdAt: new Date(Date.now() - 2 * 60 * 1000) };
+    const oldAlert = {
+      ...first,
+      id: 'a3',
+      createdAt: new Date(Date.now() - 2 * 60 * 1000),
+    };
     const deduped2 = dedupeAlerts(deduped, oldAlert, 60 * 1000);
     expect(deduped2).toHaveLength(2);
   });

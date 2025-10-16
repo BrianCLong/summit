@@ -15,7 +15,10 @@ import {
   checkMlService,
   checkSystemResources,
 } from '../monitoring/health.js';
-import { recordBusinessEvent, type BusinessMetricEvent } from '../monitoring/businessMetrics.js';
+import {
+  recordBusinessEvent,
+  type BusinessMetricEvent,
+} from '../monitoring/businessMetrics.js';
 
 const router = express.Router();
 router.use(express.json());
@@ -130,7 +133,7 @@ router.get('/health/info', (req: Request, res: Response) => {
       rss: Math.round(process.memoryUsage().rss / 1024 / 1024),
     },
   };
-  
+
   res.json(info);
 });
 
@@ -250,7 +253,9 @@ router.post('/web-vitals', (req: Request, res: Response) => {
     webVitalValue.set({ metric: name, id: id || 'unknown' }, value);
     res.status(204).end();
   } catch (error: any) {
-    res.status(500).json({ error: 'Failed to record web vital', details: error.message });
+    res
+      .status(500)
+      .json({ error: 'Failed to record web vital', details: error.message });
   }
 });
 

@@ -19,7 +19,9 @@ interface PrometheusResponse {
 
 export const metricsCache: Record<string, any> = {};
 
-async function queryPrometheus(query: string): Promise<QueryResult | undefined> {
+async function queryPrometheus(
+  query: string,
+): Promise<QueryResult | undefined> {
   try {
     const response = await fetch(
       `${PROMETHEUS_URL}/api/v1/query?query=${encodeURIComponent(query)}`,

@@ -1,6 +1,9 @@
 import type { Driver } from 'neo4j-driver';
 
-export async function waitForNeo4j(driver: Driver, timeoutMs = 30000): Promise<boolean> {
+export async function waitForNeo4j(
+  driver: Driver,
+  timeoutMs = 30000,
+): Promise<boolean> {
   const start = Date.now();
   let delay = 250;
   while (Date.now() - start < timeoutMs) {

@@ -5,4 +5,3 @@ export const integrationsResolvers = {
     n8nAllowed: async () => listAllowedN8nFlows(),
   },
 };
-

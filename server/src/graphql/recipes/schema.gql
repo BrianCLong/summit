@@ -11,7 +11,8 @@ type StartRecipeResult {
   name: String!
 }
 extend type Mutation {
-  startRecipe(input: StartRecipeInput!): StartRecipeResult! @budget(capUSD: 0.50, tokenCeiling: 8000)
+  startRecipe(input: StartRecipeInput!): StartRecipeResult!
+    @budget(capUSD: 0.50, tokenCeiling: 8000)
 }
 
 extend type Query {

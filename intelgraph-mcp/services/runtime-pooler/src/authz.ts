@@ -14,7 +14,10 @@ export interface PolicyDecision {
 
 const OPA_URL = process.env.OPA_URL;
 
-export async function authorize(authorization: unknown, context: PolicyContext): Promise<PolicyDecision> {
+export async function authorize(
+  authorization: unknown,
+  context: PolicyContext,
+): Promise<PolicyDecision> {
   if (!authorization) throw new Error('unauthorized');
   if (!OPA_URL) {
     return { allow: true };
@@ -27,14 +30,14 @@ export async function authorize(authorization: unknown, context: PolicyContext):
       tool: context.toolClass,
       capability_scopes: context.capabilityScopes ?? [],
       purpose: context.purpose ?? 'ops',
-      destination: context.destination
-    }
+      destination: context.destination,
+    },
   };
 
   const res = await fetch(`${OPA_URL}/v1/data/intelgraph/mcp/allow`, {
     method: 'POST',
     headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(payload)
+    body: JSON.stringify(payload),
   });
 
   if (!res.ok) {

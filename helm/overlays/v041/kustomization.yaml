@@ -4,7 +4,7 @@ kind: Kustomization
 metadata:
   name: mc-platform-v041-sovereign-safeguards
   annotations:
-    config.kubernetes.io/local-config: "true"
+    config.kubernetes.io/local-config: 'true'
 
 namespace: mc-platform-v041
 

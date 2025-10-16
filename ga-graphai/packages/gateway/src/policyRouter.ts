@@ -23,17 +23,33 @@ interface AnnotatedBid {
   density: number;
 }
 
-function computeCoverage(bid: RouterBid, resource: ResourceAdapter, tags: PolicyTag[]): number {
+function computeCoverage(
+  bid: RouterBid,
+  resource: ResourceAdapter,
+  tags: PolicyTag[],
+): number {
   const tagSkills = tags.map((tag) => tag.split(':')[1] ?? tag);
   const fitTags = bid.fitTags ?? [];
-  const matches = fitTags.filter((tag) => tagSkills.includes(tag.toLowerCase()));
+  const matches = fitTags.filter((tag) =>
+    tagSkills.includes(tag.toLowerCase()),
+  );
   const skillOverlap = scoreSkillOverlap(resource.profile.skills, tagSkills);
   return matches.length + skillOverlap;
 }
 
-function computeDensity(bid: RouterBid, coverage: number, task: TaskSpec): number {
-  const latencyPenalty = Math.max(bid.est.latencyMs / task.constraints.latencyP95Ms, 0.5);
-  const costPenalty = Math.max(bid.est.costUSD / Math.max(task.constraints.budgetUSD, 0.01), 0.1);
+function computeDensity(
+  bid: RouterBid,
+  coverage: number,
+  task: TaskSpec,
+): number {
+  const latencyPenalty = Math.max(
+    bid.est.latencyMs / task.constraints.latencyP95Ms,
+    0.5,
+  );
+  const costPenalty = Math.max(
+    bid.est.costUSD / Math.max(task.constraints.budgetUSD, 0.01),
+    0.1,
+  );
   return (bid.est.quality * (1 + coverage)) / (latencyPenalty * costPenalty);
 }
 
@@ -59,7 +75,10 @@ export class PolicyRouter {
   private readonly qualityFloor: number;
   private readonly costAlertFraction: number;
 
-  constructor(private readonly registry: CapabilityRegistry, options: RouterOptions = {}) {
+  constructor(
+    private readonly registry: CapabilityRegistry,
+    options: RouterOptions = {},
+  ) {
     this.qualityFloor = options.qualityFloor ?? 0.6;
     this.costAlertFraction = options.costAlertFraction ?? 0.8;
   }
@@ -91,8 +110,12 @@ export class PolicyRouter {
       latency = fallback.bid.est.latencyMs;
     }
 
-    const primaryAssignments = selected.slice(0, 1).map((entry) => entry.resource.profile.id);
-    const supportAssignments = selected.slice(1).map((entry) => entry.resource.profile.id);
+    const primaryAssignments = selected
+      .slice(0, 1)
+      .map((entry) => entry.resource.profile.id);
+    const supportAssignments = selected
+      .slice(1)
+      .map((entry) => entry.resource.profile.id);
 
     const mode = chooseMode(task);
     const provenanceRef = `router-${task.taskId}-${randomUUID()}`;
@@ -111,7 +134,10 @@ export class PolicyRouter {
     };
   }
 
-  private collectBids(task: TaskSpec, resources: ResourceAdapter[]): AnnotatedBid[] {
+  private collectBids(
+    task: TaskSpec,
+    resources: ResourceAdapter[],
+  ): AnnotatedBid[] {
     return resources.map((resource) => {
       const bid = resource.bid(task);
       const coverage = computeCoverage(bid, resource, task.policyTags);

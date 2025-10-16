@@ -4,7 +4,7 @@ const path = require('node:path');
 function runGitCommand(args) {
   try {
     const output = execSync(`git ${args}`, {
-      stdio: ['ignore', 'pipe', 'pipe']
+      stdio: ['ignore', 'pipe', 'pipe'],
     });
     return output.toString().trim();
   } catch (error) {
@@ -28,7 +28,7 @@ function getChangedFiles(baseRef) {
 function getAddedLineNumbers(baseRef, filePath) {
   const diffRange = `${baseRef}...HEAD`;
   const diffOutput = runGitCommand(
-    `diff --unified=0 --no-color ${diffRange} -- ${escapePath(filePath)}`
+    `diff --unified=0 --no-color ${diffRange} -- ${escapePath(filePath)}`,
   );
   if (!diffOutput) {
     return new Set();
@@ -61,5 +61,5 @@ function resolveWorkspacePath(relativePath) {
 module.exports = {
   getChangedFiles,
   getAddedLineNumbers,
-  resolveWorkspacePath
+  resolveWorkspacePath,
 };

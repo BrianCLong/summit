@@ -2,13 +2,13 @@
 
 This Canvas includes:
 
-1) **Branch name**
+1. **Branch name**
 
 ```
 feat/policy-receipts-ledger-opa
 ```
 
-2) **Commit messages** (squash-ready)
+2. **Commit messages** (squash-ready)
 
 - chore(infra): add OPA bundle & ledger service (micro‑Merkle, healthz)
 - feat(api): TypeScript middleware with OPA HTTP adapter + signed policy receipts + dual‑graph attestation hook
@@ -18,7 +18,7 @@ feat/policy-receipts-ledger-opa
 
 > If you prefer one commit, use the combined message: **feat: policy decision receipts + ledger anchoring + OPA-in-the-loop across API/Worker**
 
-3) **Single patch (.patch)** — apply from repo root
+3. **Single patch (.patch)** — apply from repo root
 
 > Usage:
 >
@@ -288,28 +288,33 @@ index 5b7aef1..e2a3b20 100644
 **Title:** feat: policy decision receipts + ledger anchoring + OPA-in-the-loop across API/Worker
 
 **Summary**
+
 - Adds OPA bundle/service and Ledger service (micro‑Merkle anchors)
 - API (TypeScript): OPA HTTP adapter, authz‑receipt middleware, dual‑graph attestation helper
 - Worker (Python): receipt emission wrapper for jobs
 - CI: assurance job to smoke anchor latency
 
 **Env Vars**
+
 - `OPA_URL` (default `http://opa:8181`)
 - `LEDGER_ENDPOINT` (default `http://ledger:4600`)
 - `POLICY_VERSION` (default `policy-v1`)
 - `PRIVATE_KEY_PEM` (API TS) or `LEDGER_SIGNING_SECRET` (Python worker)
 
 **KPIs**
+
 - Authz p95 < 12ms; Anchor p95 < 15ms (local)
 - ≥95% privileged paths emit receipts (tracked via headers & logs)
 
 **Rollout**
+
 - Feature‑flag: `RECEIPTS_ENABLED` (optional guard in app wiring)
 - Canary on low‑risk routes/jobs → expand
 
 **Testing**
+
 - `make bootstrap && docker compose up -d ledger opa && make run && make smoke`
 
 **License**
-- Apache‑2.0; no GPL/AGPL deps introduced
 
+- Apache‑2.0; no GPL/AGPL deps introduced

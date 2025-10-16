@@ -4,14 +4,14 @@ export async function run(ctx: { endpoint: string; token?: string }) {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
-        ...(ctx.token ? { Authorization: `Bearer ${ctx.token}` } : {})
+        ...(ctx.token ? { Authorization: `Bearer ${ctx.token}` } : {}),
       },
       body: JSON.stringify({
         jsonrpc: '2.0',
         id: 1,
         method: 'echo',
-        params: { toolClass: 'echo', args: { demo: true } }
-      })
+        params: { toolClass: 'echo', args: { demo: true } },
+      }),
     });
     const ok = res.ok;
     let result: unknown = null;

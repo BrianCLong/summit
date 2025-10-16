@@ -3,6 +3,7 @@ This add-on bundle completes the sprint: **Renovate** for safe dependency upgrad
 ---
 
 ## File Map
+
 ```
 .renovaterc.json
 .github/workflows/renovate-selfhosted.yml   # optional if using app token
@@ -20,6 +21,7 @@ docs/observability/README.md
 ## Renovate Config (safe-by-default, canary-aware)
 
 ### `.renovaterc.json`
+
 ```json
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
@@ -62,7 +64,9 @@ docs/observability/README.md
     {
       "matchUpdateTypes": ["minor", "patch"],
       "automerge": false,
-      "prBodyNotes": ["This PR will roll out via canary using the release train."]
+      "prBodyNotes": [
+        "This PR will roll out via canary using the release train."
+      ]
     },
     {
       "matchUpdateTypes": ["major"],
@@ -90,6 +94,7 @@ docs/observability/README.md
 > If using Renovate App, no workflow is needed. If self-hosting, add the workflow below.
 
 ### `.github/workflows/renovate-selfhosted.yml`
+
 ```yaml
 name: renovate
 on:
@@ -114,6 +119,7 @@ jobs:
 ## Clean Main Sentinel (freeze merges when red)
 
 ### `.github/workflows/clean-main-sentinel.yml`
+
 ```yaml
 name: clean-main-sentinel
 on:
@@ -166,6 +172,7 @@ jobs:
 ## OTEL Resource Attributes (tag builds, envs, PRs)
 
 ### `.ci/otel/resource-attrs.env`
+
 ```env
 OTEL_SERVICE_NAME=summit
 OTEL_RESOURCE_ATTRIBUTES=deployment.environment=${{ env.ENVIRONMENT }},ci.system=github,ci.workflow=${{ github.workflow }},ci.run_id=${{ github.run_id }},git.sha=${{ github.sha }},git.branch=${{ github.ref_name }},pr.number=${{ github.event.pull_request.number }}
@@ -178,14 +185,35 @@ OTEL_RESOURCE_ATTRIBUTES=deployment.environment=${{ env.ENVIRONMENT }},ci.system
 ## Grafana Dashboards-as-Code
 
 ### `observability/grafana/dashboard_overview.json`
+
 ```json
 {
   "title": "Summit — Golden Signals Overview",
   "timezone": "browser",
   "panels": [
-    { "type": "stat", "title": "p95 Latency (ms)", "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service=\"summit\"}[5m])) by (le)) * 1000" }] },
-    { "type": "stat", "title": "Error Rate (%)", "targets": [{ "expr": "sum(rate(http_requests_total{service=\"summit\",code=~\"5..\"}[5m])) / sum(rate(http_requests_total{service=\"summit\"}[5m])) * 100" }] },
-    { "type": "gauge", "title": "Saturation (CPU)", "targets": [{ "expr": "avg(node_cpu_seconds_total{mode=\"idle\"})" }] }
+    {
+      "type": "stat",
+      "title": "p95 Latency (ms)",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service=\"summit\"}[5m])) by (le)) * 1000"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Error Rate (%)",
+      "targets": [
+        {
+          "expr": "sum(rate(http_requests_total{service=\"summit\",code=~\"5..\"}[5m])) / sum(rate(http_requests_total{service=\"summit\"}[5m])) * 100"
+        }
+      ]
+    },
+    {
+      "type": "gauge",
+      "title": "Saturation (CPU)",
+      "targets": [{ "expr": "avg(node_cpu_seconds_total{mode=\"idle\"})" }]
+    }
   ],
   "schemaVersion": 39,
   "version": 1
@@ -193,12 +221,29 @@ OTEL_RESOURCE_ATTRIBUTES=deployment.environment=${{ env.ENVIRONMENT }},ci.system
 ```
 
 ### `observability/grafana/dashboard_slo_service.json`
+
 ```json
 {
   "title": "Summit — Service SLO",
   "panels": [
-    { "type": "timeseries", "title": "Latency p95 (ms)", "targets": [{ "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service=\"summit\", environment=~\"stage|prod\"}[5m])) by (le, environment)) * 1000" }] },
-    { "type": "timeseries", "title": "Error Budget Burn (1h/6h)", "targets": [{ "expr": "(sum(rate(http_requests_total{service=\"summit\",code=~\"5..\",environment=\"prod\"}[1h])) / sum(rate(http_requests_total{service=\"summit\",environment=\"prod\"}[1h]))) / 0.01" }] }
+    {
+      "type": "timeseries",
+      "title": "Latency p95 (ms)",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{service=\"summit\", environment=~\"stage|prod\"}[5m])) by (le, environment)) * 1000"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Error Budget Burn (1h/6h)",
+      "targets": [
+        {
+          "expr": "(sum(rate(http_requests_total{service=\"summit\",code=~\"5..\",environment=\"prod\"}[1h])) / sum(rate(http_requests_total{service=\"summit\",environment=\"prod\"}[1h]))) / 0.01"
+        }
+      ]
+    }
   ],
   "schemaVersion": 39,
   "version": 1
@@ -206,6 +251,7 @@ OTEL_RESOURCE_ATTRIBUTES=deployment.environment=${{ env.ENVIRONMENT }},ci.system
 ```
 
 ### `observability/grafana/alerts_slo.yaml`
+
 ```yaml
 apiVersion: 1
 groups:
@@ -233,8 +279,10 @@ groups:
 ## Observability README
 
 ### `docs/observability/README.md`
+
 ```md
 # Observability Setup
+
 - Import Grafana dashboards from `observability/grafana/*.json`.
 - Load `.ci/otel/resource-attrs.env` in CI and application pods.
 - Configure Prometheus scrape for `/metrics` and attach `service="summit"`, `environment` labels.
@@ -244,7 +292,7 @@ groups:
 ---
 
 ## Wiring Notes
+
 - Add a repository **Ruleset** to block merges when label `freeze/main-red` is present.
 - In CI, `source ./.ci/otel/resource-attrs.env` before build/test/deploy steps (GitHub Actions supports `${{ env.* }}` interpolation via `env:` blocks).
 - Grafana JSONs are intentionally minimal—expand with your service‑specific metrics and labels.
-

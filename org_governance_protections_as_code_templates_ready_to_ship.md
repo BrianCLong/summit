@@ -3,6 +3,7 @@ This package finishes the CI/CD hardening by codifying **environment protections
 ---
 
 ## File Map (add to repo or infra repo)
+
 ```
 .github/workflows/
   org-rules-drift.yml
@@ -32,6 +33,7 @@ scripts/
 ## Required Checks Registry
 
 ### `.ci/config/required-checks.yml`
+
 ```yaml
 # Map branch → required status checks. Used by Terraform and gh script.
 branches:
@@ -54,6 +56,7 @@ branches:
 ```
 
 ### `.ci/config/checks-matrix.yml`
+
 ```yaml
 # Derive which checks are required for which paths (optional for rulesets)
 paths:
@@ -66,6 +69,7 @@ paths:
 ```
 
 ### `.ci/config/repo-rules.yml`
+
 ```yaml
 rulesets:
   - name: Protect main
@@ -89,6 +93,7 @@ rulesets:
 > Use a separate **infra repo**. Point a GitHub App/Token with org‑admin scope to apply. Imports supported.
 
 ### `infra/github/versions.tf`
+
 ```hcl
 terraform {
   required_version = ">= 1.6.0"
@@ -102,6 +107,7 @@ terraform {
 ```
 
 ### `infra/github/providers.tf`
+
 ```hcl
 provider "github" {
   owner = var.org
@@ -110,6 +116,7 @@ provider "github" {
 ```
 
 ### `infra/github/vars.tf`
+
 ```hcl
 variable "org" { type = string }
 variable "token" { type = string }
@@ -118,6 +125,7 @@ variable "environments" { type = list(string) default = ["stage","prod"] }
 ```
 
 ### `infra/github/org.auto.tfvars.example`
+
 ```hcl
 org   = "your-org"
 repo  = "summit-main"
@@ -125,6 +133,7 @@ token = "${GITHUB_TOKEN}" # or TF_VAR_token env
 ```
 
 ### `infra/github/branch_protection.tf`
+
 ```hcl
 # Protect main with required checks
 resource "github_branch_protection_v3" "main" {
@@ -156,6 +165,7 @@ resource "github_branch_protection_v3" "main" {
 ```
 
 ### `infra/github/environments.tf`
+
 ```hcl
 # Create and protect environments
 resource "github_repository_environment" "env" {
@@ -172,6 +182,7 @@ resource "github_repository_environment" "env" {
 ```
 
 ### `infra/github/rulesets.tf`
+
 ```hcl
 # Optional: Repository Ruleset for path-conditional checks
 resource "github_repository_ruleset" "protect_main" {
@@ -207,6 +218,7 @@ resource "github_repository_ruleset" "protect_main" {
 ## Fallback — `gh` CLI Script (apply without Terraform)
 
 ### `scripts/gh-apply-rules.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -241,8 +253,10 @@ done
 ## Templates — Migrations Docs
 
 ### `.ci/config/templates/migrations-plan.md`
+
 ```md
 # Migration Plan
+
 - Service/Owner:
 - Issue/PR:
 - Summary:
@@ -254,8 +268,10 @@ done
 ```
 
 ### `.ci/config/templates/migrations-rollback.md`
+
 ```md
 # Migration Rollback
+
 - Owner:
 - Preconditions to rollback:
 - Exact statements to reverse:
@@ -268,11 +284,12 @@ done
 ## Flaky‑Test Bot (minimal)
 
 ### `.github/workflows/flake-bot.yml`
+
 ```yaml
 name: flake-bot
 on:
   workflow_run:
-    workflows: ["pr"]
+    workflows: ['pr']
     types: [completed]
 permissions: { checks: read, contents: read, issues: write }
 jobs:
@@ -299,20 +316,22 @@ jobs:
 ## How to Apply
 
 ### Terraform path
-1) Put `infra/github/*` in your infra repo.
-2) Export `TF_VAR_token` with org‑admin token; set `TF_VAR_org` and `TF_VAR_repo`.
-3) `terraform init && terraform apply`.
+
+1. Put `infra/github/*` in your infra repo.
+2. Export `TF_VAR_token` with org‑admin token; set `TF_VAR_org` and `TF_VAR_repo`.
+3. `terraform init && terraform apply`.
 
 ### `gh` CLI path
-1) Ensure `gh auth login` as org admin.
-2) Run: `bash scripts/gh-apply-rules.sh your-org/summit-main`.
+
+1. Ensure `gh auth login` as org admin.
+2. Run: `bash scripts/gh-apply-rules.sh your-org/summit-main`.
 
 ---
 
 ## After Enablement — Acceptance Evidence
+
 - Screenshot GitHub **Rulesets** and **Environments** with protections.
 - `main` shows required checks blocking merges.
 - PRs with DB changes must pass **migration-gate**.
 - Canary promotions blocked on **SLO** gate until green.
 - Flake issues automatically opened with failure summaries.
-

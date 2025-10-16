@@ -67,7 +67,9 @@ const getOrCreateCounter = (
   help: string,
   labelNames: string[],
 ): promClient.Counter<string> => {
-  const existing = promClient.register.getSingleMetric(name) as promClient.Counter<string> | undefined;
+  const existing = promClient.register.getSingleMetric(name) as
+    | promClient.Counter<string>
+    | undefined;
   if (existing) {
     return existing;
   }
@@ -79,7 +81,9 @@ const getOrCreateGauge = (
   help: string,
   labelNames: string[],
 ): promClient.Gauge<string> => {
-  const existing = promClient.register.getSingleMetric(name) as promClient.Gauge<string> | undefined;
+  const existing = promClient.register.getSingleMetric(name) as
+    | promClient.Gauge<string>
+    | undefined;
   if (existing) {
     return existing;
   }
@@ -91,7 +95,9 @@ const getOrCreateHistogram = (
   help: string,
   labelNames: string[],
 ): promClient.Histogram<string> => {
-  const existing = promClient.register.getSingleMetric(name) as promClient.Histogram<string> | undefined;
+  const existing = promClient.register.getSingleMetric(name) as
+    | promClient.Histogram<string>
+    | undefined;
   if (existing) {
     return existing;
   }
@@ -99,13 +105,41 @@ const getOrCreateHistogram = (
 };
 
 const createMetrics = (): ConnectionMetrics => ({
-  messageCounter: getOrCreateCounter('websocket_messages_sent_total', 'Total WebSocket messages sent', ['tenant']),
-  failureCounter: getOrCreateCounter('websocket_failures_total', 'Total WebSocket failures by reason', ['reason']),
-  backpressureCounter: getOrCreateCounter('websocket_backpressure_events_total', 'Total WebSocket backpressure events', ['tenant']),
-  reconnectHistogram: getOrCreateHistogram('websocket_reconnect_delay_ms', 'Reconnect delay duration in ms', ['tenant']),
-  stateGauge: getOrCreateGauge('websocket_connections_state', 'Current WebSocket connections by state', ['state']),
-  queueGauge: getOrCreateGauge('websocket_connection_queue_depth', 'Queued messages awaiting delivery by tenant', ['tenant']),
-  queueLatencyHistogram: getOrCreateHistogram('websocket_queue_latency_ms', 'Latency between enqueue and send in ms', ['tenant']),
+  messageCounter: getOrCreateCounter(
+    'websocket_messages_sent_total',
+    'Total WebSocket messages sent',
+    ['tenant'],
+  ),
+  failureCounter: getOrCreateCounter(
+    'websocket_failures_total',
+    'Total WebSocket failures by reason',
+    ['reason'],
+  ),
+  backpressureCounter: getOrCreateCounter(
+    'websocket_backpressure_events_total',
+    'Total WebSocket backpressure events',
+    ['tenant'],
+  ),
+  reconnectHistogram: getOrCreateHistogram(
+    'websocket_reconnect_delay_ms',
+    'Reconnect delay duration in ms',
+    ['tenant'],
+  ),
+  stateGauge: getOrCreateGauge(
+    'websocket_connections_state',
+    'Current WebSocket connections by state',
+    ['state'],
+  ),
+  queueGauge: getOrCreateGauge(
+    'websocket_connection_queue_depth',
+    'Queued messages awaiting delivery by tenant',
+    ['tenant'],
+  ),
+  queueLatencyHistogram: getOrCreateHistogram(
+    'websocket_queue_latency_ms',
+    'Latency between enqueue and send in ms',
+    ['tenant'],
+  ),
 });
 
 const enum TimerType {
@@ -172,7 +206,8 @@ export class ManagedConnection {
 
   getReconnectDelay(): number {
     const base = Math.min(
-      this.options.initialRetryDelay * Math.pow(this.options.backoffMultiplier, this.reconnectAttempts),
+      this.options.initialRetryDelay *
+        Math.pow(this.options.backoffMultiplier, this.reconnectAttempts),
       this.options.maxRetryDelay,
     );
     const jitter = base * this.options.jitter;
@@ -197,7 +232,9 @@ export class ManagedConnection {
     this.reconnectAttempts += 1;
     this.transitionTo(ConnectionState.RECONNECTING);
     this.metrics.failureCounter.labels(reason).inc();
-    this.metrics.reconnectHistogram.labels(this.context.tenantId).observe(this.getReconnectDelay());
+    this.metrics.reconnectHistogram
+      .labels(this.context.tenantId)
+      .observe(this.getReconnectDelay());
   }
 
   markNetworkOffline(): void {
@@ -246,7 +283,9 @@ export class ManagedConnection {
         (this.ws as any).close(code, reason);
       }
     } catch (error) {
-      this.options.logger.warn?.(`Failed to close WebSocket ${this.context.id}: ${String(error)}`);
+      this.options.logger.warn?.(
+        `Failed to close WebSocket ${this.context.id}: ${String(error)}`,
+      );
     }
     this.transitionTo(ConnectionState.DISCONNECTED);
     this.clearTimer(TimerType.QUEUE_DRAIN);
@@ -293,13 +332,17 @@ export class ManagedConnection {
       if (!success) {
         this.queue.unshift(item, ...batch.slice(sent + 1));
         this.scheduleQueueDrain();
-        this.metrics.queueGauge.labels(this.context.tenantId).set(this.queue.length);
+        this.metrics.queueGauge
+          .labels(this.context.tenantId)
+          .set(this.queue.length);
         return sent;
       }
       sent += 1;
     }
 
-    this.metrics.queueGauge.labels(this.context.tenantId).set(this.queue.length);
+    this.metrics.queueGauge
+      .labels(this.context.tenantId)
+      .set(this.queue.length);
 
     if (this.queue.length > 0) {
       this.scheduleQueueDrain();
@@ -354,7 +397,9 @@ export class ManagedConnection {
       );
     }
     this.queue.push({ payload, enqueuedAt: now, attempts: 1 });
-    this.metrics.queueGauge.labels(this.context.tenantId).set(this.queue.length);
+    this.metrics.queueGauge
+      .labels(this.context.tenantId)
+      .set(this.queue.length);
     this.scheduleQueueDrain();
   }
 
@@ -399,14 +444,20 @@ export class ManagedConnection {
   }
 
   private isReadyForSend(): boolean {
-    if (typeof (this.ws as any).readyState === 'number' && (this.ws as any).readyState !== READY_STATE_OPEN) {
+    if (
+      typeof (this.ws as any).readyState === 'number' &&
+      (this.ws as any).readyState !== READY_STATE_OPEN
+    ) {
       return false;
     }
 
     if (typeof (this.ws as any).getBufferedAmount === 'function') {
       try {
         const buffered = (this.ws as any).getBufferedAmount();
-        if (typeof buffered === 'number' && buffered > this.options.backpressureThreshold) {
+        if (
+          typeof buffered === 'number' &&
+          buffered > this.options.backpressureThreshold
+        ) {
           return false;
         }
       } catch (error) {
@@ -465,9 +516,15 @@ export class WebSocketConnectionPool {
       return existing;
     }
 
-    const managed = new ManagedConnection(ws, context, this.options, this.metrics, () => {
-      this.refreshStateGauge();
-    });
+    const managed = new ManagedConnection(
+      ws,
+      context,
+      this.options,
+      this.metrics,
+      () => {
+        this.refreshStateGauge();
+      },
+    );
     this.connections.set(id, managed);
     managed.markConnected(ws);
     this.refreshStateGauge();
@@ -506,7 +563,10 @@ export class WebSocketConnectionPool {
     return this.send(id, JSON.stringify(payload));
   }
 
-  broadcast(payload: string, filter?: (conn: ManagedConnection) => boolean): void {
+  broadcast(
+    payload: string,
+    filter?: (conn: ManagedConnection) => boolean,
+  ): void {
     for (const connection of this.connections.values()) {
       if (filter && !filter(connection)) {
         continue;
@@ -568,10 +628,13 @@ export class WebSocketConnectionPool {
     }
     return {
       totalConnections: this.connections.size,
-      byState: stats.reduce<Record<ConnectionState, number>>((acc, stat) => {
-        acc[stat.state] = (acc[stat.state] || 0) + 1;
-        return acc;
-      }, {} as Record<ConnectionState, number>),
+      byState: stats.reduce<Record<ConnectionState, number>>(
+        (acc, stat) => {
+          acc[stat.state] = (acc[stat.state] || 0) + 1;
+          return acc;
+        },
+        {} as Record<ConnectionState, number>,
+      ),
       connections: stats,
     };
   }

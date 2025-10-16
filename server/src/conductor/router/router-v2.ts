@@ -2,7 +2,12 @@
 // Integrates bandit algorithms with production routing logic
 
 import { EventEmitter } from 'events';
-import { adaptiveRouter, BanditContext, ExpertArm, RouteDecision } from '../learn/bandit';
+import {
+  adaptiveRouter,
+  BanditContext,
+  ExpertArm,
+  RouteDecision,
+} from '../learn/bandit';
 import { prometheusConductorMetrics } from '../observability/prometheus';
 import { conductorResilienceManager } from '../resilience/circuit-breaker';
 
@@ -111,7 +116,10 @@ export class AdaptiveExpertRouter extends EventEmitter {
       // Determine routing strategy
       if (this.shouldUseLearning(query, banditContext)) {
         // Use learning-based routing
-        const learningDecision = await adaptiveRouter.route(banditContext, query.query);
+        const learningDecision = await adaptiveRouter.route(
+          banditContext,
+          query.query,
+        );
         selectedExpert = learningDecision.selectedArm;
         confidence = learningDecision.confidence;
         decisionId = learningDecision.decisionId;
@@ -119,7 +127,10 @@ export class AdaptiveExpertRouter extends EventEmitter {
 
         // Shadow mode: also get production decision for comparison
         if (this.config.learningMode === 'shadow') {
-          const productionExpert = this.getProductionExpert(query, banditContext);
+          const productionExpert = this.getProductionExpert(
+            query,
+            banditContext,
+          );
           shadowDecision = {
             arm: productionExpert.expert,
             confidence: productionExpert.confidence,
@@ -134,7 +145,10 @@ export class AdaptiveExpertRouter extends EventEmitter {
         }
       } else {
         // Use production heuristics
-        const productionDecision = this.getProductionExpert(query, banditContext);
+        const productionDecision = this.getProductionExpert(
+          query,
+          banditContext,
+        );
         selectedExpert = productionDecision.expert;
         confidence = productionDecision.confidence;
         decisionId = `heuristic_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
@@ -142,7 +156,11 @@ export class AdaptiveExpertRouter extends EventEmitter {
       }
 
       // Apply safety checks and fallbacks
-      const finalExpert = await this.applySafetyChecks(selectedExpert, query, banditContext);
+      const finalExpert = await this.applySafetyChecks(
+        selectedExpert,
+        query,
+        banditContext,
+      );
       if (finalExpert !== selectedExpert) {
         routingReason += ` (safety fallback to ${finalExpert})`;
         selectedExpert = finalExpert;
@@ -152,7 +170,11 @@ export class AdaptiveExpertRouter extends EventEmitter {
       // Calculate estimates
       const capability = this.expertCapabilities.get(selectedExpert)!;
       const estimatedCost = this.calculateCost(selectedExpert, tokenEstimate);
-      const estimatedLatency = this.calculateLatency(selectedExpert, tokenEstimate, query.context);
+      const estimatedLatency = this.calculateLatency(
+        selectedExpert,
+        tokenEstimate,
+        query.context,
+      );
 
       const routingDecisionTime = performance.now() - routingStartTime;
 
@@ -164,7 +186,10 @@ export class AdaptiveExpertRouter extends EventEmitter {
         estimatedCost,
         estimatedLatency,
         routingReason,
-        fallbackChain: this.generateFallbackChain(selectedExpert, banditContext),
+        fallbackChain: this.generateFallbackChain(
+          selectedExpert,
+          banditContext,
+        ),
         shadowDecision,
         timing: {
           routingDecisionTime: Math.round(routingDecisionTime * 100) / 100,
@@ -184,8 +209,14 @@ export class AdaptiveExpertRouter extends EventEmitter {
         'router_v2_decision_time',
         routingDecisionTime,
       );
-      prometheusConductorMetrics.recordOperationalMetric('router_v2_confidence', confidence);
-      prometheusConductorMetrics.recordOperationalMetric('router_v2_estimated_cost', estimatedCost);
+      prometheusConductorMetrics.recordOperationalMetric(
+        'router_v2_confidence',
+        confidence,
+      );
+      prometheusConductorMetrics.recordOperationalMetric(
+        'router_v2_estimated_cost',
+        estimatedCost,
+      );
 
       // Emit routing event
       this.emit('route:decision', { query, response, context: banditContext });
@@ -193,7 +224,10 @@ export class AdaptiveExpertRouter extends EventEmitter {
       return response;
     } catch (error) {
       console.error('Routing error:', error);
-      prometheusConductorMetrics.recordOperationalEvent('router_v2_error', false);
+      prometheusConductorMetrics.recordOperationalEvent(
+        'router_v2_error',
+        false,
+      );
 
       // Fallback to safe default
       return this.createFallbackResponse(query, error.message, startTime);
@@ -271,13 +305,30 @@ export class AdaptiveExpertRouter extends EventEmitter {
     this.updatePerformanceMetrics(routingResponse.selectedExpert, outcome);
 
     // Emit outcome event
-    this.emit('route:outcome', { queryId, outcome, response: routingResponse, rewardValue });
+    this.emit('route:outcome', {
+      queryId,
+      outcome,
+      response: routingResponse,
+      rewardValue,
+    });
 
     // Record metrics
-    prometheusConductorMetrics.recordOperationalEvent('router_v2_outcome', outcome.success);
-    prometheusConductorMetrics.recordOperationalMetric('router_v2_actual_latency', outcome.latency);
-    prometheusConductorMetrics.recordOperationalMetric('router_v2_actual_cost', outcome.cost);
-    prometheusConductorMetrics.recordOperationalMetric('router_v2_reward_value', rewardValue);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'router_v2_outcome',
+      outcome.success,
+    );
+    prometheusConductorMetrics.recordOperationalMetric(
+      'router_v2_actual_latency',
+      outcome.latency,
+    );
+    prometheusConductorMetrics.recordOperationalMetric(
+      'router_v2_actual_cost',
+      outcome.cost,
+    );
+    prometheusConductorMetrics.recordOperationalMetric(
+      'router_v2_reward_value',
+      rewardValue,
+    );
   }
 
   /**
@@ -324,7 +375,10 @@ export class AdaptiveExpertRouter extends EventEmitter {
     };
   }
 
-  private shouldUseLearning(query: RouterQuery, context: BanditContext): boolean {
+  private shouldUseLearning(
+    query: RouterQuery,
+    context: BanditContext,
+  ): boolean {
     if (!this.config.enableLearning) {
       return false;
     }
@@ -363,32 +417,60 @@ export class AdaptiveExpertRouter extends EventEmitter {
 
     // Domain-based routing
     if (context.domain === 'graph') {
-      return { expert: 'GRAPH_TOOL', confidence: 0.9, reason: 'Domain: graph operations' };
+      return {
+        expert: 'GRAPH_TOOL',
+        confidence: 0.9,
+        reason: 'Domain: graph operations',
+      };
     }
 
     if (context.domain === 'files') {
-      return { expert: 'FILES_TOOL', confidence: 0.9, reason: 'Domain: file operations' };
+      return {
+        expert: 'FILES_TOOL',
+        confidence: 0.9,
+        reason: 'Domain: file operations',
+      };
     }
 
     if (context.domain === 'osint') {
-      return { expert: 'OSINT_TOOL', confidence: 0.85, reason: 'Domain: OSINT analysis' };
+      return {
+        expert: 'OSINT_TOOL',
+        confidence: 0.85,
+        reason: 'Domain: OSINT analysis',
+      };
     }
 
     if (context.domain === 'export') {
-      return { expert: 'EXPORT_TOOL', confidence: 0.9, reason: 'Domain: export operations' };
+      return {
+        expert: 'EXPORT_TOOL',
+        confidence: 0.9,
+        reason: 'Domain: export operations',
+      };
     }
 
     if (context.domain === 'rag') {
-      return { expert: 'RAG_TOOL', confidence: 0.85, reason: 'Domain: RAG retrieval' };
+      return {
+        expert: 'RAG_TOOL',
+        confidence: 0.85,
+        reason: 'Domain: RAG retrieval',
+      };
     }
 
     // Token-based routing for LLM selection
     if (context.tokenEst > 5000 || context.queryComplexity === 'complex') {
-      return { expert: 'LLM_HEAVY', confidence: 0.8, reason: 'High token count/complexity' };
+      return {
+        expert: 'LLM_HEAVY',
+        confidence: 0.8,
+        reason: 'High token count/complexity',
+      };
     }
 
     // Default to light LLM
-    return { expert: 'LLM_LIGHT', confidence: 0.7, reason: 'Default: general query' };
+    return {
+      expert: 'LLM_LIGHT',
+      confidence: 0.7,
+      reason: 'Default: general query',
+    };
   }
 
   private async applySafetyChecks(
@@ -414,7 +496,10 @@ export class AdaptiveExpertRouter extends EventEmitter {
 
     // Check cost constraints
     if (query.context.maxCost) {
-      const estimatedCost = this.calculateCost(selectedExpert, context.tokenEst);
+      const estimatedCost = this.calculateCost(
+        selectedExpert,
+        context.tokenEst,
+      );
       if (estimatedCost > query.context.maxCost) {
         console.warn(`${selectedExpert} exceeds cost limit, falling back`);
         return this.selectFallbackExpert(selectedExpert, context);
@@ -424,7 +509,10 @@ export class AdaptiveExpertRouter extends EventEmitter {
     return selectedExpert;
   }
 
-  private selectFallbackExpert(originalExpert: ExpertArm, context: BanditContext): ExpertArm {
+  private selectFallbackExpert(
+    originalExpert: ExpertArm,
+    context: BanditContext,
+  ): ExpertArm {
     const fallbackChain = this.generateFallbackChain(originalExpert, context);
 
     for (const fallback of fallbackChain) {
@@ -445,7 +533,10 @@ export class AdaptiveExpertRouter extends EventEmitter {
     return 'LLM_LIGHT';
   }
 
-  private generateFallbackChain(expert: ExpertArm, context: BanditContext): ExpertArm[] {
+  private generateFallbackChain(
+    expert: ExpertArm,
+    context: BanditContext,
+  ): ExpertArm[] {
     const fallbacks: ExpertArm[] = [];
 
     switch (expert) {
@@ -604,7 +695,11 @@ export class AdaptiveExpertRouter extends EventEmitter {
     return capability ? capability.costPerToken * tokens : 0.001;
   }
 
-  private calculateLatency(expert: ExpertArm, tokens: number, context: any): number {
+  private calculateLatency(
+    expert: ExpertArm,
+    tokens: number,
+    context: any,
+  ): number {
     const capability = this.expertCapabilities.get(expert);
     if (!capability) return 2000;
 
@@ -689,16 +784,19 @@ export class AdaptiveExpertRouter extends EventEmitter {
 
     // Update success rate (exponential moving average)
     const alpha = 0.1;
-    metrics.successRate = (1 - alpha) * metrics.successRate + alpha * (outcome.success ? 1 : 0);
+    metrics.successRate =
+      (1 - alpha) * metrics.successRate + alpha * (outcome.success ? 1 : 0);
 
     // Update latency
     if (outcome.latency) {
-      metrics.averageLatency = (1 - alpha) * metrics.averageLatency + alpha * outcome.latency;
+      metrics.averageLatency =
+        (1 - alpha) * metrics.averageLatency + alpha * outcome.latency;
     }
 
     // Update cost
     if (outcome.cost) {
-      metrics.averageCost = (1 - alpha) * metrics.averageCost + alpha * outcome.cost;
+      metrics.averageCost =
+        (1 - alpha) * metrics.averageCost + alpha * outcome.cost;
     }
 
     // Update failure streak
@@ -728,7 +826,9 @@ export class AdaptiveExpertRouter extends EventEmitter {
     setInterval(() => {
       // Update current load metrics (simulate)
       for (const [expert, capability] of this.expertCapabilities) {
-        capability.currentLoad = Math.floor(Math.random() * capability.maxConcurrency * 0.7);
+        capability.currentLoad = Math.floor(
+          Math.random() * capability.maxConcurrency * 0.7,
+        );
       }
 
       // Record expert metrics
@@ -769,4 +869,6 @@ export const defaultRouterConfig: RouterConfig = {
 };
 
 // Singleton instance
-export const adaptiveExpertRouter = new AdaptiveExpertRouter(defaultRouterConfig);
+export const adaptiveExpertRouter = new AdaptiveExpertRouter(
+  defaultRouterConfig,
+);

@@ -2,297 +2,296 @@ groups:
   - name: intelgraph-slo-enhanced
     interval: 30s
     rules:
+      # =====================
+      # ENHANCED SLO ALERTS
+      # =====================
 
-    # =====================
-    # ENHANCED SLO ALERTS
-    # =====================
-
-    # Multi-window SLO alerting with burn rate analysis
-    - alert: LatencyBurnRateFast
-      expr: >
-        (
-          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="intelgraph-prod"}[1m])) by (le)) > 0.35
-        ) and (
-          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="intelgraph-prod"}[5m])) by (le)) > 0.35
-        )
-      for: 2m
-      labels:
-        severity: critical
-        slo: latency
-        burn_rate: fast
-        service: intelgraph-mc
-      annotations:
-        summary: "Fast burn rate detected for latency SLO"
-        description: "P95 latency has exceeded 350ms threshold for 2 minutes, consuming error budget at {{ $value | printf \"%.1f\" }}x normal rate"
-        runbook_url: "https://runbooks.intelgraph.com/slo/latency-fast-burn"
-        dashboard_url: "https://grafana.intelgraph.com/d/slo-dashboard"
-
-    - alert: LatencyBurnRateSlow
-      expr: >
-        (
-          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="intelgraph-prod"}[6h])) by (le)) > 0.35
-        ) and (
-          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="intelgraph-prod"}[30m])) by (le)) > 0.35
-        )
-      for: 15m
-      labels:
-        severity: warning
-        slo: latency
-        burn_rate: slow
-        service: intelgraph-mc
-      annotations:
-        summary: "Slow burn rate detected for latency SLO"
-        description: "P95 latency trending above 350ms over extended period, consuming error budget at {{ $value | printf \"%.3f\" }}x rate"
-        runbook_url: "https://runbooks.intelgraph.com/slo/latency-slow-burn"
-
-    # Availability SLO with multi-window burn rates
-    - alert: AvailabilityBurnRateFast
-      expr: >
-        (
-          (sum(rate(http_requests_total{namespace="intelgraph-prod",status=~"[45].."}[1m])) / sum(rate(http_requests_total{namespace="intelgraph-prod"}[1m]))) > 0.02
-        ) and (
-          (sum(rate(http_requests_total{namespace="intelgraph-prod",status=~"[45].."}[5m])) / sum(rate(http_requests_total{namespace="intelgraph-prod"}[5m]))) > 0.02
-        )
-      for: 2m
-      labels:
-        severity: critical
-        slo: availability
-        burn_rate: fast
-        service: intelgraph-mc
-      annotations:
-        summary: "Fast burn rate detected for availability SLO"
-        description: "Error rate {{ $value | printf \"%.2f\" }}% exceeding 2% for 2+ minutes, rapid error budget consumption"
-        runbook_url: "https://runbooks.intelgraph.com/slo/availability-fast-burn"
-
-    - alert: AvailabilityBurnRateSlow
-      expr: >
-        (
-          (sum(rate(http_requests_total{namespace="intelgraph-prod",status=~"[45].."}[6h])) / sum(rate(http_requests_total{namespace="intelgraph-prod"}[6h]))) > 0.01
-        ) and (
-          (sum(rate(http_requests_total{namespace="intelgraph-prod",status=~"[45].."}[30m])) / sum(rate(http_requests_total{namespace="intelgraph-prod"}[30m]))) > 0.01
-        )
-      for: 15m
-      labels:
-        severity: warning
-        slo: availability
-        burn_rate: slow
-        service: intelgraph-mc
-      annotations:
-        summary: "Slow burn rate detected for availability SLO"
-        description: "Sustained error rate {{ $value | printf \"%.3f\" }}% above 1% threshold over extended period"
-        runbook_url: "https://runbooks.intelgraph.com/slo/availability-slow-burn"
-
-    # Throughput SLO monitoring
-    - alert: ThroughputBelowBaseline
-      expr: sum(rate(http_requests_total{namespace="intelgraph-prod"}[5m])) < 50
-      for: 10m
-      labels:
-        severity: warning
-        slo: throughput
-        service: intelgraph-mc
-      annotations:
-        summary: "Request throughput below baseline"
-        description: "Current RPS {{ $value | printf \"%.1f\" }} below 50 RPS baseline for 10+ minutes"
-        runbook_url: "https://runbooks.intelgraph.com/slo/throughput-low"
-
-    # =====================
-    # ADVANCED ALERTS
-    # =====================
-
-    # Database performance degradation
-    - alert: DatabasePerformanceDegraded
-      expr: >
-        (
-          histogram_quantile(0.95, sum(rate(postgres_query_duration_seconds_bucket{namespace="intelgraph-prod"}[5m])) by (le)) > 0.1
-        ) or (
-          histogram_quantile(0.95, sum(rate(neo4j_cypher_duration_seconds_bucket{namespace="intelgraph-prod"}[5m])) by (le)) > 0.2
-        ) or (
-          histogram_quantile(0.95, sum(rate(redis_command_duration_seconds_bucket{namespace="intelgraph-prod"}[5m])) by (le)) > 0.05
-        )
-      for: 5m
-      labels:
-        severity: warning
-        category: database
-        service: intelgraph-mc
-      annotations:
-        summary: "Database performance degraded"
-        description: "Database P95 response times elevated: Postgres={{ $value }}ms, contributing to overall latency"
-        runbook_url: "https://runbooks.intelgraph.com/database/performance-degraded"
-
-    # Resource saturation prediction
-    - alert: CPUSaturationPredicted
-      expr: >
-        predict_linear(avg(rate(container_cpu_usage_seconds_total{namespace="intelgraph-prod"}[5m]))[30m:1m], 3600) > 0.9
-      for: 5m
-      labels:
-        severity: warning
-        category: capacity
-        service: intelgraph-mc
-      annotations:
-        summary: "CPU saturation predicted within 1 hour"
-        description: "Current CPU trend {{ $value | printf \"%.1f\" }}% indicates saturation risk in ~60 minutes"
-        runbook_url: "https://runbooks.intelgraph.com/capacity/cpu-saturation-predicted"
-
-    - alert: MemorySaturationPredicted
-      expr: >
-        predict_linear(avg(container_memory_usage_bytes{namespace="intelgraph-prod"} / container_spec_memory_limit_bytes{namespace="intelgraph-prod"})[30m:1m], 3600) > 0.9
-      for: 5m
-      labels:
-        severity: warning
-        category: capacity
-        service: intelgraph-mc
-      annotations:
-        summary: "Memory saturation predicted within 1 hour"
-        description: "Current memory trend {{ $value | printf \"%.1f\" }}% indicates saturation risk in ~60 minutes"
-        runbook_url: "https://runbooks.intelgraph.com/capacity/memory-saturation-predicted"
-
-    # =====================
-    # COST ALERTS
-    # =====================
-
-    # Cost budget alerts
-    - alert: WeeklyCostBudgetExceeded
-      expr: >
-        (
-          sum(increase(ingest_events_total{namespace="intelgraph-prod"}[7d])) * 0.00005 +
-          sum(increase(graphql_requests_total{namespace="intelgraph-prod"}[7d])) * 0.00001
-        ) > 200
-      for: 0m
-      labels:
-        severity: critical
-        category: cost
-        service: intelgraph-mc
-      annotations:
-        summary: "Weekly cost budget exceeded"
-        description: "Weekly cost projection ${{ $value | printf \"%.2f\" }} exceeds $200 budget"
-        runbook_url: "https://runbooks.intelgraph.com/cost/budget-exceeded"
-
-    - alert: DailyCostSpike
-      expr: >
-        (
-          sum(increase(ingest_events_total{namespace="intelgraph-prod"}[1d])) * 0.00005 +
-          sum(increase(graphql_requests_total{namespace="intelgraph-prod"}[1d])) * 0.00001
-        ) > 50
-      for: 0m
-      labels:
-        severity: warning
-        category: cost
-        service: intelgraph-mc
-      annotations:
-        summary: "Daily cost spike detected"
-        description: "Daily cost ${{ $value | printf \"%.2f\" }} exceeds $50 daily average"
-        runbook_url: "https://runbooks.intelgraph.com/cost/daily-spike"
-
-    # Unit cost efficiency alerts
-    - alert: IngestCostEfficiencyDegraded
-      expr: >
-        (
-          sum(increase(ingest_events_total{namespace="intelgraph-prod"}[1h])) > 0 and
-          (sum(increase(ingest_events_total{namespace="intelgraph-prod"}[1h])) * 0.00005) /
-          sum(increase(ingest_events_total{namespace="intelgraph-prod"}[1h])) > 0.00006
-        )
-      for: 15m
-      labels:
-        severity: warning
-        category: cost_efficiency
-        service: intelgraph-mc
-      annotations:
-        summary: "Ingest cost efficiency degraded"
-        description: "Ingest unit cost {{ $value | printf \"%.6f\" }} above $0.00005 target"
-        runbook_url: "https://runbooks.intelgraph.com/cost/ingest-efficiency"
-
-    # =====================
-    # SECURITY ALERTS
-    # =====================
-
-    # Security policy violations
-    - alert: PolicyViolationRateHigh
-      expr: sum(rate(policy_decisions_total{namespace="intelgraph-prod",decision="deny"}[5m])) > 10
-      for: 2m
-      labels:
-        severity: warning
-        category: security
-        service: intelgraph-mc
-      annotations:
-        summary: "High policy violation rate detected"
-        description: "{{ $value | printf \"%.1f\" }} policy denials/sec indicates potential attack or misconfiguration"
-        runbook_url: "https://runbooks.intelgraph.com/security/policy-violations-high"
-
-    # Suspicious GraphQL query patterns
-    - alert: GraphQLComplexityAttack
-      expr: histogram_quantile(0.95, sum(rate(graphql_query_complexity_bucket{namespace="intelgraph-prod"}[5m])) by (le)) > 1000
-      for: 1m
-      labels:
-        severity: critical
-        category: security
-        service: intelgraph-mc
-      annotations:
-        summary: "GraphQL complexity attack detected"
-        description: "P95 query complexity {{ $value | printf \"%.0f\" }} indicates potential DoS attack via complex queries"
-        runbook_url: "https://runbooks.intelgraph.com/security/graphql-complexity-attack"
-
-    # Anomalous authentication patterns
-    - alert: AuthenticationAnomalyDetected
-      expr: >
-        (
-          sum(rate(auth_failures_total{namespace="intelgraph-prod"}[5m])) > 5
-        ) and (
-          sum(rate(auth_failures_total{namespace="intelgraph-prod"}[5m])) /
-          sum(rate(auth_attempts_total{namespace="intelgraph-prod"}[5m])) > 0.5
-        )
-      for: 2m
-      labels:
-        severity: warning
-        category: security
-        service: intelgraph-mc
-      annotations:
-        summary: "Authentication anomaly detected"
-        description: "Authentication failure rate {{ $value | printf \"%.1f\" }}% indicates potential brute force attack"
-        runbook_url: "https://runbooks.intelgraph.com/security/auth-anomaly"
-
-    # =====================
-    # CANARY ALERTS
-    # =====================
-
-    # Canary deployment health
-    - alert: CanaryDeploymentUnhealthy
-      expr: >
-        (
-          sum(kube_deployment_status_replicas{namespace="intelgraph-prod",deployment="intelgraph-canary"}) > 0
-        ) and (
+      # Multi-window SLO alerting with burn rate analysis
+      - alert: LatencyBurnRateFast
+        expr: >
           (
-            sum(rate(http_requests_total{namespace="intelgraph-prod",deployment="intelgraph-canary",status=~"[45].."}[5m])) /
-            sum(rate(http_requests_total{namespace="intelgraph-prod",deployment="intelgraph-canary"}[5m]))
-          ) > (
-            sum(rate(http_requests_total{namespace="intelgraph-prod",deployment="intelgraph-stable",status=~"[45].."}[5m])) /
-            sum(rate(http_requests_total{namespace="intelgraph-prod",deployment="intelgraph-stable"}[5m])) * 1.2
+            histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="intelgraph-prod"}[1m])) by (le)) > 0.35
+          ) and (
+            histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="intelgraph-prod"}[5m])) by (le)) > 0.35
           )
-        )
-      for: 5m
-      labels:
-        severity: critical
-        category: deployment
-        service: intelgraph-mc
-      annotations:
-        summary: "Canary deployment showing elevated errors"
-        description: "Canary error rate {{ $value | printf \"%.2f\" }}% significantly higher than stable deployment"
-        runbook_url: "https://runbooks.intelgraph.com/deployment/canary-unhealthy"
+        for: 2m
+        labels:
+          severity: critical
+          slo: latency
+          burn_rate: fast
+          service: intelgraph-mc
+        annotations:
+          summary: 'Fast burn rate detected for latency SLO'
+          description: 'P95 latency has exceeded 350ms threshold for 2 minutes, consuming error budget at {{ $value | printf "%.1f" }}x normal rate'
+          runbook_url: 'https://runbooks.intelgraph.com/slo/latency-fast-burn'
+          dashboard_url: 'https://grafana.intelgraph.com/d/slo-dashboard'
 
-    # Canary performance regression
-    - alert: CanaryPerformanceRegression
-      expr: >
-        (
-          sum(kube_deployment_status_replicas{namespace="intelgraph-prod",deployment="intelgraph-canary"}) > 0
-        ) and (
-          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="intelgraph-prod",deployment="intelgraph-canary"}[5m])) by (le)) >
-          histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="intelgraph-prod",deployment="intelgraph-stable"}[5m])) by (le)) * 1.3
-        )
-      for: 3m
-      labels:
-        severity: warning
-        category: deployment
-        service: intelgraph-mc
-      annotations:
-        summary: "Canary deployment performance regression"
-        description: "Canary P95 latency {{ $value | printf \"%.0f\" }}ms significantly higher than stable"
-        runbook_url: "https://runbooks.intelgraph.com/deployment/canary-performance-regression"
+      - alert: LatencyBurnRateSlow
+        expr: >
+          (
+            histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="intelgraph-prod"}[6h])) by (le)) > 0.35
+          ) and (
+            histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="intelgraph-prod"}[30m])) by (le)) > 0.35
+          )
+        for: 15m
+        labels:
+          severity: warning
+          slo: latency
+          burn_rate: slow
+          service: intelgraph-mc
+        annotations:
+          summary: 'Slow burn rate detected for latency SLO'
+          description: 'P95 latency trending above 350ms over extended period, consuming error budget at {{ $value | printf "%.3f" }}x rate'
+          runbook_url: 'https://runbooks.intelgraph.com/slo/latency-slow-burn'
+
+      # Availability SLO with multi-window burn rates
+      - alert: AvailabilityBurnRateFast
+        expr: >
+          (
+            (sum(rate(http_requests_total{namespace="intelgraph-prod",status=~"[45].."}[1m])) / sum(rate(http_requests_total{namespace="intelgraph-prod"}[1m]))) > 0.02
+          ) and (
+            (sum(rate(http_requests_total{namespace="intelgraph-prod",status=~"[45].."}[5m])) / sum(rate(http_requests_total{namespace="intelgraph-prod"}[5m]))) > 0.02
+          )
+        for: 2m
+        labels:
+          severity: critical
+          slo: availability
+          burn_rate: fast
+          service: intelgraph-mc
+        annotations:
+          summary: 'Fast burn rate detected for availability SLO'
+          description: 'Error rate {{ $value | printf "%.2f" }}% exceeding 2% for 2+ minutes, rapid error budget consumption'
+          runbook_url: 'https://runbooks.intelgraph.com/slo/availability-fast-burn'
+
+      - alert: AvailabilityBurnRateSlow
+        expr: >
+          (
+            (sum(rate(http_requests_total{namespace="intelgraph-prod",status=~"[45].."}[6h])) / sum(rate(http_requests_total{namespace="intelgraph-prod"}[6h]))) > 0.01
+          ) and (
+            (sum(rate(http_requests_total{namespace="intelgraph-prod",status=~"[45].."}[30m])) / sum(rate(http_requests_total{namespace="intelgraph-prod"}[30m]))) > 0.01
+          )
+        for: 15m
+        labels:
+          severity: warning
+          slo: availability
+          burn_rate: slow
+          service: intelgraph-mc
+        annotations:
+          summary: 'Slow burn rate detected for availability SLO'
+          description: 'Sustained error rate {{ $value | printf "%.3f" }}% above 1% threshold over extended period'
+          runbook_url: 'https://runbooks.intelgraph.com/slo/availability-slow-burn'
+
+      # Throughput SLO monitoring
+      - alert: ThroughputBelowBaseline
+        expr: sum(rate(http_requests_total{namespace="intelgraph-prod"}[5m])) < 50
+        for: 10m
+        labels:
+          severity: warning
+          slo: throughput
+          service: intelgraph-mc
+        annotations:
+          summary: 'Request throughput below baseline'
+          description: 'Current RPS {{ $value | printf "%.1f" }} below 50 RPS baseline for 10+ minutes'
+          runbook_url: 'https://runbooks.intelgraph.com/slo/throughput-low'
+
+      # =====================
+      # ADVANCED ALERTS
+      # =====================
+
+      # Database performance degradation
+      - alert: DatabasePerformanceDegraded
+        expr: >
+          (
+            histogram_quantile(0.95, sum(rate(postgres_query_duration_seconds_bucket{namespace="intelgraph-prod"}[5m])) by (le)) > 0.1
+          ) or (
+            histogram_quantile(0.95, sum(rate(neo4j_cypher_duration_seconds_bucket{namespace="intelgraph-prod"}[5m])) by (le)) > 0.2
+          ) or (
+            histogram_quantile(0.95, sum(rate(redis_command_duration_seconds_bucket{namespace="intelgraph-prod"}[5m])) by (le)) > 0.05
+          )
+        for: 5m
+        labels:
+          severity: warning
+          category: database
+          service: intelgraph-mc
+        annotations:
+          summary: 'Database performance degraded'
+          description: 'Database P95 response times elevated: Postgres={{ $value }}ms, contributing to overall latency'
+          runbook_url: 'https://runbooks.intelgraph.com/database/performance-degraded'
+
+      # Resource saturation prediction
+      - alert: CPUSaturationPredicted
+        expr: >
+          predict_linear(avg(rate(container_cpu_usage_seconds_total{namespace="intelgraph-prod"}[5m]))[30m:1m], 3600) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          category: capacity
+          service: intelgraph-mc
+        annotations:
+          summary: 'CPU saturation predicted within 1 hour'
+          description: 'Current CPU trend {{ $value | printf "%.1f" }}% indicates saturation risk in ~60 minutes'
+          runbook_url: 'https://runbooks.intelgraph.com/capacity/cpu-saturation-predicted'
+
+      - alert: MemorySaturationPredicted
+        expr: >
+          predict_linear(avg(container_memory_usage_bytes{namespace="intelgraph-prod"} / container_spec_memory_limit_bytes{namespace="intelgraph-prod"})[30m:1m], 3600) > 0.9
+        for: 5m
+        labels:
+          severity: warning
+          category: capacity
+          service: intelgraph-mc
+        annotations:
+          summary: 'Memory saturation predicted within 1 hour'
+          description: 'Current memory trend {{ $value | printf "%.1f" }}% indicates saturation risk in ~60 minutes'
+          runbook_url: 'https://runbooks.intelgraph.com/capacity/memory-saturation-predicted'
+
+      # =====================
+      # COST ALERTS
+      # =====================
+
+      # Cost budget alerts
+      - alert: WeeklyCostBudgetExceeded
+        expr: >
+          (
+            sum(increase(ingest_events_total{namespace="intelgraph-prod"}[7d])) * 0.00005 +
+            sum(increase(graphql_requests_total{namespace="intelgraph-prod"}[7d])) * 0.00001
+          ) > 200
+        for: 0m
+        labels:
+          severity: critical
+          category: cost
+          service: intelgraph-mc
+        annotations:
+          summary: 'Weekly cost budget exceeded'
+          description: 'Weekly cost projection ${{ $value | printf "%.2f" }} exceeds $200 budget'
+          runbook_url: 'https://runbooks.intelgraph.com/cost/budget-exceeded'
+
+      - alert: DailyCostSpike
+        expr: >
+          (
+            sum(increase(ingest_events_total{namespace="intelgraph-prod"}[1d])) * 0.00005 +
+            sum(increase(graphql_requests_total{namespace="intelgraph-prod"}[1d])) * 0.00001
+          ) > 50
+        for: 0m
+        labels:
+          severity: warning
+          category: cost
+          service: intelgraph-mc
+        annotations:
+          summary: 'Daily cost spike detected'
+          description: 'Daily cost ${{ $value | printf "%.2f" }} exceeds $50 daily average'
+          runbook_url: 'https://runbooks.intelgraph.com/cost/daily-spike'
+
+      # Unit cost efficiency alerts
+      - alert: IngestCostEfficiencyDegraded
+        expr: >
+          (
+            sum(increase(ingest_events_total{namespace="intelgraph-prod"}[1h])) > 0 and
+            (sum(increase(ingest_events_total{namespace="intelgraph-prod"}[1h])) * 0.00005) /
+            sum(increase(ingest_events_total{namespace="intelgraph-prod"}[1h])) > 0.00006
+          )
+        for: 15m
+        labels:
+          severity: warning
+          category: cost_efficiency
+          service: intelgraph-mc
+        annotations:
+          summary: 'Ingest cost efficiency degraded'
+          description: 'Ingest unit cost {{ $value | printf "%.6f" }} above $0.00005 target'
+          runbook_url: 'https://runbooks.intelgraph.com/cost/ingest-efficiency'
+
+      # =====================
+      # SECURITY ALERTS
+      # =====================
+
+      # Security policy violations
+      - alert: PolicyViolationRateHigh
+        expr: sum(rate(policy_decisions_total{namespace="intelgraph-prod",decision="deny"}[5m])) > 10
+        for: 2m
+        labels:
+          severity: warning
+          category: security
+          service: intelgraph-mc
+        annotations:
+          summary: 'High policy violation rate detected'
+          description: '{{ $value | printf "%.1f" }} policy denials/sec indicates potential attack or misconfiguration'
+          runbook_url: 'https://runbooks.intelgraph.com/security/policy-violations-high'
+
+      # Suspicious GraphQL query patterns
+      - alert: GraphQLComplexityAttack
+        expr: histogram_quantile(0.95, sum(rate(graphql_query_complexity_bucket{namespace="intelgraph-prod"}[5m])) by (le)) > 1000
+        for: 1m
+        labels:
+          severity: critical
+          category: security
+          service: intelgraph-mc
+        annotations:
+          summary: 'GraphQL complexity attack detected'
+          description: 'P95 query complexity {{ $value | printf "%.0f" }} indicates potential DoS attack via complex queries'
+          runbook_url: 'https://runbooks.intelgraph.com/security/graphql-complexity-attack'
+
+      # Anomalous authentication patterns
+      - alert: AuthenticationAnomalyDetected
+        expr: >
+          (
+            sum(rate(auth_failures_total{namespace="intelgraph-prod"}[5m])) > 5
+          ) and (
+            sum(rate(auth_failures_total{namespace="intelgraph-prod"}[5m])) /
+            sum(rate(auth_attempts_total{namespace="intelgraph-prod"}[5m])) > 0.5
+          )
+        for: 2m
+        labels:
+          severity: warning
+          category: security
+          service: intelgraph-mc
+        annotations:
+          summary: 'Authentication anomaly detected'
+          description: 'Authentication failure rate {{ $value | printf "%.1f" }}% indicates potential brute force attack'
+          runbook_url: 'https://runbooks.intelgraph.com/security/auth-anomaly'
+
+      # =====================
+      # CANARY ALERTS
+      # =====================
+
+      # Canary deployment health
+      - alert: CanaryDeploymentUnhealthy
+        expr: >
+          (
+            sum(kube_deployment_status_replicas{namespace="intelgraph-prod",deployment="intelgraph-canary"}) > 0
+          ) and (
+            (
+              sum(rate(http_requests_total{namespace="intelgraph-prod",deployment="intelgraph-canary",status=~"[45].."}[5m])) /
+              sum(rate(http_requests_total{namespace="intelgraph-prod",deployment="intelgraph-canary"}[5m]))
+            ) > (
+              sum(rate(http_requests_total{namespace="intelgraph-prod",deployment="intelgraph-stable",status=~"[45].."}[5m])) /
+              sum(rate(http_requests_total{namespace="intelgraph-prod",deployment="intelgraph-stable"}[5m])) * 1.2
+            )
+          )
+        for: 5m
+        labels:
+          severity: critical
+          category: deployment
+          service: intelgraph-mc
+        annotations:
+          summary: 'Canary deployment showing elevated errors'
+          description: 'Canary error rate {{ $value | printf "%.2f" }}% significantly higher than stable deployment'
+          runbook_url: 'https://runbooks.intelgraph.com/deployment/canary-unhealthy'
+
+      # Canary performance regression
+      - alert: CanaryPerformanceRegression
+        expr: >
+          (
+            sum(kube_deployment_status_replicas{namespace="intelgraph-prod",deployment="intelgraph-canary"}) > 0
+          ) and (
+            histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="intelgraph-prod",deployment="intelgraph-canary"}[5m])) by (le)) >
+            histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{namespace="intelgraph-prod",deployment="intelgraph-stable"}[5m])) by (le)) * 1.3
+          )
+        for: 3m
+        labels:
+          severity: warning
+          category: deployment
+          service: intelgraph-mc
+        annotations:
+          summary: 'Canary deployment performance regression'
+          description: 'Canary P95 latency {{ $value | printf "%.0f" }}ms significantly higher than stable'
+          runbook_url: 'https://runbooks.intelgraph.com/deployment/canary-performance-regression'

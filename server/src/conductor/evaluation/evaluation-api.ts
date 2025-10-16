@@ -2,7 +2,12 @@
 // Provides endpoints for running evaluations, tracking quality trends, and CI/CD integration
 
 import express from 'express';
-import { evaluationEngine, GoldenTask, EvaluationResult, QualityMetrics } from './golden-tasks';
+import {
+  evaluationEngine,
+  GoldenTask,
+  EvaluationResult,
+  QualityMetrics,
+} from './golden-tasks';
 import { prometheusConductorMetrics } from '../observability/prometheus';
 import Redis from 'ioredis';
 
@@ -46,17 +51,23 @@ evaluationRouter.post('/evaluate', async (req, res) => {
     let tasksToRun = allTasks;
 
     if (request.taskIds?.length) {
-      tasksToRun = allTasks.filter((task) => request.taskIds!.includes(task.id));
+      tasksToRun = allTasks.filter((task) =>
+        request.taskIds!.includes(task.id),
+      );
     }
 
     if (request.expertTypes?.length) {
-      tasksToRun = tasksToRun.filter((task) => request.expertTypes!.includes(task.expertType));
+      tasksToRun = tasksToRun.filter((task) =>
+        request.expertTypes!.includes(task.expertType),
+      );
     }
 
     if (request.tenantId) {
       // Filter tasks by tenant if specified
       tasksToRun = tasksToRun.filter(
-        (task) => !task.metadata?.tenantId || task.metadata.tenantId === request.tenantId,
+        (task) =>
+          !task.metadata?.tenantId ||
+          task.metadata.tenantId === request.tenantId,
       );
     }
 
@@ -75,15 +86,26 @@ evaluationRouter.post('/evaluate', async (req, res) => {
     // Check for regressions if baseline specified
     let regressions: any[] = [];
     if (request.baseline) {
-      const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+      const redis = new Redis(
+        process.env.REDIS_URL || 'redis://localhost:6379',
+      );
       try {
-        const baselineData = await redis.get(`evaluation_baseline:${request.baseline}`);
+        const baselineData = await redis.get(
+          `evaluation_baseline:${request.baseline}`,
+        );
         if (baselineData) {
           const baseline = JSON.parse(baselineData);
-          regressions = evaluationEngine.detectRegressions(results, baseline.results, 0.05);
+          regressions = evaluationEngine.detectRegressions(
+            results,
+            baseline.results,
+            0.05,
+          );
         }
       } catch (error) {
-        console.warn('Failed to load baseline for regression detection:', error);
+        console.warn(
+          'Failed to load baseline for regression detection:',
+          error,
+        );
       } finally {
         redis.disconnect();
       }
@@ -127,27 +149,42 @@ evaluationRouter.post('/evaluate', async (req, res) => {
       'evaluation_duration',
       response.processingTime,
     );
-    prometheusConductorMetrics.recordOperationalMetric('evaluation_tasks_run', tasksToRun.length);
+    prometheusConductorMetrics.recordOperationalMetric(
+      'evaluation_tasks_run',
+      tasksToRun.length,
+    );
     prometheusConductorMetrics.recordOperationalMetric(
       'evaluation_average_score',
       metrics.averageScore,
     );
-    prometheusConductorMetrics.recordOperationalMetric('evaluation_pass_rate', metrics.passRate);
-    prometheusConductorMetrics.recordOperationalEvent('evaluation_completed', response.success);
+    prometheusConductorMetrics.recordOperationalMetric(
+      'evaluation_pass_rate',
+      metrics.passRate,
+    );
+    prometheusConductorMetrics.recordOperationalEvent(
+      'evaluation_completed',
+      response.success,
+    );
 
     if (regressions.length > 0) {
       prometheusConductorMetrics.recordOperationalMetric(
         'evaluation_regressions',
         regressions.length,
       );
-      prometheusConductorMetrics.recordOperationalEvent('evaluation_regression_detected', false);
+      prometheusConductorMetrics.recordOperationalEvent(
+        'evaluation_regression_detected',
+        false,
+      );
     }
 
     res.json(response);
   } catch (error) {
     console.error('Evaluation error:', error);
 
-    prometheusConductorMetrics.recordOperationalEvent('evaluation_error', false);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'evaluation_error',
+      false,
+    );
 
     res.status(500).json({
       success: false,
@@ -173,7 +210,8 @@ evaluationRouter.get('/tasks', async (req, res) => {
 
     if (tenantId) {
       tasks = tasks.filter(
-        (task) => !task.metadata?.tenantId || task.metadata.tenantId === tenantId,
+        (task) =>
+          !task.metadata?.tenantId || task.metadata.tenantId === tenantId,
       );
     }
 
@@ -320,7 +358,10 @@ evaluationRouter.post('/baseline/:baselineId', async (req, res) => {
       createdAt: Date.now(),
     };
 
-    await redis.set(`evaluation_baseline:${baselineId}`, JSON.stringify(baseline));
+    await redis.set(
+      `evaluation_baseline:${baselineId}`,
+      JSON.stringify(baseline),
+    );
 
     redis.disconnect();
 
@@ -366,14 +407,20 @@ evaluationRouter.post('/gate', async (req, res) => {
     let tasksToRun = allTasks;
 
     if (taskIds?.length) {
-      tasksToRun = allTasks.filter((task: GoldenTask) => taskIds.includes(task.id));
+      tasksToRun = allTasks.filter((task: GoldenTask) =>
+        taskIds.includes(task.id),
+      );
     }
 
     if (expertTypes?.length) {
-      tasksToRun = tasksToRun.filter((task: GoldenTask) => expertTypes.includes(task.expertType));
+      tasksToRun = tasksToRun.filter((task: GoldenTask) =>
+        expertTypes.includes(task.expertType),
+      );
     }
 
-    const results = await evaluationEngine.runEvaluation(tasksToRun, { parallel: true });
+    const results = await evaluationEngine.runEvaluation(tasksToRun, {
+      parallel: true,
+    });
     const metrics = evaluationEngine.calculateQualityMetrics(results);
 
     // Check quality gates
@@ -386,7 +433,9 @@ evaluationRouter.post('/gate', async (req, res) => {
     // Check for regressions if baseline specified
     let regressions: any[] = [];
     if (baseline) {
-      const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+      const redis = new Redis(
+        process.env.REDIS_URL || 'redis://localhost:6379',
+      );
       try {
         const baselineData = await redis.get(`evaluation_baseline:${baseline}`);
         if (baselineData) {
@@ -408,7 +457,10 @@ evaluationRouter.post('/gate', async (req, res) => {
     const passed = gates.passRate && gates.averageScore && gates.regressions;
 
     // Record gate check
-    prometheusConductorMetrics.recordOperationalEvent('quality_gate_check', passed);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'quality_gate_check',
+      passed,
+    );
 
     res.json({
       success: passed,
@@ -420,7 +472,10 @@ evaluationRouter.post('/gate', async (req, res) => {
   } catch (error) {
     console.error('Quality gate error:', error);
 
-    prometheusConductorMetrics.recordOperationalEvent('quality_gate_error', false);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'quality_gate_error',
+      false,
+    );
 
     res.status(500).json({
       success: false,
@@ -448,9 +503,14 @@ evaluationRouter.use((req, res, next) => {
 
   res.on('finish', () => {
     const duration = Date.now() - start;
-    console.log(`Evaluation API: ${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`);
+    console.log(
+      `Evaluation API: ${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`,
+    );
 
-    prometheusConductorMetrics.recordOperationalMetric('evaluation_api_request_duration', duration);
+    prometheusConductorMetrics.recordOperationalMetric(
+      'evaluation_api_request_duration',
+      duration,
+    );
     prometheusConductorMetrics.recordOperationalEvent(
       `evaluation_api_${req.method.toLowerCase()}`,
       res.statusCode < 400,

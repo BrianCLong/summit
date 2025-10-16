@@ -24,7 +24,10 @@ interface SLSAAttestation {
     buildDefinition: {
       buildType: string;
       externalParameters: Record<string, any>;
-      resolvedDependencies: Array<{ uri: string; digest: { [alg: string]: string } }>;
+      resolvedDependencies: Array<{
+        uri: string;
+        digest: { [alg: string]: string };
+      }>;
     };
     runDetails: {
       builder: { id: string; version?: string };
@@ -40,7 +43,11 @@ interface SLSAAttestation {
 interface TrustCenterReport {
   id: string;
   tenantId: string;
-  reportType: 'audit_export' | 'slsa_attestation' | 'sbom_report' | 'compliance_check';
+  reportType:
+    | 'audit_export'
+    | 'slsa_attestation'
+    | 'sbom_report'
+    | 'compliance_check';
   status: 'generating' | 'completed' | 'failed';
   downloadUrl?: string;
   expiresAt: Date;
@@ -57,19 +64,26 @@ export class TrustCenterService {
     this.timestampService = process.env.TIMESTAMP_SERVICE_URL; // Optional 3rd-party timestamping
   }
 
-  async createAuditExport(request: AuditExportRequest, userId: string): Promise<string> {
+  async createAuditExport(
+    request: AuditExportRequest,
+    userId: string,
+  ): Promise<string> {
     const span = otelService.createSpan('trust_center.create_audit_export');
-    
+
     try {
       const reportId = crypto.randomUUID();
       const pool = getPostgresPool();
-      
+
       // Create report record
       await pool.query(
         `INSERT INTO trust_center_reports 
          (id, tenant_id, report_type, status, metadata, created_at, expires_at)
          VALUES ($1, $2, 'audit_export', 'generating', $3, now(), now() + interval '7 days')`,
-        [reportId, request.tenantId, JSON.stringify({ request, createdBy: userId })]
+        [
+          reportId,
+          request.tenantId,
+          JSON.stringify({ request, createdBy: userId }),
+        ],
       );
 
       // Generate export asynchronously
@@ -90,13 +104,16 @@ export class TrustCenterService {
     }
   }
 
-  private async generateAuditExportAsync(reportId: string, request: AuditExportRequest): Promise<void> {
+  private async generateAuditExportAsync(
+    reportId: string,
+    request: AuditExportRequest,
+  ): Promise<void> {
     const span = otelService.createSpan('trust_center.generate_audit_export');
-    
+
     try {
       const pool = getPostgresPool();
       const exportData = await this.collectAuditData(request);
-      
+
       // Generate different formats
       let fileContent: string;
       let contentType: string;
@@ -124,12 +141,12 @@ export class TrustCenterService {
 
       // Sign the export (digital signature)
       const signature = this.signContent(fileContent);
-      
+
       // Store the file (in production, use S3 or similar)
       const filePath = `/tmp/trust-center/${fileName}`;
       await fs.mkdir('/tmp/trust-center', { recursive: true });
       await fs.writeFile(filePath, fileContent);
-      
+
       // Store signature
       await fs.writeFile(`${filePath}.sig`, signature);
 
@@ -138,7 +155,7 @@ export class TrustCenterService {
         `UPDATE trust_center_reports 
          SET status = 'completed', download_url = $2, updated_at = now()
          WHERE id = $1`,
-        [reportId, `/api/trust-center/download/${reportId}`]
+        [reportId, `/api/trust-center/download/${reportId}`],
       );
 
       // Optional: Submit to 3rd-party timestamping service
@@ -150,16 +167,15 @@ export class TrustCenterService {
         'trust_center.export_size': fileContent.length,
         'trust_center.format': request.format,
       });
-
     } catch (error: any) {
       console.error('Audit export generation failed:', error);
-      
+
       const pool = getPostgresPool();
       await pool.query(
         `UPDATE trust_center_reports 
          SET status = 'failed', error_message = $2, updated_at = now()
          WHERE id = $1`,
-        [reportId, error.message]
+        [reportId, error.message],
       );
     } finally {
       span?.end();
@@ -184,7 +200,7 @@ export class TrustCenterService {
         `SELECT * FROM policy_audit 
          WHERE tenant_id = $1 AND created_at BETWEEN $2 AND $3
          ORDER BY created_at DESC`,
-        [request.tenantId, request.startDate, request.endDate]
+        [request.tenantId, request.startDate, request.endDate],
       );
       auditData.sections.policyDecisions = policyRows;
     }
@@ -198,7 +214,7 @@ export class TrustCenterService {
            AND re.kind = 'routing.override'
          WHERE rd.created_at BETWEEN $1 AND $2
          ORDER BY rd.created_at DESC`,
-        [request.startDate, request.endDate]
+        [request.startDate, request.endDate],
       );
       auditData.sections.routerDecisions = routerRows;
     }
@@ -206,9 +222,11 @@ export class TrustCenterService {
     // Collect evidence if requested
     if (request.includeEvidence) {
       if (request.runId) {
-        const evidence = await evidenceProvenanceService.listEvidenceForRun(request.runId);
+        const evidence = await evidenceProvenanceService.listEvidenceForRun(
+          request.runId,
+        );
         auditData.sections.evidence = evidence;
-        
+
         // Include Merkle tree verification
         const manifest = await provenanceLedger.exportManifest(request.runId);
         auditData.sections.provenanceManifest = manifest;
@@ -218,7 +236,7 @@ export class TrustCenterService {
           `SELECT * FROM evidence_artifacts 
            WHERE created_at BETWEEN $1 AND $2
            ORDER BY created_at DESC LIMIT 1000`,
-          [request.startDate, request.endDate]
+          [request.startDate, request.endDate],
         );
         auditData.sections.evidence = evidenceRows;
       }
@@ -230,23 +248,28 @@ export class TrustCenterService {
        WHERE ts BETWEEN $1 AND $2
        AND kind IN ('approval.created', 'approval.approved', 'approval.declined', 'routing.override')
        ORDER BY ts DESC`,
-      [request.startDate, request.endDate]
+      [request.startDate, request.endDate],
     );
     auditData.sections.systemEvents = eventRows;
 
     return auditData;
   }
 
-  async generateSLSAAttestation(runId: string, tenantId: string): Promise<SLSAAttestation> {
-    const span = otelService.createSpan('trust_center.generate_slsa_attestation');
-    
+  async generateSLSAAttestation(
+    runId: string,
+    tenantId: string,
+  ): Promise<SLSAAttestation> {
+    const span = otelService.createSpan(
+      'trust_center.generate_slsa_attestation',
+    );
+
     try {
       const pool = getPostgresPool();
-      
+
       // Get run details
       const { rows: runRows } = await pool.query(
         `SELECT * FROM run WHERE id = $1`,
-        [runId]
+        [runId],
       );
 
       if (!runRows.length) {
@@ -256,12 +279,13 @@ export class TrustCenterService {
       const run = runRows[0];
 
       // Get evidence artifacts for this run
-      const evidence = await evidenceProvenanceService.listEvidenceForRun(runId);
-      
+      const evidence =
+        await evidenceProvenanceService.listEvidenceForRun(runId);
+
       // Get dependencies (from router decisions, MCP servers, etc.)
       const { rows: routerRows } = await pool.query(
         `SELECT selected_model, candidates FROM router_decisions WHERE run_id = $1`,
-        [runId]
+        [runId],
       );
 
       const { rows: mcpRows } = await pool.query(
@@ -274,13 +298,13 @@ export class TrustCenterService {
              )
            )
          )`,
-        [run.ended_at || new Date()]
+        [run.ended_at || new Date()],
       );
 
       // Build SLSA attestation
       const attestation: SLSAAttestation = {
         _type: 'https://in-toto.io/Statement/v0.1',
-        subject: evidence.map(e => ({
+        subject: evidence.map((e) => ({
           name: `artifact-${e.id}`,
           digest: { sha256: e.sha256_hash },
         })),
@@ -294,13 +318,21 @@ export class TrustCenterService {
               runId: runId,
             },
             resolvedDependencies: [
-              ...routerRows.map(r => ({
+              ...routerRows.map((r) => ({
                 uri: `model://${r.selected_model}`,
-                digest: { sha256: createHash('sha256').update(r.selected_model).digest('hex') },
+                digest: {
+                  sha256: createHash('sha256')
+                    .update(r.selected_model)
+                    .digest('hex'),
+                },
               })),
-              ...mcpRows.map(m => ({
+              ...mcpRows.map((m) => ({
                 uri: m.url,
-                digest: { sha256: createHash('sha256').update(m.name + m.url).digest('hex') },
+                digest: {
+                  sha256: createHash('sha256')
+                    .update(m.name + m.url)
+                    .digest('hex'),
+                },
               })),
             ],
           },
@@ -311,8 +343,10 @@ export class TrustCenterService {
             },
             metadata: {
               invocationId: runId,
-              startedOn: run.started_at?.toISOString() || new Date().toISOString(),
-              finishedOn: run.ended_at?.toISOString() || new Date().toISOString(),
+              startedOn:
+                run.started_at?.toISOString() || new Date().toISOString(),
+              finishedOn:
+                run.ended_at?.toISOString() || new Date().toISOString(),
             },
           },
         },
@@ -322,7 +356,7 @@ export class TrustCenterService {
       await pool.query(
         `INSERT INTO slsa_attestations (run_id, tenant_id, attestation, created_at)
          VALUES ($1, $2, $3, now())`,
-        [runId, tenantId, JSON.stringify(attestation)]
+        [runId, tenantId, JSON.stringify(attestation)],
       );
 
       span?.addSpanAttributes({
@@ -342,12 +376,13 @@ export class TrustCenterService {
 
   async generateSBOMReport(runId: string): Promise<any> {
     const span = otelService.createSpan('trust_center.generate_sbom');
-    
+
     try {
       const pool = getPostgresPool();
-      
+
       // Get all components used in this run
-      const { rows: componentRows } = await pool.query(`
+      const { rows: componentRows } = await pool.query(
+        `
         SELECT DISTINCT
           rd.selected_model as component_name,
           'model' as component_type,
@@ -373,7 +408,9 @@ export class TrustCenterService {
             )
           )
         )
-      `, [runId]);
+      `,
+        [runId],
+      );
 
       const sbom = {
         bomFormat: 'CycloneDX',
@@ -382,25 +419,27 @@ export class TrustCenterService {
         version: 1,
         metadata: {
           timestamp: new Date().toISOString(),
-          tools: [{
-            vendor: 'IntelGraph',
-            name: 'Maestro Trust Center',
-            version: '1.0.0',
-          }],
+          tools: [
+            {
+              vendor: 'IntelGraph',
+              name: 'Maestro Trust Center',
+              version: '1.0.0',
+            },
+          ],
           component: {
             type: 'application',
             name: `maestro-run-${runId}`,
             version: '1.0.0',
           },
         },
-        components: componentRows.map(row => ({
+        components: componentRows.map((row) => ({
           type: row.component_type,
           name: row.component_name,
           version: '1.0.0',
           scope: 'required',
-          properties: row.metadata ? [
-            { name: 'metadata', value: JSON.stringify(row.metadata) }
-          ] : [],
+          properties: row.metadata
+            ? [{ name: 'metadata', value: JSON.stringify(row.metadata) }]
+            : [],
         })),
       };
 
@@ -408,7 +447,7 @@ export class TrustCenterService {
       await pool.query(
         `INSERT INTO sbom_reports (run_id, sbom, created_at)
          VALUES ($1, $2, now())`,
-        [runId, JSON.stringify(sbom)]
+        [runId, JSON.stringify(sbom)],
       );
 
       return sbom;
@@ -420,9 +459,12 @@ export class TrustCenterService {
     }
   }
 
-  async checkComplianceStatus(tenantId: string, framework: 'SOC2' | 'ISO27001' | 'HIPAA' | 'PCI'): Promise<any> {
+  async checkComplianceStatus(
+    tenantId: string,
+    framework: 'SOC2' | 'ISO27001' | 'HIPAA' | 'PCI',
+  ): Promise<any> {
     const pool = getPostgresPool();
-    
+
     const checks: Record<string, any> = {
       SOC2: {
         controls: [
@@ -436,14 +478,26 @@ export class TrustCenterService {
         controls: [
           { id: 'A.9.1', name: 'Access Control Policy', status: 'compliant' },
           { id: 'A.10.1', name: 'Cryptographic Controls', status: 'compliant' },
-          { id: 'A.12.6', name: 'Management of Technical Vulnerabilities', status: 'compliant' },
+          {
+            id: 'A.12.6',
+            name: 'Management of Technical Vulnerabilities',
+            status: 'compliant',
+          },
         ],
       },
       HIPAA: {
         controls: [
-          { id: '164.308(a)(1)', name: 'Security Officer', status: 'compliant' },
+          {
+            id: '164.308(a)(1)',
+            name: 'Security Officer',
+            status: 'compliant',
+          },
           { id: '164.312(a)(1)', name: 'Access Control', status: 'compliant' },
-          { id: '164.312(e)(1)', name: 'Transmission Security', status: 'compliant' },
+          {
+            id: '164.312(e)(1)',
+            name: 'Transmission Security',
+            status: 'compliant',
+          },
         ],
       },
       PCI: {
@@ -482,21 +536,27 @@ export class TrustCenterService {
   private convertToCSV(data: any): string {
     // Simple CSV conversion for audit data
     const lines: string[] = [];
-    
+
     if (data.sections?.policyDecisions) {
       lines.push('Policy Decisions:');
       lines.push('timestamp,decision,policy,user,resource');
       data.sections.policyDecisions.forEach((row: any) => {
-        lines.push(`${row.created_at},${row.decision},${row.policy},${row.user_id},${row.resource}`);
+        lines.push(
+          `${row.created_at},${row.decision},${row.policy},${row.user_id},${row.resource}`,
+        );
       });
       lines.push('');
     }
 
     if (data.sections?.routerDecisions) {
       lines.push('Router Decisions:');
-      lines.push('timestamp,run_id,selected_model,candidates_count,override_reason');
+      lines.push(
+        'timestamp,run_id,selected_model,candidates_count,override_reason',
+      );
       data.sections.routerDecisions.forEach((row: any) => {
-        lines.push(`${row.created_at},${row.run_id},${row.selected_model},${JSON.parse(row.candidates || '[]').length},${row.override_reason || ''}`);
+        lines.push(
+          `${row.created_at},${row.run_id},${row.selected_model},${JSON.parse(row.candidates || '[]').length},${row.override_reason || ''}`,
+        );
       });
     }
 
@@ -509,7 +569,10 @@ export class TrustCenterService {
     return `MAESTRO AUDIT REPORT\n\nGenerated: ${new Date().toISOString()}\n\nTenant: ${data.metadata.tenantId}\n\nTime Range: ${data.metadata.timeRange.start} to ${data.metadata.timeRange.end}\n\n[PDF content would be rendered here with charts and tables]`;
   }
 
-  private async submitToTimestampService(content: string, reportId: string): Promise<void> {
+  private async submitToTimestampService(
+    content: string,
+    reportId: string,
+  ): Promise<void> {
     // Optional 3rd-party timestamping (RFC 3161)
     if (!this.timestampService) return;
 
@@ -522,16 +585,19 @@ export class TrustCenterService {
     }
   }
 
-  async generateComprehensiveAuditReport(tenantId: string, options: {
-    startDate?: string;
-    endDate?: string;
-    includeMetrics?: boolean;
-    includeCompliance?: boolean;
-    format?: 'json' | 'csv' | 'pdf';
-    frameworks?: ('SOC2' | 'ISO27001' | 'HIPAA' | 'PCI')[];
-  } = {}): Promise<any> {
+  async generateComprehensiveAuditReport(
+    tenantId: string,
+    options: {
+      startDate?: string;
+      endDate?: string;
+      includeMetrics?: boolean;
+      includeCompliance?: boolean;
+      format?: 'json' | 'csv' | 'pdf';
+      frameworks?: ('SOC2' | 'ISO27001' | 'HIPAA' | 'PCI')[];
+    } = {},
+  ): Promise<any> {
     const span = otelService.createSpan('trust-center.comprehensive-audit');
-    
+
     try {
       const {
         startDate = '1970-01-01',
@@ -539,26 +605,41 @@ export class TrustCenterService {
         includeMetrics = true,
         includeCompliance = true,
         format = 'json',
-        frameworks = ['SOC2', 'ISO27001']
+        frameworks = ['SOC2', 'ISO27001'],
       } = options;
 
       const pool = getPostgresPool();
       const reportId = `audit-${tenantId}-${Date.now()}`;
 
       // Gather all audit sections
-      const auditSections = await this.gatherAuditSections(tenantId, startDate, endDate, includeMetrics);
+      const auditSections = await this.gatherAuditSections(
+        tenantId,
+        startDate,
+        endDate,
+        includeMetrics,
+      );
 
       // Multi-framework compliance check
-      const complianceResults = includeCompliance 
-        ? await Promise.all(frameworks.map(framework => this.checkComplianceStatus(tenantId, framework)))
+      const complianceResults = includeCompliance
+        ? await Promise.all(
+            frameworks.map((framework) =>
+              this.checkComplianceStatus(tenantId, framework),
+            ),
+          )
         : [];
 
       // Generate SLSA attestation
       const slsaAttestation = await this.generateSLSAAttestation(tenantId, {
         buildDefinition: {
           buildType: 'intelgraph-audit',
-          externalParameters: { tenant: tenantId, period: `${startDate}_to_${endDate}` },
-          internalParameters: { auditVersion: '1.0', frameworks: frameworks.join(',') },
+          externalParameters: {
+            tenant: tenantId,
+            period: `${startDate}_to_${endDate}`,
+          },
+          internalParameters: {
+            auditVersion: '1.0',
+            frameworks: frameworks.join(','),
+          },
         },
         runDetails: {
           builder: { id: 'intelgraph-trust-center' },
@@ -586,14 +667,25 @@ export class TrustCenterService {
         complianceResults,
         slsaAttestation,
         summary: {
-          totalEvents: Object.values(auditSections).reduce((acc: number, section: any) => 
-            acc + (Array.isArray(section) ? section.length : 0), 0),
-          complianceScore: complianceResults.length > 0 
-            ? complianceResults.filter(r => r.overallStatus === 'compliant').length / complianceResults.length * 100
-            : 100,
+          totalEvents: Object.values(auditSections).reduce(
+            (acc: number, section: any) =>
+              acc + (Array.isArray(section) ? section.length : 0),
+            0,
+          ),
+          complianceScore:
+            complianceResults.length > 0
+              ? (complianceResults.filter(
+                  (r) => r.overallStatus === 'compliant',
+                ).length /
+                  complianceResults.length) *
+                100
+              : 100,
           riskLevel: this.calculateRiskLevel(auditSections, complianceResults),
-          recommendations: this.generateRecommendations(auditSections, complianceResults),
-        }
+          recommendations: this.generateRecommendations(
+            auditSections,
+            complianceResults,
+          ),
+        },
       };
 
       // Sign the report
@@ -603,15 +695,23 @@ export class TrustCenterService {
         summary: report.summary,
         timestamp: report.metadata.timestamp,
       });
-      
+
       report.metadata.signature = this.signContent(contentToSign);
-      report.metadata.reportHash = createHash('sha256').update(JSON.stringify(report.sections)).digest('hex');
+      report.metadata.reportHash = createHash('sha256')
+        .update(JSON.stringify(report.sections))
+        .digest('hex');
 
       // Store report
       await pool.query(
         `INSERT INTO audit_reports (id, tenant_id, report_type, report_data, frameworks, created_at)
          VALUES ($1, $2, $3, $4, $5, now())`,
-        [reportId, tenantId, 'comprehensive', JSON.stringify(report), JSON.stringify(frameworks)]
+        [
+          reportId,
+          tenantId,
+          'comprehensive',
+          JSON.stringify(report),
+          JSON.stringify(frameworks),
+        ],
       );
 
       // Format based on request
@@ -631,7 +731,6 @@ export class TrustCenterService {
         default:
           return report;
       }
-
     } catch (error: any) {
       console.error('Comprehensive audit failed:', error);
       throw error;
@@ -640,11 +739,16 @@ export class TrustCenterService {
     }
   }
 
-  private calculateRiskLevel(auditSections: any, complianceResults: any[]): 'low' | 'medium' | 'high' {
+  private calculateRiskLevel(
+    auditSections: any,
+    complianceResults: any[],
+  ): 'low' | 'medium' | 'high' {
     let riskScore = 0;
 
     // Check policy violations
-    const policyDenials = auditSections.policyDecisions?.filter((d: any) => d.decision === 'deny').length || 0;
+    const policyDenials =
+      auditSections.policyDecisions?.filter((d: any) => d.decision === 'deny')
+        .length || 0;
     if (policyDenials > 10) riskScore += 2;
     else if (policyDenials > 5) riskScore += 1;
 
@@ -653,7 +757,9 @@ export class TrustCenterService {
     if (evidenceCount < 10) riskScore += 1;
 
     // Check compliance status
-    const nonCompliantFrameworks = complianceResults.filter(r => r.overallStatus !== 'compliant').length;
+    const nonCompliantFrameworks = complianceResults.filter(
+      (r) => r.overallStatus !== 'compliant',
+    ).length;
     riskScore += nonCompliantFrameworks;
 
     if (riskScore >= 4) return 'high';
@@ -661,29 +767,44 @@ export class TrustCenterService {
     return 'low';
   }
 
-  private generateRecommendations(auditSections: any, complianceResults: any[]): string[] {
+  private generateRecommendations(
+    auditSections: any,
+    complianceResults: any[],
+  ): string[] {
     const recommendations: string[] = [];
 
     // Policy-based recommendations
-    const policyDenials = auditSections.policyDecisions?.filter((d: any) => d.decision === 'deny').length || 0;
+    const policyDenials =
+      auditSections.policyDecisions?.filter((d: any) => d.decision === 'deny')
+        .length || 0;
     if (policyDenials > 5) {
-      recommendations.push('Review and refine access control policies - high denial rate detected');
+      recommendations.push(
+        'Review and refine access control policies - high denial rate detected',
+      );
     }
 
     // Router decision recommendations
-    const overriddenDecisions = auditSections.routerDecisions?.filter((d: any) => d.override_reason).length || 0;
+    const overriddenDecisions =
+      auditSections.routerDecisions?.filter((d: any) => d.override_reason)
+        .length || 0;
     if (overriddenDecisions > 0) {
-      recommendations.push('Analyze router decision overrides to improve model selection accuracy');
+      recommendations.push(
+        'Analyze router decision overrides to improve model selection accuracy',
+      );
     }
 
     // Cost recommendations
-    const highCostRequests = auditSections.servingMetrics?.filter((m: any) => m.cost_usd > 1.0).length || 0;
+    const highCostRequests =
+      auditSections.servingMetrics?.filter((m: any) => m.cost_usd > 1.0)
+        .length || 0;
     if (highCostRequests > 10) {
-      recommendations.push('Implement cost optimization strategies for high-cost model invocations');
+      recommendations.push(
+        'Implement cost optimization strategies for high-cost model invocations',
+      );
     }
 
     // Compliance recommendations
-    complianceResults.forEach(result => {
+    complianceResults.forEach((result) => {
       if (result.overallStatus !== 'compliant') {
         recommendations.push(`Address ${result.framework} compliance gaps`);
       }
@@ -691,15 +812,24 @@ export class TrustCenterService {
 
     // Default recommendations if none specific
     if (recommendations.length === 0) {
-      recommendations.push('Continue monitoring and maintain current security posture');
+      recommendations.push(
+        'Continue monitoring and maintain current security posture',
+      );
       recommendations.push('Schedule regular compliance assessments');
-      recommendations.push('Consider implementing additional monitoring controls');
+      recommendations.push(
+        'Consider implementing additional monitoring controls',
+      );
     }
 
     return recommendations;
   }
 
-  private async gatherAuditSections(tenantId: string, startDate: string, endDate: string, includeMetrics: boolean) {
+  private async gatherAuditSections(
+    tenantId: string,
+    startDate: string,
+    endDate: string,
+    includeMetrics: boolean,
+  ) {
     const pool = getPostgresPool();
     const sections: any = {};
 
@@ -709,7 +839,7 @@ export class TrustCenterService {
        FROM policy_decisions 
        WHERE tenant_id = $1 AND created_at BETWEEN $2 AND $3
        ORDER BY created_at DESC`,
-      [tenantId, startDate, endDate]
+      [tenantId, startDate, endDate],
     );
     sections.policyDecisions = policyQuery.rows;
 
@@ -719,7 +849,7 @@ export class TrustCenterService {
        FROM router_decisions 
        WHERE tenant_id = $1 AND created_at BETWEEN $2 AND $3
        ORDER BY created_at DESC`,
-      [tenantId, startDate, endDate]
+      [tenantId, startDate, endDate],
     );
     sections.routerDecisions = routerQuery.rows;
 
@@ -729,7 +859,7 @@ export class TrustCenterService {
        FROM evidence_artifacts 
        WHERE tenant_id = $1 AND created_at BETWEEN $2 AND $3
        ORDER BY created_at DESC`,
-      [tenantId, startDate, endDate]
+      [tenantId, startDate, endDate],
     );
     sections.evidenceArtifacts = evidenceQuery.rows;
 
@@ -741,7 +871,7 @@ export class TrustCenterService {
          WHERE tenant_id = $1 AND timestamp BETWEEN $2 AND $3
          ORDER BY timestamp DESC
          LIMIT 1000`,
-        [tenantId, startDate, endDate]
+        [tenantId, startDate, endDate],
       );
       sections.servingMetrics = metricsQuery.rows;
     }
@@ -751,7 +881,7 @@ export class TrustCenterService {
 
   private convertToCSVEnhanced(data: any): string {
     const lines: string[] = [];
-    
+
     // Executive summary
     lines.push('IntelGraph Audit Report - Executive Summary');
     lines.push(`Generated,${data.metadata.generatedAt}`);
@@ -761,21 +891,27 @@ export class TrustCenterService {
     lines.push(`Compliance Score,${data.summary.complianceScore}%`);
     lines.push(`Risk Level,${data.summary.riskLevel}`);
     lines.push('');
-    
+
     if (data.sections?.policyDecisions) {
       lines.push('Policy Decisions:');
       lines.push('timestamp,decision,policy,user,resource');
       data.sections.policyDecisions.forEach((row: any) => {
-        lines.push(`${row.created_at},${row.decision},${row.policy},${row.user_id},${row.resource}`);
+        lines.push(
+          `${row.created_at},${row.decision},${row.policy},${row.user_id},${row.resource}`,
+        );
       });
       lines.push('');
     }
 
     if (data.sections?.routerDecisions) {
       lines.push('Router Decisions:');
-      lines.push('timestamp,run_id,selected_model,candidates_count,override_reason');
+      lines.push(
+        'timestamp,run_id,selected_model,candidates_count,override_reason',
+      );
       data.sections.routerDecisions.forEach((row: any) => {
-        lines.push(`${row.created_at},${row.run_id},${row.selected_model},${JSON.parse(row.candidates || '[]').length},${row.override_reason || ''}`);
+        lines.push(
+          `${row.created_at},${row.run_id},${row.selected_model},${JSON.parse(row.candidates || '[]').length},${row.override_reason || ''}`,
+        );
       });
       lines.push('');
     }
@@ -784,7 +920,9 @@ export class TrustCenterService {
       lines.push('Evidence Artifacts:');
       lines.push('timestamp,type,hash,size,source');
       data.sections.evidenceArtifacts.forEach((row: any) => {
-        lines.push(`${row.created_at},${row.type},${row.hash},${row.size_bytes},${row.source}`);
+        lines.push(
+          `${row.created_at},${row.type},${row.hash},${row.size_bytes},${row.source}`,
+        );
       });
       lines.push('');
     }
@@ -793,7 +931,9 @@ export class TrustCenterService {
       lines.push('Serving Metrics:');
       lines.push('timestamp,model,latency_ms,tokens_in,tokens_out,cost_usd');
       data.sections.servingMetrics.forEach((row: any) => {
-        lines.push(`${row.timestamp},${row.model},${row.latency_ms},${row.tokens_in},${row.tokens_out},${row.cost_usd}`);
+        lines.push(
+          `${row.timestamp},${row.model},${row.latency_ms},${row.tokens_in},${row.tokens_out},${row.cost_usd}`,
+        );
       });
       lines.push('');
     }
@@ -803,7 +943,9 @@ export class TrustCenterService {
       lines.push('Compliance Summary:');
       lines.push('framework,status,last_assessment');
       data.complianceResults.forEach((result: any) => {
-        lines.push(`${result.framework},${result.overallStatus},${result.lastAssessment}`);
+        lines.push(
+          `${result.framework},${result.overallStatus},${result.lastAssessment}`,
+        );
       });
       lines.push('');
     }
@@ -839,31 +981,55 @@ Frameworks: ${data.metadata.frameworks.join(', ')}
 
 POLICY DECISIONS
 ================
-${data.sections?.policyDecisions?.map((row: any, idx: number) => 
-  `${idx + 1}. ${row.created_at} | ${row.decision.toUpperCase()} | ${row.policy} | User: ${row.user_id}`
-).join('\n') || 'No policy decisions in this period'}
+${
+  data.sections?.policyDecisions
+    ?.map(
+      (row: any, idx: number) =>
+        `${idx + 1}. ${row.created_at} | ${row.decision.toUpperCase()} | ${row.policy} | User: ${row.user_id}`,
+    )
+    .join('\n') || 'No policy decisions in this period'
+}
 
 ROUTER DECISIONS
 ================
-${data.sections?.routerDecisions?.map((row: any, idx: number) => 
-  `${idx + 1}. ${row.created_at} | Run: ${row.run_id} | Model: ${row.selected_model}${row.override_reason ? ` (Override: ${row.override_reason})` : ''}`
-).join('\n') || 'No router decisions in this period'}
+${
+  data.sections?.routerDecisions
+    ?.map(
+      (row: any, idx: number) =>
+        `${idx + 1}. ${row.created_at} | Run: ${row.run_id} | Model: ${row.selected_model}${row.override_reason ? ` (Override: ${row.override_reason})` : ''}`,
+    )
+    .join('\n') || 'No router decisions in this period'
+}
 
 EVIDENCE ARTIFACTS
 ==================
-${data.sections?.evidenceArtifacts?.map((row: any, idx: number) => 
-  `${idx + 1}. ${row.created_at} | ${row.type} | Hash: ${row.hash} | Size: ${row.size_bytes} bytes`
-).join('\n') || 'No evidence artifacts in this period'}
+${
+  data.sections?.evidenceArtifacts
+    ?.map(
+      (row: any, idx: number) =>
+        `${idx + 1}. ${row.created_at} | ${row.type} | Hash: ${row.hash} | Size: ${row.size_bytes} bytes`,
+    )
+    .join('\n') || 'No evidence artifacts in this period'
+}
 
 SERVING METRICS
 ===============
-${data.sections?.servingMetrics?.slice(0, 20).map((row: any, idx: number) => 
-  `${idx + 1}. ${row.timestamp} | ${row.model} | ${row.latency_ms}ms | $${row.cost_usd} | ${row.tokens_in}→${row.tokens_out} tokens`
-).join('\n') || 'No serving metrics available'}
+${
+  data.sections?.servingMetrics
+    ?.slice(0, 20)
+    .map(
+      (row: any, idx: number) =>
+        `${idx + 1}. ${row.timestamp} | ${row.model} | ${row.latency_ms}ms | $${row.cost_usd} | ${row.tokens_in}→${row.tokens_out} tokens`,
+    )
+    .join('\n') || 'No serving metrics available'
+}
 
 COMPLIANCE STATUS
 =================
-${data.complianceResults?.map((result: any) => `
+${
+  data.complianceResults
+    ?.map(
+      (result: any) => `
 Framework: ${result.framework}
 Status: ${result.overallStatus.toUpperCase()}
 Last Assessment: ${result.lastAssessment}
@@ -873,7 +1039,10 @@ ${result.controls?.map((control: any) => `  • ${control.id}: ${control.name} -
 
 Recommendations:
 ${result.recommendations?.map((rec: string) => `  • ${rec}`).join('\n')}
-`).join('\n') || 'No compliance data available'}
+`,
+    )
+    .join('\n') || 'No compliance data available'
+}
 
 RISK ASSESSMENT
 ===============

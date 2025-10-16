@@ -22,7 +22,7 @@ data:
     default_statistics_target = 100
     random_page_cost = 1.1
     effective_io_concurrency = 200
-    
+
     # Logging
     log_destination = 'stderr'
     logging_collector = on
@@ -33,13 +33,13 @@ data:
     log_min_duration_statement = 1000
     log_line_prefix = '%t [%p]: [%l-1] user=%u,db=%d,app=%a,client=%h '
     log_statement = 'ddl'
-    
+
     # Performance tuning
     synchronous_commit = on
     wal_level = replica
     archive_mode = on
     archive_command = 'test ! -f /var/lib/postgresql/archive/%f && cp %p /var/lib/postgresql/archive/%f'
-    
+
   pg_hba.conf: |
     # PostgreSQL Client Authentication Configuration
     local   all             all                                     trust
@@ -110,7 +110,7 @@ spec:
               mkdir -p /var/lib/postgresql/data
               mkdir -p /var/lib/postgresql/archive
               chown -R postgres:postgres /var/lib/postgresql
-              
+
               # Copy configuration files
               cp /tmp/config/postgresql.conf /var/lib/postgresql/data/
               cp /tmp/config/pg_hba.conf /var/lib/postgresql/data/

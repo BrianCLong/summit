@@ -115,7 +115,10 @@ export class DataReplicationEngine extends EventEmitter {
   private initializeDatabasePools(): void {
     // Initialize PostgreSQL pools
     if (this.config.databases.postgres.enabled) {
-      const regions = [this.config.regions.primary, ...this.config.regions.replicas];
+      const regions = [
+        this.config.regions.primary,
+        ...this.config.regions.replicas,
+      ];
       regions.forEach((region) => {
         const pool = new Pool({
           connectionString: process.env[`POSTGRES_${region.toUpperCase()}_URL`],
@@ -227,7 +230,10 @@ export class DataReplicationEngine extends EventEmitter {
           const operation: ReplicationOperation = JSON.parse(opData);
           await this.processOperation(operation);
         } catch (error) {
-          console.error(`Failed to process replication operation ${opId}:`, error);
+          console.error(
+            `Failed to process replication operation ${opId}:`,
+            error,
+          );
         }
       });
 
@@ -240,13 +246,18 @@ export class DataReplicationEngine extends EventEmitter {
   /**
    * Process individual replication operation
    */
-  private async processOperation(operation: ReplicationOperation): Promise<void> {
+  private async processOperation(
+    operation: ReplicationOperation,
+  ): Promise<void> {
     operation.status = 'replicating';
     operation.lastAttempt = Date.now();
 
     try {
       // Check for conflicts if vector clocks enabled
-      if (this.config.conflictResolution.vectorClockEnabled && operation.vectorClock) {
+      if (
+        this.config.conflictResolution.vectorClockEnabled &&
+        operation.vectorClock
+      ) {
         const conflict = await this.detectConflicts(operation);
         if (conflict) {
           await this.handleConflict(conflict);
@@ -255,9 +266,11 @@ export class DataReplicationEngine extends EventEmitter {
       }
 
       // Replicate to each target region
-      const replicationPromises = operation.targetRegions.map(async (region) => {
-        await this.replicateToRegion(operation, region);
-      });
+      const replicationPromises = operation.targetRegions.map(
+        async (region) => {
+          await this.replicateToRegion(operation, region);
+        },
+      );
 
       await Promise.all(replicationPromises);
 
@@ -265,7 +278,10 @@ export class DataReplicationEngine extends EventEmitter {
       this.emit('operation:completed', operation);
 
       // Update metrics
-      prometheusConductorMetrics.recordOperationalEvent('replication_success', true);
+      prometheusConductorMetrics.recordOperationalEvent(
+        'replication_success',
+        true,
+      );
     } catch (error) {
       operation.status = 'failed';
       operation.error = error.message;
@@ -282,11 +298,18 @@ export class DataReplicationEngine extends EventEmitter {
         }, delay);
       }
 
-      prometheusConductorMetrics.recordOperationalEvent('replication_failure', false);
+      prometheusConductorMetrics.recordOperationalEvent(
+        'replication_failure',
+        false,
+      );
     }
 
     // Update operation in storage
-    await this.redis.setex(`replication_op:${operation.id}`, 86400, JSON.stringify(operation));
+    await this.redis.setex(
+      `replication_op:${operation.id}`,
+      86400,
+      JSON.stringify(operation),
+    );
   }
 
   /**
@@ -357,7 +380,9 @@ export class DataReplicationEngine extends EventEmitter {
     }
 
     // Implement Neo4j replication using driver
-    console.log(`Replicating Neo4j operation ${operation.id} to ${targetRegion}`);
+    console.log(
+      `Replicating Neo4j operation ${operation.id} to ${targetRegion}`,
+    );
   }
 
   /**
@@ -379,7 +404,10 @@ export class DataReplicationEngine extends EventEmitter {
         case 'insert':
         case 'update':
           if (operation.key) {
-            await targetRedis.set(operation.key, JSON.stringify(operation.data));
+            await targetRedis.set(
+              operation.key,
+              JSON.stringify(operation.data),
+            );
           }
           break;
         case 'delete':
@@ -456,7 +484,9 @@ export class DataReplicationEngine extends EventEmitter {
   /**
    * Resolve conflict using last write wins strategy
    */
-  private async resolveLastWriteWins(conflict: ConflictDetection): Promise<void> {
+  private async resolveLastWriteWins(
+    conflict: ConflictDetection,
+  ): Promise<void> {
     const winningOp = conflict.operations.reduce((latest, current) =>
       current.timestamp > latest.timestamp ? current : latest,
     );
@@ -473,7 +503,10 @@ export class DataReplicationEngine extends EventEmitter {
     });
 
     conflict.resolved = true;
-    conflict.resolution = { strategy: 'last_write_wins', winnerId: winningOp.id };
+    conflict.resolution = {
+      strategy: 'last_write_wins',
+      winnerId: winningOp.id,
+    };
     this.emit('conflict:resolved', conflict);
   }
 
@@ -482,7 +515,9 @@ export class DataReplicationEngine extends EventEmitter {
    */
   private async resolveMerge(conflict: ConflictDetection): Promise<void> {
     // Implement merge logic based on data structure
-    const mergedData = this.mergeConflictingData(conflict.operations.map((op) => op.data));
+    const mergedData = this.mergeConflictingData(
+      conflict.operations.map((op) => op.data),
+    );
 
     // Create new merged operation
     const mergedOp: ReplicationOperation = {
@@ -495,7 +530,11 @@ export class DataReplicationEngine extends EventEmitter {
 
     // Queue merged operation
     this.operationQueue.set(mergedOp.id, mergedOp);
-    await this.redis.setex(`replication_op:${mergedOp.id}`, 86400, JSON.stringify(mergedOp));
+    await this.redis.setex(
+      `replication_op:${mergedOp.id}`,
+      86400,
+      JSON.stringify(mergedOp),
+    );
     await this.redis.lpush('replication_queue', mergedOp.id);
 
     // Mark original operations as failed
@@ -519,10 +558,16 @@ export class DataReplicationEngine extends EventEmitter {
     return { ...clock };
   }
 
-  private isConflictingVectorClock(clock1?: VectorClock, clock2?: VectorClock): boolean {
+  private isConflictingVectorClock(
+    clock1?: VectorClock,
+    clock2?: VectorClock,
+  ): boolean {
     if (!clock1 || !clock2) return false;
 
-    const allRegions = new Set([...Object.keys(clock1), ...Object.keys(clock2)]);
+    const allRegions = new Set([
+      ...Object.keys(clock1),
+      ...Object.keys(clock2),
+    ]);
     let clock1Greater = false;
     let clock2Greater = false;
 
@@ -541,7 +586,10 @@ export class DataReplicationEngine extends EventEmitter {
   /**
    * PostgreSQL operation helpers
    */
-  private async executePostgresInsert(client: any, operation: ReplicationOperation): Promise<void> {
+  private async executePostgresInsert(
+    client: any,
+    operation: ReplicationOperation,
+  ): Promise<void> {
     const { table, data } = operation;
     const columns = Object.keys(data);
     const values = Object.values(data);
@@ -551,7 +599,10 @@ export class DataReplicationEngine extends EventEmitter {
     await client.query(query, values);
   }
 
-  private async executePostgresUpdate(client: any, operation: ReplicationOperation): Promise<void> {
+  private async executePostgresUpdate(
+    client: any,
+    operation: ReplicationOperation,
+  ): Promise<void> {
     const { table, data, key } = operation;
     const setClauses = Object.keys(data)
       .filter((k) => k !== key)
@@ -569,13 +620,19 @@ export class DataReplicationEngine extends EventEmitter {
     await client.query(query, values);
   }
 
-  private async executePostgresDelete(client: any, operation: ReplicationOperation): Promise<void> {
+  private async executePostgresDelete(
+    client: any,
+    operation: ReplicationOperation,
+  ): Promise<void> {
     const { table, key, data } = operation;
     const query = `DELETE FROM ${table} WHERE ${key} = $1`;
     await client.query(query, [data[key!]]);
   }
 
-  private async executePostgresMerge(client: any, operation: ReplicationOperation): Promise<void> {
+  private async executePostgresMerge(
+    client: any,
+    operation: ReplicationOperation,
+  ): Promise<void> {
     // UPSERT logic
     await this.executePostgresInsert(client, operation);
   }
@@ -602,7 +659,8 @@ export class DataReplicationEngine extends EventEmitter {
         pending: operations.filter((op) => op.status === 'pending').length,
         completed: operations.filter((op) => op.status === 'completed').length,
         failed: operations.filter((op) => op.status === 'failed').length,
-        conflicted: operations.filter((op) => op.status === 'conflicted').length,
+        conflicted: operations.filter((op) => op.status === 'conflicted')
+          .length,
       },
       throughput: {
         operationsPerSecond: 0, // Would calculate based on historical data

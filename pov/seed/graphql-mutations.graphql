@@ -1,10 +1,36 @@
 # GraphQL mutations (adjust names to match your schema)
 mutation CreateOrg($name: String!, $slug: String!) {
-  createOrganization(input:{name:$name, slug:$slug}) { id name slug }
+  createOrganization(input: { name: $name, slug: $slug }) {
+    id
+    name
+    slug
+  }
 }
-mutation CreateTenant($orgId: ID!, $name: String!, $slug: String!, $sector: String!, $region: String!) {
-  createTenant(input:{organizationId:$orgId, name:$name, slug:$slug, sector:$sector, region:$region}) { id name slug }
+mutation CreateTenant(
+  $orgId: ID!
+  $name: String!
+  $slug: String!
+  $sector: String!
+  $region: String!
+) {
+  createTenant(
+    input: {
+      organizationId: $orgId
+      name: $name
+      slug: $slug
+      sector: $sector
+      region: $region
+    }
+  ) {
+    id
+    name
+    slug
+  }
 }
 mutation InviteUser($tenantId: ID!, $email: String!, $role: String!) {
-  inviteUser(input:{tenantId:$tenantId, email:$email, role:$role}) { id email role }
+  inviteUser(input: { tenantId: $tenantId, email: $email, role: $role }) {
+    id
+    email
+    role
+  }
 }

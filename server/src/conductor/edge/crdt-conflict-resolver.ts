@@ -111,13 +111,17 @@ export class CRDTConflictResolver {
   /**
    * Generate field-level conflict deltas for UI display
    */
-  async generateConflictDeltas(conflicts: FieldConflict[]): Promise<ConflictDelta[]> {
+  async generateConflictDeltas(
+    conflicts: FieldConflict[],
+  ): Promise<ConflictDelta[]> {
     const deltas: ConflictDelta[] = [];
 
     for (const conflict of conflicts) {
       if (conflict.operations.length >= 2) {
         // Sort operations by timestamp to identify before/after states
-        const sortedOps = conflict.operations.sort((a, b) => a.timestamp - b.timestamp);
+        const sortedOps = conflict.operations.sort(
+          (a, b) => a.timestamp - b.timestamp,
+        );
         const beforeOp = sortedOps[0];
         const afterOp = sortedOps[sortedOps.length - 1];
 
@@ -175,7 +179,12 @@ export class CRDTConflictResolver {
         );
 
         resolutions.push(resolution);
-        await this.persistResolutionEvidence(resolution, conflict, entityId, tenantId);
+        await this.persistResolutionEvidence(
+          resolution,
+          conflict,
+          entityId,
+          tenantId,
+        );
       } catch (error) {
         logger.error('Failed to resolve field conflict', {
           error: error.message,
@@ -190,13 +199,19 @@ export class CRDTConflictResolver {
           resolvedBy: 'system',
           resolutionType: 'auto',
           mergeStrategy: 'last_writer_wins',
-          finalValue: conflict.operations[conflict.operations.length - 1]?.value,
+          finalValue:
+            conflict.operations[conflict.operations.length - 1]?.value,
           rationale: `Fallback resolution due to error: ${error.message}`,
           timestamp: new Date(),
         };
 
         resolutions.push(fallbackResolution);
-        await this.persistResolutionEvidence(fallbackResolution, conflict, entityId, tenantId);
+        await this.persistResolutionEvidence(
+          fallbackResolution,
+          conflict,
+          entityId,
+          tenantId,
+        );
       }
     }
 
@@ -257,11 +272,13 @@ export class CRDTConflictResolver {
         WHERE entity_id = $1 AND tenant_id = $2
       `;
 
-      const [conflictResult, resolutionResult, countResult] = await Promise.all([
-        client.query(conflictQuery, [entityId, tenantId, limit]),
-        client.query(resolutionQuery, [entityId, tenantId, limit]),
-        client.query(countQuery, [entityId, tenantId]),
-      ]);
+      const [conflictResult, resolutionResult, countResult] = await Promise.all(
+        [
+          client.query(conflictQuery, [entityId, tenantId, limit]),
+          client.query(resolutionQuery, [entityId, tenantId, limit]),
+          client.query(countQuery, [entityId, tenantId]),
+        ],
+      );
 
       return {
         conflicts: conflictResult.rows,
@@ -282,7 +299,9 @@ export class CRDTConflictResolver {
     }
   }
 
-  private groupOperationsByField(operations: CRDTOperation[]): Map<string, CRDTOperation[]> {
+  private groupOperationsByField(
+    operations: CRDTOperation[],
+  ): Map<string, CRDTOperation[]> {
     const groups = new Map<string, CRDTOperation[]>();
 
     for (const op of operations) {
@@ -295,7 +314,10 @@ export class CRDTConflictResolver {
     return groups;
   }
 
-  private analyzeFieldConflict(field: string, operations: CRDTOperation[]): FieldConflict | null {
+  private analyzeFieldConflict(
+    field: string,
+    operations: CRDTOperation[],
+  ): FieldConflict | null {
     if (operations.length < 2) {
       return null; // No conflict with single operation
     }
@@ -339,7 +361,9 @@ export class CRDTConflictResolver {
     return null;
   }
 
-  private findConcurrentOperations(operations: CRDTOperation[]): CRDTOperation[] {
+  private findConcurrentOperations(
+    operations: CRDTOperation[],
+  ): CRDTOperation[] {
     const concurrent: CRDTOperation[] = [];
 
     for (let i = 0; i < operations.length; i++) {
@@ -395,7 +419,9 @@ export class CRDTConflictResolver {
 
   private detectSchemaMismatch(operations: CRDTOperation[]): boolean {
     // Check if operations have incompatible value types
-    const valueTypes = operations.map((op) => typeof op.value).filter((t) => t !== 'undefined');
+    const valueTypes = operations
+      .map((op) => typeof op.value)
+      .filter((t) => t !== 'undefined');
     const uniqueTypes = new Set(valueTypes);
 
     return uniqueTypes.size > 1;
@@ -528,7 +554,11 @@ export class CRDTConflictResolver {
     }
 
     // Policy-based resolution
-    const policyResolution = await this.applyResolutionPolicy(conflict, context, tenantId);
+    const policyResolution = await this.applyResolutionPolicy(
+      conflict,
+      context,
+      tenantId,
+    );
     if (policyResolution) {
       return {
         conflictId,
@@ -566,24 +596,27 @@ export class CRDTConflictResolver {
     try {
       // Query OPA for conflict resolution policy
       const opaUrl = process.env.OPA_URL || 'http://localhost:8181';
-      const response = await fetch(`${opaUrl}/v1/data/intelgraph/crdt/resolve`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          input: {
-            conflict: {
-              field: conflict.field,
-              type: conflict.conflictType,
-              operations: conflict.operations,
+      const response = await fetch(
+        `${opaUrl}/v1/data/intelgraph/crdt/resolve`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            input: {
+              conflict: {
+                field: conflict.field,
+                type: conflict.conflictType,
+                operations: conflict.operations,
+              },
+              context: {
+                tenant: tenantId,
+                user: context.userId,
+                role: context.userRole,
+              },
             },
-            context: {
-              tenant: tenantId,
-              user: context.userId,
-              role: context.userRole,
-            },
-          },
-        }),
-      });
+          }),
+        },
+      );
 
       if (!response.ok) {
         return null;
@@ -592,7 +625,9 @@ export class CRDTConflictResolver {
       const { result } = await response.json();
       return result?.resolution || null;
     } catch (error) {
-      logger.warn('Failed to apply resolution policy', { error: error.message });
+      logger.warn('Failed to apply resolution policy', {
+        error: error.message,
+      });
       return null;
     }
   }
@@ -611,7 +646,13 @@ export class CRDTConflictResolver {
           id, entity_id, tenant_id, conflicts, detected_at, resolution_count
         ) VALUES ($1, $2, $3, $4, NOW(), $5)
       `,
-        [randomUUID(), entityId, tenantId, JSON.stringify(conflicts), conflicts.length],
+        [
+          randomUUID(),
+          entityId,
+          tenantId,
+          JSON.stringify(conflicts),
+          conflicts.length,
+        ],
       );
     } finally {
       client.release();

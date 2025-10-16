@@ -66,7 +66,14 @@ export class MCPServersRepo {
       `INSERT INTO mcp_servers (name, url, auth_token, scopes, tags, fingerprint_sha256)
        VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING id, name, url, auth_token, scopes, tags, fingerprint_sha256, created_at, updated_at`,
-      [name, url, authToken ?? null, scopes, tags, input.fingerprintSha256 ?? null],
+      [
+        name,
+        url,
+        authToken ?? null,
+        scopes,
+        tags,
+        input.fingerprintSha256 ?? null,
+      ],
     );
     return rows[0];
   }
@@ -90,7 +97,10 @@ export class MCPServersRepo {
     return rows[0] || null;
   }
 
-  public async update(id: string, input: UpdateMCPServerInput): Promise<MCPServerRecord | null> {
+  public async update(
+    id: string,
+    input: UpdateMCPServerInput,
+  ): Promise<MCPServerRecord | null> {
     await this.ensureTable();
     // Build dynamic update
     const sets: string[] = [];
@@ -137,7 +147,10 @@ export class MCPServersRepo {
 
   public async delete(id: string): Promise<boolean> {
     await this.ensureTable();
-    const { rowCount } = await this.pool.query(`DELETE FROM mcp_servers WHERE id = $1`, [id]);
+    const { rowCount } = await this.pool.query(
+      `DELETE FROM mcp_servers WHERE id = $1`,
+      [id],
+    );
     return rowCount > 0;
   }
 }
@@ -157,7 +170,9 @@ export const mcpServersRepo = {
   list: () => mcpServersRepo.instance.list(),
   create: (server: Omit<MCPServer, 'id' | 'created_at' | 'updated_at'>) =>
     mcpServersRepo.instance.create(server),
-  update: (id: string, server: Partial<Omit<MCPServer, 'id' | 'created_at' | 'updated_at'>>) =>
-    mcpServersRepo.instance.update(id, server),
+  update: (
+    id: string,
+    server: Partial<Omit<MCPServer, 'id' | 'created_at' | 'updated_at'>>,
+  ) => mcpServersRepo.instance.update(id, server),
   delete: (id: string) => mcpServersRepo.instance.delete(id),
 };

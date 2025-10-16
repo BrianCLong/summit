@@ -10,11 +10,11 @@
 
 ## 0) Context Snapshot (from repo + sprint docs)
 
-- **Stacks present:** Helm charts for `intelgraph`, `gateway`, `neo4j`, `postgres`, `redis`, `analytics` under `infra/helm`; K8s overlays under `infra/k8s` with `kyverno`, `monitoring`, `rbac`, `ingress`, etc.  
-- **CI/CD:** ~49 GH Actions workflows including `ci.yml`, `ci-comprehensive.yml`, `build-images.yml`, `canary-deployment.yml`, `auto-rollback.yml`, `error-budget-monitoring.yml`, `deploy.yml`.  
-- **IaC:** Terraform layouts for `aws`, `oci`, plus `infra/docker-compose.*` for local & demo.  
-- **Security/Compliance:** OPA/Conftest wiring, CodeQL, SBOM attest hints; Cosign references.  
-- **Planning artifacts:** GA plans & multiple sprint files (e.g., *TRIAD MERGE*, *UNIFIED DATA FOUNDATION*, *MAESTRO COMPOSER*), backlog YAML with P0/P1 stories.
+- **Stacks present:** Helm charts for `intelgraph`, `gateway`, `neo4j`, `postgres`, `redis`, `analytics` under `infra/helm`; K8s overlays under `infra/k8s` with `kyverno`, `monitoring`, `rbac`, `ingress`, etc.
+- **CI/CD:** ~49 GH Actions workflows including `ci.yml`, `ci-comprehensive.yml`, `build-images.yml`, `canary-deployment.yml`, `auto-rollback.yml`, `error-budget-monitoring.yml`, `deploy.yml`.
+- **IaC:** Terraform layouts for `aws`, `oci`, plus `infra/docker-compose.*` for local & demo.
+- **Security/Compliance:** OPA/Conftest wiring, CodeQL, SBOM attest hints; Cosign references.
+- **Planning artifacts:** GA plans & multiple sprint files (e.g., _TRIAD MERGE_, _UNIFIED DATA FOUNDATION_, _MAESTRO COMPOSER_), backlog YAML with P0/P1 stories.
 
 > Conclusion: Excellent foundation. However, several pieces are partial or lack strict gates/automation in the golden path.
 
@@ -23,6 +23,7 @@
 ## 1) Gaps & Risks (within my ambit)
 
 ### 1.1 CI/CD & Supply Chain
+
 - **Terraform deploy workflow** runs `apply` on push without a mandatory `plan` approval or OIDC‑backed ephemeral credentials per env.
 - **Canary workflow** exists but inputs/health gates appear stubbed; missing codified rollback criteria + objective health signals.
 - **Auto‑rollback** job exists but lacks end‑to‑end linkage to rollout controller + Helm values to drive rollback.
@@ -30,19 +31,23 @@
 - **Preview environments**: implied but no unified action that spins K8s namespace + seeded data + secrets on each PR.
 
 ### 1.2 Observability & SLOs
-- **Golden signals** not fully wired to gates: p95 latency, error‑rate, saturation should block promotion.  
-- **OTEL** collector config not standardized across services.  
+
+- **Golden signals** not fully wired to gates: p95 latency, error‑rate, saturation should block promotion.
+- **OTEL** collector config not standardized across services.
 - **Grafana/SLO rules** incomplete: need PrometheusRules for burn‑rate + dashboards tied to service SLOs.
 
 ### 1.3 Progressive Delivery
+
 - **Argo Rollouts/Flagger** not consistently configured; Helm charts lack `canary` values schema; no standard health checks.
 
 ### 1.4 Secrets & Compliance
-- **`.env` artifacts** exist in repo; need enforced use of **sealed‑secrets** and CI secret scanning with deny rules.  
-- **Access governance**: missing step‑up auth hooks for risky ops in admin flows (policy present, gate missing in CI/CD for prod changes).  
+
+- **`.env` artifacts** exist in repo; need enforced use of **sealed‑secrets** and CI secret scanning with deny rules.
+- **Access governance**: missing step‑up auth hooks for risky ops in admin flows (policy present, gate missing in CI/CD for prod changes).
 - **Audit**: release approvals & reason‑for‑access prompts not enforced in pipelines.
 
 ### 1.5 Repo Hygiene
+
 - Many workflows, but **branch protections** and mandatory checks not centralized in a policy as code file; stale branches likely; CODEOWNERS may be incomplete on infra paths.
 
 ---
@@ -52,6 +57,7 @@
 > **Make production promotion boring.** Establish the golden path that: plans → previews → canaries → verifies → promotes, with auto‑rollback and airtight provenance.
 
 **Definition of Success:**
+
 - One PR triggers: build+scan → SBOM+attest → preview env → e2e path → health SLO green → staged canary → auto‑promotion or rollback.
 
 ---
@@ -59,6 +65,7 @@
 ## 3) Scope (In/Out)
 
 **In**
+
 - OIDC auth for cloud; Terraform `plan → apply` with manual approval gates.
 - Argo Rollouts canary for `gateway` and `web` charts (reference pattern for others).
 - Preview env per PR (namespace, seeded data, sealed secrets).
@@ -67,6 +74,7 @@
 - Repo hygiene (branch protections, CODEOWNERS refresh, labels, chatops).
 
 **Out (this sprint)**
+
 - Cross‑region DR drills (prep only); cost dashboards beyond baseline; full DLP.
 
 ---
@@ -271,11 +279,11 @@ metrics:
       - name: p95_latency
         query: histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{job="gateway"}[5m])) by (le))
         threshold: 1.5
-        comparator: "<"
+        comparator: '<'
       - name: error_rate
         query: sum(rate(http_requests_total{job="gateway",status=~"5.."}[5m])) / sum(rate(http_requests_total{job="gateway"}[5m]))
         threshold: 0.01
-        comparator: "<"
+        comparator: '<'
 ```
 
 ### 4.4 Observability — OTEL + PrometheusRules + Dashboards
@@ -297,12 +305,12 @@ spec:
           expr: job:http_request_error_rate:ratio_rate5m > 0.01
           for: 10m
           labels: { severity: critical }
-          annotations: { summary: "Gateway error budget burn >1%" }
+          annotations: { summary: 'Gateway error budget burn >1%' }
         - alert: GatewayLatencyHigh
           expr: histogram_quantile(0.95, sum(rate(http_server_request_duration_seconds_bucket{job="gateway"}[5m])) by (le)) > 1.5
           for: 10m
           labels: { severity: warning }
-          annotations: { summary: "Gateway p95 latency >1.5s" }
+          annotations: { summary: 'Gateway p95 latency >1.5s' }
 ```
 
 ```yaml
@@ -399,6 +407,7 @@ branches:
 
 ```md
 # RUNBOOK: Canary Rollout & Auto‑Rollback
+
 - Prechecks: SLO dashboard green; error budget > 99% remaining.
 - Rollout: 10%→25%→50%→100% with gates on p95<1.5s & err<1%.
 - Rollback triggers: any gate breach for ≥10m or saturation >80%.
@@ -407,7 +416,9 @@ branches:
 
 ```md
 # RELEASE NOTES TEMPLATE
+
 ## Version X.Y.Z (YYYY‑MM‑DD)
+
 - ✨ Features
 - 🛠 Fixes
 - 🔐 Security
@@ -423,36 +434,41 @@ branches:
 ## 5) Sprint Backlog (2 weeks)
 
 ### Epic A — Golden Path CI/CD
-- **A1**: Implement `ci-pr.yml` (build→scan→SBOM→policy→preview).  
-- **A2**: Implement `release-train.yml` with stage canary & health gate.  
-- **A3**: IaC `plan→apply` gated with OIDC + Conftest.  
+
+- **A1**: Implement `ci-pr.yml` (build→scan→SBOM→policy→preview).
+- **A2**: Implement `release-train.yml` with stage canary & health gate.
+- **A3**: IaC `plan→apply` gated with OIDC + Conftest.
 - **A4**: ChatOps `/deploy canary` command to trigger workflow_dispatch.
 
 **Acceptance:** green runs on demo PR + artifact evidence.
 
 ### Epic B — Progressive Delivery
-- **B1**: Add Argo Rollouts to `gateway` & `web` charts with `values-canary.yaml`.  
+
+- **B1**: Add Argo Rollouts to `gateway` & `web` charts with `values-canary.yaml`.
 - **B2**: Wire metric queries + thresholds; document rollback runbook.
 
 **Acceptance:** successful 10→100% rollout in stage with screenshots.
 
 ### Epic C — Observability & SLOs
-- **C1**: Deploy OTEL collector baseline.  
-- **C2**: PrometheusRules for `gateway` SLOs; alerts to on‑call.  
+
+- **C1**: Deploy OTEL collector baseline.
+- **C2**: PrometheusRules for `gateway` SLOs; alerts to on‑call.
 - **C3**: Grafana dashboard JSON committed & linked in README.
 
 **Acceptance:** p95/error widgets live; alerts fire on synthetic breach.
 
 ### Epic D — Secrets & Compliance
-- **D1**: Sealed‑secrets operational; remove `.env.*` from repo history (BFG).  
-- **D2**: Add secret scans (Gitleaks) to CI; deny on findings.  
+
+- **D1**: Sealed‑secrets operational; remove `.env.*` from repo history (BFG).
+- **D2**: Add secret scans (Gitleaks) to CI; deny on findings.
 - **D3**: Reason‑for‑access prompt on prod apply and prod rollout.
 
 **Acceptance:** compliance evidence in PRODUCTION_GO_EVIDENCE.md.
 
 ### Epic E — Repo Hygiene
-- **E1**: CODEOWNERS coverage for infra paths.  
-- **E2**: Branch protection policy synced.  
+
+- **E1**: CODEOWNERS coverage for infra paths.
+- **E2**: Branch protection policy synced.
 - **E3**: Stale branch pruning (safe list + archived refs).
 
 **Acceptance:** policy bot report; repository settings export committed.
@@ -461,22 +477,24 @@ branches:
 
 ## 6) Day‑by‑Day Cadence
 
-- **D1‑D2**: CI golden path & preview env scripts; CODEOWNERS.  
-- **D3‑D4**: Terraform plan/apply gating; secrets sealing; gitleaks.  
-- **D5**: Argo Rollouts + canary values; gateway wired.  
-- **D6**: OTEL collector; PrometheusRules; Grafana baseline.  
-- **D7**: Stage dry‑run release train; health gates tuned.  
-- **D8**: Auto‑rollback wiring; runbook drills; finalize docs.  
+- **D1‑D2**: CI golden path & preview env scripts; CODEOWNERS.
+- **D3‑D4**: Terraform plan/apply gating; secrets sealing; gitleaks.
+- **D5**: Argo Rollouts + canary values; gateway wired.
+- **D6**: OTEL collector; PrometheusRules; Grafana baseline.
+- **D7**: Stage dry‑run release train; health gates tuned.
+- **D8**: Auto‑rollback wiring; runbook drills; finalize docs.
 - **D9‑D10**: Soak, fix, evidence capture, ship.
 
 ---
 
 ## 7) Acceptance Evidence (to collect)
+
 - Links to CI runs, preview URLs, rollout history, Prometheus alerts, Grafana screenshots, Cosign verification output, Conftest report, branch‑protection export, sealed‑secrets diffs.
 
 ---
 
 ## 8) Risks & Mitigations
+
 - **Metric flakiness** → use synthetic load (k6) during canary.
 - **Secret migration churn** → progressive replacement with dual‑reads.
 - **Policy false positives** → quarantine mode first, then enforce.
@@ -491,8 +509,9 @@ branches:
 ---
 
 ## 10) How this aligns with existing sprints
-- *TRIAD MERGE* & *UNIFIED DATA FOUNDATION* depend on safe deploys → this sprint creates the delivery runway.
-- *MAESTRO COMPOSER* backend needs preview envs → delivered in Epic A.
+
+- _TRIAD MERGE_ & _UNIFIED DATA FOUNDATION_ depend on safe deploys → this sprint creates the delivery runway.
+- _MAESTRO COMPOSER_ backend needs preview envs → delivered in Epic A.
 - GA plans require policy+provenance evidence → delivered in Epics A/D.
 
 ---
@@ -513,14 +532,16 @@ branches:
 ---
 
 ## 12) Follow‑on (Next Sprint seeds)
-- DR drill on stage (failover of Neo4j + Postgres with RTO/RPO proof).  
-- Multi‑region CDNs + WAF policy.  
-- Cost guardrails (Karpenter/cluster autoscaling policies, idle detection).  
+
+- DR drill on stage (failover of Neo4j + Postgres with RTO/RPO proof).
+- Multi‑region CDNs + WAF policy.
+- Cost guardrails (Karpenter/cluster autoscaling policies, idle detection).
 - Data retention policies + dual‑control deletes.
 
 ---
 
 ### Appendix A — Minimal k6 Load for Canary Gate
+
 ```js
 import http from 'k6/http';
 import { check, sleep } from 'k6';
@@ -533,13 +554,15 @@ export default function () {
 ```
 
 ### Appendix B — Gitleaks in CI
+
 ```yaml
 - name: Gitleaks Scan
   uses: gitleaks/gitleaks-action@v2
-  with: { args: "detect --redact --exit-code 1" }
+  with: { args: 'detect --redact --exit-code 1' }
 ```
 
 ### Appendix C — ChatOps Commands (slash‑commands)
+
 ```yaml
 # .github/commands.yml
 commands:
@@ -548,4 +571,3 @@ commands:
     workflow: canary-deployment.yml
     inputs: [version, environment, canary_percentage]
 ```
-

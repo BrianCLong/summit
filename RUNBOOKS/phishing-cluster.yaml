@@ -7,16 +7,16 @@ tasks:
     name: Ingest Email Data
     uses: connector:elastic
     with:
-      index: "email-security-*"
-      query: "phishing OR suspicious"
-      time_range: "7d"
+      index: 'email-security-*'
+      query: 'phishing OR suspicious'
+      time_range: '7d'
 
   - id: url_extraction
     name: Extract URLs and Domains
     uses: graph:entity-resolution
     needs: [email_ingest]
     with:
-      entity_types: ["url", "domain", "ip"]
+      entity_types: ['url', 'domain', 'ip']
       similarity_threshold: 0.85
 
   - id: campaign_clustering
@@ -24,22 +24,22 @@ tasks:
     uses: ml:forecast
     needs: [url_extraction]
     with:
-      algorithm: "dbscan"
-      features: ["domain_similarity", "timing", "targets"]
+      algorithm: 'dbscan'
+      features: ['domain_similarity', 'timing', 'targets']
 
   - id: threat_scoring
     name: Score Threat Level
     uses: analyze:risk
     needs: [campaign_clustering]
     with:
-      scoring_model: "phishing-impact-v2"
+      scoring_model: 'phishing-impact-v2'
 
   - id: attribution
     name: Threat Actor Attribution
     uses: xai:explanations
     needs: [threat_scoring]
     with:
-      model: "attribution-v1"
+      model: 'attribution-v1'
       confidence_threshold: 0.7
 
   - id: export_intel
@@ -47,7 +47,7 @@ tasks:
     uses: export:bundle
     needs: [attribution]
     with:
-      format: "stix-bundle"
+      format: 'stix-bundle'
       include_iocs: true
 
 kpis:

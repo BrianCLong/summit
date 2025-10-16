@@ -2,10 +2,17 @@ const fs = require('node:fs');
 const { createResult } = require('./lib/reporting.cjs');
 const { getAddedLineNumbers, getChangedFiles } = require('./lib/git-utils.cjs');
 
-const PRODUCTION_DIRECTORIES = [/^src\//, /^client\//, /^apps\//, /^services\//, /^packages\//];
+const PRODUCTION_DIRECTORIES = [
+  /^src\//,
+  /^client\//,
+  /^apps\//,
+  /^services\//,
+  /^packages\//,
+];
 
 function runConsoleLogScan({ baseRef }) {
-  const description = 'Prevents new console.log statements from landing in production code paths.';
+  const description =
+    'Prevents new console.log statements from landing in production code paths.';
   const remediation =
     'Replace console.log with structured logging utilities or remove the statement before committing.';
   const changedFiles = getChangedFiles(baseRef).filter(isRelevantFile);
@@ -27,7 +34,7 @@ function runConsoleLogScan({ baseRef }) {
       description,
       passed: true,
       details: ['No new console.log statements detected in production code.'],
-      remediation
+      remediation,
     });
   }
   const details = violations.map((violation) => {
@@ -41,7 +48,7 @@ function runConsoleLogScan({ baseRef }) {
     description,
     passed: false,
     details,
-    remediation
+    remediation,
   });
 }
 
@@ -80,5 +87,5 @@ function isRelevantFile(filePath) {
 
 module.exports = {
   runConsoleLogScan,
-  findConsoleLogViolations
+  findConsoleLogViolations,
 };

@@ -6,8 +6,10 @@ spec:
   policyTypes: [Ingress]
   ingress:
     - from:
-        - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: ingress } }
+        - namespaceSelector:
+            { matchLabels: { kubernetes.io/metadata.name: ingress } }
       ports: [{ protocol: TCP, port: 4000 }]
     - from:
-        - namespaceSelector: { matchLabels: { kubernetes.io/metadata.name: monitoring } }
+        - namespaceSelector:
+            { matchLabels: { kubernetes.io/metadata.name: monitoring } }
       ports: [{ protocol: TCP, port: 4000 }]

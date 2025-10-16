@@ -6,11 +6,11 @@
   },
   "mappings": {
     "properties": {
-      "utc": {"type": "date"},
-      "type": {"type": "keyword"},
-      "marker_rate_est_per_min": {"type": "float"},
-      "sha256": {"type": "keyword"},
-      "candidate_station": {"type": "keyword"}
+      "utc": { "type": "date" },
+      "type": { "type": "keyword" },
+      "marker_rate_est_per_min": { "type": "float" },
+      "sha256": { "type": "keyword" },
+      "candidate_station": { "type": "keyword" }
     }
   }
 }

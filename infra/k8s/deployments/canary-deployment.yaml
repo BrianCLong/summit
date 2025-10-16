@@ -72,14 +72,14 @@ metadata:
     app.kubernetes.io/part-of: intelgraph
 spec:
   metrics:
-  - name: success-rate
-    interval: 30s
-    count: 10
-    successCondition: result[0] >= 99
-    provider:
-      prometheus:
-        address: http://prometheus.monitoring.svc.cluster.local:9090
-        query: maestro:workflow_success_rate_5m{service="{{.args.service-name}}"}
+    - name: success-rate
+      interval: 30s
+      count: 10
+      successCondition: result[0] >= 99
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: maestro:workflow_success_rate_5m{service="{{.args.service-name}}"}
 
 ---
 apiVersion: argoproj.io/v1alpha1
@@ -93,14 +93,14 @@ metadata:
     app.kubernetes.io/part-of: intelgraph
 spec:
   metrics:
-  - name: latency-p95
-    interval: 30s
-    count: 10
-    successCondition: result[0] <= 300
-    provider:
-      prometheus:
-        address: http://prometheus.monitoring.svc.cluster.local:9090
-        query: maestro:workflow_latency_p95_5m{service="{{.args.service-name}}"}
+    - name: latency-p95
+      interval: 30s
+      count: 10
+      successCondition: result[0] <= 300
+      provider:
+        prometheus:
+          address: http://prometheus.monitoring.svc.cluster.local:9090
+          query: maestro:workflow_latency_p95_5m{service="{{.args.service-name}}"}
 
 ---
 apiVersion: argoproj.io/v1alpha1
@@ -117,35 +117,35 @@ spec:
   strategy:
     canary:
       steps:
-      - setWeight: 10
-      - pause: {duration: 5m}
-      - analysis:
-          templates:
-          - templateName: success-rate
-          - templateName: latency
-          args:
-          - name: service-name
-            value: maestro-conductor
-      - setWeight: 25
-      - pause: {duration: 10m}
-      - analysis:
-          templates:
-          - templateName: success-rate
-          - templateName: latency
-          args:
-          - name: service-name
-            value: maestro-conductor
-      - setWeight: 50
-      - pause: {duration: 10m}
-      - setWeight: 75
-      - pause: {duration: 5m}
-      - analysis:
-          templates:
-          - templateName: success-rate
-          - templateName: latency
-          args:
-          - name: service-name
-            value: maestro-conductor
+        - setWeight: 10
+        - pause: { duration: 5m }
+        - analysis:
+            templates:
+              - templateName: success-rate
+              - templateName: latency
+            args:
+              - name: service-name
+                value: maestro-conductor
+        - setWeight: 25
+        - pause: { duration: 10m }
+        - analysis:
+            templates:
+              - templateName: success-rate
+              - templateName: latency
+            args:
+              - name: service-name
+                value: maestro-conductor
+        - setWeight: 50
+        - pause: { duration: 10m }
+        - setWeight: 75
+        - pause: { duration: 5m }
+        - analysis:
+            templates:
+              - templateName: success-rate
+              - templateName: latency
+            args:
+              - name: service-name
+                value: maestro-conductor
       trafficRouting:
         nginx:
           stableIngress: maestro-conductor-ingress
@@ -275,7 +275,7 @@ spec:
             - |
               set -ex
               echo "Starting rollback automation monitor..."
-              
+
               # Monitor SLO metrics and trigger rollback if needed
               while true; do
                 # Check workflow success rate

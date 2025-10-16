@@ -5,6 +5,7 @@ owner: docs
 ---
 
 ## Headers
+
 - `Content-Security-Policy`: Prevents XSS attacks.
 - `Strict-Transport-Security`: Enforces HTTPS.
 - `X-Content-Type-Options`: Prevents MIME-sniffing.

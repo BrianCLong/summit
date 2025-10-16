@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata: { name: index-watcher, namespace: prod }
 spec:
-  schedule: "*/1 * * * *" # run every 1m during soak window.
+  schedule: '*/1 * * * *' # run every 1m during soak window.
   jobTemplate:
     spec:
       template:
@@ -11,7 +11,7 @@ spec:
           containers:
             - name: watcher
               image: bitnami/kubectl:latest
-              command: ["/bin/sh","-c"]
+              command: ['/bin/sh', '-c']
               args:
                 - |
                   echo "Watching index metrics..."

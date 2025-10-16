@@ -23,7 +23,7 @@ interface ConductorClient {
 }
 
 function sleep(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms));
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function isRetryable(e: any): boolean {
@@ -31,13 +31,22 @@ function isRetryable(e: any): boolean {
   return false;
 }
 
-export async function runTaskLoop(client: ConductorClient, handler: TaskHandler) {
+export async function runTaskLoop(
+  client: ConductorClient,
+  handler: TaskHandler,
+) {
   while (true) {
     const lease = await client.leaseTask();
-    if (!lease) { await sleep(250); continue; }
+    if (!lease) {
+      await sleep(250);
+      continue;
+    }
 
     const ctrl = new AbortController();
-    const hb = setInterval(() => client.renewLease(lease.id).catch(()=>ctrl.abort()), 2000);
+    const hb = setInterval(
+      () => client.renewLease(lease.id).catch(() => ctrl.abort()),
+      2000,
+    );
 
     try {
       const res = await handler(lease, { signal: ctrl.signal });

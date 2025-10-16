@@ -1,7 +1,7 @@
 id: plugin.codesearch@v1
 capabilities:
-  inputs: ["repo/fs"]
-  outputs: ["matches:list"]
+  inputs: ['repo/fs']
+  outputs: ['matches:list']
 permissions:
-  fs_read: ["server/**", "web/**"]
+  fs_read: ['server/**', 'web/**']
 license: MIT

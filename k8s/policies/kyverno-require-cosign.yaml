@@ -10,14 +10,14 @@ spec:
       match:
         any:
           - resources:
-              kinds: ["Pod"]
+              kinds: ['Pod']
       verifyImages:
-        - image: "*dkr.ecr.*.amazonaws.com/summit-company/*"
+        - image: '*dkr.ecr.*.amazonaws.com/summit-company/*'
           keyless:
-            subject: "https://github.com/BrianCLong/summit/.github/workflows/build-and-push.yml@refs/heads/main"
-            issuer: "https://token.actions.githubusercontent.com"
+            subject: 'https://github.com/BrianCLong/summit/.github/workflows/build-and-push.yml@refs/heads/main'
+            issuer: 'https://token.actions.githubusercontent.com'
           attestations:
-            - predicateType: "https://slsa.dev/provenance/v0.2"
+            - predicateType: 'https://slsa.dev/provenance/v0.2'
               # Optional: Further restrict by policy if needed, e.g., specific builder ID
               # policy:
               #   subject:

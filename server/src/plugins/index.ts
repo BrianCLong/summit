@@ -15,12 +15,25 @@ export function get(name: string): Plugin | undefined {
 }
 
 export function registerBuiltins() {
-  try { const { shodanIpLookup } = require('./shodan'); register(shodanIpLookup.name, shodanIpLookup); } catch {}
-  try { const { vtHashLookup } = require('./virustotal'); register(vtHashLookup.name, vtHashLookup); } catch {}
-  try { const { csQuery } = require('./crowdstrike'); register(csQuery.name, csQuery); } catch {}
+  try {
+    const { shodanIpLookup } = require('./shodan');
+    register(shodanIpLookup.name, shodanIpLookup);
+  } catch {}
+  try {
+    const { vtHashLookup } = require('./virustotal');
+    register(vtHashLookup.name, vtHashLookup);
+  } catch {}
+  try {
+    const { csQuery } = require('./crowdstrike');
+    register(csQuery.name, csQuery);
+  } catch {}
 }
 
-export async function runPlugin(name: string, inputs: any, opts?: { tenant?: string }) {
+export async function runPlugin(
+  name: string,
+  inputs: any,
+  opts?: { tenant?: string },
+) {
   const p = registry.get(name);
   if (!p) throw new Error(`Plugin not found: ${name}`);
   const cache = new RedisCache();
@@ -28,18 +41,22 @@ export async function runPlugin(name: string, inputs: any, opts?: { tenant?: str
     vault: { read: (path: string) => vaultReadKvV2(path) },
     cache: {
       get: async (k: string) => (await cache.get(k)) as any,
-      set: async (k: string, v: any, ttl?: number) => cache.set(k, v, Math.max(1, Number(ttl || 300))),
+      set: async (k: string, v: any, ttl?: number) =>
+        cache.set(k, v, Math.max(1, Number(ttl || 300))),
     },
     logger: console as any,
   };
   const tenant = opts?.tenant || 'unknown';
-  const span = otelService.createSpan('plugin.run', { 'plugin.name': name, 'tenant.id': tenant });
+  const span = otelService.createSpan('plugin.run', {
+    'plugin.name': name,
+    'tenant.id': tenant,
+  });
   try {
     const res = await p.run(inputs, ctx);
     pluginInvocations.labels(name, 'ok', tenant).inc();
     span?.setAttribute('plugin.status', 'ok');
     return res;
-  } catch (e:any) {
+  } catch (e: any) {
     pluginInvocations.labels(name, 'error', tenant).inc();
     pluginErrors.labels(name, tenant).inc();
     span?.setAttribute('plugin.status', 'error');

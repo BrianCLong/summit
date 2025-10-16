@@ -1,8 +1,15 @@
-import { createHash } from "crypto";
+import { createHash } from 'crypto';
 
 export interface ProvenanceRecord {
   reqId: string;
-  step: "router" | "generator" | "critic" | "evaluator" | "normalizer" | "planner" | "coordinator";
+  step:
+    | 'router'
+    | 'generator'
+    | 'critic'
+    | 'evaluator'
+    | 'normalizer'
+    | 'planner'
+    | 'coordinator';
   inputHash: string;
   outputHash: string;
   modelId?: string;
@@ -31,16 +38,19 @@ export function recordProvenance(record: ProvenanceRecord): void {
   const complete: ProvenanceRecord = {
     ...record,
     time: record.time ?? { start: now.toISOString(), end: now.toISOString() },
-    inputHash: record.inputHash || hashObject(""),
-    outputHash: record.outputHash || hashObject(""),
-    policy: record.policy || { retention: "standard-365d", purpose: "engineering" },
+    inputHash: record.inputHash || hashObject(''),
+    outputHash: record.outputHash || hashObject(''),
+    policy: record.policy || {
+      retention: 'standard-365d',
+      purpose: 'engineering',
+    },
   };
   for (const l of listeners) {
     try {
       l(complete);
     } catch (err) {
-      if (process.env.NODE_ENV !== "test") {
-        console.warn("provenance-listener-error", err);
+      if (process.env.NODE_ENV !== 'test') {
+        console.warn('provenance-listener-error', err);
       }
     }
   }
@@ -52,10 +62,10 @@ export function onProvenance(listener: ProvenanceListener): () => void {
 }
 
 export function hashObject(obj: unknown): string {
-  const h = createHash("sha256");
-  const serialized = typeof obj === "string" ? obj : JSON.stringify(obj ?? {});
+  const h = createHash('sha256');
+  const serialized = typeof obj === 'string' ? obj : JSON.stringify(obj ?? {});
   h.update(serialized);
-  return `sha256:${h.digest("hex")}`;
+  return `sha256:${h.digest('hex')}`;
 }
 
 export function signPrompt(prompt: string, modelId: string): string {

@@ -40,6 +40,7 @@ Break-glass procedures provide emergency access mechanisms for critical system r
 ### Emergency Administrative Access
 
 #### Kubernetes Cluster Access
+
 ```bash
 # Emergency cluster admin access
 kubectl --kubeconfig=/secure/emergency-kubeconfig.yaml get nodes
@@ -52,6 +53,7 @@ kubectl --kubeconfig=/secure/emergency-kubeconfig.yaml get nodes
 ```
 
 #### Database Emergency Access
+
 ```sql
 -- Emergency database admin account
 -- Credentials stored in secure vault
@@ -63,6 +65,7 @@ SELECT 'EMERGENCY ACCESS INITIATED' AS status;
 ```
 
 #### Cloud Platform Access
+
 ```bash
 # AWS emergency access role
 aws sts assume-role \
@@ -78,6 +81,7 @@ aws sts assume-role \
 ### Emergency User Access
 
 #### Privileged User Impersonation
+
 ```yaml
 # Temporary user account with elevated privileges
 apiVersion: v1
@@ -86,9 +90,9 @@ metadata:
   name: emergency-responder
   namespace: intelgraph-prod
   annotations:
-    incident.id: "INC-2025-001"
-    authorized.by: "security-manager@intelgraph.com"
-    expires.at: "2025-09-20T12:00:00Z"
+    incident.id: 'INC-2025-001'
+    authorized.by: 'security-manager@intelgraph.com'
+    expires.at: '2025-09-20T12:00:00Z'
 ```
 
 ## Break-Glass Activation Process
@@ -105,12 +109,12 @@ Incident Declaration → Manager Approval → Security Team Notification
 
 #### Authorization Matrix
 
-| Incident Severity | Required Approvers | Notification Time | Access Duration |
-|-------------------|-------------------|-------------------|-----------------|
-| P0 (Critical) | Security Manager | Immediate | 4 hours |
-| P1 (High) | Security Manager + CTO | 15 minutes | 2 hours |
-| P2 (Medium) | Department Head | 30 minutes | 1 hour |
-| Emergency | On-call Security Lead | Real-time | 30 minutes |
+| Incident Severity | Required Approvers     | Notification Time | Access Duration |
+| ----------------- | ---------------------- | ----------------- | --------------- |
+| P0 (Critical)     | Security Manager       | Immediate         | 4 hours         |
+| P1 (High)         | Security Manager + CTO | 15 minutes        | 2 hours         |
+| P2 (Medium)       | Department Head        | 30 minutes        | 1 hour          |
+| Emergency         | On-call Security Lead  | Real-time         | 30 minutes      |
 
 ### Step 2: Access Provisioning
 
@@ -147,24 +151,24 @@ esac
 
 ```yaml
 # Break-glass activation record
-incident_id: "INC-2025-001"
-timestamp: "2025-09-20T08:00:00Z"
+incident_id: 'INC-2025-001'
+timestamp: '2025-09-20T08:00:00Z'
 responder:
-  email: "security-lead@intelgraph.com"
-  name: "Jane Smith"
-  role: "Senior Security Engineer"
+  email: 'security-lead@intelgraph.com'
+  name: 'Jane Smith'
+  role: 'Senior Security Engineer'
 
 authorization:
-  approved_by: "security-manager@intelgraph.com"
-  approval_method: "Emergency Phone Call"
-  incident_severity: "P0"
-  business_impact: "Production system outage"
+  approved_by: 'security-manager@intelgraph.com'
+  approval_method: 'Emergency Phone Call'
+  incident_severity: 'P0'
+  business_impact: 'Production system outage'
 
 access_details:
-  type: "k8s-admin"
-  scope: "intelgraph-prod namespace"
-  duration: "4 hours"
-  expiry: "2025-09-20T12:00:00Z"
+  type: 'k8s-admin'
+  scope: 'intelgraph-prod namespace'
+  duration: '4 hours'
+  expiry: '2025-09-20T12:00:00Z'
 
 justification: |
   Critical production outage affecting all customer-facing services.
@@ -177,6 +181,7 @@ justification: |
 ### Kubernetes Emergency Access
 
 #### Step 1: Secure Workstation Access
+
 ```bash
 # Physical access to designated emergency workstation
 # Located in secure operations center
@@ -188,6 +193,7 @@ cd /mnt/emergency/intelgraph-emergency-kit
 ```
 
 #### Step 2: Emergency Kubeconfig
+
 ```bash
 # Decrypt emergency kubeconfig
 gpg --decrypt emergency-kubeconfig.gpg > /tmp/kubeconfig
@@ -199,6 +205,7 @@ kubectl get pods -n intelgraph-prod
 ```
 
 #### Step 3: Emergency Response Actions
+
 ```bash
 # Common emergency procedures
 
@@ -216,6 +223,7 @@ kubectl get events --sort-by='.lastTimestamp' -n intelgraph-prod
 ### Database Emergency Access
 
 #### Step 1: Secure Database Connection
+
 ```bash
 # Connect via emergency bastion host
 ssh -i ~/.ssh/emergency-key emergency-bastion.intelgraph.com
@@ -225,6 +233,7 @@ psql postgresql://emergency_user:$(vault read -field=password secret/emergency/d
 ```
 
 #### Step 2: Emergency Database Operations
+
 ```sql
 -- Check system status
 SELECT
@@ -254,15 +263,15 @@ alerts:
       rate(break_glass_access_total[5m]) > 0
     severity: critical
     annotations:
-      summary: "Break-glass access activated"
-      description: "Emergency access procedures have been initiated"
+      summary: 'Break-glass access activated'
+      description: 'Emergency access procedures have been initiated'
 
   - name: BreakGlassExceededDuration
     query: |
       time() - break_glass_activation_time > break_glass_max_duration
     severity: critical
     annotations:
-      summary: "Break-glass access exceeded authorized duration"
+      summary: 'Break-glass access exceeded authorized duration'
 ```
 
 ### Audit Logging
@@ -316,7 +325,7 @@ rm -f /tmp/emergency-creds-$INCIDENT_ID
 
 ```yaml
 # Post-incident review template
-incident_id: "INC-2025-001"
+incident_id: 'INC-2025-001'
 break_glass_review:
   activation_justified: true
   access_scope_appropriate: true
@@ -324,22 +333,22 @@ break_glass_review:
   actions_documented: true
 
 findings:
-  - "Emergency access was necessary due to authentication system failure"
-  - "Access was used appropriately for incident containment"
-  - "No unauthorized actions detected"
+  - 'Emergency access was necessary due to authentication system failure'
+  - 'Access was used appropriately for incident containment'
+  - 'No unauthorized actions detected'
 
 improvements:
-  - "Update emergency contact procedures"
-  - "Test emergency access quarterly"
-  - "Improve documentation for common scenarios"
+  - 'Update emergency contact procedures'
+  - 'Test emergency access quarterly'
+  - 'Improve documentation for common scenarios'
 
 follow_up_actions:
-  - task: "Review emergency access procedures"
-    owner: "security-team"
-    due_date: "2025-10-01"
-  - task: "Update emergency runbooks"
-    owner: "ops-team"
-    due_date: "2025-09-30"
+  - task: 'Review emergency access procedures'
+    owner: 'security-team'
+    due_date: '2025-10-01'
+  - task: 'Update emergency runbooks'
+    owner: 'ops-team'
+    due_date: '2025-09-30'
 ```
 
 ### Step 3: Evidence Collection
@@ -363,34 +372,34 @@ follow_up_actions:
 
 ```yaml
 security_team:
-  primary: "security-manager@intelgraph.com"
-  secondary: "security-lead@intelgraph.com"
-  escalation: "ciso@intelgraph.com"
+  primary: 'security-manager@intelgraph.com'
+  secondary: 'security-lead@intelgraph.com'
+  escalation: 'ciso@intelgraph.com'
 
 operations_team:
-  primary: "ops-manager@intelgraph.com"
-  secondary: "sre-lead@intelgraph.com"
-  escalation: "cto@intelgraph.com"
+  primary: 'ops-manager@intelgraph.com'
+  secondary: 'sre-lead@intelgraph.com'
+  escalation: 'cto@intelgraph.com'
 
 business_continuity:
-  primary: "bc-manager@intelgraph.com"
-  escalation: "coo@intelgraph.com"
+  primary: 'bc-manager@intelgraph.com'
+  escalation: 'coo@intelgraph.com'
 ```
 
 ### External Contacts
 
 ```yaml
 cloud_providers:
-  aws: "+1-800-AWS-SUPPORT"
-  azure: "+1-800-642-7676"
+  aws: '+1-800-AWS-SUPPORT'
+  azure: '+1-800-642-7676'
 
 security_vendors:
-  incident_response: "ir-team@securitypartner.com"
-  forensics: "forensics@digitalinvestigator.com"
+  incident_response: 'ir-team@securitypartner.com'
+  forensics: 'forensics@digitalinvestigator.com'
 
 legal_counsel:
-  primary: "legal@lawfirm.com"
-  cyber_insurance: "claims@cyberinsurer.com"
+  primary: 'legal@lawfirm.com'
+  cyber_insurance: 'claims@cyberinsurer.com'
 ```
 
 ## Training and Testing
@@ -400,20 +409,20 @@ legal_counsel:
 ```yaml
 # Break-glass procedure test scenarios
 test_scenarios:
-  - name: "Kubernetes cluster compromise"
-    objective: "Test emergency access to recover services"
-    participants: ["security", "operations", "management"]
-    duration: "2 hours"
+  - name: 'Kubernetes cluster compromise'
+    objective: 'Test emergency access to recover services'
+    participants: ['security', 'operations', 'management']
+    duration: '2 hours'
 
-  - name: "Database corruption"
-    objective: "Test emergency data recovery procedures"
-    participants: ["dba", "security", "operations"]
-    duration: "1 hour"
+  - name: 'Database corruption'
+    objective: 'Test emergency data recovery procedures'
+    participants: ['dba', 'security', 'operations']
+    duration: '1 hour'
 
-  - name: "Authentication system failure"
-    objective: "Test alternative access mechanisms"
-    participants: ["security", "operations"]
-    duration: "30 minutes"
+  - name: 'Authentication system failure'
+    objective: 'Test alternative access mechanisms'
+    participants: ['security', 'operations']
+    duration: '30 minutes'
 ```
 
 ### Training Requirements
@@ -426,17 +435,20 @@ test_scenarios:
 ## Compliance and Audit
 
 ### SOC 2 Requirements
+
 - **CC6.1**: Logical access controls
 - **CC6.2**: Multi-factor authentication
 - **CC6.3**: Network access controls
 - Evidence: Emergency access logs, approval records
 
 ### ISO 27001 Requirements
+
 - **A.9.1.2**: Access to networks and network services
 - **A.16.1.5**: Response to information security incidents
 - Evidence: Procedures documentation, test results
 
 ### Regulatory Requirements
+
 - **Data Protection**: Emergency access to personal data
 - **Financial Services**: Critical system recovery procedures
 - **Healthcare**: Patient data access controls

@@ -5,11 +5,10 @@ metadata:
 spec:
   match:
     kinds:
-      - apiGroups: [""]
-        kinds: ["Pod"]
-    excludedNamespaces: ["kube-system", "gatekeeper-system"]
+      - apiGroups: ['']
+        kinds: ['Pod']
+    excludedNamespaces: ['kube-system', 'gatekeeper-system']
   parameters:
     annotations:
-      intelgraph.dev/signed: "true"
-      intelgraph.dev/sbom: "spdx"
-
+      intelgraph.dev/signed: 'true'
+      intelgraph.dev/sbom: 'spdx'

@@ -109,7 +109,11 @@ export const typeDefs = gql`
     # XAI Queries
     explanation(id: ID!): Explanation
     explainEntity(entityId: ID!, model: String!, version: String!): Explanation!
-    explainRelationship(relationshipId: ID!, model: String!, version: String!): Explanation!
+    explainRelationship(
+      relationshipId: ID!
+      model: String!
+      version: String!
+    ): Explanation!
 
     # Provenance Queries
     claim(id: ID!): Claim

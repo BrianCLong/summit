@@ -1,7 +1,7 @@
-import { BuildTaskSpec } from "../build/schema";
-import { recordProvenance, hashObject } from "../provenance/ledger";
+import { BuildTaskSpec } from '../build/schema';
+import { recordProvenance, hashObject } from '../provenance/ledger';
 
-export type SafetyTier = "baseline" | "enhanced" | "restricted";
+export type SafetyTier = 'baseline' | 'enhanced' | 'restricted';
 
 export interface CapabilityRecord {
   id: string;
@@ -53,10 +53,17 @@ export class CapabilityRegistry {
 
   list(query: CapabilityQuery = {}): CapabilityRecord[] {
     return [...this.records.values()].filter((record) => {
-      if (query.skills && !query.skills.every((skill) => record.skills.includes(skill))) return false;
-      if (query.maxLatencyMs && record.latencyMsP95 > query.maxLatencyMs) return false;
-      if (query.budgetUsd && record.costUsdPer1KTokens * 2 > query.budgetUsd) return false;
-      if (query.residency && record.dataResidency !== query.residency) return false;
+      if (
+        query.skills &&
+        !query.skills.every((skill) => record.skills.includes(skill))
+      )
+        return false;
+      if (query.maxLatencyMs && record.latencyMsP95 > query.maxLatencyMs)
+        return false;
+      if (query.budgetUsd && record.costUsdPer1KTokens * 2 > query.budgetUsd)
+        return false;
+      if (query.residency && record.dataResidency !== query.residency)
+        return false;
       if (query.safety && record.safety !== query.safety) return false;
       return true;
     });
@@ -70,7 +77,10 @@ export class CapabilityRegistry {
 
   createAoEBids(spec: BuildTaskSpec, maxBids = 8): AoEBid[] {
     const relevantSkills = deriveSkills(spec);
-    const candidates = this.topN({ skills: relevantSkills, maxLatencyMs: spec.constraints.latencyP95Ms }, maxBids);
+    const candidates = this.topN(
+      { skills: relevantSkills, maxLatencyMs: spec.constraints.latencyP95Ms },
+      maxBids,
+    );
     const bids = candidates.map((record) => {
       const coverage = coverageScore(record.skills, relevantSkills);
       const quality = (record.evalScore ?? 0.7) * coverage;
@@ -81,7 +91,9 @@ export class CapabilityRegistry {
         est: {
           quality,
           latencyMs: record.latencyMsP95,
-          costUSD: (spec.constraints.contextTokensMax || 2000) / 1000 * record.costUsdPer1KTokens,
+          costUSD:
+            ((spec.constraints.contextTokensMax || 2000) / 1000) *
+            record.costUsdPer1KTokens,
         },
         confidence: Math.min(1, (record.evalScore ?? 0.6) * coverage + 0.1),
         fitTags,
@@ -92,12 +104,16 @@ export class CapabilityRegistry {
 
     recordProvenance({
       reqId: spec.taskId,
-      step: "router",
+      step: 'router',
       inputHash: hashObject(relevantSkills),
       outputHash: hashObject(bids),
-      policy: { retention: spec.policy.retention, purpose: spec.policy.purpose, licenseClass: spec.policy.licenseClass },
+      policy: {
+        retention: spec.policy.retention,
+        purpose: spec.policy.purpose,
+        licenseClass: spec.policy.licenseClass,
+      },
       time: { start: new Date().toISOString(), end: new Date().toISOString() },
-      tags: ["aoe", "bid"],
+      tags: ['aoe', 'bid'],
     });
 
     return bids;
@@ -118,11 +134,11 @@ export function deriveSkills(spec: BuildTaskSpec): string[] {
   }
   for (const ac of spec.acceptanceCriteria) {
     if (ac.metric) skills.add(ac.metric);
-    if (/cve/i.test(ac.statement)) skills.add("security");
-    if (/coverage/i.test(ac.statement)) skills.add("coverage");
+    if (/cve/i.test(ac.statement)) skills.add('security');
+    if (/coverage/i.test(ac.statement)) skills.add('coverage');
   }
-  if (/helm/i.test(spec.goal)) skills.add("helm");
-  if (/jest/i.test(spec.goal)) skills.add("jest");
+  if (/helm/i.test(spec.goal)) skills.add('helm');
+  if (/jest/i.test(spec.goal)) skills.add('jest');
   return [...skills];
 }
 

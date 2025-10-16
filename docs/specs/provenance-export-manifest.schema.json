@@ -14,15 +14,18 @@
         "type": "object",
         "properties": {
           "id": { "type": "string" },
-          "kind": { "type": "string", "enum": ["node","edge","file","note"] },
+          "kind": {
+            "type": "string",
+            "enum": ["node", "edge", "file", "note"]
+          },
           "source": { "type": "string" },
           "transforms": { "type": "array", "items": { "type": "string" } },
           "hash": { "type": "string" }
         },
-        "required": ["id","kind","hash"]
+        "required": ["id", "kind", "hash"]
       }
     },
     "license": { "type": "string" }
   },
-  "required": ["bundleId","createdAt","items","hashAlgo"]
+  "required": ["bundleId", "createdAt", "items", "hashAlgo"]
 }

@@ -61,7 +61,10 @@ interface OPAEnforcerOptions {
 export class OPAEnforcer {
   private options: Required<OPAEnforcerOptions>;
   private budgetLedger = getBudgetLedgerManager();
-  private decisionCache = new Map<string, { decision: OPADecision; expiresAt: number }>();
+  private decisionCache = new Map<
+    string,
+    { decision: OPADecision; expiresAt: number }
+  >();
 
   constructor(options: OPAEnforcerOptions = {}) {
     this.options = {
@@ -70,7 +73,7 @@ export class OPAEnforcer {
       timeoutMs: options.timeoutMs || 5000,
       retries: options.retries || 2,
       cacheDecisions: options.cacheDecisions ?? true,
-      cacheTtlMs: options.cacheTtlMs || 60000 // 1 minute
+      cacheTtlMs: options.cacheTtlMs || 60000, // 1 minute
     };
   }
 
@@ -84,14 +87,14 @@ export class OPAEnforcer {
     }
 
     const cacheKey = this.generateCacheKey(input);
-    
+
     // Check cache first
     if (this.options.cacheDecisions) {
       const cached = this.decisionCache.get(cacheKey);
       if (cached && Date.now() < cached.expiresAt) {
         logger.debug('OPA decision cache hit', {
           tenantId: input.tenant_id,
-          requestId: input.request_id
+          requestId: input.request_id,
         });
         return cached.decision;
       }
@@ -100,12 +103,12 @@ export class OPAEnforcer {
     try {
       const data = await this.buildOPAData(input);
       const decision = await this.queryOPA(input, data);
-      
+
       // Cache successful decisions
       if (this.options.cacheDecisions) {
         this.decisionCache.set(cacheKey, {
           decision,
-          expiresAt: Date.now() + this.options.cacheTtlMs
+          expiresAt: Date.now() + this.options.cacheTtlMs,
         });
       }
 
@@ -120,16 +123,15 @@ export class OPAEnforcer {
         requiresFourEyes: decision.requires_four_eyes,
         validApprovers: decision.valid_approvers,
         riskLevel: decision.risk_level,
-        violations: decision.violation_reasons
+        violations: decision.violation_reasons,
       });
 
       return decision;
-
     } catch (error) {
       logger.error('OPA policy evaluation failed', {
         error: error instanceof Error ? error.message : String(error),
         tenantId: input.tenant_id,
-        requestId: input.request_id
+        requestId: input.request_id,
       });
 
       // Fail-safe: use fallback decision
@@ -147,10 +149,11 @@ export class OPAEnforcer {
       input.mutation,
       input.est_usd.toFixed(4),
       input.risk_tag || 'none',
-      input.approvers?.map(a => `${a.user_id}:${a.approved_at}`).join(',') || 'none',
-      Math.floor(Date.now() / 60000) // Round to minute for cache stability
+      input.approvers?.map((a) => `${a.user_id}:${a.approved_at}`).join(',') ||
+        'none',
+      Math.floor(Date.now() / 60000), // Round to minute for cache stability
     ];
-    
+
     return keyComponents.join('|');
   }
 
@@ -160,32 +163,42 @@ export class OPAEnforcer {
   private async buildOPAData(input: OPAInput): Promise<any> {
     const [tenantBudget, spendingSummary] = await Promise.all([
       this.budgetLedger.getTenantBudget(input.tenant_id),
-      this.budgetLedger.getSpendingSummary(input.tenant_id)
+      this.budgetLedger.getSpendingSummary(input.tenant_id),
     ]);
 
     return {
-      tenant_budgets: tenantBudget ? {
-        [input.tenant_id]: {
-          monthly_usd_limit: tenantBudget.monthlyUsdLimit,
-          daily_usd_limit: tenantBudget.dailyUsdLimit,
-          hard_cap: tenantBudget.hardCap,
-          notification_threshold: tenantBudget.notificationThreshold
-        }
-      } : {},
-      
+      tenant_budgets: tenantBudget
+        ? {
+            [input.tenant_id]: {
+              monthly_usd_limit: tenantBudget.monthlyUsdLimit,
+              daily_usd_limit: tenantBudget.dailyUsdLimit,
+              hard_cap: tenantBudget.hardCap,
+              notification_threshold: tenantBudget.notificationThreshold,
+            },
+          }
+        : {},
+
       spending_ledger: {
-        [input.tenant_id]: await this.getRecentSpendingEntries(input.tenant_id)
+        [input.tenant_id]: await this.getRecentSpendingEntries(input.tenant_id),
       },
-      
+
       global_config: {
-        four_eyes_threshold_usd: parseFloat(process.env.FOUR_EYES_THRESHOLD_USD || '5.0'),
-        four_eyes_threshold_tokens: parseInt(process.env.FOUR_EYES_THRESHOLD_TOKENS || '50000'),
-        emergency_multiplier: parseFloat(process.env.EMERGENCY_BUDGET_MULTIPLIER || '1.2')
+        four_eyes_threshold_usd: parseFloat(
+          process.env.FOUR_EYES_THRESHOLD_USD || '5.0',
+        ),
+        four_eyes_threshold_tokens: parseInt(
+          process.env.FOUR_EYES_THRESHOLD_TOKENS || '50000',
+        ),
+        emergency_multiplier: parseFloat(
+          process.env.EMERGENCY_BUDGET_MULTIPLIER || '1.2',
+        ),
       },
-      
-      sensitive_tenants: (process.env.SENSITIVE_TENANTS || '').split(',').filter(Boolean),
-      
-      tenant_overrides: await this.getTenantOverrides()
+
+      sensitive_tenants: (process.env.SENSITIVE_TENANTS || '')
+        .split(',')
+        .filter(Boolean),
+
+      tenant_overrides: await this.getTenantOverrides(),
     };
   }
 
@@ -195,16 +208,19 @@ export class OPAEnforcer {
   private async getRecentSpendingEntries(tenantId: string): Promise<any[]> {
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
-    const entries = await this.budgetLedger.getSpendingEntries({
-      tenantId,
-      startDate: thirtyDaysAgo
-    }, 1000); // Last 1000 entries or 30 days
 
-    return entries.map(entry => ({
+    const entries = await this.budgetLedger.getSpendingEntries(
+      {
+        tenantId,
+        startDate: thirtyDaysAgo,
+      },
+      1000,
+    ); // Last 1000 entries or 30 days
+
+    return entries.map((entry) => ({
       created_at: entry.createdAt.toISOString(),
       total_usd: entry.actualTotalUsd || entry.estTotalUsd,
-      status: entry.status
+      status: entry.status,
     }));
   }
 
@@ -222,21 +238,21 @@ export class OPAEnforcer {
    */
   private async queryOPA(input: OPAInput, data: any): Promise<OPADecision> {
     const url = `${this.options.opaUrl}/v1/data/intelgraph/budget/decision`;
-    
+
     const payload = {
       input,
-      data
+      data,
     };
 
     let lastError: Error | null = null;
-    
+
     for (let attempt = 1; attempt <= this.options.retries; attempt++) {
       try {
         const response = await axios.post<OPAResponse>(url, payload, {
           timeout: this.options.timeoutMs,
           headers: {
-            'Content-Type': 'application/json'
-          }
+            'Content-Type': 'application/json',
+          },
         });
 
         if (!response.data?.result) {
@@ -244,19 +260,18 @@ export class OPAEnforcer {
         }
 
         return response.data.result;
-
       } catch (error) {
         lastError = error instanceof Error ? error : new Error(String(error));
-        
+
         if (attempt < this.options.retries) {
           const delay = Math.min(1000 * attempt, 3000); // Exponential backoff, max 3s
-          await new Promise(resolve => setTimeout(resolve, delay));
-          
+          await new Promise((resolve) => setTimeout(resolve, delay));
+
           logger.warn(`OPA query attempt ${attempt} failed, retrying`, {
             error: lastError.message,
             tenantId: input.tenant_id,
             requestId: input.request_id,
-            nextAttempt: attempt + 1
+            nextAttempt: attempt + 1,
           });
         }
       }
@@ -272,19 +287,22 @@ export class OPAEnforcer {
     logger.warn('Using fallback budget decision', {
       tenantId: input.tenant_id,
       requestId: input.request_id,
-      reason: this.options.enabled ? 'OPA unavailable' : 'OPA disabled'
+      reason: this.options.enabled ? 'OPA unavailable' : 'OPA disabled',
     });
 
     // Simple budget check using database directly
     const budgetCheck = await this.budgetLedger.checkTenantBudget(
       input.tenant_id,
-      input.est_usd
+      input.est_usd,
     );
 
-    const requiresFourEyes = input.est_usd > 5.0 || 
-                           ['destructive', 'bulk_delete'].includes(input.risk_tag || '');
+    const requiresFourEyes =
+      input.est_usd > 5.0 ||
+      ['destructive', 'bulk_delete'].includes(input.risk_tag || '');
 
-    const allow = budgetCheck.canAfford && (!requiresFourEyes || (input.approvers?.length || 0) >= 2);
+    const allow =
+      budgetCheck.canAfford &&
+      (!requiresFourEyes || (input.approvers?.length || 0) >= 2);
 
     return {
       allow,
@@ -294,10 +312,11 @@ export class OPAEnforcer {
       daily_room: budgetCheck.budgetLimit / 30, // Rough daily estimate
       requires_four_eyes: requiresFourEyes,
       valid_approvers: input.approvers?.length || 0,
-      risk_level: input.est_usd > 10 ? 'high' : input.est_usd > 1 ? 'medium' : 'low',
+      risk_level:
+        input.est_usd > 10 ? 'high' : input.est_usd > 1 ? 'medium' : 'low',
       violation_reasons: allow ? [] : [budgetCheck.reason],
       policy_version: 'fallback-1.0',
-      evaluated_at: Date.now()
+      evaluated_at: Date.now(),
     };
   }
 
@@ -313,7 +332,8 @@ export class OPAEnforcer {
 
       try {
         const input: OPAInput = {
-          tenant_id: req.get('x-tenant-id') || (req as any).user?.tenantId || 'default',
+          tenant_id:
+            req.get('x-tenant-id') || (req as any).user?.tenantId || 'default',
           user_id: (req as any).user?.id || req.get('x-user-id') || 'anonymous',
           mutation: req.body.operationName || 'unnamed',
           field_name: this.extractMutationField(req.body.query),
@@ -323,7 +343,7 @@ export class OPAEnforcer {
           mutation_category: req.get('x-mutation-category'),
           approvers: this.parseApprovers(req.get('x-approvers')),
           request_id: req.get('x-request-id') || `req-${Date.now()}`,
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         };
 
         const decision = await this.evaluatePolicy(input);
@@ -337,10 +357,10 @@ export class OPAEnforcer {
               requires_four_eyes: decision.requires_four_eyes,
               valid_approvers: decision.valid_approvers,
               risk_level: decision.risk_level,
-              violation_reasons: decision.violation_reasons
+              violation_reasons: decision.violation_reasons,
             },
             tenant_id: input.tenant_id,
-            request_id: input.request_id
+            request_id: input.request_id,
           });
           return;
         }
@@ -348,11 +368,10 @@ export class OPAEnforcer {
         // Attach decision to request for downstream use
         (req as any).opaDecision = decision;
         next();
-
       } catch (error) {
         logger.error('OPA middleware error', {
           error: error instanceof Error ? error.message : String(error),
-          url: req.originalUrl
+          url: req.originalUrl,
         });
 
         // Fail open in case of errors
@@ -378,9 +397,9 @@ export class OPAEnforcer {
     try {
       return JSON.parse(decodeURIComponent(approversHeader));
     } catch (error) {
-      logger.warn('Failed to parse approvers header', { 
+      logger.warn('Failed to parse approvers header', {
         header: approversHeader,
-        error 
+        error,
       });
       return undefined;
     }
@@ -390,14 +409,17 @@ export class OPAEnforcer {
    * Clean up cache periodically
    */
   startCacheCleanup(): void {
-    setInterval(() => {
-      const now = Date.now();
-      for (const [key, cached] of this.decisionCache.entries()) {
-        if (now >= cached.expiresAt) {
-          this.decisionCache.delete(key);
+    setInterval(
+      () => {
+        const now = Date.now();
+        for (const [key, cached] of this.decisionCache.entries()) {
+          if (now >= cached.expiresAt) {
+            this.decisionCache.delete(key);
+          }
         }
-      }
-    }, 5 * 60 * 1000); // Every 5 minutes
+      },
+      5 * 60 * 1000,
+    ); // Every 5 minutes
   }
 
   /**
@@ -411,7 +433,7 @@ export class OPAEnforcer {
     return {
       enabled: this.options.enabled,
       cacheSize: this.decisionCache.size,
-      cacheHitRate: 0 // TODO: Track cache hits/misses
+      cacheHitRate: 0, // TODO: Track cache hits/misses
     };
   }
 }

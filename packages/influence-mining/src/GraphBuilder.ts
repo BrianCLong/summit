@@ -14,7 +14,12 @@ export class GraphBuilder {
     this.nodes.set(entity.id, { ...entity });
   }
 
-  addEdge(from: Entity, to: Entity, weight: number, type: RelationshipType = 'interaction'): void {
+  addEdge(
+    from: Entity,
+    to: Entity,
+    weight: number,
+    type: RelationshipType = 'interaction',
+  ): void {
     if (!this.nodes.has(from.id)) {
       this.addNode(from);
     }

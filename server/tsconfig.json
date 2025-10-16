@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "node",
     "rootDir": "./src",
@@ -14,7 +14,8 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "sourceMap": true,
-    "lib": ["ES2020"]
+    "lib": ["ES2022"],
+    "types": ["node", "jest"]
   },
   "ts-node": {
     "esm": true

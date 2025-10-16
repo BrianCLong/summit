@@ -2,26 +2,74 @@ timezone: America/Denver
 models:
   chatgpt_plus:
     schedule:
-      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: '06:05', duration: '00:25' }
-      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: '09:05', duration: '00:25' }
-      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: '12:05', duration: '00:25' }
-      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: '15:05', duration: '00:25' }
-      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: '18:05', duration: '00:25' }
-      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: '21:05', duration: '00:25' }
+      - {
+          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
+          at: '06:05',
+          duration: '00:25',
+        }
+      - {
+          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
+          at: '09:05',
+          duration: '00:25',
+        }
+      - {
+          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
+          at: '12:05',
+          duration: '00:25',
+        }
+      - {
+          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
+          at: '15:05',
+          duration: '00:25',
+        }
+      - {
+          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
+          at: '18:05',
+          duration: '00:25',
+        }
+      - {
+          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
+          at: '21:05',
+          duration: '00:25',
+        }
     dynamic: { detector: chatgpt_ui, action: shift_to_next_reset }
 
   claude_pro:
     schedule:
-      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: '05:00', duration: '00:55' }
-      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: '10:00', duration: '00:55' }
-      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: '15:00', duration: '00:55' }
-      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: '20:00', duration: '00:55' }
+      - {
+          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
+          at: '05:00',
+          duration: '00:55',
+        }
+      - {
+          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
+          at: '10:00',
+          duration: '00:55',
+        }
+      - {
+          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
+          at: '15:00',
+          duration: '00:55',
+        }
+      - {
+          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
+          at: '20:00',
+          duration: '00:55',
+        }
     dynamic: { detector: claude_ui, action: phase_lock }
 
   gemini_api:
     schedule:
-      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: '01:05', duration: '01:30' }
-      - { days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun], at: '13:00', duration: '00:30' }
+      - {
+          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
+          at: '01:05',
+          duration: '01:30',
+        }
+      - {
+          days: [Mon, Tue, Wed, Thu, Fri, Sat, Sun],
+          at: '13:00',
+          duration: '00:30',
+        }
 
   grok_live_search:
     schedule:

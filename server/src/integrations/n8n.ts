@@ -14,7 +14,11 @@ function sign(body: any) {
   return { payload, mac };
 }
 
-export async function triggerN8nFlow(flowKey: string, body: any, ctx: { userId?: string, runId?: string }) {
+export async function triggerN8nFlow(
+  flowKey: string,
+  body: any,
+  ctx: { userId?: string; runId?: string },
+) {
   if (!base || !secret) throw new Error('n8n missing env');
   const path = `/webhook/${encodeURIComponent(flowKey)}`;
   const payload = { ...body };
@@ -40,7 +44,12 @@ export async function triggerN8nFlow(flowKey: string, body: any, ctx: { userId?:
     await provenance.recordProvenanceEntry({
       operation_type: 'N8N_TRIGGER_RESULT',
       actor_id: ctx.userId || 'system',
-      metadata: { flowKey, runId: ctx.runId, status: res.status, data: res.data },
+      metadata: {
+        flowKey,
+        runId: ctx.runId,
+        status: res.status,
+        data: res.data,
+      },
     });
   } catch (e) {
     logger.warn({ err: e }, 'provenance record failed for N8N_TRIGGER_RESULT');
@@ -52,4 +61,3 @@ export async function triggerN8nFlow(flowKey: string, body: any, ctx: { userId?:
 export function n8nIntegrationEnabled() {
   return Boolean(base && secret);
 }
-

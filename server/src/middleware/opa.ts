@@ -1,6 +1,6 @@
 /**
  * OPA (Open Policy Agent) Middleware for IntelGraph
- * 
+ *
  * Features:
  * - RBAC enforcement at GraphQL resolver level
  * - Tenant isolation for multi-tenancy
@@ -84,7 +84,12 @@ interface GraphQLInfo {
   };
 }
 
-type GraphQLResolver = (parent: any, args: any, context: GraphQLContext, info: GraphQLInfo) => any;
+type GraphQLResolver = (
+  parent: any,
+  args: any,
+  context: GraphQLContext,
+  info: GraphQLInfo,
+) => any;
 
 export class OPAMiddleware {
   private options: Required<OPAOptions>;
@@ -99,7 +104,7 @@ export class OPAMiddleware {
       cacheEnabled: options.cacheEnabled !== false,
       cacheTTL: options.cacheTTL || 300000, // 5 minutes
       timeout: options.timeout || 5000,
-      ...options
+      ...options,
     };
 
     this.cache = new Map();
@@ -108,7 +113,7 @@ export class OPAMiddleware {
       allowedRequests: 0,
       deniedRequests: 0,
       cacheHits: 0,
-      errors: 0
+      errors: 0,
     };
   }
 
@@ -120,7 +125,7 @@ export class OPAMiddleware {
       user: input.user?.id || 'anonymous',
       action: input.action,
       resource: input.resource,
-      tenantId: input.context.tenantId
+      tenantId: input.context.tenantId,
     };
     return JSON.stringify(key);
   }
@@ -153,19 +158,19 @@ export class OPAMiddleware {
       const response = await axios.post(
         `${this.options.opaUrl}${this.options.policyPath}`,
         { input },
-        { 
+        {
           timeout: this.options.timeout,
-          headers: { 'Content-Type': 'application/json' }
-        }
+          headers: { 'Content-Type': 'application/json' },
+        },
       );
 
       const result = response.data.result || { allow: false };
-      
+
       // Cache the result
       if (this.options.cacheEnabled) {
         this.cache.set(cacheKey, {
           result,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
       }
 
@@ -176,16 +181,15 @@ export class OPAMiddleware {
       }
 
       return result;
-
     } catch (error: any) {
       this.stats.errors++;
       logger.error(`OPA policy check failed: ${error.message}`);
-      
+
       // Fail-safe: deny by default on OPA errors
-      return { 
-        allow: false, 
+      return {
+        allow: false,
         reason: 'Policy service unavailable',
-        error: error.message 
+        error: error.message,
       };
     }
   }
@@ -194,7 +198,13 @@ export class OPAMiddleware {
    * Create GraphQL resolver middleware
    */
   createGraphQLMiddleware() {
-    return async (resolve: GraphQLResolver, parent: any, args: any, context: GraphQLContext, info: GraphQLInfo) => {
+    return async (
+      resolve: GraphQLResolver,
+      parent: any,
+      args: any,
+      context: GraphQLContext,
+      info: GraphQLInfo,
+    ) => {
       const user = context.user;
       const operation = info.operation.operation; // query, mutation, subscription
       const fieldName = info.fieldName;
@@ -207,26 +217,28 @@ export class OPAMiddleware {
           email: user?.email,
           role: user?.role,
           tenantId: user?.tenantId,
-          permissions: user?.permissions || []
+          permissions: user?.permissions || [],
         },
         action: `${operation}.${fieldName}`,
         resource: {
           type: parentType,
           field: fieldName,
-          args: this.sanitizeArgs(args)
+          args: this.sanitizeArgs(args),
         },
         context: {
           investigationId: args.investigationId || args.input?.investigationId,
           entityType: args.input?.type || args.type,
-          tenantId: user?.tenantId
-        }
+          tenantId: user?.tenantId,
+        },
       };
 
       const decision = await this.checkPolicy(policyInput);
 
       if (!decision.allow) {
         await this.auditDeniedAccess(user, policyInput, decision);
-        throw new Error(`Access denied: ${decision.reason || 'Insufficient privileges'}`);
+        throw new Error(
+          `Access denied: ${decision.reason || 'Insufficient privileges'}`,
+        );
       }
 
       // Allow the operation to proceed
@@ -238,7 +250,11 @@ export class OPAMiddleware {
    * Create REST API middleware
    */
   createRestMiddleware() {
-    return async (req: Request & { user?: User }, res: Response, next: NextFunction): Promise<Response | void> => {
+    return async (
+      req: Request & { user?: User },
+      res: Response,
+      next: NextFunction,
+    ): Promise<Response | void> => {
       const user = req.user;
       const method = req.method.toLowerCase();
       const path = req.path;
@@ -249,7 +265,7 @@ export class OPAMiddleware {
           email: user?.email,
           role: user?.role,
           tenantId: user?.tenantId,
-          permissions: user?.permissions || []
+          permissions: user?.permissions || [],
         },
         action: `${method}.${path}`,
         resource: {
@@ -257,22 +273,22 @@ export class OPAMiddleware {
           path: path,
           method: method,
           params: req.params,
-          query: req.query
+          query: req.query,
         },
         context: {
           tenantId: user?.tenantId,
           ip: req.ip,
-          userAgent: req.get('User-Agent')
-        }
+          userAgent: req.get('User-Agent'),
+        },
       };
 
       const decision = await this.checkPolicy(policyInput);
 
       if (!decision.allow) {
         await this.auditDeniedAccess(user, policyInput, decision);
-        return res.status(403).json({ 
+        return res.status(403).json({
           error: 'Access denied',
-          reason: decision.reason || 'Insufficient privileges'
+          reason: decision.reason || 'Insufficient privileges',
         });
       }
 
@@ -286,7 +302,7 @@ export class OPAMiddleware {
   private sanitizeArgs(args: any): any {
     // Remove sensitive data that shouldn't be in policy logs
     const sanitized = { ...args };
-    
+
     const sensitiveFields = ['password', 'token', 'secret', 'key'];
     for (const field of sensitiveFields) {
       if (sanitized[field]) {
@@ -300,7 +316,11 @@ export class OPAMiddleware {
   /**
    * Audit denied access attempts
    */
-  private async auditDeniedAccess(user: User | undefined, policyInput: PolicyInput, decision: PolicyDecision): Promise<void> {
+  private async auditDeniedAccess(
+    user: User | undefined,
+    policyInput: PolicyInput,
+    decision: PolicyDecision,
+  ): Promise<void> {
     await writeAudit({
       userId: user?.id,
       action: 'ACCESS_DENIED',
@@ -309,22 +329,30 @@ export class OPAMiddleware {
       details: {
         reason: decision.reason,
         action: policyInput.action,
-        tenantId: policyInput.context.tenantId
-      }
+        tenantId: policyInput.context.tenantId,
+      },
     });
   }
 
   /**
    * Get middleware statistics
    */
-  getStats(): OPAStats & { cacheSize: number; successRate: number; cacheHitRate: number } {
+  getStats(): OPAStats & {
+    cacheSize: number;
+    successRate: number;
+    cacheHitRate: number;
+  } {
     return {
       ...this.stats,
       cacheSize: this.cache.size,
-      successRate: this.stats.totalRequests > 0 ? 
-        (this.stats.allowedRequests / this.stats.totalRequests) * 100 : 0,
-      cacheHitRate: this.stats.totalRequests > 0 ?
-        (this.stats.cacheHits / this.stats.totalRequests) * 100 : 0
+      successRate:
+        this.stats.totalRequests > 0
+          ? (this.stats.allowedRequests / this.stats.totalRequests) * 100
+          : 0,
+      cacheHitRate:
+        this.stats.totalRequests > 0
+          ? (this.stats.cacheHits / this.stats.totalRequests) * 100
+          : 0,
     };
   }
 
@@ -338,27 +366,31 @@ export class OPAMiddleware {
   /**
    * Health check for OPA service
    */
-  async healthCheck(): Promise<{ status: string; healthy: boolean; opaStatus?: number; error?: string }> {
+  async healthCheck(): Promise<{
+    status: string;
+    healthy: boolean;
+    opaStatus?: number;
+    error?: string;
+  }> {
     if (!this.options.enabled) {
       return { status: 'disabled', healthy: true };
     }
 
     try {
-      const response = await axios.get(
-        `${this.options.opaUrl}/health`,
-        { timeout: this.options.timeout }
-      );
-      
-      return { 
-        status: 'healthy', 
+      const response = await axios.get(`${this.options.opaUrl}/health`, {
+        timeout: this.options.timeout,
+      });
+
+      return {
+        status: 'healthy',
         healthy: true,
-        opaStatus: response.status
+        opaStatus: response.status,
       };
     } catch (error: any) {
-      return { 
-        status: 'unhealthy', 
+      return {
+        status: 'unhealthy',
         healthy: false,
-        error: error.message
+        error: error.message,
       };
     }
   }
@@ -367,24 +399,44 @@ export class OPAMiddleware {
 /**
  * Helper function to create OPA-protected resolver
  */
-export function withOPACheck(resolver: GraphQLResolver, middleware: OPAMiddleware): GraphQLResolver {
-  return async (parent: any, args: any, context: GraphQLContext, info: GraphQLInfo) => {
-    return middleware.createGraphQLMiddleware()(resolver, parent, args, context, info);
+export function withOPACheck(
+  resolver: GraphQLResolver,
+  middleware: OPAMiddleware,
+): GraphQLResolver {
+  return async (
+    parent: any,
+    args: any,
+    context: GraphQLContext,
+    info: GraphQLInfo,
+  ) => {
+    return middleware.createGraphQLMiddleware()(
+      resolver,
+      parent,
+      args,
+      context,
+      info,
+    );
   };
 }
 
 /**
  * Utility to apply OPA checks to multiple resolvers
  */
-export function applyOPAToResolvers(resolvers: Record<string, Record<string, any>>, middleware: OPAMiddleware): Record<string, Record<string, any>> {
+export function applyOPAToResolvers(
+  resolvers: Record<string, Record<string, any>>,
+  middleware: OPAMiddleware,
+): Record<string, Record<string, any>> {
   const protectedResolvers: Record<string, Record<string, any>> = {};
 
   for (const [typeName, typeResolvers] of Object.entries(resolvers)) {
     protectedResolvers[typeName] = {};
-    
+
     for (const [fieldName, resolver] of Object.entries(typeResolvers)) {
       if (typeof resolver === 'function') {
-        protectedResolvers[typeName][fieldName] = withOPACheck(resolver, middleware);
+        protectedResolvers[typeName][fieldName] = withOPACheck(
+          resolver,
+          middleware,
+        );
       } else {
         protectedResolvers[typeName][fieldName] = resolver;
       }
@@ -393,5 +445,3 @@ export function applyOPAToResolvers(resolvers: Record<string, Record<string, any
 
   return protectedResolvers;
 }
-
-

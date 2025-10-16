@@ -16,9 +16,9 @@ spec:
         app.kubernetes.io/name: verification-service
         app.kubernetes.io/component: independent-verification
       annotations:
-        prometheus.io/scrape: "true"
-        prometheus.io/port: "8081"
-        prometheus.io/path: "/metrics"
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8081'
+        prometheus.io/path: '/metrics'
     spec:
       serviceAccountName: verification-service
       securityContext:
@@ -38,23 +38,23 @@ spec:
               protocol: TCP
           env:
             - name: PORT
-              value: "8081"
+              value: '8081'
             - name: METRICS_PORT
-              value: "9091"
+              value: '9091'
             - name: NODE_ENV
-              value: "production"
+              value: 'production'
             - name: LOG_LEVEL
-              value: "info"
+              value: 'info'
             - name: VERIFICATION_TIMEOUT_MS
-              value: "30000"
+              value: '30000'
             - name: MAX_CONCURRENT_VERIFICATIONS
-              value: "10"
+              value: '10'
             - name: VERIFICATION_RETRY_ATTEMPTS
-              value: "3"
+              value: '3'
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
-              value: "http://jaeger-collector.monitoring.svc.cluster.local:4317"
+              value: 'http://jaeger-collector.monitoring.svc.cluster.local:4317'
             - name: PROMETHEUS_METRICS_ENABLED
-              value: "true"
+              value: 'true'
           envFrom:
             - configMapRef:
                 name: sovereign-safeguards-config
@@ -78,11 +78,11 @@ spec:
             failureThreshold: 3
           resources:
             requests:
-              memory: "512Mi"
-              cpu: "200m"
+              memory: '512Mi'
+              cpu: '200m'
             limits:
-              memory: "1Gi"
-              cpu: "1000m"
+              memory: '1Gi'
+              cpu: '1000m'
           securityContext:
             allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true

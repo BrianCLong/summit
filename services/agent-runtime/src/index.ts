@@ -26,7 +26,10 @@ collectDefaultMetrics();
 const redis = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
 
 // Task queue
-const taskQueue = new Queue('runbook-tasks', process.env.REDIS_URL || 'redis://localhost:6379');
+const taskQueue = new Queue(
+  'runbook-tasks',
+  process.env.REDIS_URL || 'redis://localhost:6379',
+);
 
 // Schemas
 const RunbookTaskSchema = z.object({
@@ -36,7 +39,7 @@ const RunbookTaskSchema = z.object({
   with: z.record(z.any()).optional(),
   needs: z.array(z.string()).optional().default([]),
   timeout: z.number().optional().default(300),
-  retries: z.number().optional().default(0)
+  retries: z.number().optional().default(0),
 });
 
 const RunbookSchema = z.object({
@@ -45,7 +48,7 @@ const RunbookSchema = z.object({
   description: z.string().optional(),
   tasks: z.array(RunbookTaskSchema),
   kpis: z.array(z.string()).optional().default([]),
-  xai_notes: z.string().optional()
+  xai_notes: z.string().optional(),
 });
 
 const RunbookExecutionSchema = z.object({
@@ -53,21 +56,23 @@ const RunbookExecutionSchema = z.object({
   name: z.string(),
   version: z.string(),
   status: z.enum(['pending', 'running', 'completed', 'failed', 'cancelled']),
-  tasks: z.array(z.object({
-    id: z.string(),
-    name: z.string(),
-    status: z.enum(['pending', 'running', 'completed', 'failed', 'skipped']),
-    started_at: z.string().datetime().optional(),
-    completed_at: z.string().datetime().optional(),
-    output: z.record(z.any()).optional(),
-    error: z.string().optional()
-  })),
+  tasks: z.array(
+    z.object({
+      id: z.string(),
+      name: z.string(),
+      status: z.enum(['pending', 'running', 'completed', 'failed', 'skipped']),
+      started_at: z.string().datetime().optional(),
+      completed_at: z.string().datetime().optional(),
+      output: z.record(z.any()).optional(),
+      error: z.string().optional(),
+    }),
+  ),
   inputs: z.record(z.any()).optional(),
   created_at: z.string().datetime(),
   started_at: z.string().datetime().optional(),
   completed_at: z.string().datetime().optional(),
   kpis: z.record(z.any()).optional(),
-  replay_source: z.string().optional()
+  replay_source: z.string().optional(),
 });
 
 type Runbook = z.infer<typeof RunbookSchema>;
@@ -75,81 +80,93 @@ type RunbookTask = z.infer<typeof RunbookTaskSchema>;
 type RunbookExecution = z.infer<typeof RunbookExecutionSchema>;
 
 // Task executors
-const taskExecutors: Record<string, (task: RunbookTask, inputs: any, context: any) => Promise<any>> = {
+const taskExecutors: Record<
+  string,
+  (task: RunbookTask, inputs: any, context: any) => Promise<any>
+> = {
   'connector:esri': async (task, inputs, context) => {
     // Mock ESRI connector
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     return {
       entities_ingested: 150,
       source: inputs.source || 'esri-default',
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   },
 
   'connector:elastic': async (task, inputs, context) => {
     // Mock Elasticsearch connector
-    await new Promise(resolve => setTimeout(resolve, 800));
+    await new Promise((resolve) => setTimeout(resolve, 800));
     return {
       documents_ingested: 2500,
       indices: ['logs-*', 'metrics-*'],
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   },
 
   'graph:entity-resolution': async (task, inputs, context) => {
     // Mock entity resolution
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
     return {
       entities_resolved: 125,
       confidence_avg: 0.89,
       clusters_formed: 23,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   },
 
   'xai:explanations': async (task, inputs, context) => {
     // Mock XAI explanation generation
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    await new Promise((resolve) => setTimeout(resolve, 1500));
     return {
       explanations_generated: 125,
       avg_confidence: 0.92,
       counterfactuals: 45,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   },
 
   'export:bundle': async (task, inputs, context) => {
     // Mock export bundle creation
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 500));
     return {
       bundle_id: `bundle_${uuidv4()}`,
       artifacts: ['entities.json', 'relationships.json', 'explanations.json'],
       size_mb: 12.5,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   },
 
   'ml:forecast': async (task, inputs, context) => {
     // Mock forecasting
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    await new Promise((resolve) => setTimeout(resolve, 3000));
     return {
       forecast_horizon: inputs.horizon || 30,
-      predictions: Array.from({ length: inputs.horizon || 30 }, () => Math.random() * 100),
-      confidence_intervals: Array.from({ length: inputs.horizon || 30 }, () => [0.8, 0.95]),
-      timestamp: new Date().toISOString()
+      predictions: Array.from(
+        { length: inputs.horizon || 30 },
+        () => Math.random() * 100,
+      ),
+      confidence_intervals: Array.from({ length: inputs.horizon || 30 }, () => [
+        0.8, 0.95,
+      ]),
+      timestamp: new Date().toISOString(),
     };
   },
 
   'analyze:risk': async (task, inputs, context) => {
     // Mock risk analysis
-    await new Promise(resolve => setTimeout(resolve, 1200));
+    await new Promise((resolve) => setTimeout(resolve, 1200));
     return {
       risk_score: Math.random() * 100,
-      risk_factors: ['financial_anomaly', 'network_centrality', 'temporal_patterns'],
+      risk_factors: [
+        'financial_anomaly',
+        'network_centrality',
+        'temporal_patterns',
+      ],
       confidence: 0.87,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
-  }
+  },
 };
 
 // Runbook engine
@@ -168,7 +185,7 @@ class RunbookEngine {
   async executeRunbook(
     runbook: Runbook,
     inputs: any = {},
-    replaySource?: string
+    replaySource?: string,
   ): Promise<RunbookExecution> {
     const executionId = uuidv4();
     const now = new Date().toISOString();
@@ -178,28 +195,32 @@ class RunbookEngine {
       name: runbook.name,
       version: runbook.version,
       status: 'pending',
-      tasks: runbook.tasks.map(task => ({
+      tasks: runbook.tasks.map((task) => ({
         id: task.id,
         name: task.name,
-        status: 'pending'
+        status: 'pending',
       })),
       inputs,
       created_at: now,
-      replay_source: replaySource
+      replay_source: replaySource,
     };
 
     // Store execution state
     await redis.set(`execution:${executionId}`, JSON.stringify(execution));
 
     // Add to queue for processing
-    await taskQueue.add('execute-runbook', {
-      executionId,
-      runbook,
-      inputs
-    }, {
-      attempts: 3,
-      backoff: 'exponential'
-    });
+    await taskQueue.add(
+      'execute-runbook',
+      {
+        executionId,
+        runbook,
+        inputs,
+      },
+      {
+        attempts: 3,
+        backoff: 'exponential',
+      },
+    );
 
     return execution;
   }
@@ -215,14 +236,24 @@ class RunbookEngine {
     await redis.set(`execution:${execution.id}`, JSON.stringify(execution));
   }
 
-  async replayExecution(sourceId: string, inputs?: any): Promise<RunbookExecution> {
+  async replayExecution(
+    sourceId: string,
+    inputs?: any,
+  ): Promise<RunbookExecution> {
     const sourceExecution = await this.getExecution(sourceId);
     if (!sourceExecution) {
       throw new Error(`Source execution not found: ${sourceId}`);
     }
 
-    const runbook = await this.loadRunbook(sourceExecution.name, sourceExecution.version);
-    return this.executeRunbook(runbook, inputs || sourceExecution.inputs, sourceId);
+    const runbook = await this.loadRunbook(
+      sourceExecution.name,
+      sourceExecution.version,
+    );
+    return this.executeRunbook(
+      runbook,
+      inputs || sourceExecution.inputs,
+      sourceId,
+    );
   }
 
   buildDAG(tasks: RunbookTask[]): Map<string, string[]> {
@@ -283,7 +314,7 @@ taskQueue.process('execute-runbook', 5, async (job) => {
     const dag = engine.buildDAG(runbook.tasks);
     const sortedTaskIds = engine.topologicalSort(dag);
 
-    const taskMap = new Map(runbook.tasks.map(t => [t.id, t]));
+    const taskMap = new Map(runbook.tasks.map((t) => [t.id, t]));
     const results = new Map<string, any>();
 
     // Execute tasks in topological order
@@ -292,7 +323,7 @@ taskQueue.process('execute-runbook', 5, async (job) => {
       if (!task) continue;
 
       // Update task status
-      const taskExecution = execution.tasks.find(t => t.id === taskId);
+      const taskExecution = execution.tasks.find((t) => t.id === taskId);
       if (!taskExecution) continue;
 
       taskExecution.status = 'running';
@@ -314,7 +345,7 @@ taskQueue.process('execute-runbook', 5, async (job) => {
 
         const output = await executor(task, taskInputs, {
           executionId,
-          replaySource: execution.replay_source
+          replaySource: execution.replay_source,
         });
 
         results.set(taskId, output);
@@ -324,7 +355,6 @@ taskQueue.process('execute-runbook', 5, async (job) => {
         taskExecution.completed_at = new Date().toISOString();
         taskExecution.output = output;
         await engine.updateExecution(execution);
-
       } catch (error) {
         taskExecution.status = 'failed';
         taskExecution.completed_at = new Date().toISOString();
@@ -345,14 +375,20 @@ taskQueue.process('execute-runbook', 5, async (job) => {
     const endTime = Date.now();
 
     kpis.total_duration_ms = endTime - startTime;
-    kpis.tasks_completed = execution.tasks.filter(t => t.status === 'completed').length;
+    kpis.tasks_completed = execution.tasks.filter(
+      (t) => t.status === 'completed',
+    ).length;
     kpis.success_rate = kpis.tasks_completed / execution.tasks.length;
 
     // Add runbook-specific KPIs
     if (runbook.kpis?.includes('time_to_first_path')) {
-      const firstPath = execution.tasks.find(t => t.name.includes('entity-resolution'));
+      const firstPath = execution.tasks.find((t) =>
+        t.name.includes('entity-resolution'),
+      );
       if (firstPath?.completed_at && execution.started_at) {
-        kpis.time_to_first_path_ms = new Date(firstPath.completed_at).getTime() - new Date(execution.started_at).getTime();
+        kpis.time_to_first_path_ms =
+          new Date(firstPath.completed_at).getTime() -
+          new Date(execution.started_at).getTime();
       }
     }
 
@@ -366,7 +402,6 @@ taskQueue.process('execute-runbook', 5, async (job) => {
     execution.completed_at = new Date().toISOString();
     execution.kpis = kpis;
     await engine.updateExecution(execution);
-
   } catch (error) {
     console.error('Runbook execution failed:', error);
     throw error;
@@ -389,7 +424,7 @@ function policyMiddleware(request: any, reply: any, done: any) {
     return reply.status(403).send({
       error: 'Policy denial',
       reason: 'Missing authority binding or reason-for-access',
-      appealPath: '/ombudsman/appeals'
+      appealPath: '/ombudsman/appeals',
     });
   }
 
@@ -402,8 +437,10 @@ function policyMiddleware(request: any, reply: any, done: any) {
 const server = Fastify({
   logger: {
     level: NODE_ENV === 'development' ? 'debug' : 'info',
-    ...(NODE_ENV === 'development' ? { transport: { target: 'pino-pretty' } } : {})
-  }
+    ...(NODE_ENV === 'development'
+      ? { transport: { target: 'pino-pretty' } }
+      : {}),
+  },
 });
 
 // Register plugins
@@ -424,82 +461,97 @@ server.get('/health', async () => {
       version: '1.0.0',
       dependencies: {
         redis: 'healthy',
-        queue: 'healthy'
-      }
+        queue: 'healthy',
+      },
     };
   } catch (error) {
     return {
       status: 'unhealthy',
       timestamp: new Date().toISOString(),
       dependencies: {
-        redis: 'unhealthy'
-      }
+        redis: 'unhealthy',
+      },
     };
   }
 });
 
 // Get runbook execution
-server.get<{ Params: { id: string } }>('/runbooks/:id', async (request, reply) => {
-  const execution = await engine.getExecution(request.params.id);
-  if (!execution) {
-    reply.status(404);
-    return { error: 'Runbook execution not found' };
-  }
-  return execution;
-});
+server.get<{ Params: { id: string } }>(
+  '/runbooks/:id',
+  async (request, reply) => {
+    const execution = await engine.getExecution(request.params.id);
+    if (!execution) {
+      reply.status(404);
+      return { error: 'Runbook execution not found' };
+    }
+    return execution;
+  },
+);
 
 // List runbook executions
-server.get<{ Querystring: { status?: string } }>('/runbooks', async (request) => {
-  const keys = await redis.keys('execution:*');
-  const executions = await Promise.all(
-    keys.map(async key => {
-      const data = await redis.get(key);
-      return data ? JSON.parse(data) : null;
-    })
-  );
+server.get<{ Querystring: { status?: string } }>(
+  '/runbooks',
+  async (request) => {
+    const keys = await redis.keys('execution:*');
+    const executions = await Promise.all(
+      keys.map(async (key) => {
+        const data = await redis.get(key);
+        return data ? JSON.parse(data) : null;
+      }),
+    );
 
-  let filtered = executions.filter(Boolean);
+    let filtered = executions.filter(Boolean);
 
-  if (request.query.status) {
-    filtered = filtered.filter(e => e.status === request.query.status);
-  }
+    if (request.query.status) {
+      filtered = filtered.filter((e) => e.status === request.query.status);
+    }
 
-  return filtered.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-});
+    return filtered.sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
+  },
+);
 
 // Start runbook execution
-server.post<{ Body: { name: string; version?: string; inputs?: any } }>('/runbooks', async (request, reply) => {
-  try {
-    const { name, version, inputs } = request.body;
+server.post<{ Body: { name: string; version?: string; inputs?: any } }>(
+  '/runbooks',
+  async (request, reply) => {
+    try {
+      const { name, version, inputs } = request.body;
 
-    const runbook = await engine.loadRunbook(name, version);
-    const execution = await engine.executeRunbook(runbook, inputs);
+      const runbook = await engine.loadRunbook(name, version);
+      const execution = await engine.executeRunbook(runbook, inputs);
 
-    return execution;
-  } catch (error) {
-    server.log.error('Failed to start runbook', error);
-    reply.status(500);
-    return { error: 'Failed to start runbook execution' };
-  }
-});
+      return execution;
+    } catch (error) {
+      server.log.error('Failed to start runbook', error);
+      reply.status(500);
+      return { error: 'Failed to start runbook execution' };
+    }
+  },
+);
 
 // Replay runbook execution
-server.post<{ Body: { sourceId: string; inputs?: any } }>('/runbooks/replay', async (request, reply) => {
-  try {
-    const { sourceId, inputs } = request.body;
-    const execution = await engine.replayExecution(sourceId, inputs);
-    return execution;
-  } catch (error) {
-    server.log.error('Failed to replay runbook', error);
-    reply.status(500);
-    return { error: 'Failed to replay runbook execution' };
-  }
-});
+server.post<{ Body: { sourceId: string; inputs?: any } }>(
+  '/runbooks/replay',
+  async (request, reply) => {
+    try {
+      const { sourceId, inputs } = request.body;
+      const execution = await engine.replayExecution(sourceId, inputs);
+      return execution;
+    } catch (error) {
+      server.log.error('Failed to replay runbook', error);
+      reply.status(500);
+      return { error: 'Failed to replay runbook execution' };
+    }
+  },
+);
 
 // WebSocket for real-time updates
 server.register(async function (fastify) {
   fastify.get('/ws', { websocket: true }, (connection, req) => {
-    connection.socket.on('message', message => {
+    connection.socket.on('message', (message) => {
       const data = JSON.parse(message.toString());
 
       if (data.type === 'subscribe' && data.executionId) {
@@ -507,12 +559,16 @@ server.register(async function (fastify) {
         const interval = setInterval(async () => {
           const execution = await engine.getExecution(data.executionId);
           if (execution) {
-            connection.socket.send(JSON.stringify({
-              type: 'execution_update',
-              data: execution
-            }));
+            connection.socket.send(
+              JSON.stringify({
+                type: 'execution_update',
+                data: execution,
+              }),
+            );
 
-            if (['completed', 'failed', 'cancelled'].includes(execution.status)) {
+            if (
+              ['completed', 'failed', 'cancelled'].includes(execution.status)
+            ) {
               clearInterval(interval);
             }
           }

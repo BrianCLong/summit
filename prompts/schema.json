@@ -33,7 +33,7 @@
           "properties": {
             "min_context_window": { "type": "number" },
             "preferred_models": {
-              "type": "array", 
+              "type": "array",
               "items": { "type": "string" }
             },
             "max_tokens": { "type": "number" }

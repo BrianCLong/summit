@@ -1,5 +1,8 @@
 import type { ApolloServerPlugin } from '@apollo/server';
-import type { GraphQLRequestContext, GraphQLRequestContextWillSendResponse } from '@apollo/server';
+import type {
+  GraphQLRequestContext,
+  GraphQLRequestContextWillSendResponse,
+} from '@apollo/server';
 import { Counter, Histogram } from 'prom-client';
 import { registry } from './registry.js';
 
@@ -41,19 +44,25 @@ function opName(ctx: GraphQLRequestContext): string {
   return ctx.operationName || 'anonymous';
 }
 
-function opType(ctx: GraphQLRequestContext): 'query' | 'mutation' | 'subscription' | 'unknown' {
+function opType(
+  ctx: GraphQLRequestContext,
+): 'query' | 'mutation' | 'subscription' | 'unknown' {
   const t = ctx.operation?.operation;
-  return t === 'query' || t === 'mutation' || t === 'subscription' ? t : 'unknown';
+  return t === 'query' || t === 'mutation' || t === 'subscription'
+    ? t
+    : 'unknown';
 }
 
 function tenantFromCtx(ctx: GraphQLRequestContext): string {
   try {
     // Prefer GraphQL context if present
-    const fromCtx = (ctx.contextValue as any)?.tenant || (ctx.contextValue as any)?.tenantId;
+    const fromCtx =
+      (ctx.contextValue as any)?.tenant || (ctx.contextValue as any)?.tenantId;
     if (fromCtx) return String(fromCtx);
     // Fallback to HTTP header commonly used for multitenancy
     const hdr =
-      ctx.request.http?.headers.get('x-tenant') || ctx.request.http?.headers.get('x-tenant-id');
+      ctx.request.http?.headers.get('x-tenant') ||
+      ctx.request.http?.headers.get('x-tenant-id');
     if (hdr) return String(hdr);
   } catch {}
   return 'unknown';
@@ -74,15 +83,20 @@ export function apolloPromPlugin(): ApolloServerPlugin {
               const rStart = process.hrtime.bigint();
               return () => {
                 const ns = Number(process.hrtime.bigint() - rStart);
-                resDur.labels(info.parentType.name, info.fieldName).observe(ns / 1e9);
+                resDur
+                  .labels(info.parentType.name, info.fieldName)
+                  .observe(ns / 1e9);
               };
             },
           };
         },
 
-        async willSendResponse(rctx: GraphQLRequestContextWillSendResponse<any>) {
+        async willSendResponse(
+          rctx: GraphQLRequestContextWillSendResponse<any>,
+        ) {
           const ns = Number(process.hrtime.bigint() - start);
-          const hadErrors = Array.isArray(rctx.errors) && rctx.errors.length > 0;
+          const hadErrors =
+            Array.isArray(rctx.errors) && rctx.errors.length > 0;
           const status = hadErrors ? 'error' : 'success';
 
           reqDur.labels(name, type, tenant, status).observe(ns / 1e9);
@@ -90,7 +104,8 @@ export function apolloPromPlugin(): ApolloServerPlugin {
 
           if (hadErrors) {
             for (const e of rctx.errors!) {
-              const code = (e.extensions && (e.extensions as any).code) || 'UNKNOWN';
+              const code =
+                (e.extensions && (e.extensions as any).code) || 'UNKNOWN';
               reqErrors.labels(name, type, String(code), tenant).inc();
             }
           }

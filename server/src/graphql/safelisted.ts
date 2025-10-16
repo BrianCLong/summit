@@ -3,7 +3,10 @@ import fs from 'fs';
 import path from 'path';
 import type { Request, Response, NextFunction } from 'express';
 
-const GENERATED_PATH = path.resolve(process.cwd(), 'server/src/graphql/safelist.generated.json');
+const GENERATED_PATH = path.resolve(
+  process.cwd(),
+  'server/src/graphql/safelist.generated.json',
+);
 
 function loadSafelist(): Set<string> {
   try {
@@ -38,7 +41,11 @@ export function enforceSafelist(
   }
 }
 
-export function safelistMiddleware(req: Request, res: Response, next: NextFunction) {
+export function safelistMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   try {
     enforceSafelist(req);
     next();

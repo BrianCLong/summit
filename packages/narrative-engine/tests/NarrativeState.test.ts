@@ -31,7 +31,12 @@ describe('NarrativeState', () => {
     state.addActor(a);
     state.addActor(b);
 
-    state.registerRelationship({ sourceId: 'alpha', targetId: 'bravo', type: 'ally', intensity: 0.9 });
+    state.registerRelationship({
+      sourceId: 'alpha',
+      targetId: 'bravo',
+      type: 'ally',
+      intensity: 0.9,
+    });
 
     expect(a.getRelationship('bravo')).toBeDefined();
     expect(b.getRelationship('alpha')).toBeDefined();

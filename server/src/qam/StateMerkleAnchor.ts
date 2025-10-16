@@ -103,16 +103,22 @@ export class StateMerkleAnchor extends EventEmitter {
   // Mock external services (in production, replace with actual implementations)
   private s3Client: any = {
     putObject: async (params: any) => {
-      logger.debug('Mock S3 putObject', { bucket: params.Bucket, key: params.Key });
+      logger.debug('Mock S3 putObject', {
+        bucket: params.Bucket,
+        key: params.Key,
+      });
       return { ETag: `"${crypto.randomBytes(16).toString('hex')}"` };
     },
     getObject: async (params: any) => {
-      logger.debug('Mock S3 getObject', { bucket: params.Bucket, key: params.Key });
+      logger.debug('Mock S3 getObject', {
+        bucket: params.Bucket,
+        key: params.Key,
+      });
       return { Body: Buffer.from('mock-data'), LastModified: new Date() };
     },
     headObject: async (params: any) => {
       return { ContentLength: 1024, LastModified: new Date() };
-    }
+    },
   };
 
   private blockchainClient: any = {
@@ -121,7 +127,7 @@ export class StateMerkleAnchor extends EventEmitter {
       return {
         txId: crypto.randomBytes(32).toString('hex'),
         blockHeight: Math.floor(Math.random() * 1000000) + 700000,
-        confirmations: 1
+        confirmations: 1,
       };
     },
     getTransaction: async (txId: string) => {
@@ -130,9 +136,9 @@ export class StateMerkleAnchor extends EventEmitter {
         data: 'mock-transaction-data',
         blockHeight: 700000,
         confirmations: 6,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
-    }
+    },
   };
 
   constructor(config: Partial<AnchorConfig> = {}) {
@@ -147,14 +153,14 @@ export class StateMerkleAnchor extends EventEmitter {
       anchorBatchSize: 10,
       anchorFrequencyMinutes: 60, // 1 hour
       retentionYears: 7,
-      ...config
+      ...config,
     };
 
     // Start batch processing timer
     if (this.config.anchorFrequencyMinutes > 0) {
       this.batchTimer = setInterval(
         () => this.processBatchAnchors(),
-        this.config.anchorFrequencyMinutes * 60 * 1000
+        this.config.anchorFrequencyMinutes * 60 * 1000,
       );
     }
 
@@ -162,14 +168,17 @@ export class StateMerkleAnchor extends EventEmitter {
       s3Enabled: this.config.enableS3ObjectLock,
       blockchainEnabled: this.config.enableBlockchainAnchor,
       batchSize: this.config.anchorBatchSize,
-      anchorFrequency: this.config.anchorFrequencyMinutes
+      anchorFrequency: this.config.anchorFrequencyMinutes,
     });
   }
 
   /**
    * Anchor state with immutable external evidence
    */
-  async anchorState(stateSnapshot: any, priority: number = 1): Promise<MerkleAnchor> {
+  async anchorState(
+    stateSnapshot: any,
+    priority: number = 1,
+  ): Promise<MerkleAnchor> {
     try {
       const timestamp = new Date();
       const anchorId = this.generateAnchorId();
@@ -187,13 +196,18 @@ export class StateMerkleAnchor extends EventEmitter {
         retentionPolicy: `${this.config.retentionYears}y`,
         tags: stateSnapshot.tags || [],
         creator: 'StateMerkleAnchor',
-        purpose: 'integrity_verification'
+        purpose: 'integrity_verification',
       };
 
       // Check if immediate anchoring is needed
       if (priority >= 5) {
         // High priority - immediate anchoring
-        return await this.createImmediateAnchor(anchorId, stateHash, stateSnapshot, metadata);
+        return await this.createImmediateAnchor(
+          anchorId,
+          stateHash,
+          stateSnapshot,
+          metadata,
+        );
       } else {
         // Normal priority - batch anchoring
         this.pendingAnchors.set(anchorId, {
@@ -201,7 +215,7 @@ export class StateMerkleAnchor extends EventEmitter {
           stateHash,
           stateSnapshot,
           metadata,
-          timestamp
+          timestamp,
         });
 
         // If batch is full, process immediately
@@ -216,21 +230,21 @@ export class StateMerkleAnchor extends EventEmitter {
           merkleRoot: '', // Will be calculated during batch processing
           timestamp,
           integrity: this.createPlaceholderProof(),
-          metadata
+          metadata,
         };
 
         this.emit('anchor_queued', {
           anchorId,
           stateHash,
           priority,
-          batchSize: this.pendingAnchors.size
+          batchSize: this.pendingAnchors.size,
         });
 
         logger.debug('State queued for batch anchoring', {
           anchorId,
           stateHash: stateHash.slice(0, 16) + '...',
           priority,
-          pendingCount: this.pendingAnchors.size
+          pendingCount: this.pendingAnchors.size,
         });
 
         return placeholderAnchor;
@@ -247,7 +261,7 @@ export class StateMerkleAnchor extends EventEmitter {
    */
   async verifyStateIntegrity(
     currentState: any,
-    anchorId?: string
+    anchorId?: string,
   ): Promise<VerificationResult> {
     try {
       const verificationTimestamp = new Date();
@@ -276,8 +290,8 @@ export class StateMerkleAnchor extends EventEmitter {
             verificationTimestamp,
             proofPath: [],
             errors: ['No anchor found for verification'],
-            warnings: []
-          }
+            warnings: [],
+          },
         };
       }
 
@@ -299,8 +313,8 @@ export class StateMerkleAnchor extends EventEmitter {
           verificationTimestamp,
           proofPath: anchor.integrity.verificationPath,
           errors: [],
-          warnings: []
-        }
+          warnings: [],
+        },
       };
 
       // Add verification details
@@ -318,17 +332,24 @@ export class StateMerkleAnchor extends EventEmitter {
 
       // Check blockchain confirmations if enabled
       if (this.config.enableBlockchainAnchor && anchor.transactionId) {
-        const blockchainVerification = await this.verifyBlockchainAnchor(anchor.transactionId);
-        result.details.blockchainConfirmations = blockchainVerification.confirmations;
+        const blockchainVerification = await this.verifyBlockchainAnchor(
+          anchor.transactionId,
+        );
+        result.details.blockchainConfirmations =
+          blockchainVerification.confirmations;
 
         if (blockchainVerification.confirmations < 6) {
-          result.details.warnings.push('Blockchain anchor has insufficient confirmations');
+          result.details.warnings.push(
+            'Blockchain anchor has insufficient confirmations',
+          );
         }
       }
 
       // Check S3 object integrity if enabled
       if (this.config.enableS3ObjectLock && anchor.s3Location) {
-        const s3Verification = await this.verifyS3ObjectIntegrity(anchor.s3Location);
+        const s3Verification = await this.verifyS3ObjectIntegrity(
+          anchor.s3Location,
+        );
         result.details.s3ObjectIntact = s3Verification.intact;
 
         if (!s3Verification.intact) {
@@ -343,7 +364,7 @@ export class StateMerkleAnchor extends EventEmitter {
         valid: result.valid,
         merkleValid,
         timestampValid,
-        integrityValid
+        integrityValid,
       });
 
       logger.debug('State integrity verification completed', {
@@ -352,7 +373,7 @@ export class StateMerkleAnchor extends EventEmitter {
         merkleValid,
         timestampValid,
         integrityValid,
-        hashMatch: currentHash === anchor.stateHash
+        hashMatch: currentHash === anchor.stateHash,
       });
 
       return result;
@@ -378,11 +399,13 @@ export class StateMerkleAnchor extends EventEmitter {
 
       logger.info('Processing batch anchor', {
         batchId,
-        anchorCount: pendingList.length
+        anchorCount: pendingList.length,
       });
 
       // Build Merkle tree for batch
-      const merkleTree = this.buildMerkleTree(pendingList.map(p => p.stateHash));
+      const merkleTree = this.buildMerkleTree(
+        pendingList.map((p) => p.stateHash),
+      );
       const merkleRoot = merkleTree.root;
 
       // Create external anchors
@@ -394,7 +417,11 @@ export class StateMerkleAnchor extends EventEmitter {
       }
 
       if (this.config.enableS3ObjectLock) {
-        s3BatchLocation = await this.submitS3Anchor(batchId, merkleRoot, pendingList);
+        s3BatchLocation = await this.submitS3Anchor(
+          batchId,
+          merkleRoot,
+          pendingList,
+        );
       }
 
       // Create individual anchor records with proofs
@@ -409,11 +436,13 @@ export class StateMerkleAnchor extends EventEmitter {
           stateHash: pending.stateHash,
           merkleRoot,
           timestamp: pending.timestamp,
-          blockHeight: blockchainTxId ? await this.getBlockHeight(blockchainTxId) : undefined,
+          blockHeight: blockchainTxId
+            ? await this.getBlockHeight(blockchainTxId)
+            : undefined,
           transactionId: blockchainTxId,
           s3Location: s3BatchLocation,
           integrity: proof,
-          metadata: pending.metadata
+          metadata: pending.metadata,
         };
 
         this.anchorHistory.set(anchor.id, anchor);
@@ -432,7 +461,7 @@ export class StateMerkleAnchor extends EventEmitter {
         s3BatchLocation,
         processedStates,
         duration,
-        timestamp: new Date()
+        timestamp: new Date(),
       };
 
       this.emit('batch_processed', result);
@@ -443,13 +472,19 @@ export class StateMerkleAnchor extends EventEmitter {
         duration,
         merkleRoot: merkleRoot.slice(0, 16) + '...',
         blockchainTxId: blockchainTxId?.slice(0, 16) + '...',
-        s3Location: s3BatchLocation
+        s3Location: s3BatchLocation,
       });
 
       return result;
     } catch (error) {
-      logger.error('Batch anchoring failed', { error, pendingCount: this.pendingAnchors.size });
-      this.emit('batch_error', { error, pendingCount: this.pendingAnchors.size });
+      logger.error('Batch anchoring failed', {
+        error,
+        pendingCount: this.pendingAnchors.size,
+      });
+      this.emit('batch_error', {
+        error,
+        pendingCount: this.pendingAnchors.size,
+      });
       throw error;
     }
   }
@@ -461,7 +496,7 @@ export class StateMerkleAnchor extends EventEmitter {
     anchorId: string,
     stateHash: string,
     stateSnapshot: any,
-    metadata: AnchorMetadata
+    metadata: AnchorMetadata,
   ): Promise<MerkleAnchor> {
     const timestamp = new Date();
 
@@ -479,7 +514,9 @@ export class StateMerkleAnchor extends EventEmitter {
     }
 
     if (this.config.enableS3ObjectLock) {
-      s3Location = await this.submitS3Anchor(anchorId, merkleRoot, [{ stateHash, stateSnapshot, metadata }]);
+      s3Location = await this.submitS3Anchor(anchorId, merkleRoot, [
+        { stateHash, stateSnapshot, metadata },
+      ]);
     }
 
     const anchor: MerkleAnchor = {
@@ -487,11 +524,13 @@ export class StateMerkleAnchor extends EventEmitter {
       stateHash,
       merkleRoot,
       timestamp,
-      blockHeight: blockchainTxId ? await this.getBlockHeight(blockchainTxId) : undefined,
+      blockHeight: blockchainTxId
+        ? await this.getBlockHeight(blockchainTxId)
+        : undefined,
       transactionId: blockchainTxId,
       s3Location,
       integrity: proof,
-      metadata
+      metadata,
     };
 
     this.anchorHistory.set(anchorId, anchor);
@@ -501,14 +540,14 @@ export class StateMerkleAnchor extends EventEmitter {
       stateHash,
       merkleRoot,
       blockchainTxId,
-      s3Location
+      s3Location,
     });
 
     logger.info('Immediate anchor created', {
       anchorId,
       stateHash: stateHash.slice(0, 16) + '...',
       merkleRoot: merkleRoot.slice(0, 16) + '...',
-      priority: metadata.priority
+      priority: metadata.priority,
     });
 
     return anchor;
@@ -523,13 +562,13 @@ export class StateMerkleAnchor extends EventEmitter {
     }
 
     // Build tree bottom-up
-    let currentLevel = stateHashes.map(hash => hash);
+    let currentLevel = stateHashes.map((hash) => hash);
 
     const tree = {
       levels: [currentLevel],
       root: '',
       leafCount: stateHashes.length,
-      depth: 0
+      depth: 0,
     };
 
     while (currentLevel.length > 1) {
@@ -556,7 +595,10 @@ export class StateMerkleAnchor extends EventEmitter {
   /**
    * Generate Merkle proof for a specific leaf
    */
-  private generateMerkleProof(merkleTree: any, leafIndex: number): IntegrityProof {
+  private generateMerkleProof(
+    merkleTree: any,
+    leafIndex: number,
+  ): IntegrityProof {
     const proof: string[] = [];
     const witness: string[] = [];
     const verificationPath: string[] = [];
@@ -584,14 +626,17 @@ export class StateMerkleAnchor extends EventEmitter {
       witness,
       verificationPath,
       leafCount: merkleTree.leafCount,
-      depth: merkleTree.depth
+      depth: merkleTree.depth,
     };
   }
 
   /**
    * Verify Merkle proof
    */
-  private async verifyMerkleProof(anchor: MerkleAnchor, currentHash: string): Promise<boolean> {
+  private async verifyMerkleProof(
+    anchor: MerkleAnchor,
+    currentHash: string,
+  ): Promise<boolean> {
     try {
       const proof = anchor.integrity;
       const proofElements = proof.proof.split(':');
@@ -604,12 +649,14 @@ export class StateMerkleAnchor extends EventEmitter {
 
         if (direction === 'R') {
           // Sibling is on the right
-          computedHash = crypto.createHash('sha256')
+          computedHash = crypto
+            .createHash('sha256')
             .update(computedHash + siblingHash)
             .digest('hex');
         } else {
           // Sibling is on the left
-          computedHash = crypto.createHash('sha256')
+          computedHash = crypto
+            .createHash('sha256')
             .update(siblingHash + computedHash)
             .digest('hex');
         }
@@ -617,7 +664,10 @@ export class StateMerkleAnchor extends EventEmitter {
 
       return computedHash === anchor.merkleRoot;
     } catch (error) {
-      logger.error('Merkle proof verification failed', { error, anchorId: anchor.id });
+      logger.error('Merkle proof verification failed', {
+        error,
+        anchorId: anchor.id,
+      });
       return false;
     }
   }
@@ -630,11 +680,14 @@ export class StateMerkleAnchor extends EventEmitter {
       const result = await this.blockchainClient.submitTransaction(merkleRoot);
       logger.debug('Blockchain anchor submitted', {
         txId: result.txId,
-        blockHeight: result.blockHeight
+        blockHeight: result.blockHeight,
       });
       return result.txId;
     } catch (error) {
-      logger.error('Blockchain anchor submission failed', { error, merkleRoot });
+      logger.error('Blockchain anchor submission failed', {
+        error,
+        merkleRoot,
+      });
       throw error;
     }
   }
@@ -645,7 +698,7 @@ export class StateMerkleAnchor extends EventEmitter {
   private async submitS3Anchor(
     anchorId: string,
     merkleRoot: string,
-    anchors: any[]
+    anchors: any[],
   ): Promise<string> {
     try {
       const s3Key = `anchors/${new Date().getFullYear()}/${anchorId}.json`;
@@ -654,10 +707,10 @@ export class StateMerkleAnchor extends EventEmitter {
         anchorId,
         merkleRoot,
         timestamp: new Date().toISOString(),
-        anchors: anchors.map(a => ({
+        anchors: anchors.map((a) => ({
           stateHash: a.stateHash,
-          metadata: a.metadata
-        }))
+          metadata: a.metadata,
+        })),
       };
 
       const params = {
@@ -666,22 +719,31 @@ export class StateMerkleAnchor extends EventEmitter {
         Body: JSON.stringify(anchorData),
         ContentType: 'application/json',
         ObjectLockMode: 'GOVERNANCE',
-        ObjectLockRetainUntilDate: new Date(Date.now() + this.config.retentionYears * 365 * 24 * 60 * 60 * 1000),
+        ObjectLockRetainUntilDate: new Date(
+          Date.now() + this.config.retentionYears * 365 * 24 * 60 * 60 * 1000,
+        ),
         Metadata: {
           merkleRoot,
           anchorCount: anchors.length.toString(),
-          creator: 'StateMerkleAnchor'
-        }
+          creator: 'StateMerkleAnchor',
+        },
       };
 
       await this.s3Client.putObject(params);
 
       const s3Location = `s3://${this.config.s3Bucket}/${s3Key}`;
-      logger.debug('S3 anchor submitted', { s3Location, anchorCount: anchors.length });
+      logger.debug('S3 anchor submitted', {
+        s3Location,
+        anchorCount: anchors.length,
+      });
 
       return s3Location;
     } catch (error) {
-      logger.error('S3 anchor submission failed', { error, anchorId, merkleRoot });
+      logger.error('S3 anchor submission failed', {
+        error,
+        anchorId,
+        merkleRoot,
+      });
       throw error;
     }
   }
@@ -689,19 +751,25 @@ export class StateMerkleAnchor extends EventEmitter {
   /**
    * Verify external integrity (S3 and blockchain)
    */
-  private async verifyExternalIntegrity(anchor: MerkleAnchor): Promise<boolean> {
+  private async verifyExternalIntegrity(
+    anchor: MerkleAnchor,
+  ): Promise<boolean> {
     let s3Valid = true;
     let blockchainValid = true;
 
     // Verify S3 integrity if enabled
     if (this.config.enableS3ObjectLock && anchor.s3Location) {
-      const s3Verification = await this.verifyS3ObjectIntegrity(anchor.s3Location);
+      const s3Verification = await this.verifyS3ObjectIntegrity(
+        anchor.s3Location,
+      );
       s3Valid = s3Verification.intact;
     }
 
     // Verify blockchain integrity if enabled
     if (this.config.enableBlockchainAnchor && anchor.transactionId) {
-      const blockchainVerification = await this.verifyBlockchainAnchor(anchor.transactionId);
+      const blockchainVerification = await this.verifyBlockchainAnchor(
+        anchor.transactionId,
+      );
       blockchainValid = blockchainVerification.valid;
     }
 
@@ -711,7 +779,9 @@ export class StateMerkleAnchor extends EventEmitter {
   /**
    * Verify S3 object integrity
    */
-  private async verifyS3ObjectIntegrity(s3Location: string): Promise<{ intact: boolean; details: any }> {
+  private async verifyS3ObjectIntegrity(
+    s3Location: string,
+  ): Promise<{ intact: boolean; details: any }> {
     try {
       // Extract bucket and key from S3 location
       const match = s3Location.match(/s3:\/\/([^\/]+)\/(.+)/);
@@ -724,7 +794,7 @@ export class StateMerkleAnchor extends EventEmitter {
       // Check if object exists and retrieve metadata
       const headResult = await this.s3Client.headObject({
         Bucket: bucket,
-        Key: key
+        Key: key,
       });
 
       // Verify object hasn't been modified
@@ -736,14 +806,17 @@ export class StateMerkleAnchor extends EventEmitter {
           lastModified: headResult.LastModified,
           contentLength: headResult.ContentLength,
           objectLockMode: headResult.ObjectLockMode,
-          objectLockRetainUntilDate: headResult.ObjectLockRetainUntilDate
-        }
+          objectLockRetainUntilDate: headResult.ObjectLockRetainUntilDate,
+        },
       };
     } catch (error) {
-      logger.warn('S3 object integrity verification failed', { error, s3Location });
+      logger.warn('S3 object integrity verification failed', {
+        error,
+        s3Location,
+      });
       return {
         intact: false,
-        details: { error: error.message }
+        details: { error: error.message },
       };
     }
   }
@@ -751,19 +824,25 @@ export class StateMerkleAnchor extends EventEmitter {
   /**
    * Verify blockchain anchor
    */
-  private async verifyBlockchainAnchor(transactionId: string): Promise<{ valid: boolean; confirmations: number }> {
+  private async verifyBlockchainAnchor(
+    transactionId: string,
+  ): Promise<{ valid: boolean; confirmations: number }> {
     try {
-      const transaction = await this.blockchainClient.getTransaction(transactionId);
+      const transaction =
+        await this.blockchainClient.getTransaction(transactionId);
 
       return {
         valid: !!transaction,
-        confirmations: transaction.confirmations || 0
+        confirmations: transaction.confirmations || 0,
       };
     } catch (error) {
-      logger.warn('Blockchain anchor verification failed', { error, transactionId });
+      logger.warn('Blockchain anchor verification failed', {
+        error,
+        transactionId,
+      });
       return {
         valid: false,
-        confirmations: 0
+        confirmations: 0,
       };
     }
   }
@@ -811,7 +890,7 @@ export class StateMerkleAnchor extends EventEmitter {
       witness: [],
       verificationPath: [],
       leafCount: 0,
-      depth: 0
+      depth: 0,
     };
   }
 
@@ -832,9 +911,12 @@ export class StateMerkleAnchor extends EventEmitter {
     return mostRecent;
   }
 
-  private async getBlockHeight(transactionId: string): Promise<number | undefined> {
+  private async getBlockHeight(
+    transactionId: string,
+  ): Promise<number | undefined> {
     try {
-      const transaction = await this.blockchainClient.getTransaction(transactionId);
+      const transaction =
+        await this.blockchainClient.getTransaction(transactionId);
       return transaction.blockHeight;
     } catch (error) {
       logger.warn('Failed to get block height', { error, transactionId });
@@ -854,7 +936,7 @@ export class StateMerkleAnchor extends EventEmitter {
    */
   getAnchorsByTenant(tenantId: string): MerkleAnchor[] {
     return Array.from(this.anchorHistory.values())
-      .filter(anchor => anchor.metadata.tenantId === tenantId)
+      .filter((anchor) => anchor.metadata.tenantId === tenantId)
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime());
   }
 
@@ -873,7 +955,7 @@ export class StateMerkleAnchor extends EventEmitter {
       oldestAnchor: null as Date | null,
       newestAnchor: null as Date | null,
       blockchainAnchors: 0,
-      s3Anchors: 0
+      s3Anchors: 0,
     };
 
     if (anchors.length > 0) {
@@ -883,11 +965,17 @@ export class StateMerkleAnchor extends EventEmitter {
       for (const anchor of anchors) {
         // Count by type
         const dataType = anchor.metadata.dataType;
-        stats.anchorsByType.set(dataType, (stats.anchorsByType.get(dataType) || 0) + 1);
+        stats.anchorsByType.set(
+          dataType,
+          (stats.anchorsByType.get(dataType) || 0) + 1,
+        );
 
         // Count by tenant
         const tenantId = anchor.metadata.tenantId;
-        stats.anchorsByTenant.set(tenantId, (stats.anchorsByTenant.get(tenantId) || 0) + 1);
+        stats.anchorsByTenant.set(
+          tenantId,
+          (stats.anchorsByTenant.get(tenantId) || 0) + 1,
+        );
 
         // Size accumulation
         totalSize += anchor.metadata.size;
@@ -911,7 +999,7 @@ export class StateMerkleAnchor extends EventEmitter {
     return {
       ...stats,
       anchorsByType: Object.fromEntries(stats.anchorsByType),
-      anchorsByTenant: Object.fromEntries(stats.anchorsByTenant)
+      anchorsByTenant: Object.fromEntries(stats.anchorsByTenant),
     };
   }
 
@@ -927,7 +1015,7 @@ export class StateMerkleAnchor extends EventEmitter {
       if (this.config.anchorFrequencyMinutes > 0) {
         this.batchTimer = setInterval(
           () => this.processBatchAnchors(),
-          this.config.anchorFrequencyMinutes * 60 * 1000
+          this.config.anchorFrequencyMinutes * 60 * 1000,
         );
       }
     }
@@ -950,9 +1038,9 @@ export class StateMerkleAnchor extends EventEmitter {
     return {
       config: this.config,
       anchorHistory: Object.fromEntries(
-        Array.from(this.anchorHistory.entries()).slice(-100) // Keep recent anchors
+        Array.from(this.anchorHistory.entries()).slice(-100), // Keep recent anchors
       ),
-      pendingAnchors: Object.fromEntries(this.pendingAnchors)
+      pendingAnchors: Object.fromEntries(this.pendingAnchors),
     };
   }
 
@@ -966,7 +1054,7 @@ export class StateMerkleAnchor extends EventEmitter {
 
     logger.info('State imported', {
       anchorHistory: this.anchorHistory.size,
-      pendingAnchors: this.pendingAnchors.size
+      pendingAnchors: this.pendingAnchors.size,
     });
   }
 

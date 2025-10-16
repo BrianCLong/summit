@@ -5,49 +5,64 @@
     {
       "type": "stat",
       "title": "Availability SLO",
-      "gridPos": {"w": 6, "h": 4, "x": 0, "y": 0},
+      "gridPos": { "w": 6, "h": 4, "x": 0, "y": 0 },
       "targets": [
-        {"expr": "sum(slo_availability_burn_rate)", "legendFormat": "Availability Burn Rate"}
+        {
+          "expr": "sum(slo_availability_burn_rate)",
+          "legendFormat": "Availability Burn Rate"
+        }
       ]
     },
     {
       "type": "stat",
       "title": "Error Budget Remaining",
-      "gridPos": {"w": 6, "h": 4, "x": 6, "y": 0},
+      "gridPos": { "w": 6, "h": 4, "x": 6, "y": 0 },
       "targets": [
-        {"expr": "sum(slo_error_budget_remaining)", "legendFormat": "Error Budget %"}
+        {
+          "expr": "sum(slo_error_budget_remaining)",
+          "legendFormat": "Error Budget %"
+        }
       ]
     },
     {
       "type": "graph",
       "title": "API Latency (RED - p95)",
-      "gridPos": {"w": 12, "h": 8, "x": 0, "y": 4},
+      "gridPos": { "w": 12, "h": 8, "x": 0, "y": 4 },
       "targets": [
-        {"expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"intelgraph-api\"}[5m])) by (le))", "legendFormat": "API p95 Latency"}
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job=\"intelgraph-api\"}[5m])) by (le))",
+          "legendFormat": "API p95 Latency"
+        }
       ]
     },
     {
       "type": "graph",
       "title": "API Saturation (CPU)",
-      "gridPos": {"w": 12, "h": 8, "x": 0, "y": 12},
+      "gridPos": { "w": 12, "h": 8, "x": 0, "y": 12 },
       "targets": [
-        {"expr": "sum(rate(process_cpu_seconds_total{job=\"intelgraph-api\"}[5m])) / sum(process_cpu_seconds_total{job=\"intelgraph-api\"})", "legendFormat": "API CPU Saturation"}
+        {
+          "expr": "sum(rate(process_cpu_seconds_total{job=\"intelgraph-api\"}[5m])) / sum(process_cpu_seconds_total{job=\"intelgraph-api\"})",
+          "legendFormat": "API CPU Saturation"
+        }
       ]
     },
     {
       "type": "stat",
       "title": "Lead Time for Changes (DORA)",
-      "gridPos": {"w": 6, "h": 4, "x": 0, "y": 20},
+      "gridPos": { "w": 6, "h": 4, "x": 0, "y": 20 },
       "targets": [
-        {"expr": "avg(dora_lead_time_seconds)", "legendFormat": "Lead Time (s)"}
+        {
+          "expr": "avg(dora_lead_time_seconds)",
+          "legendFormat": "Lead Time (s)"
+        }
       ]
     },
     {
       "type": "stat",
       "title": "Mean Time to Recovery (DORA)",
-      "gridPos": {"w": 6, "h": 4, "x": 6, "y": 20},
+      "gridPos": { "w": 6, "h": 4, "x": 6, "y": 20 },
       "targets": [
-        {"expr": "avg(dora_mttr_seconds)", "legendFormat": "MTTR (s)"}
+        { "expr": "avg(dora_mttr_seconds)", "legendFormat": "MTTR (s)" }
       ]
     }
   ]

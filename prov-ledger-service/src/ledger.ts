@@ -1,4 +1,10 @@
-import { randomUUID, createHash, generateKeyPairSync, sign, verify } from 'crypto';
+import {
+  randomUUID,
+  createHash,
+  generateKeyPairSync,
+  sign,
+  verify,
+} from 'crypto';
 import pino from 'pino';
 
 const logger = pino({ name: 'prov-ledger' });
@@ -34,16 +40,22 @@ export function registerEvidence(input: Omit<Evidence, 'id'>): Evidence {
   return evid;
 }
 
-export function createClaim(input: Omit<Claim, 'id' | 'hash' | 'signature' | 'publicKey'>): Claim {
+export function createClaim(
+  input: Omit<Claim, 'id' | 'hash' | 'signature' | 'publicKey'>,
+): Claim {
   const id = randomUUID();
   const hash = createHash('sha256').update(input.text).digest('hex');
-  const sig = sign(null, Buffer.from(hash, 'hex'), privateKey).toString('base64');
+  const sig = sign(null, Buffer.from(hash, 'hex'), privateKey).toString(
+    'base64',
+  );
   const claim: Claim = {
     id,
     ...input,
     hash,
     signature: sig,
-    publicKey: publicKey.export({ type: 'spki', format: 'der' }).toString('base64'),
+    publicKey: publicKey
+      .export({ type: 'spki', format: 'der' })
+      .toString('base64'),
   };
   claimStore.set(id, claim);
   return claim;
@@ -112,7 +124,11 @@ export function buildManifest(claimIds: string[]): Manifest {
       if (evid) licenses.add(evid.licenseId);
     }
   }
-  return { merkleRoot: merkleRoot(hashes), licenses: Array.from(licenses), claims };
+  return {
+    merkleRoot: merkleRoot(hashes),
+    licenses: Array.from(licenses),
+    claims,
+  };
 }
 
 export interface LicenseCheck {
@@ -121,10 +137,16 @@ export interface LicenseCheck {
   appealCode?: string;
 }
 
-const incompatibleLicenses = new Map<string, { reason: string; appealCode: string }>([
+const incompatibleLicenses = new Map<
+  string,
+  { reason: string; appealCode: string }
+>([
   [
     'GPL-3.0',
-    { reason: 'GPL-3.0 license is incompatible with export policy', appealCode: 'LIC001' },
+    {
+      reason: 'GPL-3.0 license is incompatible with export policy',
+      appealCode: 'LIC001',
+    },
   ],
 ]);
 
@@ -193,12 +215,15 @@ export function recordTransform(input: Omit<Transform, 'id'>): Transform {
   // Update provenance chains for outputs
   updateProvenanceChain(input.outputId, transform);
 
-  logger.info({
-    transformId: id,
-    operation: input.operation,
-    inputCount: input.inputIds.length,
-    outputId: input.outputId
-  }, 'Transform recorded');
+  logger.info(
+    {
+      transformId: id,
+      operation: input.operation,
+      inputCount: input.inputIds.length,
+      outputId: input.outputId,
+    },
+    'Transform recorded',
+  );
 
   return transform;
 }
@@ -206,11 +231,11 @@ export function recordTransform(input: Omit<Transform, 'id'>): Transform {
 function updateProvenanceChain(outputId: string, transform: Transform): void {
   const chain = provenanceStore.get(outputId) || {
     id: outputId,
-    type: claimStore.has(outputId) ? 'claim' as const : 'evidence' as const,
+    type: claimStore.has(outputId) ? ('claim' as const) : ('evidence' as const),
     source: claimStore.get(outputId) || evidenceStore.get(outputId)!,
     transforms: [],
     derivedFrom: [],
-    lineage: []
+    lineage: [],
   };
 
   chain.transforms.push(transform);
@@ -223,9 +248,9 @@ function updateProvenanceChain(outputId: string, transform: Transform): void {
     parentIds: transform.inputIds,
     metadata: {
       operation: transform.operation,
-      parameters: transform.parameters || {}
+      parameters: transform.parameters || {},
     },
-    timestamp: transform.timestamp
+    timestamp: transform.timestamp,
   };
 
   chain.lineage.push(lineageNode);
@@ -249,17 +274,19 @@ export function getProvenance(id: string): ProvenanceChain | null {
       source: evidence,
       transforms: [],
       derivedFrom: [],
-      lineage: [{
-        id: evidence.id,
-        type: 'evidence',
-        parentIds: [],
-        metadata: {
-          source: evidence.source,
-          licenseId: evidence.licenseId,
-          contentHash: evidence.contentHash
+      lineage: [
+        {
+          id: evidence.id,
+          type: 'evidence',
+          parentIds: [],
+          metadata: {
+            source: evidence.source,
+            licenseId: evidence.licenseId,
+            contentHash: evidence.contentHash,
+          },
+          timestamp: new Date(), // TODO: Add timestamp to Evidence interface
         },
-        timestamp: new Date() // TODO: Add timestamp to Evidence interface
-      }]
+      ],
     };
     provenanceStore.set(id, chain);
     return chain;
@@ -273,17 +300,19 @@ export function getProvenance(id: string): ProvenanceChain | null {
       transforms: [],
       derivedFrom: claim.evidenceIds,
       confidence: claim.confidence,
-      lineage: [{
-        id: claim.id,
-        type: 'claim',
-        parentIds: claim.evidenceIds,
-        metadata: {
-          text: claim.text,
-          confidence: claim.confidence,
-          hash: claim.hash
+      lineage: [
+        {
+          id: claim.id,
+          type: 'claim',
+          parentIds: claim.evidenceIds,
+          metadata: {
+            text: claim.text,
+            confidence: claim.confidence,
+            hash: claim.hash,
+          },
+          timestamp: new Date(), // TODO: Add timestamp to Claim interface
         },
-        timestamp: new Date() // TODO: Add timestamp to Claim interface
-      }]
+      ],
     };
     provenanceStore.set(id, chain);
     return chain;
@@ -319,7 +348,7 @@ export interface EnhancedLicenseCheck {
 
 export function checkLicensesWithContext(
   licenses: string[],
-  context: PolicyContext
+  context: PolicyContext,
 ): EnhancedLicenseCheck {
   // Start with basic license check
   const basicCheck = checkLicenses(licenses);
@@ -329,8 +358,8 @@ export function checkLicensesWithContext(
   let riskLevel: 'low' | 'medium' | 'high' = 'low';
 
   // Check for restrictive licenses
-  const restrictiveLicenses = licenses.filter(l =>
-    ['GPL-3.0', 'AGPL-3.0', 'CC-BY-NC'].includes(l)
+  const restrictiveLicenses = licenses.filter((l) =>
+    ['GPL-3.0', 'AGPL-3.0', 'CC-BY-NC'].includes(l),
   );
 
   if (restrictiveLicenses.length > 0) {
@@ -339,7 +368,10 @@ export function checkLicensesWithContext(
   }
 
   // Check export type and destination
-  if (context.exportType === 'dataset' && context.destination?.includes('external')) {
+  if (
+    context.exportType === 'dataset' &&
+    context.destination?.includes('external')
+  ) {
     riskFactors.push('External dataset export requires additional review');
     riskLevel = 'high';
   }
@@ -368,16 +400,19 @@ export function checkLicensesWithContext(
     valid: policyAction === 'allow',
     reason: basicCheck.reason,
     appealCode: basicCheck.appealCode,
-    appealUrl: basicCheck.appealCode ? `https://compliance.intelgraph.io/appeal/${basicCheck.appealCode}` : undefined,
+    appealUrl: basicCheck.appealCode
+      ? `https://compliance.intelgraph.io/appeal/${basicCheck.appealCode}`
+      : undefined,
     policyDecision: {
       action: policyAction,
       reasons: policyReasons,
-      requiredApprovals: policyAction === 'review' ? ['compliance-officer'] : undefined
+      requiredApprovals:
+        policyAction === 'review' ? ['compliance-officer'] : undefined,
     },
     riskAssessment: {
       level: riskLevel,
-      factors: riskFactors
-    }
+      factors: riskFactors,
+    },
   };
 }
 
@@ -392,7 +427,7 @@ export interface HashTreeNode {
 export function buildHashTree(hashes: string[]): HashTreeNode | null {
   if (hashes.length === 0) return null;
 
-  let nodes: HashTreeNode[] = hashes.map(hash => ({ hash, data: hash }));
+  let nodes: HashTreeNode[] = hashes.map((hash) => ({ hash, data: hash }));
 
   while (nodes.length > 1) {
     const nextLevel: HashTreeNode[] = [];
@@ -403,7 +438,7 @@ export function buildHashTree(hashes: string[]): HashTreeNode | null {
 
       const combined = Buffer.concat([
         Buffer.from(left.hash, 'hex'),
-        Buffer.from(right.hash, 'hex')
+        Buffer.from(right.hash, 'hex'),
       ]);
 
       const parentHash = createHash('sha256').update(combined).digest('hex');
@@ -411,7 +446,7 @@ export function buildHashTree(hashes: string[]): HashTreeNode | null {
       nextLevel.push({
         hash: parentHash,
         left,
-        right: right !== left ? right : undefined
+        right: right !== left ? right : undefined,
       });
     }
 
@@ -421,7 +456,10 @@ export function buildHashTree(hashes: string[]): HashTreeNode | null {
   return nodes[0];
 }
 
-export function getHashTreeProof(tree: HashTreeNode, targetHash: string): string[] | null {
+export function getHashTreeProof(
+  tree: HashTreeNode,
+  targetHash: string,
+): string[] | null {
   const proof: string[] = [];
 
   function findPath(node: HashTreeNode, target: string): boolean {
@@ -452,14 +490,14 @@ export function getHashTreeProof(tree: HashTreeNode, targetHash: string): string
 export function verifyHashTreeProof(
   targetHash: string,
   proof: string[],
-  rootHash: string
+  rootHash: string,
 ): boolean {
   let currentHash = targetHash;
 
   for (const proofHash of proof) {
     const combined = Buffer.concat([
       Buffer.from(currentHash, 'hex'),
-      Buffer.from(proofHash, 'hex')
+      Buffer.from(proofHash, 'hex'),
     ]);
     currentHash = createHash('sha256').update(combined).digest('hex');
   }

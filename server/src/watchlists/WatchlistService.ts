@@ -22,7 +22,9 @@ export class WatchlistService {
   }
 
   remove(id: string, entityIds: string[]) {
-    this.lists[id].members = this.lists[id].members.filter(m => !entityIds.includes(m));
+    this.lists[id].members = this.lists[id].members.filter(
+      (m) => !entityIds.includes(m),
+    );
   }
 
   get(id: string) {

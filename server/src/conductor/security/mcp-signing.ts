@@ -48,7 +48,11 @@ export class MCPRequestSigner {
   /**
    * Sign MCP request with cryptographic signature
    */
-  signRequest(request: { id: string; method: string; params: any }): SignedMCPRequest {
+  signRequest(request: {
+    id: string;
+    method: string;
+    params: any;
+  }): SignedMCPRequest {
     const timestamp = Math.floor(Date.now() / 1000);
     const nonce = randomBytes(16).toString('hex');
 
@@ -78,7 +82,9 @@ export class MCPRequestSigner {
     const now = Math.floor(Date.now() / 1000);
 
     // Check timestamp tolerance
-    if (Math.abs(now - signedRequest.timestamp) > this.config.timestampTolerance) {
+    if (
+      Math.abs(now - signedRequest.timestamp) > this.config.timestampTolerance
+    ) {
       return {
         valid: false,
         reason: 'Request timestamp outside tolerance window',
@@ -139,7 +145,10 @@ export class MCPRequestSigner {
     nonce: string;
   }): string {
     // Create deterministic canonical representation
-    const canonicalParams = JSON.stringify(request.params, Object.keys(request.params).sort());
+    const canonicalParams = JSON.stringify(
+      request.params,
+      Object.keys(request.params).sort(),
+    );
 
     return [
       request.id,
@@ -189,7 +198,10 @@ export class MCPRequestSigner {
  */
 export class SignedMCPClient {
   private signer: MCPRequestSigner;
-  private requestHistory = new Map<string, { timestamp: number; hash: string }>();
+  private requestHistory = new Map<
+    string,
+    { timestamp: number; hash: string }
+  >();
 
   constructor(config: MCPSigningConfig) {
     this.signer = new MCPRequestSigner(config);
@@ -234,7 +246,9 @@ export class SignedMCPClient {
     });
 
     if (!response.ok) {
-      throw new Error(`MCP request failed: ${response.status} ${response.statusText}`);
+      throw new Error(
+        `MCP request failed: ${response.status} ${response.statusText}`,
+      );
     }
 
     return response.json();
@@ -243,7 +257,10 @@ export class SignedMCPClient {
   /**
    * Verify incoming MCP request (for server-side)
    */
-  verifyIncomingRequest(request: any, headers: Record<string, string>): VerificationResult {
+  verifyIncomingRequest(
+    request: any,
+    headers: Record<string, string>,
+  ): VerificationResult {
     const signedRequest: SignedMCPRequest = {
       id: request.id,
       method: request.method,
@@ -272,7 +289,8 @@ export class SignedMCPClient {
 
   private cleanRequestHistory(): void {
     const cutoff =
-      Math.floor(Date.now() / 1000) - (this.signer as any).config.timestampTolerance * 2;
+      Math.floor(Date.now() / 1000) -
+      (this.signer as any).config.timestampTolerance * 2;
 
     for (const [id, data] of this.requestHistory.entries()) {
       if (data.timestamp < cutoff) {
@@ -322,8 +340,10 @@ export function mcpSignatureVerificationMiddleware(signer: MCPRequestSigner) {
 // Default configurations
 export const MCPSigningConfigs = {
   GRAPHOPS: {
-    privateKeyPath: process.env.MCP_GRAPHOPS_PRIVATE_KEY || './keys/mcp-graphops.key',
-    publicKeyPath: process.env.MCP_GRAPHOPS_PUBLIC_KEY || './keys/mcp-graphops.pub',
+    privateKeyPath:
+      process.env.MCP_GRAPHOPS_PRIVATE_KEY || './keys/mcp-graphops.key',
+    publicKeyPath:
+      process.env.MCP_GRAPHOPS_PUBLIC_KEY || './keys/mcp-graphops.pub',
     keyId: 'mcp-graphops-v1',
     algorithm: 'RS256' as const,
     timestampTolerance: 300, // 5 minutes
@@ -338,7 +358,9 @@ export const MCPSigningConfigs = {
 };
 
 // Utility function to create signed clients
-export function createSignedMCPClient(service: 'GRAPHOPS' | 'FILES'): SignedMCPClient {
+export function createSignedMCPClient(
+  service: 'GRAPHOPS' | 'FILES',
+): SignedMCPClient {
   const config = MCPSigningConfigs[service];
   return new SignedMCPClient(config);
 }

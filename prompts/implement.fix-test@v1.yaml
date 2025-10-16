@@ -1,15 +1,15 @@
 meta:
   id: implement.fix-test@v1
-  owner: "platform-ai"
-  purpose: "Fix failing unit tests without changing public API"
+  owner: 'platform-ai'
+  purpose: 'Fix failing unit tests without changing public API'
   guardrails:
-    - "Never introduce network calls in unit tests"
-    - "Respect license/TOS of any pasted snippet; cite source or omit"
-    - "If unsure about behavior, create a TODO with hypothesis & confidence"
-    - "Preserve existing test structure and naming conventions"
+    - 'Never introduce network calls in unit tests'
+    - 'Respect license/TOS of any pasted snippet; cite source or omit'
+    - 'If unsure about behavior, create a TODO with hypothesis & confidence'
+    - 'Preserve existing test structure and naming conventions'
   model_requirements:
     min_context_window: 8000
-    preferred_models: ["gpt-4", "claude-3-sonnet"]
+    preferred_models: ['gpt-4', 'claude-3-sonnet']
     max_tokens: 2000
 
 inputs:
@@ -20,64 +20,64 @@ inputs:
 
 template: |
   You are the Implementer agent in Maestro Conductor v0.3. Budget: ${{budget_usd}}.
-  
+
   **Mission**: Fix failing tests while maintaining code quality and API compatibility.
-  
+
   **Test Failure:**
   ```
   {{test_output}}
   ```
-  
+
   **Code Context:**
   ```
   {{code_context}}
   ```
-  
+
   **File Path:** {{file_path}}
-  
+
   **Requirements:**
   - Propose the minimal fix that addresses the root cause
   - Show a diff-only patch format
   - Explain risks, assumptions, and confidence level
   - Add focused unit tests if needed
   - Preserve public API contracts
-  
+
   **Output Format:**
   ```diff
   # Proposed fix for {{file_path}}
   [your diff here]
   ```
-  
+
   **Analysis:**
   - Root cause: [explain]
   - Risk assessment: [low/medium/high]
   - Confidence: [0-100]%
   - Breaking changes: [yes/no]
-  
+
   **Additional Tests:**
   [any new test cases needed]
 
 examples:
-  - name: "typescript-async-test-fix"
+  - name: 'typescript-async-test-fix'
     inputs:
       test_output: "TypeError: Cannot read property 'then' of undefined at UserService.test.ts:45"
-      code_context: "async getUserById(id: string) { return this.db.findUser(id); }"
+      code_context: 'async getUserById(id: string) { return this.db.findUser(id); }'
       budget_usd: 1.5
-      file_path: "src/services/UserService.ts"
+      file_path: 'src/services/UserService.ts'
     expected_contains:
-      - "async getUserById"
-      - "await this.db.findUser"
-      - "Root cause:"
-      - "Confidence:"
-      
-  - name: "react-component-test-fix"
+      - 'async getUserById'
+      - 'await this.db.findUser'
+      - 'Root cause:'
+      - 'Confidence:'
+
+  - name: 'react-component-test-fix'
     inputs:
       test_output: "Expected component to render 'Loading...' but got null"
-      code_context: "const Loading = ({ isLoading }) => isLoading ? <div>Loading...</div> : null"
+      code_context: 'const Loading = ({ isLoading }) => isLoading ? <div>Loading...</div> : null'
       budget_usd: 2.0
-      file_path: "src/components/Loading.tsx"
+      file_path: 'src/components/Loading.tsx'
     expected_contains:
-      - "isLoading"
-      - "Loading..."
-      - "diff"
-      - "Risk assessment:"
+      - 'isLoading'
+      - 'Loading...'
+      - 'diff'
+      - 'Risk assessment:'

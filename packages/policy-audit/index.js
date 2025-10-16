@@ -33,7 +33,9 @@ class PolicyAudit {
         ],
         (err, stdout, stderr) => {
           if (err) {
-            reject(new Error(`OPA evaluation failed: ${stderr || err.message}`));
+            reject(
+              new Error(`OPA evaluation failed: ${stderr || err.message}`),
+            );
             return;
           }
           try {
@@ -60,14 +62,24 @@ class PolicyAudit {
   }
 
   async audit(entry) {
-    if (!entry?.decision || !entry?.reason || !entry?.subject || !entry?.resource) {
+    if (
+      !entry?.decision ||
+      !entry?.reason ||
+      !entry?.subject ||
+      !entry?.resource
+    ) {
       throw new Error('decision, reason, subject, and resource required');
     }
     const date = new Date().toISOString().slice(0, 10);
     const file = path.join(this.auditDir, `audit-${date}.log`);
     const prevHash = await this._lastHash(file);
     const id = crypto.randomUUID();
-    const record = { id, timestamp: new Date().toISOString(), ...entry, prevHash };
+    const record = {
+      id,
+      timestamp: new Date().toISOString(),
+      ...entry,
+      prevHash,
+    };
     const hash = crypto
       .createHash('sha256')
       .update(prevHash + JSON.stringify(record))

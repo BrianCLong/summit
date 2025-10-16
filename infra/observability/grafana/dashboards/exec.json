@@ -5,57 +5,63 @@
     {
       "type": "stat",
       "title": "ARR",
-      "gridPos": {"w": 6, "h": 4, "x": 0, "y": 0},
-      "targets": [
-        {"expr": "sum(arr_kpi)", "legendFormat": "ARR"}
-      ]
+      "gridPos": { "w": 6, "h": 4, "x": 0, "y": 0 },
+      "targets": [{ "expr": "sum(arr_kpi)", "legendFormat": "ARR" }]
     },
     {
       "type": "stat",
       "title": "MRR",
-      "gridPos": {"w": 6, "h": 4, "x": 6, "y": 0},
-      "targets": [
-        {"expr": "sum(mrr_kpi)", "legendFormat": "MRR"}
-      ]
+      "gridPos": { "w": 6, "h": 4, "x": 6, "y": 0 },
+      "targets": [{ "expr": "sum(mrr_kpi)", "legendFormat": "MRR" }]
     },
     {
       "type": "graph",
       "title": "NRR %",
-      "gridPos": {"w": 12, "h": 8, "x": 0, "y": 4},
-      "targets": [
-        {"expr": "avg(nrr_kpi)", "legendFormat": "NRR %"}
-      ]
+      "gridPos": { "w": 12, "h": 8, "x": 0, "y": 4 },
+      "targets": [{ "expr": "avg(nrr_kpi)", "legendFormat": "NRR %" }]
     },
     {
       "type": "stat",
       "title": "Deployment Frequency (DORA)",
-      "gridPos": {"w": 6, "h": 4, "x": 0, "y": 12},
+      "gridPos": { "w": 6, "h": 4, "x": 0, "y": 12 },
       "targets": [
-        {"expr": "sum(increase(dora_deployments_total[1w])) / 7", "legendFormat": "Deployments/Day"}
+        {
+          "expr": "sum(increase(dora_deployments_total[1w])) / 7",
+          "legendFormat": "Deployments/Day"
+        }
       ]
     },
     {
       "type": "stat",
       "title": "Change Failure Rate (DORA)",
-      "gridPos": {"w": 6, "h": 4, "x": 6, "y": 12},
+      "gridPos": { "w": 6, "h": 4, "x": 6, "y": 12 },
       "targets": [
-        {"expr": "sum(dora_change_failures_total) / sum(dora_deployments_total)", "legendFormat": "Change Failure Rate"}
+        {
+          "expr": "sum(dora_change_failures_total) / sum(dora_deployments_total)",
+          "legendFormat": "Change Failure Rate"
+        }
       ]
     },
     {
       "type": "graph",
       "title": "API Latency (RED - p99)",
-      "gridPos": {"w": 12, "h": 8, "x": 0, "y": 16},
+      "gridPos": { "w": 12, "h": 8, "x": 0, "y": 16 },
       "targets": [
-        {"expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job=\"intelgraph-api\"}[5m])) by (le))", "legendFormat": "API p99 Latency"}
+        {
+          "expr": "histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job=\"intelgraph-api\"}[5m])) by (le))",
+          "legendFormat": "API p99 Latency"
+        }
       ]
     },
     {
       "type": "graph",
       "title": "API Error Rate (RED)",
-      "gridPos": {"w": 12, "h": 8, "x": 0, "y": 24},
+      "gridPos": { "w": 12, "h": 8, "x": 0, "y": 24 },
       "targets": [
-        {"expr": "sum(rate(http_requests_total{job=\"intelgraph-api\", code=~\"5..\"}[5m])) / sum(rate(http_requests_total{job=\"intelgraph-api\"}[5m]))", "legendFormat": "API Error Rate"}
+        {
+          "expr": "sum(rate(http_requests_total{job=\"intelgraph-api\", code=~\"5..\"}[5m])) / sum(rate(http_requests_total{job=\"intelgraph-api\"}[5m]))",
+          "legendFormat": "API Error Rate"
+        }
       ]
     }
   ]

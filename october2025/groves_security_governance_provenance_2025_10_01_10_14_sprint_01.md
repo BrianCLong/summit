@@ -8,6 +8,7 @@
 ---
 
 ## 0) Scope, Inputs, and Review Notes
+
 - **Scope (“my ambit”):** Security & Governance, Provenance/Claim Ledger, Authority Binding & OPA, Audit/Access Reasoning, DR/BCP & SRE; cost guardrails; tenant isolation & compartmentation; offline/edge sync integrity.
 - **Inputs reviewed:**
   - Council Wishbooks (Final + Expanded/Exhaustive) — feature backlogs, acceptance patterns, seat‑by‑seat asks, near‑term roadmap.
@@ -17,26 +18,32 @@
 ---
 
 ## 1) Gaps & Risks (In My Lane)
+
 ### A) Security & Governance
+
 - **Authority Binding → Query‑time enforcement path incomplete.** Need policy labels propagated end‑to‑end (ingest → graph → gateway → UI), plus appeal/ombuds hooks.
 - **OPA policies scattered / not versioned.** Policy as code lacks simulation harness and impact diffs before rollout.
 - **ABAC/RBAC matrix missing golden tests.** No automated proofs that cross‑tenant and compartment boundaries are sealed (need Jepsen‑style authz checks).
 
 ### B) Provenance / Claim Ledger
+
 - **External verification workflow not wired.** Exported bundles lack reference verifier CLI + detached proofs doc.
 - **Transform chain thin on ETL enrichers.** Some enrichers (OCR/STT/redaction) not attaching step‑level hash annotations.
 - **Contradiction graphs exist conceptually, not surfaced.** UI lacks “contradiction density” and claim lineage drill‑in.
 
 ### C) Auditability & Oversight
+
 - **Reason‑for‑access prompts uneven.** Not enforced on sensitive selectors; missing audit schema for motivation text + policy at time of access.
 - **Abuse/misuse tripwires not tuned.** Selector misuse & prompt‑injection red‑flags exist as patterns, but not routed to triage/ombuds queues.
 
 ### D) SRE / Ops / Reliability
+
 - **Cost Guard not actively gating.** Budgets exist on paper; no slow‑query killer in the gateway; no budget burn dashboards.
 - **Chaos/DR drills not codified.** Playbooks present, but cadence/jobs not in CI; PITR + cross‑region restore not tested weekly.
 - **Offline/Edge CRDT merges lack operator UX.** Conflict resolution UI stubbed; signed resync logs not exposed to admins.
 
 ### E) Frontend Contract Gaps (enablement for above)
+
 - **Explainability overlays** don’t yet expose: policy reasoners, provenance tooltips for every edge/node, and confidence opacity.
 
 > **Risk posture:** Medium. Primary threats are policy drift, provenance gaps in exports, and cost spikes under load. This sprint burns these down.
@@ -44,15 +51,17 @@
 ---
 
 ## 2) Sprint Goals (Definition of Victory)
-1) **Authority‑Bound Gateway GA‑Ready:** end‑to‑end ABAC+OPA with policy simulation & reason strings in UI; golden tests for cross‑tenant isolation.
-2) **Provenance Bundle v1.0:** verifiable disclosure pack (manifest + claim ledger + transform chain) + external verifier CLI.
-3) **Cost Guardrails Online:** query budgeting + slow‑query killer + tenant cost explorer MVP.
-4) **Audit & Ombuds Loop:** reason‑for‑access prompts, selector‑misuse detector → triage queues + review UX stub.
-5) **DR/Chaos Cadence:** weekly automated drills; PITR restore proof; cross‑region replica switch test; signed offline resync logs visible.
+
+1. **Authority‑Bound Gateway GA‑Ready:** end‑to‑end ABAC+OPA with policy simulation & reason strings in UI; golden tests for cross‑tenant isolation.
+2. **Provenance Bundle v1.0:** verifiable disclosure pack (manifest + claim ledger + transform chain) + external verifier CLI.
+3. **Cost Guardrails Online:** query budgeting + slow‑query killer + tenant cost explorer MVP.
+4. **Audit & Ombuds Loop:** reason‑for‑access prompts, selector‑misuse detector → triage queues + review UX stub.
+5. **DR/Chaos Cadence:** weekly automated drills; PITR restore proof; cross‑region replica switch test; signed offline resync logs visible.
 
 ---
 
 ## 3) Deliverables (This Sprint)
+
 - **D1. Gateway Policy Kit** (policy‑by‑default):
   - OPA bundle `policy/opa/` with versioned policies, unit tests, and simulation harness.
   - Policy‑impact diff tool `tools/policy-diff` to replay historical queries and show changes.
@@ -76,6 +85,7 @@
 ## 4) Work Breakdown (Epics → Stories → Tasks)
 
 ### EPIC A — Authority‑Bound Gateway
+
 - **A1. ABAC Label Propagation**
   - T1. Add policy labels to ingestion mappers (origin, legal basis, purpose, sensitivity, retention).
   - T2. Persist labels in graph schema; migrations + backfill.
@@ -89,6 +99,7 @@
   - T2. Build red/green test suite; badge in CI.
 
 ### EPIC B — Provenance Bundle & Verifier
+
 - **B1. Manifest Generator**
   - T1. Define `manifest.schema.json` (evidence, transforms, licenses, authorities, signatures).
   - T2. Implement Merkle tree + SHA‑256 variant plug.
@@ -102,6 +113,7 @@
   - T2. Graph view: provenance tooltips, contradiction density badge.
 
 ### EPIC C — Cost Guard & Budgeting
+
 - **C1. Cost Estimator & Slow‑Query Killer**
   - T1. Static cost model → estimate from persisted query plans.
   - T2. Kill switch + customer hinting; partial results with guidance.
@@ -110,6 +122,7 @@
   - T2. Grafana dashboards; SLO burn chart; unit economics panel.
 
 ### EPIC D — Audit, Ombuds & Misuse Detection
+
 - **D1. Reason‑for‑Access**
   - T1. Modal UX + API; store reason + policy snapshot.
 - **D2. Selector‑Misuse Detector**
@@ -117,6 +130,7 @@
   - T2. Ombuds queue UI stub; assignment + disposition.
 
 ### EPIC E — DR/Chaos/Offline Integrity
+
 - **E1. Chaos Suite Automation**
   - T1. Pod/broker kill experiments + alarms.
   - T2. PITR & cross‑region failover jobs with evidence artifacts.
@@ -130,6 +144,7 @@
 ## 5) Architecture & Contracts (Scaffolding)
 
 ### 5.1 Policy Labels (Canonical)
+
 ```yaml
 # policy/labels.yaml
 labels:
@@ -146,6 +161,7 @@ labels:
 ```
 
 ### 5.2 OPA Bundle (Rego skeleton)
+
 ```rego
 package intelgraph.authz
 
@@ -174,6 +190,7 @@ allow {
 ```
 
 ### 5.3 Policy Simulation Harness (CLI)
+
 ```bash
 # tools/policy-diff/examples
 policy-diff \
@@ -183,41 +200,49 @@ policy-diff \
 ```
 
 ### 5.4 Provenance Manifest Schema (excerpt)
+
 ```json
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://intelgraph.example/schemas/prov-manifest.json",
   "type": "object",
-  "required": ["bundleId", "createdAt", "evidence", "transforms", "licenses", "signatures"],
+  "required": [
+    "bundleId",
+    "createdAt",
+    "evidence",
+    "transforms",
+    "licenses",
+    "signatures"
+  ],
   "properties": {
-    "bundleId": {"type": "string", "format": "uuid"},
-    "createdAt": {"type": "string", "format": "date-time"},
-    "caseId": {"type": "string"},
-    "evidence": {"type": "array", "items": {"$ref": "#/defs/evidence"}},
-    "transforms": {"type": "array", "items": {"$ref": "#/defs/transform"}},
-    "licenses": {"type": "array", "items": {"$ref": "#/defs/license"}},
-    "signatures": {"type": "array", "items": {"$ref": "#/defs/signature"}}
+    "bundleId": { "type": "string", "format": "uuid" },
+    "createdAt": { "type": "string", "format": "date-time" },
+    "caseId": { "type": "string" },
+    "evidence": { "type": "array", "items": { "$ref": "#/defs/evidence" } },
+    "transforms": { "type": "array", "items": { "$ref": "#/defs/transform" } },
+    "licenses": { "type": "array", "items": { "$ref": "#/defs/license" } },
+    "signatures": { "type": "array", "items": { "$ref": "#/defs/signature" } }
   },
   "defs": {
     "evidence": {
       "type": "object",
       "required": ["id", "sha256", "source", "policyLabels"],
       "properties": {
-        "id": {"type": "string"},
-        "sha256": {"type": "string"},
-        "source": {"type": "string"},
-        "policyLabels": {"type": "object"}
+        "id": { "type": "string" },
+        "sha256": { "type": "string" },
+        "source": { "type": "string" },
+        "policyLabels": { "type": "object" }
       }
     },
     "transform": {
       "type": "object",
       "required": ["step", "tool", "inputs", "outputs", "sha256"],
       "properties": {
-        "step": {"type": "integer"},
-        "tool": {"type": "string"},
-        "inputs": {"type": "array", "items": {"type": "string"}},
-        "outputs": {"type": "array", "items": {"type": "string"}},
-        "sha256": {"type": "string"}
+        "step": { "type": "integer" },
+        "tool": { "type": "string" },
+        "inputs": { "type": "array", "items": { "type": "string" } },
+        "outputs": { "type": "array", "items": { "type": "string" } },
+        "sha256": { "type": "string" }
       }
     }
   }
@@ -225,6 +250,7 @@ policy-diff \
 ```
 
 ### 5.5 Prov‑Verify CLI (TS sketch)
+
 ```ts
 // tools/prov-verify/src/index.ts
 import { readFileSync } from 'fs';
@@ -247,6 +273,7 @@ console.log('evidence ok');
 ```
 
 ### 5.6 GraphQL Gateway — Reason‑for‑Access
+
 ```graphql
 mutation reasonForAccess($resourceId: ID!, $reason: String!) {
   recordAccessReason(resourceId: $resourceId, reason: $reason) {
@@ -258,6 +285,7 @@ mutation reasonForAccess($resourceId: ID!, $reason: String!) {
 ```
 
 ### 5.7 Audit Schema Change (SQL)
+
 ```sql
 ALTER TABLE audit_events
   ADD COLUMN access_reason TEXT,
@@ -266,6 +294,7 @@ ALTER TABLE audit_events
 ```
 
 ### 5.8 Cost Guard — Persisted Query Hints
+
 ```json
 {
   "id": "q:path_k_shortest",
@@ -276,6 +305,7 @@ ALTER TABLE audit_events
 ```
 
 ### 5.9 Chaos & DR — CI Jobs (YAML)
+
 ```yaml
 name: weekly-chaos
 on:
@@ -292,6 +322,7 @@ jobs:
 ```
 
 ### 5.10 Offline Resync Logs — Signed
+
 ```bash
 # ops/offline/signer.sh
 zip -r bundle.zip local_case/
@@ -302,6 +333,7 @@ cosign sign-blob --key cosign.key --output-signature bundle.sig bundle.zip
 ---
 
 ## 6) Acceptance Criteria (per Goal)
+
 - **Authority‑Bound Gateway**
   - 100% of sensitive queries blocked without legal basis; UI shows human‑readable reason + appeal path.
   - Isolation tests pass: no cross‑tenant/compartment leakage across 10k randomized attempts.
@@ -319,6 +351,7 @@ cosign sign-blob --key cosign.key --output-signature bundle.sig bundle.zip
 ---
 
 ## 7) Test Plan & Fixtures
+
 - **Authz/Policy:** table‑driven Rego tests; fuzz corpus of 50k synthetic requests; golden deny/allow sets.
 - **Provenance:** sample case with 12 exhibits; deterministic hashes; negative tests (tampered evidence).
 - **Cost Guard:** replay 500 persisted queries; ensure budget violations kill w/ hints.
@@ -328,12 +361,14 @@ cosign sign-blob --key cosign.key --output-signature bundle.sig bundle.zip
 ---
 
 ## 8) Dashboards & Ops
+
 - **Grafana:** SLO burn, query latency heatmap, budget burn, selector‑misuse, chaos drill outcomes.
 - **Prom/OTEL:** instrument gateway cost estimator, policy denials, audit writes, prov‑export timings.
 
 ---
 
 ## 9) Documentation & ADRs
+
 - **ADRs:**
   - ADR‑042: Authority Binding at Query Time (labels, OPA flow, snapshots).
   - ADR‑043: Provenance Manifest & Verifier Format (Merkle + detached sigs).
@@ -349,9 +384,10 @@ cosign sign-blob --key cosign.key --output-signature bundle.sig bundle.zip
 ---
 
 ## 10) RACI & Cadence
-- **R:** Groves Workstream (Security/Gov/Prov/Ops).  
-- **A:** CTO/Chief Architect.  
-- **C:** Ombudsman, Legal, SRE, Data Steward.  
+
+- **R:** Groves Workstream (Security/Gov/Prov/Ops).
+- **A:** CTO/Chief Architect.
+- **C:** Ombudsman, Legal, SRE, Data Steward.
 - **I:** Seat owners (Wolf, Inman, le Carré), Frontend lead.
 
 **Ceremonies:** Daily stand‑up; Mid‑sprint demo (2025‑10‑08); Sprint review (2025‑10‑14); Retro + next sprint planning.
@@ -359,47 +395,52 @@ cosign sign-blob --key cosign.key --output-signature bundle.sig bundle.zip
 ---
 
 ## 11) Dependencies & Integration Points
+
 - Graph schema migration service; Gateway team for persisted query hints; UI team for overlays/modals; Observability stack; Admin Studio hooks.
 
 ---
 
 ## 12) Out‑of‑Scope (tracked for next)
-- Full Graph‑XAI overlays for ER & forecasts (coordinate next sprint).  
-- Federated multi‑graph search controls.  
+
+- Full Graph‑XAI overlays for ER & forecasts (coordinate next sprint).
+- Federated multi‑graph search controls.
 - Marketplace compliance scans.
 
 ---
 
 ## 13) Backlog (Ready for Next Sprint)
-- Prov‑ledger contradiction graph visualizations (heatmap + drill‑through).  
-- Per‑case vector index governance (retention & purpose).  
+
+- Prov‑ledger contradiction graph visualizations (heatmap + drill‑through).
+- Per‑case vector index governance (retention & purpose).
 - Enclave compute option for sensitive transforms.
 
 ---
 
 ## 14) Shipping Checklist (Clean & Green)
-- [ ] CI green on policy, authz fuzz, provenance fixtures, cost guard tests.  
-- [ ] Security scan zero criticals; SBOM updated.  
-- [ ] Docs/ADRs merged; Playbooks published.  
-- [ ] Dashboards live; alerts tuned.  
-- [ ] Demo script + sample datasets checked in.  
+
+- [ ] CI green on policy, authz fuzz, provenance fixtures, cost guard tests.
+- [ ] Security scan zero criticals; SBOM updated.
+- [ ] Docs/ADRs merged; Playbooks published.
+- [ ] Dashboards live; alerts tuned.
+- [ ] Demo script + sample datasets checked in.
 - [ ] Rollback instructions tested.
 
 ---
 
 ## 15) Go‑to‑Market & Enablement (Internal)
-- **Demo flow:** Ingest → Policy‑blocked query (with explanation) → Link analysis → Export disclosure pack → External verify → Cost guard in action.  
+
+- **Demo flow:** Ingest → Policy‑blocked query (with explanation) → Link analysis → Export disclosure pack → External verify → Cost guard in action.
 - **Training:** 30‑min “Policy & Provenance 101” + 15‑min hands‑on lab.
 
 ---
 
 ## 16) Appendix — Sample Data & Fixtures
-- `fixtures/policy/tenants.yaml` — tenants/compartments/users.  
-- `fixtures/prov/case‑alpha/` — 12 exhibits + manifest + tampered negative case.  
-- `fixtures/queries/` — persisted query corpus with expected costs.  
+
+- `fixtures/policy/tenants.yaml` — tenants/compartments/users.
+- `fixtures/prov/case‑alpha/` — 12 exhibits + manifest + tampered negative case.
+- `fixtures/queries/` — persisted query corpus with expected costs.
 - `fixtures/audit/` — selector‑misuse sequences and expected tickets.
 
 ---
 
-**Finish the drill.** Ship it clean, prove it with evidence, and leave no gaps. 
-
+**Finish the drill.** Ship it clean, prove it with evidence, and leave no gaps.

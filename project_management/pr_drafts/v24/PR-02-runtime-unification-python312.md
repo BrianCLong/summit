@@ -7,11 +7,13 @@ Why: EOL avoidance, perf, security.
 Scope: Replace `python:3.9*-slim*` → `python:3.12-slim` where used.
 
 Files (examples):
+
 - active-measures-module/Dockerfile
 - deescalation-coach/infra/Dockerfile
 - api/Dockerfile
 
 Patch command:
+
 ```bash
 rg -l "^FROM\s+python:3\.9" | while read f; do gsed -i 's/^FROM\s\+python:3\.9[^ ]*/FROM python:3.12-slim/' "$f"; done
 ```

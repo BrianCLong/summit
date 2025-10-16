@@ -34,7 +34,7 @@ _Squash alt:_ **feat: tenant dashboards + signed evidence exporter (CLI+API) wit
 
 ### `PR-feat-tenant-dashboards-and-evidence-exporter.patch`
 
-```diff
+````diff
 diff --git a/services/api/src/lib/metrics.ts b/services/api/src/lib/metrics.ts
 new file mode 100644
 index 0000000..11aa22b
@@ -319,23 +319,25 @@ index 0000000..2468ace
 2. Verify SHA-256:
    ```bash
    echo "$(cat manifest.json | shasum -a 256 | cut -d' ' -f1) == $(cat manifest.sha256)" | bc
-   ```
+````
+
 3. Verify signature (public key provided securely):
    ```bash
    python3 - <<'PY'
-from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
-from cryptography.hazmat.primitives import serialization
-from hashlib import sha256
-pk_hex = input('PUBLIC_KEY_HEX: ').strip()
-pub = Ed25519PublicKey.from_public_bytes(bytes.fromhex(pk_hex))
-with open('manifest.json','rb') as f: m=f.read()
-with open('manifest.sig','rb') as f: s=f.read()
-pub.verify(s, m)
-print('OK')
-PY
+   from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+   from cryptography.hazmat.primitives import serialization
+   from hashlib import sha256
+   pk_hex = input('PUBLIC_KEY_HEX: ').strip()
+   pub = Ed25519PublicKey.from_public_bytes(bytes.fromhex(pk_hex))
+   with open('manifest.json','rb') as f: m=f.read()
+   with open('manifest.sig','rb') as f: s=f.read()
+   pub.verify(s, m)
+   print('OK')
+   PY
    ```
 4. Reconcile sample `ops/*` with internal logs as required.
-```
+
+````
 
 ---
 
@@ -359,7 +361,7 @@ make bootstrap
 nohup make run &
 sleep 2
 python3 integration/evidence_bundle.py --tenant default --op_ids abc def --key_hex <hex> --out /tmp/evidence.zip
-```
+````
 
 ---
 
@@ -368,22 +370,25 @@ python3 integration/evidence_bundle.py --tenant default --op_ids abc def --key_h
 **Theme**: Raise maturity: typed receipts v2, automated coverage reporter, and flag ramp automation based on SLO health.
 
 ## Objectives & KPIs
+
 - **Receipts v2**: typed fields, stable schema, embedded kid/policy/region; migration tool.
-  - *KPI*: zero parse errors; backcompat shims in place.
+  - _KPI_: zero parse errors; backcompat shims in place.
 - **Coverage Reporter**: nightly job emits per‑tenant coverage %, drift, and ramp recommendations.
-  - *KPI*: report generated <5m, diffs PR’d automatically.
+  - _KPI_: report generated <5m, diffs PR’d automatically.
 - **Ramp Automation**: controller increases pct when SLOs green; freezes on alerts.
-  - *KPI*: ramps 10→50→100% without incident in test env.
+  - _KPI_: ramps 10→50→100% without incident in test env.
 
 ## Backlog (Stories)
+
 - [ ] Define `ReceiptV02` schema + adapters (TS/Py) and migration tool for stored receipts.
 - [ ] Coverage Reporter: scan mapper catalog + traces; write `coverage/coverage-YYYYMMDD.json` + dashboard panel.
 - [ ] Ramp Controller: periodic job reading alerts/SLOs → writes `flags.spec` with new pct; PR bot.
 - [ ] Docs: migration playbook; operator guardrails.
 
 ## CI
+
 - Schema fixtures for v1↔v2; coverage report generation smoke; ramp controller dry‑run.
 
 ## DoD
-- v2 schema merged; automated coverage reports PR to repo; ramp controller demo toggles pct in dev without breaching alerts.
 
+- v2 schema merged; automated coverage reports PR to repo; ramp controller demo toggles pct in dev without breaching alerts.

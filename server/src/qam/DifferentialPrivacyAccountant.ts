@@ -79,7 +79,10 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
   private refreshTimer?: NodeJS.Timeout;
 
   // RDP tracking
-  private rdpOrders: number[] = [1.25, 1.5, 1.75, 2, 2.25, 2.5, 3, 3.5, 4, 4.5, 5, 6, 7, 8, 9, 10, 11, 12, 14, 16, 20, 24, 28, 32, 64, 256];
+  private rdpOrders: number[] = [
+    1.25, 1.5, 1.75, 2, 2.25, 2.5, 3, 3.5, 4, 4.5, 5, 6, 7, 8, 9, 10, 11, 12,
+    14, 16, 20, 24, 28, 32, 64, 256,
+  ];
   private rdpEpsilons: Map<number, number> = new Map();
 
   // Moments Accountant tracking
@@ -93,7 +96,7 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
       maxDelta: 1e-3,
       budgetRefreshInterval: 24 * 60 * 60 * 1000, // 24 hours
       warningThreshold: 0.8, // 80% budget usage warning
-      ...config
+      ...config,
     };
 
     // Initialize privacy budget
@@ -104,7 +107,7 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
       usedDelta: 0,
       remainingEpsilon: config.defaultEpsilon,
       remainingDelta: config.defaultDelta,
-      queries: []
+      queries: [],
     };
 
     // Initialize RDP tracking
@@ -116,14 +119,14 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
     if (this.config.budgetRefreshInterval! > 0) {
       this.refreshTimer = setInterval(
         () => this.refreshBudget(),
-        this.config.budgetRefreshInterval!
+        this.config.budgetRefreshInterval!,
       );
     }
 
     logger.info('DifferentialPrivacyAccountant initialized', {
       defaultEpsilon: config.defaultEpsilon,
       defaultDelta: config.defaultDelta,
-      compositionMethod: config.compositionMethod
+      compositionMethod: config.compositionMethod,
     });
   }
 
@@ -137,19 +140,22 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
 
       // Set defaults
       const mechanism = query.mechanism || 'laplace';
-      const compositionMethod = query.compositionMethod || this.config.compositionMethod;
+      const compositionMethod =
+        query.compositionMethod || this.config.compositionMethod;
 
       // Calculate noise scale for the mechanism
       const noiseScale = this.calculateNoiseScale(query, mechanism);
 
       // Calculate privacy loss after composition
-      const composition = await this.calculateComposition([...this.queryHistory, query], compositionMethod);
+      const composition = await this.calculateComposition(
+        [...this.queryHistory, query],
+        compositionMethod,
+      );
 
       // Check budget constraints
-      const budgetExceeded = (
+      const budgetExceeded =
         composition.totalEpsilon > this.privacyBudget.totalEpsilon ||
-        composition.totalDelta > this.privacyBudget.totalDelta
-      );
+        composition.totalDelta > this.privacyBudget.totalDelta;
 
       if (budgetExceeded) {
         logger.warn('Privacy budget exceeded', {
@@ -159,14 +165,14 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
           totalEpsilon: composition.totalEpsilon,
           totalDelta: composition.totalDelta,
           budgetEpsilon: this.privacyBudget.totalEpsilon,
-          budgetDelta: this.privacyBudget.totalDelta
+          budgetDelta: this.privacyBudget.totalDelta,
         });
 
         this.emit('budget_exceeded', {
           queryId,
           query,
           composition,
-          budget: this.privacyBudget
+          budget: this.privacyBudget,
         });
       } else {
         // Update budget if not exceeded
@@ -185,12 +191,16 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
       }
 
       // Check warning threshold
-      const epsilonUsageRatio = this.privacyBudget.usedEpsilon / this.privacyBudget.totalEpsilon;
-      if (epsilonUsageRatio >= this.config.warningThreshold! && !budgetExceeded) {
+      const epsilonUsageRatio =
+        this.privacyBudget.usedEpsilon / this.privacyBudget.totalEpsilon;
+      if (
+        epsilonUsageRatio >= this.config.warningThreshold! &&
+        !budgetExceeded
+      ) {
         this.emit('budget_warning', {
           usageRatio: epsilonUsageRatio,
           remainingEpsilon: this.privacyBudget.remainingEpsilon,
-          remainingDelta: this.privacyBudget.remainingDelta
+          remainingDelta: this.privacyBudget.remainingDelta,
         });
       }
 
@@ -201,17 +211,17 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
         budgetExceeded,
         remainingBudget: {
           epsilon: this.privacyBudget.remainingEpsilon,
-          delta: this.privacyBudget.remainingDelta
+          delta: this.privacyBudget.remainingDelta,
         },
         queryId,
-        timestamp
+        timestamp,
       };
 
       this.emit('budget_consumed', {
         queryId,
         query,
         privacyLoss,
-        composition
+        composition,
       });
 
       logger.debug('Privacy budget consumed', {
@@ -222,7 +232,7 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
         noiseScale,
         budgetExceeded,
         remainingEpsilon: this.privacyBudget.remainingEpsilon,
-        remainingDelta: this.privacyBudget.remainingDelta
+        remainingDelta: this.privacyBudget.remainingDelta,
       });
 
       return privacyLoss;
@@ -236,7 +246,10 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
   /**
    * Calculate composition of privacy parameters
    */
-  async calculateComposition(queries: PrivacyQuery[], method: string): Promise<CompositionResult> {
+  async calculateComposition(
+    queries: PrivacyQuery[],
+    method: string,
+  ): Promise<CompositionResult> {
     try {
       switch (method) {
         case 'basic':
@@ -251,7 +264,11 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
           throw new Error(`Unknown composition method: ${method}`);
       }
     } catch (error) {
-      logger.error('Composition calculation failed', { error, method, queryCount: queries.length });
+      logger.error('Composition calculation failed', {
+        error,
+        method,
+        queryCount: queries.length,
+      });
       throw error;
     }
   }
@@ -268,7 +285,7 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
       totalDelta,
       method: 'basic',
       queryCount: queries.length,
-      effectiveness: 1.0 // Basic composition has no privacy amplification
+      effectiveness: 1.0, // Basic composition has no privacy amplification
     };
   }
 
@@ -277,11 +294,20 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
    */
   private advancedComposition(queries: PrivacyQuery[]): CompositionResult {
     if (queries.length === 0) {
-      return { totalEpsilon: 0, totalDelta: 0, method: 'advanced', queryCount: 0, effectiveness: 1.0 };
+      return {
+        totalEpsilon: 0,
+        totalDelta: 0,
+        method: 'advanced',
+        queryCount: 0,
+        effectiveness: 1.0,
+      };
     }
 
     // Group queries by (epsilon, delta) pairs
-    const groupedQueries = new Map<string, { epsilon: number; delta: number; count: number }>();
+    const groupedQueries = new Map<
+      string,
+      { epsilon: number; delta: number; count: number }
+    >();
 
     for (const query of queries) {
       const key = `${query.epsilon}_${query.delta}`;
@@ -289,7 +315,11 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
       if (existing) {
         existing.count++;
       } else {
-        groupedQueries.set(key, { epsilon: query.epsilon, delta: query.delta, count: 1 });
+        groupedQueries.set(key, {
+          epsilon: query.epsilon,
+          delta: query.delta,
+          count: 1,
+        });
       }
     }
 
@@ -310,7 +340,9 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
         const deltaPlus = delta * k;
 
         // Advanced composition bound
-        const epsilonAdvanced = epsilon * Math.sqrt(2 * k * Math.log(1 / deltaPlus)) + k * epsilon * (Math.exp(epsilon) - 1);
+        const epsilonAdvanced =
+          epsilon * Math.sqrt(2 * k * Math.log(1 / deltaPlus)) +
+          k * epsilon * (Math.exp(epsilon) - 1);
 
         totalEpsilon += epsilonAdvanced;
         totalDelta += deltaPlus;
@@ -318,14 +350,15 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
     }
 
     const basicTotalEpsilon = queries.reduce((sum, q) => sum + q.epsilon, 0);
-    const effectiveness = basicTotalEpsilon > 0 ? totalEpsilon / basicTotalEpsilon : 1.0;
+    const effectiveness =
+      basicTotalEpsilon > 0 ? totalEpsilon / basicTotalEpsilon : 1.0;
 
     return {
       totalEpsilon,
       totalDelta,
       method: 'advanced',
       queryCount: queries.length,
-      effectiveness
+      effectiveness,
     };
   }
 
@@ -334,7 +367,13 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
    */
   private rdpComposition(queries: PrivacyQuery[]): CompositionResult {
     if (queries.length === 0) {
-      return { totalEpsilon: 0, totalDelta: 0, method: 'RDP', queryCount: 0, effectiveness: 1.0 };
+      return {
+        totalEpsilon: 0,
+        totalDelta: 0,
+        method: 'RDP',
+        queryCount: 0,
+        effectiveness: 1.0,
+      };
     }
 
     // Calculate RDP for each order
@@ -353,18 +392,22 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
     }
 
     // Convert back to (ε, δ)-DP
-    const targetDelta = Math.min(...queries.map(q => q.delta));
-    const { epsilon: totalEpsilon } = this.convertFromRDP(rdpValues, targetDelta);
+    const targetDelta = Math.min(...queries.map((q) => q.delta));
+    const { epsilon: totalEpsilon } = this.convertFromRDP(
+      rdpValues,
+      targetDelta,
+    );
 
     const basicTotalEpsilon = queries.reduce((sum, q) => sum + q.epsilon, 0);
-    const effectiveness = basicTotalEpsilon > 0 ? totalEpsilon / basicTotalEpsilon : 1.0;
+    const effectiveness =
+      basicTotalEpsilon > 0 ? totalEpsilon / basicTotalEpsilon : 1.0;
 
     return {
       totalEpsilon,
       totalDelta: targetDelta,
       method: 'RDP',
       queryCount: queries.length,
-      effectiveness
+      effectiveness,
     };
   }
 
@@ -373,11 +416,17 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
    */
   private momentsComposition(queries: PrivacyQuery[]): CompositionResult {
     if (queries.length === 0) {
-      return { totalEpsilon: 0, totalDelta: 0, method: 'moments', queryCount: 0, effectiveness: 1.0 };
+      return {
+        totalEpsilon: 0,
+        totalDelta: 0,
+        method: 'moments',
+        queryCount: 0,
+        effectiveness: 1.0,
+      };
     }
 
     // Simplified moments accountant (would use more sophisticated implementation in practice)
-    const targetDelta = Math.min(...queries.map(q => q.delta));
+    const targetDelta = Math.min(...queries.map((q) => q.delta));
 
     let totalEpsilon = 0;
     let cumulativeNoise = 0;
@@ -391,19 +440,21 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
       const q = Math.min(query.dataPoints / 1000, 0.1); // Sampling ratio
       const lambda = 8 * Math.log(1 / targetDelta); // Moment order
 
-      const momentsBound = Math.sqrt(lambda * q * Math.log(1 / targetDelta)) / sigma;
+      const momentsBound =
+        Math.sqrt(lambda * q * Math.log(1 / targetDelta)) / sigma;
       totalEpsilon += momentsBound;
     }
 
     const basicTotalEpsilon = queries.reduce((sum, q) => sum + q.epsilon, 0);
-    const effectiveness = basicTotalEpsilon > 0 ? totalEpsilon / basicTotalEpsilon : 1.0;
+    const effectiveness =
+      basicTotalEpsilon > 0 ? totalEpsilon / basicTotalEpsilon : 1.0;
 
     return {
       totalEpsilon,
       totalDelta: targetDelta,
       method: 'moments',
       queryCount: queries.length,
-      effectiveness
+      effectiveness,
     };
   }
 
@@ -420,11 +471,13 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
 
       case 'gaussian':
         // Gaussian mechanism: σ = Δf * √(2 * ln(1.25/δ)) / ε
-        return sensitivityBound * Math.sqrt(2 * Math.log(1.25 / delta)) / epsilon;
+        return (
+          (sensitivityBound * Math.sqrt(2 * Math.log(1.25 / delta))) / epsilon
+        );
 
       case 'exponential':
         // Exponential mechanism noise scale
-        return 2 * sensitivityBound / epsilon;
+        return (2 * sensitivityBound) / epsilon;
 
       default:
         throw new Error(`Unknown mechanism: ${mechanism}`);
@@ -442,17 +495,24 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
     // Conversion formula for Gaussian mechanism
     if (delta === 0) {
       // Pure DP case
-      return (order - 1) * epsilon * epsilon / 2;
+      return ((order - 1) * epsilon * epsilon) / 2;
     } else {
       // Approximate conversion (would use exact formula in practice)
-      return epsilon + Math.log(1 + (order - 1) * epsilon * epsilon / 2) + Math.log(1 / delta) / (order - 1);
+      return (
+        epsilon +
+        Math.log(1 + ((order - 1) * epsilon * epsilon) / 2) +
+        Math.log(1 / delta) / (order - 1)
+      );
     }
   }
 
   /**
    * Convert RDP back to (ε, δ)-DP
    */
-  private convertFromRDP(rdpValues: Map<number, number>, targetDelta: number): { epsilon: number; order: number } {
+  private convertFromRDP(
+    rdpValues: Map<number, number>,
+    targetDelta: number,
+  ): { epsilon: number; order: number } {
     let bestEpsilon = Infinity;
     let bestOrder = 0;
 
@@ -476,11 +536,16 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
   /**
    * Update budget usage after successful query
    */
-  private updateBudgetUsage(query: PrivacyQuery, composition: CompositionResult): void {
+  private updateBudgetUsage(
+    query: PrivacyQuery,
+    composition: CompositionResult,
+  ): void {
     this.privacyBudget.usedEpsilon = composition.totalEpsilon;
     this.privacyBudget.usedDelta = composition.totalDelta;
-    this.privacyBudget.remainingEpsilon = this.privacyBudget.totalEpsilon - composition.totalEpsilon;
-    this.privacyBudget.remainingDelta = this.privacyBudget.totalDelta - composition.totalDelta;
+    this.privacyBudget.remainingEpsilon =
+      this.privacyBudget.totalEpsilon - composition.totalEpsilon;
+    this.privacyBudget.remainingDelta =
+      this.privacyBudget.totalDelta - composition.totalDelta;
     this.privacyBudget.queries.push(query);
   }
 
@@ -523,7 +588,7 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
       usedDelta: 0,
       remainingEpsilon: this.config.defaultEpsilon,
       remainingDelta: this.config.defaultDelta,
-      queries: []
+      queries: [],
     };
 
     this.queryHistory = [];
@@ -540,7 +605,7 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
     this.emit('budget_refreshed', {
       previousBudget,
       newBudget: this.privacyBudget,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
 
     logger.info('Privacy budget refreshed', {
@@ -548,8 +613,8 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
       newDelta: this.config.defaultDelta,
       previousUsage: {
         epsilon: previousBudget.usedEpsilon,
-        delta: previousBudget.usedDelta
-      }
+        delta: previousBudget.usedDelta,
+      },
     });
   }
 
@@ -570,14 +635,16 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
       totalQueries: this.queryHistory.length,
       recentQueries: recentQueries.length,
       budgetUsage: {
-        epsilonUsageRatio: this.privacyBudget.usedEpsilon / this.privacyBudget.totalEpsilon,
-        deltaUsageRatio: this.privacyBudget.usedDelta / this.privacyBudget.totalDelta
+        epsilonUsageRatio:
+          this.privacyBudget.usedEpsilon / this.privacyBudget.totalEpsilon,
+        deltaUsageRatio:
+          this.privacyBudget.usedDelta / this.privacyBudget.totalDelta,
       },
       queryTypes: this.getQueryTypeStatistics(),
       mechanisms: this.getMechanismStatistics(),
       compositionEffectiveness: this.getCompositionEffectiveness(),
       rdpStatus: this.getRDPStatus(),
-      momentsStatus: this.getMomentsStatus()
+      momentsStatus: this.getMomentsStatus(),
     };
 
     return analytics;
@@ -588,18 +655,21 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
    */
   private getRDPStatus(): RDPResult {
     const orders = Array.from(this.rdpEpsilons.keys()).sort((a, b) => a - b);
-    const rdpValues = orders.map(order => this.rdpEpsilons.get(order) || 0);
+    const rdpValues = orders.map((order) => this.rdpEpsilons.get(order) || 0);
 
     // Find best conversion to (ε, δ)-DP
     const targetDelta = this.config.defaultDelta;
-    const { epsilon, order: bestOrder } = this.convertFromRDP(this.rdpEpsilons, targetDelta);
+    const { epsilon, order: bestOrder } = this.convertFromRDP(
+      this.rdpEpsilons,
+      targetDelta,
+    );
 
     return {
       alpha: bestOrder,
       epsilon,
       delta: targetDelta,
       orders,
-      rdpValues
+      rdpValues,
     };
   }
 
@@ -611,14 +681,17 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
       return { bounds: [], sigmas: [], averageBound: 0, averageSigma: 0 };
     }
 
-    const averageBound = this.momentsBounds.reduce((sum, b) => sum + b, 0) / this.momentsBounds.length;
-    const averageSigma = this.sigmaValues.reduce((sum, s) => sum + s, 0) / this.sigmaValues.length;
+    const averageBound =
+      this.momentsBounds.reduce((sum, b) => sum + b, 0) /
+      this.momentsBounds.length;
+    const averageSigma =
+      this.sigmaValues.reduce((sum, s) => sum + s, 0) / this.sigmaValues.length;
 
     return {
       bounds: this.momentsBounds,
       sigmas: this.sigmaValues,
       averageBound,
-      averageSigma
+      averageSigma,
     };
   }
 
@@ -645,7 +718,10 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
 
     for (const method of methods) {
       try {
-        const composition = this.calculateComposition(this.queryHistory, method);
+        const composition = this.calculateComposition(
+          this.queryHistory,
+          method,
+        );
         effectiveness[method] = composition.effectiveness;
       } catch (error) {
         effectiveness[method] = 1.0;
@@ -668,12 +744,14 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
     // Update budget if total limits changed
     if (newConfig.defaultEpsilon !== undefined) {
       this.privacyBudget.totalEpsilon = newConfig.defaultEpsilon;
-      this.privacyBudget.remainingEpsilon = newConfig.defaultEpsilon - this.privacyBudget.usedEpsilon;
+      this.privacyBudget.remainingEpsilon =
+        newConfig.defaultEpsilon - this.privacyBudget.usedEpsilon;
     }
 
     if (newConfig.defaultDelta !== undefined) {
       this.privacyBudget.totalDelta = newConfig.defaultDelta;
-      this.privacyBudget.remainingDelta = newConfig.defaultDelta - this.privacyBudget.usedDelta;
+      this.privacyBudget.remainingDelta =
+        newConfig.defaultDelta - this.privacyBudget.usedDelta;
     }
 
     logger.info('Configuration updated', { config: this.config });
@@ -698,7 +776,7 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
       queryHistory: this.queryHistory,
       rdpEpsilons: Object.fromEntries(this.rdpEpsilons),
       momentsBounds: this.momentsBounds,
-      sigmaValues: this.sigmaValues
+      sigmaValues: this.sigmaValues,
     };
   }
 
@@ -709,7 +787,12 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
     this.config = state.config;
     this.privacyBudget = state.budget;
     this.queryHistory = state.queryHistory;
-    this.rdpEpsilons = new Map(Object.entries(state.rdpEpsilons).map(([k, v]) => [parseFloat(k), v as number]));
+    this.rdpEpsilons = new Map(
+      Object.entries(state.rdpEpsilons).map(([k, v]) => [
+        parseFloat(k),
+        v as number,
+      ]),
+    );
     this.momentsBounds = state.momentsBounds;
     this.sigmaValues = state.sigmaValues;
 
@@ -717,8 +800,8 @@ export class DifferentialPrivacyAccountant extends EventEmitter {
       totalQueries: this.queryHistory.length,
       budgetUsage: {
         epsilon: this.privacyBudget.usedEpsilon,
-        delta: this.privacyBudget.usedDelta
-      }
+        delta: this.privacyBudget.usedDelta,
+      },
     });
   }
 

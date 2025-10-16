@@ -13,7 +13,8 @@ module.exports = {
   },
   Subscription: {
     presenceUpdated: {
-      subscribe: (_, __, { pubsub }) => pubsub.asyncIterator('PRESENCE_UPDATED'),
+      subscribe: (_, __, { pubsub }) =>
+        pubsub.asyncIterator('PRESENCE_UPDATED'),
     },
   },
 };

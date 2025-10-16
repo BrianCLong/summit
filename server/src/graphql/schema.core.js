@@ -64,7 +64,11 @@ export const coreTypeDefs = gql`
 
     # Related entities and relationships
     entities(kind: String, limit: Int = 100, offset: Int = 0): [Entity!]!
-    relationships(type: String, limit: Int = 100, offset: Int = 0): [Relationship!]!
+    relationships(
+      type: String
+      limit: Int = 100
+      offset: Int = 0
+    ): [Relationship!]!
   }
 
   # Enums
@@ -192,7 +196,12 @@ export const coreTypeDefs = gql`
     graphNeighborhood(input: GraphTraversalInput!): GraphNeighborhood!
 
     # Search across all entity types
-    searchEntities(tenantId: String!, query: String!, kinds: [String!], limit: Int = 50): [Entity!]!
+    searchEntities(
+      tenantId: String!
+      query: String!
+      kinds: [String!]
+      limit: Int = 50
+    ): [Entity!]!
   }
 
   # Extended Mutation operations
@@ -213,7 +222,10 @@ export const coreTypeDefs = gql`
 
     # Bulk operations
     createEntitiesBatch(inputs: [EntityInput!]!, tenantId: String!): [Entity!]!
-    createRelationshipsBatch(inputs: [RelationshipInput!]!, tenantId: String!): [Relationship!]!
+    createRelationshipsBatch(
+      inputs: [RelationshipInput!]!
+      tenantId: String!
+    ): [Relationship!]!
   }
 
   # Real-time subscriptions for graph changes

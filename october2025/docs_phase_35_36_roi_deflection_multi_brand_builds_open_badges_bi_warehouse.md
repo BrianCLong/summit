@@ -7,6 +7,7 @@ version: latest
 ---
 
 # Objectives
+
 - **Prove value**: Measure support **deflection** and ROI from docs.
 - **Scale brands**: Build **white‑label** variants (partner/internal) from one repo.
 - **Motivate learning**: Issue **OpenBadges** for completed paths/quizzes.
@@ -18,37 +19,77 @@ version: latest
 # Track A — Support Deflection & ROI
 
 ## A1) “Did this resolve your issue?” event + UTM trail
+
 - Add link param support to capture support context: `?from=support&ticket=<id>`.
 - Reuse `tta.js` success signal and store `from` in attrs.
 
 **Patch** `docs-site/static/tta.js` (add source capture)
+
 ```js
-const params = new URLSearchParams(location.search)
-const from = params.get('from')
+const params = new URLSearchParams(location.search);
+const from = params.get('from');
 // ... inside success emit
-post('doc_success', { path: location.pathname, tta_ms: t0?Math.round(now()-t0):null, from })
+post('doc_success', {
+  path: location.pathname,
+  tta_ms: t0 ? Math.round(now() - t0) : null,
+  from,
+});
 ```
 
 ## A2) Support export → Deflection report
+
 - Assume a weekly CSV export from your support tool at `support/tickets.csv` with columns: `ticket_id, created, subject, tag, resolved, doc_url (optional)`.
 
 **`scripts/roi/deflection-report.js`**
+
 ```js
 const fs = require('fs');
 const path = require('path');
-const parse = s=> s.split(/\r?\n/).slice(1).filter(Boolean).map(l=>{ const [id, created, subject, tag, resolved, doc_url] = l.split(','); return { id, created, subject, tag, resolved: resolved==='true', doc_url } })
-const tickets = fs.existsSync('support/tickets.csv') ? parse(fs.readFileSync('support/tickets.csv','utf8')) : []
-const tta = (function(){ try{ return JSON.parse(fs.readFileSync('docs/ops/tta/summary.json','utf8')) }catch{ return [] } })()
-const last = tta[tta.length-1] || {}
-const linked = tickets.filter(t=> t.doc_url)
-const deflected = linked.filter(t=> /\b(resolved|answer found)\b/i.test(t.subject) || t.resolved)
-const roi = { period: new Date().toISOString().slice(0,10), tickets: tickets.length, linked: linked.length, deflected: deflected.length, tta_p50: last.tta_p50 || null }
-fs.mkdirSync('docs/ops/roi',{recursive:true})
-fs.writeFileSync('docs/ops/roi/deflection.json', JSON.stringify(roi, null, 2))
-console.log('ROI', roi)
+const parse = (s) =>
+  s
+    .split(/\r?\n/)
+    .slice(1)
+    .filter(Boolean)
+    .map((l) => {
+      const [id, created, subject, tag, resolved, doc_url] = l.split(',');
+      return {
+        id,
+        created,
+        subject,
+        tag,
+        resolved: resolved === 'true',
+        doc_url,
+      };
+    });
+const tickets = fs.existsSync('support/tickets.csv')
+  ? parse(fs.readFileSync('support/tickets.csv', 'utf8'))
+  : [];
+const tta = (function () {
+  try {
+    return JSON.parse(fs.readFileSync('docs/ops/tta/summary.json', 'utf8'));
+  } catch {
+    return [];
+  }
+})();
+const last = tta[tta.length - 1] || {};
+const linked = tickets.filter((t) => t.doc_url);
+const deflected = linked.filter(
+  (t) => /\b(resolved|answer found)\b/i.test(t.subject) || t.resolved,
+);
+const roi = {
+  period: new Date().toISOString().slice(0, 10),
+  tickets: tickets.length,
+  linked: linked.length,
+  deflected: deflected.length,
+  tta_p50: last.tta_p50 || null,
+};
+fs.mkdirSync('docs/ops/roi', { recursive: true });
+fs.writeFileSync('docs/ops/roi/deflection.json', JSON.stringify(roi, null, 2));
+console.log('ROI', roi);
 ```
 
 **Workflow** `.github/workflows/docs-roi.yml`
+
 ```yaml
 name: Docs ROI/Deflection
 on:
@@ -71,22 +112,27 @@ jobs:
 # Track B — Multi‑Brand / White‑Label Builds
 
 ## B1) Brand tokens
+
 **`brands/base.json`**
+
 ```json
 { "name": "IntelGraph", "primary": "#0f766e", "logo": "img/logo.svg" }
 ```
 
 **`brands/partnerX.json`**
+
 ```json
 { "name": "PartnerX", "primary": "#5b21b6", "logo": "img/partnerx-logo.svg" }
 ```
 
 ## B2) Apply brand script
+
 **`scripts/brands/apply-brand.js`**
+
 ```js
 const fs = require('fs');
 const brand = process.env.BRAND || 'base';
-const cfg = JSON.parse(fs.readFileSync(`brands/${brand}.json`,'utf8'));
+const cfg = JSON.parse(fs.readFileSync(`brands/${brand}.json`, 'utf8'));
 const css = `:root{ --ig-primary:${cfg.primary}; }`;
 fs.mkdirSync('docs-site/src/css', { recursive: true });
 fs.writeFileSync('docs-site/src/css/brand.css', css);
@@ -98,7 +144,9 @@ console.log('Applied brand', brand);
 **Patch** `docusaurus.config.js` to merge `brand.config.js` if present.
 
 ## B3) Build matrix
+
 **`.github/workflows/docs-multibrand.yml`**
+
 ```yaml
 name: Docs Multi‑brand Build
 on: [workflow_dispatch]
@@ -124,7 +172,9 @@ jobs:
 # Track C — OpenBadges for Learning Paths
 
 ## C1) Badge classes
+
 **`docs/learn/badges/badge-classes.json`**
+
 ```json
 {
   "user-essentials": {
@@ -138,27 +188,31 @@ jobs:
 ```
 
 ## C2) Issuer stub & assertion
+
 **`scripts/learn/issue-badge.js`**
+
 ```js
 const fs = require('fs');
-const cls = JSON.parse(fs.readFileSync('docs/learn/badges/badge-classes.json','utf8'));
-const id = process.argv[2] || 'user-essentials'
-const email = process.argv[3] || 'user@example.com'
-const badge = cls[id]
-if(!badge) throw new Error('Unknown badge '+id)
+const cls = JSON.parse(
+  fs.readFileSync('docs/learn/badges/badge-classes.json', 'utf8'),
+);
+const id = process.argv[2] || 'user-essentials';
+const email = process.argv[3] || 'user@example.com';
+const badge = cls[id];
+if (!badge) throw new Error('Unknown badge ' + id);
 const assertion = {
   '@context': 'https://w3id.org/openbadges/v2',
-  'type': 'Assertion',
-  'id': `${badge.id}/assertions/${Date.now()}`,
-  'recipient': { 'type': 'email', 'identity': email },
-  'badge': badge.id,
-  'verification': { 'type': 'HostedBadge' },
-  'issuedOn': new Date().toISOString()
-}
-const out = `docs/learn/badges/assertions/${id}-${Date.now()}.json`
-fs.mkdirSync('docs/learn/badges/assertions',{recursive:true})
-fs.writeFileSync(out, JSON.stringify(assertion, null, 2))
-console.log('Wrote', out)
+  type: 'Assertion',
+  id: `${badge.id}/assertions/${Date.now()}`,
+  recipient: { type: 'email', identity: email },
+  badge: badge.id,
+  verification: { type: 'HostedBadge' },
+  issuedOn: new Date().toISOString(),
+};
+const out = `docs/learn/badges/assertions/${id}-${Date.now()}.json`;
+fs.mkdirSync('docs/learn/badges/assertions', { recursive: true });
+fs.writeFileSync(out, JSON.stringify(assertion, null, 2));
+console.log('Wrote', out);
 ```
 
 **Acceptance**: Badge class JSON exists; script generates hosted assertions (for private or demo use).
@@ -168,7 +222,9 @@ console.log('Wrote', out)
 # Track D — BI Warehouse (DuckDB) & Charts
 
 ## D1) Aggregate docs signals into DuckDB
+
 **`scripts/warehouse/load.py`**
+
 ```python
 import duckdb, json, os, csv
 con = duckdb.connect('docs/ops/warehouse/docs.duckdb')
@@ -198,7 +254,9 @@ print('Warehouse updated')
 ```
 
 ## D2) Export CSV for dashboard
+
 **`.github/workflows/docs-warehouse.yml`**
+
 ```yaml
 name: Docs Warehouse
 on:
@@ -231,23 +289,46 @@ PY
 # Track E — Search Re‑ranking & Query Rules
 
 ## E1) Click‑ranker from TTA logs
+
 **`scripts/search/click-rank.js`**
+
 ```js
 const fs = require('fs');
-function safe(p){ try{ return JSON.parse(fs.readFileSync(p,'utf8')) }catch{ return [] } }
-const tta = safe('docs/ops/tta/summary.json')
+function safe(p) {
+  try {
+    return JSON.parse(fs.readFileSync(p, 'utf8'));
+  } catch {
+    return [];
+  }
+}
+const tta = safe('docs/ops/tta/summary.json');
 // Placeholder: in production, aggregate per query; here, output simple boosts for high‑success pages
 const rules = [
-  { objectID: 'boost-zip', condition: { context: 'query', pattern: 'zip|cert' }, consequence: { promote: [{ objectID: '/how-to/zip-export', position: 1 }] } },
-  { objectID: 'boost-upgrade', condition: { context: 'query', pattern: 'upgrade|v24' }, consequence: { promote: [{ objectID: '/how-to/upgrade-to-v24', position: 1 }] } }
-]
-fs.mkdirSync('docs/ops/search',{recursive:true})
-fs.writeFileSync('docs/ops/search/algolia.rules.json', JSON.stringify(rules, null, 2))
-console.log('Wrote rules')
+  {
+    objectID: 'boost-zip',
+    condition: { context: 'query', pattern: 'zip|cert' },
+    consequence: { promote: [{ objectID: '/how-to/zip-export', position: 1 }] },
+  },
+  {
+    objectID: 'boost-upgrade',
+    condition: { context: 'query', pattern: 'upgrade|v24' },
+    consequence: {
+      promote: [{ objectID: '/how-to/upgrade-to-v24', position: 1 }],
+    },
+  },
+];
+fs.mkdirSync('docs/ops/search', { recursive: true });
+fs.writeFileSync(
+  'docs/ops/search/algolia.rules.json',
+  JSON.stringify(rules, null, 2),
+);
+console.log('Wrote rules');
 ```
 
 ## E2) Workflow stub to upload rules (requires keys)
+
 **`.github/workflows/search-rules.yml`**
+
 ```yaml
 name: Docs Search Rules
 on: [workflow_dispatch]
@@ -264,6 +345,7 @@ jobs:
 ---
 
 # Execution Plan (4–6 days)
+
 1. **A1–A2**: Wire success source capture + weekly deflection report.
 2. **B1–B3**: Apply brand tokens; build `base` and `partnerX` artifacts.
 3. **C**: Add OpenBadges class + issuer stub; surface badges on learning pages.
@@ -273,9 +355,9 @@ jobs:
 ---
 
 # Acceptance Criteria
+
 - Deflection report artifact published weekly; shows linked & deflected counts.
 - Multi‑brand builds produce distinct artifacts with themed colors and logo.
 - Badge classes defined; hosted assertions generated for a test user.
 - DuckDB warehouse updated on schedule; KPI CSV available as artifact.
 - Search rules JSON produced with at least two promotions.
-

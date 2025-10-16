@@ -5,8 +5,9 @@ interface RateLimiterOptions {
   max?: number;
 }
 
-export function rateLimiter({ windowMs = 60000, max = 60 }: RateLimiterOptions): RateLimitRequestHandler {
+export function rateLimiter({
+  windowMs = 60000,
+  max = 60,
+}: RateLimiterOptions): RateLimitRequestHandler {
   return rateLimit({ windowMs, max });
 }
-
-

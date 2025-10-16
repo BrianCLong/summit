@@ -11,6 +11,7 @@ import { createHash } from 'crypto';
 import { registerBuiltins, runPlugin } from '../plugins/index.js';
 import { checkResidency } from '../policy/opaClient.js';
 import { checkQuota, accrueUsage } from './quotas.js';
+import { MissionControlConflictResolver, } from './mission-control/conflict-resolution';
 export class Conductor {
     constructor(config) {
         this.config = config;
@@ -28,6 +29,7 @@ export class Conductor {
         const redisClient = new Redis();
         this.budgetController = createBudgetController(redisClient);
         this.cache = new ConductorCache();
+        this.missionControlResolver = new MissionControlConflictResolver();
         try {
             registerBuiltins();
         }
@@ -47,7 +49,17 @@ export class Conductor {
         const startTime = performance.now();
         // Determine tenantId for budget control
         const tenantId = input.userContext?.tenantId || input.userContext?.tenant || 'global';
+        let missionControlResolution = null;
+        let missionControlLogs = [];
         try {
+            if (input.missionControlContext) {
+                missionControlResolution = this.missionControlResolver.resolve(input.missionControlContext);
+                if (!missionControlResolution.allowProceed) {
+                    const deferReason = missionControlResolution.deferred.find((entry) => entry.missionId === input.missionControlContext?.currentMissionId)?.reason || 'Mission deferred by arbitration';
+                    throw new Error(`Mission control deferred ${input.missionControlContext.currentMissionId}: ${deferReason}`);
+                }
+                missionControlLogs = this.formatMissionControlLogs(missionControlResolution);
+            }
             // Quotas admission
             const q = await checkQuota(tenantId);
             if (!q.allow) {
@@ -83,8 +95,19 @@ export class Conductor {
                             latencyMs: Math.round(endTime - startTime),
                             auditId,
                         };
+                        if (missionControlLogs.length) {
+                            conductResult.logs = [...missionControlLogs, ...conductResult.logs];
+                        }
                         if (this.config.auditEnabled) {
-                            this.logAudit({ auditId, input, decision, result: conductResult, cache: 'hit', timestamp: new Date().toISOString() });
+                            this.logAudit({
+                                auditId,
+                                input,
+                                decision,
+                                result: conductResult,
+                                cache: 'hit',
+                                missionControlResolution,
+                                timestamp: new Date().toISOString(),
+                            });
                         }
                         return conductResult;
                     }
@@ -125,6 +148,9 @@ export class Conductor {
             await this.validateSecurity(input, decision);
             // Execute with selected expert
             const result = await this.executeWithExpert(decision.expert, input, decision);
+            if (missionControlLogs.length) {
+                result.logs = [...missionControlLogs, ...result.logs];
+            }
             const endTime = performance.now();
             const conductResult = {
                 expertId: decision.expert,
@@ -162,6 +188,7 @@ export class Conductor {
                     input,
                     decision,
                     result: conductResult,
+                    missionControlResolution,
                     timestamp: new Date().toISOString(),
                 });
             }
@@ -271,6 +298,25 @@ export class Conductor {
             default:
                 throw new Error(`Expert ${expert} not implemented`);
         }
+    }
+    formatMissionControlLogs(resolution) {
+        const logs = [];
+        const summary = resolution.arbitrationSummary;
+        const assignment = resolution.currentAssignment;
+        logs.push(`mission-control: arbitration fairness=${summary.fairnessIndex.toFixed(2)} concessions=${summary.totalConcessions} rounds=${summary.rounds} latency=${summary.resolutionLatencyMs}ms`);
+        if (assignment) {
+            logs.push(`mission-control: mission ${assignment.missionId} assigned ${assignment.decision} slot ${assignment.slot.start}→${assignment.slot.end}`);
+        }
+        else {
+            logs.push('mission-control: current mission deferred by arbitration');
+        }
+        summary.priorityDecisions.slice(0, 2).forEach((decision) => {
+            logs.push(`mission-control: ${decision}`);
+        });
+        resolution.negotiationLog.slice(0, 3).forEach((event) => {
+            logs.push(`mission-control:${event.type}:${event.description}`);
+        });
+        return logs;
     }
     /**
      * Execute graph operations via MCP

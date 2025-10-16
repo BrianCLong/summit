@@ -116,7 +116,10 @@ export class ThreatDetectionEngine {
             }
 
             // Record threat detection metrics
-            prometheusConductorMetrics.recordSecurityEvent(`threat_${rule.severity}`, !blocked);
+            prometheusConductorMetrics.recordSecurityEvent(
+              `threat_${rule.severity}`,
+              !blocked,
+            );
           }
         }
       } catch (error) {
@@ -161,8 +164,11 @@ export class ThreatDetectionEngine {
   /**
    * Update user behavior profile with new activity
    */
-  private async updateUserProfile(context: ThreatContext): Promise<Partial<UserBehaviorProfile>> {
-    const profile = context.userProfile || (await this.createBaselineProfile(context.userId));
+  private async updateUserProfile(
+    context: ThreatContext,
+  ): Promise<Partial<UserBehaviorProfile>> {
+    const profile =
+      context.userProfile || (await this.createBaselineProfile(context.userId));
 
     const now = Date.now();
     const currentHour = new Date().getHours();
@@ -189,11 +195,19 @@ export class ThreatDetectionEngine {
 
       profile.baselinePatterns.avgCostPerTask =
         recentCosts.reduce((a, b) => a + b, 0) / recentCosts.length;
-      profile.baselinePatterns.commonExperts = this.getMostFrequent(recentExperts, 3);
+      profile.baselinePatterns.commonExperts = this.getMostFrequent(
+        recentExperts,
+        3,
+      );
 
       // Update active hours
-      const activeHours = profile.recentActivity.map((a) => new Date(a.timestamp).getHours());
-      profile.baselinePatterns.usualActiveHours = this.getMostFrequent(activeHours, 8);
+      const activeHours = profile.recentActivity.map((a) =>
+        new Date(a.timestamp).getHours(),
+      );
+      profile.baselinePatterns.usualActiveHours = this.getMostFrequent(
+        activeHours,
+        8,
+      );
     }
 
     profile.lastUpdated = now;
@@ -229,16 +243,23 @@ export class ThreatDetectionEngine {
 
     // Cost anomaly
     const costDeviation =
-      Math.abs(context.currentRequest.cost - profile.baselinePatterns.avgCostPerTask) /
-      Math.max(profile.baselinePatterns.avgCostPerTask, 1);
+      Math.abs(
+        context.currentRequest.cost - profile.baselinePatterns.avgCostPerTask,
+      ) / Math.max(profile.baselinePatterns.avgCostPerTask, 1);
     if (costDeviation > 2) {
-      factors.push({ name: 'cost_anomaly', score: Math.min(costDeviation / 5, 1), weight: 0.25 });
+      factors.push({
+        name: 'cost_anomaly',
+        score: Math.min(costDeviation / 5, 1),
+        weight: 0.25,
+      });
     }
 
     // Expert usage anomaly
     if (
       context.currentRequest.expert &&
-      !profile.baselinePatterns.commonExperts.includes(context.currentRequest.expert)
+      !profile.baselinePatterns.commonExperts.includes(
+        context.currentRequest.expert,
+      )
     ) {
       factors.push({ name: 'unusual_expert', score: 0.4, weight: 0.2 });
     }
@@ -254,12 +275,19 @@ export class ThreatDetectionEngine {
 
     // Task complexity anomaly (simplified heuristic)
     const taskComplexity = context.currentRequest.task.split(' ').length;
-    if (Math.abs(taskComplexity - profile.baselinePatterns.typicalTaskComplexity) > 50) {
+    if (
+      Math.abs(
+        taskComplexity - profile.baselinePatterns.typicalTaskComplexity,
+      ) > 50
+    ) {
       factors.push({ name: 'unusual_complexity', score: 0.3, weight: 0.1 });
     }
 
     // Calculate weighted anomaly score
-    anomalyScore = factors.reduce((sum, factor) => sum + factor.score * factor.weight, 0);
+    anomalyScore = factors.reduce(
+      (sum, factor) => sum + factor.score * factor.weight,
+      0,
+    );
 
     return Math.min(anomalyScore, 1);
   }
@@ -267,7 +295,9 @@ export class ThreatDetectionEngine {
   /**
    * Create baseline profile for new user
    */
-  private async createBaselineProfile(userId: string): Promise<UserBehaviorProfile> {
+  private async createBaselineProfile(
+    userId: string,
+  ): Promise<UserBehaviorProfile> {
     return {
       userId,
       baselinePatterns: {
@@ -313,7 +343,9 @@ export class ThreatDetectionEngine {
       condition: (ctx) => {
         const currentHour = new Date().getHours();
         return (
-          !ctx.userProfile.baselinePatterns.usualActiveHours.includes(currentHour) &&
+          !ctx.userProfile.baselinePatterns.usualActiveHours.includes(
+            currentHour,
+          ) &&
           (currentHour < 6 || currentHour > 22)
         );
       },
@@ -328,7 +360,10 @@ export class ThreatDetectionEngine {
       description: 'Expensive operations exceeding user baseline',
       severity: 'medium',
       condition: (ctx) => {
-        return ctx.currentRequest.cost > ctx.userProfile.baselinePatterns.avgCostPerTask * 10;
+        return (
+          ctx.currentRequest.cost >
+          ctx.userProfile.baselinePatterns.avgCostPerTask * 10
+        );
       },
       action: 'alert',
       cooldownMs: 300000, // 5 minutes
@@ -341,7 +376,13 @@ export class ThreatDetectionEngine {
       description: 'Potential attempt to extract PII data',
       severity: 'critical',
       condition: (ctx) => {
-        const suspiciousPatterns = ['extract', 'list all', 'dump', 'export users', 'get passwords'];
+        const suspiciousPatterns = [
+          'extract',
+          'list all',
+          'dump',
+          'export users',
+          'get passwords',
+        ];
         return (
           suspiciousPatterns.some((pattern) =>
             ctx.currentRequest.task.toLowerCase().includes(pattern),
@@ -366,7 +407,9 @@ export class ThreatDetectionEngine {
         return (
           ctx.currentRequest.expert &&
           restrictedExperts.includes(ctx.currentRequest.expert) &&
-          !ctx.userProfile.baselinePatterns.commonExperts.includes(ctx.currentRequest.expert)
+          !ctx.userProfile.baselinePatterns.commonExperts.includes(
+            ctx.currentRequest.expert,
+          )
         );
       },
       action: 'block',
@@ -433,7 +476,11 @@ export class ThreatDetectionEngine {
 
   private async storeAlerts(alerts: ThreatAlert[]): Promise<void> {
     for (const alert of alerts) {
-      await this.redis.zadd('threat:alerts', alert.timestamp, JSON.stringify(alert));
+      await this.redis.zadd(
+        'threat:alerts',
+        alert.timestamp,
+        JSON.stringify(alert),
+      );
     }
 
     // Keep only last 1000 alerts
@@ -455,7 +502,9 @@ export class ThreatDetectionEngine {
     }
   }
 
-  private async calculateUserRiskScore(profile: UserBehaviorProfile): Promise<number> {
+  private async calculateUserRiskScore(
+    profile: UserBehaviorProfile,
+  ): Promise<number> {
     let riskScore = 0;
 
     // Recent alerts increase risk

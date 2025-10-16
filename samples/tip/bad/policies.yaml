@@ -6,8 +6,8 @@ metadata:
 spec:
   match:
     kinds:
-      - apiGroups: [""]
-        kinds: ["Pod"]
+      - apiGroups: ['']
+        kinds: ['Pod']
   parameters:
     repos:
       - ghcr.io/example

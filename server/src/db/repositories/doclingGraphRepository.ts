@@ -33,15 +33,23 @@ class DoclingGraphRepository {
   private async ensureConstraints() {
     if (this.initialized) return;
     await neo.run(
-      `CREATE CONSTRAINT IF NOT EXISTS ON (f:DocFragment) ASSERT f.id IS UNIQUE`
+      `CREATE CONSTRAINT IF NOT EXISTS ON (f:DocFragment) ASSERT f.id IS UNIQUE`,
     );
     await neo.run(
-      `CREATE CONSTRAINT IF NOT EXISTS ON (s:DocSummary) ASSERT s.id IS UNIQUE`
+      `CREATE CONSTRAINT IF NOT EXISTS ON (s:DocSummary) ASSERT s.id IS UNIQUE`,
     );
     this.initialized = true;
   }
 
-  async mergeFragments(fragments: FragmentGraphInput[], context: { tenantId: string; buildId?: string; testId?: string; prId?: string }) {
+  async mergeFragments(
+    fragments: FragmentGraphInput[],
+    context: {
+      tenantId: string;
+      buildId?: string;
+      testId?: string;
+      prId?: string;
+    },
+  ) {
     await this.ensureConstraints();
     for (const fragment of fragments) {
       const params = {
@@ -69,7 +77,10 @@ class DoclingGraphRepository {
     }
   }
 
-  async mergeSummary(summary: SummaryGraphInput, context: { buildId?: string; tenantId: string }) {
+  async mergeSummary(
+    summary: SummaryGraphInput,
+    context: { buildId?: string; tenantId: string },
+  ) {
     await this.ensureConstraints();
     await neo.run(
       `MERGE (s:DocSummary { id: $id })
@@ -89,7 +100,11 @@ class DoclingGraphRepository {
     );
   }
 
-  async linkTrace(requestId: string, tenantId: string, links: TraceLinkGraphInput[]) {
+  async linkTrace(
+    requestId: string,
+    tenantId: string,
+    links: TraceLinkGraphInput[],
+  ) {
     await this.ensureConstraints();
     for (const link of links) {
       await neo.run(

@@ -3,7 +3,7 @@ import {
   PiiOntologyEngine,
   PIICategory,
   RegulatoryFramework,
-  TrainingSample
+  TrainingSample,
 } from '../privacy/piiOntologyEngine';
 
 describe('PiiOntologyEngine', () => {
@@ -16,8 +16,8 @@ describe('PiiOntologyEngine', () => {
       contextualThreshold: 0.25,
       enrichment: {
         highRiskThreshold: 0.5,
-        criticalRiskThreshold: 0.85
-      }
+        criticalRiskThreshold: 0.85,
+      },
     });
 
     engine.registerPattern({
@@ -25,7 +25,7 @@ describe('PiiOntologyEngine', () => {
       description: 'Email address detection',
       regex: /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/,
       categories: ['CONTACT'],
-      confidenceBoost: 0.2
+      confidenceBoost: 0.2,
     });
 
     engine.registerPattern({
@@ -33,7 +33,7 @@ describe('PiiOntologyEngine', () => {
       description: 'North American phone number detection',
       regex: /(\+1[ \-]?)?\(?\d{3}\)?[ \-]?\d{3}[ \-]?\d{4}/,
       categories: ['CONTACT'],
-      confidenceBoost: 0.1
+      confidenceBoost: 0.1,
     });
 
     engine.registerPattern({
@@ -41,35 +41,35 @@ describe('PiiOntologyEngine', () => {
       description: 'US Social Security Number',
       regex: /\b\d{3}-\d{2}-\d{4}\b/,
       categories: ['IDENTIFIER', 'FINANCIAL'],
-      confidenceBoost: 0.3
+      confidenceBoost: 0.3,
     });
 
     trainingSamples = [
       {
         value: 'alice@example.com',
         context: 'customer contact email',
-        categories: ['CONTACT']
+        categories: ['CONTACT'],
       },
       {
         value: 'bob@example.org',
         context: 'user email login',
-        categories: ['CONTACT']
+        categories: ['CONTACT'],
       },
       {
         value: 'Account balance: 1520',
         context: 'financial summary report',
-        categories: ['FINANCIAL']
+        categories: ['FINANCIAL'],
       },
       {
         value: 'General system notification',
         context: 'anonymous event log',
-        categories: []
+        categories: [],
       },
       {
         value: 'Patient has diabetes diagnosis',
         context: 'clinical health record',
-        categories: ['HEALTH']
-      }
+        categories: ['HEALTH'],
+      },
     ];
 
     engine.train(trainingSamples);
@@ -89,10 +89,10 @@ describe('PiiOntologyEngine', () => {
           retentionPolicy: '3 years',
           lineage: {
             path: ['crm', 'contacts', 'primaryEmail'],
-            transformations: ['normalized', 'lowercased']
+            transformations: ['normalized', 'lowercased'],
           },
-          accessControls: ['crm-admin', 'crm-support']
-        }
+          accessControls: ['crm-admin', 'crm-support'],
+        },
       },
       {
         id: '2',
@@ -107,10 +107,10 @@ describe('PiiOntologyEngine', () => {
           retentionPolicy: '7 years',
           lineage: {
             path: ['ehr', 'encounters', 'clinicalNotes'],
-            transformations: ['de-identified for analytics']
+            transformations: ['de-identified for analytics'],
           },
-          accessControls: ['hipaa-compliant-zone']
-        }
+          accessControls: ['hipaa-compliant-zone'],
+        },
       },
       {
         id: '3',
@@ -122,8 +122,8 @@ describe('PiiOntologyEngine', () => {
           owner: 'finance',
           tags: ['payment', 'billing'],
           retentionPolicy: 'PCI retention policy',
-          accessControls: ['pci-segment']
-        }
+          accessControls: ['pci-segment'],
+        },
       },
       {
         id: '4',
@@ -134,9 +134,9 @@ describe('PiiOntologyEngine', () => {
           description: 'Support phone contact for case',
           tags: ['callback'],
           owner: 'support',
-          retentionPolicy: '1 year'
-        }
-      }
+          retentionPolicy: '1 year',
+        },
+      },
     ];
 
     const report = await engine.processRecords(records);
@@ -144,30 +144,37 @@ describe('PiiOntologyEngine', () => {
     expect(report.summary.totalRecords).toBe(records.length);
     expect(report.summary.piiRecords).toBeGreaterThanOrEqual(3);
 
-    const emailEntity = report.entities.find((entity) => entity.recordId === '1');
+    const emailEntity = report.entities.find(
+      (entity) => entity.recordId === '1',
+    );
     expect(emailEntity).toBeDefined();
     expect(emailEntity?.categories).toContain('CONTACT');
     expect(emailEntity?.metadata.recommendedControls).toEqual(
-      expect.arrayContaining(['Encrypt data at rest and in transit'])
+      expect.arrayContaining(['Encrypt data at rest and in transit']),
     );
-    expect(emailEntity?.regulatoryMappings.map((mapping) => mapping.framework)).toEqual(
-      expect.arrayContaining<RegulatoryFramework>(['GDPR', 'CCPA'])
-    );
+    expect(
+      emailEntity?.regulatoryMappings.map((mapping) => mapping.framework),
+    ).toEqual(expect.arrayContaining<RegulatoryFramework>(['GDPR', 'CCPA']));
 
-    const healthEntity = report.entities.find((entity) => entity.recordId === '2');
+    const healthEntity = report.entities.find(
+      (entity) => entity.recordId === '2',
+    );
     expect(healthEntity).toBeDefined();
     expect(healthEntity?.categories).toContain('HEALTH');
-    expect(healthEntity?.sensitivity === 'HIGH' || healthEntity?.sensitivity === 'CRITICAL').toBe(
-      true
-    );
-    expect(healthEntity?.regulatoryMappings.map((mapping) => mapping.framework)).toContain(
-      'HIPAA'
-    );
+    expect(
+      healthEntity?.sensitivity === 'HIGH' ||
+        healthEntity?.sensitivity === 'CRITICAL',
+    ).toBe(true);
+    expect(
+      healthEntity?.regulatoryMappings.map((mapping) => mapping.framework),
+    ).toContain('HIPAA');
 
-    const identifierEntity = report.entities.find((entity) => entity.recordId === '3');
+    const identifierEntity = report.entities.find(
+      (entity) => entity.recordId === '3',
+    );
     expect(identifierEntity).toBeDefined();
     expect(identifierEntity?.categories).toEqual(
-      expect.arrayContaining<PIICategory>(['IDENTIFIER', 'FINANCIAL'])
+      expect.arrayContaining<PIICategory>(['IDENTIFIER', 'FINANCIAL']),
     );
     expect(identifierEntity?.metadata.riskScore).toBeGreaterThanOrEqual(0.5);
 
@@ -176,14 +183,21 @@ describe('PiiOntologyEngine', () => {
     });
 
     const validations = report.validations;
-    const hipaaValidation = validations.find((validation) => validation.framework === 'HIPAA');
+    const hipaaValidation = validations.find(
+      (validation) => validation.framework === 'HIPAA',
+    );
     expect(hipaaValidation).toBeDefined();
     expect(hipaaValidation?.passed).toBe(true);
 
-    const targetedValidations = engine.validateAgainstFrameworks(report.entities, ['GDPR', 'CCPA']);
+    const targetedValidations = engine.validateAgainstFrameworks(
+      report.entities,
+      ['GDPR', 'CCPA'],
+    );
     expect(targetedValidations).toHaveLength(2);
     targetedValidations.forEach((validation) => {
-      expect(validation.framework === 'GDPR' || validation.framework === 'CCPA').toBe(true);
+      expect(
+        validation.framework === 'GDPR' || validation.framework === 'CCPA',
+      ).toBe(true);
       expect(validation.description.length).toBeGreaterThan(0);
     });
   });
@@ -196,8 +210,8 @@ describe('PiiOntologyEngine', () => {
         context: {
           system: 'marketing',
           field: 'email',
-          description: 'subscriber email record'
-        }
+          description: 'subscriber email record',
+        },
       },
       {
         id: 'summary-2',
@@ -205,15 +219,15 @@ describe('PiiOntologyEngine', () => {
         context: {
           system: 'ehr',
           field: 'diagnosis',
-          description: 'clinical diagnosis field'
-        }
-      }
+          description: 'clinical diagnosis field',
+        },
+      },
     ];
 
     const report = await engine.processRecords(records);
 
     expect(Object.keys(report.regulatorySummary)).toEqual(
-      expect.arrayContaining<RegulatoryFramework>(['GDPR', 'CCPA', 'HIPAA'])
+      expect.arrayContaining<RegulatoryFramework>(['GDPR', 'CCPA', 'HIPAA']),
     );
 
     const gdprSummary = report.regulatorySummary.GDPR;
@@ -222,8 +236,8 @@ describe('PiiOntologyEngine', () => {
     expect(gdprSummary.obligations).toEqual(
       expect.arrayContaining([
         'Document lawful basis for processing',
-        'Apply data minimization and purpose limitation controls'
-      ])
+        'Apply data minimization and purpose limitation controls',
+      ]),
     );
   });
 });

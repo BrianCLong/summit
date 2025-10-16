@@ -1,10 +1,10 @@
-import React from 'react'
-import { Box, Typography, Button } from '@mui/material'
-import { useNavigate } from 'react-router-dom'
-import { Home } from '@mui/icons-material'
+import React from 'react';
+import { Box, Typography, Button } from '@mui/material';
+import { useNavigate } from 'react-router-dom';
+import { Home } from '@mui/icons-material';
 
 function NotFound() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   return (
     <Box
@@ -17,7 +17,10 @@ function NotFound() {
         textAlign: 'center',
       }}
     >
-      <Typography variant="h1" sx={{ fontSize: '6rem', fontWeight: 'bold', color: 'primary.main' }}>
+      <Typography
+        variant="h1"
+        sx={{ fontSize: '6rem', fontWeight: 'bold', color: 'primary.main' }}
+      >
         404
       </Typography>
       <Typography variant="h4" gutterBottom>
@@ -34,7 +37,7 @@ function NotFound() {
         Go Home
       </Button>
     </Box>
-  )
+  );
 }
 
-export default NotFound
+export default NotFound;

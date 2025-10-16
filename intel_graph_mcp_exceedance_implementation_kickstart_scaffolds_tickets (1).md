@@ -3,6 +3,7 @@
 This pack gives us running starts for the **Firecracker Runtime Pooler**, **Deterministic Replay Engine**, **TS SDK Alpha**, and the **Conformance CLI** — plus CI, Helm, and test scaffolds. It’s aligned to the accepted ADRs and the 90‑day roadmap you captured. Everything is minimal, typed, observable, and ready to iterate.
 
 > Repo shape (monorepo via pnpm workspaces)
+
 ```
 intelgraph-mcp/
   package.json
@@ -85,6 +86,7 @@ intelgraph-mcp/
 ## Root workspace
 
 **package.json** (root)
+
 ```json
 {
   "name": "intelgraph-mcp",
@@ -100,25 +102,22 @@ intelgraph-mcp/
     "conformance": "pnpm --filter conformance-cli start",
     "bench": "pnpm --filter harness start"
   },
-  "workspaces": [
-    "services/*",
-    "packages/*",
-    "tools/*",
-    "benchmarks/*"
-  ]
+  "workspaces": ["services/*", "packages/*", "tools/*", "benchmarks/*"]
 }
 ```
 
 **pnpm-workspace.yaml**
+
 ```yaml
 packages:
-  - "services/*"
-  - "packages/*"
-  - "tools/*"
-  - "benchmarks/*"
+  - 'services/*'
+  - 'packages/*'
+  - 'tools/*'
+  - 'benchmarks/*'
 ```
 
 **tsconfig.base.json**
+
 ```json
 {
   "compilerOptions": {
@@ -139,13 +138,14 @@ packages:
 ```
 
 **.github/workflows/ci.yml**
+
 ```yaml
 name: ci
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 jobs:
   build-test:
     runs-on: ubuntu-latest
@@ -172,6 +172,7 @@ jobs:
 ## Service: runtime-pooler (Firecracker + deterministic sandboxes)
 
 **services/runtime-pooler/package.json**
+
 ```json
 {
   "name": "runtime-pooler",
@@ -207,6 +208,7 @@ jobs:
 ```
 
 **services/runtime-pooler/src/index.ts**
+
 ```ts
 import Fastify from 'fastify';
 import underPressure from '@fastify/under-pressure';
@@ -220,7 +222,7 @@ async function main() {
   app.register(underPressure, {
     maxEventLoopDelay: 100,
     maxHeapUsedBytes: 1024 * 1024 * 1024,
-    retryAfter: 30
+    retryAfter: 30,
   });
 
   registerApi(app);
@@ -229,10 +231,14 @@ async function main() {
   await app.listen({ port, host: '0.0.0.0' });
 }
 
-main().catch((e) => { console.error(e); process.exit(1); });
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});
 ```
 
 **services/runtime-pooler/src/api.ts**
+
 ```ts
 import { FastifyInstance } from 'fastify';
 import { z } from 'zod';
@@ -243,7 +249,9 @@ const scheduler = new Scheduler();
 
 export function registerApi(app: FastifyInstance) {
   app.post('/v1/session', async (req, reply) => {
-    const body = z.object({ toolClass: z.string(), caps: z.array(z.string()).default([]) }).parse(req.body);
+    const body = z
+      .object({ toolClass: z.string(), caps: z.array(z.string()).default([]) })
+      .parse(req.body);
     await authorize(req.headers.authorization, body.caps);
     const session = await scheduler.allocate(body.toolClass);
     return reply.code(201).send(session);
@@ -259,11 +267,17 @@ export function registerApi(app: FastifyInstance) {
 ```
 
 **services/runtime-pooler/src/scheduler.ts**
+
 ```ts
 import pLimit from 'p-limit';
 import { startMicroVM, invokeSandbox } from './firecracker';
 
-export type Session = { id: string; vmId: string; sandboxId: string; createdAt: string };
+export type Session = {
+  id: string;
+  vmId: string;
+  sandboxId: string;
+  createdAt: string;
+};
 
 export class Scheduler {
   private pool = new Map<string, { vmId: string; busy: boolean }>();
@@ -273,7 +287,12 @@ export class Scheduler {
     const vmId = await this.getOrStartVm(toolClass);
     const sandboxId = `sbx_${Math.random().toString(36).slice(2)}`;
     // TODO: snapshot/restore per toolClass for p95 cold-start ≤300ms.
-    return { id: `sess_${crypto.randomUUID()}`, vmId, sandboxId, createdAt: new Date().toISOString() };
+    return {
+      id: `sess_${crypto.randomUUID()}`,
+      vmId,
+      sandboxId,
+      createdAt: new Date().toISOString(),
+    };
   }
 
   async invoke(sessionId: string, fn: string, args: unknown) {
@@ -292,6 +311,7 @@ export class Scheduler {
 ```
 
 **services/runtime-pooler/src/firecracker.ts**
+
 ```ts
 import { execa } from 'execa';
 
@@ -302,15 +322,23 @@ export async function startMicroVM(toolClass: string): Promise<string> {
   return id;
 }
 
-export async function invokeSandbox(sessionId: string, fn: string, args: unknown) {
+export async function invokeSandbox(
+  sessionId: string,
+  fn: string,
+  args: unknown,
+) {
   // Placeholder: execute inside deterministic sandbox, capture I/O for replay.
   return { sessionId, fn, ok: true, result: { echo: args } };
 }
 ```
 
 **services/runtime-pooler/src/authz.ts**
+
 ```ts
-export async function authorize(authorization: unknown, requestedCaps: string[]) {
+export async function authorize(
+  authorization: unknown,
+  requestedCaps: string[],
+) {
   // Verify scoped capability token (OPA/ABAC call in real impl)
   if (!authorization) throw new Error('unauthorized');
   // TODO: enforce purpose tags and caps intersection.
@@ -318,6 +346,7 @@ export async function authorize(authorization: unknown, requestedCaps: string[])
 ```
 
 **services/runtime-pooler/src/telemetry.ts**
+
 ```ts
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
@@ -325,12 +354,16 @@ import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentation
 let sdk: NodeSDK | null = null;
 export async function initTelemetry(serviceName: string) {
   if (sdk) return;
-  sdk = new NodeSDK({ serviceName, instrumentations: [getNodeAutoInstrumentations()] });
+  sdk = new NodeSDK({
+    serviceName,
+    instrumentations: [getNodeAutoInstrumentations()],
+  });
   await sdk.start();
 }
 ```
 
 **services/runtime-pooler/tests/scheduler.spec.ts**
+
 ```ts
 import { describe, it, expect } from 'vitest';
 import { Scheduler } from '../src/scheduler';
@@ -350,6 +383,7 @@ describe('Scheduler', () => {
 ## Service: replay-engine (deterministic recorder/replayer)
 
 **services/replay-engine/package.json**
+
 ```json
 {
   "name": "replay-engine",
@@ -377,25 +411,52 @@ describe('Scheduler', () => {
 ```
 
 **services/replay-engine/src/model.ts**
+
 ```ts
-export type IOEvent = { t: number; dir: 'in'|'out'; channel: 'mcp'|'net'|'fs'|'env'; payload: unknown; hash?: string };
-export type Recording = { id: string; sessionId: string; seed: string; events: IOEvent[]; version: string };
-export type ReplayResult = { id: string; sessionId: string; divergence?: { at: number; expected: unknown; got: unknown } };
+export type IOEvent = {
+  t: number;
+  dir: 'in' | 'out';
+  channel: 'mcp' | 'net' | 'fs' | 'env';
+  payload: unknown;
+  hash?: string;
+};
+export type Recording = {
+  id: string;
+  sessionId: string;
+  seed: string;
+  events: IOEvent[];
+  version: string;
+};
+export type ReplayResult = {
+  id: string;
+  sessionId: string;
+  divergence?: { at: number; expected: unknown; got: unknown };
+};
 ```
 
 **services/replay-engine/src/recorder.ts**
+
 ```ts
 import { Recording, IOEvent } from './model';
 
 export class Recorder {
   start(sessionId: string, seed: string): Recording {
-    return { id: `rec_${crypto.randomUUID()}`, sessionId, seed, events: [], version: '1' };
+    return {
+      id: `rec_${crypto.randomUUID()}`,
+      sessionId,
+      seed,
+      events: [],
+      version: '1',
+    };
   }
-  push(rec: Recording, ev: IOEvent) { rec.events.push(ev); }
+  push(rec: Recording, ev: IOEvent) {
+    rec.events.push(ev);
+  }
 }
 ```
 
 **services/replay-engine/src/replayer.ts**
+
 ```ts
 import { Recording, ReplayResult } from './model';
 
@@ -412,6 +473,7 @@ export class Replayer {
 ```
 
 **services/replay-engine/src/redaction.ts**
+
 ```ts
 export function redact(obj: unknown): unknown {
   // Replace secrets with tokens; align to purpose/retention policy.
@@ -420,16 +482,23 @@ export function redact(obj: unknown): unknown {
 ```
 
 **services/replay-engine/src/storage.ts**
+
 ```ts
 import { Recording } from './model';
 const mem = new Map<string, Recording>();
 export const Storage = {
-  save(rec: Recording) { mem.set(rec.id, rec); return rec.id; },
-  get(id: string) { return mem.get(id); }
+  save(rec: Recording) {
+    mem.set(rec.id, rec);
+    return rec.id;
+  },
+  get(id: string) {
+    return mem.get(id);
+  },
 };
 ```
 
 **services/replay-engine/src/index.ts**
+
 ```ts
 import Fastify from 'fastify';
 import { Recorder } from './recorder';
@@ -459,6 +528,7 @@ app.listen({ port: Number(process.env.PORT || 8081), host: '0.0.0.0' });
 ```
 
 **services/replay-engine/tests/replayer.spec.ts**
+
 ```ts
 import { describe, it, expect } from 'vitest';
 import { Replayer } from '../src/replayer';
@@ -478,6 +548,7 @@ describe('Replayer', () => {
 ## Package: sdk-ts (3‑line connect, typed contracts)
 
 **packages/sdk-ts/package.json**
+
 ```json
 {
   "name": "@intelgraph/mcp-sdk",
@@ -503,23 +574,31 @@ describe('Replayer', () => {
 ```
 
 **packages/sdk-ts/src/types.ts**
+
 ```ts
 export type Session = { id: string };
 export type InvokeArgs = { fn: string; args: unknown };
 ```
 
 **packages/sdk-ts/src/client.ts**
+
 ```ts
 import { Session, InvokeArgs } from './types';
 
 export class McpClient {
-  constructor(private baseUrl: string, private token: string) {}
+  constructor(
+    private baseUrl: string,
+    private token: string,
+  ) {}
 
   async connect(toolClass: string): Promise<Session> {
     const res = await fetch(`${this.baseUrl}/v1/session`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', 'authorization': `Bearer ${this.token}` },
-      body: JSON.stringify({ toolClass })
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${this.token}`,
+      },
+      body: JSON.stringify({ toolClass }),
     });
     if (!res.ok) throw new Error(`connect failed: ${res.status}`);
     return res.json();
@@ -528,8 +607,11 @@ export class McpClient {
   async invoke(session: Session, input: InvokeArgs) {
     const res = await fetch(`${this.baseUrl}/v1/session/${session.id}/invoke`, {
       method: 'POST',
-      headers: { 'content-type': 'application/json', 'authorization': `Bearer ${this.token}` },
-      body: JSON.stringify(input)
+      headers: {
+        'content-type': 'application/json',
+        authorization: `Bearer ${this.token}`,
+      },
+      body: JSON.stringify(input),
     });
     if (!res.ok) throw new Error(`invoke failed: ${res.status}`);
     return res.json();
@@ -538,12 +620,14 @@ export class McpClient {
 ```
 
 **packages/sdk-ts/src/index.ts**
+
 ```ts
 export * from './client';
 export * from './types';
 ```
 
 **packages/sdk-ts/tests/client.spec.ts**
+
 ```ts
 import { describe, it, expect } from 'vitest';
 import { McpClient } from '../src/client';
@@ -561,6 +645,7 @@ describe('McpClient', () => {
 ## Tool: conformance-cli (self‑cert for marketplace)
 
 **tools/conformance-cli/package.json**
+
 ```json
 {
   "name": "@intelgraph/mcp-conformance-cli",
@@ -585,6 +670,7 @@ describe('McpClient', () => {
 ```
 
 **tools/conformance-cli/bin/ig-mcp-conformance.ts**
+
 ```ts
 #!/usr/bin/env tsx
 import { Command } from 'commander';
@@ -603,6 +689,7 @@ program.parse();
 ```
 
 **tools/conformance-cli/src/runner.ts**
+
 ```ts
 import * as latency from './checks/latency';
 import * as auth from './checks/auth';
@@ -614,16 +701,22 @@ export async function runAll(endpoint: string, token?: string) {
   const ctx = { endpoint, token } as const;
   return {
     summary: {
-      passed: 0, failed: 0
+      passed: 0,
+      failed: 0,
     },
     checks: await Promise.all([
-      latency.run(ctx), auth.run(ctx), sandbox.run(ctx), schema.run(ctx), provenance.run(ctx)
-    ])
+      latency.run(ctx),
+      auth.run(ctx),
+      sandbox.run(ctx),
+      schema.run(ctx),
+      provenance.run(ctx),
+    ]),
   };
 }
 ```
 
 **tools/conformance-cli/src/checks/latency.ts**
+
 ```ts
 export async function run(ctx: { endpoint: string; token?: string }) {
   const t0 = Date.now();
@@ -641,6 +734,7 @@ export async function run(ctx: { endpoint: string; token?: string }) {
 ## Benchmarks harness (baseline)
 
 **benchmarks/harness/package.json**
+
 ```json
 {
   "name": "mcp-bench-harness",
@@ -652,6 +746,7 @@ export async function run(ctx: { endpoint: string; token?: string }) {
 ```
 
 **benchmarks/harness/k6/pooler-baseline.js**
+
 ```js
 import http from 'k6/http';
 import { check, sleep } from 'k6';
@@ -659,13 +754,23 @@ import { check, sleep } from 'k6';
 export const options = { vus: 50, duration: '1m' };
 
 export default function () {
-  const res = http.post(`${__ENV.ENDPOINT}/v1/session`, JSON.stringify({ toolClass: 'github' }), { headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${__ENV.TOKEN}` } });
-  check(res, { '201': (r) => r.status === 201 });
+  const res = http.post(
+    `${__ENV.ENDPOINT}/v1/session`,
+    JSON.stringify({ toolClass: 'github' }),
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${__ENV.TOKEN}`,
+      },
+    },
+  );
+  check(res, { 201: (r) => r.status === 201 });
   sleep(0.1);
 }
 ```
 
 **benchmarks/harness/src/run.ts**
+
 ```ts
 console.log('Run k6 with ENDPOINT and TOKEN envs against pooler-baseline.js');
 ```
@@ -675,23 +780,25 @@ console.log('Run k6 with ENDPOINT and TOKEN envs against pooler-baseline.js');
 ## Ops: Helm charts (minimal values)
 
 **ops/helm/runtime-pooler/values.yaml**
+
 ```yaml
 image: { repository: intelgraph/runtime-pooler, tag: v0.1.0 }
 replicaCount: 2
 resources:
-  requests: { cpu: "250m", memory: "256Mi" }
-  limits: { cpu: "1", memory: "512Mi" }
+  requests: { cpu: '250m', memory: '256Mi' }
+  limits: { cpu: '1', memory: '512Mi' }
 otel:
-  endpoint: "http://otel-collector:4317"
+  endpoint: 'http://otel-collector:4317'
 ```
 
 **ops/helm/replay-engine/values.yaml**
+
 ```yaml
 image: { repository: intelgraph/replay-engine, tag: v0.1.0 }
 replicaCount: 1
 resources:
-  requests: { cpu: "200m", memory: "256Mi" }
-  limits: { cpu: "500m", memory: "512Mi" }
+  requests: { cpu: '200m', memory: '256Mi' }
+  limits: { cpu: '500m', memory: '512Mi' }
 ```
 
 ---
@@ -699,48 +806,52 @@ resources:
 ## Incremental Tickets (ready to open)
 
 **EPIC: Runtime (Pooler) — P95 cold start ≤300ms**
-- RT-01 Implement Firecracker controller (API sock, jailer, snapshot/restore). *3d*
-- RT-02 Snapshot cache per toolClass with LRU + prewarm cron. *2d*
-- RT-03 Deterministic sandbox runner (syscall filter, network egress policy). *4d*
-- RT-04 OTEL spans for session start + invoke; pool hit metric. *1d*
-- RT-05 k6 baseline vs legacy runtime; report deltas. *1d*
+
+- RT-01 Implement Firecracker controller (API sock, jailer, snapshot/restore). _3d_
+- RT-02 Snapshot cache per toolClass with LRU + prewarm cron. _2d_
+- RT-03 Deterministic sandbox runner (syscall filter, network egress policy). _4d_
+- RT-04 OTEL spans for session start + invoke; pool hit metric. _1d_
+- RT-05 k6 baseline vs legacy runtime; report deltas. _1d_
 
 **EPIC: Replay — Deterministic replays ≥95%**
-- RP-01 Event taps (mcp/net/fs/env) + hashing; seed capture. *3d*
-- RP-02 Side‑effect stubs registry + policy binding. *3d*
-- RP-03 Divergence detector + causal graph UI (MVP). *4d*
-- RP-04 Privacy redaction + retention enforcement. *2d*
+
+- RP-01 Event taps (mcp/net/fs/env) + hashing; seed capture. _3d_
+- RP-02 Side‑effect stubs registry + policy binding. _3d_
+- RP-03 Divergence detector + causal graph UI (MVP). _4d_
+- RP-04 Privacy redaction + retention enforcement. _2d_
 
 **EPIC: Marketplace/DX**
-- DX-01 SDK alpha ergonomics (connect/invoke/stream + typings). *3d*
-- DX-02 Local emulator for tool authors. *3d*
-- DX-03 Conformance CLI checks mapped to spec; badges. *4d*
+
+- DX-01 SDK alpha ergonomics (connect/invoke/stream + typings). _3d_
+- DX-02 Local emulator for tool authors. _3d_
+- DX-03 Conformance CLI checks mapped to spec; badges. _4d_
 
 **EPIC: Compliance/Benchmarks**
-- CB-01 Provenance ledger write-path hooks; signed artifacts. *3d*
-- CB-02 Public shootout dashboard scaffold; signed results. *3d*
+
+- CB-01 Provenance ledger write-path hooks; signed artifacts. _3d_
+- CB-02 Public shootout dashboard scaffold; signed results. _3d_
 
 ---
 
 ## Acceptance & Verification (initial)
-- p95 session start ≤ 250 ms (k6 + OTEL traces).  
-- p95 cold start ≤ 300 ms (pool hit ratio ≥ 0.8 at steady state).  
-- Replay success rate ≥ 95% on golden fixtures; divergence triage report.  
-- Conformance CLI ≥ 90% pass on partner servers; badges generated.  
+
+- p95 session start ≤ 250 ms (k6 + OTEL traces).
+- p95 cold start ≤ 300 ms (pool hit ratio ≥ 0.8 at steady state).
+- Replay success rate ≥ 95% on golden fixtures; divergence triage report.
+- Conformance CLI ≥ 90% pass on partner servers; badges generated.
 - SBOM built on CI; signatures verified in publish pipeline.
 
 ---
 
 ### How to run locally
-1) `pnpm i && pnpm build`  
-2) `pnpm --filter runtime-pooler dev` (port 8080)  
-3) `pnpm --filter replay-engine dev` (port 8081)  
-4) `pnpm --filter @intelgraph/mcp-sdk build` then import in sample.  
-5) `ENDPOINT=http://localhost:8080 TOKEN=dev k6 run benchmarks/harness/k6/pooler-baseline.js`
+
+1. `pnpm i && pnpm build`
+2. `pnpm --filter runtime-pooler dev` (port 8080)
+3. `pnpm --filter replay-engine dev` (port 8081)
+4. `pnpm --filter @intelgraph/mcp-sdk build` then import in sample.
+5. `ENDPOINT=http://localhost:8080 TOKEN=dev k6 run benchmarks/harness/k6/pooler-baseline.js`
 
 > These are thin, testable slices to get engineering unblocked today. Next pass will wire Firecracker APIs, side‑effect stubs, and conformance checks to your specs and ADRs.
-
-
 
 ---
 
@@ -749,47 +860,56 @@ resources:
 **Objective:** Incorporate the widely adopted MCP mental model (Host ↔ MCP Client ↔ MCP Server) and full protocol stack (Transport → JSON‑RPC 2.0 → Capability layer) into our runtime, SDK, conformance suite, benchmarks, and docs so we’re best‑in‑class and obviously standards‑aligned.
 
 ### Scope & Impacts
+
 - **Transports:** Support both **STDIO (local)** and **HTTP + SSE (remote streaming)** in the pooler and SDK. The router negotiates transport per server and enforces auth (mTLS/JWT) for HTTP and OS‑level policy for STDIO.
 - **Protocol:** First‑class **JSON‑RPC 2.0** framing and error semantics (id correlation, `-32600/-32601/-32602/-32603` handling; no silent coercions). Add explicit batch handling = **not supported** unless whitelisted (per MCP guidance).
 - **Capabilities:** Canonical primitives — **Tools** (actions), **Resources** (read‑only data), **Prompts** (templates/flows). The SDK exposes typed accessors; the conformance CLI validates declarations vs behavior.
 - **Roles:** Clarify **Host App** (CompanyOS/Switchboard) responsibilities vs **MCP Client** (per‑server connection, 1:1) vs **MCP Server** (integration wrapper). Our registry and DX docs adopt this vocabulary.
 
 ### SDK Work (TypeScript alpha)
-- **SDK-TR-01 (new):** Add **SSE event stream** helper with auto‑reconnect, backoff, and back‑pressure (pause/resume) APIs. *3d*
-- **SDK-TR-02:** Implement **dual transport**: `stdio://` endpoints spawn local servers; `https://` uses fetch + SSE. *4d*
-- **SDK-CP-01:** Capability discovery: `listPrompts`, `listResources`, `listTools`; strong types + Zod schemas. *2d*
-- **SDK-CP-02:** **Streaming invokes** with iterator‑style consumption and cancellation tokens. *2d*
-- **SDK-OBS-01:** Correlate **JSON‑RPC id** ↔ OTEL span id; attach transport/method/capability attributes. *1d*
+
+- **SDK-TR-01 (new):** Add **SSE event stream** helper with auto‑reconnect, backoff, and back‑pressure (pause/resume) APIs. _3d_
+- **SDK-TR-02:** Implement **dual transport**: `stdio://` endpoints spawn local servers; `https://` uses fetch + SSE. _4d_
+- **SDK-CP-01:** Capability discovery: `listPrompts`, `listResources`, `listTools`; strong types + Zod schemas. _2d_
+- **SDK-CP-02:** **Streaming invokes** with iterator‑style consumption and cancellation tokens. _2d_
+- **SDK-OBS-01:** Correlate **JSON‑RPC id** ↔ OTEL span id; attach transport/method/capability attributes. _1d_
 
 ### Runtime/Pooler
-- **RT-TR-06 (new):** **HTTP+SSE gateway** with mTLS and SSE fan‑out; p95 server→client latency ≤ **250 ms** (subscriptions SLO). *3d*
-- **RT-TR-07:** **STDIO adapter** for local servers with OS sandboxing; enforce cgroup limits and seccomp profile. *3d*
-- **RT-PR-08:** JSON‑RPC 2.0 validator and error mapper; reject malformed frames with proper codes. *2d*
-- **RT-CB-09:** Capability registry per session; enforce **Resources = read‑only** (deny mutations); **Tools = side‑effectful** audited via ledger; **Prompts = templates** versioned. *3d*
+
+- **RT-TR-06 (new):** **HTTP+SSE gateway** with mTLS and SSE fan‑out; p95 server→client latency ≤ **250 ms** (subscriptions SLO). _3d_
+- **RT-TR-07:** **STDIO adapter** for local servers with OS sandboxing; enforce cgroup limits and seccomp profile. _3d_
+- **RT-PR-08:** JSON‑RPC 2.0 validator and error mapper; reject malformed frames with proper codes. _2d_
+- **RT-CB-09:** Capability registry per session; enforce **Resources = read‑only** (deny mutations); **Tools = side‑effectful** audited via ledger; **Prompts = templates** versioned. _3d_
 
 ### Replay/Observability
-- **RP-TR-05 (new):** Record raw **JSON‑RPC frames** and **SSE events** (with seeds) as first‑class IO channels for deterministic replay. *3d*
-- **RP-TR-06:** **Journey-of-a-request trace**: Host→Client→Server→Downstream annotated spans; export causal graph. *2d*
+
+- **RP-TR-05 (new):** Record raw **JSON‑RPC frames** and **SSE events** (with seeds) as first‑class IO channels for deterministic replay. _3d_
+- **RP-TR-06:** **Journey-of-a-request trace**: Host→Client→Server→Downstream annotated spans; export causal graph. _2d_
 
 ### Conformance CLI (expand to protocol spec)
-- **CONF-TPT-01:** **Transport matrix** checks: HTTP+SSE streaming continuity under packet loss; STDIO round‑trip correctness. *3d*
-- **CONF-JRPC-02:** JSON‑RPC id correlation, error codes, invalid request handling; schema drift detection. *2d*
-- **CONF-CAP-03:** Verify capability declarations match observed behavior (resources immutable; tools effectful; prompts enumerated). *2d*
-- **CONF-SEC-04:** Auth across transports (mTLS for HTTP; OS identity for STDIO), capability‑scoped tokens enforced end‑to‑end. *2d*
+
+- **CONF-TPT-01:** **Transport matrix** checks: HTTP+SSE streaming continuity under packet loss; STDIO round‑trip correctness. _3d_
+- **CONF-JRPC-02:** JSON‑RPC id correlation, error codes, invalid request handling; schema drift detection. _2d_
+- **CONF-CAP-03:** Verify capability declarations match observed behavior (resources immutable; tools effectful; prompts enumerated). _2d_
+- **CONF-SEC-04:** Auth across transports (mTLS for HTTP; OS identity for STDIO), capability‑scoped tokens enforced end‑to‑end. _2d_
 
 ### Benchmarks (add streaming + local mode)
-- **BENCH-SSE-01:** Measure SSE **message latency** and **throughput** under 50/200 VU; target p95 ≤ 250 ms; error budget burn alarms. *2d*
-- **BENCH-STDIO-02:** Local STDIO invoke p95 ≤ **20 ms** on dev iron; document variance across OSes. *1d*
+
+- **BENCH-SSE-01:** Measure SSE **message latency** and **throughput** under 50/200 VU; target p95 ≤ 250 ms; error budget burn alarms. _2d_
+- **BENCH-STDIO-02:** Local STDIO invoke p95 ≤ **20 ms** on dev iron; document variance across OSes. _1d_
 
 ### SRE & Security Runbooks
+
 - **SSE incident guide:** stuck streams, missed heartbeats, replay gaps, CDN/proxy compatibility.
 - **Local server hardening:** guidance for sandboxing, path/FD whitelists, and environment sealing for STDIO servers.
 
 ### Data/Policy & Registry
+
 - **Registry metadata additions:** transport(s) supported, capability manifest (tools/resources/prompts), streaming readiness, and required scopes.
 - **Retention defaults:** **Resources** results → `standard-365d`; **Tools** outputs with PII → `short-30d` unless legal‑hold.
 
 ### Acceptance Criteria (added)
+
 - Dual transport supported and validated by conformance suite.
 - JSON‑RPC 2.0 compliance: 100% of negative tests pass; **no** protocol‑level warnings in traces.
 - Streaming (SSE) p95 server→client latency ≤ **250 ms**, packet‑loss test shows graceful recovery.
@@ -797,6 +917,7 @@ resources:
 - Capability semantics enforced (resource immutability, prompt versioning, tool side‑effect audit) with evidence in provenance ledger.
 
 ### New Files/Edits
+
 - **packages/sdk-ts/src/sse.ts** — SSE helper with iterator API and backoff.
 - **services/runtime-pooler/src/transport/httpSse.ts** — SSE gateway & keepalive.
 - **services/runtime-pooler/src/transport/stdio.ts** — STDIO adapter + sandboxing.
@@ -805,8 +926,6 @@ resources:
 - **benchmarks/harness/k6/sse-latency.js** — streaming benchmark.
 - **docs** — Update `docs/conformance/mcp-tool-server-conformance.md` to include transport/protocol/capability sections; add developer guides for Host/Client/Server roles.
 
-
-
 ---
 
 ## ByteByteGo Article Integration — Deepening & Actions
@@ -814,10 +933,12 @@ resources:
 **Source context:** ByteByteGo, “Why Anthropic’s MCP is a Big Deal,” Sep 30, 2025. This section distills the explainer into concrete design choices, checks, and developer experience improvements aligned to our roadmap.
 
 ### Industry Signals & Positioning
+
 - Treat MCP as the **universal adapter** for AI connectivity; our messaging should mirror the USB‑C analogy and emphasize **addition vs. multiplication** of integrations.
 - Public roadmap note: **host ↔ client ↔ server** roles are first‑class in IntelGraph (CompanyOS/Switchboard = Host; our adapters = Clients; partner integrations = Servers). Marketecture slide + docs update.
 
 ### Protocol Stack Deepening (Transport → JSON‑RPC 2.0 → Capabilities)
+
 - **Transport**
   - Local: **STDIO** default for low‑latency dev & on‑prem; locked with cgroups/seccomp and **no‑net by default**.
   - Remote: **HTTP requests + SSE streaming responses**; built‑in **mTLS** and connection heartbeats; tolerant of packet loss with resume tokens.
@@ -831,27 +952,32 @@ resources:
   - **Prompts = versioned templates**; changes produce new semver + hash.
 
 ### Journey of a Request → Observability Mapping
+
 - Emit spans for **Host→Client→Server→Downstream** legs; attach transport, size, and auth mode attributes.
 - Record raw frames (**JSON‑RPC** and **SSE**) into the Recorder with seed + wall‑clock; replayer enforces causal ordering.
 - Add **causal graph** view in replay UI (request node → tool call → downstream I/O → response node).
 
 ### Conformance Matrix (expanded tests)
+
 - **Transport**: HTTP+SSE continuity under jitter/packet loss; STDIO sandboxing blocks outbound network by default.
 - **Protocol**: negative tests for malformed JSON, unknown method, invalid params, id reuse, and batch rejection.
 - **Capabilities**: declaration vs. behavior checks (resources truly read‑only; prompts enumerated & versioned; tools produce effect records).
 - **Security**: mTLS verification, JWT expiry/clock‑skew handling, capability‑scoped tokens enforced end‑to‑end.
 
 ### Benchmarks Enhancements
+
 - **Streaming latency**: p95 server→client ≤ **250 ms** at 50/200 VU, with 1% packet loss.
 - **Local STDIO**: p95 invoke ≤ **20 ms** on dev iron; doc variance.
 - Publish **addition‑not‑multiplication** integration cost chart in blog.
 
 ### Docs & DX Tasks
+
 - Add **Host/Client/Server** role primers to the SDK & Conformance docs.
 - Provide **reference flows**: GitHub server (resource + tool), Postgres server (resource → SQL), and a Prompt bundle example.
 - Include **developer cookbook**: build, test, debug MCP servers with our emulator & CLI.
 
 ### New Tickets (add to backlog)
+
 - **RT-TR-10:** STDIO seccomp profile & fs/FD whitelist; default **no‑net**; escape‑hatch via capability.
 - **RT-TR-11:** SSE resume tokens + keepalive/heartbeat; proxy/CDN compatibility matrix.
 - **SDK-CP-03:** Capability discovery APIs (`listTools`, `listResources`, `listPrompts`) + Zod typings.
@@ -860,12 +986,14 @@ resources:
 - **DOCS-ROLE-01:** Role mapping section + diagrams (USB‑C analogy, journey‑of‑request).
 
 ### Acceptance Criteria (added)
+
 - **Dual transport** passes transport tests (continuity, sandbox) with green badges.
 - **JSON‑RPC 2.0** negative tests: 100% pass; no protocol warnings in traces.
 - **Capability semantics** enforced with ledger evidence (immutable resources, effectful tools, versioned prompts).
 - **SSE** p95 ≤ 250 ms; **STDIO** p95 ≤ 20 ms under baseline hardware.
 
 ### File Stubs to Add
+
 - `packages/sdk-ts/src/sse.ts` (iterator API, backoff, pause/resume)
 - `services/runtime-pooler/src/transport/httpSse.ts`
 - `services/runtime-pooler/src/transport/stdio.ts`
@@ -873,4 +1001,3 @@ resources:
 - `tools/conformance-cli/src/checks/jsonrpc.ts`
 - `benchmarks/harness/k6/sse-latency.js`
 - `docs/architecture/mcp-roles-and-journeys.md` (marketecture + diagrams)
-

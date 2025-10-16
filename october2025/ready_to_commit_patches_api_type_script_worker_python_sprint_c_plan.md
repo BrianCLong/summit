@@ -1,6 +1,7 @@
 # Ready-to-Commit Patches (API=TypeScript, Worker=Python) + Sprint C Plan
 
 **Repo read-in outcome** (from uploaded `summit-main` zip):
+
 - **API**: TypeScript/Node (`services/api/src/*.ts` — e.g., `app.ts`, routes, DB adapters).
 - **Worker**: Python (`ga-graphai/packages/worker/src/*.py` — e.g., `main.py`, `automation.py`, tests present).
 - Also a lightweight Python worker at `services/workers/web_fetch_worker.py` (kept unchanged).
@@ -238,6 +239,7 @@ infra/opa/bundle/data/policy_versions.json
 **Goals**: Replace stubs with live OPA, achieve ≥95% coverage of privileged API/Worker paths with receipts; wire dual‑graph attestation for all write ops; turn on CI budgets.
 
 **Backlog**
+
 - [ ] API: replace route‑level TODOs with `attest()` calls in `cases.ts`, `evidence.ts`, `ingest.ts`.
 - [ ] API: add `x-policy-version` header + OTEL attrs.
 - [ ] Worker: wrap top 3 job types with `with_receipt()`; emit op_ids and add attest calls post‑mutation.
@@ -246,14 +248,16 @@ infra/opa/bundle/data/policy_versions.json
 - [ ] Docs: runbooks + rollback plan (feature flag `RECEIPTS_ENABLED`).
 
 **Exit/KPIs**
+
 - Receipts present on 95%+ privileged requests/jobs.
-- Zero policy oracle mismatches on suite; 
-- Dual‑graph divergence rate 0% on tests; 
+- Zero policy oracle mismatches on suite;
+- Dual‑graph divergence rate 0% on tests;
 - Latency budgets met (authz p95<12ms; anchor p95<15ms local).
 
 ---
 
 # Notes
+
 - No GPL/AGPL. All added code Apache‑2.0.
 - Minimal invasiveness: middleware/interceptor pattern and fire‑and‑forget anchoring keeps hot paths fast.
 - Secrets: ensure `PRIVATE_KEY_PEM` or `LEDGER_SIGNING_SECRET` provided in env or KMS.

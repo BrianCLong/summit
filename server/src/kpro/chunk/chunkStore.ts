@@ -1,8 +1,5 @@
 import crypto from 'crypto';
-import {
-  ChunkRecord,
-  DocumentRecord,
-} from '../types.js';
+import { ChunkRecord, DocumentRecord } from '../types.js';
 
 export interface ChunkStore {
   deleteByDocumentIds(ids: string[]): Promise<number>;
@@ -45,7 +42,10 @@ export class SimpleTextChunkingStrategy implements ChunkingStrategy {
     for (const text of texts) {
       const embedding = await this.embedding(text);
       chunks.push({
-        id: crypto.createHash('sha1').update(`${document.id}:${index}:${text}`).digest('hex'),
+        id: crypto
+          .createHash('sha1')
+          .update(`${document.id}:${index}:${text}`)
+          .digest('hex'),
         documentId: document.id,
         text,
         embedding,
@@ -69,7 +69,9 @@ export class InMemoryChunkStore implements ChunkStore {
   linkDocuments(documentId: string, relatedIds: string[]): void {
     const doc = this.documents.get(documentId);
     if (!doc) throw new Error(`Document ${documentId} not registered`);
-    doc.relatedIds = Array.from(new Set([...(doc.relatedIds ?? []), ...relatedIds]));
+    doc.relatedIds = Array.from(
+      new Set([...(doc.relatedIds ?? []), ...relatedIds]),
+    );
     this.documents.set(documentId, doc);
   }
 
@@ -95,11 +97,17 @@ export class InMemoryChunkStore implements ChunkStore {
     return impacted;
   }
 
-  async replaceChunks(documentId: string, chunks: ChunkRecord[]): Promise<void> {
+  async replaceChunks(
+    documentId: string,
+    chunks: ChunkRecord[],
+  ): Promise<void> {
     if (!this.documents.has(documentId)) {
       throw new Error(`Document ${documentId} not found`);
     }
-    this.chunks.set(documentId, chunks.map((c) => ({ ...c })));
+    this.chunks.set(
+      documentId,
+      chunks.map((c) => ({ ...c })),
+    );
     const doc = this.documents.get(documentId)!;
     this.documents.set(documentId, { ...doc, version: doc.version + 1 });
   }

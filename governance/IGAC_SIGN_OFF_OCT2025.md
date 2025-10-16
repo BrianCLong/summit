@@ -12,6 +12,7 @@
 The Intelligence Governance and Compliance (IGAC) committee has reviewed and approved the October 2025 release (2025.10.HALLOWEEN) for production deployment. All policy controls, provenance tracking, and security gates meet organizational standards.
 
 **Key Findings**:
+
 - ✅ All 9 policy files reviewed and approved
 - ✅ Policy bundle SHAs cryptographically pinned to release
 - ✅ Provenance tracking operational and verified
@@ -25,21 +26,22 @@ The Intelligence Governance and Compliance (IGAC) committee has reviewed and app
 
 ### Policy Files Reviewed (9 Total)
 
-| Policy File | SHA256 Hash | Purpose | Status |
-|------------|-------------|---------|--------|
-| `abac.rego` | `8b05548c...ce5cf1a4` | ABAC authorization | ✅ Approved |
-| `abac_tenant_isolation.rego` | `b2db308e...6bc353f5` | Tenant isolation | ✅ Approved |
-| `approval.rego` | `80599782...562b8b12` | Approval workflows | ✅ Approved |
-| `authority_binding.rego` | `0dd2fad0...7cdb0db7` | Authority binding | ✅ Approved |
-| `aws_iam.rego` | `40dc76e8...963c082e` | AWS IAM integration | ✅ Approved |
-| `aws_s3.rego` | `c9611c8b...6f621be` | AWS S3 controls | ✅ Approved |
-| `budget.rego` | `800be371...74bcbf06` | Budget governance | ✅ Approved |
-| `export.rego` | `a3ba32b0...2df52bae` | Export controls | ✅ Approved |
-| `switchboard.rego` | `2249a125...f833cf44` | Switchboard routing | ✅ Approved |
+| Policy File                  | SHA256 Hash           | Purpose             | Status      |
+| ---------------------------- | --------------------- | ------------------- | ----------- |
+| `abac.rego`                  | `8b05548c...ce5cf1a4` | ABAC authorization  | ✅ Approved |
+| `abac_tenant_isolation.rego` | `b2db308e...6bc353f5` | Tenant isolation    | ✅ Approved |
+| `approval.rego`              | `80599782...562b8b12` | Approval workflows  | ✅ Approved |
+| `authority_binding.rego`     | `0dd2fad0...7cdb0db7` | Authority binding   | ✅ Approved |
+| `aws_iam.rego`               | `40dc76e8...963c082e` | AWS IAM integration | ✅ Approved |
+| `aws_s3.rego`                | `c9611c8b...6f621be`  | AWS S3 controls     | ✅ Approved |
+| `budget.rego`                | `800be371...74bcbf06` | Budget governance   | ✅ Approved |
+| `export.rego`                | `a3ba32b0...2df52bae` | Export controls     | ✅ Approved |
+| `switchboard.rego`           | `2249a125...f833cf44` | Switchboard routing | ✅ Approved |
 
 ### Bundle Integrity
 
 **Combined Policy Bundle SHA256**:
+
 ```
 95e8a7c3d4f2b1a068574e9f3c2d1b5a847f6e9d0c3b2a1f5e4d3c2b1a098765
 ```
@@ -47,6 +49,7 @@ The Intelligence Governance and Compliance (IGAC) committee has reviewed and app
 **Git Tag**: `policy-bundle-2025.10.HALLOWEEN`
 
 **Verification Command**:
+
 ```bash
 cd policies && sha256sum -c ../governance/policy-bundle-shas-2025.10.HALLOWEEN.txt
 ```
@@ -58,26 +61,31 @@ cd policies && sha256sum -c ../governance/policy-bundle-shas-2025.10.HALLOWEEN.t
 ### Supply Chain Attestation
 
 **SBOM Hash** (CycloneDX):
+
 ```
 a1b2c3d4e5f6789a0b1c2d3e4f5a6b7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3
 ```
 
 **Provenance ID** (SLSA v0.2):
+
 ```
 sha256:abc123def456789fedcba098765432100112233445566778899aabbccddeeff
 ```
 
 **Artifacts**:
+
 - `release-artifacts/sbom.json` (522 bytes)
 - `release-artifacts/provenance.json` (447 bytes)
 - `release-artifacts/checksums.txt` (158 bytes)
 
 **Attached to GitHub Release**:
+
 - https://github.com/BrianCLong/summit/releases/tag/2025.10.HALLOWEEN
 
 ### Provenance Chain Verification
 
 ✅ **All provenance chains validated**:
+
 1. Code → Build → Image → Registry
 2. Policy → Bundle → Tag → Release
 3. Config → Deployment → Runtime
@@ -96,6 +104,7 @@ sha256:abc123def456789fedcba098765432100112233445566778899aabbccddeeff
 - Audit trail complete
 
 **Test Results**:
+
 - Contrived violation: ✅ Blocked as expected
 - Valid release: ✅ Passed with artifact upload
 - Policy outcomes: ✅ Logged and auditable
@@ -110,6 +119,7 @@ sha256:abc123def456789fedcba098765432100112233445566778899aabbccddeeff
 - "Why blocked?" explanations functional
 
 **Test Results**:
+
 - Export without step-up: ✅ Blocked with explanation
 - Export with step-up: ✅ Allowed with audit evidence
 - Policy binding: ✅ Triggers correctly
@@ -132,6 +142,7 @@ sha256:abc123def456789fedcba098765432100112233445566778899aabbccddeeff
 **Status**: ✅ VERIFIED
 
 **Bundle Contents**:
+
 - 11 Docker images with SHA256 digests
 - Private registry mirror scripts
 - Configuration injection templates
@@ -140,12 +151,14 @@ sha256:abc123def456789fedcba098765432100112233445566778899aabbccddeeff
 - Comprehensive documentation
 
 **Checksum Verification**:
+
 ```bash
 ✅ images.sha256 - All checksums match
 ✅ manifest.sha256 - Bundle integrity verified
 ```
 
 **Deployment Test**:
+
 ```
 ✅ Registry setup complete
 ✅ Application deployed
@@ -168,6 +181,7 @@ This document serves as the official IGAC chair notes for the October 2025 relea
 ### ✅ 2. Policy Bundle SHAs Recorded and Pinned
 
 All policy file SHAs have been:
+
 - Cryptographically hashed (SHA256)
 - Recorded in JSON manifest
 - Pinned to Git tag `policy-bundle-2025.10.HALLOWEEN`
@@ -178,6 +192,7 @@ All policy file SHAs have been:
 ### ✅ 3. Sign-Off Doc Linked in Release Notes
 
 This sign-off document is referenced in:
+
 - Release Notes: `docs/RELEASE_NOTES_2025.10.HALLOWEEN.md`
 - GitHub Release: https://github.com/BrianCLong/summit/releases/tag/2025.10.HALLOWEEN
 
@@ -206,12 +221,12 @@ sha256sum -c ../governance/policy-bundle-shas-2025.10.HALLOWEEN.txt
 
 ### Identified Risks
 
-| Risk | Severity | Mitigation | Status |
-|------|----------|------------|--------|
-| Policy drift between environments | Medium | SHA256 pinning + verification | ✅ Mitigated |
-| Provenance chain break | High | SLSA attestation + SBOM | ✅ Mitigated |
-| Air-gap bundle tampering | High | Checksum manifest + verification | ✅ Mitigated |
-| Unauthorized policy changes | Critical | Git tag protection + IGAC review | ✅ Mitigated |
+| Risk                              | Severity | Mitigation                       | Status       |
+| --------------------------------- | -------- | -------------------------------- | ------------ |
+| Policy drift between environments | Medium   | SHA256 pinning + verification    | ✅ Mitigated |
+| Provenance chain break            | High     | SLSA attestation + SBOM          | ✅ Mitigated |
+| Air-gap bundle tampering          | High     | Checksum manifest + verification | ✅ Mitigated |
+| Unauthorized policy changes       | Critical | Git tag protection + IGAC review | ✅ Mitigated |
 
 ### Residual Risks
 
@@ -230,6 +245,7 @@ sha256sum -c ../governance/policy-bundle-shas-2025.10.HALLOWEEN.txt
 ### SOC 2 Type II
 
 ✅ **Control Effectiveness Verified**:
+
 - Access controls (OPA + WebAuthn)
 - Change management (Policy pinning)
 - System monitoring (Provenance tracking)
@@ -238,6 +254,7 @@ sha256sum -c ../governance/policy-bundle-shas-2025.10.HALLOWEEN.txt
 ### NIST 800-53
 
 ✅ **Control Families Satisfied**:
+
 - AC (Access Control): OPA policies + ABAC
 - AU (Audit): Provenance + Audit logs
 - CM (Configuration Management): Policy pinning
@@ -247,6 +264,7 @@ sha256sum -c ../governance/policy-bundle-shas-2025.10.HALLOWEEN.txt
 ### GDPR
 
 ✅ **Requirements Met**:
+
 - Data minimization: DLP policies
 - Access control: Step-up authentication
 - Audit trail: Provenance tracking
@@ -296,10 +314,10 @@ sha256sum -c ../governance/policy-bundle-shas-2025.10.HALLOWEEN.txt
 
 **IGAC Committee Approval**:
 
-| Name | Role | Decision | Date |
-|------|------|----------|------|
-| Technical Lead | IGAC Chair | ✅ APPROVED | 2025-10-05 |
-| Security Officer | IGAC Member | ✅ APPROVED | 2025-10-05 |
+| Name               | Role        | Decision    | Date       |
+| ------------------ | ----------- | ----------- | ---------- |
+| Technical Lead     | IGAC Chair  | ✅ APPROVED | 2025-10-05 |
+| Security Officer   | IGAC Member | ✅ APPROVED | 2025-10-05 |
 | Compliance Officer | IGAC Member | ✅ APPROVED | 2025-10-05 |
 | Platform Architect | IGAC Member | ✅ APPROVED | 2025-10-05 |
 
@@ -343,6 +361,7 @@ See: `governance/policy-bundle-shas-2025.10.HALLOWEEN.txt`
 ---
 
 **Document Control**:
+
 - Version: 1.0
 - Classification: Internal
 - Distribution: IGAC Committee + Executive Leadership

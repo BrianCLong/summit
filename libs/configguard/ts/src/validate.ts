@@ -2,7 +2,12 @@ import Ajv, { type ErrorObject, type ValidateFunction } from 'ajv';
 import addFormats from 'ajv-formats';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import type { Diagnostic, Position, SchemaInput, ValidateOptions } from './types';
+import type {
+  Diagnostic,
+  Position,
+  SchemaInput,
+  ValidateOptions,
+} from './types';
 import { escapeJsonPointerSegment } from './interpolate';
 
 const validatorCache = new Map<string, ValidateFunction>();
@@ -11,14 +16,14 @@ const ajv = new Ajv({
   strict: false,
   allowUnionTypes: true,
   messages: true,
-  verbose: true
+  verbose: true,
 });
 addFormats(ajv);
 
 export function validate(
   value: unknown,
   schema: SchemaInput,
-  options: ValidateOptions = {}
+  options: ValidateOptions = {},
 ): Diagnostic[] {
   const validateFn = resolveSchema(schema);
   const diagnostics: Diagnostic[] = [];
@@ -60,10 +65,11 @@ function resolveSchema(schema: SchemaInput): ValidateFunction {
 
 function convertAjvError(
   error: ErrorObject,
-  pointerMap?: Record<string, Position>
+  pointerMap?: Record<string, Position>,
 ): Diagnostic {
   const pointer = normalizePointer(error.instancePath);
-  const position = pointerMap?.[pointer] ?? pointerMap?.[''] ?? { line: 0, column: 0 };
+  const position = pointerMap?.[pointer] ??
+    pointerMap?.[''] ?? { line: 0, column: 0 };
   const message = error.message ?? 'Schema validation error';
   const code = error.keyword;
   const hint = buildHint(error);
@@ -75,7 +81,7 @@ function convertAjvError(
     line: position.line,
     column: position.column,
     code,
-    hint
+    hint,
   };
 }
 

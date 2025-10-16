@@ -26,7 +26,8 @@ export const getEvidenceStoreConfig = (): EvidenceStorageConfig => {
     case 'production':
       return {
         ...baseConfig,
-        bucketName: process.env.EVIDENCE_STORE_BUCKET || 'conductor-evidence-prod',
+        bucketName:
+          process.env.EVIDENCE_STORE_BUCKET || 'conductor-evidence-prod',
         kmsKeyId: process.env.EVIDENCE_STORE_KMS_KEY_ID, // Required in production
         retentionPolicies: {
           ...baseConfig.retentionPolicies,
@@ -39,7 +40,8 @@ export const getEvidenceStoreConfig = (): EvidenceStorageConfig => {
     case 'staging':
       return {
         ...baseConfig,
-        bucketName: process.env.EVIDENCE_STORE_BUCKET || 'conductor-evidence-staging',
+        bucketName:
+          process.env.EVIDENCE_STORE_BUCKET || 'conductor-evidence-staging',
         retentionPolicies: {
           hot: 30, // Shorter retention in staging
           warm: 90,
@@ -197,12 +199,20 @@ export const getCloudTrailConfig = (bucketName: string) => ({
 /**
  * IAM Policy for Conductor Evidence Store Access
  */
-export const getEvidenceStoreIAMPolicy = (bucketName: string, kmsKeyArn?: string) => ({
+export const getEvidenceStoreIAMPolicy = (
+  bucketName: string,
+  kmsKeyArn?: string,
+) => ({
   Version: '2012-10-17',
   Statement: [
     {
       Effect: 'Allow',
-      Action: ['s3:GetObject', 's3:PutObject', 's3:DeleteObject', 's3:ListBucket'],
+      Action: [
+        's3:GetObject',
+        's3:PutObject',
+        's3:DeleteObject',
+        's3:ListBucket',
+      ],
       Resource: [`arn:aws:s3:::${bucketName}`, `arn:aws:s3:::${bucketName}/*`],
     },
     {
@@ -219,7 +229,12 @@ export const getEvidenceStoreIAMPolicy = (bucketName: string, kmsKeyArn?: string
       ? [
           {
             Effect: 'Allow',
-            Action: ['kms:Decrypt', 'kms:Encrypt', 'kms:GenerateDataKey', 'kms:DescribeKey'],
+            Action: [
+              'kms:Decrypt',
+              'kms:Encrypt',
+              'kms:GenerateDataKey',
+              'kms:DescribeKey',
+            ],
             Resource: kmsKeyArn,
           },
         ]

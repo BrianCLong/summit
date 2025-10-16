@@ -35,7 +35,10 @@ export function initSocket(httpServer: any): Server {
       socket.user = user;
       next();
     } catch (e: any) {
-      logger.warn({ error: e.message }, 'Unauthorized socket connection attempt');
+      logger.warn(
+        { error: e.message },
+        'Unauthorized socket connection attempt',
+      );
       next(new Error('Unauthorized'));
     }
   });
@@ -65,7 +68,15 @@ export function initSocket(httpServer: any): Server {
       authorize(
         EDIT_ROLES,
         'entity_update',
-        ({ graphId, entityId, changes }: { graphId: string; entityId: string; changes: any }) => {
+        ({
+          graphId,
+          entityId,
+          changes,
+        }: {
+          graphId: string;
+          entityId: string;
+          changes: any;
+        }) => {
           if (!graphId || !entityId) return;
           socket.to(`graph:${graphId}`).emit('entity_updated', {
             userId: socket.user?.id,
@@ -82,7 +93,9 @@ export function initSocket(httpServer: any): Server {
     registerPresenceHandlers(socket);
 
     socket.on('disconnect', () => {
-      logger.info(`Realtime disconnect ${socket.id} for user ${socket.user?.id}`);
+      logger.info(
+        `Realtime disconnect ${socket.id} for user ${socket.user?.id}`,
+      );
     });
   });
 

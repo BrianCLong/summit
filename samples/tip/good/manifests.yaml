@@ -27,9 +27,9 @@ metadata:
   name: tenant-a-reader
   namespace: tenant-a
 rules:
-  - apiGroups: [""]
-    resources: ["configmaps"]
-    verbs: ["get", "list"]
+  - apiGroups: ['']
+    resources: ['configmaps']
+    verbs: ['get', 'list']
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
@@ -79,7 +79,7 @@ metadata:
   namespace: tenant-a
 spec:
   podSelector: {}
-  policyTypes: ["Ingress"]
+  policyTypes: ['Ingress']
   ingress:
     - from:
         - podSelector: {}
@@ -94,7 +94,7 @@ metadata:
   namespace: tenant-b
 spec:
   podSelector: {}
-  policyTypes: ["Ingress"]
+  policyTypes: ['Ingress']
   ingress:
     - from:
         - podSelector: {}

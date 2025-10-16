@@ -1,4 +1,4 @@
-import { createHash, createHmac } from "node:crypto";
+import { createHash, createHmac } from 'node:crypto';
 import {
   MODEL_ALLOWLIST,
   PURPOSE_ALLOWLIST,
@@ -9,8 +9,8 @@ import {
   enumerateArtifacts,
   listSinkNodes,
   listSourceNodes,
-  normalizeWorkflow
-} from "common-types";
+  normalizeWorkflow,
+} from 'common-types';
 import type {
   PolicyCondition,
   PolicyEvaluationRequest,
@@ -36,8 +36,8 @@ import type {
   WorkflowStaticAnalysis,
   WorkflowSuggestion,
   WorkflowValidationIssue,
-  WorkflowValidationResult
-} from "common-types";
+  WorkflowValidationResult,
+} from 'common-types';
 
 // ============================================================================
 // RUNTIME POLICY ENGINE - From HEAD
@@ -46,7 +46,7 @@ import type {
 function valueMatches(
   left: string | number | boolean | undefined,
   operator: PolicyCondition['operator'],
-  right: PolicyCondition['value']
+  right: PolicyCondition['value'],
 ): boolean {
   if (left === undefined) {
     return false;
@@ -58,17 +58,25 @@ function valueMatches(
     case 'neq':
       return left !== right;
     case 'lt':
-      return typeof left === 'number' && typeof right === 'number' && left < right;
+      return (
+        typeof left === 'number' && typeof right === 'number' && left < right
+      );
     case 'lte':
-      return typeof left === 'number' && typeof right === 'number' && left <= right;
+      return (
+        typeof left === 'number' && typeof right === 'number' && left <= right
+      );
     case 'gt':
-      return typeof left === 'number' && typeof right === 'number' && left > right;
+      return (
+        typeof left === 'number' && typeof right === 'number' && left > right
+      );
     case 'gte':
-      return typeof left === 'number' && typeof right === 'number' && left >= right;
+      return (
+        typeof left === 'number' && typeof right === 'number' && left >= right
+      );
     case 'includes':
       if (Array.isArray(right)) {
         if (Array.isArray(left)) {
-          return left.some(item => right.includes(item));
+          return left.some((item) => right.includes(item));
         }
         return right.includes(left);
       }
@@ -81,18 +89,23 @@ function valueMatches(
   }
 }
 
-function ruleTargetsRequest(rule: PolicyRule, request: PolicyEvaluationRequest): boolean {
+function ruleTargetsRequest(
+  rule: PolicyRule,
+  request: PolicyEvaluationRequest,
+): boolean {
   const actionMatch =
-    rule.actions.length === 0 || rule.actions.some(action => action === request.action);
+    rule.actions.length === 0 ||
+    rule.actions.some((action) => action === request.action);
   const resourceMatch =
-    rule.resources.length === 0 || rule.resources.some(resource => resource === request.resource);
+    rule.resources.length === 0 ||
+    rule.resources.some((resource) => resource === request.resource);
   return actionMatch && resourceMatch;
 }
 
 function evaluateConditions(
   rule: PolicyRule,
   request: PolicyEvaluationRequest,
-  trace: string[]
+  trace: string[],
 ): boolean {
   if (!rule.conditions || rule.conditions.length === 0) {
     return true;
@@ -101,15 +114,22 @@ function evaluateConditions(
   const attributes = {
     roles: request.context.roles,
     region: request.context.region,
-    ...request.context.attributes
-  } as Record<string, string | number | boolean | Array<string | number | boolean>>;
+    ...request.context.attributes,
+  } as Record<
+    string,
+    string | number | boolean | Array<string | number | boolean>
+  >;
 
-  return rule.conditions.every(condition => {
+  return rule.conditions.every((condition) => {
     const candidate = attributes[condition.attribute];
-    const matched = valueMatches(candidate as never, condition.operator, condition.value);
+    const matched = valueMatches(
+      candidate as never,
+      condition.operator,
+      condition.value,
+    );
     if (!matched) {
       trace.push(
-        `condition ${condition.attribute} ${condition.operator} ${JSON.stringify(condition.value)} failed`
+        `condition ${condition.attribute} ${condition.operator} ${JSON.stringify(condition.value)} failed`,
       );
     }
     return matched;
@@ -159,7 +179,7 @@ export class PolicyEngine {
             matchedRules,
             reasons,
             obligations: [],
-            trace
+            trace,
           };
         }
 
@@ -170,7 +190,7 @@ export class PolicyEngine {
         }
       } else {
         if (ruleReasons.length > 0) {
-          reasons.push(...ruleReasons.map(reason => `${rule.id}: ${reason}`));
+          reasons.push(...ruleReasons.map((reason) => `${rule.id}: ${reason}`));
         }
       }
 
@@ -183,7 +203,7 @@ export class PolicyEngine {
       matchedRules,
       reasons,
       obligations,
-      trace
+      trace,
     };
   }
 }
@@ -197,21 +217,30 @@ export function buildDefaultPolicyEngine(): PolicyEngine {
       actions: ['intent:read'],
       resources: ['intent'],
       conditions: [
-        { attribute: 'roles', operator: 'includes', value: ['product-manager', 'architect'] }
+        {
+          attribute: 'roles',
+          operator: 'includes',
+          value: ['product-manager', 'architect'],
+        },
       ],
-      obligations: [{ type: 'emit-audit' }]
+      obligations: [{ type: 'emit-audit' }],
     },
     {
       id: 'allow-workcell-execution',
-      description: 'Permit authorised roles to execute workcell tasks in approved regions',
+      description:
+        'Permit authorised roles to execute workcell tasks in approved regions',
       effect: 'allow',
       actions: ['workcell:execute'],
       resources: ['analysis', 'codegen', 'evaluation'],
       conditions: [
-        { attribute: 'roles', operator: 'includes', value: ['developer', 'architect'] },
-        { attribute: 'region', operator: 'eq', value: 'allowed-region' }
+        {
+          attribute: 'roles',
+          operator: 'includes',
+          value: ['developer', 'architect'],
+        },
+        { attribute: 'region', operator: 'eq', value: 'allowed-region' },
       ],
-      obligations: [{ type: 'record-provenance' }]
+      obligations: [{ type: 'record-provenance' }],
     },
     {
       id: 'deny-out-of-region-models',
@@ -219,8 +248,10 @@ export function buildDefaultPolicyEngine(): PolicyEngine {
       effect: 'deny',
       actions: ['model:invoke'],
       resources: ['llm'],
-      conditions: [{ attribute: 'region', operator: 'neq', value: 'allowed-region' }]
-    }
+      conditions: [
+        { attribute: 'region', operator: 'neq', value: 'allowed-region' },
+      ],
+    },
   ]);
 
   return engine;
@@ -248,11 +279,11 @@ export interface PolicyEvaluatorOptions {
 }
 
 const DEFAULT_CONFIG: PolicyConfig = {
-  allowedLicenses: ["MIT", "Apache-2.0"],
+  allowedLicenses: ['MIT', 'Apache-2.0'],
   allowedPurposes: [...PURPOSE_ALLOWLIST],
   modelAllowList: Array.from(MODEL_ALLOWLIST),
-  deniedDataClasses: ["production-PII", "secrets", "proprietary-client"],
-  redactableDataClasses: ["production-PII"],
+  deniedDataClasses: ['production-PII', 'secrets', 'proprietary-client'],
+  redactableDataClasses: ['production-PII'],
   requireRedactionForDeniedDataClasses: true,
 };
 
@@ -267,7 +298,7 @@ export class PolicyEvaluator {
 
   evaluate(
     event: CursorEvent,
-    context: PolicyEvaluationContext = {}
+    context: PolicyEvaluationContext = {},
   ): PolicyDecision {
     const explanations: string[] = [];
     const ruleIds: string[] = [];
@@ -275,50 +306,50 @@ export class PolicyEvaluator {
 
     const model = context.model ?? event.model;
     if (!model) {
-      denies.push("model-missing");
+      denies.push('model-missing');
     } else {
       const allowReason = this.checkModel(model.name);
       explanations.push(allowReason);
-      if (allowReason.startsWith("deny:")) {
+      if (allowReason.startsWith('deny:')) {
         denies.push(allowReason);
       } else {
-        ruleIds.push("model-allowlist");
+        ruleIds.push('model-allowlist');
       }
     }
 
     const purpose = context.purpose ?? event.purpose;
     const purposeDecision = this.checkPurpose(purpose);
     explanations.push(purposeDecision);
-    if (purposeDecision.startsWith("deny:")) {
+    if (purposeDecision.startsWith('deny:')) {
       denies.push(purposeDecision);
     } else {
-      ruleIds.push("purpose-allowlist");
+      ruleIds.push('purpose-allowlist');
     }
 
     const license = context.repoMeta?.license;
     if (license) {
       const licenseDecision = this.checkLicense(license);
       explanations.push(licenseDecision);
-      if (licenseDecision.startsWith("deny:")) {
+      if (licenseDecision.startsWith('deny:')) {
         denies.push(licenseDecision);
       } else {
-        ruleIds.push("license-allowlist");
+        ruleIds.push('license-allowlist');
       }
     } else {
-      explanations.push("warn:license-unknown");
+      explanations.push('warn:license-unknown');
     }
 
     const scan = context.scan;
     if (scan?.piiFound) {
-      denies.push("deny:pii-detected");
-      explanations.push("deny:pii-detected");
+      denies.push('deny:pii-detected');
+      explanations.push('deny:pii-detected');
     } else {
-      explanations.push("allow:no-pii");
+      explanations.push('allow:no-pii');
     }
 
     if (scan?.secretsFound) {
-      denies.push("deny:secret-detected");
-      explanations.push("deny:secret-detected");
+      denies.push('deny:secret-detected');
+      explanations.push('deny:secret-detected');
     }
 
     const classes = mergeDataClasses(event, context);
@@ -330,7 +361,7 @@ export class PolicyEvaluator {
     }
 
     const decision: PolicyDecision = {
-      decision: denies.length > 0 ? "deny" : "allow",
+      decision: denies.length > 0 ? 'deny' : 'allow',
       explanations,
       ruleIds,
       timestamp: this.now().toISOString(),
@@ -362,45 +393,45 @@ export class PolicyEvaluator {
       return `allow:model:${modelName}`;
     }
 
-    return "deny:model-not-allowed";
+    return 'deny:model-not-allowed';
   }
 
   private checkPurpose(purpose: CursorPurpose): string {
     const override = this.config.purposeOverrides?.[purpose];
     if (override) {
-      return `${override.allow ? "allow" : "deny"}:purpose:${override.explanation}`;
+      return `${override.allow ? 'allow' : 'deny'}:purpose:${override.explanation}`;
     }
 
     if (this.config.allowedPurposes.includes(purpose)) {
       return `allow:purpose:${purpose}`;
     }
 
-    return "deny:purpose-not-allowed";
+    return 'deny:purpose-not-allowed';
   }
 
   private checkLicense(license: string): string {
     const override = this.config.licenseOverrides?.[license];
     if (override) {
-      return `${override.allow ? "allow" : "deny"}:license:${override.explanation}`;
+      return `${override.allow ? 'allow' : 'deny'}:license:${override.explanation}`;
     }
 
     if (this.config.allowedLicenses.includes(license)) {
       return `allow:license:${license}`;
     }
 
-    return "deny:license-not-allowed";
+    return 'deny:license-not-allowed';
   }
 
   private checkDataClasses(
     classes: CursorDataClass[],
-    scan?: PolicyEvaluationContext["scan"]
+    scan?: PolicyEvaluationContext['scan'],
   ): { explanations: string[]; denies: string[]; ruleId?: string } {
     const explanations: string[] = [];
     const denies: string[] = [];
 
     if (classes.length === 0) {
-      explanations.push("allow:no-sensitive-classes");
-      return { explanations, denies, ruleId: "data-class-baseline" };
+      explanations.push('allow:no-sensitive-classes');
+      return { explanations, denies, ruleId: 'data-class-baseline' };
     }
 
     const denied = new Set(this.config.deniedDataClasses ?? []);
@@ -418,8 +449,8 @@ export class PolicyEvaluator {
     }
 
     if (flagged.length === 0) {
-      explanations.push("allow:data-classes-ok");
-      return { explanations, denies, ruleId: "data-class-baseline" };
+      explanations.push('allow:data-classes-ok');
+      return { explanations, denies, ruleId: 'data-class-baseline' };
     }
 
     if (
@@ -427,23 +458,21 @@ export class PolicyEvaluator {
       this.config.requireRedactionForDeniedDataClasses &&
       !scan?.redactionsApplied
     ) {
-      denies.push(
-        `deny:redaction-required:${redactionRequired.join(",")}`
-      );
+      denies.push(`deny:redaction-required:${redactionRequired.join(',')}`);
       explanations.push(
-        `deny:redaction-required:${redactionRequired.join(",")}`
+        `deny:redaction-required:${redactionRequired.join(',')}`,
       );
-      return { explanations, denies, ruleId: "data-class-redaction" };
+      return { explanations, denies, ruleId: 'data-class-redaction' };
     }
 
     if (flagged.length > 0 && redactionRequired.length === 0) {
-      denies.push(`deny:data-class:${flagged.join(",")}`);
-      explanations.push(`deny:data-class:${flagged.join(",")}`);
-      return { explanations, denies, ruleId: "data-class-deny" };
+      denies.push(`deny:data-class:${flagged.join(',')}`);
+      explanations.push(`deny:data-class:${flagged.join(',')}`);
+      return { explanations, denies, ruleId: 'data-class-deny' };
     }
 
-    explanations.push("allow:data-classes-redacted");
-    return { explanations, denies, ruleId: "data-class-redaction" };
+    explanations.push('allow:data-classes-redacted');
+    return { explanations, denies, ruleId: 'data-class-redaction' };
   }
 }
 
@@ -469,11 +498,11 @@ export interface TopologyResult {
 
 export function validateWorkflow(
   workflow: WorkflowDefinition,
-  options: ValidateOptions = {}
+  options: ValidateOptions = {},
 ): WorkflowValidationResult {
   const normalized = normalizeWorkflow(workflow, {
     evidenceRequired: options.requireEvidence ?? true,
-    ...options.defaults
+    ...options.defaults,
   });
 
   const issues: WorkflowValidationIssue[] = [];
@@ -484,10 +513,10 @@ export function validateWorkflow(
   for (const node of normalized.nodes) {
     if (seenIds.has(node.id)) {
       issues.push({
-        severity: "error",
-        code: "node.duplicate",
+        severity: 'error',
+        code: 'node.duplicate',
         message: `Duplicate node id detected: ${node.id}`,
-        nodes: [node.id]
+        nodes: [node.id],
       });
     }
     seenIds.add(node.id);
@@ -496,45 +525,51 @@ export function validateWorkflow(
     const secretHit = scanForLiteralSecret(node.params);
     if (secretHit) {
       issues.push({
-        severity: "error",
-        code: "policy.secret",
+        severity: 'error',
+        code: 'policy.secret',
         message: `Node ${node.id} contains literal secret at ${secretHit.path}. Use vault refs instead.`,
         nodes: [node.id],
-        suggestion: "Replace literal values with {\"vault\":\"vault://path\",\"key\":\"secret\"}."
+        suggestion:
+          'Replace literal values with {"vault":"vault://path","key":"secret"}.',
       });
     }
 
     if (node.policy?.handlesPii && !normalized.policy.pii) {
       issues.push({
-        severity: "error",
-        code: "policy.pii",
+        severity: 'error',
+        code: 'policy.pii',
         message: `Node ${node.id} handles PII but workflow policy does not allow pii processing.`,
-        nodes: [node.id]
+        nodes: [node.id],
       });
     }
 
     if (node.policy?.requiresApproval) {
       const hasApprovalNode = normalized.nodes.some(
-        (candidate) => candidate.type === "util.approval"
+        (candidate) => candidate.type === 'util.approval',
       );
       if (!hasApprovalNode) {
         issues.push({
-          severity: "warning",
-          code: "policy.approval",
+          severity: 'warning',
+          code: 'policy.approval',
           message: `Node ${node.id} requires an approval gate but no util.approval node is present.`,
           nodes: [node.id],
-          suggestion: "Insert a util.approval node before production deployment steps."
+          suggestion:
+            'Insert a util.approval node before production deployment steps.',
         });
       }
     }
 
-    if (node.estimates?.latencyP95Ms && node.timeoutMs && node.estimates.latencyP95Ms > node.timeoutMs) {
+    if (
+      node.estimates?.latencyP95Ms &&
+      node.timeoutMs &&
+      node.estimates.latencyP95Ms > node.timeoutMs
+    ) {
       issues.push({
-        severity: "warning",
-        code: "slo.timeout",
+        severity: 'warning',
+        code: 'slo.timeout',
         message: `Node ${node.id} latency estimate ${node.estimates.latencyP95Ms}ms exceeds timeout ${node.timeoutMs}ms.`,
         nodes: [node.id],
-        suggestion: "Increase timeout or reduce workload size."
+        suggestion: 'Increase timeout or reduce workload size.',
       });
     }
   }
@@ -542,10 +577,10 @@ export function validateWorkflow(
   for (const edge of normalized.edges) {
     if (!nodeMap.has(edge.from) || !nodeMap.has(edge.to)) {
       issues.push({
-        severity: "error",
-        code: "edge.unknown-node",
+        severity: 'error',
+        code: 'edge.unknown-node',
         message: `Edge ${edge.from} -> ${edge.to} references unknown nodes`,
-        edge
+        edge,
       });
       continue;
     }
@@ -554,11 +589,11 @@ export function validateWorkflow(
     const incompatibility = validateArtifactCompatibility(from, to);
     if (incompatibility) {
       issues.push({
-        severity: "error",
-        code: "artifact.mismatch",
+        severity: 'error',
+        code: 'artifact.mismatch',
         message: incompatibility,
         edge,
-        nodes: [from.id, to.id]
+        nodes: [from.id, to.id],
       });
     }
   }
@@ -568,16 +603,16 @@ export function validateWorkflow(
     const sinks = listSinkNodes(normalized);
     if (sources.length === 0) {
       issues.push({
-        severity: "error",
-        code: "topology.no-source",
-        message: "Workflow must include at least one source node"
+        severity: 'error',
+        code: 'topology.no-source',
+        message: 'Workflow must include at least one source node',
       });
     }
     if (sinks.length === 0) {
       issues.push({
-        severity: "error",
-        code: "topology.no-sink",
-        message: "Workflow must include at least one sink node"
+        severity: 'error',
+        code: 'topology.no-sink',
+        message: 'Workflow must include at least one sink node',
       });
     }
   }
@@ -585,19 +620,19 @@ export function validateWorkflow(
   const topology = topologicalSort(normalized);
   if (topology.cycles.length > 0 && !options.allowLoops) {
     issues.push({
-      severity: "error",
-      code: "topology.cycle",
+      severity: 'error',
+      code: 'topology.cycle',
       message: `Workflow contains cycle(s): ${topology.cycles
-        .map((cycle) => cycle.join(" -> "))
-        .join("; ")}`
+        .map((cycle) => cycle.join(' -> '))
+        .join('; ')}`,
     });
   } else if (topology.cycles.length > 0) {
     suggestions.push({
-      code: "topology.loop",
-      title: "Verify loop nodes",
+      code: 'topology.loop',
+      title: 'Verify loop nodes',
       detail:
-        "Workflow contains intentional loops. Ensure loop nodes have exit criteria and bounded iterations.",
-      appliesTo: [...new Set(topology.cycles.flat())]
+        'Workflow contains intentional loops. Ensure loop nodes have exit criteria and bounded iterations.',
+      appliesTo: [...new Set(topology.cycles.flat())],
     });
   }
 
@@ -609,21 +644,21 @@ export function validateWorkflow(
     .filter((id) => !reachable.has(id));
   if (unreachable.length > 0) {
     issues.push({
-      severity: "warning",
-      code: "topology.unreachable",
-      message: `Unreachable nodes detected: ${unreachable.join(", ")}`,
-      nodes: unreachable
+      severity: 'warning',
+      code: 'topology.unreachable',
+      message: `Unreachable nodes detected: ${unreachable.join(', ')}`,
+      nodes: unreachable,
     });
   }
 
   const evidence = analyzeEvidence(normalized.nodes);
   if (evidence.missing.length > 0) {
     issues.push({
-      severity: "error",
-      code: "evidence.missing",
-      message: `Evidence outputs required for nodes: ${evidence.missing.join(", ")}`,
+      severity: 'error',
+      code: 'evidence.missing',
+      message: `Evidence outputs required for nodes: ${evidence.missing.join(', ')}`,
       nodes: evidence.missing,
-      suggestion: "Attach provenance or SARIF/SPDX outputs to each node."
+      suggestion: 'Attach provenance or SARIF/SPDX outputs to each node.',
     });
   }
 
@@ -634,32 +669,38 @@ export function validateWorkflow(
   const budgetSuggestions = suggestBudgetActions(normalized, estimated);
   suggestions.push(...budgetSuggestions);
 
-  if (normalized.constraints.latencyP95Ms > 0 && estimated.latencyP95Ms > normalized.constraints.latencyP95Ms) {
+  if (
+    normalized.constraints.latencyP95Ms > 0 &&
+    estimated.latencyP95Ms > normalized.constraints.latencyP95Ms
+  ) {
     issues.push({
-      severity: "error",
-      code: "constraint.latency",
+      severity: 'error',
+      code: 'constraint.latency',
       message: `Estimated latency ${estimated.latencyP95Ms}ms exceeds constraint ${normalized.constraints.latencyP95Ms}ms`,
-      nodes: estimated.criticalPath
+      nodes: estimated.criticalPath,
     });
   } else if (
     normalized.constraints.latencyP95Ms > 0 &&
     estimated.latencyP95Ms > normalized.constraints.latencyP95Ms * 0.8
   ) {
     suggestions.push({
-      code: "constraint.latency.headroom",
-      title: "Latency headroom is tight",
+      code: 'constraint.latency.headroom',
+      title: 'Latency headroom is tight',
       detail: `Estimated latency ${estimated.latencyP95Ms}ms is within 20% of the constraint ${normalized.constraints.latencyP95Ms}ms. Consider enabling caching or splitting long-running steps.`,
       appliesTo: estimated.criticalPath,
-      estimatedGain: { latencyMs: Math.round(estimated.latencyP95Ms * 0.15) }
+      estimatedGain: { latencyMs: Math.round(estimated.latencyP95Ms * 0.15) },
     });
   }
 
-  if (normalized.constraints.budgetUSD > 0 && estimated.costUSD > normalized.constraints.budgetUSD) {
+  if (
+    normalized.constraints.budgetUSD > 0 &&
+    estimated.costUSD > normalized.constraints.budgetUSD
+  ) {
     issues.push({
-      severity: "error",
-      code: "constraint.cost",
+      severity: 'error',
+      code: 'constraint.cost',
       message: `Estimated cost ${estimated.costUSD.toFixed(2)} exceeds budget ${normalized.constraints.budgetUSD.toFixed(2)}`,
-      nodes: estimated.criticalPath
+      nodes: estimated.criticalPath,
     });
   }
 
@@ -670,18 +711,18 @@ export function validateWorkflow(
     sinks,
     unreachable,
     estimated,
-    evidence
+    evidence,
   };
 
   return {
     normalized,
-    analysis
+    analysis,
   };
 }
 
 export function computeWorkflowEstimates(
   workflow: WorkflowDefinition,
-  orderOverride?: string[]
+  orderOverride?: string[],
 ): WorkflowEstimates {
   if (workflow.nodes.length === 0) {
     return {
@@ -689,12 +730,17 @@ export function computeWorkflowEstimates(
       costUSD: 0,
       queueMs: 0,
       successRate: 1,
-      criticalPath: []
+      criticalPath: [],
     };
   }
 
-  const order = orderOverride && orderOverride.length > 0 ? orderOverride : topologicalSort(workflow).order;
-  const nodeMap = new Map(workflow.nodes.map((node) => [node.id, node] as const));
+  const order =
+    orderOverride && orderOverride.length > 0
+      ? orderOverride
+      : topologicalSort(workflow).order;
+  const nodeMap = new Map(
+    workflow.nodes.map((node) => [node.id, node] as const),
+  );
   const incoming = buildIncomingMap(workflow.edges);
   const distance = new Map<string, number>();
   const predecessor = new Map<string, string | null>();
@@ -706,9 +752,10 @@ export function computeWorkflowEstimates(
     if (!node) {
       continue;
     }
-    const latency = (node.estimates?.latencyP95Ms ?? 0) + (node.estimates?.queueMs ?? 0);
+    const latency =
+      (node.estimates?.latencyP95Ms ?? 0) + (node.estimates?.queueMs ?? 0);
     totalCost += node.estimates?.costUSD ?? 0;
-    if (typeof node.estimates?.successRate === "number") {
+    if (typeof node.estimates?.successRate === 'number') {
       successRateProduct *= node.estimates.successRate;
     }
     let bestDistance = 0;
@@ -725,7 +772,7 @@ export function computeWorkflowEstimates(
     predecessor.set(nodeId, bestPredecessor);
   }
 
-  let anchor = "";
+  let anchor = '';
   let maxDistance = 0;
   for (const [nodeId, value] of distance.entries()) {
     if (value >= maxDistance) {
@@ -751,7 +798,7 @@ export function computeWorkflowEstimates(
     costUSD: Number(totalCost.toFixed(2)),
     queueMs: Math.round(queueMs),
     successRate: Number(successRateProduct.toFixed(4)),
-    criticalPath
+    criticalPath,
   };
 }
 
@@ -811,10 +858,9 @@ export function topologicalSort(workflow: WorkflowDefinition): TopologyResult {
   return { order, cycles };
 }
 
-
 function detectCycles(
   adjacency: Map<string, Set<string>>,
-  candidates: Set<string>
+  candidates: Set<string>,
 ): string[][] {
   const cycles: string[][] = [];
   const visited = new Set<string>();
@@ -848,7 +894,7 @@ function detectCycles(
 
 export function planWhatIf(
   workflow: WorkflowDefinition,
-  scenario: WhatIfScenario
+  scenario: WhatIfScenario,
 ): WorkflowEstimates {
   const normalized = normalizeWorkflow(workflow);
   const nodes = normalized.nodes.map((node) => ({ ...node }));
@@ -859,77 +905,87 @@ export function planWhatIf(
     if (overrides) {
       node.estimates = {
         ...node.estimates,
-        ...overrides
+        ...overrides,
       };
     }
     if (scenario.parallelismMultiplier && node.parallelism) {
       const multiplier = Math.max(0.1, scenario.parallelismMultiplier);
-      const newParallelism = Math.max(1, Math.round(node.parallelism * multiplier));
+      const newParallelism = Math.max(
+        1,
+        Math.round(node.parallelism * multiplier),
+      );
       node.parallelism = newParallelism;
       if (node.estimates?.latencyP95Ms) {
         node.estimates.latencyP95Ms = Math.max(
           50,
-          Math.round(node.estimates.latencyP95Ms / multiplier)
+          Math.round(node.estimates.latencyP95Ms / multiplier),
         );
       }
     }
-    if (scenario.cacheHitRate && node.estimates?.cacheable && node.estimates.costUSD) {
+    if (
+      scenario.cacheHitRate &&
+      node.estimates?.cacheable &&
+      node.estimates.costUSD
+    ) {
       const hitRate = Math.min(Math.max(scenario.cacheHitRate, 0), 0.95);
       node.estimates.costUSD = Number(
-        (node.estimates.costUSD * (1 - hitRate)).toFixed(2)
+        (node.estimates.costUSD * (1 - hitRate)).toFixed(2),
       );
     }
   }
 
   return computeWorkflowEstimates({
     ...normalized,
-    nodes
+    nodes,
   });
 }
 
 export function suggestBudgetActions(
   workflow: WorkflowDefinition,
   estimates: WorkflowEstimates,
-  threshold = 0.8
+  threshold = 0.8,
 ): WorkflowSuggestion[] {
   const suggestions: WorkflowSuggestion[] = [];
   const budget = workflow.constraints.budgetUSD;
   if (budget > 0 && estimates.costUSD >= budget * threshold) {
     suggestions.push({
-      code: "budget.watch",
-      title: "Budget usage nearing limit",
+      code: 'budget.watch',
+      title: 'Budget usage nearing limit',
       detail: `Estimated cost ${estimates.costUSD.toFixed(2)} is at or above ${
         threshold * 100
       }% of the budget ${budget.toFixed(2)}. Consider enabling caches or reducing parallelism on expensive nodes.`,
       appliesTo: estimates.criticalPath,
-      estimatedGain: { costUSD: Number((estimates.costUSD * 0.2).toFixed(2)) }
+      estimatedGain: { costUSD: Number((estimates.costUSD * 0.2).toFixed(2)) },
     });
   }
 
   const heavyNodes = workflow.nodes.filter(
-    (node) => (node.estimates?.costUSD ?? 0) > (node.budgetUSD ?? budget)
+    (node) => (node.estimates?.costUSD ?? 0) > (node.budgetUSD ?? budget),
   );
   for (const node of heavyNodes) {
     suggestions.push({
-      code: "budget.node",
+      code: 'budget.node',
       title: `Reduce spend on ${node.id}`,
       detail: `Node ${node.id} is estimated at ${
-        node.estimates?.costUSD?.toFixed(2) ?? "0.00"
+        node.estimates?.costUSD?.toFixed(2) ?? '0.00'
       }, exceeding the per-node budget of ${(node.budgetUSD ?? budget).toFixed(
-        2
+        2,
       )}. Introduce caching or split the workload.`,
-      appliesTo: [node.id]
+      appliesTo: [node.id],
     });
   }
 
   if (workflow.constraints.maxParallelism) {
     for (const node of workflow.nodes) {
-      if (node.parallelism && node.parallelism > workflow.constraints.maxParallelism) {
+      if (
+        node.parallelism &&
+        node.parallelism > workflow.constraints.maxParallelism
+      ) {
         suggestions.push({
-          code: "parallelism.reduce",
+          code: 'parallelism.reduce',
           title: `Scale down ${node.id} parallelism`,
           detail: `Parallelism ${node.parallelism} exceeds constraint ${workflow.constraints.maxParallelism}. Reduce concurrency or request an exception.`,
-          appliesTo: [node.id]
+          appliesTo: [node.id],
         });
       }
     }
@@ -944,70 +1000,86 @@ export function buildPolicyInput(workflow: WorkflowDefinition): PolicyInput {
 
 function validatePolicy(
   policy: WorkflowPolicy,
-  nodes: WorkflowNode[]
+  nodes: WorkflowNode[],
 ): WorkflowValidationIssue[] {
   const issues: WorkflowValidationIssue[] = [];
   if (policy.pii && policy.retention !== SHORT_RETENTION) {
     issues.push({
-      severity: "error",
-      code: "policy.retention",
-      message: `PII workflows must use ${SHORT_RETENTION} retention. Current value: ${policy.retention}`
+      severity: 'error',
+      code: 'policy.retention',
+      message: `PII workflows must use ${SHORT_RETENTION} retention. Current value: ${policy.retention}`,
     });
   }
-  const securityNodes = nodes.filter((node) => node.type.startsWith("security."));
-  if (securityNodes.length > 0 && policy.licenseClass !== "SEC-APPROVED") {
+  const securityNodes = nodes.filter((node) =>
+    node.type.startsWith('security.'),
+  );
+  if (securityNodes.length > 0 && policy.licenseClass !== 'SEC-APPROVED') {
     issues.push({
-      severity: "warning",
-      code: "policy.license",
-      message: "Security nodes detected. Consider upgrading licenseClass to SEC-APPROVED for scanner entitlements.",
-      nodes: securityNodes.map((node) => node.id)
+      severity: 'warning',
+      code: 'policy.license',
+      message:
+        'Security nodes detected. Consider upgrading licenseClass to SEC-APPROVED for scanner entitlements.',
+      nodes: securityNodes.map((node) => node.id),
     });
   }
-  const deployNodes = nodes.filter((node) => node.type.startsWith("deploy."));
-  if (deployNodes.length > 0 && policy.purpose !== "production") {
+  const deployNodes = nodes.filter((node) => node.type.startsWith('deploy.'));
+  if (deployNodes.length > 0 && policy.purpose !== 'production') {
     issues.push({
-      severity: "warning",
-      code: "policy.purpose",
-      message: "Deploy nodes typically require purpose=production for auditability.",
-      nodes: deployNodes.map((node) => node.id)
+      severity: 'warning',
+      code: 'policy.purpose',
+      message:
+        'Deploy nodes typically require purpose=production for auditability.',
+      nodes: deployNodes.map((node) => node.id),
     });
   }
   return issues;
 }
 
-function scanForLiteralSecret(params: Record<string, unknown>): SecretScanResult {
+function scanForLiteralSecret(
+  params: Record<string, unknown>,
+): SecretScanResult {
   for (const [key, value] of Object.entries(params)) {
     if (value === undefined || value === null) {
       continue;
     }
-    if (typeof value === "string") {
+    if (typeof value === 'string') {
       if (looksSecretLike(key, value)) {
-        if (!value.startsWith("vault://") && !value.startsWith("env://")) {
+        if (!value.startsWith('vault://') && !value.startsWith('env://')) {
           return { path: key, value };
         }
       }
     } else if (Array.isArray(value)) {
       for (let index = 0; index < value.length; index += 1) {
         const nested = value[index];
-        if (typeof nested === "string" && looksSecretLike(key, nested)) {
-          if (!nested.startsWith("vault://") && !nested.startsWith("env://")) {
+        if (typeof nested === 'string' && looksSecretLike(key, nested)) {
+          if (!nested.startsWith('vault://') && !nested.startsWith('env://')) {
             return { path: `${key}[${index}]`, value: nested };
           }
         }
-        if (typeof nested === "object" && nested) {
-          const result = scanForLiteralSecret(nested as Record<string, unknown>);
+        if (typeof nested === 'object' && nested) {
+          const result = scanForLiteralSecret(
+            nested as Record<string, unknown>,
+          );
           if (result) {
-            return { path: `${key}[${index}].${result.path}`, value: result.value };
+            return {
+              path: `${key}[${index}].${result.path}`,
+              value: result.value,
+            };
           }
         }
       }
-    } else if (typeof value === "object") {
+    } else if (typeof value === 'object') {
       if (ensureSecret(value)) {
         continue;
       }
-      const nestedResult = scanForLiteralSecret(value as Record<string, unknown>);
+      const nestedResult = scanForLiteralSecret(
+        value as Record<string, unknown>,
+      );
       if (nestedResult) {
-        return { path: `${key}.${nestedResult.path}`, value: nestedResult.value };
+        return {
+          path: `${key}.${nestedResult.path}`,
+          value: nestedResult.value,
+        };
       }
     }
   }
@@ -1043,7 +1115,7 @@ function buildIncomingMap(edges: WorkflowEdge[]): Map<string, Set<string>> {
 
 function discoverReachable(
   workflow: WorkflowDefinition,
-  sources: string[]
+  sources: string[],
 ): Set<string> {
   const adjacency = buildAdjacency(workflow.edges);
   const reachable = new Set<string>();
@@ -1063,7 +1135,7 @@ function discoverReachable(
 
 function validateArtifactCompatibility(
   from: WorkflowNode,
-  to: WorkflowNode
+  to: WorkflowNode,
 ): string | null {
   if (!from.produces || !to.consumes) {
     return null;
@@ -1071,16 +1143,16 @@ function validateArtifactCompatibility(
   const producedTypes = new Set(from.produces.map((artifact) => artifact.type));
   for (const artifact of to.consumes) {
     if (!artifact.optional && !producedTypes.has(artifact.type)) {
-      return `Node ${to.id} expects artifact type ${artifact.type} from ${from.id}, but producer emits ${[...
-        producedTypes
-      ].join(", ") || "none"}.`;
+      return `Node ${to.id} expects artifact type ${artifact.type} from ${from.id}, but producer emits ${
+        [...producedTypes].join(', ') || 'none'
+      }.`;
     }
   }
   return null;
 }
 
 export function collectArtifactCatalog(
-  workflow: WorkflowDefinition
+  workflow: WorkflowDefinition,
 ): ArtifactBinding[] {
   return enumerateArtifacts(workflow.nodes);
 }
@@ -1188,7 +1260,7 @@ export interface AuditRecord {
   allowed: boolean;
   matchedRules: string[];
   reasons: string[];
-  simulationType: "retroactive" | "rollback";
+  simulationType: 'retroactive' | 'rollback';
   compliant?: boolean;
   expectedEffect?: PolicyEffect;
   metadata?: Record<string, unknown>;
@@ -1196,12 +1268,12 @@ export interface AuditRecord {
 
 export interface AuditTrailQuery {
   policyId?: string;
-  simulationType?: AuditRecord["simulationType"];
+  simulationType?: AuditRecord['simulationType'];
   from?: Date | string;
   to?: Date | string;
 }
 
-export type MissingSnapshotStrategy = "error" | "skip";
+export type MissingSnapshotStrategy = 'error' | 'skip';
 
 export interface PolicyBacktestEngineOptions {
   missingSnapshotStrategy?: MissingSnapshotStrategy;
@@ -1223,18 +1295,20 @@ function cloneSnapshot(snapshot: PolicySnapshot): PolicySnapshot {
   return {
     ...snapshot,
     capturedAt: new Date(snapshot.capturedAt),
-    rules: snapshot.rules.map((rule) => ({ ...rule }))
+    rules: snapshot.rules.map((rule) => ({ ...rule })),
   };
 }
 
-function resolveExpectedEffect(event: HistoricalPolicyEvent): PolicyEffect | undefined {
+function resolveExpectedEffect(
+  event: HistoricalPolicyEvent,
+): PolicyEffect | undefined {
   if (event.expectedEffect) {
     return event.expectedEffect;
   }
   if (event.expectedAllowed === undefined) {
     return undefined;
   }
-  return event.expectedAllowed ? "allow" : "deny";
+  return event.expectedAllowed ? 'allow' : 'deny';
 }
 
 export class PolicyBacktestEngine {
@@ -1242,13 +1316,16 @@ export class PolicyBacktestEngine {
   private readonly auditTrail: AuditRecord[] = [];
   private readonly missingSnapshotStrategy: MissingSnapshotStrategy;
 
-  constructor(history: PolicyHistory[], options: PolicyBacktestEngineOptions = {}) {
-    this.missingSnapshotStrategy = options.missingSnapshotStrategy ?? "error";
+  constructor(
+    history: PolicyHistory[],
+    options: PolicyBacktestEngineOptions = {},
+  ) {
+    this.missingSnapshotStrategy = options.missingSnapshotStrategy ?? 'error';
     history.forEach((item) => {
       const snapshots = item.snapshots
         .map((snapshot) => ({
           ...snapshot,
-          capturedAt: new Date(snapshot.capturedAt)
+          capturedAt: new Date(snapshot.capturedAt),
         }))
         .sort((a, b) => a.capturedAt.getTime() - b.capturedAt.getTime());
       this.history.set(item.policyId, snapshots);
@@ -1258,7 +1335,7 @@ export class PolicyBacktestEngine {
   registerSnapshot(policyId: string, snapshot: PolicySnapshot): void {
     const normalized = {
       ...snapshot,
-      capturedAt: new Date(snapshot.capturedAt)
+      capturedAt: new Date(snapshot.capturedAt),
     };
     const existing = this.history.get(policyId) ?? [];
     existing.push(normalized);
@@ -1275,7 +1352,10 @@ export class PolicyBacktestEngine {
     return snapshots.map((snapshot) => cloneSnapshot(snapshot));
   }
 
-  querySnapshots(policyId: string, options: TemporalQueryOptions = {}): PolicySnapshot[] {
+  querySnapshots(
+    policyId: string,
+    options: TemporalQueryOptions = {},
+  ): PolicySnapshot[] {
     const from = normalizeDate(options.from)?.getTime();
     const to = normalizeDate(options.to)?.getTime();
     return this.getSnapshots(policyId).filter((snapshot) => {
@@ -1290,7 +1370,10 @@ export class PolicyBacktestEngine {
     });
   }
 
-  getSnapshotAt(policyId: string, timestamp: Date | string): PolicySnapshot | undefined {
+  getSnapshotAt(
+    policyId: string,
+    timestamp: Date | string,
+  ): PolicySnapshot | undefined {
     const snapshots = this.history.get(policyId);
     if (!snapshots || snapshots.length === 0) {
       return undefined;
@@ -1310,12 +1393,22 @@ export class PolicyBacktestEngine {
     return candidate ? cloneSnapshot(candidate) : undefined;
   }
 
-  compareVersions(policyId: string, fromVersion: string, toVersion: string): PolicyVersionDiff {
+  compareVersions(
+    policyId: string,
+    fromVersion: string,
+    toVersion: string,
+  ): PolicyVersionDiff {
     const snapshots = this.history.get(policyId) ?? [];
-    const fromSnapshot = snapshots.find((snapshot) => snapshot.version === fromVersion);
-    const toSnapshot = snapshots.find((snapshot) => snapshot.version === toVersion);
+    const fromSnapshot = snapshots.find(
+      (snapshot) => snapshot.version === fromVersion,
+    );
+    const toSnapshot = snapshots.find(
+      (snapshot) => snapshot.version === toVersion,
+    );
     if (!fromSnapshot || !toSnapshot) {
-      throw new Error(`Unable to locate versions ${fromVersion} or ${toVersion} for policy ${policyId}`);
+      throw new Error(
+        `Unable to locate versions ${fromVersion} or ${toVersion} for policy ${policyId}`,
+      );
     }
     const diff: PolicyVersionDiff = {
       policyId,
@@ -1323,7 +1416,7 @@ export class PolicyBacktestEngine {
       toVersion,
       addedRules: [],
       removedRules: [],
-      changedRules: []
+      changedRules: [],
     };
     const fromMap = new Map(fromSnapshot.rules.map((rule) => [rule.id, rule]));
     const toMap = new Map(toSnapshot.rules.map((rule) => [rule.id, rule]));
@@ -1347,14 +1440,15 @@ export class PolicyBacktestEngine {
 
   retroactiveComplianceCheck(
     policyId: string,
-    events: HistoricalPolicyEvent[]
+    events: HistoricalPolicyEvent[],
   ): RetroactiveComplianceReport {
     const snapshots = this.history.get(policyId) ?? [];
     if (snapshots.length === 0) {
       throw new Error(`No history recorded for policy ${policyId}`);
     }
     const orderedEvents = [...events].sort(
-      (a, b) => new Date(a.occurredAt).getTime() - new Date(b.occurredAt).getTime()
+      (a, b) =>
+        new Date(a.occurredAt).getTime() - new Date(b.occurredAt).getTime(),
     );
     const compliantEvents: ComplianceResult[] = [];
     const nonCompliantEvents: ComplianceResult[] = [];
@@ -1363,27 +1457,37 @@ export class PolicyBacktestEngine {
     for (const event of orderedEvents) {
       const snapshot = this.getSnapshotAt(policyId, event.occurredAt);
       if (!snapshot) {
-        if (this.missingSnapshotStrategy === "skip") {
+        if (this.missingSnapshotStrategy === 'skip') {
           skippedEvents.push(event);
           continue;
         }
         throw new Error(
-          `No snapshot available for policy ${policyId} at ${new Date(event.occurredAt).toISOString()}`
+          `No snapshot available for policy ${policyId} at ${new Date(event.occurredAt).toISOString()}`,
         );
       }
       const engine = new PolicyEngine(snapshot.rules);
       const decision = engine.evaluate(event.request);
       const expectedEffect = resolveExpectedEffect(event);
-      const compliant = expectedEffect ? decision.effect === expectedEffect : true;
+      const compliant = expectedEffect
+        ? decision.effect === expectedEffect
+        : true;
       const result: ComplianceResult = {
         event,
         snapshot,
         decision,
         compliant,
-        expectedEffect
+        expectedEffect,
       };
       evaluationEntries.push({ snapshot, decision });
-      this.recordAuditEntry("retroactive", policyId, event, snapshot, decision, compliant, expectedEffect);
+      this.recordAuditEntry(
+        'retroactive',
+        policyId,
+        event,
+        snapshot,
+        decision,
+        compliant,
+        expectedEffect,
+      );
       if (compliant) {
         compliantEvents.push(result);
       } else {
@@ -1397,25 +1501,30 @@ export class PolicyBacktestEngine {
       compliantEvents,
       nonCompliantEvents,
       skippedEvents,
-      impact
+      impact,
     };
   }
 
   simulateRollback(
     policyId: string,
     targetVersion: string,
-    events: HistoricalPolicyEvent[]
+    events: HistoricalPolicyEvent[],
   ): RollbackSimulationReport {
     const snapshots = this.history.get(policyId) ?? [];
     if (snapshots.length === 0) {
       throw new Error(`No history recorded for policy ${policyId}`);
     }
-    const rollbackSnapshot = snapshots.find((snapshot) => snapshot.version === targetVersion);
+    const rollbackSnapshot = snapshots.find(
+      (snapshot) => snapshot.version === targetVersion,
+    );
     if (!rollbackSnapshot) {
-      throw new Error(`Target version ${targetVersion} not found for policy ${policyId}`);
+      throw new Error(
+        `Target version ${targetVersion} not found for policy ${policyId}`,
+      );
     }
     const orderedEvents = [...events].sort(
-      (a, b) => new Date(a.occurredAt).getTime() - new Date(b.occurredAt).getTime()
+      (a, b) =>
+        new Date(a.occurredAt).getTime() - new Date(b.occurredAt).getTime(),
     );
     const baselineVersions = new Set<string>();
     const skippedEvents: HistoricalPolicyEvent[] = [];
@@ -1424,12 +1533,12 @@ export class PolicyBacktestEngine {
     for (const event of orderedEvents) {
       const baselineSnapshot = this.getSnapshotAt(policyId, event.occurredAt);
       if (!baselineSnapshot) {
-        if (this.missingSnapshotStrategy === "skip") {
+        if (this.missingSnapshotStrategy === 'skip') {
           skippedEvents.push(event);
           continue;
         }
         throw new Error(
-          `No snapshot available for policy ${policyId} at ${new Date(event.occurredAt).toISOString()}`
+          `No snapshot available for policy ${policyId} at ${new Date(event.occurredAt).toISOString()}`,
         );
       }
       baselineVersions.add(baselineSnapshot.version);
@@ -1437,19 +1546,23 @@ export class PolicyBacktestEngine {
       const rollbackEngine = new PolicyEngine(rollbackSnapshot.rules);
       const baselineDecision = baselineEngine.evaluate(event.request);
       const rollbackDecision = rollbackEngine.evaluate(event.request);
-      evaluationEntries.push({ snapshot: rollbackSnapshot, decision: rollbackDecision });
+      evaluationEntries.push({
+        snapshot: rollbackSnapshot,
+        decision: rollbackDecision,
+      });
       const diverges =
         baselineDecision.allowed !== rollbackDecision.allowed ||
         baselineDecision.effect !== rollbackDecision.effect ||
-        baselineDecision.matchedRules.join(",") !== rollbackDecision.matchedRules.join(",");
+        baselineDecision.matchedRules.join(',') !==
+          rollbackDecision.matchedRules.join(',');
       this.recordAuditEntry(
-        "rollback",
+        'rollback',
         policyId,
         event,
         rollbackSnapshot,
         rollbackDecision,
         undefined,
-        resolveExpectedEffect(event)
+        resolveExpectedEffect(event),
       );
       if (diverges) {
         divergingEvents.push({
@@ -1457,7 +1570,7 @@ export class PolicyBacktestEngine {
           baselineSnapshot: cloneSnapshot(baselineSnapshot),
           rollbackSnapshot: cloneSnapshot(rollbackSnapshot),
           baselineDecision,
-          rollbackDecision
+          rollbackDecision,
         });
       }
     }
@@ -1469,7 +1582,7 @@ export class PolicyBacktestEngine {
       evaluatedEvents: evaluationEntries.length,
       skippedEvents,
       divergingEvents,
-      impact
+      impact,
     };
   }
 
@@ -1481,7 +1594,10 @@ export class PolicyBacktestEngine {
         if (query.policyId && record.policyId !== query.policyId) {
           return false;
         }
-        if (query.simulationType && record.simulationType !== query.simulationType) {
+        if (
+          query.simulationType &&
+          record.simulationType !== query.simulationType
+        ) {
           return false;
         }
         const ts = record.occurredAt.getTime();
@@ -1498,20 +1614,21 @@ export class PolicyBacktestEngine {
         occurredAt: new Date(record.occurredAt),
         evaluatedAt: new Date(record.evaluatedAt),
         matchedRules: [...record.matchedRules],
-        reasons: [...record.reasons]
+        reasons: [...record.reasons],
       }));
   }
 
   private recordAuditEntry(
-    simulationType: AuditRecord["simulationType"],
+    simulationType: AuditRecord['simulationType'],
     policyId: string,
     event: HistoricalPolicyEvent,
     snapshot: PolicySnapshot,
     decision: PolicyEvaluationResult,
     compliant?: boolean,
-    expectedEffect?: PolicyEffect
+    expectedEffect?: PolicyEffect,
   ): void {
-    const eventId = event.id ?? `${policyId}:${new Date(event.occurredAt).toISOString()}`;
+    const eventId =
+      event.id ?? `${policyId}:${new Date(event.occurredAt).toISOString()}`;
     this.auditTrail.push({
       policyId,
       eventId,
@@ -1525,19 +1642,26 @@ export class PolicyBacktestEngine {
       simulationType,
       compliant,
       expectedEffect,
-      metadata: event.metadata
+      metadata: event.metadata,
     });
   }
 
-  private buildImpactReport(policyId: string, entries: EvaluationEntry[]): ImpactAnalysisReport {
+  private buildImpactReport(
+    policyId: string,
+    entries: EvaluationEntry[],
+  ): ImpactAnalysisReport {
     const effectCounts: Record<PolicyEffect, number> = { allow: 0, deny: 0 };
-    const versionBreakdown: ImpactAnalysisReport["versionBreakdown"] = {};
+    const versionBreakdown: ImpactAnalysisReport['versionBreakdown'] = {};
     const ruleHits: Record<string, number> = {};
     const obligationCounts: Record<string, number> = {};
     entries.forEach((entry) => {
       effectCounts[entry.decision.effect] += 1;
       if (!versionBreakdown[entry.snapshot.version]) {
-        versionBreakdown[entry.snapshot.version] = { evaluated: 0, allows: 0, denies: 0 };
+        versionBreakdown[entry.snapshot.version] = {
+          evaluated: 0,
+          allows: 0,
+          denies: 0,
+        };
       }
       const breakdown = versionBreakdown[entry.snapshot.version];
       breakdown.evaluated += 1;
@@ -1550,7 +1674,7 @@ export class PolicyBacktestEngine {
         ruleHits[ruleId] = (ruleHits[ruleId] ?? 0) + 1;
       });
       entry.decision.obligations.forEach((obligation) => {
-        const key = obligation.type ?? "unknown";
+        const key = obligation.type ?? 'unknown';
         obligationCounts[key] = (obligationCounts[key] ?? 0) + 1;
       });
     });
@@ -1560,10 +1684,10 @@ export class PolicyBacktestEngine {
       effectCounts,
       versionBreakdown,
       ruleHits,
-      obligationCounts
+      obligationCounts,
     };
   }
 }
 
-export { analyzeEvidence } from "common-types";
-export { ConsentStateReconciler } from "./consent-reconciler";
+export { analyzeEvidence } from 'common-types';
+export { ConsentStateReconciler } from './consent-reconciler';

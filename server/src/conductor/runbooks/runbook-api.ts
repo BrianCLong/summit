@@ -2,7 +2,12 @@
 // Provides endpoints for managing signed runbooks and approval workflows
 
 import express from 'express';
-import { runbookRegistry, Runbook, RunbookStep, ApprovalWorkflow } from './registry';
+import {
+  runbookRegistry,
+  Runbook,
+  RunbookStep,
+  ApprovalWorkflow,
+} from './registry';
 import { prometheusConductorMetrics } from '../observability/prometheus';
 import crypto from 'crypto';
 
@@ -37,7 +42,11 @@ runbookRouter.post('/create', async (req, res) => {
     const author = req.user?.sub || 'unknown';
 
     // Validation
-    if (!createRequest.name || !createRequest.description || !createRequest.steps?.length) {
+    if (
+      !createRequest.name ||
+      !createRequest.description ||
+      !createRequest.steps?.length
+    ) {
       return res.status(400).json({
         success: false,
         message: 'Name, description, and steps are required',
@@ -56,7 +65,8 @@ runbookRouter.post('/create', async (req, res) => {
       description: createRequest.description,
       category: createRequest.category,
       severity: createRequest.severity,
-      approvalRequired: createRequest.approvalRequired ?? createRequest.severity !== 'low',
+      approvalRequired:
+        createRequest.approvalRequired ?? createRequest.severity !== 'low',
       steps: createRequest.steps.map((step, index) => ({
         ...step,
         id: step.id || crypto.randomUUID(),
@@ -74,7 +84,10 @@ runbookRouter.post('/create', async (req, res) => {
     };
 
     // Register runbook
-    const signatureHash = await runbookRegistry.registerRunbook(runbook, author);
+    const signatureHash = await runbookRegistry.registerRunbook(
+      runbook,
+      author,
+    );
 
     const response = {
       success: true,
@@ -96,7 +109,10 @@ runbookRouter.post('/create', async (req, res) => {
   } catch (error) {
     console.error('Runbook creation error:', error);
 
-    prometheusConductorMetrics.recordOperationalEvent('runbook_creation_error', false);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'runbook_creation_error',
+      false,
+    );
 
     res.status(500).json({
       success: false,
@@ -115,7 +131,10 @@ runbookRouter.get('/:runbookId', async (req, res) => {
     const { runbookId } = req.params;
     const { version } = req.query;
 
-    const runbook = await runbookRegistry.getRunbook(runbookId, version as string);
+    const runbook = await runbookRegistry.getRunbook(
+      runbookId,
+      version as string,
+    );
 
     if (!runbook) {
       return res.status(404).json({
@@ -126,7 +145,10 @@ runbookRouter.get('/:runbookId', async (req, res) => {
 
     // Check tenant access if applicable
     const requestingTenantId = req.headers['x-tenant-id'] as string;
-    if (runbook.metadata.tenantId && runbook.metadata.tenantId !== requestingTenantId) {
+    if (
+      runbook.metadata.tenantId &&
+      runbook.metadata.tenantId !== requestingTenantId
+    ) {
       return res.status(403).json({
         success: false,
         message: 'Access denied: tenant boundary violation',
@@ -154,7 +176,10 @@ runbookRouter.get('/', async (req, res) => {
   try {
     const { category, tenantId } = req.query;
 
-    const runbooks = await runbookRegistry.listRunbooks(category as string, tenantId as string);
+    const runbooks = await runbookRegistry.listRunbooks(
+      category as string,
+      tenantId as string,
+    );
 
     res.json({
       success: true,
@@ -216,7 +241,10 @@ runbookRouter.post('/:runbookId/execute', async (req, res) => {
   } catch (error) {
     console.error('Runbook execution error:', error);
 
-    prometheusConductorMetrics.recordOperationalEvent('runbook_execution_error', false);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'runbook_execution_error',
+      false,
+    );
 
     res.status(500).json({
       success: false,
@@ -297,17 +325,26 @@ runbookRouter.post('/approvals/:approvalId/process', async (req, res) => {
     };
 
     // Record metrics
-    prometheusConductorMetrics.recordOperationalEvent('runbook_approval_processed', result.success);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'runbook_approval_processed',
+      result.success,
+    );
 
     if (result.success) {
-      prometheusConductorMetrics.recordOperationalEvent(`runbook_${decision}`, true);
+      prometheusConductorMetrics.recordOperationalEvent(
+        `runbook_${decision}`,
+        true,
+      );
     }
 
     res.json(response);
   } catch (error) {
     console.error('Approval processing error:', error);
 
-    prometheusConductorMetrics.recordOperationalEvent('runbook_approval_error', false);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'runbook_approval_error',
+      false,
+    );
 
     res.status(500).json({
       success: false,
@@ -326,8 +363,9 @@ runbookRouter.put('/:runbookId', async (req, res) => {
 
   try {
     const { runbookId } = req.params;
-    const updateRequest: CreateRunbookRequest & { versionIncrement?: 'patch' | 'minor' | 'major' } =
-      req.body;
+    const updateRequest: CreateRunbookRequest & {
+      versionIncrement?: 'patch' | 'minor' | 'major';
+    } = req.body;
     const author = req.user?.sub || 'unknown';
 
     // Get current runbook to determine new version
@@ -368,20 +406,25 @@ runbookRouter.put('/:runbookId', async (req, res) => {
       description: updateRequest.description || currentRunbook.description,
       category: updateRequest.category || currentRunbook.category,
       severity: updateRequest.severity || currentRunbook.severity,
-      approvalRequired: updateRequest.approvalRequired ?? currentRunbook.approvalRequired,
+      approvalRequired:
+        updateRequest.approvalRequired ?? currentRunbook.approvalRequired,
       steps: updateRequest.steps || currentRunbook.steps,
       metadata: {
         ...currentRunbook.metadata,
         updatedAt: Date.now(),
         tags: updateRequest.tags || currentRunbook.metadata.tags,
         tenantId: updateRequest.tenantId || currentRunbook.metadata.tenantId,
-        businessUnit: updateRequest.businessUnit || currentRunbook.metadata.businessUnit,
+        businessUnit:
+          updateRequest.businessUnit || currentRunbook.metadata.businessUnit,
       },
       approvals: [],
     };
 
     // Register new version
-    const signatureHash = await runbookRegistry.registerRunbook(updatedRunbook, author);
+    const signatureHash = await runbookRegistry.registerRunbook(
+      updatedRunbook,
+      author,
+    );
 
     const response = {
       success: true,
@@ -399,7 +442,10 @@ runbookRouter.put('/:runbookId', async (req, res) => {
   } catch (error) {
     console.error('Runbook update error:', error);
 
-    prometheusConductorMetrics.recordOperationalEvent('runbook_update_error', false);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'runbook_update_error',
+      false,
+    );
 
     res.status(500).json({
       success: false,
@@ -418,7 +464,10 @@ runbookRouter.post('/:runbookId/validate', async (req, res) => {
     const { runbookId } = req.params;
     const { version } = req.query;
 
-    const runbook = await runbookRegistry.getRunbook(runbookId, version as string);
+    const runbook = await runbookRegistry.getRunbook(
+      runbookId,
+      version as string,
+    );
 
     if (!runbook) {
       return res.status(404).json({
@@ -457,7 +506,10 @@ runbookRouter.get('/stats/overview', async (req, res) => {
   try {
     const { tenantId } = req.query;
 
-    const allRunbooks = await runbookRegistry.listRunbooks(undefined, tenantId as string);
+    const allRunbooks = await runbookRegistry.listRunbooks(
+      undefined,
+      tenantId as string,
+    );
 
     // Calculate statistics
     const stats = {
@@ -472,7 +524,8 @@ runbookRouter.get('/stats/overview', async (req, res) => {
 
     // Count by category and severity
     allRunbooks.forEach((runbook) => {
-      stats.byCategory[runbook.category] = (stats.byCategory[runbook.category] || 0) + 1;
+      stats.byCategory[runbook.category] =
+        (stats.byCategory[runbook.category] || 0) + 1;
     });
 
     res.json({
@@ -507,9 +560,14 @@ runbookRouter.use((req, res, next) => {
 
   res.on('finish', () => {
     const duration = Date.now() - start;
-    console.log(`Runbook API: ${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`);
+    console.log(
+      `Runbook API: ${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`,
+    );
 
-    prometheusConductorMetrics.recordOperationalMetric('runbook_api_request_duration', duration);
+    prometheusConductorMetrics.recordOperationalMetric(
+      'runbook_api_request_duration',
+      duration,
+    );
     prometheusConductorMetrics.recordOperationalEvent(
       `runbook_api_${req.method.toLowerCase()}`,
       res.statusCode < 400,

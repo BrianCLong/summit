@@ -1,7 +1,17 @@
 import crypto from 'node:crypto';
-import { describe, expect, test, beforeAll, afterAll, jest } from '@jest/globals';
+import {
+  describe,
+  expect,
+  test,
+  beforeAll,
+  afterAll,
+  jest,
+} from '@jest/globals';
 import { ProvenanceLedgerV2 } from '../src/provenance/ledger.js';
-import { CryptoPipeline, InMemoryKeyStore } from '../src/security/crypto/index.js';
+import {
+  CryptoPipeline,
+  InMemoryKeyStore,
+} from '../src/security/crypto/index.js';
 
 describe('ProvenanceLedgerV2 crypto integration', () => {
   beforeAll(() => {
@@ -24,8 +34,12 @@ describe('ProvenanceLedgerV2 crypto integration', () => {
       id: keyId,
       version: 1,
       algorithm: 'EdDSA_ED25519',
-      publicKeyPem: publicKey.export({ type: 'spki', format: 'pem' }).toString(),
-      privateKeyPem: privateKey.export({ type: 'pkcs8', format: 'pem' }).toString(),
+      publicKeyPem: publicKey
+        .export({ type: 'spki', format: 'pem' })
+        .toString(),
+      privateKeyPem: privateKey
+        .export({ type: 'pkcs8', format: 'pem' })
+        .toString(),
       createdAt: new Date(),
       validFrom: new Date(),
       isActive: true,

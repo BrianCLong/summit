@@ -66,7 +66,10 @@ class MaestroAPI {
     return response.data.steps || [];
   }
 
-  async runPipeline(workflowPath: string, parameters: Record<string, any> = {}): Promise<string> {
+  async runPipeline(
+    workflowPath: string,
+    parameters: Record<string, any> = {},
+  ): Promise<string> {
     const workflow = this.loadWorkflow(workflowPath);
 
     const response = await this.client.post('/api/v1/runs', {
@@ -95,7 +98,8 @@ class MaestroAPI {
   }
 
   createWebSocket(runId: string): WebSocket {
-    const wsUrl = this.apiUrl.replace(/^http/, 'ws') + `/api/v1/runs/${runId}/stream`;
+    const wsUrl =
+      this.apiUrl.replace(/^http/, 'ws') + `/api/v1/runs/${runId}/stream`;
     return new WebSocket(wsUrl, {
       headers: {
         Authorization: `Bearer ${this.apiKey}`,
@@ -105,10 +109,12 @@ class MaestroAPI {
 }
 
 class MaestroRunsProvider implements vscode.TreeDataProvider<MaestroRunItem> {
-  private _onDidChangeTreeData: vscode.EventEmitter<MaestroRunItem | undefined | null | void> =
-    new vscode.EventEmitter<MaestroRunItem | undefined | null | void>();
-  readonly onDidChangeTreeData: vscode.Event<MaestroRunItem | undefined | null | void> =
-    this._onDidChangeTreeData.event;
+  private _onDidChangeTreeData: vscode.EventEmitter<
+    MaestroRunItem | undefined | null | void
+  > = new vscode.EventEmitter<MaestroRunItem | undefined | null | void>();
+  readonly onDidChangeTreeData: vscode.Event<
+    MaestroRunItem | undefined | null | void
+  > = this._onDidChangeTreeData.event;
 
   private runs: MaestroRun[] = [];
   private api: MaestroAPI;
@@ -127,7 +133,9 @@ class MaestroRunsProvider implements vscode.TreeDataProvider<MaestroRunItem> {
       })
       .catch((error) => {
         console.error('Failed to refresh runs:', error);
-        vscode.window.showErrorMessage(`Failed to refresh Maestro runs: ${error.message}`);
+        vscode.window.showErrorMessage(
+          `Failed to refresh Maestro runs: ${error.message}`,
+        );
       });
   }
 
@@ -204,8 +212,12 @@ class MaestroRunItem extends vscode.TreeItem {
           : '';
       return [cost, duration].filter(Boolean).join(' • ');
     } else if (this.step) {
-      const duration = this.step.duration_ms ? `${this.step.duration_ms}ms` : '';
-      const cost = this.step.cost_usd ? `$${this.step.cost_usd.toFixed(4)}` : '';
+      const duration = this.step.duration_ms
+        ? `${this.step.duration_ms}ms`
+        : '';
+      const cost = this.step.cost_usd
+        ? `$${this.step.cost_usd.toFixed(4)}`
+        : '';
       return [duration, cost].filter(Boolean).join(' • ');
     }
     return '';
@@ -214,15 +226,30 @@ class MaestroRunItem extends vscode.TreeItem {
   private getIcon(): vscode.ThemeIcon {
     const statusIcons = {
       running: new vscode.ThemeIcon('loading~spin'),
-      completed: new vscode.ThemeIcon('check', new vscode.ThemeColor('charts.green')),
-      succeeded: new vscode.ThemeIcon('check', new vscode.ThemeColor('charts.green')),
-      failed: new vscode.ThemeIcon('error', new vscode.ThemeColor('charts.red')),
-      cancelled: new vscode.ThemeIcon('circle-slash', new vscode.ThemeColor('charts.yellow')),
+      completed: new vscode.ThemeIcon(
+        'check',
+        new vscode.ThemeColor('charts.green'),
+      ),
+      succeeded: new vscode.ThemeIcon(
+        'check',
+        new vscode.ThemeColor('charts.green'),
+      ),
+      failed: new vscode.ThemeIcon(
+        'error',
+        new vscode.ThemeColor('charts.red'),
+      ),
+      cancelled: new vscode.ThemeIcon(
+        'circle-slash',
+        new vscode.ThemeColor('charts.yellow'),
+      ),
       pending: new vscode.ThemeIcon('clock'),
       default: new vscode.ThemeIcon('circle-outline'),
     };
 
-    return statusIcons[this.status as keyof typeof statusIcons] || statusIcons.default;
+    return (
+      statusIcons[this.status as keyof typeof statusIcons] ||
+      statusIcons.default
+    );
   }
 }
 
@@ -267,7 +294,9 @@ export function activate(context: vscode.ExtensionContext) {
 
   const api = new MaestroAPI(apiUrl, apiKey);
   const provider = new MaestroRunsProvider(api);
-  const treeView = vscode.window.createTreeView('maestroRuns', { treeDataProvider: provider });
+  const treeView = vscode.window.createTreeView('maestroRuns', {
+    treeDataProvider: provider,
+  });
 
   // Auto-refresh
   const autoRefresh = config.get<boolean>('autoRefresh', true);
@@ -284,73 +313,78 @@ export function activate(context: vscode.ExtensionContext) {
   }
 
   // Commands
-  const runPipelineCommand = vscode.commands.registerCommand('maestro.runPipeline', async () => {
-    try {
-      // Find maestro.yaml files in workspace
-      const files = await vscode.workspace.findFiles(
-        '**/*.maestro.{yaml,yml}',
-        '**/node_modules/**',
-      );
+  const runPipelineCommand = vscode.commands.registerCommand(
+    'maestro.runPipeline',
+    async () => {
+      try {
+        // Find maestro.yaml files in workspace
+        const files = await vscode.workspace.findFiles(
+          '**/*.maestro.{yaml,yml}',
+          '**/node_modules/**',
+        );
 
-      if (files.length === 0) {
-        vscode.window.showErrorMessage('No Maestro pipeline files found in workspace');
-        return;
-      }
-
-      let selectedFile: vscode.Uri;
-
-      if (files.length === 1) {
-        selectedFile = files[0];
-      } else {
-        const items = files.map((file) => ({
-          label: vscode.workspace.asRelativePath(file),
-          uri: file,
-        }));
-
-        const selected = await vscode.window.showQuickPick(items, {
-          placeHolder: 'Select a pipeline to run',
-        });
-
-        if (!selected) {
+        if (files.length === 0) {
+          vscode.window.showErrorMessage(
+            'No Maestro pipeline files found in workspace',
+          );
           return;
         }
 
-        selectedFile = selected.uri;
-      }
+        let selectedFile: vscode.Uri;
 
-      // Ask for parameters
-      const parametersInput = await vscode.window.showInputBox({
-        prompt: 'Enter parameters (JSON format, or leave empty)',
-        placeHolder: '{"env": "staging", "debug": true}',
-      });
+        if (files.length === 1) {
+          selectedFile = files[0];
+        } else {
+          const items = files.map((file) => ({
+            label: vscode.workspace.asRelativePath(file),
+            uri: file,
+          }));
 
-      let parameters = {};
-      if (parametersInput) {
-        try {
-          parameters = JSON.parse(parametersInput);
-        } catch (error) {
-          vscode.window.showErrorMessage(`Invalid JSON parameters: ${error}`);
-          return;
-        }
-      }
+          const selected = await vscode.window.showQuickPick(items, {
+            placeHolder: 'Select a pipeline to run',
+          });
 
-      vscode.window.showInformationMessage('Starting pipeline execution...');
-
-      const runId = await api.runPipeline(selectedFile.fsPath, parameters);
-
-      vscode.window
-        .showInformationMessage(`Pipeline started: ${runId}`, 'Show Logs')
-        .then((selection) => {
-          if (selection === 'Show Logs') {
-            vscode.commands.executeCommand('maestro.showLogs', runId);
+          if (!selected) {
+            return;
           }
+
+          selectedFile = selected.uri;
+        }
+
+        // Ask for parameters
+        const parametersInput = await vscode.window.showInputBox({
+          prompt: 'Enter parameters (JSON format, or leave empty)',
+          placeHolder: '{"env": "staging", "debug": true}',
         });
 
-      provider.refresh();
-    } catch (error) {
-      vscode.window.showErrorMessage(`Failed to run pipeline: ${error}`);
-    }
-  });
+        let parameters = {};
+        if (parametersInput) {
+          try {
+            parameters = JSON.parse(parametersInput);
+          } catch (error) {
+            vscode.window.showErrorMessage(`Invalid JSON parameters: ${error}`);
+            return;
+          }
+        }
+
+        vscode.window.showInformationMessage('Starting pipeline execution...');
+
+        const runId = await api.runPipeline(selectedFile.fsPath, parameters);
+
+        vscode.window
+          .showInformationMessage(`Pipeline started: ${runId}`, 'Show Logs')
+          .then((selection) => {
+            if (selection === 'Show Logs') {
+              vscode.commands.executeCommand('maestro.showLogs', runId);
+            }
+          });
+
+        provider.refresh();
+      } catch (error) {
+        vscode.window.showErrorMessage(`Failed to run pipeline: ${error}`);
+      }
+    },
+  );
 
   const showStatusCommand = vscode.commands.registerCommand(
     'maestro.showStatus',
@@ -376,11 +410,14 @@ export function activate(context: vscode.ExtensionContext) {
   const showLogsCommand = vscode.commands.registerCommand(
     'maestro.showLogs',
     async (runIdOrItem: string | MaestroRunItem) => {
-      const runId = typeof runIdOrItem === 'string' ? runIdOrItem : runIdOrItem.runId;
+      const runId =
+        typeof runIdOrItem === 'string' ? runIdOrItem : runIdOrItem.runId;
 
       try {
         const run = await api.getRun(runId);
-        const logChannel = new MaestroLogOutputChannel(`Maestro: ${run.workflow_name}`);
+        const logChannel = new MaestroLogOutputChannel(
+          `Maestro: ${run.workflow_name}`,
+        );
 
         logChannel.show();
         logChannel.clear();
@@ -404,10 +441,14 @@ export function activate(context: vscode.ExtensionContext) {
 
             switch (event.type) {
               case 'step:started':
-                logChannel.appendLine(`[${timestamp}] ⏳ Step started: ${event.step_id}`);
+                logChannel.appendLine(
+                  `[${timestamp}] ⏳ Step started: ${event.step_id}`,
+                );
                 break;
               case 'step:completed':
-                logChannel.appendLine(`[${timestamp}] ✅ Step completed: ${event.step_id}`);
+                logChannel.appendLine(
+                  `[${timestamp}] ✅ Step completed: ${event.step_id}`,
+                );
                 break;
               case 'step:failed':
                 logChannel.appendLine(
@@ -419,7 +460,9 @@ export function activate(context: vscode.ExtensionContext) {
                 ws.close();
                 break;
               case 'run:failed':
-                logChannel.appendLine(`[${timestamp}] 💥 Run failed: ${event.error}`);
+                logChannel.appendLine(
+                  `[${timestamp}] 💥 Run failed: ${event.error}`,
+                );
                 ws.close();
                 break;
               default:
@@ -513,14 +556,19 @@ export function activate(context: vscode.ExtensionContext) {
 
         vscode.window.showInformationMessage('✅ Template is valid');
       } catch (error) {
-        vscode.window.showErrorMessage(`❌ Template validation failed: ${error}`);
+        vscode.window.showErrorMessage(
+          `❌ Template validation failed: ${error}`,
+        );
       }
     },
   );
 
-  const refreshRunsListCommand = vscode.commands.registerCommand('maestro.refreshRunsList', () => {
-    provider.refresh();
-  });
+  const refreshRunsListCommand = vscode.commands.registerCommand(
+    'maestro.refreshRunsList',
+    () => {
+      provider.refresh();
+    },
+  );
 
   // Register all commands
   context.subscriptions.push(
@@ -534,7 +582,10 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   // Status bar item
-  const statusBarItem = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+  const statusBarItem = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Right,
+    100,
+  );
   statusBarItem.text = '$(terminal) Maestro';
   statusBarItem.tooltip = 'Maestro Orchestration';
   statusBarItem.command = 'maestro.runPipeline';

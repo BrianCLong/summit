@@ -54,7 +54,11 @@ import { IntelGraphSafeMutations } from './server/src/graphql/mutations/SafeMuta
 
 // Create an entity with full audit trail
 const context = {
-  user: { id: 'user-123', tenantId: 'tenant-123', permissions: ['entity:create'] },
+  user: {
+    id: 'user-123',
+    tenantId: 'tenant-123',
+    permissions: ['entity:create'],
+  },
   requestId: 'req-123',
   timestamp: new Date().toISOString(),
   source: 'graphql',
@@ -224,7 +228,10 @@ const EntityMutationSchema = z.object({
   kind: z.string().regex(/^[a-zA-Z][a-zA-Z0-9_]*$/),
   props: z
     .record(z.any())
-    .refine((props) => JSON.stringify(props).length <= 32768, 'Entity properties too large'),
+    .refine(
+      (props) => JSON.stringify(props).length <= 32768,
+      'Entity properties too large',
+    ),
 });
 ```
 
@@ -246,7 +253,10 @@ if (context.entityCount >= 50000) {
 
 ```typescript
 // Detect potential injection attacks
-const sqlInjectionPatterns = [/(\bSELECT\b.*\bFROM\b)/i, /(\bDROP\b.*\bTABLE\b)/i];
+const sqlInjectionPatterns = [
+  /(\bSELECT\b.*\bFROM\b)/i,
+  /(\bDROP\b.*\bTABLE\b)/i,
+];
 
 if (sqlInjectionPatterns.some((pattern) => pattern.test(input))) {
   throw new Error('Potential SQL injection detected');

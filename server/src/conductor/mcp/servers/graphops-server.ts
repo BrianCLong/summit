@@ -20,13 +20,17 @@ export interface GraphOpsConfig {
 export class GraphOpsServer {
   private server: WebSocket.Server;
   private neo4jDriver: any; // Neo4j driver instance
-  private rateLimitCache = new Map<string, { count: number; resetTime: number }>();
+  private rateLimitCache = new Map<
+    string,
+    { count: number; resetTime: number }
+  >();
 
   // Available tools
   private tools: MCPTool[] = [
     {
       name: 'graph.query',
-      description: 'Execute parameterized Cypher queries against the tenant graph',
+      description:
+        'Execute parameterized Cypher queries against the tenant graph',
       schema: {
         type: 'object',
         properties: {
@@ -63,13 +67,20 @@ export class GraphOpsServer {
     },
     {
       name: 'graph.alg',
-      description: 'Execute graph algorithms (PageRank, Community Detection, etc.)',
+      description:
+        'Execute graph algorithms (PageRank, Community Detection, etc.)',
       schema: {
         type: 'object',
         properties: {
           name: {
             type: 'string',
-            enum: ['pagerank', 'community', 'shortestPath', 'betweenness', 'closeness'],
+            enum: [
+              'pagerank',
+              'community',
+              'shortestPath',
+              'betweenness',
+              'closeness',
+            ],
           },
           args: {
             type: 'object',
@@ -149,7 +160,12 @@ export class GraphOpsServer {
               await this.handleToolExecute(ws, message, authToken);
               break;
             default:
-              this.sendError(ws, message.id, -32601, `Method '${message.method}' not found`);
+              this.sendError(
+                ws,
+                message.id,
+                -32601,
+                `Method '${message.method}' not found`,
+              );
           }
         } catch (error) {
           console.error('Error processing message:', error);
@@ -271,11 +287,19 @@ export class GraphOpsServer {
       ws.send(JSON.stringify(response));
     } catch (error) {
       console.error(`Error executing tool ${name}:`, error);
-      this.sendError(ws, message.id, -32000, `Tool execution failed: ${error.message}`);
+      this.sendError(
+        ws,
+        message.id,
+        -32000,
+        `Tool execution failed: ${error.message}`,
+      );
     }
   }
 
-  private async executeQuery(args: any, isWrite: boolean = false): Promise<any> {
+  private async executeQuery(
+    args: any,
+    isWrite: boolean = false,
+  ): Promise<any> {
     const { cypher, params = {}, tenantId } = args;
 
     if (!cypher) {
@@ -372,7 +396,12 @@ export class GraphOpsServer {
       case 'get':
         return {
           nodeLabels: ['Person', 'Organization', 'Event', 'Location'],
-          relationshipTypes: ['KNOWS', 'WORKS_FOR', 'LOCATED_AT', 'PARTICIPATED_IN'],
+          relationshipTypes: [
+            'KNOWS',
+            'WORKS_FOR',
+            'LOCATED_AT',
+            'PARTICIPATED_IN',
+          ],
           properties: {
             Person: ['name', 'age', 'email'],
             Organization: ['name', 'type', 'founded'],
@@ -406,7 +435,12 @@ export class GraphOpsServer {
     }
   }
 
-  private sendError(ws: WebSocket, id: string, code: number, message: string): void {
+  private sendError(
+    ws: WebSocket,
+    id: string,
+    code: number,
+    message: string,
+  ): void {
     const response: MCPResponse = {
       jsonrpc: '2.0',
       id,

@@ -1,7 +1,7 @@
 // server/src/optimization/cost-efficiency-optimizer.ts
 
 import { getRedisClient } from '../config/database.js';
-import logger from '../config/logger.js';
+import logger from '../utils/logger.js';
 import { EventEmitter } from 'events';
 
 interface ModelProfile {
@@ -154,8 +154,10 @@ export class CostEfficiencyOptimizer extends EventEmitter {
       // Step 2: Check budget constraints
       const budgetCheck = await this.checkBudgetConstraints(criteria);
       if (!budgetCheck.allowed) {
-        candidateModels = candidateModels.filter(model => 
-          this.estimateRequestCost(model, criteria) <= budgetCheck.maxAllowedCost
+        candidateModels = candidateModels.filter(
+          (model) =>
+            this.estimateRequestCost(model, criteria) <=
+            budgetCheck.maxAllowedCost,
         );
         optimizations.push('budget_filtering');
       }
@@ -166,29 +168,44 @@ export class CostEfficiencyOptimizer extends EventEmitter {
 
       // Step 4: Apply intelligent routing strategies
       const routingStrategy = this.determineRoutingStrategy(criteria);
-      const finalModel = await this.applyRoutingStrategy(scoredModels, routingStrategy, criteria);
+      const finalModel = await this.applyRoutingStrategy(
+        scoredModels,
+        routingStrategy,
+        criteria,
+      );
       optimizations.push(`routing_${routingStrategy}`);
 
       // Step 5: Generate cost prediction
-      const costPrediction = await this.generateCostPrediction(finalModel, criteria);
+      const costPrediction = await this.generateCostPrediction(
+        finalModel,
+        criteria,
+      );
       optimizations.push('cost_prediction');
 
       // Step 6: Prepare alternatives
       const alternatives = scoredModels
-        .filter(m => m.id !== finalModel.id)
+        .filter((m) => m.id !== finalModel.id)
         .slice(0, 3);
 
-      const reasoning = this.generateSelectionReasoning(finalModel, criteria, routingStrategy);
+      const reasoning = this.generateSelectionReasoning(
+        finalModel,
+        criteria,
+        routingStrategy,
+      );
 
       // Step 7: Record selection for learning
-      await this.recordModelSelection(finalModel, criteria, costPrediction.estimatedCost);
+      await this.recordModelSelection(
+        finalModel,
+        criteria,
+        costPrediction.estimatedCost,
+      );
 
       this.emit('modelSelected', {
         modelId: finalModel.id,
         criteria: criteria.taskType,
         estimatedCost: costPrediction.estimatedCost,
         selectionTime: Date.now() - startTime,
-        reasoning
+        reasoning,
       });
 
       return {
@@ -196,14 +213,13 @@ export class CostEfficiencyOptimizer extends EventEmitter {
         reasoning,
         alternatives,
         costPrediction,
-        optimizationApplied: optimizations
+        optimizationApplied: optimizations,
       };
-
     } catch (error) {
       this.emit('modelSelectionError', {
         error: error.message,
         criteria: criteria.taskType,
-        selectionTime: Date.now() - startTime
+        selectionTime: Date.now() - startTime,
       });
       throw error;
     }
@@ -215,10 +231,14 @@ export class CostEfficiencyOptimizer extends EventEmitter {
   async predictRequestCost(
     modelId: string,
     criteria: ModelSelectionCriteria,
-    inputText?: string
+    inputText?: string,
   ): Promise<CostPrediction> {
-    const cacheKey = this.generatePredictionCacheKey(modelId, criteria, inputText);
-    
+    const cacheKey = this.generatePredictionCacheKey(
+      modelId,
+      criteria,
+      inputText,
+    );
+
     // Check cache first
     const cached = await this.getCachedPrediction(cacheKey);
     if (cached) {
@@ -232,33 +252,41 @@ export class CostEfficiencyOptimizer extends EventEmitter {
     }
 
     // Estimate token counts
-    const inputTokens = inputText ? this.estimateTokenCount(inputText) : criteria.contextSize;
+    const inputTokens = inputText
+      ? this.estimateTokenCount(inputText)
+      : criteria.contextSize;
     const outputTokens = criteria.expectedOutputSize;
 
     // Base cost calculation
     let baseCost = 0;
     if (model.costPerToken > 0) {
-      baseCost = (inputTokens * model.costPerToken) + (outputTokens * model.costPerToken * 2); // Output typically costs more
+      baseCost =
+        inputTokens * model.costPerToken +
+        outputTokens * model.costPerToken * 2; // Output typically costs more
     } else {
       baseCost = model.costPerRequest;
     }
 
     // Apply complexity multiplier
-    const complexityMultiplier = 1 + (criteria.complexity * 0.5);
-    
+    const complexityMultiplier = 1 + criteria.complexity * 0.5;
+
     // Apply urgency multiplier
     const urgencyMultipliers = {
       low: 0.8,
       medium: 1.0,
       high: 1.2,
-      critical: 1.5
+      critical: 1.5,
     };
     const urgencyMultiplier = urgencyMultipliers[criteria.urgency];
 
     const estimatedCost = baseCost * complexityMultiplier * urgencyMultiplier;
 
     // Generate alternatives
-    const alternatives = await this.generateCostAlternatives(model, criteria, estimatedCost);
+    const alternatives = await this.generateCostAlternatives(
+      model,
+      criteria,
+      estimatedCost,
+    );
 
     const prediction: CostPrediction = {
       estimatedCost,
@@ -268,9 +296,9 @@ export class CostEfficiencyOptimizer extends EventEmitter {
         outputTokens,
         baseRequestCost: baseCost,
         complexityMultiplier,
-        urgencyMultiplier
+        urgencyMultiplier,
       },
-      alternatives
+      alternatives,
     };
 
     // Cache the prediction
@@ -293,12 +321,12 @@ export class CostEfficiencyOptimizer extends EventEmitter {
       outputTokens: number;
       responseTime: number;
       quality: number;
-    }
+    },
   ): Promise<void> {
     // Update budget tracker
     const budgetKey = `${tenantId}:${userId}`;
     let tracker = this.budgetTrackers.get(budgetKey);
-    
+
     if (!tracker) {
       tracker = await this.initializeBudgetTracker(userId, tenantId);
       this.budgetTrackers.set(budgetKey, tracker);
@@ -307,7 +335,13 @@ export class CostEfficiencyOptimizer extends EventEmitter {
     tracker.currentSpend += actualCost;
 
     // Update usage analytics
-    this.updateUsageAnalytics(userId, tenantId, modelId, requestData.taskType, actualCost);
+    this.updateUsageAnalytics(
+      userId,
+      tenantId,
+      modelId,
+      requestData.taskType,
+      actualCost,
+    );
 
     // Update model performance
     await this.updateModelPerformance(modelId, actualCost, requestData);
@@ -324,7 +358,7 @@ export class CostEfficiencyOptimizer extends EventEmitter {
       modelId,
       actualCost,
       currentSpend: tracker.currentSpend,
-      budgetUtilization: tracker.currentSpend / tracker.totalBudget
+      budgetUtilization: tracker.currentSpend / tracker.totalBudget,
     });
   }
 
@@ -334,13 +368,18 @@ export class CostEfficiencyOptimizer extends EventEmitter {
   async generateOptimizationRecommendations(
     userId: string,
     tenantId: string,
-    timeframe: number = 7 * 24 * 60 * 60 * 1000 // 7 days
+    timeframe: number = 7 * 24 * 60 * 60 * 1000, // 7 days
   ): Promise<OptimizationRecommendation[]> {
     const recommendations: OptimizationRecommendation[] = [];
-    const userAnalytics = await this.getUserAnalytics(userId, tenantId, timeframe);
+    const userAnalytics = await this.getUserAnalytics(
+      userId,
+      tenantId,
+      timeframe,
+    );
 
     // Recommendation 1: Model switching based on usage patterns
-    const modelSwitchRec = await this.analyzeModelSwitchingOpportunities(userAnalytics);
+    const modelSwitchRec =
+      await this.analyzeModelSwitchingOpportunities(userAnalytics);
     if (modelSwitchRec) {
       recommendations.push(modelSwitchRec);
     }
@@ -376,7 +415,10 @@ export class CostEfficiencyOptimizer extends EventEmitter {
       userId,
       tenantId,
       recommendationCount: recommendations.length,
-      totalPotentialSavings: recommendations.reduce((sum, rec) => sum + rec.estimatedSavings, 0)
+      totalPotentialSavings: recommendations.reduce(
+        (sum, rec) => sum + rec.estimatedSavings,
+        0,
+      ),
     });
 
     return recommendations;
@@ -399,26 +441,26 @@ export class CostEfficiencyOptimizer extends EventEmitter {
     const recommendedAllocation = await this.generateOptimalAllocation(
       currentUsage,
       demandPatterns,
-      costEfficiencyMap
+      costEfficiencyMap,
     );
 
     // Calculate projected savings
     const projectedSavings = this.calculateProjectedSavings(
       currentUsage,
-      recommendedAllocation
+      recommendedAllocation,
     );
 
     // Create implementation plan
     const implementationPlan = this.generateImplementationPlan(
       currentUsage,
-      recommendedAllocation
+      recommendedAllocation,
     );
 
     return {
       currentAllocation: currentUsage,
       recommendedAllocation,
       projectedSavings,
-      implementationPlan
+      implementationPlan,
     };
   }
 
@@ -436,13 +478,13 @@ export class CostEfficiencyOptimizer extends EventEmitter {
         avgCostPerRequest: 0,
         costTrend: 0,
         utilizationRate: 0,
-        wastePercentage: 0
+        wastePercentage: 0,
       },
       patterns: {
         peakHours: [],
         lowUsagePeriods: [],
-        seasonality: {}
-      }
+        seasonality: {},
+      },
     };
   }
 
@@ -462,7 +504,7 @@ export class CostEfficiencyOptimizer extends EventEmitter {
         capabilities: ['text_generation', 'analysis', 'reasoning', 'code'],
         contextWindow: 128000,
         throughputRpm: 500,
-        reliabilityScore: 0.98
+        reliabilityScore: 0.98,
       },
       {
         id: 'gpt-3.5-turbo',
@@ -477,7 +519,7 @@ export class CostEfficiencyOptimizer extends EventEmitter {
         capabilities: ['text_generation', 'analysis', 'basic_reasoning'],
         contextWindow: 16384,
         throughputRpm: 1000,
-        reliabilityScore: 0.96
+        reliabilityScore: 0.96,
       },
       {
         id: 'claude-3-opus',
@@ -492,7 +534,7 @@ export class CostEfficiencyOptimizer extends EventEmitter {
         capabilities: ['text_generation', 'analysis', 'reasoning', 'creative'],
         contextWindow: 200000,
         throughputRpm: 300,
-        reliabilityScore: 0.97
+        reliabilityScore: 0.97,
       },
       {
         id: 'claude-3-sonnet',
@@ -503,11 +545,11 @@ export class CostEfficiencyOptimizer extends EventEmitter {
         costPerRequest: 0,
         maxTokens: 4096,
         averageLatency: 2000,
-        qualityScore: 0.90,
+        qualityScore: 0.9,
         capabilities: ['text_generation', 'analysis', 'reasoning'],
         contextWindow: 200000,
         throughputRpm: 500,
-        reliabilityScore: 0.96
+        reliabilityScore: 0.96,
       },
       {
         id: 'text-embedding-3-large',
@@ -522,8 +564,8 @@ export class CostEfficiencyOptimizer extends EventEmitter {
         capabilities: ['embedding', 'similarity'],
         contextWindow: 8191,
         throughputRpm: 2000,
-        reliabilityScore: 0.99
-      }
+        reliabilityScore: 0.99,
+      },
     ];
 
     for (const model of defaultModels) {
@@ -535,8 +577,8 @@ export class CostEfficiencyOptimizer extends EventEmitter {
           avgResponseTime: model.averageLatency || 2000,
           p99ResponseTime: (model.averageLatency || 2000) * 2,
           errorRate: 0.02,
-          throttleRate: 0.01
-        }
+          throttleRate: 0.01,
+        },
       } as ModelProfile;
 
       this.modelProfiles.set(fullModel.id, fullModel);
@@ -564,14 +606,16 @@ export class CostEfficiencyOptimizer extends EventEmitter {
     }
   }
 
-  private async filterModelsByCriteria(criteria: ModelSelectionCriteria): Promise<ModelProfile[]> {
+  private async filterModelsByCriteria(
+    criteria: ModelSelectionCriteria,
+  ): Promise<ModelProfile[]> {
     const candidates: ModelProfile[] = [];
 
     for (const model of this.modelProfiles.values()) {
       // Check required capabilities
       if (criteria.requiredCapabilities.length > 0) {
-        const hasRequiredCapabilities = criteria.requiredCapabilities.every(cap =>
-          model.capabilities.includes(cap)
+        const hasRequiredCapabilities = criteria.requiredCapabilities.every(
+          (cap) => model.capabilities.includes(cap),
         );
         if (!hasRequiredCapabilities) continue;
       }
@@ -580,7 +624,8 @@ export class CostEfficiencyOptimizer extends EventEmitter {
       if (criteria.contextSize > model.contextWindow) continue;
 
       // Check latency requirements
-      if (criteria.maxLatency && model.averageLatency > criteria.maxLatency) continue;
+      if (criteria.maxLatency && model.averageLatency > criteria.maxLatency)
+        continue;
 
       // Check quality requirements
       if (model.qualityScore < criteria.qualityRequirement) continue;
@@ -594,7 +639,9 @@ export class CostEfficiencyOptimizer extends EventEmitter {
     return candidates;
   }
 
-  private async checkBudgetConstraints(criteria: ModelSelectionCriteria): Promise<{
+  private async checkBudgetConstraints(
+    criteria: ModelSelectionCriteria,
+  ): Promise<{
     allowed: boolean;
     maxAllowedCost: number;
     currentSpend: number;
@@ -609,7 +656,7 @@ export class CostEfficiencyOptimizer extends EventEmitter {
         allowed: true,
         maxAllowedCost: criteria.budgetLimit || Infinity,
         currentSpend: 0,
-        budgetRemaining: Infinity
+        budgetRemaining: Infinity,
       };
     }
 
@@ -617,22 +664,22 @@ export class CostEfficiencyOptimizer extends EventEmitter {
     const maxAllowedCost = Math.min(
       criteria.budgetLimit || tracker.totalBudget,
       budgetRemaining * 0.1, // Don't allow more than 10% of remaining budget in one request
-      tracker.restrictions.maxCostPerRequest
+      tracker.restrictions.maxCostPerRequest,
     );
 
     return {
       allowed: budgetRemaining > 0 && maxAllowedCost > 0,
       maxAllowedCost,
       currentSpend: tracker.currentSpend,
-      budgetRemaining
+      budgetRemaining,
     };
   }
 
   private async scoreModels(
     models: ModelProfile[],
-    criteria: ModelSelectionCriteria
+    criteria: ModelSelectionCriteria,
   ): Promise<ModelProfile[]> {
-    const scoredModels = models.map(model => {
+    const scoredModels = models.map((model) => {
       const cost = this.estimateRequestCost(model, criteria);
       const quality = model.qualityScore;
       const speed = 1 / (model.averageLatency / 1000); // Requests per second
@@ -642,7 +689,9 @@ export class CostEfficiencyOptimizer extends EventEmitter {
       let score = 0;
 
       // Cost efficiency (lower cost = higher score)
-      const maxCost = Math.max(...models.map(m => this.estimateRequestCost(m, criteria)));
+      const maxCost = Math.max(
+        ...models.map((m) => this.estimateRequestCost(m, criteria)),
+      );
       const costScore = maxCost > 0 ? (maxCost - cost) / maxCost : 1;
       score += costScore * 0.3;
 
@@ -650,7 +699,9 @@ export class CostEfficiencyOptimizer extends EventEmitter {
       score += quality * 0.4;
 
       // Speed score
-      const maxSpeed = Math.max(...models.map(m => 1 / (m.averageLatency / 1000)));
+      const maxSpeed = Math.max(
+        ...models.map((m) => 1 / (m.averageLatency / 1000)),
+      );
       const speedScore = maxSpeed > 0 ? speed / maxSpeed : 1;
       score += speedScore * 0.2;
 
@@ -667,7 +718,7 @@ export class CostEfficiencyOptimizer extends EventEmitter {
       return {
         ...model,
         _score: score,
-        _estimatedCost: cost
+        _estimatedCost: cost,
       };
     });
 
@@ -678,26 +729,27 @@ export class CostEfficiencyOptimizer extends EventEmitter {
     // Intelligent routing strategy based on request characteristics
     if (criteria.urgency === 'critical') return 'performance_first';
     if (criteria.qualityRequirement > 0.9) return 'quality_first';
-    if (criteria.budgetLimit && criteria.budgetLimit < 0.01) return 'cost_first';
+    if (criteria.budgetLimit && criteria.budgetLimit < 0.01)
+      return 'cost_first';
     if (criteria.complexity > 0.8) return 'capability_first';
-    
+
     return 'balanced';
   }
 
   private async applyRoutingStrategy(
     scoredModels: ModelProfile[],
     strategy: string,
-    criteria: ModelSelectionCriteria
+    criteria: ModelSelectionCriteria,
   ): Promise<ModelProfile> {
     switch (strategy) {
       case 'performance_first':
-        return scoredModels.reduce((best, current) => 
-          current.averageLatency < best.averageLatency ? current : best
+        return scoredModels.reduce((best, current) =>
+          current.averageLatency < best.averageLatency ? current : best,
         );
 
       case 'quality_first':
-        return scoredModels.reduce((best, current) => 
-          current.qualityScore > best.qualityScore ? current : best
+        return scoredModels.reduce((best, current) =>
+          current.qualityScore > best.qualityScore ? current : best,
         );
 
       case 'cost_first':
@@ -708,8 +760,10 @@ export class CostEfficiencyOptimizer extends EventEmitter {
         });
 
       case 'capability_first':
-        return scoredModels.reduce((best, current) => 
-          current.capabilities.length > best.capabilities.length ? current : best
+        return scoredModels.reduce((best, current) =>
+          current.capabilities.length > best.capabilities.length
+            ? current
+            : best,
         );
 
       case 'balanced':
@@ -718,24 +772,29 @@ export class CostEfficiencyOptimizer extends EventEmitter {
     }
   }
 
-  private estimateRequestCost(model: ModelProfile, criteria: ModelSelectionCriteria): number {
+  private estimateRequestCost(
+    model: ModelProfile,
+    criteria: ModelSelectionCriteria,
+  ): number {
     let cost = model.costPerRequest;
 
     if (model.costPerToken > 0) {
       const inputTokens = criteria.contextSize || 1000;
       const outputTokens = criteria.expectedOutputSize || 500;
-      cost = (inputTokens * model.costPerToken) + (outputTokens * model.costPerToken * 1.5);
+      cost =
+        inputTokens * model.costPerToken +
+        outputTokens * model.costPerToken * 1.5;
     }
 
     // Apply complexity multiplier
-    cost *= (1 + criteria.complexity * 0.5);
+    cost *= 1 + criteria.complexity * 0.5;
 
     return cost;
   }
 
   private async generateCostPrediction(
     model: ModelProfile,
-    criteria: ModelSelectionCriteria
+    criteria: ModelSelectionCriteria,
   ): Promise<CostPrediction> {
     return this.predictRequestCost(model.id, criteria);
   }
@@ -743,21 +802,23 @@ export class CostEfficiencyOptimizer extends EventEmitter {
   private generateSelectionReasoning(
     model: ModelProfile,
     criteria: ModelSelectionCriteria,
-    strategy: string
+    strategy: string,
   ): string {
     const cost = this.estimateRequestCost(model, criteria);
-    
-    return `Selected ${model.name} using ${strategy} strategy. ` +
-           `Quality score: ${(model.qualityScore * 100).toFixed(1)}%, ` +
-           `Estimated cost: $${cost.toFixed(4)}, ` +
-           `Average latency: ${model.averageLatency}ms, ` +
-           `Reliability: ${(model.performance.successRate * 100).toFixed(1)}%`;
+
+    return (
+      `Selected ${model.name} using ${strategy} strategy. ` +
+      `Quality score: ${(model.qualityScore * 100).toFixed(1)}%, ` +
+      `Estimated cost: $${cost.toFixed(4)}, ` +
+      `Average latency: ${model.averageLatency}ms, ` +
+      `Reliability: ${(model.performance.successRate * 100).toFixed(1)}%`
+    );
   }
 
   private async recordModelSelection(
     model: ModelProfile,
     criteria: ModelSelectionCriteria,
-    estimatedCost: number
+    estimatedCost: number,
   ): Promise<void> {
     // Record selection for learning and optimization
     const selectionRecord = {
@@ -767,39 +828,54 @@ export class CostEfficiencyOptimizer extends EventEmitter {
         taskType: criteria.taskType,
         complexity: criteria.complexity,
         urgency: criteria.urgency,
-        qualityRequirement: criteria.qualityRequirement
+        qualityRequirement: criteria.qualityRequirement,
       },
       estimatedCost,
       userId: criteria.userId,
-      tenantId: criteria.tenantId
+      tenantId: criteria.tenantId,
     };
 
     if (this.redis) {
-      await this.redis.lpush('model_selections', JSON.stringify(selectionRecord));
+      await this.redis.lpush(
+        'model_selections',
+        JSON.stringify(selectionRecord),
+      );
       await this.redis.ltrim('model_selections', 0, 9999); // Keep last 10k selections
     }
   }
 
   private startPeriodicTasks(): void {
     // Update model profiles every hour
-    setInterval(() => {
-      this.updateModelProfiles();
-    }, 60 * 60 * 1000);
+    setInterval(
+      () => {
+        this.updateModelProfiles();
+      },
+      60 * 60 * 1000,
+    );
 
     // Generate analytics every 15 minutes
-    setInterval(() => {
-      this.updateAnalytics();
-    }, 15 * 60 * 1000);
+    setInterval(
+      () => {
+        this.updateAnalytics();
+      },
+      15 * 60 * 1000,
+    );
 
     // Check budget alerts every 5 minutes
-    setInterval(() => {
-      this.checkAllBudgetAlerts();
-    }, 5 * 60 * 1000);
+    setInterval(
+      () => {
+        this.checkAllBudgetAlerts();
+      },
+      5 * 60 * 1000,
+    );
 
     // Clean up old data daily
-    setInterval(() => {
-      this.cleanupOldData();
-    }, 24 * 60 * 60 * 1000);
+    setInterval(
+      () => {
+        this.cleanupOldData();
+      },
+      24 * 60 * 60 * 1000,
+    );
   }
 
   private async updateModelProfiles(): Promise<void> {
@@ -810,9 +886,10 @@ export class CostEfficiencyOptimizer extends EventEmitter {
         if (recentMetrics) {
           profile.performance = {
             ...profile.performance,
-            ...recentMetrics
+            ...recentMetrics,
           };
-          profile.averageLatency = recentMetrics.avgResponseTime || profile.averageLatency;
+          profile.averageLatency =
+            recentMetrics.avgResponseTime || profile.averageLatency;
           profile.lastUpdated = Date.now();
         }
       } catch (error) {
@@ -829,7 +906,7 @@ export class CostEfficiencyOptimizer extends EventEmitter {
       avgResponseTime: 1500 + Math.random() * 1000,
       p99ResponseTime: 3000 + Math.random() * 2000,
       errorRate: Math.random() * 0.05,
-      throttleRate: Math.random() * 0.02
+      throttleRate: Math.random() * 0.02,
     };
   }
 
@@ -843,31 +920,39 @@ export class CostEfficiencyOptimizer extends EventEmitter {
   private analyzeUsagePatterns(): void {
     // Analyze request patterns by hour
     const currentHour = new Date().getHours();
-    const requestCount = this.usageAnalytics.requestsByHour.get(currentHour) || 0;
+    const requestCount =
+      this.usageAnalytics.requestsByHour.get(currentHour) || 0;
     this.usageAnalytics.requestsByHour.set(currentHour, requestCount + 1);
 
     // Identify peak hours (simplified)
-    const hourlyAverages = Array.from(this.usageAnalytics.requestsByHour.entries())
-      .sort(([, a], [, b]) => b - a);
-    
+    const hourlyAverages = Array.from(
+      this.usageAnalytics.requestsByHour.entries(),
+    ).sort(([, a], [, b]) => b - a);
+
     this.usageAnalytics.patterns.peakHours = hourlyAverages
       .slice(0, 6)
       .map(([hour]) => hour);
   }
 
   private calculateEfficiencyMetrics(): void {
-    const totalCost = Array.from(this.usageAnalytics.costByModel.values())
-      .reduce((sum, cost) => sum + cost, 0);
-    
-    const totalRequests = Array.from(this.usageAnalytics.requestsByHour.values())
-      .reduce((sum, count) => sum + count, 0);
+    const totalCost = Array.from(
+      this.usageAnalytics.costByModel.values(),
+    ).reduce((sum, cost) => sum + cost, 0);
+
+    const totalRequests = Array.from(
+      this.usageAnalytics.requestsByHour.values(),
+    ).reduce((sum, count) => sum + count, 0);
 
     if (totalRequests > 0) {
-      this.usageAnalytics.efficiencyMetrics.avgCostPerRequest = totalCost / totalRequests;
+      this.usageAnalytics.efficiencyMetrics.avgCostPerRequest =
+        totalCost / totalRequests;
     }
 
     // Calculate utilization rate (simplified)
-    this.usageAnalytics.efficiencyMetrics.utilizationRate = Math.min(1.0, totalRequests / 10000);
+    this.usageAnalytics.efficiencyMetrics.utilizationRate = Math.min(
+      1.0,
+      totalRequests / 10000,
+    );
   }
 
   private identifyOptimizationOpportunities(): void {
@@ -888,14 +973,14 @@ export class CostEfficiencyOptimizer extends EventEmitter {
       if (!alert.triggered && utilizationRate >= alert.threshold) {
         alert.triggered = true;
         alert.triggeredAt = Date.now();
-        
+
         this.emit('budgetAlert', {
           userId: tracker.userId,
           tenantId: tracker.tenantId,
           threshold: alert.threshold,
           currentSpend: tracker.currentSpend,
           totalBudget: tracker.totalBudget,
-          utilizationRate
+          utilizationRate,
         });
       }
     }
@@ -913,26 +998,31 @@ export class CostEfficiencyOptimizer extends EventEmitter {
   private generatePredictionCacheKey(
     modelId: string,
     criteria: ModelSelectionCriteria,
-    inputText?: string
+    inputText?: string,
   ): string {
     const key = `${modelId}:${criteria.taskType}:${criteria.complexity}:${criteria.contextSize}`;
     return Buffer.from(key).toString('base64');
   }
 
-  private async getCachedPrediction(cacheKey: string): Promise<CostPrediction | null> {
+  private async getCachedPrediction(
+    cacheKey: string,
+  ): Promise<CostPrediction | null> {
     if (!this.redis) return null;
-    
+
     const cached = await this.redis.get(`cost_prediction:${cacheKey}`);
     return cached ? JSON.parse(cached) : null;
   }
 
-  private async cachePrediction(cacheKey: string, prediction: CostPrediction): Promise<void> {
+  private async cachePrediction(
+    cacheKey: string,
+    prediction: CostPrediction,
+  ): Promise<void> {
     if (!this.redis) return;
-    
+
     await this.redis.setex(
       `cost_prediction:${cacheKey}`,
       this.PREDICTION_CACHE_TTL,
-      JSON.stringify(prediction)
+      JSON.stringify(prediction),
     );
   }
 
@@ -941,12 +1031,15 @@ export class CostEfficiencyOptimizer extends EventEmitter {
     return Math.ceil(text.length / 4);
   }
 
-  private calculatePredictionConfidence(model: ModelProfile, criteria: ModelSelectionCriteria): number {
+  private calculatePredictionConfidence(
+    model: ModelProfile,
+    criteria: ModelSelectionCriteria,
+  ): number {
     let confidence = 0.8; // Base confidence
 
     // Higher confidence for well-known models
     if (model.performance.successRate > 0.95) confidence += 0.1;
-    
+
     // Lower confidence for very new or experimental models
     if (Date.now() - model.lastUpdated < 24 * 60 * 60 * 1000) confidence -= 0.1;
 
@@ -959,24 +1052,38 @@ export class CostEfficiencyOptimizer extends EventEmitter {
   private async generateCostAlternatives(
     baseModel: ModelProfile,
     criteria: ModelSelectionCriteria,
-    baseCost: number
-  ): Promise<Array<{modelId: string; cost: number; quality: number; latency: number; reasoning: string}>> {
-    const alternatives: Array<{modelId: string; cost: number; quality: number; latency: number; reasoning: string}> = [];
-    
+    baseCost: number,
+  ): Promise<
+    Array<{
+      modelId: string;
+      cost: number;
+      quality: number;
+      latency: number;
+      reasoning: string;
+    }>
+  > {
+    const alternatives: Array<{
+      modelId: string;
+      cost: number;
+      quality: number;
+      latency: number;
+      reasoning: string;
+    }> = [];
+
     for (const model of this.modelProfiles.values()) {
       if (model.id === baseModel.id) continue;
-      
+
       const cost = this.estimateRequestCost(model, criteria);
       const savings = baseCost - cost;
       const savingsPercent = (savings / baseCost) * 100;
-      
+
       let reasoning = '';
       if (savings > 0) {
         reasoning = `${savingsPercent.toFixed(1)}% cheaper, `;
       } else {
         reasoning = `${Math.abs(savingsPercent).toFixed(1)}% more expensive, `;
       }
-      
+
       if (model.qualityScore > baseModel.qualityScore) {
         reasoning += 'higher quality';
       } else {
@@ -988,7 +1095,7 @@ export class CostEfficiencyOptimizer extends EventEmitter {
         cost,
         quality: model.qualityScore,
         latency: model.averageLatency,
-        reasoning
+        reasoning,
       });
     }
 
@@ -1000,7 +1107,10 @@ export class CostEfficiencyOptimizer extends EventEmitter {
   // The remaining private methods would continue with similar implementations
   // for budget tracking, analytics, and optimization recommendations...
 
-  private async initializeBudgetTracker(userId: string, tenantId: string): Promise<BudgetTracker> {
+  private async initializeBudgetTracker(
+    userId: string,
+    tenantId: string,
+  ): Promise<BudgetTracker> {
     // This would load budget configuration from database
     return {
       userId,
@@ -1013,13 +1123,13 @@ export class CostEfficiencyOptimizer extends EventEmitter {
       alerts: [
         { threshold: 0.5, triggered: false },
         { threshold: 0.8, triggered: false },
-        { threshold: 0.95, triggered: false }
+        { threshold: 0.95, triggered: false },
       ],
       restrictions: {
         modelTiers: ['basic', 'standard', 'premium'],
         maxCostPerRequest: 1.0,
-        requireApproval: false
-      }
+        requireApproval: false,
+      },
     };
   }
 
@@ -1028,7 +1138,7 @@ export class CostEfficiencyOptimizer extends EventEmitter {
     tenantId: string,
     modelId: string,
     taskType: string,
-    cost: number
+    cost: number,
   ): void {
     // Update cost by model
     const modelCost = this.usageAnalytics.costByModel.get(modelId) || 0;
@@ -1050,78 +1160,104 @@ export class CostEfficiencyOptimizer extends EventEmitter {
   private async updateModelPerformance(
     modelId: string,
     actualCost: number,
-    requestData: any
+    requestData: any,
   ): Promise<void> {
     const model = this.modelProfiles.get(modelId);
     if (!model) return;
 
     // Update performance metrics (rolling average)
     const alpha = 0.1; // Exponential moving average factor
-    
-    model.performance.avgResponseTime = 
-      model.performance.avgResponseTime * (1 - alpha) + requestData.responseTime * alpha;
+
+    model.performance.avgResponseTime =
+      model.performance.avgResponseTime * (1 - alpha) +
+      requestData.responseTime * alpha;
 
     // Update cost per token if applicable
     if (model.costPerToken > 0 && requestData.inputTokens > 0) {
-      const actualCostPerToken = actualCost / (requestData.inputTokens + requestData.outputTokens);
-      model.costPerToken = model.costPerToken * (1 - alpha) + actualCostPerToken * alpha;
+      const actualCostPerToken =
+        actualCost / (requestData.inputTokens + requestData.outputTokens);
+      model.costPerToken =
+        model.costPerToken * (1 - alpha) + actualCostPerToken * alpha;
     }
   }
 
-  private async updateSpendingProjection(tracker: BudgetTracker): Promise<void> {
+  private async updateSpendingProjection(
+    tracker: BudgetTracker,
+  ): Promise<void> {
     // Simple linear projection based on current spending rate
     const timeElapsed = Date.now() - tracker.periodStart;
     const periodDuration = tracker.periodEnd - tracker.periodStart;
     const spendingRate = tracker.currentSpend / timeElapsed;
-    
+
     tracker.projectedSpend = spendingRate * periodDuration;
   }
 
   // Placeholder implementations for the remaining complex methods
-  private async getUserAnalytics(userId: string, tenantId: string, timeframe: number): Promise<any> {
+  private async getUserAnalytics(
+    userId: string,
+    tenantId: string,
+    timeframe: number,
+  ): Promise<any> {
     return {
       totalSpend: this.usageAnalytics.costByUser.get(userId) || 0,
       requestCount: 100, // Would be calculated from actual data
       avgCostPerRequest: 0.05,
-      modelUsage: new Map([['gpt-3.5-turbo', 0.8], ['gpt-4-turbo', 0.2]]),
-      taskTypeDistribution: new Map([['analysis', 0.6], ['generation', 0.4]])
+      modelUsage: new Map([
+        ['gpt-3.5-turbo', 0.8],
+        ['gpt-4-turbo', 0.2],
+      ]),
+      taskTypeDistribution: new Map([
+        ['analysis', 0.6],
+        ['generation', 0.4],
+      ]),
     };
   }
 
-  private async analyzeModelSwitchingOpportunities(userAnalytics: any): Promise<OptimizationRecommendation | null> {
+  private async analyzeModelSwitchingOpportunities(
+    userAnalytics: any,
+  ): Promise<OptimizationRecommendation | null> {
     // Analyze if user could save money by switching models for certain tasks
     return {
       type: 'model_switch',
       title: 'Switch to GPT-3.5 for Simple Tasks',
-      description: 'You could save 70% on costs by using GPT-3.5 for routine analysis tasks',
-      estimatedSavings: 15.50,
+      description:
+        'You could save 70% on costs by using GPT-3.5 for routine analysis tasks',
+      estimatedSavings: 15.5,
       confidence: 0.85,
       implementation: {
         complexity: 'low',
         effort: 'Update task routing configuration',
-        risks: ['Slightly lower quality for complex reasoning']
+        risks: ['Slightly lower quality for complex reasoning'],
       },
       data: {
         currentModel: 'gpt-4-turbo',
         recommendedModel: 'gpt-3.5-turbo',
-        taskTypes: ['basic_analysis', 'data_extraction']
-      }
+        taskTypes: ['basic_analysis', 'data_extraction'],
+      },
     };
   }
 
-  private async analyzeBatchingOpportunities(userAnalytics: any): Promise<OptimizationRecommendation | null> {
+  private async analyzeBatchingOpportunities(
+    userAnalytics: any,
+  ): Promise<OptimizationRecommendation | null> {
     return null; // Would implement batching analysis
   }
 
-  private async analyzeCachingOpportunities(userAnalytics: any): Promise<OptimizationRecommendation | null> {
+  private async analyzeCachingOpportunities(
+    userAnalytics: any,
+  ): Promise<OptimizationRecommendation | null> {
     return null; // Would implement caching analysis
   }
 
-  private async analyzeParameterTuning(userAnalytics: any): Promise<OptimizationRecommendation | null> {
+  private async analyzeParameterTuning(
+    userAnalytics: any,
+  ): Promise<OptimizationRecommendation | null> {
     return null; // Would implement parameter analysis
   }
 
-  private async analyzeTimeBasedOptimization(userAnalytics: any): Promise<OptimizationRecommendation | null> {
+  private async analyzeTimeBasedOptimization(
+    userAnalytics: any,
+  ): Promise<OptimizationRecommendation | null> {
     return null; // Would implement time-based analysis
   }
 
@@ -1137,15 +1273,25 @@ export class CostEfficiencyOptimizer extends EventEmitter {
     return {}; // Would implement efficiency mapping
   }
 
-  private async generateOptimalAllocation(currentUsage: any, demandPatterns: any, efficiencyMap: any): Promise<any> {
+  private async generateOptimalAllocation(
+    currentUsage: any,
+    demandPatterns: any,
+    efficiencyMap: any,
+  ): Promise<any> {
     return {}; // Would implement optimization algorithm
   }
 
-  private calculateProjectedSavings(currentUsage: any, recommendedAllocation: any): number {
+  private calculateProjectedSavings(
+    currentUsage: any,
+    recommendedAllocation: any,
+  ): number {
     return 0; // Would calculate actual savings
   }
 
-  private generateImplementationPlan(currentUsage: any, recommendedAllocation: any): string[] {
+  private generateImplementationPlan(
+    currentUsage: any,
+    recommendedAllocation: any,
+  ): string[] {
     return []; // Would generate implementation steps
   }
 
@@ -1155,37 +1301,46 @@ export class CostEfficiencyOptimizer extends EventEmitter {
   async getUsageReport(userId: string, tenantId: string): Promise<any> {
     const budgetKey = `${tenantId}:${userId}`;
     const tracker = this.budgetTrackers.get(budgetKey);
-    
+
     return {
-      budget: tracker ? {
-        total: tracker.totalBudget,
-        current: tracker.currentSpend,
-        projected: tracker.projectedSpend,
-        remaining: tracker.totalBudget - tracker.currentSpend,
-        utilizationRate: tracker.currentSpend / tracker.totalBudget
-      } : null,
+      budget: tracker
+        ? {
+            total: tracker.totalBudget,
+            current: tracker.currentSpend,
+            projected: tracker.projectedSpend,
+            remaining: tracker.totalBudget - tracker.currentSpend,
+            utilizationRate: tracker.currentSpend / tracker.totalBudget,
+          }
+        : null,
       costs: {
         byModel: Object.fromEntries(this.usageAnalytics.costByModel),
         byTaskType: Object.fromEntries(this.usageAnalytics.costByTaskType),
-        total: this.usageAnalytics.costByUser.get(userId) || 0
+        total: this.usageAnalytics.costByUser.get(userId) || 0,
       },
       efficiency: this.usageAnalytics.efficiencyMetrics,
-      recommendations: await this.generateOptimizationRecommendations(userId, tenantId)
+      recommendations: await this.generateOptimizationRecommendations(
+        userId,
+        tenantId,
+      ),
     };
   }
 
-  async updateBudget(userId: string, tenantId: string, newBudget: number): Promise<void> {
+  async updateBudget(
+    userId: string,
+    tenantId: string,
+    newBudget: number,
+  ): Promise<void> {
     const budgetKey = `${tenantId}:${userId}`;
     let tracker = this.budgetTrackers.get(budgetKey);
-    
+
     if (!tracker) {
       tracker = await this.initializeBudgetTracker(userId, tenantId);
       this.budgetTrackers.set(budgetKey, tracker);
     }
-    
+
     tracker.totalBudget = newBudget;
-    tracker.alerts.forEach(alert => alert.triggered = false); // Reset alerts
-    
+    tracker.alerts.forEach((alert) => (alert.triggered = false)); // Reset alerts
+
     this.emit('budgetUpdated', { userId, tenantId, newBudget });
   }
 }

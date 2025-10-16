@@ -6,7 +6,9 @@ import { ExpressInstrumentation } from '@opentelemetry/instrumentation-express';
 import { HttpInstrumentation } from '@opentelemetry/instrumentation-http';
 
 const exporter = new OTLPTraceExporter({
-  url: process.env.OTEL_EXPORTER_OTLP_ENDPOINT || 'http://localhost:4318/v1/traces',
+  url:
+    process.env.OTEL_EXPORTER_OTLP_ENDPOINT ||
+    'http://localhost:4318/v1/traces',
 });
 
 const sdk = new NodeSDK({

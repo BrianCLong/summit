@@ -97,7 +97,8 @@ export class FederatedOrchestrationService {
   private localPrivateKey: string;
 
   constructor() {
-    this.policyBrokerEndpoint = process.env.POLICY_BROKER_ENDPOINT || 'https://policy-broker.internal';
+    this.policyBrokerEndpoint =
+      process.env.POLICY_BROKER_ENDPOINT || 'https://policy-broker.internal';
     this.localEnclaveId = process.env.LOCAL_ENCLAVE_ID || 'enclave-default';
     this.localPrivateKey = process.env.LOCAL_ENCLAVE_PRIVATE_KEY || '';
     this.initializeEnclaveFederation();
@@ -106,7 +107,7 @@ export class FederatedOrchestrationService {
   private async initializeEnclaveFederation() {
     // Load registered enclaves and policy configurations
     await this.loadRegisteredEnclaves();
-    
+
     // Start periodic enclave discovery
     setInterval(async () => {
       try {
@@ -122,14 +123,14 @@ export class FederatedOrchestrationService {
    */
   async registerEnclave(manifest: EnclaveManifest): Promise<string> {
     const span = otelService.createSpan('federation.register-enclave');
-    
+
     try {
       const validatedManifest = EnclaveManifestSchema.parse(manifest);
       const pool = getPostgresPool();
-      
+
       // Verify enclave signature and public key
       await this.verifyEnclaveCredentials(validatedManifest);
-      
+
       // Store enclave registration
       await pool.query(
         `INSERT INTO federated_enclaves (
@@ -155,18 +156,25 @@ export class FederatedOrchestrationService {
           validatedManifest.publicKey,
           JSON.stringify(validatedManifest.endpoints),
           'active',
-        ]
+        ],
       );
 
       // Update local registry
-      this.registeredEnclaves.set(validatedManifest.enclaveId, validatedManifest);
+      this.registeredEnclaves.set(
+        validatedManifest.enclaveId,
+        validatedManifest,
+      );
 
       // Create audit entry
       await pool.query(
         `INSERT INTO federation_audit (
           action, enclave_id, metadata, created_at
         ) VALUES ($1, $2, $3, now())`,
-        ['enclave_registered', validatedManifest.enclaveId, JSON.stringify(validatedManifest)]
+        [
+          'enclave_registered',
+          validatedManifest.enclaveId,
+          JSON.stringify(validatedManifest),
+        ],
       );
 
       otelService.addSpanAttributes({
@@ -195,14 +203,18 @@ export class FederatedOrchestrationService {
     airgapInstructions?: string[];
   }> {
     const span = otelService.createSpan('federation.request-rendezvous');
-    
+
     try {
       const validatedRequest = RendezvousRequestSchema.parse(request);
-      
+
       // Verify source and target enclaves are registered
-      const sourceEnclave = this.registeredEnclaves.get(validatedRequest.sourceEnclave);
-      const targetEnclave = this.registeredEnclaves.get(validatedRequest.targetEnclave);
-      
+      const sourceEnclave = this.registeredEnclaves.get(
+        validatedRequest.sourceEnclave,
+      );
+      const targetEnclave = this.registeredEnclaves.get(
+        validatedRequest.targetEnclave,
+      );
+
       if (!sourceEnclave || !targetEnclave) {
         return {
           approved: false,
@@ -211,8 +223,12 @@ export class FederatedOrchestrationService {
       }
 
       // Run OPA policy checks at policy broker
-      const policyDecision = await this.evaluateRendezvousPolicy(validatedRequest, sourceEnclave, targetEnclave);
-      
+      const policyDecision = await this.evaluateRendezvousPolicy(
+        validatedRequest,
+        sourceEnclave,
+        targetEnclave,
+      );
+
       if (!policyDecision.allowed) {
         return {
           approved: false,
@@ -225,7 +241,12 @@ export class FederatedOrchestrationService {
 
       // Handle air-gap mode
       if (validatedRequest.metadata.airgapMode) {
-        return await this.handleAirgapRendezvous(validatedRequest, rendezvousId, sourceEnclave, targetEnclave);
+        return await this.handleAirgapRendezvous(
+          validatedRequest,
+          rendezvousId,
+          sourceEnclave,
+          targetEnclave,
+        );
       }
 
       // Standard rendezvous
@@ -245,7 +266,7 @@ export class FederatedOrchestrationService {
           JSON.stringify(validatedRequest.claims),
           'approved',
           JSON.stringify(validatedRequest.metadata),
-        ]
+        ],
       );
 
       // Create Merkle proof for WORM sync if required
@@ -265,8 +286,9 @@ export class FederatedOrchestrationService {
         approved: true,
         rendezvousId,
         reason: 'Policy evaluation passed - rendezvous authorized',
-        airgapInstructions: validatedRequest.metadata.airgapMode ? 
-          await this.generateAirgapInstructions(rendezvousId) : undefined,
+        airgapInstructions: validatedRequest.metadata.airgapMode
+          ? await this.generateAirgapInstructions(rendezvousId)
+          : undefined,
       };
     } catch (error: any) {
       console.error('Rendezvous request failed:', error);
@@ -282,22 +304,22 @@ export class FederatedOrchestrationService {
   private async evaluateRendezvousPolicy(
     request: RendezvousRequest,
     sourceEnclave: EnclaveManifest,
-    targetEnclave: EnclaveManifest
+    targetEnclave: EnclaveManifest,
   ): Promise<{
     allowed: boolean;
     reason: string;
     requiredApprovals?: string[];
   }> {
     // Policy evaluation logic (simplified OPA-style rules)
-    
+
     // Check jurisdiction compatibility
     if (sourceEnclave.jurisdiction !== targetEnclave.jurisdiction) {
       const crossJurisdictionAllowed = await this.checkCrossJurisdictionPolicy(
         sourceEnclave.jurisdiction,
         targetEnclave.jurisdiction,
-        request.dataClassification
+        request.dataClassification,
       );
-      
+
       if (!crossJurisdictionAllowed) {
         return {
           allowed: false,
@@ -308,7 +330,9 @@ export class FederatedOrchestrationService {
     }
 
     // Check data classification compatibility
-    if (!targetEnclave.dataClassifications.includes(request.dataClassification)) {
+    if (
+      !targetEnclave.dataClassifications.includes(request.dataClassification)
+    ) {
       return {
         allowed: false,
         reason: `Target enclave does not support data classification: ${request.dataClassification}`,
@@ -327,7 +351,9 @@ export class FederatedOrchestrationService {
     }
 
     // Check residency requirements
-    const residencyCompliant = await this.checkResidencyCompliance(request.claims);
+    const residencyCompliant = await this.checkResidencyCompliance(
+      request.claims,
+    );
     if (!residencyCompliant) {
       return {
         allowed: false,
@@ -337,7 +363,10 @@ export class FederatedOrchestrationService {
     }
 
     // Check purpose limitation
-    const purposeValid = await this.validatePurpose(request.purpose, request.action);
+    const purposeValid = await this.validatePurpose(
+      request.purpose,
+      request.action,
+    );
     if (!purposeValid) {
       return {
         allowed: false,
@@ -358,10 +387,10 @@ export class FederatedOrchestrationService {
     request: RendezvousRequest,
     rendezvousId: string,
     sourceEnclave: EnclaveManifest,
-    targetEnclave: EnclaveManifest
+    targetEnclave: EnclaveManifest,
   ): Promise<any> {
     const pool = getPostgresPool();
-    
+
     // Create air-gap transfer manifest
     const transferManifest = {
       rendezvousId,
@@ -374,14 +403,16 @@ export class FederatedOrchestrationService {
     };
 
     // Generate Merkle proof for integrity
-    transferManifest.merkleRoot = await this.generateMerkleProof(request.claims);
+    transferManifest.merkleRoot = await this.generateMerkleProof(
+      request.claims,
+    );
 
     // Store in air-gap queue
     await pool.query(
       `INSERT INTO airgap_transfers (
         id, transfer_manifest, status, created_at
       ) VALUES ($1, $2, $3, now())`,
-      [rendezvousId, JSON.stringify(transferManifest), 'queued']
+      [rendezvousId, JSON.stringify(transferManifest), 'queued'],
     );
 
     // Generate offline transfer instructions
@@ -406,11 +437,14 @@ export class FederatedOrchestrationService {
   /**
    * Verify policy claim signature
    */
-  private async verifyClaim(claim: PolicyClaim, publicKey: string): Promise<boolean> {
+  private async verifyClaim(
+    claim: PolicyClaim,
+    publicKey: string,
+  ): Promise<boolean> {
     try {
       const verifier = createVerify('RSA-SHA256');
       const contentToVerify = `${claim.claimId}:${claim.dataHash}:${claim.residencyProof}:${claim.purposeProof}:${claim.licenseProof}:${claim.timestamp}`;
-      
+
       verifier.update(contentToVerify);
       return verifier.verify(publicKey, claim.signature, 'base64');
     } catch (error) {
@@ -422,14 +456,14 @@ export class FederatedOrchestrationService {
   private async checkCrossJurisdictionPolicy(
     sourceJurisdiction: string,
     targetJurisdiction: string,
-    dataClassification: string
+    dataClassification: string,
   ): Promise<boolean> {
     // Cross-jurisdiction policy matrix
     const allowedTransfers: Record<string, string[]> = {
-      'US': ['US', 'CA', 'UK'], // US can transfer to these jurisdictions
-      'EU': ['EU', 'UK', 'CH'], // EU can transfer to these jurisdictions  
-      'UK': ['UK', 'US', 'CA', 'AU'],
-      'CA': ['CA', 'US', 'UK'],
+      US: ['US', 'CA', 'UK'], // US can transfer to these jurisdictions
+      EU: ['EU', 'UK', 'CH'], // EU can transfer to these jurisdictions
+      UK: ['UK', 'US', 'CA', 'AU'],
+      CA: ['CA', 'US', 'UK'],
     };
 
     // Restricted data cannot cross jurisdictions
@@ -441,31 +475,36 @@ export class FederatedOrchestrationService {
     return allowedTargets.includes(targetJurisdiction);
   }
 
-  private async checkResidencyCompliance(claims: PolicyClaim[]): Promise<boolean> {
+  private async checkResidencyCompliance(
+    claims: PolicyClaim[],
+  ): Promise<boolean> {
     // Verify all residency proofs are valid
     for (const claim of claims) {
       if (!claim.residencyProof || claim.residencyProof === '') {
         return false;
       }
-      
+
       // In production, verify against residency service
       // For now, just check format
       if (!claim.residencyProof.startsWith('residency-proof-')) {
         return false;
       }
     }
-    
+
     return true;
   }
 
-  private async validatePurpose(purpose: string, action: string): Promise<boolean> {
+  private async validatePurpose(
+    purpose: string,
+    action: string,
+  ): Promise<boolean> {
     // Purpose limitation validation
     const purposeActionMap: Record<string, string[]> = {
-      'analytics': ['read', 'transform', 'analyze'],
-      'backup': ['read', 'copy', 'store'],
-      'processing': ['read', 'transform', 'write'],
-      'compliance': ['read', 'audit', 'report'],
-      'investigation': ['read', 'analyze', 'trace'],
+      analytics: ['read', 'transform', 'analyze'],
+      backup: ['read', 'copy', 'store'],
+      processing: ['read', 'transform', 'write'],
+      compliance: ['read', 'audit', 'report'],
+      investigation: ['read', 'analyze', 'trace'],
     };
 
     const allowedActions = purposeActionMap[purpose] || [];
@@ -474,31 +513,36 @@ export class FederatedOrchestrationService {
 
   private async generateMerkleProof(claims: PolicyClaim[]): Promise<string> {
     // Generate Merkle root for claims integrity
-    const hashes = claims.map(claim => 
-      createHash('sha256').update(JSON.stringify(claim)).digest('hex')
+    const hashes = claims.map((claim) =>
+      createHash('sha256').update(JSON.stringify(claim)).digest('hex'),
     );
-    
+
     if (hashes.length === 0) return '';
     if (hashes.length === 1) return hashes[0];
-    
+
     // Build Merkle tree (simplified)
     while (hashes.length > 1) {
       const newHashes: string[] = [];
       for (let i = 0; i < hashes.length; i += 2) {
         const left = hashes[i];
         const right = hashes[i + 1] || left;
-        const combined = createHash('sha256').update(left + right).digest('hex');
+        const combined = createHash('sha256')
+          .update(left + right)
+          .digest('hex');
         newHashes.push(combined);
       }
       hashes.splice(0, hashes.length, ...newHashes);
     }
-    
+
     return hashes[0];
   }
 
-  private async createWORMSyncEntry(rendezvousId: string, request: RendezvousRequest): Promise<void> {
+  private async createWORMSyncEntry(
+    rendezvousId: string,
+    request: RendezvousRequest,
+  ): Promise<void> {
     const pool = getPostgresPool();
-    
+
     const wormEntry = {
       rendezvousId,
       sourceEnclave: request.sourceEnclave,
@@ -512,11 +556,13 @@ export class FederatedOrchestrationService {
       `INSERT INTO worm_sync_entries (
         rendezvous_id, sync_data, merkle_root, created_at
       ) VALUES ($1, $2, $3, now())`,
-      [rendezvousId, JSON.stringify(wormEntry), wormEntry.merkleRoot]
+      [rendezvousId, JSON.stringify(wormEntry), wormEntry.merkleRoot],
     );
   }
 
-  private async generateAirgapInstructions(rendezvousId: string): Promise<string[]> {
+  private async generateAirgapInstructions(
+    rendezvousId: string,
+  ): Promise<string[]> {
     return [
       `1. Export rendezvous manifest: ${rendezvousId}`,
       '2. Use certified removable media (air-gap approved)',
@@ -530,14 +576,14 @@ export class FederatedOrchestrationService {
 
   private async loadRegisteredEnclaves(): Promise<void> {
     const pool = getPostgresPool();
-    
+
     try {
       const result = await pool.query(
         'SELECT * FROM federated_enclaves WHERE status = $1',
-        ['active']
+        ['active'],
       );
-      
-      result.rows.forEach(row => {
+
+      result.rows.forEach((row) => {
         const manifest: EnclaveManifest = {
           enclaveId: row.enclave_id,
           region: row.region,
@@ -548,7 +594,7 @@ export class FederatedOrchestrationService {
           publicKey: row.public_key,
           endpoints: JSON.parse(row.endpoints),
         };
-        
+
         this.registeredEnclaves.set(manifest.enclaveId, manifest);
       });
     } catch (error) {
@@ -561,7 +607,7 @@ export class FederatedOrchestrationService {
     try {
       // In production, query central federation registry
       console.log('Running enclave discovery...');
-      
+
       // Update enclave health status
       await this.updateEnclaveHealth();
     } catch (error) {
@@ -571,38 +617,43 @@ export class FederatedOrchestrationService {
 
   private async updateEnclaveHealth(): Promise<void> {
     const pool = getPostgresPool();
-    
+
     for (const [enclaveId, manifest] of this.registeredEnclaves) {
       try {
         // Health check each enclave
-        const healthResponse = await fetch(`${manifest.endpoints.rendezvous}/health`, {
-          method: 'GET',
-          timeout: 5000,
-        });
-        
+        const healthResponse = await fetch(
+          `${manifest.endpoints.rendezvous}/health`,
+          {
+            method: 'GET',
+            timeout: 5000,
+          },
+        );
+
         const status = healthResponse.ok ? 'healthy' : 'unhealthy';
-        
+
         await pool.query(
           'UPDATE federated_enclaves SET last_health_check = now(), health_status = $1 WHERE enclave_id = $2',
-          [status, enclaveId]
+          [status, enclaveId],
         );
       } catch (error) {
         console.error(`Health check failed for enclave ${enclaveId}:`, error);
-        
+
         await pool.query(
           'UPDATE federated_enclaves SET last_health_check = now(), health_status = $1 WHERE enclave_id = $2',
-          ['unreachable', enclaveId]
+          ['unreachable', enclaveId],
         );
       }
     }
   }
 
-  private async verifyEnclaveCredentials(manifest: EnclaveManifest): Promise<void> {
+  private async verifyEnclaveCredentials(
+    manifest: EnclaveManifest,
+  ): Promise<void> {
     // Verify enclave public key and certificates
     if (!manifest.publicKey || manifest.publicKey.length < 100) {
       throw new Error('Invalid enclave public key');
     }
-    
+
     // In production, verify against trusted CA or enclave registry
     if (!manifest.enclaveId.startsWith('enclave-')) {
       throw new Error('Invalid enclave ID format');
@@ -614,19 +665,31 @@ export class FederatedOrchestrationService {
    */
   async getFederationStatus(): Promise<any> {
     const pool = getPostgresPool();
-    
+
     const [enclaveStats, recentSessions, airgapQueue] = await Promise.all([
-      pool.query('SELECT COUNT(*) as total, health_status FROM federated_enclaves GROUP BY health_status'),
-      pool.query('SELECT COUNT(*) as count FROM rendezvous_sessions WHERE created_at > now() - interval \'24 hours\''),
-      pool.query('SELECT COUNT(*) as count FROM airgap_transfers WHERE status = \'queued\''),
+      pool.query(
+        'SELECT COUNT(*) as total, health_status FROM federated_enclaves GROUP BY health_status',
+      ),
+      pool.query(
+        "SELECT COUNT(*) as count FROM rendezvous_sessions WHERE created_at > now() - interval '24 hours'",
+      ),
+      pool.query(
+        "SELECT COUNT(*) as count FROM airgap_transfers WHERE status = 'queued'",
+      ),
     ]);
-    
+
     return {
       federation: {
         totalEnclaves: Array.from(this.registeredEnclaves.keys()).length,
-        healthyEnclaves: enclaveStats.rows.find(r => r.health_status === 'healthy')?.total || 0,
-        unhealthyEnclaves: enclaveStats.rows.find(r => r.health_status === 'unhealthy')?.total || 0,
-        unreachableEnclaves: enclaveStats.rows.find(r => r.health_status === 'unreachable')?.total || 0,
+        healthyEnclaves:
+          enclaveStats.rows.find((r) => r.health_status === 'healthy')?.total ||
+          0,
+        unhealthyEnclaves:
+          enclaveStats.rows.find((r) => r.health_status === 'unhealthy')
+            ?.total || 0,
+        unreachableEnclaves:
+          enclaveStats.rows.find((r) => r.health_status === 'unreachable')
+            ?.total || 0,
       },
       activity: {
         recentRendezvous: parseInt(recentSessions.rows[0].count),

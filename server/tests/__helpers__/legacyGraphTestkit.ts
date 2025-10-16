@@ -12,7 +12,10 @@ export async function withLegacyGraphServer<T>(
   await server.start();
   try {
     const exec = async ({ query, variables }: ExecInput) => {
-      return server.executeOperation({ query, variables }, { contextValue: context });
+      return server.executeOperation(
+        { query, variables },
+        { contextValue: context },
+      );
     };
     return await run(exec);
   } finally {

@@ -1,12 +1,15 @@
 ```markdown
 # IntelGraph — Next Sprint Plan (v0.6.0)
+
 **Slug:** `sprint-2025-09-29-intelgraph-v0-6`  
 **Date:** 2025-09-29 (America/Denver)  
 **Sprint Window:** 2025-09-29 → 2025-10-10 (10 business days)  
 **Goal Theme:** Ship the **Auditable Intelligence Core**: ingestion→ER→graph analytics→NL/Cypher preview→provenance export, wrapped in tri‑pane UI with guardrails, SLOs, and cost controls.
 
 ---
+
 ## 0) North Stars & Acceptance Gate (Definition of Done)
+
 - **Provenance > Prediction:** All materialized artifacts (graphs, briefs, exports) carry lineage + license + authority bindings.
 - **Compartmentation by Default:** RBAC/ABAC enforced on GraphQL resolvers; OPA policies dry‑run + enforce.
 - **AI with Receipts:** NL→Cypher preview with cost estimates; RAG replies include citations; blocked actions show policy reasons.
@@ -14,25 +17,30 @@
 - **Ethics Gate:** No features enabling unlawful harm; all exports checked against license/authority compiler.
 
 **Sprint DoD:**
-1) Demo: Ingest CSV→map schema→ER queue→tri‑pane investigation→NL query→generated Cypher→sandbox run→report studio export with provenance bundle.  
-2) SLO dashboard shows compliant latency on demo dataset.  
-3) 100% of GraphQL mutations covered by authZ tests + audit trail.
+
+1. Demo: Ingest CSV→map schema→ER queue→tri‑pane investigation→NL query→generated Cypher→sandbox run→report studio export with provenance bundle.
+2. SLO dashboard shows compliant latency on demo dataset.
+3. 100% of GraphQL mutations covered by authZ tests + audit trail.
 
 ---
+
 ## 1) High‑Level Epic Map → Objectives (What we ship in 2 weeks)
-1. **Ingestion & Mapping (A2/A4)** — Ingest Wizard MVP: CSV/JSON mapping, PII flags, license registry enforcement, lineage stamps.  
-2. **Entity Resolution Core (B1/C3)** — Deterministic + probabilistic ER with explainable scorecards and manual reconcile queue.  
-3. **Tri‑Pane Analyst UI (I)** — Graph (Cytoscape.js) + Timeline + Map with synchronized brushing; pinboards, filter chips.  
-4. **NL→Cypher (D1)** — Prompt→generated Cypher preview, row/cost estimates, sandbox execution, diff vs. manual query.  
-5. **Provenance & Claim Ledger (B4)** — Evidence registration; export manifests (hash tree + transform chain).  
-6. **Governance & Guardrails (F)** — OPA policy bundle; warrant/license compiler gating exports; reason‑for‑access prompts.  
-7. **Ops & Cost Guard (H)** — SLO dashboards; slow‑query killer; query budget hints; Helm chart updates.  
+
+1. **Ingestion & Mapping (A2/A4)** — Ingest Wizard MVP: CSV/JSON mapping, PII flags, license registry enforcement, lineage stamps.
+2. **Entity Resolution Core (B1/C3)** — Deterministic + probabilistic ER with explainable scorecards and manual reconcile queue.
+3. **Tri‑Pane Analyst UI (I)** — Graph (Cytoscape.js) + Timeline + Map with synchronized brushing; pinboards, filter chips.
+4. **NL→Cypher (D1)** — Prompt→generated Cypher preview, row/cost estimates, sandbox execution, diff vs. manual query.
+5. **Provenance & Claim Ledger (B4)** — Evidence registration; export manifests (hash tree + transform chain).
+6. **Governance & Guardrails (F)** — OPA policy bundle; warrant/license compiler gating exports; reason‑for‑access prompts.
+7. **Ops & Cost Guard (H)** — SLO dashboards; slow‑query killer; query budget hints; Helm chart updates.
 8. **QA/Docs** — Golden datasets; test packs; operator playbook; user study checklist.
 
 ---
+
 ## 2) Swimlanes & Workstreams
 
 ### 2.1 Frontend Experience (React + MUI + Cytoscape.js + jQuery enchants)
+
 - **FE-1** Tri‑Pane shell (Graph/Timeline/Map) with synchronized cursors & time‑brushing.
 - **FE-2** Graph canvas interactions via **jQuery** wrappers (drag, lasso, context actions) integrated with Cytoscape events.
 - **FE-3** NL Query panel → Cypher preview → run in sandbox; diff panel vs manual Cypher.
@@ -40,6 +48,7 @@
 - **FE-5** A11y + keyboard palette; dark/light; saved views.
 
 ### 2.2 Backend Graph & ETL (Node.js/Express + Apollo GraphQL + Neo4j)
+
 - **BE-1** Ingest Wizard API: schema introspection, mapping persistence, PII classifier stub, lineage stamping.
 - **BE-2** Streaming ETL jobs (BullMQ + Redis) with enrichers (GeoIP, language, hash, EXIF scrub, OCR stub hooks).
 - **BE-3** ER service: rules + probabilistic scoring; explainability panel payloads; reconcile queue CRUD.
@@ -47,25 +56,31 @@
 - **BE-5** NL→Cypher engine: prompt→generated Cypher; cost estimator; sandbox executor with query budget.
 
 ### 2.3 Provenance, Guardrails & Export
+
 - **PG-1** Claim/Evidence registration; provenance manifest builder (Merkle tree over transforms + inputs).
 - **PG-2** License/Authority Compiler: blocklist/allowlist by source terms; query‑time annotations; export gate.
 - **PG-3** Audit trail: who/what/why/when; reason‑for‑access modal; immutable log sink.
 
 ### 2.4 Ops, SRE & Security
+
 - **OP-1** SLO dashboards (Prometheus + Grafana); latency heatmaps; error budgets.
 - **OP-2** Slow query killer; archived tiering; Helm chart params for budgets/concurrency.
 - **OP-3** OPA policy bundles; SCIM sync stub; WebAuthn/FIDO2 toggle; JWT hardening.
 
 ### 2.5 QA, Data, and Docs
+
 - **QA-1** Golden dataset pack (CSV/JSON + fixtures) for ingest→ER→analysis e2e.
 - **QA-2** Contract tests: connectors, GraphQL, Cypher sandbox; k6 perf scripts.
 - **DOC-1** Operator playbook; analyst quick‑start; security & privacy guide v0.
 
 ---
+
 ## 3) Sprint Backlog (User Stories with AC & Est.)
+
 > Scoring: **S** (1), **M** (3), **L** (5), **XL** (8). Target: ~80 points across team.
 
 ### FE — Tri‑Pane & NL Query (28 pts)
+
 1. **As an analyst**, I can see Graph/Timeline/Map panes with synchronized time‑brush.  
    **AC:** Brush in timeline filters graph & map; p95 redraw < 200ms; saved view persists. (**L**)
 2. **As an analyst**, I can right‑click a node to open actions (expand/pin/path) via jQuery context menu.  
@@ -76,6 +91,7 @@
    **AC:** Export HTML/PDF includes hash manifest & citations placeholders. (**M**)
 
 ### BE — Ingest, ER, GraphQL, NL→Cypher (34 pts)
+
 5. **As a data steward**, I can map CSV → canonical schema with PII flags and license selection.  
    **AC:** Mapping saved; PII fields marked; license saved; lineage recorded on import. (**L**)
 6. **As a platform**, I enrich documents with GeoIP/language/hash and queue for ER.  
@@ -88,24 +104,28 @@
    **AC:** Time limit + row limit + memory limit enforced; explain denial reasons. (**M**)
 
 ### PG — Provenance & Guardrails (12 pts)
+
 10. **As a case owner**, I can export a provenance bundle (manifest + transforms + license terms).  
     **AC:** External verifier script validates manifest; tamper triggers failure. (**M**)
 11. **As an ombuds**, I see blocked export attempts with human‑readable policy reasons and appeal path.  
     **AC:** Reason‑for‑access prompts logged; appeal workflow stub. (**M**)
 
 ### OP — SLO, Budgets, Security (10 pts)
+
 12. **As SRE**, I can see p95 graph query latency & ingest throughput on Grafana with error budgets.  
     **AC:** Dashboards live; alerts on breach; runbook links. (**M**)
 13. **As a platform**, I kill slow queries and suggest cheaper alternatives (budget hints).  
     **AC:** Killer threshold configurable; hints logged; regression test. (**M**)
 
 ### QA/DOC — Tests & Guides (8 pts)
+
 14. **As QA**, I run k6 perf + Jest + Supertest; Playwright E2E for tri‑pane flows.  
     **AC:** CI gates on thresholds; screenshots archived. (**M**)
 15. **As a user**, I follow a quick‑start from ingest to report in <30 min.  
     **AC:** Dogfooding session passes; feedback captured. (**S**)
 
 ---
+
 ## 4) Architecture Snapshots (Scaffolds)
 
 ### 4.1 Repo Structure (additions)
@@ -149,53 +169,64 @@ type Mutation {
 
 ```ts
 // server/src/index.ts
-import 'dotenv/config'
-import { ApolloServer } from '@apollo/server'
-import { expressMiddleware } from '@apollo/server/express4'
-import express from 'express'
-import neo4j, { Driver } from 'neo4j-driver'
-import { readFileSync } from 'fs'
-import resolvers from './graphql/resolvers'
-import { authzPlugin } from './graphql/resolvers/authz'
+import 'dotenv/config';
+import { ApolloServer } from '@apollo/server';
+import { expressMiddleware } from '@apollo/server/express4';
+import express from 'express';
+import neo4j, { Driver } from 'neo4j-driver';
+import { readFileSync } from 'fs';
+import resolvers from './graphql/resolvers';
+import { authzPlugin } from './graphql/resolvers/authz';
 
-const typeDefs = readFileSync('server/src/graphql/schema.graphql', 'utf8')
-const app = express()
+const typeDefs = readFileSync('server/src/graphql/schema.graphql', 'utf8');
+const app = express();
 
 const driver: Driver = neo4j.driver(
   process.env.NEO4J_URI!,
-  neo4j.auth.basic(process.env.NEO4J_USER!, process.env.NEO4J_PASSWORD!)
-)
+  neo4j.auth.basic(process.env.NEO4J_USER!, process.env.NEO4J_PASSWORD!),
+);
 
-const server = new ApolloServer({ typeDefs, resolvers, plugins: [authzPlugin()] })
-await server.start()
-app.use('/graphql', express.json(), expressMiddleware(server, {
-  context: async ({ req }) => ({
-    user: req.user, // from upstream authn
-    abac: req.abac, // attributes for OPA
-    driver
-  })
-}))
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  plugins: [authzPlugin()],
+});
+await server.start();
+app.use(
+  '/graphql',
+  express.json(),
+  expressMiddleware(server, {
+    context: async ({ req }) => ({
+      user: req.user, // from upstream authn
+      abac: req.abac, // attributes for OPA
+      driver,
+    }),
+  }),
+);
 
-app.listen(4000, () => console.log('GraphQL on :4000'))
+app.listen(4000, () => console.log('GraphQL on :4000'));
 ```
 
 ### 4.4 NL → Cypher Engine (sketch)
 
 ```ts
 // server/src/nl2cypher/engine.ts
-import { estimateCost } from './cost'
-import { runSandbox } from './sandbox'
+import { estimateCost } from './cost';
+import { runSandbox } from './sandbox';
 
 export async function nlToCypher(prompt: string, schemaHint: string) {
   // Call LLM with schema/system prompts kept server‑side; strip PII via regex/allowlist
-  const cypher = await generateCypher(prompt, schemaHint)
-  const estimate = await estimateCost(cypher)
-  return { cypher, estimate }
+  const cypher = await generateCypher(prompt, schemaHint);
+  const estimate = await estimateCost(cypher);
+  return { cypher, estimate };
 }
 
-export async function executeSandbox(cypher: string, budget: { rows: number; ms: number; memoryMB: number }) {
-  if (!withinBudget(budget)) throw new Error('BudgetExceeded')
-  return await runSandbox(cypher, budget)
+export async function executeSandbox(
+  cypher: string,
+  budget: { rows: number; ms: number; memoryMB: number },
+) {
+  if (!withinBudget(budget)) throw new Error('BudgetExceeded');
+  return await runSandbox(cypher, budget);
 }
 ```
 
@@ -207,11 +238,14 @@ export function scoreCandidate(a: any, b: any) {
   const features = {
     nameJaro: jaro(a.name, b.name),
     emailExact: +(a.email && b.email && a.email === b.email),
-    phoneEdit: editDistance(a.phone, b.phone)
-  }
-  const w = { nameJaro: 0.5, emailExact: 0.9, phoneEdit: -0.1 }
-  const score = w.nameJaro*features.nameJaro + w.emailExact*features.emailExact + w.phoneEdit*Math.min(features.phoneEdit, 3)
-  return { score, features }
+    phoneEdit: editDistance(a.phone, b.phone),
+  };
+  const w = { nameJaro: 0.5, emailExact: 0.9, phoneEdit: -0.1 };
+  const score =
+    w.nameJaro * features.nameJaro +
+    w.emailExact * features.emailExact +
+    w.phoneEdit * Math.min(features.phoneEdit, 3);
+  return { score, features };
 }
 ```
 
@@ -219,26 +253,36 @@ export function scoreCandidate(a: any, b: any) {
 
 ```ts
 // server/src/provenance/manifest.ts
-import { createHash } from 'crypto'
+import { createHash } from 'crypto';
 
-export interface ManifestItem { path: string; hash: string }
-export interface Manifest { algo: 'sha256'; items: ManifestItem[]; merkleRoot: string }
-
-export function buildManifest(files: Buffer[], paths: string[]): Manifest {
-  const items = files.map((buf, i) => ({ path: paths[i], hash: sha256(buf) }))
-  const merkleRoot = merkle(items.map(i => i.hash))
-  return { algo: 'sha256', items, merkleRoot }
+export interface ManifestItem {
+  path: string;
+  hash: string;
+}
+export interface Manifest {
+  algo: 'sha256';
+  items: ManifestItem[];
+  merkleRoot: string;
 }
 
-function sha256(b: Buffer) { return createHash('sha256').update(b).digest('hex') }
+export function buildManifest(files: Buffer[], paths: string[]): Manifest {
+  const items = files.map((buf, i) => ({ path: paths[i], hash: sha256(buf) }));
+  const merkleRoot = merkle(items.map((i) => i.hash));
+  return { algo: 'sha256', items, merkleRoot };
+}
+
+function sha256(b: Buffer) {
+  return createHash('sha256').update(b).digest('hex');
+}
 function merkle(leaves: string[]) {
-  let layer = leaves
+  let layer = leaves;
   while (layer.length > 1) {
-    const next: string[] = []
-    for (let i = 0; i < layer.length; i += 2) next.push(sha256(Buffer.from((layer[i]||'') + (layer[i+1]||''))))
-    layer = next
+    const next: string[] = [];
+    for (let i = 0; i < layer.length; i += 2)
+      next.push(sha256(Buffer.from((layer[i] || '') + (layer[i + 1] || ''))));
+    layer = next;
   }
-  return layer[0] || ''
+  return layer[0] || '';
 }
 ```
 
@@ -246,19 +290,21 @@ function merkle(leaves: string[]) {
 
 ```js
 // apps/web/src/components/GraphCanvas/jquery-hooks.js
-$(function(){
-  $('#graph').on('contextmenu', '.node', function(e){
+$(function () {
+  $('#graph').on('contextmenu', '.node', function (e) {
     e.preventDefault();
-    const id = $(this).data('id')
-    $('#ctx').css({ top: e.pageY, left: e.pageX }).show().data('id', id)
-  })
-  $('#ctx .action').on('click', function(){
-    const action = $(this).data('action')
-    const id = $('#ctx').data('id')
-    window.dispatchEvent(new CustomEvent('graph:action', { detail: { action, id } }))
-    $('#ctx').hide()
-  })
-})
+    const id = $(this).data('id');
+    $('#ctx').css({ top: e.pageY, left: e.pageX }).show().data('id', id);
+  });
+  $('#ctx .action').on('click', function () {
+    const action = $(this).data('action');
+    const id = $('#ctx').data('id');
+    window.dispatchEvent(
+      new CustomEvent('graph:action', { detail: { action, id } }),
+    );
+    $('#ctx').hide();
+  });
+});
 ```
 
 ### 4.8 OPA Policy (export gate)
@@ -287,8 +333,8 @@ blocked_selector[input] {
 server:
   resources:
     limits:
-      cpu: "2"
-      memory: "4Gi"
+      cpu: '2'
+      memory: '4Gi'
   queryBudget:
     rows: 200000
     ms: 2000
@@ -301,15 +347,19 @@ server:
 ### 4.10 k6 Perf Smoke
 
 ```js
-import http from 'k6/http'
-import { sleep, check } from 'k6'
-export const options = { vus: 10, duration: '2m' }
-export default function(){
-  const res = http.post('http://localhost:4000/graphql', JSON.stringify({
-    query: '{ searchEntities(q:"acme", limit:20){ type } }'
-  }), { headers: { 'Content-Type': 'application/json' }})
-  check(res, { 'status 200': r => r.status === 200 })
-  sleep(1)
+import http from 'k6/http';
+import { sleep, check } from 'k6';
+export const options = { vus: 10, duration: '2m' };
+export default function () {
+  const res = http.post(
+    'http://localhost:4000/graphql',
+    JSON.stringify({
+      query: '{ searchEntities(q:"acme", limit:20){ type } }',
+    }),
+    { headers: { 'Content-Type': 'application/json' } },
+  );
+  check(res, { 'status 200': (r) => r.status === 200 });
+  sleep(1);
 }
 ```
 
@@ -393,4 +443,5 @@ export default function(){
 - Full Graph‑XAI counterfactuals; Zero‑knowledge federation; Advanced simulations; Offline/edge kits; Selective disclosure wallets.
 
 ```
+
 ```

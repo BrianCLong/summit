@@ -2,7 +2,11 @@ import { computeScore } from '../../src/services/score';
 
 describe('computeScore', () => {
   it('should compute the weighted mean correctly', () => {
-    const values = [{ v: 10, w: 1 }, { v: 20, w: 2 }, { v: 30, w: 1 }];
+    const values = [
+      { v: 10, w: 1 },
+      { v: 20, w: 2 },
+      { v: 30, w: 1 },
+    ];
     expect(computeScore(values)).toBe(20);
   });
 
@@ -17,7 +21,10 @@ describe('computeScore', () => {
   });
 
   it('should handle zero weights', () => {
-    const values = [{ v: 10, w: 0 }, { v: 20, w: 0 }];
+    const values = [
+      { v: 10, w: 0 },
+      { v: 20, w: 0 },
+    ];
     expect(computeScore(values)).toBe(0);
   });
 

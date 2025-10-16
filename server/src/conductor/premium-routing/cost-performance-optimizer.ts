@@ -14,9 +14,9 @@ interface CostPerformanceMetrics {
   avgQualityScore: number;
   avgLatency: number;
   successRate: number;
-  costEfficiencyScore: number;    // Quality / Cost ratio
-  performanceScore: number;       // (Quality * Speed) / Cost
-  valueScore: number;             // Composite value metric
+  costEfficiencyScore: number; // Quality / Cost ratio
+  performanceScore: number; // (Quality * Speed) / Cost
+  valueScore: number; // Composite value metric
   budgetUtilization: number;
   costTrends: CostTrend[];
   qualityTrends: QualityTrend[];
@@ -56,8 +56,8 @@ interface OptimizationStrategy {
   name: string;
   description: string;
   targetMetric: 'cost' | 'quality' | 'speed' | 'value';
-  aggressiveness: number;    // 0-1 scale
-  riskTolerance: number;     // 0-1 scale
+  aggressiveness: number; // 0-1 scale
+  riskTolerance: number; // 0-1 scale
   timeHorizon: 'short' | 'medium' | 'long';
   constraints: OptimizationConstraints;
 }
@@ -72,7 +72,12 @@ interface OptimizationConstraints {
 }
 
 interface CostOptimizationRecommendation {
-  recommendationType: 'model_switch' | 'parameter_tuning' | 'batch_optimization' | 'cache_utilization' | 'timing_optimization';
+  recommendationType:
+    | 'model_switch'
+    | 'parameter_tuning'
+    | 'batch_optimization'
+    | 'cache_utilization'
+    | 'timing_optimization';
   currentModel: string;
   recommendedModel?: string;
   expectedCostSaving: number;
@@ -93,7 +98,11 @@ interface OptimizationAction {
 
 interface RealTimeAlert {
   id: string;
-  type: 'cost_spike' | 'quality_drop' | 'budget_exceeded' | 'performance_degradation';
+  type:
+    | 'cost_spike'
+    | 'quality_drop'
+    | 'budget_exceeded'
+    | 'performance_degradation';
   severity: 'info' | 'warning' | 'critical';
   modelId: string;
   tenantId: string;
@@ -133,7 +142,7 @@ export class CostPerformanceOptimizer {
   private optimizationStrategies: Map<string, OptimizationStrategy> = new Map();
   private dynamicPricing: Map<string, DynamicPricingModel> = new Map();
   private activeAlerts: Map<string, RealTimeAlert> = new Map();
-  
+
   // Optimization parameters
   private readonly QUALITY_WEIGHT = 0.4;
   private readonly COST_WEIGHT = 0.3;
@@ -153,12 +162,14 @@ export class CostPerformanceOptimizer {
     await this.loadBudgetConstraints();
     await this.initializeOptimizationStrategies();
     await this.initializeDynamicPricing();
-    
+
     // Start real-time monitoring
     this.startRealTimeMonitoring();
     this.startOptimizationEngine();
-    
-    logger.info('Cost Performance Optimizer initialized with real-time monitoring');
+
+    logger.info(
+      'Cost Performance Optimizer initialized with real-time monitoring',
+    );
   }
 
   /**
@@ -167,10 +178,10 @@ export class CostPerformanceOptimizer {
   async getCostPerformanceAnalysis(
     modelId: string,
     timeWindow: string = '1h',
-    tenantId?: string
+    tenantId?: string,
   ): Promise<CostPerformanceMetrics> {
     const cacheKey = `cost_perf:${modelId}:${timeWindow}:${tenantId || 'global'}`;
-    
+
     // Try cache first
     const cached = await this.redis.get(cacheKey);
     if (cached) {
@@ -178,11 +189,15 @@ export class CostPerformanceOptimizer {
     }
 
     // Calculate fresh metrics
-    const metrics = await this.calculateCostPerformanceMetrics(modelId, timeWindow, tenantId);
-    
+    const metrics = await this.calculateCostPerformanceMetrics(
+      modelId,
+      timeWindow,
+      tenantId,
+    );
+
     // Cache with TTL
     await this.redis.setex(cacheKey, 300, JSON.stringify(metrics)); // 5 minute cache
-    
+
     return metrics;
   }
 
@@ -192,7 +207,7 @@ export class CostPerformanceOptimizer {
   async getOptimizationRecommendations(
     tenantId: string,
     strategy: string = 'balanced',
-    constraints?: Partial<OptimizationConstraints>
+    constraints?: Partial<OptimizationConstraints>,
   ): Promise<CostOptimizationRecommendation[]> {
     const optimizationStrategy = this.optimizationStrategies.get(strategy);
     if (!optimizationStrategy) {
@@ -200,14 +215,15 @@ export class CostPerformanceOptimizer {
     }
 
     const recommendations: CostOptimizationRecommendation[] = [];
-    const tenantMetrics = Array.from(this.metrics.values())
-      .filter(m => m.timeWindow === '1h'); // Focus on recent performance
+    const tenantMetrics = Array.from(this.metrics.values()).filter(
+      (m) => m.timeWindow === '1h',
+    ); // Focus on recent performance
 
     for (const metrics of tenantMetrics) {
       const modelRecommendations = await this.analyzeModelOptimization(
         metrics,
         optimizationStrategy,
-        constraints
+        constraints,
       );
       recommendations.push(...modelRecommendations);
     }
@@ -222,8 +238,8 @@ export class CostPerformanceOptimizer {
       {
         tenant_id: tenantId,
         strategy,
-        recommendation_count: recommendations.length.toString()
-      }
+        recommendation_count: recommendations.length.toString(),
+      },
     );
 
     return recommendations.slice(0, 10); // Top 10 recommendations
@@ -235,7 +251,7 @@ export class CostPerformanceOptimizer {
   async applyOptimizations(
     tenantId: string,
     recommendationIds: string[],
-    dryRun: boolean = false
+    dryRun: boolean = false,
   ): Promise<{
     appliedOptimizations: number;
     expectedSavings: number;
@@ -254,13 +270,14 @@ export class CostPerformanceOptimizer {
 
     for (const recommendationId of recommendationIds) {
       try {
-        const recommendation = await this.getRecommendationById(recommendationId);
+        const recommendation =
+          await this.getRecommendationById(recommendationId);
         if (!recommendation) {
           results.push({
             recommendationId,
             success: false,
             impact: 0,
-            error: 'Recommendation not found'
+            error: 'Recommendation not found',
           });
           continue;
         }
@@ -268,12 +285,17 @@ export class CostPerformanceOptimizer {
         // Risk assessment
         const risk = this.assessOptimizationRisk(recommendation);
         if (risk.level === 'high') {
-          potentialRisks.push(`High risk for ${recommendation.recommendationType}: ${risk.reason}`);
+          potentialRisks.push(
+            `High risk for ${recommendation.recommendationType}: ${risk.reason}`,
+          );
         }
 
         if (!dryRun && risk.level !== 'high') {
           // Apply the optimization
-          const success = await this.executeOptimization(recommendation, tenantId);
+          const success = await this.executeOptimization(
+            recommendation,
+            tenantId,
+          );
           if (success) {
             appliedOptimizations++;
             expectedSavings += recommendation.expectedCostSaving;
@@ -283,7 +305,7 @@ export class CostPerformanceOptimizer {
             recommendationId,
             success,
             impact: recommendation.expectedCostSaving,
-            error: success ? undefined : 'Failed to apply optimization'
+            error: success ? undefined : 'Failed to apply optimization',
           });
         } else {
           // Dry run or high risk
@@ -291,20 +313,19 @@ export class CostPerformanceOptimizer {
             recommendationId,
             success: true,
             impact: recommendation.expectedCostSaving,
-            error: dryRun ? 'Dry run - not applied' : 'High risk - skipped'
+            error: dryRun ? 'Dry run - not applied' : 'High risk - skipped',
           });
-          
+
           if (!dryRun) {
             expectedSavings += recommendation.expectedCostSaving;
           }
         }
-
       } catch (error) {
         results.push({
           recommendationId,
           success: false,
           impact: 0,
-          error: error.message
+          error: error.message,
         });
       }
     }
@@ -313,13 +334,13 @@ export class CostPerformanceOptimizer {
     prometheusConductorMetrics.recordOperationalMetric(
       'optimizations_applied',
       appliedOptimizations,
-      { tenant_id: tenantId, dry_run: dryRun.toString() }
+      { tenant_id: tenantId, dry_run: dryRun.toString() },
     );
 
     prometheusConductorMetrics.recordOperationalMetric(
       'expected_cost_savings',
       expectedSavings,
-      { tenant_id: tenantId }
+      { tenant_id: tenantId },
     );
 
     logger.info('Applied cost optimizations', {
@@ -327,14 +348,14 @@ export class CostPerformanceOptimizer {
       appliedOptimizations,
       expectedSavings,
       dryRun,
-      potentialRisks: potentialRisks.length
+      potentialRisks: potentialRisks.length,
     });
 
     return {
       appliedOptimizations,
       expectedSavings,
       potentialRisks,
-      results
+      results,
     };
   }
 
@@ -357,7 +378,7 @@ export class CostPerformanceOptimizer {
     // Calculate current usage
     const currentUsage = await this.calculateCurrentUsage(tenantId, 'day');
     const monthlyUsage = await this.calculateCurrentUsage(tenantId, 'month');
-    
+
     const dailyUtilization = (currentUsage / constraints.dailyLimit) * 100;
     const monthlyUtilization = (monthlyUsage / constraints.monthlyLimit) * 100;
 
@@ -365,27 +386,28 @@ export class CostPerformanceOptimizer {
     const projectedMonthlyUsage = await this.projectMonthlyUsage(tenantId);
 
     // Check for alerts
-    const alerts = Array.from(this.activeAlerts.values())
-      .filter(alert => alert.tenantId === tenantId);
+    const alerts = Array.from(this.activeAlerts.values()).filter(
+      (alert) => alert.tenantId === tenantId,
+    );
 
     // Generate recommendations
     const recommendations = await this.generateBudgetRecommendations(
       constraints,
       currentUsage,
-      projectedMonthlyUsage
+      projectedMonthlyUsage,
     );
 
     // Record budget monitoring metrics
     prometheusConductorMetrics.recordOperationalMetric(
       'budget_utilization_daily',
       dailyUtilization,
-      { tenant_id: tenantId }
+      { tenant_id: tenantId },
     );
 
     prometheusConductorMetrics.recordOperationalMetric(
       'budget_utilization_monthly',
       monthlyUtilization,
-      { tenant_id: tenantId }
+      { tenant_id: tenantId },
     );
 
     return {
@@ -394,7 +416,7 @@ export class CostPerformanceOptimizer {
       utilizationPercentage: dailyUtilization,
       projectedMonthlyUsage,
       alerts,
-      recommendations
+      recommendations,
     };
   }
 
@@ -411,12 +433,14 @@ export class CostPerformanceOptimizer {
 
         // Update multipliers
         pricingModel.demandMultiplier = this.calculateDemandMultiplier(demand);
-        pricingModel.qualityMultiplier = this.calculateQualityMultiplier(quality);
+        pricingModel.qualityMultiplier =
+          this.calculateQualityMultiplier(quality);
         pricingModel.timeOfDayMultiplier = this.calculateTimeMultiplier();
         pricingModel.volumeDiscount = this.calculateVolumeDiscount(modelId);
 
         // Calculate new price
-        const newPrice = pricingModel.baseCost * 
+        const newPrice =
+          pricingModel.baseCost *
           pricingModel.demandMultiplier *
           pricingModel.qualityMultiplier *
           pricingModel.timeOfDayMultiplier *
@@ -428,11 +452,12 @@ export class CostPerformanceOptimizer {
           price: newPrice,
           demand,
           quality,
-          utilization
+          utilization,
         });
 
         // Keep only recent history
-        if (pricingModel.priceHistory.length > 1440) { // 24 hours of minute data
+        if (pricingModel.priceHistory.length > 1440) {
+          // 24 hours of minute data
           pricingModel.priceHistory = pricingModel.priceHistory.slice(-1440);
         }
 
@@ -443,17 +468,16 @@ export class CostPerformanceOptimizer {
         prometheusConductorMetrics.recordOperationalMetric(
           'dynamic_pricing_update',
           newPrice,
-          { 
+          {
             model_id: modelId,
             demand_multiplier: pricingModel.demandMultiplier.toFixed(2),
-            quality_multiplier: pricingModel.qualityMultiplier.toFixed(2)
-          }
+            quality_multiplier: pricingModel.qualityMultiplier.toFixed(2),
+          },
         );
-
       } catch (error) {
         logger.error('Failed to update dynamic pricing', {
           modelId,
-          error: error.message
+          error: error.message,
         });
       }
     }
@@ -496,7 +520,8 @@ export class CostPerformanceOptimizer {
       const recentCosts = metrics.costTrends.slice(-10); // Last 10 data points
       if (recentCosts.length < 5) continue;
 
-      const avgCost = recentCosts.reduce((sum, t) => sum + t.cost, 0) / recentCosts.length;
+      const avgCost =
+        recentCosts.reduce((sum, t) => sum + t.cost, 0) / recentCosts.length;
       const latestCost = recentCosts[recentCosts.length - 1].cost;
 
       // Check for 50% spike above average
@@ -507,7 +532,7 @@ export class CostPerformanceOptimizer {
           modelId,
           tenantId: 'global',
           message: `Cost spike detected for ${modelId}: ${latestCost.toFixed(4)} vs avg ${avgCost.toFixed(4)}`,
-          metrics: { latestCost, avgCost, spikeRatio: latestCost / avgCost }
+          metrics: { latestCost, avgCost, spikeRatio: latestCost / avgCost },
         });
       }
     }
@@ -521,8 +546,11 @@ export class CostPerformanceOptimizer {
       const recentQuality = metrics.qualityTrends.slice(-10);
       if (recentQuality.length < 5) continue;
 
-      const avgQuality = recentQuality.reduce((sum, t) => sum + t.qualityScore, 0) / recentQuality.length;
-      const latestQuality = recentQuality[recentQuality.length - 1].qualityScore;
+      const avgQuality =
+        recentQuality.reduce((sum, t) => sum + t.qualityScore, 0) /
+        recentQuality.length;
+      const latestQuality =
+        recentQuality[recentQuality.length - 1].qualityScore;
 
       // Check for 15% drop in quality
       if (latestQuality < avgQuality * 0.85) {
@@ -532,7 +560,11 @@ export class CostPerformanceOptimizer {
           modelId,
           tenantId: 'global',
           message: `Quality degradation detected for ${modelId}: ${(latestQuality * 100).toFixed(1)}% vs avg ${(avgQuality * 100).toFixed(1)}%`,
-          metrics: { latestQuality, avgQuality, degradationRatio: latestQuality / avgQuality }
+          metrics: {
+            latestQuality,
+            avgQuality,
+            degradationRatio: latestQuality / avgQuality,
+          },
         });
       }
     }
@@ -553,7 +585,11 @@ export class CostPerformanceOptimizer {
           modelId: 'all',
           tenantId,
           message: `Budget exceeded for ${tenantId}: ${utilization.toFixed(1)}% of daily limit`,
-          metrics: { currentUsage, dailyLimit: constraints.dailyLimit, utilization }
+          metrics: {
+            currentUsage,
+            dailyLimit: constraints.dailyLimit,
+            utilization,
+          },
         });
       } else if (utilization > constraints.warningThreshold) {
         await this.createAlert({
@@ -562,7 +598,11 @@ export class CostPerformanceOptimizer {
           modelId: 'all',
           tenantId,
           message: `Budget warning for ${tenantId}: ${utilization.toFixed(1)}% of daily limit`,
-          metrics: { currentUsage, dailyLimit: constraints.dailyLimit, utilization }
+          metrics: {
+            currentUsage,
+            dailyLimit: constraints.dailyLimit,
+            utilization,
+          },
         });
       }
     }
@@ -571,15 +611,18 @@ export class CostPerformanceOptimizer {
   /**
    * Create and manage alerts
    */
-  private async createAlert(alertData: Omit<RealTimeAlert, 'id' | 'timestamp' | 'acknowledged'>): Promise<void> {
+  private async createAlert(
+    alertData: Omit<RealTimeAlert, 'id' | 'timestamp' | 'acknowledged'>,
+  ): Promise<void> {
     const alertId = `alert_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     // Check for alert cooldown
-    const recentSimilarAlerts = Array.from(this.activeAlerts.values()).filter(alert =>
-      alert.type === alertData.type &&
-      alert.modelId === alertData.modelId &&
-      alert.tenantId === alertData.tenantId &&
-      Date.now() - alert.timestamp.getTime() < this.ALERT_COOLDOWN_MS
+    const recentSimilarAlerts = Array.from(this.activeAlerts.values()).filter(
+      (alert) =>
+        alert.type === alertData.type &&
+        alert.modelId === alertData.modelId &&
+        alert.tenantId === alertData.tenantId &&
+        Date.now() - alert.timestamp.getTime() < this.ALERT_COOLDOWN_MS,
     );
 
     if (recentSimilarAlerts.length > 0) {
@@ -590,7 +633,7 @@ export class CostPerformanceOptimizer {
       ...alertData,
       id: alertId,
       timestamp: new Date(),
-      acknowledged: false
+      acknowledged: false,
     };
 
     this.activeAlerts.set(alertId, alert);
@@ -606,8 +649,8 @@ export class CostPerformanceOptimizer {
         alert_type: alert.type,
         severity: alert.severity,
         model_id: alert.modelId,
-        tenant_id: alert.tenantId
-      }
+        tenant_id: alert.tenantId,
+      },
     );
 
     logger.warn('Cost optimization alert created', {
@@ -616,7 +659,7 @@ export class CostPerformanceOptimizer {
       severity: alert.severity,
       modelId: alert.modelId,
       tenantId: alert.tenantId,
-      message: alert.message
+      message: alert.message,
     });
   }
 
@@ -624,14 +667,17 @@ export class CostPerformanceOptimizer {
   private async calculateCostPerformanceMetrics(
     modelId: string,
     timeWindow: string,
-    tenantId?: string
+    tenantId?: string,
   ): Promise<CostPerformanceMetrics> {
     const client = await this.pool.connect();
     try {
       const whereClause = tenantId ? 'AND tenant_id = $3' : '';
-      const params = tenantId ? [modelId, timeWindow, tenantId] : [modelId, timeWindow];
-      
-      const result = await client.query(`
+      const params = tenantId
+        ? [modelId, timeWindow, tenantId]
+        : [modelId, timeWindow];
+
+      const result = await client.query(
+        `
         SELECT 
           SUM(cost) as total_cost,
           COUNT(*) as total_requests,
@@ -643,7 +689,9 @@ export class CostPerformanceOptimizer {
         WHERE model_id = $1 AND 
               timestamp > NOW() - INTERVAL $2
               ${whereClause}
-      `, params);
+      `,
+        params,
+      );
 
       const row = result.rows[0];
       const totalCost = parseFloat(row.total_cost || '0');
@@ -653,16 +701,27 @@ export class CostPerformanceOptimizer {
       const successRate = parseFloat(row.success_rate || '0');
 
       // Calculate derived metrics
-      const avgCostPerRequest = totalRequests > 0 ? totalCost / totalRequests : 0;
+      const avgCostPerRequest =
+        totalRequests > 0 ? totalCost / totalRequests : 0;
       const costEfficiencyScore = totalCost > 0 ? avgQuality / totalCost : 0;
-      const performanceScore = totalCost > 0 ? (avgQuality * (1 / avgLatency)) / totalCost : 0;
-      const valueScore = (avgQuality * this.QUALITY_WEIGHT) + 
-                        ((1 / avgCostPerRequest) * this.COST_WEIGHT) +
-                        ((1 / avgLatency) * this.SPEED_WEIGHT);
+      const performanceScore =
+        totalCost > 0 ? (avgQuality * (1 / avgLatency)) / totalCost : 0;
+      const valueScore =
+        avgQuality * this.QUALITY_WEIGHT +
+        (1 / avgCostPerRequest) * this.COST_WEIGHT +
+        (1 / avgLatency) * this.SPEED_WEIGHT;
 
       // Get trends
-      const costTrends = await this.getCostTrends(modelId, timeWindow, tenantId);
-      const qualityTrends = await this.getQualityTrends(modelId, timeWindow, tenantId);
+      const costTrends = await this.getCostTrends(
+        modelId,
+        timeWindow,
+        tenantId,
+      );
+      const qualityTrends = await this.getQualityTrends(
+        modelId,
+        timeWindow,
+        tenantId,
+      );
 
       return {
         modelId,
@@ -679,45 +738,54 @@ export class CostPerformanceOptimizer {
         budgetUtilization: 0, // Would need budget context
         costTrends,
         qualityTrends,
-        lastUpdated: new Date()
+        lastUpdated: new Date(),
       };
-
     } finally {
       client.release();
     }
   }
 
-  private async getCostTrends(modelId: string, timeWindow: string, tenantId?: string): Promise<CostTrend[]> {
+  private async getCostTrends(
+    modelId: string,
+    timeWindow: string,
+    tenantId?: string,
+  ): Promise<CostTrend[]> {
     // Simplified implementation - would use time series analysis
     const trends: CostTrend[] = [];
-    
-    for (let i = 0; i < 24; i++) { // 24 hour trend
+
+    for (let i = 0; i < 24; i++) {
+      // 24 hour trend
       trends.push({
         timestamp: new Date(Date.now() - i * 3600000),
         cost: Math.random() * 0.01,
         movingAverage: Math.random() * 0.008,
         trend: Math.random() > 0.5 ? 'increasing' : 'decreasing',
-        volatility: Math.random() * 0.1
+        volatility: Math.random() * 0.1,
       });
     }
-    
+
     return trends.reverse();
   }
 
-  private async getQualityTrends(modelId: string, timeWindow: string, tenantId?: string): Promise<QualityTrend[]> {
+  private async getQualityTrends(
+    modelId: string,
+    timeWindow: string,
+    tenantId?: string,
+  ): Promise<QualityTrend[]> {
     // Simplified implementation - would use time series analysis
     const trends: QualityTrend[] = [];
-    
-    for (let i = 0; i < 24; i++) { // 24 hour trend
+
+    for (let i = 0; i < 24; i++) {
+      // 24 hour trend
       trends.push({
         timestamp: new Date(Date.now() - i * 3600000),
-        qualityScore: 0.8 + (Math.random() * 0.2),
-        movingAverage: 0.82 + (Math.random() * 0.15),
+        qualityScore: 0.8 + Math.random() * 0.2,
+        movingAverage: 0.82 + Math.random() * 0.15,
         trend: Math.random() > 0.6 ? 'improving' : 'stable',
-        confidence: 0.8 + (Math.random() * 0.2)
+        confidence: 0.8 + Math.random() * 0.2,
       });
     }
-    
+
     return trends.reverse();
   }
 
@@ -727,10 +795,10 @@ export class CostPerformanceOptimizer {
   private async analyzeModelOptimization(
     metrics: CostPerformanceMetrics,
     strategy: OptimizationStrategy,
-    constraints?: Partial<OptimizationConstraints>
+    constraints?: Partial<OptimizationConstraints>,
   ): Promise<CostOptimizationRecommendation[]> {
     const recommendations: CostOptimizationRecommendation[] = [];
-    
+
     // Model switching recommendation
     if (metrics.costEfficiencyScore < 0.5) {
       recommendations.push({
@@ -741,21 +809,25 @@ export class CostPerformanceOptimizer {
         expectedQualityImpact: 0.05,
         expectedLatencyImpact: 100,
         confidence: 0.8,
-        reasoning: 'Current model has low cost efficiency. Switching could reduce costs while maintaining quality.',
+        reasoning:
+          'Current model has low cost efficiency. Switching could reduce costs while maintaining quality.',
         implementation: [
           {
             action: 'switch_model',
             parameters: { new_model_id: 'claude-3.5-sonnet' },
             expectedImpact: 0.3,
             riskLevel: 'medium',
-            implementation_priority: 1
-          }
-        ]
+            implementation_priority: 1,
+          },
+        ],
       });
     }
 
     // Caching recommendation
-    if (metrics.totalRequests > 100 && !metrics.costTrends.some(t => t.cost < metrics.avgCostPerRequest * 0.1)) {
+    if (
+      metrics.totalRequests > 100 &&
+      !metrics.costTrends.some((t) => t.cost < metrics.avgCostPerRequest * 0.1)
+    ) {
       recommendations.push({
         recommendationType: 'cache_utilization',
         currentModel: metrics.modelId,
@@ -763,32 +835,39 @@ export class CostPerformanceOptimizer {
         expectedQualityImpact: 0,
         expectedLatencyImpact: -200, // Improvement
         confidence: 0.9,
-        reasoning: 'High request volume with potential for caching similar queries.',
+        reasoning:
+          'High request volume with potential for caching similar queries.',
         implementation: [
           {
             action: 'enable_caching',
             parameters: { cache_ttl: 3600, similarity_threshold: 0.9 },
             expectedImpact: 0.2,
             riskLevel: 'low',
-            implementation_priority: 2
-          }
-        ]
+            implementation_priority: 2,
+          },
+        ],
       });
     }
 
     return recommendations;
   }
 
-  private async calculateCurrentUsage(tenantId: string, period: 'day' | 'month'): Promise<number> {
+  private async calculateCurrentUsage(
+    tenantId: string,
+    period: 'day' | 'month',
+  ): Promise<number> {
     const client = await this.pool.connect();
     try {
       const interval = period === 'day' ? '1 DAY' : '1 MONTH';
-      const result = await client.query(`
+      const result = await client.query(
+        `
         SELECT SUM(cost) as total_cost
         FROM model_executions 
         WHERE tenant_id = $1 AND 
               timestamp > NOW() - INTERVAL $2
-      `, [tenantId, interval]);
+      `,
+        [tenantId, interval],
+      );
 
       return parseFloat(result.rows[0].total_cost || '0');
     } finally {
@@ -799,27 +878,37 @@ export class CostPerformanceOptimizer {
   private async projectMonthlyUsage(tenantId: string): Promise<number> {
     const dailyUsage = await this.calculateCurrentUsage(tenantId, 'day');
     const daysInMonth = new Date().getDate();
-    const totalDaysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
-    
+    const totalDaysInMonth = new Date(
+      new Date().getFullYear(),
+      new Date().getMonth() + 1,
+      0,
+    ).getDate();
+
     return (dailyUsage / daysInMonth) * totalDaysInMonth;
   }
 
   private async generateBudgetRecommendations(
     constraints: BudgetConstraints,
     currentUsage: number,
-    projectedUsage: number
+    projectedUsage: number,
   ): Promise<string[]> {
     const recommendations: string[] = [];
-    
+
     if (projectedUsage > constraints.monthlyLimit) {
-      recommendations.push('Consider enabling automatic cost optimization to stay within monthly budget');
-      recommendations.push('Review model selection strategy to prioritize cost-efficient options');
+      recommendations.push(
+        'Consider enabling automatic cost optimization to stay within monthly budget',
+      );
+      recommendations.push(
+        'Review model selection strategy to prioritize cost-efficient options',
+      );
     }
-    
+
     if (currentUsage > constraints.dailyLimit * 0.8) {
-      recommendations.push('Daily budget utilization is high - consider rate limiting or quality thresholds');
+      recommendations.push(
+        'Daily budget utilization is high - consider rate limiting or quality thresholds',
+      );
     }
-    
+
     return recommendations;
   }
 
@@ -842,19 +931,26 @@ export class CostPerformanceOptimizer {
     return 0.05; // 5% discount placeholder
   }
 
-  private async getRecommendationById(id: string): Promise<CostOptimizationRecommendation | null> {
+  private async getRecommendationById(
+    id: string,
+  ): Promise<CostOptimizationRecommendation | null> {
     // Would fetch from database
     return null;
   }
 
-  private assessOptimizationRisk(recommendation: CostOptimizationRecommendation): { level: string; reason: string } {
+  private assessOptimizationRisk(
+    recommendation: CostOptimizationRecommendation,
+  ): { level: string; reason: string } {
     if (recommendation.expectedQualityImpact < -0.1) {
       return { level: 'high', reason: 'Significant quality impact expected' };
     }
     return { level: 'low', reason: 'Low risk optimization' };
   }
 
-  private async executeOptimization(recommendation: CostOptimizationRecommendation, tenantId: string): Promise<boolean> {
+  private async executeOptimization(
+    recommendation: CostOptimizationRecommendation,
+    tenantId: string,
+  ): Promise<boolean> {
     // Would implement actual optimization logic
     return true;
   }
@@ -889,8 +985,8 @@ export class CostPerformanceOptimizer {
         maxCostPerRequest: 0.01,
         maxDailyCost: 100,
         allowedProviders: ['anthropic', 'openai', 'google'],
-        excludedModels: []
-      }
+        excludedModels: [],
+      },
     });
 
     this.optimizationStrategies.set('balanced', {
@@ -906,8 +1002,8 @@ export class CostPerformanceOptimizer {
         maxCostPerRequest: 0.02,
         maxDailyCost: 200,
         allowedProviders: ['anthropic', 'openai', 'google'],
-        excludedModels: []
-      }
+        excludedModels: [],
+      },
     });
 
     logger.info('Optimization strategies initialized');
@@ -930,7 +1026,7 @@ export class CostPerformanceOptimizer {
 
   private async getModelQualityScore(modelId: string): Promise<number> {
     // Get current quality score - placeholder
-    return 0.8 + (Math.random() * 0.2);
+    return 0.8 + Math.random() * 0.2;
   }
 
   private async getModelUtilization(modelId: string): Promise<number> {

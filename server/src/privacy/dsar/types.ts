@@ -36,11 +36,18 @@ export interface ConnectorSnapshot<T = unknown> {
   subjectIds: string[];
 }
 
-export interface DSARConnector<TCollect = unknown, TSnapshot = ConnectorSnapshot> {
+export interface DSARConnector<
+  TCollect = unknown,
+  TSnapshot = ConnectorSnapshot,
+> {
   readonly name: string;
   collect(subjectId: string, tenantId: string): Promise<TCollect>;
   snapshot(): Promise<TSnapshot>;
-  rectify?(subjectId: string, tenantId: string, patch: Record<string, unknown>): Promise<void>;
+  rectify?(
+    subjectId: string,
+    tenantId: string,
+    patch: Record<string, unknown>,
+  ): Promise<void>;
   delete?(subjectId: string, tenantId: string): Promise<void>;
 }
 

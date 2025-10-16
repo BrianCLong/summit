@@ -7,15 +7,17 @@ import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentation
 import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 
 // Set diagnostic logging level (ERROR in prod, DEBUG in dev)
-const logLevel = process.env.NODE_ENV === 'production'
-  ? DiagLogLevel.ERROR
-  : DiagLogLevel.INFO;
+const logLevel =
+  process.env.NODE_ENV === 'production'
+    ? DiagLogLevel.ERROR
+    : DiagLogLevel.INFO;
 diag.setLogger(new DiagConsoleLogger(), logLevel);
 
 // Service resource attributes
 const resource = new Resource({
   'service.name': 'intelgraph-server',
-  'service.version': process.env.GIT_SHA || process.env.npm_package_version || 'dev',
+  'service.version':
+    process.env.GIT_SHA || process.env.npm_package_version || 'dev',
   'service.namespace': 'intelgraph',
   'deployment.environment': process.env.NODE_ENV || 'local',
   'container.id': process.env.HOSTNAME || 'local',
@@ -25,20 +27,22 @@ const resource = new Resource({
 
 // OTLP exporters configuration
 const traceExporter = new OTLPTraceExporter({
-  url: process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT ||
-       process.env.OTEL_EXPORTER_OTLP_ENDPOINT ||
-       'http://localhost:4318/v1/traces',
+  url:
+    process.env.OTEL_EXPORTER_OTLP_TRACES_ENDPOINT ||
+    process.env.OTEL_EXPORTER_OTLP_ENDPOINT ||
+    'http://localhost:4318/v1/traces',
   headers: {
-    'Authorization': process.env.OTEL_EXPORTER_OTLP_HEADERS || '',
+    Authorization: process.env.OTEL_EXPORTER_OTLP_HEADERS || '',
   },
 });
 
 const metricExporter = new OTLPMetricExporter({
-  url: process.env.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT ||
-       process.env.OTEL_EXPORTER_OTLP_ENDPOINT?.replace('/traces', '/metrics') ||
-       'http://localhost:4318/v1/metrics',
+  url:
+    process.env.OTEL_EXPORTER_OTLP_METRICS_ENDPOINT ||
+    process.env.OTEL_EXPORTER_OTLP_ENDPOINT?.replace('/traces', '/metrics') ||
+    'http://localhost:4318/v1/metrics',
   headers: {
-    'Authorization': process.env.OTEL_EXPORTER_OTLP_HEADERS || '',
+    Authorization: process.env.OTEL_EXPORTER_OTLP_HEADERS || '',
   },
 });
 
@@ -105,7 +109,9 @@ export async function startOtel(): Promise<void> {
     console.log('🔍 Starting OpenTelemetry instrumentation...');
     console.log(`📊 Service: ${resource.attributes['service.name']}`);
     console.log(`🏷️  Version: ${resource.attributes['service.version']}`);
-    console.log(`🌍 Environment: ${resource.attributes['deployment.environment']}`);
+    console.log(
+      `🌍 Environment: ${resource.attributes['deployment.environment']}`,
+    );
 
     await sdk.start();
 
@@ -125,7 +131,6 @@ export async function startOtel(): Promise<void> {
 
     process.on('SIGTERM', shutdown);
     process.on('SIGINT', shutdown);
-
   } catch (error) {
     console.error('❌ Failed to start OpenTelemetry:', error);
     // Don't fail the application if OTEL fails
@@ -160,10 +165,12 @@ export function getTracer(name: string = 'intelgraph') {
 // Environment validation
 export function validateOtelConfig(): boolean {
   const required = ['OTEL_EXPORTER_OTLP_ENDPOINT'];
-  const missing = required.filter(env => !process.env[env]);
+  const missing = required.filter((env) => !process.env[env]);
 
   if (missing.length > 0) {
-    console.warn(`⚠️  Missing OTEL environment variables: ${missing.join(', ')}`);
+    console.warn(
+      `⚠️  Missing OTEL environment variables: ${missing.join(', ')}`,
+    );
     console.warn('⚠️  OpenTelemetry will use default endpoints');
     return false;
   }

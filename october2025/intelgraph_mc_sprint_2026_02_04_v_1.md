@@ -1,4 +1,4 @@
-```markdown
+````markdown
 ---
 slug: intelgraph-mc-sprint-2026-02-04
 version: v1.0
@@ -16,11 +16,14 @@ status: planned
 > **Mission (Sprint N+9)**: Promote **Multi‑Cloud to GA (AWS+GCP)**, introduce **Realtime Subscriptions** with SLO guards, ship **Zero‑Downtime Migrations (ZDM)** kit, launch **Connector Marketplace v0.9**, add **Graph Embeddings Preview** (GDS/RAG‑safe), and formalize **Customer Portal** with SLA reports—while maintaining platform SLOs/cost guardrails. Evidence bundle v10 included.
 
 ## Conductor Summary (Commit)
+
 **Assumptions & Provenance**
+
 - Builds on 2026‑01‑21 sprint (multi‑cloud v0.9, federation subgraphs, model ops, PII redaction, usage reports).
 - Summit bundles remain pending import; placeholders _[ATTACH FROM SUMMIT BUNDLE]_ where noted.
 
 **Goals**
+
 1. **Multi‑Cloud GA**: production overlays, health checks, cost parity dashboards, and failover playbook (control plane only).
 2. **Realtime Subscriptions**: GraphQL subscriptions for entity changes; fan‑out p95 ≤ 250 ms; backpressure & authZ.
 3. **ZDM Kit**: schema versioning/migrations with dual‑write + read‑compat shims; automated cutover/rollback.
@@ -29,23 +32,28 @@ status: planned
 6. **Customer Portal**: SLA & cost dashboards, usage statements, download of evidence bundle snapshots.
 
 **Non‑Goals**
-- Cross‑cloud *data plane* DR; embedding‑based ER replacement; external paid marketplace.
+
+- Cross‑cloud _data plane_ DR; embedding‑based ER replacement; external paid marketplace.
 
 **Constraints**
+
 - SLOs unchanged, plus Subscriptions: server→client latency p95 ≤ 250 ms.
 - Cost guardrails unchanged; embeddings jobs limited to off‑peak windows and per‑tenant caps.
 
 **Risks**
+
 - R1: Subscriptions overload during spikes. _Mitigation_: topic partitioning, fan‑out pools, backpressure with drop policies for non‑critical.
 - R2: ZDM dual‑write divergence. _Mitigation_: write‑audit, consistency checks, canary cutovers.
 - R3: Marketplace plugin security. _Mitigation_: signing + sandbox + policy class checks.
 
 **Definition of Done**
+
 - Multi‑cloud overlays run prod traffic (subset tenants) with cost parity dashboards; subscriptions enabled for pilot tenants meeting latency SLO; ZDM executed on one schema change with evidence; marketplace installs signed plugins; embeddings preview produces vectors + hybrid search integration; customer portal live for 2 tenants.
 
 ---
 
 ## Swimlanes
+
 - **Lane A — Multi‑Cloud GA** (Platform + SRE)
 - **Lane B — Realtime Subscriptions** (Backend + SRE)
 - **Lane C — Zero‑Downtime Migrations** (Backend + QA)
@@ -57,9 +65,11 @@ status: planned
 ---
 
 ## Backlog (Epics → Stories → Tasks) + RACI
+
 Estimates in SP.
 
 ### EPIC A: Multi‑Cloud GA (30 SP)
+
 - **A‑1** Production overlays & health checks (10 SP) — _Platform (R), SRE (A)_
   - AC: AWS/GCP overlays with parity; health endpoints and regional SLO boards.
 - **A‑2** Cost parity dashboards (8 SP) — _SRE FinOps (R)_
@@ -68,6 +78,7 @@ Estimates in SP.
 - **A‑4** Residency conformance suite (6 SP) — _QA (R), Sec (C)_
 
 ### EPIC B: Realtime Subscriptions (28 SP)
+
 - **B‑1** Gateway → broker fan‑out (10 SP) — _Backend (R)_
   - AC: Socket.IO or WebSocket server with topic authZ.
 - **B‑2** Backpressure & QoS (8 SP) — _Backend (R), SRE (C)_
@@ -76,26 +87,31 @@ Estimates in SP.
   - AC: p50/p95 fan‑out, drops, reconnects; burn alerts.
 
 ### EPIC C: Zero‑Downtime Migrations (ZDM) (26 SP)
+
 - **C‑1** Dual‑write shims + toggles (10 SP) — _Backend (R)_
 - **C‑2** Read‑compat mapper (6 SP) — _Backend (R)_
 - **C‑3** Cutover/rollback CLI + checks (10 SP) — _QA (R), Backend (C)_
 
 ### EPIC D: Connector Marketplace v0.9 (24 SP)
+
 - **D‑1** Plugin registry & signing (10 SP) — _Backend (R), Sec (A)_
 - **D‑2** Policy/TOS class checks (6 SP) — _Sec (R)_
 - **D‑3** Install/enable UX (8 SP) — _Frontend (R)_
 
 ### EPIC E: Graph Embeddings Preview (28 SP)
+
 - **E‑1** Embedding service + pgvector writer (12 SP) — _DS (R), Backend (C)_
 - **E‑2** Cost caps & scheduler (8 SP) — _SRE (R)_
 - **E‑3** Hybrid search integration (8 SP) — _Backend (R)_
 
 ### EPIC F: Customer Portal v0.9 (22 SP)
+
 - **F‑1** SLA & usage dashboards (10 SP) — _Frontend (R), SRE (C)_
 - **F‑2** Evidence bundle downloads (6 SP) — _Backend (R)_
 - **F‑3** Notifications & webhooks (6 SP) — _SRE (R)_
 
 ### EPIC G: QA & Evidence v10 (12 SP)
+
 - **G‑1** Federation compat under subs/ZDM (6 SP) — _QA (R)_
 - **G‑2** Evidence bundle v10 (6 SP) — _MC (R)_
 
@@ -104,6 +120,7 @@ _Total_: **170 SP** (descope candidates: E‑3 or F‑3 if capacity < 150 SP).
 ---
 
 ## Architecture (Deltas)
+
 ```mermaid
 flowchart LR
   subgraph Cloud A (AWS)
@@ -140,6 +157,7 @@ flowchart LR
     EVDL[Evidence Downloads]
   end
 ```
+````
 
 **ADR‑027**: Subscriptions via brokered fan‑out with strict QoS and tenant caps. _Trade‑off_: added infra vs realtime UX.
 
@@ -152,7 +170,9 @@ flowchart LR
 ---
 
 ## Data & Policy
+
 **Plugin Registry (PG)**
+
 ```sql
 CREATE TABLE plugins (
   id UUID PRIMARY KEY,
@@ -166,6 +186,7 @@ CREATE TABLE plugins (
 ```
 
 **ZDM Cutover Ledger (PG)**
+
 ```sql
 CREATE TABLE zdm_cutovers (
   id UUID PRIMARY KEY,
@@ -179,6 +200,7 @@ CREATE TABLE zdm_cutovers (
 ```
 
 **Embeddings Cap (Policy)**
+
 ```rego
 package intelgraph.embeddings
 
@@ -192,11 +214,19 @@ allow_job {
 ---
 
 ## APIs & Schemas
+
 **GraphQL — Subscriptions & ZDM**
+
 ```graphql
 scalar DateTime
 
-type EntityChange { id: ID!, type: String!, at: DateTime!, op: String!, actor: String }
+type EntityChange {
+  id: ID!
+  type: String!
+  at: DateTime!
+  op: String!
+  actor: String
+}
 
 type Subscription {
   entityChanged(tenantId: ID!, filter: JSON): EntityChange!
@@ -208,6 +238,7 @@ type Mutation {
 ```
 
 **Marketplace REST**
+
 ```
 POST /plugins        # upload signed plugin
 POST /plugins/{id}/enable
@@ -217,6 +248,7 @@ GET  /plugins        # list
 ---
 
 ## Security & Privacy
+
 - **AuthZ**: subscribe requires tenant scope and ABAC filter enforcement; per‑tenant rate limits.
 - **Supply‑chain**: all marketplace artifacts signed; SBOM recorded.
 - **Privacy**: embeddings store vectors only; no raw PII text kept; export redaction still enforced.
@@ -224,12 +256,14 @@ GET  /plugins        # list
 ---
 
 ## Observability & SLOs
+
 - New metrics: subscription fan‑out latency, backlog, drops; ZDM divergence rate; plugin enablement successes; embeddings job cost & throughput; portal download counts.
 - Alerts: fan‑out p95 > 250 ms 10m; divergence > 0.01%; unsigned plugin upload attempt; embeddings spend > 80% cap.
 
 ---
 
 ## Testing Strategy
+
 - **Unit**: backpressure/QoS; read‑compat mappers; plugin signature verify; embeddings cost caps.
 - **Contract**: subscription authZ; marketplace API; zdm CLI.
 - **E2E**: dual‑write → cutover → rollback; subgraph + subscriptions flow; embeddings → hybrid search; portal downloads.
@@ -237,6 +271,7 @@ GET  /plugins        # list
 - **Chaos**: broker partition; cutover mid‑failure (automatic rollback); corrupt plugin signature.
 
 **Acceptance Packs**
+
 - Subscriptions p95 ≤ 250 ms; drops < 1%; ABAC filters applied.
 - ZDM: canary → rolling → complete with zero downtime; rollback works; divergence report = 0.
 - Marketplace: unsigned plugin rejected; signed plugin enabled; policy class enforced.
@@ -245,6 +280,7 @@ GET  /plugins        # list
 ---
 
 ## CI/CD & IaC
+
 ```yaml
 name: subs-zdm-marketplace
 on: [push]
@@ -265,6 +301,7 @@ jobs:
 ```
 
 **Terraform (realtime & caps)**
+
 ```hcl
 module "realtime" {
   source = "./modules/realtime"
@@ -276,6 +313,7 @@ module "realtime" {
 ---
 
 ## Code & Scaffolds
+
 ```
 repo/
   realtime/
@@ -298,51 +336,67 @@ repo/
 ```
 
 **QoS (TS excerpt)**
+
 ```ts
-export function tokenBucket(tenant:string){ /* burst + refill */ }
+export function tokenBucket(tenant: string) {
+  /* burst + refill */
+}
 ```
 
 **Dual‑write Shim (TS excerpt)**
+
 ```ts
-export async function upsertEntityBoth(a:any){ await writeV1(a); await writeV2(map(a)); }
+export async function upsertEntityBoth(a: any) {
+  await writeV1(a);
+  await writeV2(map(a));
+}
 ```
 
 **Plugin Signer (TS excerpt)**
+
 ```ts
-export function sign(bytes:Buffer, key:string){ /* sha256 + sig */ }
+export function sign(bytes: Buffer, key: string) {
+  /* sha256 + sig */
+}
 ```
 
 ---
 
 ## Release Plan & Runbooks
+
 - **Staging cuts**: 2026‑02‑07, 2026‑02‑14.
 - **Prod**: 2026‑02‑17 (canary 10→50→100%).
 
 **Backout**
+
 - Disable subscriptions for tenants (feature flags); abort ZDM and revert to v1; lock marketplace to installed‑only; pause embeddings jobs.
 
 **Evidence Bundle v10**
+
 - Multi‑cloud cost parity reports; subscription SLO dashboards; ZDM cutover logs; plugin signatures & SBOM; embeddings job logs; portal access logs; signed manifest.
 
 ---
 
 ## RACI (Consolidated)
-| Workstream | R | A | C | I |
-|---|---|---|---|---|
-| Multi‑Cloud GA | Platform | Tech Lead | SRE | PM |
-| Subscriptions | Backend | MC | SRE | PM |
-| ZDM | Backend | MC | QA | PM |
-| Marketplace | Backend | Sec TL | Security | PM |
-| Embeddings | DS | MC | Backend, SRE | PM |
-| Portal | Frontend | PM | SRE FinOps | All |
-| QA & Evidence | QA | PM | MC | All |
+
+| Workstream     | R        | A         | C            | I   |
+| -------------- | -------- | --------- | ------------ | --- |
+| Multi‑Cloud GA | Platform | Tech Lead | SRE          | PM  |
+| Subscriptions  | Backend  | MC        | SRE          | PM  |
+| ZDM            | Backend  | MC        | QA           | PM  |
+| Marketplace    | Backend  | Sec TL    | Security     | PM  |
+| Embeddings     | DS       | MC        | Backend, SRE | PM  |
+| Portal         | Frontend | PM        | SRE FinOps   | All |
+| QA & Evidence  | QA       | PM        | MC           | All |
 
 ---
 
 ## Open Items
+
 1. Choose pilot tenants for subscriptions and embeddings preview.
 2. Approve plugin policy classes + review workflow with Legal/Sec.
 3. Identify first schema change to trial ZDM.
 
 ```
 
+```

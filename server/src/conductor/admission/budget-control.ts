@@ -62,25 +62,43 @@ export class BudgetAdmissionController {
     ]);
 
     // Check daily budget first (primary constraint)
-    const dailyCheck = this.checkDailyBudget(dailyUsage, projectedCostUsd, options?.tenantId);
+    const dailyCheck = this.checkDailyBudget(
+      dailyUsage,
+      projectedCostUsd,
+      options?.tenantId,
+    );
     if (dailyCheck.mode === 'blocked' && !options?.isEmergency) {
       return dailyCheck;
     }
 
     // Check hourly budget (rate limiting)
-    const hourlyCheck = this.checkHourlyBudget(hourlyUsage, projectedCostUsd, options?.tenantId);
+    const hourlyCheck = this.checkHourlyBudget(
+      hourlyUsage,
+      projectedCostUsd,
+      options?.tenantId,
+    );
     if (hourlyCheck.mode === 'blocked' && !options?.isEmergency) {
       return hourlyCheck;
     }
 
     // Determine admission mode based on budget thresholds
-    const admissionMode = this.determineAdmissionMode(dailyUsage, projectedCostUsd);
+    const admissionMode = this.determineAdmissionMode(
+      dailyUsage,
+      projectedCostUsd,
+    );
 
     // Apply expert filtering based on mode
-    const expertDecision = this.filterExperts(expert, admissionMode, options?.isEmergency);
+    const expertDecision = this.filterExperts(
+      expert,
+      admissionMode,
+      options?.isEmergency,
+    );
 
     // Emergency override logic
-    if (options?.isEmergency && this.hasEmergencyBudget(dailyUsage, projectedCostUsd)) {
+    if (
+      options?.isEmergency &&
+      this.hasEmergencyBudget(dailyUsage, projectedCostUsd)
+    ) {
       return {
         admit: true,
         mode: 'emergency',
@@ -88,12 +106,21 @@ export class BudgetAdmissionController {
         allowedExperts: [expert], // Allow requested expert in emergency
         blockedExperts: [],
         budgetRemaining: this.config.emergencyReserveUsd,
-        budgetPercentUsed: Math.min(100, (dailyUsage.totalSpent / this.config.dailyUsd) * 100),
+        budgetPercentUsed: Math.min(
+          100,
+          (dailyUsage.totalSpent / this.config.dailyUsd) * 100,
+        ),
       };
     }
 
-    const budgetRemaining = Math.max(0, this.config.dailyUsd - dailyUsage.totalSpent);
-    const budgetPercentUsed = Math.min(100, (dailyUsage.totalSpent / this.config.dailyUsd) * 100);
+    const budgetRemaining = Math.max(
+      0,
+      this.config.dailyUsd - dailyUsage.totalSpent,
+    );
+    const budgetPercentUsed = Math.min(
+      100,
+      (dailyUsage.totalSpent / this.config.dailyUsd) * 100,
+    );
 
     return {
       admit: expertDecision.admit,
@@ -161,7 +188,10 @@ export class BudgetAdmissionController {
       this.redis.hgetall(`${key}:experts`),
     ]);
 
-    const expertBreakdown: Record<ExpertType, { spent: number; requests: number }> = {} as any;
+    const expertBreakdown: Record<
+      ExpertType,
+      { spent: number; requests: number }
+    > = {} as any;
 
     // Initialize all experts with zero values
     const allExperts: ExpertType[] = [
@@ -207,9 +237,11 @@ export class BudgetAdmissionController {
       this.getUsage('day'),
     ]);
 
-    const dailyPercentUsed = (dailyUsage.totalSpent / this.config.dailyUsd) * 100;
+    const dailyPercentUsed =
+      (dailyUsage.totalSpent / this.config.dailyUsd) * 100;
 
-    let status: 'healthy' | 'warning' | 'degraded' | 'critical' | 'blocked' = 'healthy';
+    let status: 'healthy' | 'warning' | 'degraded' | 'critical' | 'blocked' =
+      'healthy';
     if (dailyPercentUsed >= 100) {
       status = 'blocked';
     } else if (dailyPercentUsed >= this.config.degradationThresholds.critical) {
@@ -230,7 +262,15 @@ export class BudgetAdmissionController {
       0,
       0,
     );
-    const nextDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
+    const nextDay = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + 1,
+      0,
+      0,
+      0,
+      0,
+    );
 
     return {
       config: this.config,
@@ -246,10 +286,20 @@ export class BudgetAdmissionController {
 
   // Private helper methods
 
-  private checkDailyBudget(usage: BudgetUsage, projectedCost: number, tenantId?: string): AdmissionResult {
+  private checkDailyBudget(
+    usage: BudgetUsage,
+    projectedCost: number,
+    tenantId?: string,
+  ): AdmissionResult {
     const totalAfterSpending = usage.totalSpent + projectedCost;
-    const budgetRemaining = Math.max(0, this.config.dailyUsd - usage.totalSpent);
-    const percentUsed = Math.min(100, (usage.totalSpent / this.config.dailyUsd) * 100);
+    const budgetRemaining = Math.max(
+      0,
+      this.config.dailyUsd - usage.totalSpent,
+    );
+    const percentUsed = Math.min(
+      100,
+      (usage.totalSpent / this.config.dailyUsd) * 100,
+    );
 
     if (totalAfterSpending > this.config.dailyUsd) {
       const nextMidnight = new Date();
@@ -295,10 +345,20 @@ export class BudgetAdmissionController {
     };
   }
 
-  private checkHourlyBudget(usage: BudgetUsage, projectedCost: number, tenantId?: string): AdmissionResult {
+  private checkHourlyBudget(
+    usage: BudgetUsage,
+    projectedCost: number,
+    tenantId?: string,
+  ): AdmissionResult {
     const totalAfterSpending = usage.totalSpent + projectedCost;
-    const budgetRemaining = Math.max(0, this.config.hourlyUsd - usage.totalSpent);
-    const percentUsed = Math.min(100, (usage.totalSpent / this.config.hourlyUsd) * 100);
+    const budgetRemaining = Math.max(
+      0,
+      this.config.hourlyUsd - usage.totalSpent,
+    );
+    const percentUsed = Math.min(
+      100,
+      (usage.totalSpent / this.config.hourlyUsd) * 100,
+    );
 
     if (totalAfterSpending > this.config.hourlyUsd) {
       const nextHour = new Date();
@@ -348,7 +408,8 @@ export class BudgetAdmissionController {
     usage: BudgetUsage,
     projectedCost: number,
   ): 'normal' | 'degraded' | 'critical' {
-    const percentUsed = ((usage.totalSpent + projectedCost) / this.config.dailyUsd) * 100;
+    const percentUsed =
+      ((usage.totalSpent + projectedCost) / this.config.dailyUsd) * 100;
 
     if (percentUsed >= this.config.degradationThresholds.critical) {
       return 'critical';
@@ -373,14 +434,22 @@ export class BudgetAdmissionController {
     // Expert cost tiers (high to low)
     const expensiveExperts: ExpertType[] = ['LLM_HEAVY', 'OSINT_TOOL'];
     const moderateExperts: ExpertType[] = ['GRAPH_TOOL', 'RAG_TOOL'];
-    const cheapExperts: ExpertType[] = ['LLM_LIGHT', 'FILES_TOOL', 'EXPORT_TOOL'];
+    const cheapExperts: ExpertType[] = [
+      'LLM_LIGHT',
+      'FILES_TOOL',
+      'EXPORT_TOOL',
+    ];
 
     switch (mode) {
       case 'normal':
         return {
           admit: true,
           reason: 'Normal budget mode - all experts available',
-          allowedExperts: [...expensiveExperts, ...moderateExperts, ...cheapExperts],
+          allowedExperts: [
+            ...expensiveExperts,
+            ...moderateExperts,
+            ...cheapExperts,
+          ],
           blockedExperts: [],
         };
 
@@ -429,7 +498,11 @@ export class BudgetAdmissionController {
           admit: false,
           reason: 'Budget exceeded - all experts blocked until reset',
           allowedExperts: [],
-          blockedExperts: [...expensiveExperts, ...moderateExperts, ...cheapExperts],
+          blockedExperts: [
+            ...expensiveExperts,
+            ...moderateExperts,
+            ...cheapExperts,
+          ],
           retryAfterMs: this.getTimeUntilReset(),
         };
 
@@ -438,23 +511,42 @@ export class BudgetAdmissionController {
           admit: false,
           reason: 'Unknown budget mode',
           allowedExperts: [],
-          blockedExperts: [...expensiveExperts, ...moderateExperts, ...cheapExperts],
+          blockedExperts: [
+            ...expensiveExperts,
+            ...moderateExperts,
+            ...cheapExperts,
+          ],
         };
     }
   }
 
-  private hasEmergencyBudget(usage: BudgetUsage, projectedCost: number): boolean {
+  private hasEmergencyBudget(
+    usage: BudgetUsage,
+    projectedCost: number,
+  ): boolean {
     const totalBudget = this.config.dailyUsd + this.config.emergencyReserveUsd;
     return usage.totalSpent + projectedCost <= totalBudget;
   }
 
   private getTimeUntilReset(): number {
     const now = new Date();
-    const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 0, 0);
+    const nextMidnight = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() + 1,
+      0,
+      0,
+      0,
+      0,
+    );
     return nextMidnight.getTime() - now.getTime();
   }
 
-  private getUsageKey(period: 'hour' | 'day', timestamp: number, tenantId: string): string {
+  private getUsageKey(
+    period: 'hour' | 'day',
+    timestamp: number,
+    tenantId: string,
+  ): string {
     const date = new Date(timestamp);
 
     if (period === 'hour') {
@@ -471,7 +563,9 @@ export class BudgetAdmissionController {
 export const defaultBudgetConfig: BudgetConfig = {
   dailyUsd: parseFloat(process.env.CONDUCTOR_BUDGET_DAILY_USD || '100'),
   hourlyUsd: parseFloat(process.env.CONDUCTOR_BUDGET_HOURLY_USD || '25'),
-  emergencyReserveUsd: parseFloat(process.env.CONDUCTOR_BUDGET_EMERGENCY_USD || '50'),
+  emergencyReserveUsd: parseFloat(
+    process.env.CONDUCTOR_BUDGET_EMERGENCY_USD || '50',
+  ),
   degradationThresholds: {
     warning: 80,
     degraded: 90,
@@ -484,5 +578,8 @@ export function createBudgetController(
   redis: Redis,
   config?: Partial<BudgetConfig>,
 ): BudgetAdmissionController {
-  return new BudgetAdmissionController(redis, { ...defaultBudgetConfig, ...config });
+  return new BudgetAdmissionController(redis, {
+    ...defaultBudgetConfig,
+    ...config,
+  });
 }

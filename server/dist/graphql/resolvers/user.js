@@ -1,4 +1,5 @@
 import pino from 'pino';
+import { recordUserSignup } from '../../monitoring/businessMetrics.js';
 const logger = pino();
 const userResolvers = {
     Query: {
@@ -25,6 +26,11 @@ const userResolvers = {
         createUser: async (_, { input }) => {
             logger.info(`Creating user: ${input.email} (placeholder)`);
             // Placeholder: In a real implementation, create user in PostgreSQL
+            recordUserSignup({
+                tenant: 'global',
+                plan: 'standard',
+                metadata: { email: input.email },
+            });
             return {
                 id: 'new-user-id',
                 email: input.email,

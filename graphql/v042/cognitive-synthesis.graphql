@@ -23,32 +23,32 @@ extend type Query {
 
   # Multi-modal reasoning
   performMultiModalReasoning(
-    tenant: Tenant!,
-    inputs: [MultiModalInput!]!,
+    tenant: Tenant!
+    inputs: [MultiModalInput!]!
     context: CognitiveContext
   ): MultiModalReasoningResult!
 
   # Cognitive synthesis
   performCognitiveSynthesis(
-    tenant: Tenant!,
+    tenant: Tenant!
     synthesisRequest: CognitiveSynthesisRequest!
   ): CognitiveSynthesisResult!
 
   # Memory recall
   recallCognitiveMemory(
-    tenant: Tenant!,
+    tenant: Tenant!
     memoryQuery: CognitiveMemoryQuery!
   ): CognitiveMemoryResult!
 
   # Federated learning insights
   getFederatedLearningInsights(
-    tenant: Tenant!,
+    tenant: Tenant!
     sessionId: String!
   ): FederatedLearningInsights!
 
   # Cognitive performance metrics
   getCognitivePerformanceMetrics(
-    tenant: Tenant!,
+    tenant: Tenant!
     timeRange: Duration
   ): CognitivePerformanceMetrics!
 
@@ -69,31 +69,31 @@ extend type Mutation {
 
   # Configure cognitive synthesis engine
   configureCognitiveSynthesis(
-    tenant: Tenant!,
+    tenant: Tenant!
     config: CognitiveSynthesisConfig!
   ): MutationResult!
 
   # Configure multi-modal processing
   configureMultiModalProcessing(
-    tenant: Tenant!,
+    tenant: Tenant!
     config: MultiModalConfig!
   ): MutationResult!
 
   # Configure federated learning
   configureFederatedLearning(
-    tenant: Tenant!,
+    tenant: Tenant!
     config: FederatedLearningConfig!
   ): MutationResult!
 
   # Configure cognitive memory
   configureCognitiveMemory(
-    tenant: Tenant!,
+    tenant: Tenant!
     config: CognitiveMemoryConfig!
   ): MutationResult!
 
   # Configure adaptive architecture
   configureAdaptiveArchitecture(
-    tenant: Tenant!,
+    tenant: Tenant!
     config: AdaptiveArchitectureConfig!
   ): MutationResult!
 
@@ -101,27 +101,27 @@ extend type Mutation {
 
   # Start multi-modal processing session
   startMultiModalSession(
-    tenant: Tenant!,
+    tenant: Tenant!
     sessionConfig: MultiModalSessionConfig!
   ): MultiModalSession!
 
   # Start federated learning session
   startFederatedLearningSession(
-    tenant: Tenant!,
-    participants: [FederatedParticipant!]!,
+    tenant: Tenant!
+    participants: [FederatedParticipant!]!
     sessionConfig: FederatedLearningSessionConfig!
   ): FederatedLearningSession!
 
   # Store cognitive memory
   storeCognitiveMemory(
-    tenant: Tenant!,
-    memoryData: CognitiveMemoryData!,
+    tenant: Tenant!
+    memoryData: CognitiveMemoryData!
     memoryType: CognitiveMemoryType!
   ): CognitiveMemoryHandle!
 
   # Trigger cognitive adaptation
   triggerCognitiveAdaptation(
-    tenant: Tenant!,
+    tenant: Tenant!
     adaptationTrigger: AdaptationTrigger!
   ): AdaptationResult!
 
@@ -129,21 +129,21 @@ extend type Mutation {
 
   # Submit learning feedback
   submitLearningFeedback(
-    tenant: Tenant!,
-    sessionId: String!,
+    tenant: Tenant!
+    sessionId: String!
     feedback: LearningFeedback!
   ): MutationResult!
 
   # Update cognitive model
   updateCognitiveModel(
-    tenant: Tenant!,
-    modelId: String!,
+    tenant: Tenant!
+    modelId: String!
     updateData: ModelUpdateData!
   ): ModelUpdateResult!
 
   # Consolidate cognitive memory
   consolidateCognitiveMemory(
-    tenant: Tenant!,
+    tenant: Tenant!
     consolidationConfig: MemoryConsolidationConfig
   ): MemoryConsolidationResult!
 
@@ -151,20 +151,20 @@ extend type Mutation {
 
   # Adjust cognitive load
   adjustCognitiveLoad(
-    tenant: Tenant!,
+    tenant: Tenant!
     loadAdjustment: CognitiveLoadAdjustment!
   ): MutationResult!
 
   # Redirect cognitive attention
   redirectCognitiveAttention(
-    tenant: Tenant!,
+    tenant: Tenant!
     attentionRedirection: AttentionRedirection!
   ): MutationResult!
 
   # Emergency cognitive shutdown
   emergencyCognitiveShutdown(
-    tenant: Tenant!,
-    shutdownReason: String!,
+    tenant: Tenant!
+    shutdownReason: String!
     preserveMemory: Boolean! = true
   ): MutationResult!
 }
@@ -174,10 +174,16 @@ extend type Subscription {
   cognitiveProcessingUpdates(tenant: Tenant!): CognitiveProcessingUpdate!
 
   # Multi-modal session updates
-  multiModalSessionUpdates(tenant: Tenant!, sessionId: String!): MultiModalSessionUpdate!
+  multiModalSessionUpdates(
+    tenant: Tenant!
+    sessionId: String!
+  ): MultiModalSessionUpdate!
 
   # Federated learning progress
-  federatedLearningProgress(tenant: Tenant!, sessionId: String!): FederatedLearningProgress!
+  federatedLearningProgress(
+    tenant: Tenant!
+    sessionId: String!
+  ): FederatedLearningProgress!
 
   # Cognitive load changes
   cognitiveLoadChanges(tenant: Tenant!): CognitiveLoadChange!

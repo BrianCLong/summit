@@ -2,7 +2,7 @@ import ffmpeg from 'fluent-ffmpeg';
 import path from 'path';
 import fs from 'fs/promises';
 import pino from 'pino';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'crypto';
 
 const logger = pino({ name: 'VideoFrameExtractor' });
 
@@ -49,12 +49,12 @@ export class VideoFrameExtractor {
    */
   async extract(
     videoPath: string,
-    options: FrameExtractionOptions = {}
+    options: FrameExtractionOptions = {},
   ): Promise<{ frames: ExtractedFrame[]; audio?: ExtractedAudio }> {
     const {
       frameRate,
       interval,
-      outputDir = path.join(this.tempDir, `frames-${uuidv4()}`),
+      outputDir = path.join(this.tempDir, `frames-${randomUUID()}`),
       outputFormat = 'png',
       startTime,
       endTime,
@@ -92,7 +92,9 @@ export class VideoFrameExtractor {
         .on('filenames', (filenames: string[]) => {
           filenames.forEach((filename) => {
             const timestampMatch = filename.match(/frame-(\d+(\.\d+)?)\./);
-            const timestamp = timestampMatch ? parseFloat(timestampMatch[1]) : 0; // Extract timestamp from filename
+            const timestamp = timestampMatch
+              ? parseFloat(timestampMatch[1])
+              : 0; // Extract timestamp from filename
             frames.push({
               framePath: path.join(outputDir, filename),
               timestamp: timestamp,
@@ -101,10 +103,17 @@ export class VideoFrameExtractor {
           });
         })
         .on('end', async () => {
-          logger.info(`Finished frame extraction for ${videoPath}. Extracted ${frames.length} frames.`);
+          logger.info(
+            `Finished frame extraction for ${videoPath}. Extracted ${frames.length} frames.`,
+          );
           if (extractAudio) {
             try {
-              audio = await this.extractAudioStream(videoPath, outputDir, startTime, endTime);
+              audio = await this.extractAudioStream(
+                videoPath,
+                outputDir,
+                startTime,
+                endTime,
+              );
               logger.info(`Finished audio extraction for ${videoPath}.`);
             } catch (audioErr) {
               logger.error(`Failed to extract audio: ${audioErr}`);
@@ -114,7 +123,9 @@ export class VideoFrameExtractor {
           resolve({ frames, audio });
         })
         .on('error', (err: Error) => {
-          logger.error(`Error during frame extraction for ${videoPath}: ${err.message}`);
+          logger.error(
+            `Error during frame extraction for ${videoPath}: ${err.message}`,
+          );
           reject(err);
         })
         .run();
@@ -133,9 +144,9 @@ export class VideoFrameExtractor {
     videoPath: string,
     outputDir: string,
     startTime?: number,
-    endTime?: number
+    endTime?: number,
   ): Promise<ExtractedAudio> {
-    const audioFileName = `audio-${uuidv4()}.mp3`;
+    const audioFileName = `audio-${randomUUID()}.mp3`;
     const audioPath = path.join(outputDir, audioFileName);
 
     return new Promise((resolve, reject) => {
@@ -170,7 +181,7 @@ export class VideoFrameExtractor {
    * @param videoPath Absolute path to the video file.
    * @returns Video metadata.
    */
-  private async getVideoMetadata(videoPath: string): Promise<ffmpeg.FfprobeData> {
+  private async getVideoMetadata(videoPath: string): Promise<any> {
     return new Promise((resolve, reject) => {
       ffmpeg.ffprobe(videoPath, (err, metadata) => {
         if (err) {

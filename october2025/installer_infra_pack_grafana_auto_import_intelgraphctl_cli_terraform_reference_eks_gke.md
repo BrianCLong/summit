@@ -5,6 +5,7 @@
 ---
 
 ## 0) Repo Layout Additions
+
 ```
 ops/grafana/
   import-dashboards.sh
@@ -67,15 +68,17 @@ Makefile (new targets)
 ## 1) Grafana API — Auto‑Import Dashboards & Folders
 
 ### 1.1 Folders map
+
 ```json
 // ops/grafana/folders.json
 [
-  {"title":"IntelGraph GA","uid":"ig-ga"},
-  {"title":"Security & Audit","uid":"ig-sec"}
+  { "title": "IntelGraph GA", "uid": "ig-ga" },
+  { "title": "Security & Audit", "uid": "ig-sec" }
 ]
 ```
 
 ### 1.2 Import script
+
 ```bash
 # ops/grafana/import-dashboards.sh
 set -euo pipefail
@@ -105,6 +108,7 @@ done
 ```
 
 **Usage**
+
 ```bash
 GRAFANA_URL=https://grafana.example.com \
 GRAFANA_TOKEN=ey... \
@@ -118,6 +122,7 @@ bash ops/grafana/import-dashboards.sh
 ## 2) `intelgraphctl` — Bootstrap CLI (TypeScript)
 
 ### 2.1 package.json
+
 ```json
 // cli/intelgraphctl/package.json
 {
@@ -137,18 +142,35 @@ bash ops/grafana/import-dashboards.sh
     "ora": "^8.0.1",
     "yaml": "^2.5.0"
   },
-  "devDependencies": { "typescript": "^5.4.0", "jest": "^29.7.0", "ts-jest": "^29.1.1" },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1"
+  },
   "license": "MIT"
 }
 ```
 
 ### 2.2 tsconfig
+
 ```json
 // cli/intelgraphctl/tsconfig.json
-{ "compilerOptions": { "target": "ES2022", "module": "ES2022", "outDir": "dist", "moduleResolution": "Node", "esModuleInterop": true, "resolveJsonModule": true, "skipLibCheck": true }, "include": ["src"] }
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "outDir": "dist",
+    "moduleResolution": "Node",
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true
+  },
+  "include": ["src"]
+}
 ```
 
 ### 2.3 CLI entry
+
 ```ts
 // cli/intelgraphctl/src/index.ts
 import { Command } from 'commander';
@@ -164,50 +186,64 @@ program
   .description('IntelGraph installer/bootstrapper')
   .version('1.0.0');
 
-program.command('preflight')
-  .requiredOption('--issuer <url>','Keycloak issuer')
-  .requiredOption('--host <host>','Ingress hostname')
+program
+  .command('preflight')
+  .requiredOption('--issuer <url>', 'Keycloak issuer')
+  .requiredOption('--host <host>', 'Ingress hostname')
   .action(preflight);
 
-program.command('install')
-  .requiredOption('--org <org>','GitHub org/repo, e.g. BrianCLong/intelgraph')
-  .requiredOption('--chart <name>','Chart name, e.g. intelgraph')
-  .requiredOption('--version <ver>','Chart version')
-  .option('--values <file>','values.yaml path','onboarding/values-sample.yaml')
+program
+  .command('install')
+  .requiredOption('--org <org>', 'GitHub org/repo, e.g. BrianCLong/intelgraph')
+  .requiredOption('--chart <name>', 'Chart name, e.g. intelgraph')
+  .requiredOption('--version <ver>', 'Chart version')
+  .option(
+    '--values <file>',
+    'values.yaml path',
+    'onboarding/values-sample.yaml',
+  )
   .action(helm.install);
 
-program.command('seed')
-  .option('--tenant <id>','tenant id','pilot')
+program
+  .command('seed')
+  .option('--tenant <id>', 'tenant id', 'pilot')
   .action(seed);
 
-program.command('grafana')
-  .requiredOption('--url <url>','Grafana URL')
-  .requiredOption('--token <tok>','Grafana API token')
+program
+  .command('grafana')
+  .requiredOption('--url <url>', 'Grafana URL')
+  .requiredOption('--token <tok>', 'Grafana API token')
   .action(grafana.importDashboards);
 
-program.command('smoke')
-  .requiredOption('--gateway <url>','Gateway GraphQL URL')
-  .requiredOption('--issuer <url>','Keycloak issuer URL')
-  .requiredOption('--client-secret <sec>','Keycloak client secret')
+program
+  .command('smoke')
+  .requiredOption('--gateway <url>', 'Gateway GraphQL URL')
+  .requiredOption('--issuer <url>', 'Keycloak issuer URL')
+  .requiredOption('--client-secret <sec>', 'Keycloak client secret')
   .action(smoke);
 
 program.parse();
 ```
 
 ### 2.4 Commands (snippets)
+
 ```ts
 // cli/intelgraphctl/src/lib/exec.ts
-import { execa } from 'execa'; export const sh = (cmd:string,args:string[]=[],env:any={})=> execa(cmd,args,{stdio:'inherit',env});
+import { execa } from 'execa';
+export const sh = (cmd: string, args: string[] = [], env: any = {}) =>
+  execa(cmd, args, { stdio: 'inherit', env });
 ```
 
 ```ts
 // cli/intelgraphctl/src/commands/preflight.ts
-import { sh } from '../lib/exec.js'; import fetch from 'node-fetch';
-export async function preflight(opts:any){
-  await sh('kubectl',['cluster-info']);
-  await sh('helm',['version']);
-  await sh('cosign',['version']);
-  const r = await fetch(`${opts.issuer}/.well-known/openid-configuration`); if(!r.ok) throw new Error('Issuer not reachable');
+import { sh } from '../lib/exec.js';
+import fetch from 'node-fetch';
+export async function preflight(opts: any) {
+  await sh('kubectl', ['cluster-info']);
+  await sh('helm', ['version']);
+  await sh('cosign', ['version']);
+  const r = await fetch(`${opts.issuer}/.well-known/openid-configuration`);
+  if (!r.ok) throw new Error('Issuer not reachable');
   console.log('Issuer OK');
   console.log('Host:', opts.host);
 }
@@ -229,9 +265,9 @@ export const helm = {
 ```ts
 // cli/intelgraphctl/src/commands/seed.ts
 import { execa } from 'execa';
-export async function seed(opts:any){
+export async function seed(opts: any) {
   process.env.TENANT = opts.tenant;
-  await execa('node',['bootstrap/seed-tenant.ts'],{stdio:'inherit'});
+  await execa('node', ['bootstrap/seed-tenant.ts'], { stdio: 'inherit' });
 }
 ```
 
@@ -239,30 +275,55 @@ export async function seed(opts:any){
 // cli/intelgraphctl/src/commands/grafana.ts
 import { execa } from 'execa';
 export const grafana = {
-  async importDashboards(opts:any){
-    process.env.GRAFANA_URL = opts.url; process.env.GRAFANA_TOKEN = opts.token;
-    await execa('bash',['ops/grafana/import-dashboards.sh'],{stdio:'inherit'});
-  }
+  async importDashboards(opts: any) {
+    process.env.GRAFANA_URL = opts.url;
+    process.env.GRAFANA_TOKEN = opts.token;
+    await execa('bash', ['ops/grafana/import-dashboards.sh'], {
+      stdio: 'inherit',
+    });
+  },
 };
 ```
 
 ```ts
 // cli/intelgraphctl/src/commands/smoke.ts
 import fetch from 'node-fetch';
-export async function smoke(opts:any){
-  const tok = await fetch(`${opts.issuer}/protocol/openid-connect/token`,{ method:'POST', headers:{'content-type':'application/x-www-form-urlencoded'}, body: new URLSearchParams({ grant_type:'client_credentials', client_id:'intelgraph-api', client_secret:opts['client-secret']})}).then(r=>r.json()).then(j=>j.access_token);
-  const res = await fetch(opts.gateway,{ method:'POST', headers:{'content-type':'application/json','authorization':`Bearer ${tok}`}, body: JSON.stringify({ query:'{ __typename }'})});
-  if(!res.ok) throw new Error('Smoke failed'); console.log('Smoke OK');
+export async function smoke(opts: any) {
+  const tok = await fetch(`${opts.issuer}/protocol/openid-connect/token`, {
+    method: 'POST',
+    headers: { 'content-type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'client_credentials',
+      client_id: 'intelgraph-api',
+      client_secret: opts['client-secret'],
+    }),
+  })
+    .then((r) => r.json())
+    .then((j) => j.access_token);
+  const res = await fetch(opts.gateway, {
+    method: 'POST',
+    headers: {
+      'content-type': 'application/json',
+      authorization: `Bearer ${tok}`,
+    },
+    body: JSON.stringify({ query: '{ __typename }' }),
+  });
+  if (!res.ok) throw new Error('Smoke failed');
+  console.log('Smoke OK');
 }
 ```
 
 ### 2.5 Tests
+
 ```ts
 // cli/intelgraphctl/__tests__/smoke.test.ts
-test('dummy',()=>{ expect(1).toBe(1); });
+test('dummy', () => {
+  expect(1).toBe(1);
+});
 ```
 
 ### 2.6 Make & CI
+
 ```make
 cli-build:
 	cd cli/intelgraphctl && pnpm install && pnpm build
@@ -293,6 +354,7 @@ jobs:
 > Opinionated reference that stands up a cluster + Helm addons (Prom/Grafana, Keycloak, Vault, CSI). Use one of the stacks (`eks` or `gke`).
 
 ### 3.1 Module: kube-basics
+
 ```hcl
 // infrastructure/terraform/modules/kube-basics/main.tf
 terraform { required_version = ">= 1.5" }
@@ -306,6 +368,7 @@ provider "helm" { kubernetes { } }
 ```
 
 ### 3.2 Module: observability (kube-prometheus-stack + grafana)
+
 ```hcl
 // infrastructure/terraform/modules/observability/main.tf
 variable "namespace" { default = "observability" }
@@ -329,6 +392,7 @@ output "grafana_admin_password" { value = helm_release.grafana.metadata["adminPa
 ```
 
 ### 3.3 Module: identity (Keycloak)
+
 ```hcl
 // infrastructure/terraform/modules/identity/main.tf
 variable "namespace" { default = "identity" }
@@ -344,6 +408,7 @@ resource "helm_release" "keycloak" {
 ```
 
 ### 3.4 Module: vault-csi
+
 ```hcl
 // infrastructure/terraform/modules/vault-csi/main.tf
 variable "namespace" { default = "vault" }
@@ -366,6 +431,7 @@ resource "helm_release" "csi" {
 ```
 
 ### 3.5 Stack: EKS (expects cluster existing or add eks module as needed)
+
 ```hcl
 // infrastructure/terraform/stacks/eks/main.tf
 module "kube" { source = "../../modules/kube-basics" cluster_name = var.cluster_name region = var.region platform = "eks" }
@@ -375,6 +441,7 @@ module "csi"  { source = "../../modules/vault-csi" }
 ```
 
 ### 3.6 Stack: GKE
+
 ```hcl
 // infrastructure/terraform/stacks/gke/main.tf
 module "kube" { source = "../../modules/kube-basics" cluster_name = var.cluster_name region = var.region platform = "gke" }
@@ -384,17 +451,20 @@ module "csi"  { source = "../../modules/vault-csi" }
 ```
 
 ### 3.7 Examples
+
 ```md
 # infrastructure/terraform/examples/eks-minimal/README.md
+
 - Configure kubectl against EKS then:
   terraform -chdir=../../stacks/eks init && terraform -chdir=../../stacks/eks apply \
-    -var="cluster_name=your-eks" -var="region=us-west-2"
+   -var="cluster_name=your-eks" -var="region=us-west-2"
 - Grab Grafana admin from outputs and set `GRAFANA_TOKEN` (create API token). Run `ops/grafana/import-dashboards.sh`.
 ```
 
 ---
 
 ## 4) Everything Else — Final Production Polish
+
 - **Packaging:** `cli-release.yaml` publishes `intelgraphctl` artifact for one‑liner install.
 - **Docs:** Add `/docs/install/cli.md` and `/docs/infrastructure/terraform.md` with step‑by‑step usage.
 - **Security:** Helm values include `readinessProbe`/`livenessProbe` for all services; NetworkPolicies included earlier.
@@ -404,6 +474,7 @@ module "csi"  { source = "../../modules/vault-csi" }
 ---
 
 ## 5) Make Targets
+
 ```make
 install-cli:
 	cd cli/intelgraphctl && npm ci && npm run build && npm pack
@@ -418,6 +489,7 @@ terraform-eks:
 ---
 
 ## 6) Quick Start (One‑liner)
+
 ```bash
 # After kube/ingress ready; run from repo root
 npm -C cli/intelgraphctl ci && npm -C cli/intelgraphctl run build && node cli/intelgraphctl/dist/index.js \
@@ -426,4 +498,3 @@ node cli/intelgraphctl/dist/index.js install --org BrianCLong/intelgraph --chart
 TENANT=pilot node bootstrap/seed-tenant.ts && \
 GRAFANA_URL=https://grafana.example.com GRAFANA_TOKEN=*** node cli/intelgraphctl/dist/index.js grafana --url $GRAFANA_URL --token $GRAFANA_TOKEN
 ```
-

@@ -1,3 +1,11 @@
 mutation setSloThresholds($tenant: Tenant!, $thresholds: SloThresholdsInput!) {
-  setSloThresholds(tenant: $tenant, thresholds: $thresholds) { ok audit { evidenceId ts actor } warnings }
+  setSloThresholds(tenant: $tenant, thresholds: $thresholds) {
+    ok
+    audit {
+      evidenceId
+      ts
+      actor
+    }
+    warnings
+  }
 }

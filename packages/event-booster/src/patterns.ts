@@ -1,4 +1,9 @@
-import { BoostPattern, BoostedEvent, BoostContext, EventRecord } from './types.js';
+import {
+  BoostPattern,
+  BoostedEvent,
+  BoostContext,
+  EventRecord,
+} from './types.js';
 
 const DEFAULT_FIELD = 'signal';
 
@@ -13,7 +18,9 @@ const ensureNumber = (value: unknown): number | undefined => {
   return undefined;
 };
 
-const clonePayload = (event: EventRecord): Record<string, unknown> => ({ ...event.payload });
+const clonePayload = (event: EventRecord): Record<string, unknown> => ({
+  ...event.payload,
+});
 
 export interface AmplifyPatternConfig {
   name?: string;
@@ -22,9 +29,13 @@ export interface AmplifyPatternConfig {
   minimumSignal?: number;
 }
 
-export const createAmplifyPattern = (config: AmplifyPatternConfig = {}): BoostPattern => {
+export const createAmplifyPattern = (
+  config: AmplifyPatternConfig = {},
+): BoostPattern => {
   const field = config.field ?? DEFAULT_FIELD;
-  const intensities = (config.intensities ?? [1.2, 1.5, 1.9]).filter((value) => value > 0);
+  const intensities = (config.intensities ?? [1.2, 1.5, 1.9]).filter(
+    (value) => value > 0,
+  );
   const minimumSignal = config.minimumSignal ?? 0;
   const patternName = config.name ?? `amplify-${field}`;
 
@@ -81,7 +92,8 @@ export const createTemporalShiftPattern = (
 
   return {
     name: patternName,
-    description: 'Clones events forward and backward in time to simulate correlated detections.',
+    description:
+      'Clones events forward and backward in time to simulate correlated detections.',
     boost(event, _context) {
       const derivatives: BoostedEvent[] = [];
       offsets.forEach((offset, index) => {
@@ -114,7 +126,9 @@ export interface NoisePatternConfig {
   maxNoise?: number;
 }
 
-export const createNoisePattern = (config: NoisePatternConfig = {}): BoostPattern => {
+export const createNoisePattern = (
+  config: NoisePatternConfig = {},
+): BoostPattern => {
   const field = config.field ?? DEFAULT_FIELD;
   const maxNoise = Math.max(0, config.maxNoise ?? 0.2);
   const patternName = config.name ?? `noise-${field}`;
@@ -123,7 +137,13 @@ export const createNoisePattern = (config: NoisePatternConfig = {}): BoostPatter
     name: patternName,
     description: `Injects bounded random noise into the ${field} attribute.`,
     boost(event, context) {
-      return buildNoiseDerivatives(event, context, field, maxNoise, patternName);
+      return buildNoiseDerivatives(
+        event,
+        context,
+        field,
+        maxNoise,
+        patternName,
+      );
     },
   };
 };

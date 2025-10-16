@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata: { name: neo4j-backup-verify, namespace: prod }
 spec:
-  schedule: "30 0 * * *" # nightly
+  schedule: '30 0 * * *' # nightly
   jobTemplate:
     spec:
       template:
@@ -12,5 +12,8 @@ spec:
             - name: verify
               image: amazon/aws-cli:2
               envFrom: [{ secretRef: { name: neo4j-backup } }]
-              command: ["/bin/sh","-c"]
-              args: ["test $(aws s3 ls $S3_BUCKET/ --recursive | tail -1 | wc -l) -gt 0"]
+              command: ['/bin/sh', '-c']
+              args:
+                [
+                  'test $(aws s3 ls $S3_BUCKET/ --recursive | tail -1 | wc -l) -gt 0',
+                ]

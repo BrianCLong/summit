@@ -12,8 +12,7 @@ import { shield } from 'graphql-shield';
 import { applyMiddleware } from 'graphql-middleware';
 import bodyParser from 'body-parser';
 import cors from 'cors';
-import { trace } from '@opentelemetry/api';
-import logger from '../config/logger.js';
+import logger from '../utils/logger.js';
 
 // Import schemas and resolvers
 import { typeDefs } from './schema/index.js';
@@ -47,21 +46,21 @@ const permissions = shield({
     // Protected queries require authentication
     '*': (parent, args, context: GraphQLContext) => {
       return !!context.user;
-    }
+    },
   },
   Mutation: {
     // All mutations require authentication
     '*': (parent, args, context: GraphQLContext) => {
       return !!context.user;
-    }
-  }
+    },
+  },
 });
 
 // Create enhanced GraphQL schema with security
 function createSecureSchema() {
   const baseSchema = makeExecutableSchema({
     typeDefs,
-    resolvers
+    resolvers,
   });
 
   // Apply security middleware
@@ -70,9 +69,6 @@ function createSecureSchema() {
 
 // Context function for Apollo v5
 async function createContext({ req }: { req: any }): Promise<GraphQLContext> {
-  const tracer = trace.getActiveTracer();
-  const span = tracer.getActiveSpan();
-
   return {
     dataSources: {
       // Data sources will be injected here
@@ -81,17 +77,19 @@ async function createContext({ req }: { req: any }): Promise<GraphQLContext> {
     request: {
       ip: req.ip || req.connection.remoteAddress,
       headers: req.headers,
-      userAgent: req.get('User-Agent')
+      userAgent: req.get('User-Agent'),
     },
     telemetry: {
-      traceId: span?.spanContext().traceId || 'unknown',
-      spanId: span?.spanContext().spanId || 'unknown'
-    }
+      traceId: (req.headers?.['x-trace-id'] as string) || 'unknown',
+      spanId: 'unknown',
+    },
   };
 }
 
 // Apollo Server v5 factory
-export function createApolloV5Server(httpServer: any): ApolloServer<GraphQLContext> {
+export function createApolloV5Server(
+  httpServer: any,
+): ApolloServer<GraphQLContext> {
   const schema = createSecureSchema();
 
   const server = new ApolloServer<GraphQLContext>({
@@ -103,8 +101,7 @@ export function createApolloV5Server(httpServer: any): ApolloServer<GraphQLConte
       // Enhanced landing page for development
       ...(process.env.NODE_ENV === 'development'
         ? [ApolloServerPluginLandingPageLocalDefault({ embed: true })]
-        : []
-      ),
+        : []),
 
       // Custom telemetry plugin
       {
@@ -112,39 +109,51 @@ export function createApolloV5Server(httpServer: any): ApolloServer<GraphQLConte
           return {
             async didResolveOperation(requestContext) {
               const operationName = requestContext.request.operationName;
-              logger.info({
-                operationName,
-                query: requestContext.request.query,
-                variables: requestContext.request.variables
-              }, 'GraphQL operation started');
+              logger.info(
+                {
+                  operationName,
+                  query: requestContext.request.query,
+                  variables: requestContext.request.variables,
+                },
+                'GraphQL operation started',
+              );
             },
 
             async didEncounterErrors(requestContext) {
-              logger.error({
-                errors: requestContext.errors,
-                operationName: requestContext.request.operationName
-              }, 'GraphQL operation failed');
+              logger.error(
+                {
+                  errors: requestContext.errors,
+                  operationName: requestContext.request.operationName,
+                },
+                'GraphQL operation failed',
+              );
             },
 
             async willSendResponse(requestContext) {
               const { response } = requestContext;
-              logger.info({
-                operationName: requestContext.request.operationName,
-                hasErrors: !!response.body.singleResult?.errors?.length
-              }, 'GraphQL operation completed');
-            }
+              logger.info(
+                {
+                  operationName: requestContext.request.operationName,
+                  hasErrors: !!response.body.singleResult?.errors?.length,
+                },
+                'GraphQL operation completed',
+              );
+            },
           };
-        }
-      }
+        },
+      },
     ],
 
     // Enhanced error formatting
     formatError: (formattedError, error) => {
       // Log internal errors
-      logger.error({
-        error: formattedError,
-        originalError: error
-      }, 'GraphQL error occurred');
+      logger.error(
+        {
+          error: formattedError,
+          originalError: error,
+        },
+        'GraphQL error occurred',
+      );
 
       // Don't expose internal errors in production
       if (process.env.NODE_ENV === 'production') {
@@ -153,8 +162,8 @@ export function createApolloV5Server(httpServer: any): ApolloServer<GraphQLConte
           locations: formattedError.locations,
           path: formattedError.path,
           extensions: {
-            code: formattedError.extensions?.code
-          }
+            code: formattedError.extensions?.code,
+          },
         };
       }
 
@@ -165,7 +174,7 @@ export function createApolloV5Server(httpServer: any): ApolloServer<GraphQLConte
     introspection: process.env.NODE_ENV !== 'production',
 
     // Include stack traces in development
-    includeStacktraceInErrorResponses: process.env.NODE_ENV !== 'production'
+    includeStacktraceInErrorResponses: process.env.NODE_ENV !== 'production',
   });
 
   return server;
@@ -186,9 +195,9 @@ export function createGraphQLMiddleware(server: ApolloServer<GraphQLContext>) {
         'Authorization',
         'Apollo-Require-Preflight',
         'X-Tenant-ID',
-        'X-User-ID'
-      ]
-    } as cors.CorsOptions
+        'X-User-ID',
+      ],
+    } as cors.CorsOptions,
   });
 }
 
@@ -197,28 +206,31 @@ export function createHealthCheck(server: ApolloServer<GraphQLContext>) {
   return async (req: any, res: any) => {
     try {
       // Simple GraphQL health query
-      const result = await server.executeOperation({
-        query: 'query Health { __typename }'
-      }, { contextValue: await createContext({ req }) });
+      const result = await server.executeOperation(
+        {
+          query: 'query Health { __typename }',
+        },
+        { contextValue: await createContext({ req }) },
+      );
 
       if (result.body.kind === 'single' && !result.body.singleResult.errors) {
         res.status(200).json({
           status: 'healthy',
           service: 'apollo-v5-graphql',
-          timestamp: new Date().toISOString()
+          timestamp: new Date().toISOString(),
         });
       } else {
         res.status(503).json({
           status: 'unhealthy',
           service: 'apollo-v5-graphql',
-          errors: result.body.singleResult.errors
+          errors: result.body.singleResult.errors,
         });
       }
     } catch (error) {
       res.status(503).json({
         status: 'unhealthy',
         service: 'apollo-v5-graphql',
-        error: error instanceof Error ? error.message : 'Unknown error'
+        error: error instanceof Error ? error.message : 'Unknown error',
       });
     }
   };

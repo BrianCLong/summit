@@ -55,21 +55,29 @@ function deepClone<T>(value: T): T {
   return JSON.parse(JSON.stringify(value));
 }
 
-function isSecretReference(value: unknown): value is { [SECRET_REFERENCE_KEY]: SecretReference } {
+function isSecretReference(
+  value: unknown,
+): value is { [SECRET_REFERENCE_KEY]: SecretReference } {
   return Boolean(
     value &&
       typeof value === 'object' &&
       SECRET_REFERENCE_KEY in (value as Record<string, unknown>) &&
-      typeof (value as Record<string, unknown>)[SECRET_REFERENCE_KEY] === 'object',
+      typeof (value as Record<string, unknown>)[SECRET_REFERENCE_KEY] ===
+        'object',
   );
 }
 
-function deepMerge<TConfig>(base: TConfig, override?: Partial<TConfig>): TConfig {
+function deepMerge<TConfig>(
+  base: TConfig,
+  override?: Partial<TConfig>,
+): TConfig {
   if (!override) {
     return base;
   }
   const result: any = Array.isArray(base) ? [...(base as any[])] : { ...base };
-  for (const [key, value] of Object.entries(override as Record<string, unknown>)) {
+  for (const [key, value] of Object.entries(
+    override as Record<string, unknown>,
+  )) {
     if (value === undefined) {
       continue;
     }
@@ -89,12 +97,21 @@ function deepMerge<TConfig>(base: TConfig, override?: Partial<TConfig>): TConfig
   return result as TConfig;
 }
 
-function collectDiffs(expected: unknown, actual: unknown, path: string[] = []): DriftDelta[] {
+function collectDiffs(
+  expected: unknown,
+  actual: unknown,
+  path: string[] = [],
+): DriftDelta[] {
   if (JSON.stringify(expected) === JSON.stringify(actual)) {
     return [];
   }
 
-  if (typeof expected !== 'object' || expected === null || typeof actual !== 'object' || actual === null) {
+  if (
+    typeof expected !== 'object' ||
+    expected === null ||
+    typeof actual !== 'object' ||
+    actual === null
+  ) {
     return [
       {
         path: path.join('.') || 'root',
@@ -110,7 +127,12 @@ function collectDiffs(expected: unknown, actual: unknown, path: string[] = []): 
   ]);
   const deltas: DriftDelta[] = [];
   for (const key of keys) {
-    deltas.push(...collectDiffs((expected as any)[key], (actual as any)[key], [...path, key]));
+    deltas.push(
+      ...collectDiffs((expected as any)[key], (actual as any)[key], [
+        ...path,
+        key,
+      ]),
+    );
   }
   return deltas;
 }
@@ -123,7 +145,10 @@ function selectVariant<TConfig>(
   if (abTest.endAt && abTest.endAt.getTime() < Date.now()) {
     return undefined;
   }
-  const totalWeight = abTest.variants.reduce((sum, variant) => sum + variant.weight, 0);
+  const totalWeight = abTest.variants.reduce(
+    (sum, variant) => sum + variant.weight,
+    0,
+  );
   if (totalWeight <= 0) {
     return undefined;
   }
@@ -134,7 +159,10 @@ function selectVariant<TConfig>(
   const value =
     assignmentValue !== undefined
       ? assignmentValue
-      : parseInt(createHash('sha1').update(identifier).digest('hex').slice(0, 8), 16) / 0xffffffff;
+      : parseInt(
+          createHash('sha1').update(identifier).digest('hex').slice(0, 8),
+          16,
+        ) / 0xffffffff;
 
   let cumulative = 0;
   for (const variant of normalized) {
@@ -167,7 +195,10 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
     this.schemas.set(configId, schema);
   }
 
-  async createOrUpdate(configId: string, options: CreateOrUpdateOptions<TConfig>): Promise<ConfigVersion<TConfig>> {
+  async createOrUpdate(
+    configId: string,
+    options: CreateOrUpdateOptions<TConfig>,
+  ): Promise<ConfigVersion<TConfig>> {
     const schema = this.schemas.get(configId);
     if (schema) {
       schema.parse(options.config);
@@ -179,33 +210,29 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
         }
       }
       if (options.abTest) {
-        z
-          .object({
-            experimentId: z.string(),
-            variants: z.array(
-              z.object({
-                name: z.string(),
-                weight: z.number().positive(),
-                config: schema.partial(),
-              }),
-            ),
-            startAt: z.date(),
-            endAt: z.date().optional(),
-            targetingRules: z.record(z.any()).optional(),
-          })
-          .parse(options.abTest);
+        z.object({
+          experimentId: z.string(),
+          variants: z.array(
+            z.object({
+              name: z.string(),
+              weight: z.number().positive(),
+              config: schema.partial(),
+            }),
+          ),
+          startAt: z.date(),
+          endAt: z.date().optional(),
+          targetingRules: z.record(z.any()).optional(),
+        }).parse(options.abTest);
       }
       if (options.canary) {
-        z
-          .object({
-            environment: z.string(),
-            trafficPercent: z.number().min(0).max(100),
-            config: schema.partial(),
-            startAt: z.date(),
-            endAt: z.date().optional(),
-            guardRailMetrics: z.array(z.string()).optional(),
-          })
-          .parse(options.canary);
+        z.object({
+          environment: z.string(),
+          trafficPercent: z.number().min(0).max(100),
+          config: schema.partial(),
+          startAt: z.date(),
+          endAt: z.date().optional(),
+          guardRailMetrics: z.array(z.string()).optional(),
+        }).parse(options.canary);
       }
     }
 
@@ -225,7 +252,12 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
       config: deepClone(options.config),
       overrides: deepClone(options.overrides ?? {}),
       metadata,
-      checksum: this.computeChecksum(options.config, options.overrides, options.abTest, options.canary),
+      checksum: this.computeChecksum(
+        options.config,
+        options.overrides,
+        options.abTest,
+        options.canary,
+      ),
       abTest: options.abTest,
       canary: options.canary,
       featureFlags: options.featureFlags,
@@ -249,7 +281,10 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
     return payload;
   }
 
-  async getConfig(configId: string, options: GetConfigOptions = {}): Promise<ResolvedConfig<TConfig>> {
+  async getConfig(
+    configId: string,
+    options: GetConfigOptions = {},
+  ): Promise<ResolvedConfig<TConfig>> {
     const version = await this.repository.getLatestVersion(configId);
     if (!version) {
       throw new Error(`Config ${configId} not found`);
@@ -258,11 +293,19 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
     let effectiveConfig: TConfig = deepClone(version.config);
 
     if (options.environment && version.overrides[options.environment]) {
-      effectiveConfig = deepMerge(effectiveConfig, version.overrides[options.environment]);
+      effectiveConfig = deepMerge(
+        effectiveConfig,
+        version.overrides[options.environment],
+      );
     }
 
-    if (version.canary && this.isCanaryActive(version.canary, options.environment)) {
-      const sample = options.assignmentValue ?? this.hashAssignment(options.actorId ?? options.requestId);
+    if (
+      version.canary &&
+      this.isCanaryActive(version.canary, options.environment)
+    ) {
+      const sample =
+        options.assignmentValue ??
+        this.hashAssignment(options.actorId ?? options.requestId);
       if (sample <= version.canary.trafficPercent / 100) {
         effectiveConfig = deepMerge(effectiveConfig, version.canary.config);
       }
@@ -272,11 +315,18 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
       const identifier = options.actorId ?? options.requestId ?? 'anonymous';
       const variant =
         options.abTestVariant &&
-        version.abTest.variants.find((entry) => entry.name === options.abTestVariant)
-          ? version.abTest.variants.find((entry) => entry.name === options.abTestVariant)
+        version.abTest.variants.find(
+          (entry) => entry.name === options.abTestVariant,
+        )
+          ? version.abTest.variants.find(
+              (entry) => entry.name === options.abTestVariant,
+            )
           : selectVariant(version.abTest, identifier, options.assignmentValue);
       if (variant) {
-        effectiveConfig = deepMerge(effectiveConfig, variant.config as Partial<TConfig>);
+        effectiveConfig = deepMerge(
+          effectiveConfig,
+          variant.config as Partial<TConfig>,
+        );
       }
     }
 
@@ -287,7 +337,12 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
     return { version, effectiveConfig };
   }
 
-  async rollback(configId: string, versionNumber: number, actor: string, message?: string): Promise<ConfigVersion<TConfig>> {
+  async rollback(
+    configId: string,
+    versionNumber: number,
+    actor: string,
+    message?: string,
+  ): Promise<ConfigVersion<TConfig>> {
     const target = await this.repository.getVersion(configId, versionNumber);
     if (!target) {
       throw new Error(`Version ${versionNumber} for ${configId} not found`);
@@ -307,7 +362,9 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
     environment: EnvironmentName,
     actualConfig: TConfig,
   ): Promise<DriftReport> {
-    const { version, effectiveConfig } = await this.getConfig(configId, { environment });
+    const { version, effectiveConfig } = await this.getConfig(configId, {
+      environment,
+    });
     const deltas = collectDiffs(effectiveConfig, actualConfig);
     return {
       configId,
@@ -319,7 +376,10 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
     };
   }
 
-  async recordApplied(configId: string, environment: EnvironmentName): Promise<AppliedState> {
+  async recordApplied(
+    configId: string,
+    environment: EnvironmentName,
+  ): Promise<AppliedState> {
     const version = await this.repository.getLatestVersion(configId);
     if (!version) {
       throw new Error(`Config ${configId} not found`);
@@ -338,8 +398,12 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
     return this.repository.getAuditTrail(configId);
   }
 
-  registerWatcher(configId: string, watcher: ConfigWatcher<TConfig>): () => void {
-    const watchers = this.watchers.get(configId) ?? new Set<ConfigWatcher<TConfig>>();
+  registerWatcher(
+    configId: string,
+    watcher: ConfigWatcher<TConfig>,
+  ): () => void {
+    const watchers =
+      this.watchers.get(configId) ?? new Set<ConfigWatcher<TConfig>>();
     watchers.add(watcher);
     this.watchers.set(configId, watchers);
     return () => {
@@ -350,11 +414,17 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
     };
   }
 
-  on(event: 'config:updated', listener: (payload: ConfigVersion<TConfig>) => void): void {
+  on(
+    event: 'config:updated',
+    listener: (payload: ConfigVersion<TConfig>) => void,
+  ): void {
     this.events.on(event, listener);
   }
 
-  private async notifyWatchers(configId: string, version: ConfigVersion<TConfig>): Promise<void> {
+  private async notifyWatchers(
+    configId: string,
+    version: ConfigVersion<TConfig>,
+  ): Promise<void> {
     const watchers = this.watchers.get(configId);
     if (watchers) {
       for (const watcher of watchers) {
@@ -396,7 +466,10 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
       }
       if (value && typeof value === 'object') {
         const entries = await Promise.all(
-          Object.entries(value).map(async ([key, val]) => [key, await traverse(val)]),
+          Object.entries(value).map(async ([key, val]) => [
+            key,
+            await traverse(val),
+          ]),
         );
         return Object.fromEntries(entries);
       }
@@ -409,10 +482,18 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
     if (!identifier) {
       return Math.random();
     }
-    return parseInt(createHash('sha1').update(identifier).digest('hex').slice(0, 8), 16) / 0xffffffff;
+    return (
+      parseInt(
+        createHash('sha1').update(identifier).digest('hex').slice(0, 8),
+        16,
+      ) / 0xffffffff
+    );
   }
 
-  private isCanaryActive(canary: CanaryConfig<TConfig>, environment?: EnvironmentName): boolean {
+  private isCanaryActive(
+    canary: CanaryConfig<TConfig>,
+    environment?: EnvironmentName,
+  ): boolean {
     if (!environment || canary.environment !== environment) {
       return false;
     }
@@ -428,7 +509,10 @@ export class DistributedConfigService<TConfig = Record<string, any>> {
 
   private isABTestActive(abTest: ABTestConfig<TConfig>): boolean {
     const now = this.clock().getTime();
-    return abTest.startAt.getTime() <= now && (!abTest.endAt || abTest.endAt.getTime() >= now);
+    return (
+      abTest.startAt.getTime() <= now &&
+      (!abTest.endAt || abTest.endAt.getTime() >= now)
+    );
   }
 
   private async syncFeatureFlags(flags: FeatureFlagBindings): Promise<void> {

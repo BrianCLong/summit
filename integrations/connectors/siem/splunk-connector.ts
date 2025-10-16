@@ -53,7 +53,14 @@ export interface SplunkQuery {
 
 export interface SplunkSearchJob {
   sid: string;
-  status: 'queued' | 'parsing' | 'running' | 'paused' | 'finalizing' | 'done' | 'failed';
+  status:
+    | 'queued'
+    | 'parsing'
+    | 'running'
+    | 'paused'
+    | 'finalizing'
+    | 'done'
+    | 'failed';
   progress: number;
   resultCount: number;
   query: SplunkQuery;
@@ -96,7 +103,7 @@ export class SplunkConnector extends EventEmitter {
       lastHeartbeat: new Date(),
       connectionUptime: 0,
       errorRate: 0,
-      throughputPerSecond: 0
+      throughputPerSecond: 0,
     };
   }
 
@@ -113,14 +120,14 @@ export class SplunkConnector extends EventEmitter {
         config: {
           host: this.config.host,
           port: this.config.port,
-          index: this.config.index
-        }
+          index: this.config.index,
+        },
       });
     } catch (error) {
       this.emit('error', {
         type: 'connection_failed',
         error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date()
+        timestamp: new Date(),
       });
       throw error;
     }
@@ -132,9 +139,9 @@ export class SplunkConnector extends EventEmitter {
     const response = await fetch(authUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: `username=${this.config.username}&password=${this.config.password}`
+      body: `username=${this.config.username}&password=${this.config.password}`,
     });
 
     if (!response.ok) {
@@ -157,8 +164,8 @@ export class SplunkConnector extends EventEmitter {
 
       this.ws = new WebSocket(wsUrl, {
         headers: {
-          'Authorization': `Splunk ${this.sessionKey}`
-        }
+          Authorization: `Splunk ${this.sessionKey}`,
+        },
       });
 
       this.ws.on('open', () => {
@@ -187,13 +194,13 @@ export class SplunkConnector extends EventEmitter {
       this.emit('message_received', {
         type: message.type,
         data: message.data,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     } catch (error) {
       this.emit('parse_error', {
         error: error instanceof Error ? error.message : 'Unknown error',
         data: data.toString(),
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     }
   }
@@ -214,7 +221,7 @@ export class SplunkConnector extends EventEmitter {
       } catch (error) {
         this.emit('reconnect_failed', {
           error: error instanceof Error ? error.message : 'Unknown error',
-          timestamp: new Date()
+          timestamp: new Date(),
         });
         this.reconnectTimer = undefined;
         this.attemptReconnect();
@@ -222,14 +229,19 @@ export class SplunkConnector extends EventEmitter {
     }, 5000);
   }
 
-  async sendEvent(event: Omit<SplunkEvent, 'time' | 'host' | 'source' | 'sourcetype' | 'index'>): Promise<void> {
+  async sendEvent(
+    event: Omit<
+      SplunkEvent,
+      'time' | 'host' | 'source' | 'sourcetype' | 'index'
+    >,
+  ): Promise<void> {
     const splunkEvent: SplunkEvent = {
       time: Date.now() / 1000,
       host: this.config.host,
       source: this.config.source,
       sourcetype: this.config.sourcetype,
       index: this.config.index,
-      ...event
+      ...event,
     };
 
     this.eventQueue.push(splunkEvent);
@@ -242,18 +254,23 @@ export class SplunkConnector extends EventEmitter {
     this.emit('event_queued', {
       eventId: crypto.randomUUID(),
       queueSize: this.eventQueue.length,
-      timestamp: new Date()
+      timestamp: new Date(),
     });
   }
 
-  async sendBatch(events: Omit<SplunkEvent, 'time' | 'host' | 'source' | 'sourcetype' | 'index'>[]): Promise<void> {
-    const splunkEvents = events.map(event => ({
+  async sendBatch(
+    events: Omit<
+      SplunkEvent,
+      'time' | 'host' | 'source' | 'sourcetype' | 'index'
+    >[],
+  ): Promise<void> {
+    const splunkEvents = events.map((event) => ({
       time: Date.now() / 1000,
       host: this.config.host,
       source: this.config.source,
       sourcetype: this.config.sourcetype,
       index: this.config.index,
-      ...event
+      ...event,
     }));
 
     this.eventQueue.push(...splunkEvents);
@@ -276,8 +293,8 @@ export class SplunkConnector extends EventEmitter {
         connector: 'splunk-connector',
         version: '1.0.0',
         tenant: 'intelgraph',
-        source: this.config.source
-      }
+        source: this.config.source,
+      },
     };
 
     this.eventQueue = [];
@@ -294,7 +311,7 @@ export class SplunkConnector extends EventEmitter {
         batchId: batch.id,
         eventCount: batch.events.length,
         latency,
-        timestamp: new Date()
+        timestamp: new Date(),
       });
     } catch (error) {
       this.metrics.failedEvents += batch.events.length;
@@ -303,7 +320,7 @@ export class SplunkConnector extends EventEmitter {
         batchId: batch.id,
         eventCount: batch.events.length,
         error: error instanceof Error ? error.message : 'Unknown error',
-        timestamp: new Date()
+        timestamp: new Date(),
       });
 
       this.eventQueue.unshift(...batch.events);
@@ -311,22 +328,24 @@ export class SplunkConnector extends EventEmitter {
   }
 
   private calculateBatchChecksum(events: SplunkEvent[]): string {
-    const concatenated = events.map(e => JSON.stringify(e)).join('');
+    const concatenated = events.map((e) => JSON.stringify(e)).join('');
     return crypto.createHash('sha256').update(concatenated).digest('hex');
   }
 
   private async submitBatch(batch: SplunkBatch): Promise<void> {
     const url = `${this.config.protocol}://${this.config.host}:${this.config.port}/services/collector/event/1.0`;
 
-    const payload = batch.events.map(event => JSON.stringify(event)).join('\n');
+    const payload = batch.events
+      .map((event) => JSON.stringify(event))
+      .join('\n');
 
     const response = await fetch(url, {
       method: 'POST',
       headers: {
-        'Authorization': `Splunk ${this.config.token || this.sessionKey}`,
-        'Content-Type': 'application/json'
+        Authorization: `Splunk ${this.config.token || this.sessionKey}`,
+        'Content-Type': 'application/json',
       },
-      body: payload
+      body: payload,
     });
 
     if (!response.ok) {
@@ -340,8 +359,8 @@ export class SplunkConnector extends EventEmitter {
     const response = await fetch(searchUrl, {
       method: 'POST',
       headers: {
-        'Authorization': `Splunk ${this.sessionKey}`,
-        'Content-Type': 'application/x-www-form-urlencoded'
+        Authorization: `Splunk ${this.sessionKey}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
       body: new URLSearchParams({
         search: query.search,
@@ -349,8 +368,8 @@ export class SplunkConnector extends EventEmitter {
         latest_time: query.latest_time || 'now',
         max_count: query.max_count?.toString() || '100',
         output_mode: query.output_mode || 'json',
-        exec_mode: query.exec_mode || 'normal'
-      })
+        exec_mode: query.exec_mode || 'normal',
+      }),
     });
 
     if (!response.ok) {
@@ -370,7 +389,7 @@ export class SplunkConnector extends EventEmitter {
       progress: 0,
       resultCount: 0,
       query,
-      createdAt: new Date()
+      createdAt: new Date(),
     };
 
     this.searchJobs.set(job.sid, job);
@@ -392,16 +411,22 @@ export class SplunkConnector extends EventEmitter {
 
         const response = await fetch(statusUrl, {
           headers: {
-            'Authorization': `Splunk ${this.sessionKey}`
-          }
+            Authorization: `Splunk ${this.sessionKey}`,
+          },
         });
 
         if (response.ok) {
           const statusXml = await response.text();
 
-          const statusMatch = statusXml.match(/<s:key name="dispatchState">([^<]+)<\/s:key>/);
-          const progressMatch = statusXml.match(/<s:key name="doneProgress">([^<]+)<\/s:key>/);
-          const resultCountMatch = statusXml.match(/<s:key name="resultCount">([^<]+)<\/s:key>/);
+          const statusMatch = statusXml.match(
+            /<s:key name="dispatchState">([^<]+)<\/s:key>/,
+          );
+          const progressMatch = statusXml.match(
+            /<s:key name="doneProgress">([^<]+)<\/s:key>/,
+          );
+          const resultCountMatch = statusXml.match(
+            /<s:key name="resultCount">([^<]+)<\/s:key>/,
+          );
 
           if (statusMatch) {
             job.status = statusMatch[1] as SplunkSearchJob['status'];
@@ -417,7 +442,7 @@ export class SplunkConnector extends EventEmitter {
             sid: job.sid,
             status: job.status,
             progress: job.progress,
-            resultCount: job.resultCount
+            resultCount: job.resultCount,
           });
 
           if (job.status === 'done' || job.status === 'failed') {
@@ -428,27 +453,31 @@ export class SplunkConnector extends EventEmitter {
               sid: job.sid,
               status: job.status,
               resultCount: job.resultCount,
-              duration: job.completedAt.getTime() - job.createdAt.getTime()
+              duration: job.completedAt.getTime() - job.createdAt.getTime(),
             });
           }
         }
       } catch (error) {
         this.emit('search_monitor_error', {
           sid,
-          error: error instanceof Error ? error.message : 'Unknown error'
+          error: error instanceof Error ? error.message : 'Unknown error',
         });
       }
     }, 2000);
   }
 
-  async getSearchResults(sid: string, offset: number = 0, count: number = 100): Promise<any[]> {
+  async getSearchResults(
+    sid: string,
+    offset: number = 0,
+    count: number = 100,
+  ): Promise<any[]> {
     const resultsUrl = `${this.config.protocol}://${this.config.host}:${this.config.port}/services/search/jobs/${sid}/results`;
 
     const response = await fetch(resultsUrl, {
       method: 'GET',
       headers: {
-        'Authorization': `Splunk ${this.sessionKey}`
-      }
+        Authorization: `Splunk ${this.sessionKey}`,
+      },
     });
 
     if (!response.ok) {
@@ -477,15 +506,17 @@ export class SplunkConnector extends EventEmitter {
 
       this.emit('heartbeat', {
         timestamp: this.metrics.lastHeartbeat,
-        metrics: this.getMetrics()
+        metrics: this.getMetrics(),
       });
     }, 30000);
   }
 
   private updateMetrics(latency: number): void {
     this.metrics.averageLatency = (this.metrics.averageLatency + latency) / 2;
-    this.metrics.errorRate = this.metrics.failedEvents / this.metrics.totalEvents;
-    this.metrics.throughputPerSecond = this.metrics.successfulEvents / (Date.now() / 1000);
+    this.metrics.errorRate =
+      this.metrics.failedEvents / this.metrics.totalEvents;
+    this.metrics.throughputPerSecond =
+      this.metrics.successfulEvents / (Date.now() / 1000);
   }
 
   getMetrics(): ConnectionMetrics {
@@ -525,7 +556,7 @@ export class SplunkConnector extends EventEmitter {
 
     this.emit('disconnected', {
       timestamp: new Date(),
-      finalMetrics: this.getMetrics()
+      finalMetrics: this.getMetrics(),
     });
   }
 }

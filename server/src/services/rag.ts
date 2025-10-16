@@ -60,9 +60,14 @@ export function buildRagPrompt({
   passages: { source: string; text: string }[];
 }) {
   const graphBullets = graph
-    .map((g) => `- ${g.name} (${g.types?.join(',') ?? ''})${g.source ? ` [${g.source}]` : ''}`)
+    .map(
+      (g) =>
+        `- ${g.name} (${g.types?.join(',') ?? ''})${g.source ? ` [${g.source}]` : ''}`,
+    )
     .join('\n');
-  const docBullets = passages.map((p) => `- [${p.source}] ${p.text}`).join('\n');
+  const docBullets = passages
+    .map((p) => `- [${p.source}] ${p.text}`)
+    .join('\n');
   return [
     'You are IntelGraph Assistant. Answer precisely using the context below.',
     'Prioritize graph facts over text. If uncertain, say so.',

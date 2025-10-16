@@ -8,12 +8,20 @@
 import { randomUUID as uuidv4 } from 'crypto';
 import pino from 'pino';
 import { createSpan, businessMetrics } from '../observability/telemetry';
-import { registerEvidence, createClaim } from '../../prov-ledger-service/src/ledger';
+import {
+  registerEvidence,
+  createClaim,
+} from '../../prov-ledger-service/src/ledger';
 
 const logger = pino({ name: 'rapid-attribution-runbook' });
 
 // DAG node types
-type DAGNodeType = 'indicator_enrichment' | 'infrastructure_mapping' | 'pattern_analysis' | 'attack_mapping' | 'narrative_generation';
+type DAGNodeType =
+  | 'indicator_enrichment'
+  | 'infrastructure_mapping'
+  | 'pattern_analysis'
+  | 'attack_mapping'
+  | 'narrative_generation';
 
 // DAG execution context
 interface DAGContext {
@@ -120,9 +128,9 @@ export class RapidAttributionRunbook {
         enablePassiveDNS: true,
         enableWhoIS: true,
         enableReputation: true,
-        confidenceThreshold: 0.7
+        confidenceThreshold: 0.7,
       },
-      execute: this.enrichIndicators.bind(this)
+      execute: this.enrichIndicators.bind(this),
     });
 
     // Node 2: Infrastructure Mapping
@@ -137,9 +145,9 @@ export class RapidAttributionRunbook {
       parameters: {
         maxHops: 3,
         includeHistorical: true,
-        riskThreshold: 0.5
+        riskThreshold: 0.5,
       },
-      execute: this.mapInfrastructure.bind(this)
+      execute: this.mapInfrastructure.bind(this),
     });
 
     // Node 3: Pattern Analysis
@@ -154,9 +162,9 @@ export class RapidAttributionRunbook {
       parameters: {
         algorithmType: 'graph_clustering',
         similarityThreshold: 0.8,
-        minClusterSize: 3
+        minClusterSize: 3,
       },
-      execute: this.analyzePatterns.bind(this)
+      execute: this.analyzePatterns.bind(this),
     });
 
     // Node 4: ATT&CK Mapping
@@ -171,9 +179,9 @@ export class RapidAttributionRunbook {
       parameters: {
         attackFrameworkVersion: '14.1',
         confidenceThreshold: 0.6,
-        includeMitigations: true
+        includeMitigations: true,
       },
-      execute: this.mapToAttack.bind(this)
+      execute: this.mapToAttack.bind(this),
     });
 
     // Node 5: Narrative Generation
@@ -188,9 +196,9 @@ export class RapidAttributionRunbook {
       parameters: {
         includeTimeline: true,
         includeRecommendations: true,
-        evidenceLevel: 'detailed'
+        evidenceLevel: 'detailed',
       },
-      execute: this.generateNarrative.bind(this)
+      execute: this.generateNarrative.bind(this),
     });
 
     this.computeExecutionOrder();
@@ -207,7 +215,9 @@ export class RapidAttributionRunbook {
 
     const visit = (nodeId: string) => {
       if (visiting.has(nodeId)) {
-        throw new Error(`Circular dependency detected involving node: ${nodeId}`);
+        throw new Error(
+          `Circular dependency detected involving node: ${nodeId}`,
+        );
       }
       if (visited.has(nodeId)) {
         return;
@@ -232,11 +242,19 @@ export class RapidAttributionRunbook {
     }
 
     this.executionOrder = order;
-    logger.info({ executionOrder: this.executionOrder }, 'DAG execution order computed');
+    logger.info(
+      { executionOrder: this.executionOrder },
+      'DAG execution order computed',
+    );
   }
 
   // Execute the complete runbook
-  async execute(indicators: ThreatIndicator[], caseId: string, userId: string, tenantId: string): Promise<ThreatHypothesis> {
+  async execute(
+    indicators: ThreatIndicator[],
+    caseId: string,
+    userId: string,
+    tenantId: string,
+  ): Promise<ThreatHypothesis> {
     const runId = uuidv4();
     const startTime = new Date();
 
@@ -253,8 +271,8 @@ export class RapidAttributionRunbook {
         timeToHypothesis: 0,
         precision: 0,
         evidenceCount: 0,
-        confidenceScore: 0
-      }
+        confidenceScore: 0,
+      },
     };
 
     return createSpan('rapid-attribution-runbook', async (span) => {
@@ -263,14 +281,17 @@ export class RapidAttributionRunbook {
         'runbook.case_id': caseId,
         'runbook.user_id': userId,
         'runbook.tenant_id': tenantId,
-        'runbook.indicator_count': indicators.length
+        'runbook.indicator_count': indicators.length,
       });
 
-      logger.info({
-        runId,
-        caseId,
-        indicatorCount: indicators.length
-      }, 'Starting rapid attribution runbook execution');
+      logger.info(
+        {
+          runId,
+          caseId,
+          indicatorCount: indicators.length,
+        },
+        'Starting rapid attribution runbook execution',
+      );
 
       try {
         const nodeOutputs = new Map<string, any>();
@@ -289,25 +310,30 @@ export class RapidAttributionRunbook {
 
         // Calculate final metrics
         const endTime = new Date();
-        context.metrics.timeToHypothesis = endTime.getTime() - startTime.getTime();
+        context.metrics.timeToHypothesis =
+          endTime.getTime() - startTime.getTime();
 
         // Record business metrics
         businessMetrics.cypherQueryExecutions.add(1, {
           runbook: 'rapid-attribution',
-          status: 'completed'
+          status: 'completed',
         });
 
-        const hypothesis = nodeOutputs.get('narrative_generation') as ThreatHypothesis;
+        const hypothesis = nodeOutputs.get(
+          'narrative_generation',
+        ) as ThreatHypothesis;
 
-        logger.info({
-          runId,
-          timeToHypothesis: context.metrics.timeToHypothesis,
-          evidenceCount: context.metrics.evidenceCount,
-          confidenceScore: hypothesis.confidence
-        }, 'Rapid attribution runbook completed');
+        logger.info(
+          {
+            runId,
+            timeToHypothesis: context.metrics.timeToHypothesis,
+            evidenceCount: context.metrics.evidenceCount,
+            confidenceScore: hypothesis.confidence,
+          },
+          'Rapid attribution runbook completed',
+        );
 
         return hypothesis;
-
       } catch (error) {
         logger.error({ runId, error }, 'Rapid attribution runbook failed');
         span.recordException(error as Error);
@@ -316,17 +342,24 @@ export class RapidAttributionRunbook {
     });
   }
 
-  private async executeNode(node: DAGNode, context: DAGContext, nodeOutputs: Map<string, any>): Promise<void> {
+  private async executeNode(
+    node: DAGNode,
+    context: DAGContext,
+    nodeOutputs: Map<string, any>,
+  ): Promise<void> {
     const nodeStartTime = Date.now();
 
     return createSpan(`runbook-node-${node.id}`, async (span) => {
       span.setAttributes({
         'node.id': node.id,
         'node.type': node.type,
-        'node.name': node.name
+        'node.name': node.name,
       });
 
-      logger.debug({ nodeId: node.id, nodeName: node.name }, 'Executing DAG node');
+      logger.debug(
+        { nodeId: node.id, nodeName: node.name },
+        'Executing DAG node',
+      );
 
       try {
         // Collect inputs from dependencies
@@ -346,19 +379,24 @@ export class RapidAttributionRunbook {
         const output = await Promise.race([
           node.execute(context, inputs),
           new Promise((_, reject) =>
-            setTimeout(() => reject(new Error(`Node ${node.id} timed out`)), node.timeout)
-          )
+            setTimeout(
+              () => reject(new Error(`Node ${node.id} timed out`)),
+              node.timeout,
+            ),
+          ),
         ]);
 
         nodeOutputs.set(node.id, output);
 
         const duration = Date.now() - nodeStartTime;
-        logger.debug({
-          nodeId: node.id,
-          duration,
-          outputSize: JSON.stringify(output).length
-        }, 'DAG node completed');
-
+        logger.debug(
+          {
+            nodeId: node.id,
+            duration,
+            outputSize: JSON.stringify(output).length,
+          },
+          'DAG node completed',
+        );
       } catch (error) {
         logger.error({ nodeId: node.id, error }, 'DAG node failed');
         throw error;
@@ -367,7 +405,10 @@ export class RapidAttributionRunbook {
   }
 
   // Node implementations
-  private async enrichIndicators(context: DAGContext, inputs: Map<string, any>): Promise<ThreatIndicator[]> {
+  private async enrichIndicators(
+    context: DAGContext,
+    inputs: Map<string, any>,
+  ): Promise<ThreatIndicator[]> {
     const { indicators } = inputs.get('input') || {};
     const enrichedIndicators: ThreatIndicator[] = [];
 
@@ -408,7 +449,7 @@ export class RapidAttributionRunbook {
         contentHash: `enriched-${indicator.id}`,
         licenseId: 'threat-intel',
         source: 'Rapid Attribution Runbook',
-        transforms: ['indicator_enrichment']
+        transforms: ['indicator_enrichment'],
       });
       context.evidence.set(`enriched-${indicator.id}`, evidence);
 
@@ -419,7 +460,10 @@ export class RapidAttributionRunbook {
     return enrichedIndicators;
   }
 
-  private async mapInfrastructure(context: DAGContext, inputs: Map<string, any>): Promise<InfrastructureEntity[]> {
+  private async mapInfrastructure(
+    context: DAGContext,
+    inputs: Map<string, any>,
+  ): Promise<InfrastructureEntity[]> {
     const indicators = inputs.get('indicator_enrichment') as ThreatIndicator[];
     const infrastructure: InfrastructureEntity[] = [];
 
@@ -438,16 +482,17 @@ export class RapidAttributionRunbook {
             services: ['HTTP', 'HTTPS'],
           },
           relationships: [],
-          riskScore: 0.7
+          riskScore: 0.7,
         };
 
         // Create relationships to other infrastructure
         for (const other of infrastructure) {
-          if (Math.random() > 0.7) { // 30% chance of relationship
+          if (Math.random() > 0.7) {
+            // 30% chance of relationship
             entity.relationships.push({
               targetId: other.id,
               type: 'hosts',
-              confidence: 0.8
+              confidence: 0.8,
             });
           }
         }
@@ -459,7 +504,7 @@ export class RapidAttributionRunbook {
           contentHash: `infra-${entity.id}`,
           licenseId: 'threat-intel',
           source: 'Infrastructure Mapping',
-          transforms: ['indicator_enrichment', 'infrastructure_mapping']
+          transforms: ['indicator_enrichment', 'infrastructure_mapping'],
         });
         context.evidence.set(`infra-${entity.id}`, evidence);
       }
@@ -469,8 +514,13 @@ export class RapidAttributionRunbook {
     return infrastructure;
   }
 
-  private async analyzePatterns(context: DAGContext, inputs: Map<string, any>): Promise<any> {
-    const infrastructure = inputs.get('infrastructure_mapping') as InfrastructureEntity[];
+  private async analyzePatterns(
+    context: DAGContext,
+    inputs: Map<string, any>,
+  ): Promise<any> {
+    const infrastructure = inputs.get(
+      'infrastructure_mapping',
+    ) as InfrastructureEntity[];
     const indicators = inputs.get('indicator_enrichment') as ThreatIndicator[];
 
     // Mock pattern analysis
@@ -480,23 +530,29 @@ export class RapidAttributionRunbook {
           {
             id: 'cluster-1',
             type: 'c2_infrastructure',
-            entities: infrastructure.filter(i => i.riskScore > 0.6).map(i => i.id),
+            entities: infrastructure
+              .filter((i) => i.riskScore > 0.6)
+              .map((i) => i.id),
             confidence: 0.85,
-            characteristics: ['shared_hosting', 'recent_registration', 'suspicious_ssl']
-          }
-        ]
+            characteristics: [
+              'shared_hosting',
+              'recent_registration',
+              'suspicious_ssl',
+            ],
+          },
+        ],
       },
       temporal: {
-        timeline: indicators.map(i => ({
+        timeline: indicators.map((i) => ({
           timestamp: i.firstSeen,
           event: `Indicator ${i.value} first observed`,
-          type: i.type
-        }))
+          type: i.type,
+        })),
       },
       behavioral: {
         ttps: ['T1071.001', 'T1090', 'T1583.001'], // Common C2 techniques
-        confidence: 0.78
-      }
+        confidence: 0.78,
+      },
     };
 
     // Create claim for pattern analysis
@@ -504,14 +560,17 @@ export class RapidAttributionRunbook {
       evidenceIds: Array.from(context.evidence.keys()),
       text: `Pattern analysis identified potential C2 infrastructure cluster with ${patterns.clustering.clusters[0].entities.length} entities`,
       confidence: 0.85,
-      links: []
+      links: [],
     });
     context.claims.set('pattern-analysis', claim);
 
     return patterns;
   }
 
-  private async mapToAttack(context: DAGContext, inputs: Map<string, any>): Promise<AttackMapping[]> {
+  private async mapToAttack(
+    context: DAGContext,
+    inputs: Map<string, any>,
+  ): Promise<AttackMapping[]> {
     const patterns = inputs.get('pattern_analysis');
 
     // Mock ATT&CK mapping based on patterns
@@ -521,8 +580,14 @@ export class RapidAttributionRunbook {
         techniqueName: 'Application Layer Protocol: Web Protocols',
         tactic: 'Command and Control',
         confidence: 0.9,
-        evidence: ['HTTP/HTTPS traffic patterns', 'Web-based C2 infrastructure'],
-        mitigations: ['M1031: Network Intrusion Prevention', 'M1037: Filter Network Traffic']
+        evidence: [
+          'HTTP/HTTPS traffic patterns',
+          'Web-based C2 infrastructure',
+        ],
+        mitigations: [
+          'M1031: Network Intrusion Prevention',
+          'M1037: Filter Network Traffic',
+        ],
       },
       {
         techniqueId: 'T1090',
@@ -530,7 +595,10 @@ export class RapidAttributionRunbook {
         tactic: 'Command and Control',
         confidence: 0.75,
         evidence: ['Multi-hop infrastructure', 'Proxy chains identified'],
-        mitigations: ['M1037: Filter Network Traffic', 'M1031: Network Intrusion Prevention']
+        mitigations: [
+          'M1037: Filter Network Traffic',
+          'M1031: Network Intrusion Prevention',
+        ],
       },
       {
         techniqueId: 'T1583.001',
@@ -538,8 +606,11 @@ export class RapidAttributionRunbook {
         tactic: 'Resource Development',
         confidence: 0.8,
         evidence: ['Recently registered domains', 'Suspicious domain patterns'],
-        mitigations: ['M1056: Pre-compromise', 'M1031: Network Intrusion Prevention']
-      }
+        mitigations: [
+          'M1056: Pre-compromise',
+          'M1031: Network Intrusion Prevention',
+        ],
+      },
     ];
 
     // Create claim for ATT&CK mapping
@@ -547,50 +618,62 @@ export class RapidAttributionRunbook {
       evidenceIds: Array.from(context.evidence.keys()),
       text: `Mapped to ${mappings.length} ATT&CK techniques with average confidence ${mappings.reduce((sum, m) => sum + m.confidence, 0) / mappings.length}`,
       confidence: 0.82,
-      links: mappings.map(m => `https://attack.mitre.org/techniques/${m.techniqueId}`)
+      links: mappings.map(
+        (m) => `https://attack.mitre.org/techniques/${m.techniqueId}`,
+      ),
     });
     context.claims.set('attack-mapping', claim);
 
     return mappings;
   }
 
-  private async generateNarrative(context: DAGContext, inputs: Map<string, any>): Promise<ThreatHypothesis> {
+  private async generateNarrative(
+    context: DAGContext,
+    inputs: Map<string, any>,
+  ): Promise<ThreatHypothesis> {
     const indicators = inputs.get('indicator_enrichment') as ThreatIndicator[];
-    const infrastructure = inputs.get('infrastructure_mapping') as InfrastructureEntity[];
+    const infrastructure = inputs.get(
+      'infrastructure_mapping',
+    ) as InfrastructureEntity[];
     const patterns = inputs.get('pattern_analysis');
     const attackMappings = inputs.get('attack_mapping') as AttackMapping[];
 
     const hypothesis: ThreatHypothesis = {
       id: uuidv4(),
-      title: 'Rapid Attribution Analysis: Suspected Command & Control Infrastructure',
+      title:
+        'Rapid Attribution Analysis: Suspected Command & Control Infrastructure',
       summary: `Analysis of ${indicators.length} indicators revealed a potential command and control infrastructure cluster involving ${infrastructure.length} infrastructure entities. The activity maps to ${attackMappings.length} MITRE ATT&CK techniques with primary focus on web-based C2 communications.`,
-      confidence: attackMappings.reduce((sum, m) => sum + m.confidence, 0) / attackMappings.length,
+      confidence:
+        attackMappings.reduce((sum, m) => sum + m.confidence, 0) /
+        attackMappings.length,
       attackTechniques: attackMappings,
       indicators,
       infrastructure,
       timeline: [
         {
-          timestamp: new Date(Math.min(...indicators.map(i => i.firstSeen.getTime()))),
+          timestamp: new Date(
+            Math.min(...indicators.map((i) => i.firstSeen.getTime())),
+          ),
           event: 'First indicator observed',
-          evidence: 'Initial threat intelligence reporting'
+          evidence: 'Initial threat intelligence reporting',
         },
         {
           timestamp: new Date(),
           event: 'Infrastructure analysis completed',
-          evidence: 'Automated runbook execution'
-        }
+          evidence: 'Automated runbook execution',
+        },
       ],
       recommendations: [
         'Block identified IP addresses and domains at network perimeter',
         'Monitor for additional infrastructure using similar patterns',
         'Implement detection rules for identified ATT&CK techniques',
-        'Conduct threat hunting for similar TTPs in environment'
+        'Conduct threat hunting for similar TTPs in environment',
       ],
       citations: [
         'MITRE ATT&CK Framework v14.1',
         'IntelGraph Rapid Attribution Runbook R1',
-        ...Array.from(context.evidence.keys()).map(k => `Evidence: ${k}`)
-      ]
+        ...Array.from(context.evidence.keys()).map((k) => `Evidence: ${k}`),
+      ],
     };
 
     // Create final claim for the hypothesis
@@ -598,7 +681,7 @@ export class RapidAttributionRunbook {
       evidenceIds: Array.from(context.evidence.keys()),
       text: hypothesis.summary,
       confidence: hypothesis.confidence,
-      links: hypothesis.citations.slice(0, 3) // First 3 citations as links
+      links: hypothesis.citations.slice(0, 3), // First 3 citations as links
     });
     context.claims.set('final-hypothesis', claim);
 
@@ -619,10 +702,11 @@ export class RapidAttributionRunbook {
     return {
       id: 'rapid-attribution-r1',
       name: 'Rapid Attribution Runbook R1',
-      description: 'Automated threat attribution from indicators to ATT&CK techniques with evidence-first narrative generation',
+      description:
+        'Automated threat attribution from indicators to ATT&CK techniques with evidence-first narrative generation',
       version: '1.0.0',
       nodeCount: this.nodes.size,
-      estimatedDuration: '2-5 minutes'
+      estimatedDuration: '2-5 minutes',
     };
   }
 
@@ -630,12 +714,42 @@ export class RapidAttributionRunbook {
   async getExecutionLogs(runId: string): Promise<any[]> {
     // In real implementation, would query logs by runId
     return [
-      { timestamp: new Date(), level: 'info', message: 'Runbook execution started', runId },
-      { timestamp: new Date(), level: 'debug', message: 'Indicator enrichment completed', runId },
-      { timestamp: new Date(), level: 'debug', message: 'Infrastructure mapping completed', runId },
-      { timestamp: new Date(), level: 'debug', message: 'Pattern analysis completed', runId },
-      { timestamp: new Date(), level: 'debug', message: 'ATT&CK mapping completed', runId },
-      { timestamp: new Date(), level: 'info', message: 'Narrative generation completed', runId },
+      {
+        timestamp: new Date(),
+        level: 'info',
+        message: 'Runbook execution started',
+        runId,
+      },
+      {
+        timestamp: new Date(),
+        level: 'debug',
+        message: 'Indicator enrichment completed',
+        runId,
+      },
+      {
+        timestamp: new Date(),
+        level: 'debug',
+        message: 'Infrastructure mapping completed',
+        runId,
+      },
+      {
+        timestamp: new Date(),
+        level: 'debug',
+        message: 'Pattern analysis completed',
+        runId,
+      },
+      {
+        timestamp: new Date(),
+        level: 'debug',
+        message: 'ATT&CK mapping completed',
+        runId,
+      },
+      {
+        timestamp: new Date(),
+        level: 'info',
+        message: 'Narrative generation completed',
+        runId,
+      },
     ];
   }
 }

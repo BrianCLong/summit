@@ -1,8 +1,8 @@
 groups:
-- name: inference-cost
-  rules:
-    - record: inference:tokens_per_min:sum
-      expr: sum by (tenant,model) (inference_tokens_total[1m])
-    - alert: InferenceSpendSpike
-      expr: inference:tokens_per_min:sum > 50000
-      for: 10m
+  - name: inference-cost
+    rules:
+      - record: inference:tokens_per_min:sum
+        expr: sum by (tenant,model) (inference_tokens_total[1m])
+      - alert: InferenceSpendSpike
+        expr: inference:tokens_per_min:sum > 50000
+        for: 10m

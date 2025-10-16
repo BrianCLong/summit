@@ -30,26 +30,29 @@ export interface PoolConfig {
 
 export class HotPathOptimizer {
   private redis: Redis;
-  private localCache = new Map<string, { value: any; expires: number; hits: number }>();
+  private localCache = new Map<
+    string,
+    { value: any; expires: number; hits: number }
+  >();
   private connectionPool = new Map<string, any[]>();
   private metrics: HotPathMetrics = {
     executionTime: 0,
     cacheHits: 0,
     cacheMisses: 0,
     poolUtilization: 0,
-    memoryUsage: 0
+    memoryUsage: 0,
   };
 
   constructor(
     redisUrl: string,
     private cacheConfig: CacheConfig,
-    private poolConfig: PoolConfig
+    private poolConfig: PoolConfig,
   ) {
     this.redis = new Redis(redisUrl, {
       maxRetriesPerRequest: 3,
       retryDelayOnFailover: 100,
       enableOfflineQueue: false,
-      lazyConnect: true
+      lazyConnect: true,
     });
   }
 
@@ -63,7 +66,7 @@ export class HotPathOptimizer {
       cacheTtl?: number;
       skipCache?: boolean;
       prefetch?: boolean;
-    }
+    },
   ): Promise<T> {
     const startTime = performance.now();
 
@@ -106,30 +109,30 @@ export class HotPathOptimizer {
       key: string;
       fn: () => Promise<T>;
       options?: { cacheTtl?: number };
-    }>
+    }>,
   ): Promise<T[]> {
     const startTime = performance.now();
 
     // Check cache for all keys in parallel
-    const cachePromises = operations.map(op =>
-      this.getFromCache(op.key).then(cached => ({ key: op.key, cached }))
+    const cachePromises = operations.map((op) =>
+      this.getFromCache(op.key).then((cached) => ({ key: op.key, cached })),
     );
     const cacheResults = await Promise.all(cachePromises);
 
     // Identify cache misses
-    const misses = operations.filter((op, i) =>
-      cacheResults[i].cached === null
+    const misses = operations.filter(
+      (op, i) => cacheResults[i].cached === null,
     );
 
     // Execute misses in parallel with pooling
-    const missPromises = misses.map(async op => {
+    const missPromises = misses.map(async (op) => {
       const result = await this.executeWithPooling(op.fn);
       await this.setCache(op.key, result, op.options?.cacheTtl);
       return { key: op.key, result };
     });
 
     const missResults = await Promise.all(missPromises);
-    const missMap = new Map(missResults.map(r => [r.key, r.result]));
+    const missMap = new Map(missResults.map((r) => [r.key, r.result]));
 
     // Combine cached and computed results
     const results = operations.map((op, i) => {
@@ -148,7 +151,7 @@ export class HotPathOptimizer {
     queryKey: string,
     query: string,
     params: any[],
-    connection: any
+    connection: any,
   ): Promise<T[]> {
     // Use prepared statements for hot queries
     const preparedKey = `prepared:${queryKey}`;
@@ -171,7 +174,7 @@ export class HotPathOptimizer {
     query: string,
     params: any[],
     connection: any,
-    batchSize = 1000
+    batchSize = 1000,
   ): AsyncGenerator<T[], void, unknown> {
     let offset = 0;
     let hasMore = true;
@@ -182,7 +185,7 @@ export class HotPathOptimizer {
         `stream:${offset}`,
         batchQuery,
         params,
-        connection
+        connection,
       );
 
       if (batch.length === 0) {
@@ -194,7 +197,7 @@ export class HotPathOptimizer {
       }
 
       // Yield control to event loop
-      await new Promise(resolve => setImmediate(resolve));
+      await new Promise((resolve) => setImmediate(resolve));
     }
   }
 
@@ -254,8 +257,8 @@ export class HotPathOptimizer {
 
     this.localCache.set(key, {
       value,
-      expires: Date.now() + (ttlSeconds * 1000),
-      hits: 0
+      expires: Date.now() + ttlSeconds * 1000,
+      hits: 0,
     });
   }
 
@@ -326,11 +329,13 @@ export class HotPathOptimizer {
     this.metrics.memoryUsage = process.memoryUsage().heapUsed;
 
     // Emit metrics for monitoring
-    console.log(JSON.stringify({
-      event: 'hotpath_metrics',
-      metrics: this.metrics,
-      timestamp: new Date().toISOString()
-    }));
+    console.log(
+      JSON.stringify({
+        event: 'hotpath_metrics',
+        metrics: this.metrics,
+        timestamp: new Date().toISOString(),
+      }),
+    );
   }
 
   /**
@@ -349,14 +354,16 @@ export class HotPathOptimizer {
       cacheHits: 0,
       cacheMisses: 0,
       poolUtilization: 0,
-      memoryUsage: 0
+      memoryUsage: 0,
     };
   }
 
   /**
    * Warm up cache with common queries
    */
-  async warmupCache(warmupQueries: Array<{ key: string; fn: () => Promise<any> }>): Promise<void> {
+  async warmupCache(
+    warmupQueries: Array<{ key: string; fn: () => Promise<any> }>,
+  ): Promise<void> {
     console.log('Starting cache warmup...');
 
     const promises = warmupQueries.map(async ({ key, fn }) => {
@@ -430,7 +437,7 @@ export class PerformanceMonitor {
       max: sorted[count - 1],
       avg: sorted.reduce((a, b) => a + b, 0) / count,
       p95: sorted[Math.floor(count * 0.95)],
-      p99: sorted[Math.floor(count * 0.99)]
+      p99: sorted[Math.floor(count * 0.99)],
     };
   }
 

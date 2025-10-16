@@ -1,19 +1,19 @@
-import axios from "axios";
-import jwt from "jsonwebtoken";
-import { v4 as uuid } from "uuid";
-import { pubsub } from "../realtime/pubsub";
-import logger from "../utils/logger";
-import { wrapResolversWithPolicy } from "./policyWrapper";
+import axios from 'axios';
+import jwt from 'jsonwebtoken';
+import { v4 as uuid } from 'uuid';
+import { pubsub } from '../realtime/pubsub';
+import logger from '../utils/logger';
+import { wrapResolversWithPolicy } from './policyWrapper';
 
-const ML_URL = process.env.ML_URL || "http://intelgraph-ml:8081";
+const ML_URL = process.env.ML_URL || 'http://intelgraph-ml:8081';
 const JWT_PRIVATE_KEY = process.env.JWT_PRIVATE_KEY!;
-const JWT_ALGO = "RS256" as const;
+const JWT_ALGO = 'RS256' as const;
 
 async function mlCall(path: string, payload: any, ctx: any) {
   const token = jwt.sign(
     { sub: ctx.user.id, roles: ctx.user.roles },
     JWT_PRIVATE_KEY,
-    { algorithm: JWT_ALGO, expiresIn: "5m" },
+    { algorithm: JWT_ALGO, expiresIn: '5m' },
   );
   try {
     const { data } = await axios.post(`${ML_URL}${path}`, payload, {
@@ -21,7 +21,7 @@ async function mlCall(path: string, payload: any, ctx: any) {
     });
     return data;
   } catch (err: any) {
-    logger.error("ML request failed", { path, error: err.message });
+    logger.error('ML request failed', { path, error: err.message });
     throw err;
   }
 }
@@ -34,7 +34,7 @@ const resolvers = {
   },
   Mutation: {
     aiExtractEntities: async (_: any, { docs, jobId }: any, ctx: any) =>
-      queueJob(ctx, "nlp_entities", "/nlp/entities", { docs }, jobId),
+      queueJob(ctx, 'nlp_entities', '/nlp/entities', { docs }, jobId),
     aiResolveEntities: async (
       _: any,
       { records, threshold, jobId }: any,
@@ -42,8 +42,8 @@ const resolvers = {
     ) =>
       queueJob(
         ctx,
-        "entity_resolution",
-        "/er/resolve",
+        'entity_resolution',
+        '/er/resolve',
         { records, threshold },
         jobId,
       ),
@@ -55,8 +55,8 @@ const resolvers = {
       const edges = await fetchEdgesForSnapshot(ctx.neo4j, graphSnapshotId);
       return queueJob(
         ctx,
-        "link_prediction",
-        "/graph/link_predict",
+        'link_prediction',
+        '/graph/link_predict',
         { graph_snapshot_id: graphSnapshotId, top_k: topK, edges },
         jobId,
       );
@@ -69,16 +69,16 @@ const resolvers = {
       const edges = await fetchEdgesForSnapshot(ctx.neo4j, graphSnapshotId);
       return queueJob(
         ctx,
-        "community_detect",
-        "/graph/community_detect",
+        'community_detect',
+        '/graph/community_detect',
         { graph_snapshot_id: graphSnapshotId, edges },
         jobId,
       );
     },
     approveInsight: async (_: any, { id }: any, { db, user }: any) =>
-      decideInsight(db, id, "APPROVED", user.id),
+      decideInsight(db, id, 'APPROVED', user.id),
     rejectInsight: async (_: any, { id, reason }: any, { db, user }: any) =>
-      decideInsight(db, id, "REJECTED", user.id, reason),
+      decideInsight(db, id, 'REJECTED', user.id, reason),
   },
   Subscription: {
     aiJobProgress: {
@@ -88,13 +88,13 @@ const resolvers = {
     },
     insightAdded: {
       subscribe: (_: any, { status, kind }: any, { subscriptions }: any) =>
-        subscriptions.asyncIterator(`INSIGHT_${status || "*"}_${kind || "*"}`),
+        subscriptions.asyncIterator(`INSIGHT_${status || '*'}_${kind || '*'}`),
       resolve: (p: any) => p,
     },
   },
 };
 
-export const AIResolvers = wrapResolversWithPolicy("AI", resolvers);
+export const AIResolvers = wrapResolversWithPolicy('AI', resolvers);
 
 async function queueJob(
   ctx: any,
@@ -109,7 +109,7 @@ async function queueJob(
   await ctx.db.jobs.insert({
     id,
     kind,
-    status: "QUEUED",
+    status: 'QUEUED',
     createdAt,
     meta: { ...body },
   });
@@ -117,14 +117,14 @@ async function queueJob(
     await mlCall(path, { ...body, job_id: id, callback_url: callbackUrl }, ctx);
   } catch (err: any) {
     await ctx.db.jobs.update(id, {
-      status: "FAILED",
+      status: 'FAILED',
       error: err.message,
       updatedAt: new Date().toISOString(),
     });
-    logger.error("AI job failed", { id, kind, error: err.message });
+    logger.error('AI job failed', { id, kind, error: err.message });
     throw err;
   }
-  return { id, kind, status: "QUEUED", createdAt };
+  return { id, kind, status: 'QUEUED', createdAt };
 }
 
 async function fetchEdgesForSnapshot(neo4j: any, snapshotId: string) {
@@ -134,7 +134,7 @@ async function fetchEdgesForSnapshot(neo4j: any, snapshotId: string) {
       `MATCH (a)-[r]->(b) WHERE r.snapshotId = $snapshotId RETURN a.id as u, b.id as v`,
       { snapshotId },
     );
-    return res.records.map((rec: any) => [rec.get("u"), rec.get("v")]);
+    return res.records.map((rec: any) => [rec.get('u'), rec.get('v')]);
   } finally {
     await session.close();
   }
@@ -143,7 +143,7 @@ async function fetchEdgesForSnapshot(neo4j: any, snapshotId: string) {
 async function decideInsight(
   db: any,
   id: string,
-  status: "APPROVED" | "REJECTED",
+  status: 'APPROVED' | 'REJECTED',
   userId: string,
   reason?: string,
 ) {
@@ -155,7 +155,7 @@ async function decideInsight(
   });
   await db.audit.insert({
     id: uuid(),
-    type: "INSIGHT_DECISION",
+    type: 'INSIGHT_DECISION',
     actorId: userId,
     createdAt: now,
     meta: { insightId: id, status, reason },

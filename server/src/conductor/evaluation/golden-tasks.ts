@@ -183,10 +183,14 @@ export class GoldenTaskSuite {
         );
       }
       if (filter.difficulty) {
-        tasks = tasks.filter((t) => filter.difficulty!.includes(t.metadata.difficulty));
+        tasks = tasks.filter((t) =>
+          filter.difficulty!.includes(t.metadata.difficulty),
+        );
       }
       if (filter.tags) {
-        tasks = tasks.filter((t) => filter.tags!.some((tag) => t.metadata.tags.includes(tag)));
+        tasks = tasks.filter((t) =>
+          filter.tags!.some((tag) => t.metadata.tags.includes(tag)),
+        );
       }
     }
 
@@ -204,7 +208,8 @@ export class GoldenTaskSuite {
       category: 'graph_ops',
       description: 'Test basic graph traversal and entity relationships',
       input: {
-        query: 'Find all connections between Person:Alice and Organization:TechCorp',
+        query:
+          'Find all connections between Person:Alice and Organization:TechCorp',
         context: {
           domain: 'graph',
           tenant: 'default',
@@ -247,7 +252,8 @@ export class GoldenTaskSuite {
       category: 'rag_retrieval',
       description: 'Test RAG system document retrieval accuracy',
       input: {
-        query: 'Find documents about cybersecurity incident response procedures',
+        query:
+          'Find documents about cybersecurity incident response procedures',
         context: {
           domain: 'rag',
           tenant: 'security_team',
@@ -283,7 +289,8 @@ export class GoldenTaskSuite {
       category: 'osint_analysis',
       description: 'Test OSINT threat actor profiling capabilities',
       input: {
-        query: 'Analyze threat patterns for APT groups targeting financial institutions',
+        query:
+          'Analyze threat patterns for APT groups targeting financial institutions',
         context: {
           domain: 'osint',
           tenant: 'threat_intel',
@@ -336,7 +343,8 @@ export class GoldenTaskSuite {
         method: 'regex_match',
         weight: 1.0,
         passThreshold: 0.9,
-        target: /^user_id,activity_date,action_type[\s\S]*\n.*,\d{4}-\d{2}-\d{2},.*$/m,
+        target:
+          /^user_id,activity_date,action_type[\s\S]*\n.*,\d{4}-\d{2}-\d{2},.*$/m,
       },
       metadata: {
         createdBy: 'system',
@@ -409,7 +417,8 @@ export class GoldenTaskSuite {
       category: 'general_llm',
       description: 'Test code generation capabilities and correctness',
       input: {
-        query: 'Generate a Python function that calculates the Fibonacci sequence up to n terms',
+        query:
+          'Generate a Python function that calculates the Fibonacci sequence up to n terms',
         context: {
           tenant: 'dev_team',
           sensitivity: 'public',
@@ -596,7 +605,10 @@ export class EvaluationEngine extends EventEmitter {
       evaluationRun.summary.qualityGate = 'fail';
       this.emit('evaluation:failed', { runId, error });
 
-      prometheusConductorMetrics.recordOperationalEvent('evaluation_failed', false);
+      prometheusConductorMetrics.recordOperationalEvent(
+        'evaluation_failed',
+        false,
+      );
     } finally {
       this.activeRuns.delete(runId);
     }
@@ -607,7 +619,10 @@ export class EvaluationEngine extends EventEmitter {
   /**
    * Execute tasks in parallel
    */
-  private async executeTasksParallel(tasks: GoldenTask[], run: EvaluationRun): Promise<void> {
+  private async executeTasksParallel(
+    tasks: GoldenTask[],
+    run: EvaluationRun,
+  ): Promise<void> {
     const semaphore = new Array(run.config.maxConcurrency).fill(null);
     let taskIndex = 0;
 
@@ -655,7 +670,10 @@ export class EvaluationEngine extends EventEmitter {
   /**
    * Execute tasks sequentially
    */
-  private async executeTasksSequential(tasks: GoldenTask[], run: EvaluationRun): Promise<void> {
+  private async executeTasksSequential(
+    tasks: GoldenTask[],
+    run: EvaluationRun,
+  ): Promise<void> {
     for (const task of tasks) {
       try {
         const result = await this.executeTask(task, run.config.timeoutMs);
@@ -692,7 +710,10 @@ export class EvaluationEngine extends EventEmitter {
   /**
    * Execute individual task
    */
-  private async executeTask(task: GoldenTask, timeoutMs: number): Promise<TaskResult> {
+  private async executeTask(
+    task: GoldenTask,
+    timeoutMs: number,
+  ): Promise<TaskResult> {
     const startTime = Date.now();
 
     // Route task through router
@@ -707,7 +728,10 @@ export class EvaluationEngine extends EventEmitter {
     });
 
     // Simulate expert execution (in real implementation, this would call the actual expert)
-    const actualOutput = await this.simulateExpertExecution(routingResponse.selectedExpert, task);
+    const actualOutput = await this.simulateExpertExecution(
+      routingResponse.selectedExpert,
+      task,
+    );
 
     // Score the output
     const scoringResult = await this.scoreOutput(task, actualOutput);
@@ -745,11 +769,16 @@ export class EvaluationEngine extends EventEmitter {
   /**
    * Simulate expert execution (placeholder)
    */
-  private async simulateExpertExecution(expert: ExpertArm, task: GoldenTask): Promise<any> {
+  private async simulateExpertExecution(
+    expert: ExpertArm,
+    task: GoldenTask,
+  ): Promise<any> {
     // This would be replaced with actual expert execution
     // For now, simulate different expert responses
 
-    await new Promise((resolve) => setTimeout(resolve, Math.random() * 2000 + 500));
+    await new Promise((resolve) =>
+      setTimeout(resolve, Math.random() * 2000 + 500),
+    );
 
     switch (expert) {
       case 'GRAPH_TOOL':
@@ -820,16 +849,23 @@ export class EvaluationEngine extends EventEmitter {
     try {
       switch (scoring.method) {
         case 'exact_match':
-          rawScore = JSON.stringify(actualOutput) === JSON.stringify(scoring.target) ? 1 : 0;
+          rawScore =
+            JSON.stringify(actualOutput) === JSON.stringify(scoring.target)
+              ? 1
+              : 0;
           break;
 
         case 'json_schema':
-          rawScore = this.validateJsonSchema(actualOutput, scoring.target) ? 1 : 0;
+          rawScore = this.validateJsonSchema(actualOutput, scoring.target)
+            ? 1
+            : 0;
           break;
 
         case 'regex_match':
           const regex =
-            scoring.target instanceof RegExp ? scoring.target : new RegExp(scoring.target);
+            scoring.target instanceof RegExp
+              ? scoring.target
+              : new RegExp(scoring.target);
           rawScore = regex.test(String(actualOutput)) ? 1 : 0;
           break;
 
@@ -841,11 +877,19 @@ export class EvaluationEngine extends EventEmitter {
           break;
 
         case 'custom_hook':
-          rawScore = await this.executeCustomHook(scoring.customHook!, actualOutput, task);
+          rawScore = await this.executeCustomHook(
+            scoring.customHook!,
+            actualOutput,
+            task,
+          );
           break;
 
         case 'llm_judge':
-          const judgeResult = await this.llmJudgeScore(actualOutput, scoring.judgePrompt!, task);
+          const judgeResult = await this.llmJudgeScore(
+            actualOutput,
+            scoring.judgePrompt!,
+            task,
+          );
           rawScore = judgeResult.score;
           feedback = judgeResult.feedback;
           break;
@@ -908,7 +952,10 @@ export class EvaluationEngine extends EventEmitter {
     }
   }
 
-  private async calculateSemanticSimilarity(text1: string, text2: string): Promise<number> {
+  private async calculateSemanticSimilarity(
+    text1: string,
+    text2: string,
+  ): Promise<number> {
     // Placeholder semantic similarity calculation
     // In production, use embeddings and cosine similarity
     const words1 = text1.toLowerCase().split(/\s+/);
@@ -942,7 +989,8 @@ export class EvaluationEngine extends EventEmitter {
     if (code.includes('def fibonacci')) score += 0.3;
 
     // Check for recursive structure
-    if (code.includes('fibonacci(') && code.includes('fibonacci(')) score += 0.3;
+    if (code.includes('fibonacci(') && code.includes('fibonacci('))
+      score += 0.3;
 
     // Check for base case
     if (code.includes('n <= 1') || code.includes('n < 2')) score += 0.2;
@@ -981,8 +1029,10 @@ export class EvaluationEngine extends EventEmitter {
     run.summary.skipped = results.filter((r) => r.status === 'skipped').length;
 
     if (results.length > 0) {
-      run.summary.avgScore = results.reduce((sum, r) => sum + r.score, 0) / results.length;
-      run.summary.avgDuration = results.reduce((sum, r) => sum + r.duration, 0) / results.length;
+      run.summary.avgScore =
+        results.reduce((sum, r) => sum + r.score, 0) / results.length;
+      run.summary.avgDuration =
+        results.reduce((sum, r) => sum + r.duration, 0) / results.length;
     }
 
     // Determine quality gate status
@@ -1014,7 +1064,8 @@ export class EvaluationEngine extends EventEmitter {
     // Analyze each group for regressions
     for (const [groupKey, results] of groups) {
       const [tenant, category] = groupKey.split('_');
-      const currentScore = results.reduce((sum, r) => sum + r.score, 0) / results.length;
+      const currentScore =
+        results.reduce((sum, r) => sum + r.score, 0) / results.length;
 
       // Get baseline score for this group
       const baselineKey = `${tenant}_${category}`;
@@ -1088,11 +1139,13 @@ export class EvaluationEngine extends EventEmitter {
     }
 
     for (const [category, scores] of categoryGroups) {
-      categoryScores[category] = scores.reduce((sum, s) => sum + s, 0) / scores.length;
+      categoryScores[category] =
+        scores.reduce((sum, s) => sum + s, 0) / scores.length;
     }
 
     for (const [tenant, scores] of tenantGroups) {
-      tenantScores[tenant] = scores.reduce((sum, s) => sum + s, 0) / scores.length;
+      tenantScores[tenant] =
+        scores.reduce((sum, s) => sum + s, 0) / scores.length;
     }
 
     const trend: QualityTrend = {
@@ -1118,14 +1171,18 @@ export class EvaluationEngine extends EventEmitter {
 
   private async getGitBranch(): Promise<string> {
     try {
-      const { stdout } = await this.execCommand('git rev-parse --abbrev-ref HEAD');
+      const { stdout } = await this.execCommand(
+        'git rev-parse --abbrev-ref HEAD',
+      );
       return stdout.trim();
     } catch {
       return 'unknown';
     }
   }
 
-  private execCommand(command: string): Promise<{ stdout: string; stderr: string }> {
+  private execCommand(
+    command: string,
+  ): Promise<{ stdout: string; stderr: string }> {
     return new Promise((resolve, reject) => {
       const [cmd, ...args] = command.split(' ');
       const child = spawn(cmd, args);

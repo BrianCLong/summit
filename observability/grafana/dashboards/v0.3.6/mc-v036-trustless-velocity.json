@@ -9,7 +9,7 @@
         "id": 1,
         "title": "ZTA Coverage",
         "type": "stat",
-        "gridPos": {"h": 8, "w": 6, "x": 0, "y": 0},
+        "gridPos": { "h": 8, "w": 6, "x": 0, "y": 0 },
         "fieldConfig": {
           "defaults": {
             "color": {
@@ -17,9 +17,9 @@
             },
             "thresholds": {
               "steps": [
-                {"color": "red", "value": 0},
-                {"color": "yellow", "value": 95},
-                {"color": "green", "value": 99.5}
+                { "color": "red", "value": 0 },
+                { "color": "yellow", "value": 95 },
+                { "color": "green", "value": 99.5 }
               ]
             },
             "unit": "percent",
@@ -50,7 +50,7 @@
         "id": 2,
         "title": "ZTA Verifier Performance",
         "type": "timeseries",
-        "gridPos": {"h": 8, "w": 6, "x": 6, "y": 0},
+        "gridPos": { "h": 8, "w": 6, "x": 6, "y": 0 },
         "fieldConfig": {
           "defaults": {
             "color": {
@@ -58,8 +58,8 @@
             },
             "thresholds": {
               "steps": [
-                {"color": "green", "value": null},
-                {"color": "red", "value": 200}
+                { "color": "green", "value": null },
+                { "color": "red", "value": 200 }
               ]
             },
             "unit": "ms"
@@ -94,7 +94,7 @@
         "id": 3,
         "title": "Policy Proof Health",
         "type": "stat",
-        "gridPos": {"h": 8, "w": 6, "x": 12, "y": 0},
+        "gridPos": { "h": 8, "w": 6, "x": 12, "y": 0 },
         "fieldConfig": {
           "defaults": {
             "color": {
@@ -102,9 +102,9 @@
             },
             "thresholds": {
               "steps": [
-                {"color": "red", "value": null},
-                {"color": "yellow", "value": 0.9},
-                {"color": "green", "value": 1}
+                { "color": "red", "value": null },
+                { "color": "yellow", "value": 0.9 },
+                { "color": "green", "value": 1 }
               ]
             },
             "unit": "short",
@@ -126,7 +126,7 @@
         "id": 4,
         "title": "Counterexamples Found",
         "type": "timeseries",
-        "gridPos": {"h": 8, "w": 6, "x": 18, "y": 0},
+        "gridPos": { "h": 8, "w": 6, "x": 18, "y": 0 },
         "fieldConfig": {
           "defaults": {
             "color": {
@@ -134,8 +134,8 @@
             },
             "thresholds": {
               "steps": [
-                {"color": "green", "value": 0},
-                {"color": "red", "value": 1}
+                { "color": "green", "value": 0 },
+                { "color": "red", "value": 1 }
               ]
             },
             "unit": "short"
@@ -154,7 +154,7 @@
         "id": 5,
         "title": "Remediation MTTR",
         "type": "timeseries",
-        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
         "fieldConfig": {
           "defaults": {
             "color": {
@@ -162,9 +162,9 @@
             },
             "thresholds": {
               "steps": [
-                {"color": "green", "value": null},
-                {"color": "yellow", "value": 5},
-                {"color": "red", "value": 7}
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 5 },
+                { "color": "red", "value": 7 }
               ]
             },
             "unit": "m"
@@ -197,7 +197,7 @@
         "id": 6,
         "title": "Remediation Approval Ratios",
         "type": "piechart",
-        "gridPos": {"h": 8, "w": 6, "x": 12, "y": 8},
+        "gridPos": { "h": 8, "w": 6, "x": 12, "y": 8 },
         "fieldConfig": {
           "defaults": {
             "color": {
@@ -246,7 +246,7 @@
         "id": 7,
         "title": "Confidential Plane Performance",
         "type": "timeseries",
-        "gridPos": {"h": 8, "w": 6, "x": 18, "y": 8},
+        "gridPos": { "h": 8, "w": 6, "x": 18, "y": 8 },
         "fieldConfig": {
           "defaults": {
             "color": {
@@ -254,9 +254,9 @@
             },
             "thresholds": {
               "steps": [
-                {"color": "green", "value": null},
-                {"color": "yellow", "value": 5},
-                {"color": "red", "value": 7}
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 5 },
+                { "color": "red", "value": 7 }
               ]
             },
             "unit": "percent"
@@ -276,7 +276,7 @@
         "id": 8,
         "title": "Residency Enforcement",
         "type": "stat",
-        "gridPos": {"h": 4, "w": 6, "x": 0, "y": 16},
+        "gridPos": { "h": 4, "w": 6, "x": 0, "y": 16 },
         "fieldConfig": {
           "defaults": {
             "color": {
@@ -284,9 +284,9 @@
             },
             "thresholds": {
               "steps": [
-                {"color": "red", "value": null},
-                {"color": "yellow", "value": 99},
-                {"color": "green", "value": 100}
+                { "color": "red", "value": null },
+                { "color": "yellow", "value": 99 },
+                { "color": "green", "value": 100 }
               ]
             },
             "unit": "percent"
@@ -306,7 +306,7 @@
         "id": 9,
         "title": "Enclave Attestations",
         "type": "timeseries",
-        "gridPos": {"h": 4, "w": 6, "x": 6, "y": 16},
+        "gridPos": { "h": 4, "w": 6, "x": 6, "y": 16 },
         "fieldConfig": {
           "defaults": {
             "color": {
@@ -328,7 +328,7 @@
         "id": 10,
         "title": "KMS Access Logs",
         "type": "logs",
-        "gridPos": {"h": 4, "w": 12, "x": 12, "y": 16},
+        "gridPos": { "h": 4, "w": 12, "x": 12, "y": 16 },
         "targets": [
           {
             "expr": "{job=\"kms-audit\"} |= \"unseal_key\"",

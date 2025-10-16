@@ -1,7 +1,10 @@
 import { gql } from 'graphql-tag';
 
 export const evidenceOkTypeDefs = gql`
-  type CostSnapshot { graphqlPerMillionUsd: Float, ingestPerThousandUsd: Float }
+  type CostSnapshot {
+    graphqlPerMillionUsd: Float
+    ingestPerThousandUsd: Float
+  }
   type EvidenceOk {
     ok: Boolean!
     reasons: [String!]!
@@ -14,4 +17,3 @@ export const evidenceOkTypeDefs = gql`
 `;
 
 export default evidenceOkTypeDefs;
-

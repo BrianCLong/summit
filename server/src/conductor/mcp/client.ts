@@ -14,7 +14,7 @@ export interface MCPClientOptions {
 
 // Load allowed executor URLs from environment variable
 const allowedExecutorUrls = process.env.MCP_ALLOWED_EXECUTOR_URLS
-  ? process.env.MCP_ALLOWED_EXECUTOR_URLS.split(',').map(url => url.trim())
+  ? process.env.MCP_ALLOWED_EXECUTOR_URLS.split(',').map((url) => url.trim())
   : [];
 
 export class MCPClient {
@@ -50,9 +50,16 @@ export class MCPClient {
     }
 
     // Enforce allowlist
-    if (allowedExecutorUrls.length > 0 && !allowedExecutorUrls.includes(config.url)) {
-      logger.error(`Attempted to connect to disallowed MCP server URL: ${config.url}`);
-      throw new Error(`Connection to '${config.url}' is not allowed by policy.`);
+    if (
+      allowedExecutorUrls.length > 0 &&
+      !allowedExecutorUrls.includes(config.url)
+    ) {
+      logger.error(
+        `Attempted to connect to disallowed MCP server URL: ${config.url}`,
+      );
+      throw new Error(
+        `Connection to '${config.url}' is not allowed by policy.`,
+      );
     }
 
     if (this.connections.has(serverName)) {
@@ -79,7 +86,10 @@ export class MCPClient {
       });
 
       ws.once('error', (error) => {
-        logger.error(`Failed to connect to MCP server ${serverName} (${config.url}):`, error);
+        logger.error(
+          `Failed to connect to MCP server ${serverName} (${config.url}):`,
+          error,
+        );
         reject(error);
       });
 
@@ -88,7 +98,9 @@ export class MCPClient {
       });
 
       ws.on('close', () => {
-        logger.info(`Disconnected from MCP server: ${serverName} (${config.url})`);
+        logger.info(
+          `Disconnected from MCP server: ${serverName} (${config.url})`,
+        );
         this.connections.delete(serverName);
         let attempt = 0;
         const retry = () => {
@@ -144,7 +156,9 @@ export class MCPClient {
     }
 
     if (tool.scopes && userScopes) {
-      const hasRequiredScopes = tool.scopes.every((scope) => userScopes.includes(scope));
+      const hasRequiredScopes = tool.scopes.every((scope) =>
+        userScopes.includes(scope),
+      );
       if (!hasRequiredScopes) {
         throw new Error(
           `Insufficient scopes for tool '${toolName}'. Required: ${tool.scopes.join(', ')}`,
@@ -204,7 +218,10 @@ export class MCPClient {
   /**
    * Send a raw JSON-RPC request
    */
-  private async sendRequest(serverName: string, request: MCPRequest): Promise<any> {
+  private async sendRequest(
+    serverName: string,
+    request: MCPRequest,
+  ): Promise<any> {
     const ws = this.connections.get(serverName);
     if (!ws || ws.readyState !== WebSocket.OPEN) {
       throw new Error(`No active connection to server '${serverName}'`);
@@ -322,7 +339,9 @@ export class MCPServerRegistry {
    */
   public findServersWithTool(toolName: string): string[] {
     return Object.entries(this.servers)
-      .filter(([_, config]) => config.tools.some((tool) => tool.name === toolName))
+      .filter(([_, config]) =>
+        config.tools.some((tool) => tool.name === toolName),
+      )
       .map(([name, _]) => name);
   }
 }
@@ -354,7 +373,12 @@ export async function executeToolAnywhere(
   // Try servers in order until one succeeds
   for (const serverName of servers) {
     try {
-      const result = await mcpClient.executeTool(serverName, toolName, args, userScopes);
+      const result = await mcpClient.executeTool(
+        serverName,
+        toolName,
+        args,
+        userScopes,
+      );
       return { serverName, result };
     } catch (error) {
       console.warn(`Failed to execute ${toolName} on ${serverName}:`, error);

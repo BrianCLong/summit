@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata: { name: purge-processor, namespace: prod }
 spec:
-  schedule: "0 1 * * *" # daily
+  schedule: '0 1 * * *' # daily
   jobTemplate:
     spec:
       template:
@@ -12,7 +12,7 @@ spec:
             - name: processor
               image: ghcr.io/<org>/<repo>/dbtools:latest
               envFrom: [{ secretRef: { name: db-credentials } }]
-              command: ["/bin/sh","-c"]
+              command: ['/bin/sh', '-c']
               args:
                 - |
                   echo "Processing approved deletion requests...";

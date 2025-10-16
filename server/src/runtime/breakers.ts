@@ -15,8 +15,12 @@ export function breaker<TArgs extends any[], TRes>(
   });
 
   br.on('open', () => console.warn(`[BREAKER:${name}] OPEN - circuit tripped`));
-  br.on('halfOpen', () => console.warn(`[BREAKER:${name}] HALF-OPEN - testing recovery`));
-  br.on('close', () => console.log(`[BREAKER:${name}] CLOSED - circuit healthy`));
+  br.on('halfOpen', () =>
+    console.warn(`[BREAKER:${name}] HALF-OPEN - testing recovery`),
+  );
+  br.on('close', () =>
+    console.log(`[BREAKER:${name}] CLOSED - circuit healthy`),
+  );
 
   // Fallback strategy
   br.fallback(() => {

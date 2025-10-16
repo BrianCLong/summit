@@ -3,7 +3,8 @@ import { Pool } from 'pg';
 const pg = new Pool({ connectionString: process.env.DATABASE_URL });
 
 export async function embedUpsert(ctx: any, step: any) {
-  const items: { id: string; vec: number[]; type: string; meta: any }[] = await produceEmbeddings(step.inputs);
+  const items: { id: string; vec: number[]; type: string; meta: any }[] =
+    await produceEmbeddings(step.inputs);
   const client = await pg.connect();
   try {
     await client.query('BEGIN');
@@ -25,4 +26,3 @@ async function produceEmbeddings(_inputs: any) {
   // TODO: call Python/HTTP embedding generator; placeholder
   return [] as any[];
 }
-

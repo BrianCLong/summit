@@ -2,10 +2,10 @@
 
 /**
  * Generate Persisted Query Hashes from GraphQL Operations
- * 
+ *
  * This script scans the codebase for GraphQL operations and generates
  * SHA256 hashes for the persisted query allowlist.
- * 
+ *
  * Usage:
  *   node scripts/generate-pq-hashes.js --output=./artifacts/persisted-queries.json
  */
@@ -21,29 +21,29 @@ const config = {
     patterns: [
       'client/src/**/*.{ts,tsx,js,jsx}',
       'server/src/**/*.graphql',
-      'client/src/**/*.graphql'
+      'client/src/**/*.graphql',
     ],
     excludePatterns: [
       '**/node_modules/**',
       '**/dist/**',
       '**/build/**',
       '**/*.test.*',
-      '**/*.spec.*'
-    ]
+      '**/*.spec.*',
+    ],
   },
   operations: {
     // RegEx patterns to extract GraphQL operations
     patterns: {
       gql: /gql`\s*(query|mutation|subscription)([^`]+)`/gim,
       graphql: /graphql`\s*(query|mutation|subscription)([^`]+)`/gim,
-      string: /(query|mutation|subscription)\s+\w+[^{]*\{[^}]+\}/gim
-    }
+      string: /(query|mutation|subscription)\s+\w+[^{]*\{[^}]+\}/gim,
+    },
   },
   output: {
     format: 'json',
     includeMetadata: true,
-    checksumAlgorithm: 'sha256'
-  }
+    checksumAlgorithm: 'sha256',
+  },
 };
 
 class PQHashGenerator {
@@ -53,16 +53,16 @@ class PQHashGenerator {
       filesScanned: 0,
       operationsFound: 0,
       duplicates: 0,
-      errors: 0
+      errors: 0,
     };
   }
 
   async scanCodebase() {
     console.log('🔍 Scanning codebase for GraphQL operations...');
-    
+
     const files = await glob(config.scan.patterns, {
       ignore: config.scan.excludePatterns,
-      absolute: true
+      absolute: true,
     });
 
     console.log(`📁 Found ${files.length} files to scan`);
@@ -71,21 +71,25 @@ class PQHashGenerator {
       await this.scanFile(filePath);
     }
 
-    console.log(`✅ Scan complete: ${this.stats.operationsFound} operations found in ${this.stats.filesScanned} files`);
+    console.log(
+      `✅ Scan complete: ${this.stats.operationsFound} operations found in ${this.stats.filesScanned} files`,
+    );
   }
 
   async scanFile(filePath) {
     try {
       const content = fs.readFileSync(filePath, 'utf8');
       this.stats.filesScanned++;
-      
+
       // Extract operations using different patterns
-      for (const [patternName, pattern] of Object.entries(config.operations.patterns)) {
+      for (const [patternName, pattern] of Object.entries(
+        config.operations.patterns,
+      )) {
         let match;
         while ((match = pattern.exec(content)) !== null) {
           const operation = this.normalizeOperation(match[0]);
           const hash = this.generateHash(operation);
-          
+
           if (this.operations.has(hash)) {
             this.stats.duplicates++;
             // Update metadata with additional file location
@@ -103,7 +107,7 @@ class PQHashGenerator {
               pattern_matched: patternName,
               created_at: new Date().toISOString(),
               risk_level: this.assessRiskLevel(operation),
-              estimated_cost: this.estimateCost(operation)
+              estimated_cost: this.estimateCost(operation),
             });
             this.stats.operationsFound++;
           }
@@ -118,14 +122,14 @@ class PQHashGenerator {
   normalizeOperation(operation) {
     // Normalize whitespace and remove comments
     return operation
-      .replace(/\s+/g, ' ')           // Normalize whitespace
-      .replace(/#[^\r\n]*/g, '')      // Remove comments
-      .replace(/^\s+|\s+$/g, '')      // Trim
-      .replace(/\s*{\s*/g, ' { ')     // Normalize braces
+      .replace(/\s+/g, ' ') // Normalize whitespace
+      .replace(/#[^\r\n]*/g, '') // Remove comments
+      .replace(/^\s+|\s+$/g, '') // Trim
+      .replace(/\s*{\s*/g, ' { ') // Normalize braces
       .replace(/\s*}\s*/g, ' } ')
-      .replace(/\s*\(\s*/g, '(')      // Normalize parentheses
+      .replace(/\s*\(\s*/g, '(') // Normalize parentheses
       .replace(/\s*\)\s*/g, ')')
-      .replace(/\s*,\s*/g, ', ');     // Normalize commas
+      .replace(/\s*,\s*/g, ', '); // Normalize commas
   }
 
   generateHash(operation) {
@@ -146,44 +150,57 @@ class PQHashGenerator {
   assessRiskLevel(operation) {
     // Assess risk based on operation content
     const riskKeywords = [
-      'delete', 'remove', 'destroy', 'purge', 'drop',
-      'truncate', 'clear', 'reset', 'wipe', 'bulk',
-      'mass', 'admin', 'superuser', 'privilege'
+      'delete',
+      'remove',
+      'destroy',
+      'purge',
+      'drop',
+      'truncate',
+      'clear',
+      'reset',
+      'wipe',
+      'bulk',
+      'mass',
+      'admin',
+      'superuser',
+      'privilege',
     ];
 
     const lowerOp = operation.toLowerCase();
-    const hasRiskKeywords = riskKeywords.some(keyword => lowerOp.includes(keyword));
-    
+    const hasRiskKeywords = riskKeywords.some((keyword) =>
+      lowerOp.includes(keyword),
+    );
+
     if (operation.match(/mutation/i)) {
       return hasRiskKeywords ? 'high' : 'medium';
     }
-    
+
     return hasRiskKeywords ? 'medium' : 'low';
   }
 
   estimateCost(operation) {
     // Rough cost estimation based on complexity
     let cost = 0.001; // Base cost
-    
+
     // Count field selections
     const fieldCount = (operation.match(/\w+\s*{/g) || []).length;
     cost += fieldCount * 0.0005;
-    
+
     // Mutations are more expensive
     if (operation.match(/mutation/i)) {
       cost *= 3;
     }
-    
+
     // Complex operations (nested selections, fragments)
     const complexity = (operation.match(/{[^}]*{/g) || []).length;
     cost += complexity * 0.002;
-    
+
     return Math.round(cost * 10000) / 10000; // Round to 4 decimal places
   }
 
   generateOutput(outputPath) {
     console.log('📝 Generating hash file...');
-    
+
     const hashes = {};
     const metadata = {
       version: '1.0',
@@ -192,9 +209,9 @@ class PQHashGenerator {
       generator_version: '1.0.0',
       scan_config: {
         patterns: config.scan.patterns,
-        excludes: config.scan.excludePatterns
+        excludes: config.scan.excludePatterns,
       },
-      stats: this.stats
+      stats: this.stats,
     };
 
     // Convert operations to hash format
@@ -205,15 +222,15 @@ class PQHashGenerator {
         risk_level: operation.risk_level,
         estimated_cost: operation.estimated_cost,
         created_at: operation.created_at,
-        files: operation.files.map(f => path.relative(process.cwd(), f)),
-        pattern_matched: operation.pattern_matched
+        files: operation.files.map((f) => path.relative(process.cwd(), f)),
+        pattern_matched: operation.pattern_matched,
       };
     }
 
     const output = {
       hashes,
       metadata,
-      checksum: this.generateChecksum({ hashes, metadata })
+      checksum: this.generateChecksum({ hashes, metadata }),
     };
 
     // Ensure output directory exists
@@ -223,18 +240,21 @@ class PQHashGenerator {
     }
 
     fs.writeFileSync(outputPath, JSON.stringify(output, null, 2));
-    
+
     console.log(`✅ Hash file generated: ${outputPath}`);
     console.log(`   ${Object.keys(hashes).length} unique hashes`);
     console.log(`   ${this.stats.duplicates} duplicates found`);
     console.log(`   Checksum: ${output.checksum}`);
-    
+
     return output;
   }
 
   generateChecksum(data) {
     const content = JSON.stringify(data, null, 0); // No formatting for checksum
-    return crypto.createHash(config.output.checksumAlgorithm).update(content).digest('hex');
+    return crypto
+      .createHash(config.output.checksumAlgorithm)
+      .update(content)
+      .digest('hex');
   }
 
   printStats() {
@@ -243,12 +263,13 @@ class PQHashGenerator {
     console.log(`  Operations found: ${this.stats.operationsFound}`);
     console.log(`  Duplicates: ${this.stats.duplicates}`);
     console.log(`  Errors: ${this.stats.errors}`);
-    
+
     const riskBreakdown = {};
     for (const operation of this.operations.values()) {
-      riskBreakdown[operation.risk_level] = (riskBreakdown[operation.risk_level] || 0) + 1;
+      riskBreakdown[operation.risk_level] =
+        (riskBreakdown[operation.risk_level] || 0) + 1;
     }
-    
+
     console.log('\n🎯 Risk Level Breakdown:');
     for (const [level, count] of Object.entries(riskBreakdown)) {
       console.log(`  ${level}: ${count} operations`);
@@ -259,8 +280,8 @@ class PQHashGenerator {
 async function main() {
   const args = process.argv.slice(2);
   const options = {};
-  
-  args.forEach(arg => {
+
+  args.forEach((arg) => {
     const [key, value] = arg.split('=');
     options[key.replace(/^--/, '')] = value || true;
   });
@@ -277,9 +298,8 @@ async function main() {
     await generator.scanCodebase();
     generator.generateOutput(output);
     generator.printStats();
-    
+
     console.log('\n🎉 Hash generation completed successfully!');
-    
   } catch (error) {
     console.error('\n❌ Generation failed:', error.message);
     if (process.env.DEBUG) {

@@ -1,4 +1,4 @@
-import { Pool } from "pg";
+import { Pool } from 'pg';
 
 export default async function migrate(pool?: Pool) {
   const pg = pool || new Pool({ connectionString: process.env.DATABASE_URL });

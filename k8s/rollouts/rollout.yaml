@@ -12,7 +12,7 @@ spec:
         nginx: {}
       steps:
         - setWeight: 10
-        - pause: {duration: 120}
+        - pause: { duration: 120 }
         - analysis:
             templates:
               - templateName: ig-slo-checks
@@ -20,7 +20,7 @@ spec:
               - name: service
                 value: api
         - setWeight: 50
-        - pause: {duration: 180}
+        - pause: { duration: 180 }
         - analysis:
             templates:
               - templateName: ig-slo-checks

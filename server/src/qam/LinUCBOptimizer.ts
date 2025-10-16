@@ -76,7 +76,7 @@ export class LinUCBOptimizer extends EventEmitter {
   } = {
     thetaStability: [],
     rewardVariance: [],
-    explorationDecay: []
+    explorationDecay: [],
   };
 
   constructor(config: LinUCBConfig) {
@@ -85,7 +85,7 @@ export class LinUCBOptimizer extends EventEmitter {
       regularizationLambda: 1.0,
       maxArms: 1000,
       decayFactor: 0.995,
-      ...config
+      ...config,
     };
 
     this.contextDimension = config.contextDimension;
@@ -93,7 +93,7 @@ export class LinUCBOptimizer extends EventEmitter {
 
     logger.info('LinUCBOptimizer initialized', {
       config: this.config,
-      contextDimension: this.contextDimension
+      contextDimension: this.contextDimension,
     });
   }
 
@@ -105,11 +105,13 @@ export class LinUCBOptimizer extends EventEmitter {
       const features = context.features;
 
       if (features.length !== this.contextDimension) {
-        throw new Error(`Context dimension mismatch: expected ${this.contextDimension}, got ${features.length}`);
+        throw new Error(
+          `Context dimension mismatch: expected ${this.contextDimension}, got ${features.length}`,
+        );
       }
 
       // Validate features are finite numbers
-      if (!features.every(f => Number.isFinite(f))) {
+      if (!features.every((f) => Number.isFinite(f))) {
         throw new Error('Context features must be finite numbers');
       }
 
@@ -152,7 +154,7 @@ export class LinUCBOptimizer extends EventEmitter {
         confidence: bestConfidence,
         expectedReward: bestExpectedReward,
         explorationBonus: bestExplorationBonus,
-        recommendedAction: this.armIdToAction(bestArm)
+        recommendedAction: this.armIdToAction(bestArm),
       };
 
       // Update arm usage
@@ -164,14 +166,14 @@ export class LinUCBOptimizer extends EventEmitter {
         armId: bestArm,
         context: context.features,
         ucbValue: bestUCBValue,
-        confidence: bestConfidence
+        confidence: bestConfidence,
       });
 
       logger.debug('Optimal arm selected', {
         armId: bestArm,
         ucbValue: bestUCBValue,
         confidence: bestConfidence,
-        contextFeatures: features.slice(0, 5) // Log first 5 features
+        contextFeatures: features.slice(0, 5), // Log first 5 features
       });
 
       return result;
@@ -188,7 +190,7 @@ export class LinUCBOptimizer extends EventEmitter {
   async updateWithReward(
     armId: number,
     context: ContextVector,
-    reward: number
+    reward: number,
   ): Promise<UpdateResult> {
     try {
       if (!Number.isFinite(reward)) {
@@ -204,7 +206,11 @@ export class LinUCBOptimizer extends EventEmitter {
       armState.averageReward = armState.totalReward / armState.numPulls;
 
       // Sherman-Morrison update for efficient matrix inversion
-      const updatedTheta = this.updateThetaShermanMorrison(armState, features, reward);
+      const updatedTheta = this.updateThetaShermanMorrison(
+        armState,
+        features,
+        reward,
+      );
       const thetaUpdated = !this.arraysEqual(armState.theta, updatedTheta);
       armState.theta = updatedTheta;
 
@@ -232,7 +238,7 @@ export class LinUCBOptimizer extends EventEmitter {
         rewardReceived: reward,
         thetaUpdated,
         confidenceScores,
-        explorationRate
+        explorationRate,
       };
 
       // Emit update event
@@ -241,7 +247,7 @@ export class LinUCBOptimizer extends EventEmitter {
         reward,
         totalPulls: this.totalPulls,
         averageReward: armState.averageReward,
-        thetaUpdated
+        thetaUpdated,
       });
 
       logger.debug('Reward update completed', {
@@ -249,7 +255,7 @@ export class LinUCBOptimizer extends EventEmitter {
         reward,
         numPulls: armState.numPulls,
         averageReward: armState.averageReward,
-        thetaUpdated
+        thetaUpdated,
       });
 
       return result;
@@ -265,22 +271,31 @@ export class LinUCBOptimizer extends EventEmitter {
    */
   getPerformanceAnalytics(): any {
     const runtime = Date.now() - this.startTime.getTime();
-    const avgReward = this.totalPulls > 0 ? this.totalReward / this.totalPulls : 0;
-    const recentAvgReward = this.recentRewards.length > 0
-      ? this.recentRewards.reduce((sum, r) => sum + r, 0) / this.recentRewards.length
-      : 0;
+    const avgReward =
+      this.totalPulls > 0 ? this.totalReward / this.totalPulls : 0;
+    const recentAvgReward =
+      this.recentRewards.length > 0
+        ? this.recentRewards.reduce((sum, r) => sum + r, 0) /
+          this.recentRewards.length
+        : 0;
 
     // Calculate regret estimation
-    const estimatedOptimalReward = Math.max(...Array.from(this.arms.values()).map(a => a.averageReward));
-    const cumulativeRegret = (estimatedOptimalReward * this.totalPulls) - this.totalReward;
+    const estimatedOptimalReward = Math.max(
+      ...Array.from(this.arms.values()).map((a) => a.averageReward),
+    );
+    const cumulativeRegret =
+      estimatedOptimalReward * this.totalPulls - this.totalReward;
 
     // Arm statistics
-    const armStats = Array.from(this.arms.values()).map(arm => ({
+    const armStats = Array.from(this.arms.values()).map((arm) => ({
       armId: arm.armId,
       numPulls: arm.numPulls,
       averageReward: arm.averageReward,
       totalReward: arm.totalReward,
-      confidence: this.calculateConfidenceBound(arm.armId, this.getLastContext() || new Array(this.contextDimension).fill(0))
+      confidence: this.calculateConfidenceBound(
+        arm.armId,
+        this.getLastContext() || new Array(this.contextDimension).fill(0),
+      ),
     }));
 
     return {
@@ -294,7 +309,7 @@ export class LinUCBOptimizer extends EventEmitter {
       explorationRate: this.calculateExplorationRate(),
       convergenceMetrics: this.convergenceMetrics,
       armStatistics: armStats,
-      bestArm: this.getBestArm()
+      bestArm: this.getBestArm(),
     };
   }
 
@@ -304,26 +319,34 @@ export class LinUCBOptimizer extends EventEmitter {
   private getOrCreateArm(armId: number): ArmState {
     if (!this.arms.has(armId)) {
       if (this.arms.size >= this.config.maxArms!) {
-        throw new Error(`Maximum number of arms (${this.config.maxArms}) exceeded`);
+        throw new Error(
+          `Maximum number of arms (${this.config.maxArms}) exceeded`,
+        );
       }
 
       // Initialize arm with identity matrix and zero vectors
-      const identityMatrix = this.createIdentityMatrix(this.contextDimension, this.config.regularizationLambda!);
+      const identityMatrix = this.createIdentityMatrix(
+        this.contextDimension,
+        this.config.regularizationLambda!,
+      );
       const zeroVector = new Array(this.contextDimension).fill(0);
 
       const newArm: ArmState = {
         armId,
         theta: [...zeroVector],
-        A: identityMatrix.map(row => [...row]), // Deep copy
+        A: identityMatrix.map((row) => [...row]), // Deep copy
         b: [...zeroVector],
         numPulls: 0,
         totalReward: 0,
         averageReward: 0,
-        lastUsed: new Date()
+        lastUsed: new Date(),
       };
 
       this.arms.set(armId, newArm);
-      logger.debug('New arm created', { armId, contextDimension: this.contextDimension });
+      logger.debug('New arm created', {
+        armId,
+        contextDimension: this.contextDimension,
+      });
     }
 
     return this.arms.get(armId)!;
@@ -332,7 +355,10 @@ export class LinUCBOptimizer extends EventEmitter {
   /**
    * Calculate UCB value for an arm
    */
-  private calculateUCB(armState: ArmState, features: number[]): {
+  private calculateUCB(
+    armState: ArmState,
+    features: number[],
+  ): {
     ucbValue: number;
     expectedReward: number;
     explorationBonus: number;
@@ -352,14 +378,17 @@ export class LinUCBOptimizer extends EventEmitter {
       ucbValue,
       expectedReward,
       explorationBonus,
-      confidence
+      confidence,
     };
   }
 
   /**
    * Calculate confidence bound for exploration
    */
-  private calculateConfidenceBound(armId: number, contextFeatures: number[]): number {
+  private calculateConfidenceBound(
+    armId: number,
+    contextFeatures: number[],
+  ): number {
     const armState = this.arms.get(armId);
     if (!armState) return 1.0; // High confidence for unknown arms
 
@@ -371,7 +400,10 @@ export class LinUCBOptimizer extends EventEmitter {
       // Confidence bound: sqrt(x^T * A^(-1) * x)
       return Math.sqrt(Math.max(0, xAInvx));
     } catch (error) {
-      logger.warn('Confidence bound calculation failed, using fallback', { armId, error });
+      logger.warn('Confidence bound calculation failed, using fallback', {
+        armId,
+        error,
+      });
       return 1.0; // Fallback confidence
     }
   }
@@ -379,13 +411,17 @@ export class LinUCBOptimizer extends EventEmitter {
   /**
    * Sherman-Morrison matrix update for efficiency
    */
-  private updateThetaShermanMorrison(armState: ArmState, features: number[], reward: number): number[] {
+  private updateThetaShermanMorrison(
+    armState: ArmState,
+    features: number[],
+    reward: number,
+  ): number[] {
     try {
       // Update b: b = b + r * x
       const newB = armState.b.map((bi, i) => bi + reward * features[i]);
 
       // Update A: A = A + x * x^T (Sherman-Morrison formula)
-      const newA = armState.A.map(row => [...row]); // Deep copy
+      const newA = armState.A.map((row) => [...row]); // Deep copy
       for (let i = 0; i < this.contextDimension; i++) {
         for (let j = 0; j < this.contextDimension; j++) {
           newA[i][j] += features[i] * features[j];
@@ -402,7 +438,10 @@ export class LinUCBOptimizer extends EventEmitter {
 
       return newTheta;
     } catch (error) {
-      logger.error('Sherman-Morrison update failed', { error, armId: armState.armId });
+      logger.error('Sherman-Morrison update failed', {
+        error,
+        armId: armState.armId,
+      });
       return armState.theta; // Return unchanged theta on error
     }
   }
@@ -410,7 +449,9 @@ export class LinUCBOptimizer extends EventEmitter {
   /**
    * Calculate confidence scores for all arms
    */
-  private calculateAllConfidenceScores(features: number[]): Record<string, number> {
+  private calculateAllConfidenceScores(
+    features: number[],
+  ): Record<string, number> {
     const scores: Record<string, number> = {};
 
     for (const [armId, armState] of this.arms) {
@@ -444,12 +485,15 @@ export class LinUCBOptimizer extends EventEmitter {
   private getAverageConfidence(): number {
     if (this.arms.size === 0) return 1.0;
 
-    const lastContext = this.getLastContext() || new Array(this.contextDimension).fill(0);
-    const confidences = Array.from(this.arms.keys()).map(armId =>
-      this.calculateConfidenceBound(armId, lastContext)
+    const lastContext =
+      this.getLastContext() || new Array(this.contextDimension).fill(0);
+    const confidences = Array.from(this.arms.keys()).map((armId) =>
+      this.calculateConfidenceBound(armId, lastContext),
     );
 
-    return confidences.reduce((sum, conf) => sum + conf, 0) / confidences.length;
+    return (
+      confidences.reduce((sum, conf) => sum + conf, 0) / confidences.length
+    );
   }
 
   /**
@@ -471,9 +515,12 @@ export class LinUCBOptimizer extends EventEmitter {
     // Keep only recent metrics (last 100 updates)
     const maxLength = 100;
     if (this.convergenceMetrics.thetaStability.length > maxLength) {
-      this.convergenceMetrics.thetaStability = this.convergenceMetrics.thetaStability.slice(-maxLength);
-      this.convergenceMetrics.rewardVariance = this.convergenceMetrics.rewardVariance.slice(-maxLength);
-      this.convergenceMetrics.explorationDecay = this.convergenceMetrics.explorationDecay.slice(-maxLength);
+      this.convergenceMetrics.thetaStability =
+        this.convergenceMetrics.thetaStability.slice(-maxLength);
+      this.convergenceMetrics.rewardVariance =
+        this.convergenceMetrics.rewardVariance.slice(-maxLength);
+      this.convergenceMetrics.explorationDecay =
+        this.convergenceMetrics.explorationDecay.slice(-maxLength);
     }
   }
 
@@ -533,7 +580,9 @@ export class LinUCBOptimizer extends EventEmitter {
   // Matrix and vector operations
 
   private createIdentityMatrix(size: number, lambda: number): number[][] {
-    const matrix = Array(size).fill(null).map(() => Array(size).fill(0));
+    const matrix = Array(size)
+      .fill(null)
+      .map(() => Array(size).fill(0));
     for (let i = 0; i < size; i++) {
       matrix[i][i] = lambda;
     }
@@ -545,7 +594,7 @@ export class LinUCBOptimizer extends EventEmitter {
   }
 
   private matrixVectorProduct(matrix: number[][], vector: number[]): number[] {
-    return matrix.map(row => this.dotProduct(row, vector));
+    return matrix.map((row) => this.dotProduct(row, vector));
   }
 
   private quadraticForm(x: number[], A: number[][]): number {
@@ -601,7 +650,7 @@ export class LinUCBOptimizer extends EventEmitter {
     }
 
     // Extract inverse matrix
-    return augmented.map(row => row.slice(n));
+    return augmented.map((row) => row.slice(n));
   }
 
   private arraysEqual(a: number[], b: number[]): boolean {
@@ -611,15 +660,21 @@ export class LinUCBOptimizer extends EventEmitter {
 
   private calculateThetaStability(armState: ArmState): number {
     // Measure how much theta has changed (simplified)
-    const thetaNorm = Math.sqrt(armState.theta.reduce((sum, t) => sum + t * t, 0));
+    const thetaNorm = Math.sqrt(
+      armState.theta.reduce((sum, t) => sum + t * t, 0),
+    );
     return 1 / (1 + thetaNorm); // Stability decreases with larger theta values
   }
 
   private calculateRewardVariance(): number {
     if (this.recentRewards.length < 2) return 0;
 
-    const mean = this.recentRewards.reduce((sum, r) => sum + r, 0) / this.recentRewards.length;
-    const variance = this.recentRewards.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) / this.recentRewards.length;
+    const mean =
+      this.recentRewards.reduce((sum, r) => sum + r, 0) /
+      this.recentRewards.length;
+    const variance =
+      this.recentRewards.reduce((sum, r) => sum + Math.pow(r - mean, 2), 0) /
+      this.recentRewards.length;
 
     return variance;
   }
@@ -636,7 +691,7 @@ export class LinUCBOptimizer extends EventEmitter {
     this.convergenceMetrics = {
       thetaStability: [],
       rewardVariance: [],
-      explorationDecay: []
+      explorationDecay: [],
     };
     this.startTime = new Date();
 
@@ -663,7 +718,7 @@ export class LinUCBOptimizer extends EventEmitter {
       totalPulls: this.totalPulls,
       totalReward: this.totalReward,
       startTime: this.startTime,
-      convergenceMetrics: this.convergenceMetrics
+      convergenceMetrics: this.convergenceMetrics,
     };
   }
 
@@ -681,7 +736,7 @@ export class LinUCBOptimizer extends EventEmitter {
     logger.info('State imported', {
       totalPulls: this.totalPulls,
       numArms: this.arms.size,
-      totalReward: this.totalReward
+      totalReward: this.totalReward,
     });
   }
 

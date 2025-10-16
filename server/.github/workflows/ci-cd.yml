@@ -2,11 +2,11 @@ name: IntelGraph CI/CD Pipeline
 
 on:
   push:
-    branches: [ main, develop, 'feature/**', 'hotfix/**' ]
+    branches: [main, develop, 'feature/**', 'hotfix/**']
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   release:
-    types: [ published ]
+    types: [published]
 
 env:
   REGISTRY: ghcr.io

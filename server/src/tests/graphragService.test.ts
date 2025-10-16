@@ -1,14 +1,14 @@
-import { GraphRAGService } from "../services/GraphRAGService.js";
+import { GraphRAGService } from '../services/GraphRAGService.js';
 import {
   graphragSchemaFailuresTotal,
   graphragCacheHitRatio,
-} from "../monitoring/metrics.js";
-import { UserFacingError } from "../lib/errors.js";
+} from '../monitoring/metrics.js';
+import { UserFacingError } from '../lib/errors.js';
 
-describe("GraphRAGService", () => {
+describe('GraphRAGService', () => {
   const baseRequest = {
-    investigationId: "inv1",
-    question: "What is testing?",
+    investigationId: 'inv1',
+    question: 'What is testing?',
   };
 
   function createService(llmResponses: string[]) {
@@ -17,28 +17,28 @@ describe("GraphRAGService", () => {
         records: [
           {
             get: (field: string) => {
-              if (field === "nodes") {
+              if (field === 'nodes') {
                 return [
                   {
                     properties: {
-                      id: "e1",
-                      type: "Entity",
-                      label: "Entity1",
-                      properties: "{}",
+                      id: 'e1',
+                      type: 'Entity',
+                      label: 'Entity1',
+                      properties: '{}',
                       confidence: 1,
                     },
                   },
                 ];
               }
-              if (field === "relationships") {
+              if (field === 'relationships') {
                 return [
                   {
                     properties: {
-                      id: "r1",
-                      type: "REL",
-                      fromEntityId: "e1",
-                      toEntityId: "e1",
-                      properties: "{}",
+                      id: 'r1',
+                      type: 'REL',
+                      fromEntityId: 'e1',
+                      toEntityId: 'e1',
+                      properties: '{}',
                       confidence: 1,
                     },
                   },
@@ -83,30 +83,30 @@ describe("GraphRAGService", () => {
     graphragCacheHitRatio.set(0);
   });
 
-  test("returns valid response and uses cache", async () => {
+  test('returns valid response and uses cache', async () => {
     const valid = JSON.stringify({
-      answer: "Test",
+      answer: 'Test',
       confidence: 0.9,
-      citations: { entityIds: ["e1"] },
-      why_paths: [
-        { from: "e1", to: "e1", relId: "r1", type: "REL" },
-      ],
+      citations: { entityIds: ['e1'] },
+      why_paths: [{ from: 'e1', to: 'e1', relId: 'r1', type: 'REL' }],
     });
     const { service, neo4jSession } = createService([valid, valid]);
 
     const first = await service.answer(baseRequest);
-    expect(first.answer).toBe("Test");
+    expect(first.answer).toBe('Test');
     expect(graphragCacheHitRatio.get().values[0].value).toBe(0);
 
     const second = await service.answer(baseRequest);
-    expect(second.answer).toBe("Test");
+    expect(second.answer).toBe('Test');
     expect(graphragCacheHitRatio.get().values[0].value).toBeCloseTo(0.5);
     expect(neo4jSession.run).toHaveBeenCalledTimes(1);
   });
 
-  test("throws user-facing error with trace id on invalid output", async () => {
-    const { service } = createService(["not-json", "not-json"]);
-    await expect(service.answer(baseRequest)).rejects.toBeInstanceOf(UserFacingError);
+  test('throws user-facing error with trace id on invalid output', async () => {
+    const { service } = createService(['not-json', 'not-json']);
+    await expect(service.answer(baseRequest)).rejects.toBeInstanceOf(
+      UserFacingError,
+    );
     expect(graphragSchemaFailuresTotal.get().values[0].value).toBe(2);
   });
 });

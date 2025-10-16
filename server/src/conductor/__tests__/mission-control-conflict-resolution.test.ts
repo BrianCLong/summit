@@ -3,8 +3,14 @@ import { MissionControlConflictResolver } from '../mission-control/conflict-reso
 describe('MissionControlConflictResolver', () => {
   const resolver = new MissionControlConflictResolver();
 
-  const primarySlot = { start: '2025-01-01T00:00:00Z', end: '2025-01-01T01:00:00Z' };
-  const fallbackSlot = { start: '2025-01-01T01:00:00Z', end: '2025-01-01T02:00:00Z' };
+  const primarySlot = {
+    start: '2025-01-01T00:00:00Z',
+    end: '2025-01-01T01:00:00Z',
+  };
+  const fallbackSlot = {
+    start: '2025-01-01T01:00:00Z',
+    end: '2025-01-01T02:00:00Z',
+  };
 
   it('assigns highest priority mission to contested slot and negotiates fallback for lower priority mission', () => {
     const resolution = resolver.resolve({
@@ -39,8 +45,12 @@ describe('MissionControlConflictResolver', () => {
       ],
     });
 
-    const alphaAssignment = resolution.assignments.find((a: any) => a.missionId === 'mission-alpha');
-    const betaAssignment = resolution.assignments.find((a: any) => a.missionId === 'mission-beta');
+    const alphaAssignment = resolution.assignments.find(
+      (a: any) => a.missionId === 'mission-alpha',
+    );
+    const betaAssignment = resolution.assignments.find(
+      (a: any) => a.missionId === 'mission-beta',
+    );
 
     expect(alphaAssignment).toBeDefined();
     expect(alphaAssignment?.decision).toBe('primary');
@@ -94,7 +104,8 @@ describe('MissionControlConflictResolver', () => {
     expect(resolution.arbitrationSummary.fairnessIndex).toBeLessThan(1);
     expect(
       resolution.negotiationLog.some(
-        (event: any) => event.type === 'defer' && event.actors.includes('mission-low'),
+        (event: any) =>
+          event.type === 'defer' && event.actors.includes('mission-low'),
       ),
     ).toBe(true);
   });
@@ -138,7 +149,9 @@ describe('MissionControlConflictResolver', () => {
       ],
     });
 
-    expect(resolution.assignments.some((a: any) => a.missionId === 'mission-gamma')).toBe(false);
+    expect(
+      resolution.assignments.some((a: any) => a.missionId === 'mission-gamma'),
+    ).toBe(false);
     expect(resolution.deferred).toHaveLength(1);
     expect(resolution.arbitrationSummary.totalConcessions).toBe(1);
     expect(resolution.arbitrationSummary.fairnessIndex).toBeGreaterThan(0.7);

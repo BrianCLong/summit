@@ -1,6 +1,6 @@
 # Summit — MVP‑2 & GA PRD (360°)
 
-*A living product spec that unifies product, architecture, UX, data, ops, and governance. This version assumes current public repo state and the Council Wishbooks as the north star. Ethics and lawful‑use guardrails apply everywhere. “Provenance over prediction.”*
+_A living product spec that unifies product, architecture, UX, data, ops, and governance. This version assumes current public repo state and the Council Wishbooks as the north star. Ethics and lawful‑use guardrails apply everywhere. “Provenance over prediction.”_
 
 ---
 
@@ -17,8 +17,9 @@
 ## 1) Where We Are (Repo Reality Check)
 
 **Active surfaces (representative):**
+
 - `apps/web/` React+TS+Tailwind tri‑pane UI foundation; auth/routing; graph explorer; alerts; case mgmt basics.
-- `server/src/ai/*` extraction engines (OCR/STT/object/face* for **redaction/analysis only**), deepfake sentinel/triage, investigative thread quality agent, XAI audit logging, service continuity orchestrator.
+- `server/src/ai/*` extraction engines (OCR/STT/object/face\* for **redaction/analysis only**), deepfake sentinel/triage, investigative thread quality agent, XAI audit logging, service continuity orchestrator.
 - `graph-xai/` explainability APIs (paths, counterfactuals, saliency, fairness, robustness) + ethics/audit hooks.
 - `prov-ledger/` provenance/claim ledger service: evidence registration, claim parsing, export manifests.
 - `predictive-threat-suite/` timeline prediction, causal explainer, counterfactual simulator; Helm chart stubs.
@@ -27,6 +28,7 @@
 - `docs/project_management/*`: epics (Autonomous Copilot, War Rooms, Federated Search, Predictive Graph AI, Real‑Time Simulation, Unified Multimodal Graph), roadmaps/RACI.
 
 **Gaps to close for productization:**
+
 - Contract tests + fixtures per connector; GDPR/License policy checks wired to ingest/export.
 - p95 query/SLOs consistently observed + dashboards; cost guard policies enforced.
 - Audit trail end‑to‑end (who/what/why/when) exposed to Admin/Ombuds.
@@ -36,17 +38,18 @@
 
 ## 2) Product Objectives
 
-1) **Analyst‑grade core**: ingest→resolve→analyze→hypothesize→simulate→decide→report with citations & provenance.
-2) **Auditable AI**: glass‑box copilot generates Cypher/SQL with preview, GraphRAG with inline citations, and XAI panels.
-3) **Oversight by design**: ABAC/RBAC, OPA policies, reason‑for‑access prompts, warrant/license binding at query/export.
-4) **Operate degraded**: offline/edge kit (v1) with CRDT sync and verifiable resync logs.
-5) **FinOps & SRE**: cost guard, SLOs, chaos drills, RTO/RPO, autoscaling, observability.
+1. **Analyst‑grade core**: ingest→resolve→analyze→hypothesize→simulate→decide→report with citations & provenance.
+2. **Auditable AI**: glass‑box copilot generates Cypher/SQL with preview, GraphRAG with inline citations, and XAI panels.
+3. **Oversight by design**: ABAC/RBAC, OPA policies, reason‑for‑access prompts, warrant/license binding at query/export.
+4. **Operate degraded**: offline/edge kit (v1) with CRDT sync and verifiable resync logs.
+5. **FinOps & SRE**: cost guard, SLOs, chaos drills, RTO/RPO, autoscaling, observability.
 
 ---
 
 ## 3) MVP‑2 Scope (What We Will Ship Next)
 
 ### 3.1 Functional Scope
+
 - **A. Ingest & Prep**: Connector catalog (10–15), ingest wizard (schema map, PII classifier, DPIA checklist, redaction presets), streaming ETL enrichers (GeoIP, lang, hash/perceptual hash, EXIF scrub, OCR), **Data License Registry** with query‑time/export enforcement.
 - **B. Graph Core**: Canonical ER model (Person, Org, Asset, Account, Location, Event, Document, Communication, Device, Vehicle, FinancialInstrument, Infrastructure, Claim, Indicator, Case), bitemporal truth, geo‑temporal constructs (trajectories, stay‑points), provenance/lineage on every node/edge, policy labels.
 - **C. Analytics & Tradecraft**: link/path/community/centrality suite; pattern miner (temporal motifs, co‑travel/co‑presence, structuring); anomaly/risk scoring with feature store + triage queues; **Hypothesis Workbench** (competing hypotheses, Bayes updates, evidence weights); **COA planner** (DAGs + Monte‑Carlo) with assumptions logged.
@@ -58,6 +61,7 @@
 - **I. Starter Runbooks (DAGs)**: R1 Rapid Attribution (CTI), R2 Phishing Cluster (DFIR), R3 Disinformation Mapping, R4 AML Structuring, R5 Human Rights Vetting, R6 Supply‑Chain Compromise, R7 Insider‑Risk (consent‑bound), R8 Infrastructure Sabotage (defensive sim), R9 Crisis Ops (civic), R10 Dark‑Web Lead Vetting (lawful).
 
 ### 3.2 Non‑Functional Scope
+
 - **Performance targets:** p95 graph query < **1.5s** at 3 hops, 50k neighborhood; ingest 10k docs ≤ **5m**.
 - **Reliability:** RTO ≤ **1h**, RPO ≤ **5m** (tiered). Monthly chaos drills (pod/broker kill; topology failover).
 - **Security/Privacy:** STRIDE controls mapped; SBOM, dependency scanning, secret hygiene; minimization at ingest; purpose limitation tags; dual‑control deletes; redaction tools; export manifests verifiable.
@@ -65,6 +69,7 @@
 - **FinOps:** dashboards for unit costs; budget caps; downshift modes; archival policies.
 
 ### 3.3 Acceptance & Demos
+
 - Golden‑path E2E: “Ingest → Resolve → Runbook → Report” with reproducible screenshots & manifests.
 - Connector conformance tests (manifest, mapping, rate‑limit policy, golden IO).
 - GraphRAG citations resolve to evidence; missing citations block publish.
@@ -72,6 +77,7 @@
 - Export bundles include hash manifest & transform chain; external verifier passes.
 
 ### 3.4 Out of Scope (for MVP‑2)
+
 - Multi‑graph federation (push‑down/cross‑tenant) — prototype later.
 - ZK deconfliction & proof‑carrying queries — move to GA+.
 - Advanced simulations market; narrative causality tester; liaison escrow — GA+.
@@ -81,6 +87,7 @@
 ## 4) GA Scope (What “Core GA” Includes)
 
 **Adds on top of MVP‑2:**
+
 - **Graph‑XAI everywhere** (anomaly/ER/forecasts; fairness/robustness views).
 - **Prov‑Ledger GA** (claim extraction, contradiction graphs, disclosure bundles; external verifier CLI).
 - **Predictive Suite** beta→GA (timeline forecasting w/ confidence bands; causal explainers; counterfactual sim).
@@ -162,13 +169,13 @@
 
 ## 11) UX: Core Flows & Screens (MVP‑2)
 
-1) **Ingest Wizard** → map schema, PII flags, license rules, sample preview, lineage.
-2) **Graph Explorer** → pivot/link/path; filters (time/space/policy); XAI overlay.
-3) **Copilot Panel** → NL prompt → Cypher preview (cost/rows) → sandbox execute → diff vs manual.
-4) **Hypothesis Workbench** → competing hypotheses, evidence weights, missing‑evidence prompts.
-5) **COA Planner** → DAG builder; likelihood/impact bands; sensitivity sliders; assumptions ledger.
-6) **Report Studio** → timeline/map/graph figures; narrative builder; inline citations; disclose packager.
-7) **Audit & Policy** → access reasons; appeals; policy simulation.
+1. **Ingest Wizard** → map schema, PII flags, license rules, sample preview, lineage.
+2. **Graph Explorer** → pivot/link/path; filters (time/space/policy); XAI overlay.
+3. **Copilot Panel** → NL prompt → Cypher preview (cost/rows) → sandbox execute → diff vs manual.
+4. **Hypothesis Workbench** → competing hypotheses, evidence weights, missing‑evidence prompts.
+5. **COA Planner** → DAG builder; likelihood/impact bands; sensitivity sliders; assumptions ledger.
+6. **Report Studio** → timeline/map/graph figures; narrative builder; inline citations; disclose packager.
+7. **Audit & Policy** → access reasons; appeals; policy simulation.
 
 A11y AAA; keyboard‑first; dark/light; undo/redo; “Explain this view.”
 
@@ -176,7 +183,7 @@ A11y AAA; keyboard‑first; dark/light; undo/redo; “Explain this view.”
 
 ## 12) Runbook Library (Initial)
 
-- R1–R10 as listed in 3.1 *I*. Each ships with: Purpose, Triggers, Inputs, Outputs, Preconditions (legal/authority), Steps, KPIs, Failure Modes, XAI notes, Rollback.
+- R1–R10 as listed in 3.1 _I_. Each ships with: Purpose, Triggers, Inputs, Outputs, Preconditions (legal/authority), Steps, KPIs, Failure Modes, XAI notes, Rollback.
 
 **GA adds:** Policy Change Simulation, Audit Closure Sprint, Cost Guard Enforcement, Retention/Purge, Tenant Separation Tests, plus domain runbooks to 25+.
 
@@ -185,6 +192,7 @@ A11y AAA; keyboard‑first; dark/light; undo/redo; “Explain this view.”
 ## 13) Roadmap & Milestones
 
 **MVP‑2 (6–10 wks)**
+
 - ✅ Ingest wizard + 10–15 connectors (manifests, tests).
 - ✅ Graph core (bitemporal + geo) + ER explainability scorecards.
 - ✅ Link/path/community suite + pattern miner subset + anomaly triage.
@@ -196,6 +204,7 @@ A11y AAA; keyboard‑first; dark/light; undo/redo; “Explain this view.”
 - ✅ Acceptance packs & demo datasets; E2E screenshot diffs; chaos drill #1; security checks.
 
 **GA (Next 2–3 releases)**
+
 - Graph‑XAI everywhere; predictive suite beta→GA; prov‑ledger GA (contradiction graphs).
 - Federated search alpha; offline kit v1 harden; integrations (SIEM/XDR, STIX/TAXII/MISP/OpenCTI, GIS, Relativity/Nuix).
 - Runbooks to 25+; policy binding at query time; expanded Admin Studio; monthly chaos cadence.
@@ -230,12 +239,12 @@ A11y AAA; keyboard‑first; dark/light; undo/redo; “Explain this view.”
 
 ## 16) Open Questions (Track to Decision)
 
-1) Neo4j vs JanusGraph target for GA? (Migrate path, perf tradeoffs.)
-2) Minimum viable predictive horizon & models for first GA? (Bench + datasets.)
-3) Data residency/jurisdiction tags default policy per environment?
-4) Disclosure bundle format v1 (JSON‑LD vs custom + external verifier interface details).
-5) STIX/TAXII vs OpenCTI bridge priority ordering.
-6) Offline kit device storage encryption & key management details.
+1. Neo4j vs JanusGraph target for GA? (Migrate path, perf tradeoffs.)
+2. Minimum viable predictive horizon & models for first GA? (Bench + datasets.)
+3. Data residency/jurisdiction tags default policy per environment?
+4. Disclosure bundle format v1 (JSON‑LD vs custom + external verifier interface details).
+5. STIX/TAXII vs OpenCTI bridge priority ordering.
+6. Offline kit device storage encryption & key management details.
 
 ---
 
@@ -253,9 +262,9 @@ A11y AAA; keyboard‑first; dark/light; undo/redo; “Explain this view.”
 ---
 
 ### Ethic Gates (Reaffirmed)
+
 No targeted violence enablement, unlawful surveillance, mass repression instrumentation, or human‑subject manipulation. Deception tooling is **defensive/testing only** with risk caps. All exports carry provenance manifests. All high‑risk actions require dual‑control and dissent capture.
 
 ---
 
 **Owner:** Product (Confidential Design) • **Partners:** Eng, UX, SRE, Security, Ombuds • **Review Cadence:** Weekly ship room + Monthly council review.
-

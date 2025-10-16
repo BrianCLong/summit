@@ -5,7 +5,7 @@ import type {
   SelfEditRecord,
   SelfEditScorecard,
   SelfEditStatus,
-  SelfEditVerifierScore
+  SelfEditVerifierScore,
 } from 'common-types';
 
 export interface SelfEditRegistryOptions {
@@ -26,7 +26,9 @@ type MutableSelfEditRecord = SelfEditRecord & {
 
 type MutableScore = SelfEditVerifierScore;
 
-type ApprovalInput = Omit<SelfEditApproval, 'decidedAt'> & { decidedAt?: string };
+type ApprovalInput = Omit<SelfEditApproval, 'decidedAt'> & {
+  decidedAt?: string;
+};
 
 type StatusFilter = SelfEditStatus | ReadonlyArray<SelfEditStatus>;
 
@@ -52,7 +54,10 @@ export class SelfEditRegistry {
 
     const now = this.clock();
     const createdAt = now.toISOString();
-    const expiresAt = this.computeExpiry(now, proposal.ttlMs ?? this.defaultTtlMs);
+    const expiresAt = this.computeExpiry(
+      now,
+      proposal.ttlMs ?? this.defaultTtlMs,
+    );
 
     const record: MutableSelfEditRecord = {
       ...proposal,
@@ -74,33 +79,42 @@ export class SelfEditRegistry {
     return record ? this.clone(record) : undefined;
   }
 
-  list(filter?: { status?: StatusFilter; domain?: string; limit?: number }): SelfEditRecord[] {
+  list(filter?: {
+    status?: StatusFilter;
+    domain?: string;
+    limit?: number;
+  }): SelfEditRecord[] {
     this.pruneExpired();
 
     let entries = Array.from(this.records.values());
 
     if (filter?.status) {
-      const statuses = Array.isArray(filter.status) ? filter.status : [filter.status];
-      entries = entries.filter(entry => statuses.includes(entry.status));
+      const statuses = Array.isArray(filter.status)
+        ? filter.status
+        : [filter.status];
+      entries = entries.filter((entry) => statuses.includes(entry.status));
     }
 
     if (filter?.domain) {
-      entries = entries.filter(entry => entry.domain === filter.domain);
+      entries = entries.filter((entry) => entry.domain === filter.domain);
     }
 
-    entries.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+    entries.sort(
+      (a, b) =>
+        new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+    );
 
     if (filter?.limit !== undefined && filter.limit >= 0) {
       entries = entries.slice(0, filter.limit);
     }
 
-    return entries.map(entry => this.clone(entry));
+    return entries.map((entry) => this.clone(entry));
   }
 
   recordVerifierScore(
     id: string,
     score: Omit<SelfEditVerifierScore, 'measuredAt'> & { measuredAt?: string },
-    options?: ScorecardOptions
+    options?: ScorecardOptions,
   ): SelfEditRecord {
     this.pruneExpired();
     const record = this.require(id);
@@ -133,7 +147,11 @@ export class SelfEditRegistry {
     return this.clone(record);
   }
 
-  markApplied(id: string, checkpoint: string, appliedAt?: string): SelfEditRecord {
+  markApplied(
+    id: string,
+    checkpoint: string,
+    appliedAt?: string,
+  ): SelfEditRecord {
     this.pruneExpired();
     const record = this.require(id);
     const appliedTimestamp = appliedAt ?? this.clock().toISOString();
@@ -189,7 +207,10 @@ export class SelfEditRegistry {
     }
   }
 
-  private applyScorecard(record: MutableSelfEditRecord, options?: ScorecardOptions): void {
+  private applyScorecard(
+    record: MutableSelfEditRecord,
+    options?: ScorecardOptions,
+  ): void {
     const scorecard = this.buildScorecard(record, options);
 
     if (record.status === 'applied' || record.status === 'expired') {
@@ -197,7 +218,8 @@ export class SelfEditRegistry {
     }
 
     if (record.approval) {
-      record.status = record.approval.decision === 'approved' ? 'approved' : 'rejected';
+      record.status =
+        record.approval.decision === 'approved' ? 'approved' : 'rejected';
       return;
     }
 
@@ -218,14 +240,20 @@ export class SelfEditRegistry {
     }
   }
 
-  private buildScorecard(record: MutableSelfEditRecord, options?: ScorecardOptions): SelfEditScorecard {
+  private buildScorecard(
+    record: MutableSelfEditRecord,
+    options?: ScorecardOptions,
+  ): SelfEditScorecard {
     const totalChecks = record.verifierScores.length;
-    const passedChecks = record.verifierScores.filter(item => item.passed).length;
+    const passedChecks = record.verifierScores.filter(
+      (item) => item.passed,
+    ).length;
     const failedChecks = totalChecks - passedChecks;
     const averageScore =
       totalChecks === 0
         ? null
-        : record.verifierScores.reduce((sum, item) => sum + item.score, 0) / totalChecks;
+        : record.verifierScores.reduce((sum, item) => sum + item.score, 0) /
+          totalChecks;
 
     const threshold = options?.threshold ?? this.threshold;
     const minVerifiers = options?.minVerifierCount ?? this.minVerifierCount;
@@ -239,8 +267,12 @@ export class SelfEditRegistry {
       passedChecks,
       failedChecks,
       averageScore,
-      failingVerifiers: record.verifierScores.filter(item => !item.passed).map(item => item.verifier),
-      passedVerifiers: record.verifierScores.filter(item => item.passed).map(item => item.verifier),
+      failingVerifiers: record.verifierScores
+        .filter((item) => !item.passed)
+        .map((item) => item.verifier),
+      passedVerifiers: record.verifierScores
+        .filter((item) => item.passed)
+        .map((item) => item.verifier),
       ready,
       status: record.status,
     };
@@ -257,7 +289,7 @@ export class SelfEditRegistry {
   private clone(record: MutableSelfEditRecord): SelfEditRecord {
     return {
       ...record,
-      verifierScores: record.verifierScores.map(score => ({ ...score })),
+      verifierScores: record.verifierScores.map((score) => ({ ...score })),
       approval: record.approval ? { ...record.approval } : undefined,
     };
   }

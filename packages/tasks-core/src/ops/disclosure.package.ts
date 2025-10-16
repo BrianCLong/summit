@@ -24,7 +24,11 @@ export default defineTask<In, { bundle: string; manifest: ManifestEntry[] }>({
     archive.pipe(out);
     for (const f of payload.files) archive.file(f, { name: path.basename(f) });
     archive.append(
-      JSON.stringify({ generatedAt: new Date().toISOString(), files: manifest }, null, 2),
+      JSON.stringify(
+        { generatedAt: new Date().toISOString(), files: manifest },
+        null,
+        2,
+      ),
       { name: 'manifest.json' },
     );
     await archive.finalize();

@@ -5,10 +5,12 @@ export async function evaluateCanary(
   rollback: () => Promise<void>,
 ) {
   const m = await fetchMetrics();
-  if (m.errorRate * 100 > thresholds.errorRatePct || m.p95 > thresholds.p95LatencyMs) {
+  if (
+    m.errorRate * 100 > thresholds.errorRatePct ||
+    m.p95 > thresholds.p95LatencyMs
+  ) {
     await rollback();
     return { rolledBack: true } as const;
   }
   return { rolledBack: false } as const;
 }
-

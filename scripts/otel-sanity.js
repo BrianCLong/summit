@@ -11,8 +11,10 @@ const http = require('http');
 
 // Configuration
 const config = {
-  targetUrl: process.argv[2] || process.env.TARGET_BASE_URL || 'http://localhost:4000',
-  otelQueryUrl: process.argv[3] || process.env.OTEL_QUERY_URL || 'http://localhost:16686', // Jaeger default
+  targetUrl:
+    process.argv[2] || process.env.TARGET_BASE_URL || 'http://localhost:4000',
+  otelQueryUrl:
+    process.argv[3] || process.env.OTEL_QUERY_URL || 'http://localhost:16686', // Jaeger default
   serviceName: process.env.SERVICE_NAME || 'intelgraph-server',
   timeout: parseInt(process.env.OTEL_SANITY_TIMEOUT) || 60000, // 60 seconds
   retryInterval: parseInt(process.env.OTEL_SANITY_RETRY_INTERVAL) || 5000, // 5 seconds
@@ -36,13 +38,19 @@ function makeRequest(url, options = {}) {
 
     const req = protocol.get(url, requestOptions, (res) => {
       let data = '';
-      res.on('data', chunk => data += chunk);
+      res.on('data', (chunk) => (data += chunk));
       res.on('end', () => {
         try {
-          const jsonData = res.headers['content-type']?.includes('application/json')
+          const jsonData = res.headers['content-type']?.includes(
+            'application/json',
+          )
             ? JSON.parse(data)
             : data;
-          resolve({ status: res.statusCode, data: jsonData, headers: res.headers });
+          resolve({
+            status: res.statusCode,
+            data: jsonData,
+            headers: res.headers,
+          });
         } catch (e) {
           resolve({ status: res.statusCode, data, headers: res.headers });
         }
@@ -81,7 +89,7 @@ async function triggerApplicationActivity() {
       console.log(`    ✅ ${endpoint}: ${response.status}`);
 
       // Small delay between requests
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
     } catch (error) {
       console.log(`    ❌ ${endpoint}: ${error.message}`);
       results.push({
@@ -93,11 +101,15 @@ async function triggerApplicationActivity() {
     }
   }
 
-  const successfulRequests = results.filter(r => r.success).length;
-  console.log(`✅ Triggered ${successfulRequests}/${endpoints.length} endpoints successfully`);
+  const successfulRequests = results.filter((r) => r.success).length;
+  console.log(
+    `✅ Triggered ${successfulRequests}/${endpoints.length} endpoints successfully`,
+  );
 
   if (successfulRequests === 0) {
-    throw new Error('No endpoints responded successfully - cannot generate traces');
+    throw new Error(
+      'No endpoints responded successfully - cannot generate traces',
+    );
   }
 
   return results;
@@ -107,8 +119,10 @@ async function triggerApplicationActivity() {
 async function waitForTracePropagation() {
   console.log('⏳ Step 2: Waiting for trace propagation...');
   const waitTime = 10000; // 10 seconds
-  console.log(`   Waiting ${waitTime / 1000} seconds for traces to propagate...`);
-  await new Promise(resolve => setTimeout(resolve, waitTime));
+  console.log(
+    `   Waiting ${waitTime / 1000} seconds for traces to propagate...`,
+  );
+  await new Promise((resolve) => setTimeout(resolve, waitTime));
   console.log('✅ Trace propagation wait complete');
 }
 
@@ -153,7 +167,9 @@ async function queryJaegerBackend() {
     }
 
     const services = servicesResponse.data.data || servicesResponse.data;
-    console.log(`   📊 Found ${services.length} services: ${services.join(', ')}`);
+    console.log(
+      `   📊 Found ${services.length} services: ${services.join(', ')}`,
+    );
 
     const serviceExists = services.includes(config.serviceName);
     if (!serviceExists) {
@@ -178,16 +194,21 @@ async function queryJaegerBackend() {
     }
 
     // Validate trace content
-    const validTraces = traces.filter(trace => {
+    const validTraces = traces.filter((trace) => {
       const spans = trace.spans || [];
-      const hasHealthSpan = spans.some(span =>
-        span.operationName?.includes('health') ||
-        span.tags?.some(tag => tag.key === 'http.url' && tag.value?.includes('health'))
+      const hasHealthSpan = spans.some(
+        (span) =>
+          span.operationName?.includes('health') ||
+          span.tags?.some(
+            (tag) => tag.key === 'http.url' && tag.value?.includes('health'),
+          ),
       );
       return hasHealthSpan;
     });
 
-    console.log(`   ✅ Found ${validTraces.length} valid health-related traces`);
+    console.log(
+      `   ✅ Found ${validTraces.length} valid health-related traces`,
+    );
 
     return {
       found: validTraces.length > 0,
@@ -196,7 +217,6 @@ async function queryJaegerBackend() {
       backend: 'jaeger',
       services,
     };
-
   } catch (error) {
     console.log(`   ❌ Jaeger query failed: ${error.message}`);
     return { found: false, error: error.message, backend: 'jaeger' };
@@ -224,7 +244,6 @@ async function queryTempoBackend() {
       traces: traces.length,
       backend: 'tempo',
     };
-
   } catch (error) {
     console.log(`   ❌ Tempo query failed: ${error.message}`);
     return { found: false, error: error.message, backend: 'tempo' };
@@ -251,7 +270,6 @@ async function queryZipkinBackend() {
       traces: traces.length,
       backend: 'zipkin',
     };
-
   } catch (error) {
     console.log(`   ❌ Zipkin query failed: ${error.message}`);
     return { found: false, error: error.message, backend: 'zipkin' };
@@ -311,16 +329,18 @@ async function retryWithBackoff(fn, maxRetries = 5) {
 
       // If not found but no error, wait and retry
       lastError = new Error(`Traces not found (attempt ${attempt})`);
-
     } catch (error) {
       lastError = error;
       console.log(`   ❌ Attempt ${attempt} failed: ${error.message}`);
     }
 
     if (attempt < maxRetries) {
-      const waitTime = Math.min(config.retryInterval * Math.pow(2, attempt - 1), 30000);
+      const waitTime = Math.min(
+        config.retryInterval * Math.pow(2, attempt - 1),
+        30000,
+      );
       console.log(`   ⏳ Waiting ${waitTime / 1000}s before next attempt...`);
-      await new Promise(resolve => setTimeout(resolve, waitTime));
+      await new Promise((resolve) => setTimeout(resolve, waitTime));
     }
   }
 
@@ -360,7 +380,6 @@ async function main() {
 
     console.log('\n🔍 Observability is working correctly!');
     process.exit(0);
-
   } catch (error) {
     const duration = Date.now() - startTime;
 

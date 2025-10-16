@@ -18,21 +18,35 @@ const ResidencyConfigSchema = z.object({
 });
 
 const KMSConfigSchema = z.object({
-  provider: z.enum(['aws-kms', 'azure-keyvault', 'gcp-kms', 'hashicorp-vault', 'customer-managed']),
+  provider: z.enum([
+    'aws-kms',
+    'azure-keyvault',
+    'gcp-kms',
+    'hashicorp-vault',
+    'customer-managed',
+  ]),
   keyId: z.string().min(1),
   region: z.string().min(1),
   endpoint: z.string().url().optional(),
-  credentials: z.object({
-    accessKey: z.string().optional(),
-    secretKey: z.string().optional(),
-    token: z.string().optional(),
-  }).optional(),
+  credentials: z
+    .object({
+      accessKey: z.string().optional(),
+      secretKey: z.string().optional(),
+      token: z.string().optional(),
+    })
+    .optional(),
 });
 
 const EncryptDataSchema = z.object({
   data: z.string().min(1),
   dataClassification: z.object({
-    level: z.enum(['public', 'internal', 'confidential', 'restricted', 'top-secret']),
+    level: z.enum([
+      'public',
+      'internal',
+      'confidential',
+      'restricted',
+      'top-secret',
+    ]),
     categories: z.array(z.string()).default([]),
     residencyRequirements: z.array(z.string()).default([]),
     encryptionRequired: z.boolean().default(true),
@@ -49,7 +63,13 @@ const TransferComplianceSchema = z.object({
   sourceRegion: z.string().min(1),
   targetRegion: z.string().min(1),
   dataClassification: z.object({
-    level: z.enum(['public', 'internal', 'confidential', 'restricted', 'top-secret']),
+    level: z.enum([
+      'public',
+      'internal',
+      'confidential',
+      'restricted',
+      'top-secret',
+    ]),
     categories: z.array(z.string()).default([]),
     residencyRequirements: z.array(z.string()).default([]),
     encryptionRequired: z.boolean().default(true),
@@ -63,34 +83,36 @@ const TransferComplianceSchema = z.object({
  */
 router.post('/configure-residency', async (req, res) => {
   const span = otelService.createSpan('data-residency.configure-residency');
-  
+
   try {
-    const tenantId = req.headers['x-tenant-id'] as string || 'default';
+    const tenantId = (req.headers['x-tenant-id'] as string) || 'default';
     const validatedConfig = ResidencyConfigSchema.parse(req.body);
-    
-    const configId = await dataResidencyService.configureDataResidency(tenantId, validatedConfig);
-    
+
+    const configId = await dataResidencyService.configureDataResidency(
+      tenantId,
+      validatedConfig,
+    );
+
     res.json({
       success: true,
       configId,
       message: 'Data residency configuration updated successfully',
       configuration: validatedConfig,
     });
-    
+
     otelService.addSpanAttributes({
       'data-residency.tenant_id': tenantId,
       'data-residency.region': validatedConfig.region,
       'data-residency.country': validatedConfig.country,
       'data-residency.encryption_required': validatedConfig.encryptionRequired,
     });
-    
   } catch (error: any) {
     console.error('Data residency configuration failed:', error);
     otelService.recordException(error);
-    
+
     if (error.name === 'ZodError') {
-      res.status(400).json({ 
-        error: 'Invalid configuration data', 
+      res.status(400).json({
+        error: 'Invalid configuration data',
         details: error.errors,
         example: {
           region: 'us-east-1',
@@ -100,12 +122,12 @@ router.post('/configure-residency', async (req, res) => {
           allowedTransfers: ['us-west-2', 'ca-central-1'],
           retentionPolicyDays: 2555,
           encryptionRequired: true,
-        }
+        },
       });
     } else {
-      res.status(500).json({ 
-        error: 'Configuration failed', 
-        message: error.message 
+      res.status(500).json({
+        error: 'Configuration failed',
+        message: error.message,
       });
     }
   } finally {
@@ -119,13 +141,16 @@ router.post('/configure-residency', async (req, res) => {
  */
 router.post('/configure-kms', async (req, res) => {
   const span = otelService.createSpan('data-residency.configure-kms');
-  
+
   try {
-    const tenantId = req.headers['x-tenant-id'] as string || 'default';
+    const tenantId = (req.headers['x-tenant-id'] as string) || 'default';
     const validatedConfig = KMSConfigSchema.parse(req.body);
-    
-    const kmsConfigId = await dataResidencyService.configureKMS(tenantId, validatedConfig);
-    
+
+    const kmsConfigId = await dataResidencyService.configureKMS(
+      tenantId,
+      validatedConfig,
+    );
+
     res.json({
       success: true,
       kmsConfigId,
@@ -136,36 +161,42 @@ router.post('/configure-kms', async (req, res) => {
         keyId: validatedConfig.keyId.substring(0, 8) + '***', // Masked for security
       },
     });
-    
+
     otelService.addSpanAttributes({
       'data-residency.tenant_id': tenantId,
       'data-residency.kms_provider': validatedConfig.provider,
       'data-residency.kms_region': validatedConfig.region,
     });
-    
   } catch (error: any) {
     console.error('KMS configuration failed:', error);
     otelService.recordException(error);
-    
+
     if (error.name === 'ZodError') {
-      res.status(400).json({ 
-        error: 'Invalid KMS configuration', 
+      res.status(400).json({
+        error: 'Invalid KMS configuration',
         details: error.errors,
-        supportedProviders: ['aws-kms', 'azure-keyvault', 'gcp-kms', 'hashicorp-vault', 'customer-managed'],
+        supportedProviders: [
+          'aws-kms',
+          'azure-keyvault',
+          'gcp-kms',
+          'hashicorp-vault',
+          'customer-managed',
+        ],
         example: {
           provider: 'aws-kms',
-          keyId: 'arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012',
+          keyId:
+            'arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012',
           region: 'us-east-1',
           credentials: {
             accessKey: 'AKIAIOSFODNN7EXAMPLE',
-            secretKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY'
-          }
-        }
+            secretKey: 'wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY',
+          },
+        },
       });
     } else {
-      res.status(500).json({ 
-        error: 'KMS configuration failed', 
-        message: error.message 
+      res.status(500).json({
+        error: 'KMS configuration failed',
+        message: error.message,
       });
     }
   } finally {
@@ -179,17 +210,17 @@ router.post('/configure-kms', async (req, res) => {
  */
 router.post('/encrypt', async (req, res) => {
   const span = otelService.createSpan('data-residency.encrypt-data');
-  
+
   try {
-    const tenantId = req.headers['x-tenant-id'] as string || 'default';
+    const tenantId = (req.headers['x-tenant-id'] as string) || 'default';
     const validatedRequest = EncryptDataSchema.parse(req.body);
-    
+
     const result = await dataResidencyService.encryptData(
-      tenantId, 
-      validatedRequest.data, 
-      validatedRequest.dataClassification
+      tenantId,
+      validatedRequest.data,
+      validatedRequest.dataClassification,
     );
-    
+
     res.json({
       success: true,
       encryptedData: result.encryptedData,
@@ -197,21 +228,21 @@ router.post('/encrypt', async (req, res) => {
       residencyCompliant: result.residencyCompliant,
       dataClassification: validatedRequest.dataClassification.level,
     });
-    
+
     otelService.addSpanAttributes({
       'data-residency.tenant_id': tenantId,
-      'data-residency.classification': validatedRequest.dataClassification.level,
+      'data-residency.classification':
+        validatedRequest.dataClassification.level,
       'data-residency.compliant': result.residencyCompliant,
       'data-residency.encrypted': true,
     });
-    
   } catch (error: any) {
     console.error('Data encryption failed:', error);
     otelService.recordException(error);
-    
+
     if (error.name === 'ZodError') {
-      res.status(400).json({ 
-        error: 'Invalid encryption request', 
+      res.status(400).json({
+        error: 'Invalid encryption request',
         details: error.errors,
         example: {
           data: 'Sensitive customer information',
@@ -220,14 +251,14 @@ router.post('/encrypt', async (req, res) => {
             categories: ['customer-data', 'financial'],
             residencyRequirements: ['us-east-1', 'US'],
             encryptionRequired: true,
-            auditRequired: true
-          }
-        }
+            auditRequired: true,
+          },
+        },
       });
     } else {
-      res.status(500).json({ 
-        error: 'Encryption failed', 
-        message: error.message 
+      res.status(500).json({
+        error: 'Encryption failed',
+        message: error.message,
       });
     }
   } finally {
@@ -241,41 +272,40 @@ router.post('/encrypt', async (req, res) => {
  */
 router.post('/decrypt', async (req, res) => {
   const span = otelService.createSpan('data-residency.decrypt-data');
-  
+
   try {
-    const tenantId = req.headers['x-tenant-id'] as string || 'default';
+    const tenantId = (req.headers['x-tenant-id'] as string) || 'default';
     const validatedRequest = DecryptDataSchema.parse(req.body);
-    
+
     const decryptedData = await dataResidencyService.decryptData(
-      tenantId, 
-      validatedRequest.encryptedData, 
-      validatedRequest.encryptionMetadata
+      tenantId,
+      validatedRequest.encryptedData,
+      validatedRequest.encryptionMetadata,
     );
-    
+
     res.json({
       success: true,
       data: decryptedData,
       decryptedAt: new Date().toISOString(),
     });
-    
+
     otelService.addSpanAttributes({
       'data-residency.tenant_id': tenantId,
       'data-residency.decryption_successful': true,
     });
-    
   } catch (error: any) {
     console.error('Data decryption failed:', error);
     otelService.recordException(error);
-    
+
     if (error.name === 'ZodError') {
-      res.status(400).json({ 
-        error: 'Invalid decryption request', 
-        details: error.errors 
+      res.status(400).json({
+        error: 'Invalid decryption request',
+        details: error.errors,
       });
     } else {
-      res.status(500).json({ 
-        error: 'Decryption failed', 
-        message: error.message 
+      res.status(500).json({
+        error: 'Decryption failed',
+        message: error.message,
       });
     }
   } finally {
@@ -288,19 +318,22 @@ router.post('/decrypt', async (req, res) => {
  * Check compliance for cross-region data transfers
  */
 router.post('/check-transfer-compliance', async (req, res) => {
-  const span = otelService.createSpan('data-residency.check-transfer-compliance');
-  
+  const span = otelService.createSpan(
+    'data-residency.check-transfer-compliance',
+  );
+
   try {
-    const tenantId = req.headers['x-tenant-id'] as string || 'default';
+    const tenantId = (req.headers['x-tenant-id'] as string) || 'default';
     const validatedRequest = TransferComplianceSchema.parse(req.body);
-    
-    const complianceResult = await dataResidencyService.checkDataTransferCompliance(
-      tenantId,
-      validatedRequest.sourceRegion,
-      validatedRequest.targetRegion,
-      validatedRequest.dataClassification
-    );
-    
+
+    const complianceResult =
+      await dataResidencyService.checkDataTransferCompliance(
+        tenantId,
+        validatedRequest.sourceRegion,
+        validatedRequest.targetRegion,
+        validatedRequest.dataClassification,
+      );
+
     res.json({
       compliance: complianceResult,
       sourceRegion: validatedRequest.sourceRegion,
@@ -308,21 +341,20 @@ router.post('/check-transfer-compliance', async (req, res) => {
       dataClassification: validatedRequest.dataClassification.level,
       checkedAt: new Date().toISOString(),
     });
-    
+
     otelService.addSpanAttributes({
       'data-residency.tenant_id': tenantId,
       'data-residency.source_region': validatedRequest.sourceRegion,
       'data-residency.target_region': validatedRequest.targetRegion,
       'data-residency.transfer_compliant': complianceResult.compliant,
     });
-    
   } catch (error: any) {
     console.error('Transfer compliance check failed:', error);
     otelService.recordException(error);
-    
+
     if (error.name === 'ZodError') {
-      res.status(400).json({ 
-        error: 'Invalid compliance check request', 
+      res.status(400).json({
+        error: 'Invalid compliance check request',
         details: error.errors,
         example: {
           sourceRegion: 'us-east-1',
@@ -332,14 +364,14 @@ router.post('/check-transfer-compliance', async (req, res) => {
             categories: ['customer-data'],
             residencyRequirements: ['US'],
             encryptionRequired: true,
-            auditRequired: true
-          }
-        }
+            auditRequired: true,
+          },
+        },
       });
     } else {
-      res.status(500).json({ 
-        error: 'Compliance check failed', 
-        message: error.message 
+      res.status(500).json({
+        error: 'Compliance check failed',
+        message: error.message,
       });
     }
   } finally {
@@ -353,26 +385,27 @@ router.post('/check-transfer-compliance', async (req, res) => {
  */
 router.get('/report', async (req, res) => {
   const span = otelService.createSpan('data-residency.generate-report');
-  
+
   try {
-    const tenantId = req.headers['x-tenant-id'] as string || 'default';
-    
+    const tenantId = (req.headers['x-tenant-id'] as string) || 'default';
+
     const report = await dataResidencyService.generateResidencyReport(tenantId);
-    
+
     res.json(report);
-    
+
     otelService.addSpanAttributes({
       'data-residency.tenant_id': tenantId,
-      'data-residency.compliance_status': report.compliance?.overallStatus || 'unknown',
-      'data-residency.encryption_coverage': report.compliance?.encryptionCoverage || 0,
+      'data-residency.compliance_status':
+        report.compliance?.overallStatus || 'unknown',
+      'data-residency.encryption_coverage':
+        report.compliance?.encryptionCoverage || 0,
     });
-    
   } catch (error: any) {
     console.error('Report generation failed:', error);
     otelService.recordException(error);
-    res.status(500).json({ 
-      error: 'Report generation failed', 
-      message: error.message 
+    res.status(500).json({
+      error: 'Report generation failed',
+      message: error.message,
     });
   } finally {
     span?.end();
@@ -385,7 +418,7 @@ router.get('/report', async (req, res) => {
  */
 router.get('/health', async (req, res) => {
   const span = otelService.createSpan('data-residency.health');
-  
+
   try {
     const health = {
       status: 'healthy',
@@ -396,17 +429,28 @@ router.get('/health', async (req, res) => {
         encryption: 'operational',
         auditTrail: 'operational',
       },
-      supportedProviders: ['aws-kms', 'azure-keyvault', 'gcp-kms', 'hashicorp-vault', 'customer-managed'],
-      supportedRegions: ['us-east-1', 'us-west-2', 'eu-west-1', 'eu-central-1', 'ap-southeast-1'],
+      supportedProviders: [
+        'aws-kms',
+        'azure-keyvault',
+        'gcp-kms',
+        'hashicorp-vault',
+        'customer-managed',
+      ],
+      supportedRegions: [
+        'us-east-1',
+        'us-west-2',
+        'eu-west-1',
+        'eu-central-1',
+        'ap-southeast-1',
+      ],
       version: '1.0.0',
     };
-    
+
     res.json(health);
-    
   } catch (error: any) {
     console.error('Data residency health check failed:', error);
-    res.status(500).json({ 
-      status: 'unhealthy', 
+    res.status(500).json({
+      status: 'unhealthy',
       error: error.message,
       timestamp: new Date().toISOString(),
     });
@@ -421,7 +465,7 @@ router.get('/health', async (req, res) => {
  */
 router.get('/supported-regions', async (req, res) => {
   const span = otelService.createSpan('data-residency.supported-regions');
-  
+
   try {
     const regions = {
       'us-east-1': {
@@ -473,19 +517,22 @@ router.get('/supported-regions', async (req, res) => {
         encryptionRequired: false,
       },
     };
-    
+
     res.json({
       regions,
       totalRegions: Object.keys(regions).length,
-      jurisdictions: [...new Set(Object.values(regions).map(r => r.jurisdiction))],
-      supportedLaws: [...new Set(Object.values(regions).flatMap(r => r.dataLaws))],
+      jurisdictions: [
+        ...new Set(Object.values(regions).map((r) => r.jurisdiction)),
+      ],
+      supportedLaws: [
+        ...new Set(Object.values(regions).flatMap((r) => r.dataLaws)),
+      ],
     });
-    
   } catch (error: any) {
     console.error('Supported regions query failed:', error);
-    res.status(500).json({ 
-      error: 'Regions query failed', 
-      message: error.message 
+    res.status(500).json({
+      error: 'Regions query failed',
+      message: error.message,
     });
   } finally {
     span?.end();
@@ -498,31 +545,31 @@ router.get('/supported-regions', async (req, res) => {
  */
 router.get('/data-classifications', async (req, res) => {
   const span = otelService.createSpan('data-residency.data-classifications');
-  
+
   try {
     const classifications = {
-      'public': {
+      public: {
         description: 'Information that can be freely shared',
         encryptionRequired: false,
         auditRequired: false,
         residencyRestrictions: [],
         retentionPolicy: 'indefinite',
       },
-      'internal': {
+      internal: {
         description: 'Information for internal use only',
         encryptionRequired: false,
         auditRequired: true,
         residencyRestrictions: [],
         retentionPolicy: '7 years',
       },
-      'confidential': {
+      confidential: {
         description: 'Sensitive business information',
         encryptionRequired: true,
         auditRequired: true,
         residencyRestrictions: ['same-jurisdiction'],
         retentionPolicy: '7 years',
       },
-      'restricted': {
+      restricted: {
         description: 'Highly sensitive information with access controls',
         encryptionRequired: true,
         auditRequired: true,
@@ -537,19 +584,23 @@ router.get('/data-classifications', async (req, res) => {
         retentionPolicy: '25 years',
       },
     };
-    
+
     res.json({
       classifications,
       defaultClassification: 'internal',
       encryptionAlgorithms: ['aes-256-gcm', 'aes-256-cbc'],
-      keyManagement: ['aws-kms', 'azure-keyvault', 'gcp-kms', 'customer-managed'],
+      keyManagement: [
+        'aws-kms',
+        'azure-keyvault',
+        'gcp-kms',
+        'customer-managed',
+      ],
     });
-    
   } catch (error: any) {
     console.error('Data classifications query failed:', error);
-    res.status(500).json({ 
-      error: 'Classifications query failed', 
-      message: error.message 
+    res.status(500).json({
+      error: 'Classifications query failed',
+      message: error.message,
     });
   } finally {
     span?.end();

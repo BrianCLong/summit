@@ -35,15 +35,21 @@ function buildMerkleRoot(hashes: string[]): string {
     for (let i = 0; i < layer.length; i += 2) {
       const left = layer[i];
       const right = layer[i + 1] ?? left;
-      next.push(createHash('sha256').update(left + right).digest('hex'));
+      next.push(
+        createHash('sha256')
+          .update(left + right)
+          .digest('hex'),
+      );
     }
     layer = next;
   }
   return layer[0];
 }
 
-function deriveTransforms(entries: readonly LedgerEntry[]): ManifestTransformNode[] {
-  return entries.map(entry => ({
+function deriveTransforms(
+  entries: readonly LedgerEntry[],
+): ManifestTransformNode[] {
+  return entries.map((entry) => ({
     id: entry.id,
     category: entry.category,
     actor: entry.actor,
@@ -51,7 +57,7 @@ function deriveTransforms(entries: readonly LedgerEntry[]): ManifestTransformNod
     resource: entry.resource,
     payloadHash: hashPayload(entry.payload),
     timestamp: entry.timestamp,
-    previousHash: entry.previousHash
+    previousHash: entry.previousHash,
   }));
 }
 
@@ -63,7 +69,11 @@ export interface ManifestOptions {
 
 export function createExportManifest(options: ManifestOptions): ExportManifest {
   const transforms = deriveTransforms(options.ledger);
-  const hashes = transforms.map(node => createHash('sha256').update(node.id + node.payloadHash).digest('hex'));
+  const hashes = transforms.map((node) =>
+    createHash('sha256')
+      .update(node.id + node.payloadHash)
+      .digest('hex'),
+  );
   const ledgerHead = options.ledger.at(-1)?.hash ?? '';
   return {
     caseId: options.caseId,
@@ -71,11 +81,15 @@ export function createExportManifest(options: ManifestOptions): ExportManifest {
     version: '1.0.0',
     ledgerHead,
     merkleRoot: buildMerkleRoot(hashes),
-    transforms
+    transforms,
   };
 }
 
-export function verifyManifest(manifest: ExportManifest, ledger: readonly LedgerEntry[], evidence?: EvidenceBundle): {
+export function verifyManifest(
+  manifest: ExportManifest,
+  ledger: readonly LedgerEntry[],
+  evidence?: EvidenceBundle,
+): {
   valid: boolean;
   reasons: string[];
 } {
@@ -96,7 +110,11 @@ export function verifyManifest(manifest: ExportManifest, ledger: readonly Ledger
       reasons.push(`Previous hash mismatch for transform ${transform.id}`);
     }
   });
-  const expectedHashes = expectedTransforms.map(node => createHash('sha256').update(node.id + node.payloadHash).digest('hex'));
+  const expectedHashes = expectedTransforms.map((node) =>
+    createHash('sha256')
+      .update(node.id + node.payloadHash)
+      .digest('hex'),
+  );
   const expectedRoot = buildMerkleRoot(expectedHashes);
   if (expectedRoot !== manifest.merkleRoot) {
     reasons.push('Merkle root mismatch');

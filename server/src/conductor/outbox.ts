@@ -30,11 +30,22 @@ export async function outboxPublishLoop() {
       }
       const batches: Record<string, any[]> = {};
       for (const r of rows) {
-        (batches[r.topic] ??= []).push({ key: r.key, value: JSON.stringify(r.value) });
+        (batches[r.topic] ??= []).push({
+          key: r.key,
+          value: JSON.stringify(r.value),
+        });
       }
-      await producer.sendBatch({ topicMessages: Object.entries(batches).map(([topic, messages]) => ({ topic, messages })) });
+      await producer.sendBatch({
+        topicMessages: Object.entries(batches).map(([topic, messages]) => ({
+          topic,
+          messages,
+        })),
+      });
       const ids = rows.map((r) => r.id);
-      await client.query(`UPDATE outbox SET sent_at = now() WHERE id = ANY($1::bigint[])`, [ids]);
+      await client.query(
+        `UPDATE outbox SET sent_at = now() WHERE id = ANY($1::bigint[])`,
+        [ids],
+      );
       await client.query('COMMIT');
     } catch (e) {
       await client.query('ROLLBACK');
@@ -43,4 +54,3 @@ export async function outboxPublishLoop() {
     }
   }
 }
-

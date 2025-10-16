@@ -1,4 +1,8 @@
-import type { DSARRequest, IdentityVerification, IdentityVerifier } from './types';
+import type {
+  DSARRequest,
+  IdentityVerification,
+  IdentityVerifier,
+} from './types';
 
 export class StaticIdentityVerifier implements IdentityVerifier {
   constructor(private readonly expectedTokens: Record<string, string>) {}

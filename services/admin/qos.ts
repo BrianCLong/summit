@@ -19,9 +19,13 @@ const OverrideSchema = z.object({
 
 r.post('/admin/qos/override', async (req, res) => {
   // RBAC: require admin role
-  if (!req.user?.roles?.includes('admin')) return res.status(403).json({ error: 'forbidden' });
+  if (!req.user?.roles?.includes('admin'))
+    return res.status(403).json({ error: 'forbidden' });
   const p = OverrideSchema.safeParse(req.body);
-  if (!p.success) return res.status(400).json({ error: 'invalid', details: p.error.flatten() });
+  if (!p.success)
+    return res
+      .status(400)
+      .json({ error: 'invalid', details: p.error.flatten() });
 
   const { tenant_id, expert, explore_max, ttl_minutes, reason } = p.data;
   const actor = req.user?.id ?? 'unknown';
@@ -37,7 +41,9 @@ r.post('/admin/qos/override', async (req, res) => {
     reason,
     actor,
   ]);
-  res.status(201).json({ ok: true, id: rows[0].id, expires_at: rows[0].expires_at });
+  res
+    .status(201)
+    .json({ ok: true, id: rows[0].id, expires_at: rows[0].expires_at });
 });
 
 r.get('/admin/qos/override', async (req, res) => {
@@ -62,9 +68,13 @@ const ExtendSchema = z.object({
 });
 
 r.post('/admin/qos/override/:id/extend', async (req, res) => {
-  if (!req.user?.roles?.includes('admin')) return res.status(403).json({ error: 'forbidden' });
+  if (!req.user?.roles?.includes('admin'))
+    return res.status(403).json({ error: 'forbidden' });
   const p = ExtendSchema.safeParse(req.body);
-  if (!p.success) return res.status(400).json({ error: 'invalid', details: p.error.flatten() });
+  if (!p.success)
+    return res
+      .status(400)
+      .json({ error: 'invalid', details: p.error.flatten() });
 
   const { reason, extend_minutes } = p.data;
   const actor = req.user?.id ?? 'unknown';
@@ -74,8 +84,14 @@ r.post('/admin/qos/override/:id/extend', async (req, res) => {
             reason = reason || '; extended by ' || $2 || ' for ' || $3
         where id = $4 and expires_at > now()
         returning id, expires_at`;
-  const { rows } = await pool.query(q, [extend_minutes, actor, reason, req.params.id]);
-  if (rows.length === 0) return res.status(404).json({ error: 'not_found_or_expired' });
+  const { rows } = await pool.query(q, [
+    extend_minutes,
+    actor,
+    reason,
+    req.params.id,
+  ]);
+  if (rows.length === 0)
+    return res.status(404).json({ error: 'not_found_or_expired' });
   res.json({ ok: true, id: rows[0].id, expires_at: rows[0].expires_at });
 });
 

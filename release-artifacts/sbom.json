@@ -11,7 +11,17 @@
     }
   },
   "components": [
-    {"type": "library", "name": "@simplewebauthn/browser", "version": "9.0.1", "licenses": [{"license": {"id": "MIT"}}]},
-    {"type": "library", "name": "openpolicyagent/opa", "version": "0.60.0", "licenses": [{"license": {"id": "Apache-2.0"}}]}
+    {
+      "type": "library",
+      "name": "@simplewebauthn/browser",
+      "version": "9.0.1",
+      "licenses": [{ "license": { "id": "MIT" } }]
+    },
+    {
+      "type": "library",
+      "name": "openpolicyagent/opa",
+      "version": "0.60.0",
+      "licenses": [{ "license": { "id": "Apache-2.0" } }]
+    }
   ]
 }

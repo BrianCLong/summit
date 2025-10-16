@@ -19,33 +19,39 @@ function simulateActual(pred, optimized) {
 export class ZeroSpendOrchestrator {
   constructor(options) {
     this.baselineCandidate = options.baselineCandidate;
-    this.policyEngine = options.policyEngine ?? new PolicyEngine(options.policyConfig);
+    this.policyEngine =
+      options.policyEngine ?? new PolicyEngine(options.policyConfig);
     this.discovery = new DiscoveryEngine({
       sources: options.discoverySources ?? [],
-      policyEngine: this.policyEngine
+      policyEngine: this.policyEngine,
     });
     this.router = new ValueDensityRouter({
       baselineArmId: this.baselineCandidate?.id ?? 'baseline',
-      qualityDeltaMin: this.policyEngine.config.qualityDeltaMin
+      qualityDeltaMin: this.policyEngine.config.qualityDeltaMin,
     });
     this.budgetGuardian = new BudgetGuardian(options.budget ?? {});
     this.optimizations = new OptimizationManager({
       policyEngine: this.policyEngine,
       kvCache: options.kvCache,
-      memoCache: options.memoCache
+      memoCache: options.memoCache,
     });
-    this.ledger = options.ledger ?? new ProvenanceLedger({ namespace: 'zero-spend' });
+    this.ledger =
+      options.ledger ?? new ProvenanceLedger({ namespace: 'zero-spend' });
     this.metrics = new MetricsRecorder();
     this.concurrentLimit = options.N ?? 1;
     this.inFlight = 0;
     this.queue = [];
-    this.provenanceBaseUri = options.provenanceBaseUri ?? 's3://zero-spend-ledger';
+    this.provenanceBaseUri =
+      options.provenanceBaseUri ?? 's3://zero-spend-ledger';
   }
 
   async bootstrap() {
     await this.discovery.sync();
     if (this.baselineCandidate) {
-      this.discovery.catalog.set(this.baselineCandidate.id, this.baselineCandidate);
+      this.discovery.catalog.set(
+        this.baselineCandidate.id,
+        this.baselineCandidate,
+      );
     }
   }
 
@@ -80,28 +86,57 @@ export class ZeroSpendOrchestrator {
         taskId: task.id,
         arms: [{ id: 'cache', V: Infinity }],
         chosen: 'cache',
-        pred: { quality: cacheResult.value.quality, lat: cacheResult.value.latency, cost: 0 },
-        actual: { quality: cacheResult.value.quality, lat: cacheResult.value.latency, cost: 0 },
+        pred: {
+          quality: cacheResult.value.quality,
+          lat: cacheResult.value.latency,
+          cost: 0,
+        },
+        actual: {
+          quality: cacheResult.value.quality,
+          lat: cacheResult.value.latency,
+          cost: 0,
+        },
         provenanceUri: `${this.provenanceBaseUri}/${task.id}`,
-        budgetDeltaUSD: -cacheResult.value.cost
+        budgetDeltaUSD: -cacheResult.value.cost,
       });
       this.budgetGuardian.reclaimSavings(cacheResult.value.cost);
-      this.metrics.record({ latency: cacheResult.value.latency, cost: 0, quality: cacheResult.value.quality, cacheHit: true });
-      const entry = this.ledger.record(decision, { policyTags: ['cache-hit'], savingsUSD: cacheResult.value.cost });
+      this.metrics.record({
+        latency: cacheResult.value.latency,
+        cost: 0,
+        quality: cacheResult.value.quality,
+        cacheHit: true,
+      });
+      const entry = this.ledger.record(decision, {
+        policyTags: ['cache-hit'],
+        savingsUSD: cacheResult.value.cost,
+      });
       return entry;
     }
 
     const candidates = this.discovery.getBySkills(task.skills);
-    if (!candidates.find((candidate) => candidate.id === this.baselineCandidate?.id) && this.baselineCandidate) {
+    if (
+      !candidates.find(
+        (candidate) => candidate.id === this.baselineCandidate?.id,
+      ) &&
+      this.baselineCandidate
+    ) {
       candidates.push(this.baselineCandidate);
     }
     const budgetStatus = this.budgetGuardian.status();
     const decision = this.router.choose(task, candidates, budgetStatus);
-    const candidate = candidates.find((item) => item.id === decision.chosen) ?? this.baselineCandidate;
+    const candidate =
+      candidates.find((item) => item.id === decision.chosen) ??
+      this.baselineCandidate;
     const enforcement = this.policyEngine.enforceTaskPolicy(task, candidate);
-    const optimized = this.optimizations.apply({ cost: decision.pred.cost, latency: decision.pred.latency }, task);
+    const optimized = this.optimizations.apply(
+      { cost: decision.pred.cost, latency: decision.pred.latency },
+      task,
+    );
     const actual = simulateActual(decision.pred, optimized);
-    this.router.registerOutcome(candidate.id, { ...actual, coverage: decision.pred.coverage ?? 1 });
+    this.router.registerOutcome(candidate.id, {
+      ...actual,
+      coverage: decision.pred.coverage ?? 1,
+    });
     this.budgetGuardian.registerCost(actual.cost);
     if (optimized.savingsUSD > 0) {
       this.budgetGuardian.reclaimSavings(optimized.savingsUSD);
@@ -109,28 +144,38 @@ export class ZeroSpendOrchestrator {
     const memoValue = {
       latency: actual.lat,
       cost: actual.cost,
-      quality: actual.quality
+      quality: actual.quality,
     };
     if (cacheResult.key) {
       this.optimizations.cacheStore(cacheResult.key, memoValue);
     }
-    this.metrics.record({ latency: actual.lat, cost: actual.cost, quality: actual.quality, cacheHit: false });
-    const baselineCost = this.baselineCandidate?.cost?.estimate ?? decision.pred.cost;
+    this.metrics.record({
+      latency: actual.lat,
+      cost: actual.cost,
+      quality: actual.quality,
+      cacheHit: false,
+    });
+    const baselineCost =
+      this.baselineCandidate?.cost?.estimate ?? decision.pred.cost;
     const budgetDeltaUSD = actual.cost - baselineCost;
     const ledgerEntry = this.ledger.record(
       createDecisionRecord({
         taskId: task.id,
         arms: decision.arms.map((arm) => ({ id: arm.id, V: arm.V })),
         chosen: candidate.id,
-        pred: { quality: decision.pred.quality, lat: optimized.latency, cost: optimized.cost },
+        pred: {
+          quality: decision.pred.quality,
+          lat: optimized.latency,
+          cost: optimized.cost,
+        },
         actual,
         provenanceUri: `${this.provenanceBaseUri}/${task.id}`,
-        budgetDeltaUSD
+        budgetDeltaUSD,
       }),
       {
         policyTags: enforcement.tags,
-        savingsUSD: optimized.savingsUSD
-      }
+        savingsUSD: optimized.savingsUSD,
+      },
     );
     return ledgerEntry;
   }

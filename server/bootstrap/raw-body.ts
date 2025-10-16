@@ -24,14 +24,19 @@ export function mountRawBody(app: express.Express) {
   // Route-specific raw-body capture before generic parsers
   app.use((req, res, next) => {
     if (RAW_JSON.has(req.path)) {
-      return (express.raw({ type: '*/*', limit: '2mb' }) as any)(req, res, next);
-    }
-    if (RAW_URLENC.has(req.path)) {
-      return (express.raw({ type: 'application/x-www-form-urlencoded', limit: '1mb' }) as any)(
+      return (express.raw({ type: '*/*', limit: '2mb' }) as any)(
         req,
         res,
         next,
       );
+    }
+    if (RAW_URLENC.has(req.path)) {
+      return (
+        express.raw({
+          type: 'application/x-www-form-urlencoded',
+          limit: '1mb',
+        }) as any
+      )(req, res, next);
     }
     return next();
   });
@@ -55,4 +60,3 @@ export function mountRawBody(app: express.Express) {
     }) as any,
   );
 }
-

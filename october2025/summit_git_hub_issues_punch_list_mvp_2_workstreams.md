@@ -389,16 +389,16 @@ I’ll start by summarizing where the product currently is (based on the repo an
 
 ### Strengths & foundations (MVP‑0 / MVP‑1 baseline)
 
-- Deployable‑first architecture: clean local dev setup with Docker, make scripts, smoke tests built in. ([GitHub](https://github.com/BrianCLong/summit "GitHub - BrianCLong/summit"))
+- Deployable‑first architecture: clean local dev setup with Docker, make scripts, smoke tests built in. ([GitHub](https://github.com/BrianCLong/summit 'GitHub - BrianCLong/summit'))
 - Core stack is in place:\
-    • Frontend: React + MUI + Redux + cytoscape for graph viz. ([GitHub](https://github.com/BrianCLong/summit "GitHub - BrianCLong/summit"))\
-    • Backend: Node.js + GraphQL (Apollo) on Express middle layer. ([GitHub](https://github.com/BrianCLong/summit "GitHub - BrianCLong/summit"))\
-    • Databases: Neo4j for graph data, PostgreSQL for metadata, TimescaleDB for time series, Redis for caches & live ops. ([GitHub](https://github.com/BrianCLong/summit "GitHub - BrianCLong/summit"))\
-    • AI/ML “extraction engine” scaffolded: OCR, object detection, NLP, embeddings, vector search. ([GitHub](https://github.com/BrianCLong/summit "GitHub - BrianCLong/summit"))\
-    • Real‑time / collaboration: via WebSocket / Socket.io. ([GitHub](https://github.com/BrianCLong/summit "GitHub - BrianCLong/summit"))\
-    • Security, audits, policy: JWT + RBAC + OPA + rate limiting. ([GitHub](https://github.com/BrianCLong/summit "GitHub - BrianCLong/summit"))\
-    • Observability: OpenTelemetry / Prometheus / Grafana are in spec. ([GitHub](https://github.com/BrianCLong/summit "GitHub - BrianCLong/summit"))
-- Feature flagging, modular structure, CI/CD pipelines, tests (unit, integration, E2E) supported. ([GitHub](https://github.com/BrianCLong/summit "GitHub - BrianCLong/summit"))
+    • Frontend: React + MUI + Redux + cytoscape for graph viz. ([GitHub](https://github.com/BrianCLong/summit 'GitHub - BrianCLong/summit'))\
+    • Backend: Node.js + GraphQL (Apollo) on Express middle layer. ([GitHub](https://github.com/BrianCLong/summit 'GitHub - BrianCLong/summit'))\
+    • Databases: Neo4j for graph data, PostgreSQL for metadata, TimescaleDB for time series, Redis for caches & live ops. ([GitHub](https://github.com/BrianCLong/summit 'GitHub - BrianCLong/summit'))\
+    • AI/ML “extraction engine” scaffolded: OCR, object detection, NLP, embeddings, vector search. ([GitHub](https://github.com/BrianCLong/summit 'GitHub - BrianCLong/summit'))\
+    • Real‑time / collaboration: via WebSocket / Socket.io. ([GitHub](https://github.com/BrianCLong/summit 'GitHub - BrianCLong/summit'))\
+    • Security, audits, policy: JWT + RBAC + OPA + rate limiting. ([GitHub](https://github.com/BrianCLong/summit 'GitHub - BrianCLong/summit'))\
+    • Observability: OpenTelemetry / Prometheus / Grafana are in spec. ([GitHub](https://github.com/BrianCLong/summit 'GitHub - BrianCLong/summit'))
+- Feature flagging, modular structure, CI/CD pipelines, tests (unit, integration, E2E) supported. ([GitHub](https://github.com/BrianCLong/summit 'GitHub - BrianCLong/summit'))
 - Domain focus: intelligence / investigations, combining graph analytics + AI augmentation + collaborative UI.
 
 ### Gaps, risks & unknowns (What’s missing or under‑defined)

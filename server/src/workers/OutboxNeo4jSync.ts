@@ -147,14 +147,18 @@ export class OutboxNeo4jSync {
         default:
           eventLogger.warn(`Unknown event topic: ${event.topic}`);
           // Mark as processed to avoid retry loop
-          await client.query(`UPDATE outbox_events SET processed_at = now() WHERE id = $1`, [
-            event.id,
-          ]);
+          await client.query(
+            `UPDATE outbox_events SET processed_at = now() WHERE id = $1`,
+            [event.id],
+          );
           return;
       }
 
       // Mark as successfully processed
-      await client.query(`UPDATE outbox_events SET processed_at = now() WHERE id = $1`, [event.id]);
+      await client.query(
+        `UPDATE outbox_events SET processed_at = now() WHERE id = $1`,
+        [event.id],
+      );
 
       eventLogger.debug('Event processed successfully');
     } catch (error: any) {
@@ -194,7 +198,10 @@ export class OutboxNeo4jSync {
     );
 
     if (rows.length === 0) {
-      workerLogger.warn({ entityId: id }, 'Entity not found for upsert, may have been deleted');
+      workerLogger.warn(
+        { entityId: id },
+        'Entity not found for upsert, may have been deleted',
+      );
       return;
     }
 
@@ -357,7 +364,10 @@ export class OutboxNeo4jSync {
 
     const deletedCount = rowCount || 0;
     if (deletedCount > 0) {
-      workerLogger.info({ deletedCount, olderThanDays }, 'Cleaned up old outbox events');
+      workerLogger.info(
+        { deletedCount, olderThanDays },
+        'Cleaned up old outbox events',
+      );
     }
 
     return deletedCount;

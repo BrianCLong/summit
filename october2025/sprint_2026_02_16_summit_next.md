@@ -1,5 +1,6 @@
 ```markdown
 # Sprint Plan — Summit / IntelGraph / Maestro Conductor
+
 **Slug/Version:** `sprint-2026-02-16-intelgraph-summit-v1.9.0`
 **Dates:** Feb 16–Mar 2, 2026 (2 weeks)
 **Timezone:** America/Denver
@@ -9,6 +10,7 @@
 ---
 
 ## 0) North‑Star & Guardrails
+
 - **North‑Star:** 1 conversion (pilot→production), 2 pilots actively executing with success plans, ≥ 20 marketplace‑sourced leads/installs tracked.
 - **SLOs:** Availability ≥ 99.7%; Read P95 ≤ 250 ms; Policy P95 ≤ 8 ms; Error budget burn < 15%.
 - **Security:** Critical CVEs = 0; SBOM on `v1.9.0`; DPIA/DPA in place for all pilots.
@@ -16,6 +18,7 @@
 ---
 
 ## 1) Objectives (Demo on Mar 2)
+
 1. **Pilot Execution Pack:** success plans live, weekly metrics, and exec readouts for 2 pilots; mid‑pilot proof for one.
 2. **Conversion Motion:** pricing + SOW (production) ready; governance checks passed; migration plan authored.
 3. **CSV Schema Registry v1.1:** add **entity‑resolution rules** (email/domain/company), validation, and audit of merges.
@@ -26,6 +29,7 @@
 ---
 
 ## 2) Scope & Priority
+
 - **P0 (Must):** Success plans, weekly pilot metrics, one conversion path prepared, schema registry rules, enrichment adapter, eval harness, marketplace events, analytics v2.
 - **P1 (Should):** Audit search facets polish; report export annotations; connector health board v2; ABM wave‑2 follow‑ups.
 - **P2 (Could):** Query plan cache stats; map clustering perf; cost anomaly suppression list.
@@ -34,6 +38,7 @@
 ---
 
 ## 3) Swimlanes & Owners
+
 - **Product/GTM (Felix):** Pilot success plans, exec readouts, conversion SOW/pricing, ABM wave‑2 follow‑ups, marketplace campaigns.
 - **Frontend:** Registry rules UI, audit merge log view, analytics v2, report annotations.
 - **Backend:** ER rules engine, enrichment adapter, eval harness services, marketplace tracking events.
@@ -46,6 +51,7 @@
 ## 4) Backlog (Stories & Tasks)
 
 ### P0 — Pilot Execution & Conversion
+
 - **P0‑1** Success Plans Live (owner: Product/GTM)
   - Goals, owners, metrics; cadence; risks; shareable PDF.
 - **P0‑2** Weekly Pilot Metrics (owner: SRE/Product)
@@ -54,6 +60,7 @@
   - Production SOW + pricing; security/governance checklist; migration runbook draft.
 
 ### P0 — CSV Schema Registry v1.1 (Entity Resolution)
+
 - **P0‑4** ER Rules Engine (owner: BE)
   - Deterministic & fuzzy; thresholds; preview before merge; audit trail of merges/splits.
 - **P0‑5** Registry UI for ER (owner: FE)
@@ -62,24 +69,28 @@
   - Store pre/post state; expose `/audit/merges` endpoint; CSV export.
 
 ### P0 — Threat Intel v2 (Enrichment)
+
 - **P0‑7** Enrichment Adapter (owner: BE/Data)
   - Provider toggle (VirusTotal/OTX); caching; rate limits; redact keys in logs.
 - **P0‑8** Indicator Page UX (owner: FE)
   - Show enrichments with source, time, score; link to graph edges.
 
 ### P0 — GraphRAG Eval Harness v1
+
 - **P0‑9** 100‑Q Eval Set (owner: Product/BE)
   - Curate questions; gold answers & citations; store in `/eval/qa_set.json`.
 - **P0‑10** Scorer + Report (owner: BE)
   - Template match accuracy; grounded citation precision/recall; HTML/MD report.
 
 ### P0 — Marketplace & Analytics
+
 - **P0‑11** Install/Lead Events (owner: BE/FE)
   - Events for install, enable, first query; pass tenant/account metadata; privacy‑safe.
 - **P0‑12** Tenant Analytics v2 (owner: SRE/FE)
   - Funnels: connector enabled → ingest → first answer; TTI trend; export CSV.
 
 ### P1 — Polish & ABM
+
 - **P1‑1** Audit Facets Polish (owner: FE)
   - Saved filters; pinned views; faster pagination.
 - **P1‑2** Report Annotations (owner: FE)
@@ -90,6 +101,7 @@
   - Sequenced emails + LinkedIn; meeting targets & calendar holds.
 
 ### P2 — Ops & Cost
+
 - **P2‑1** Query Plan Cache Stats (owner: BE)
   - Expose hits/misses; invalidations; admin view.
 - **P2‑2** Cost Anomaly Suppression (owner: SRE)
@@ -98,6 +110,7 @@
 ---
 
 ## 5) Acceptance Criteria & DoD
+
 - **Pilots:** two success plans running with weekly reports; one mid‑pilot proof shown; exec readouts delivered.
 - **Conversion:** production SOW & pricing approved internally; governance checklist completed; migration plan reviewed.
 - **Registry v1.1:** ER rules create/preview/approve; merges audited; rollback works; API & UI tests pass.
@@ -108,6 +121,7 @@
 ---
 
 ## 6) Cadence & Dates
+
 - **Standup:** 09:30 MT daily
 - **Mid‑sprint demo:** Feb 23, 15:00 MT
 - **Code freeze:** Mar 1, 12:00 MT
@@ -117,6 +131,7 @@
 ---
 
 ## 7) Metrics
+
 - **Business:** conversions, ARR commit, marketplace installs/leads, meetings booked.
 - **Product:** ER merges audited, enrichment cache hit rate, eval scores, TTI proxy.
 - **Reliability/Cost:** error budget, DLQ size, anomaly count (suppressed vs active).
@@ -124,6 +139,7 @@
 ---
 
 ## 8) Deliverables (Repos & Docs)
+
 - `server/src/registry/{er_rules.ts,audit_merges.ts}` + `client/src/admin/registry/er_rules/*`
 - `server/src/ti/{enrichment_adapter.ts,providers/{virustotal.ts,otx.ts}}`
 - `client/src/features/indicator/*`
@@ -137,6 +153,7 @@
 ---
 
 ## 9) Demo Script (Mar 2)
+
 1. Walk two live success plans & weekly pilot metrics; show mid‑pilot proof.
 2. Present conversion package (SOW, pricing, governance checklist, migration plan).
 3. Configure ER rules; simulate & approve; show merge audit; rollback one merge.
@@ -149,4 +166,3 @@
 **Owner:** Felix (The B.I.Z.) — VP Sales/BD/Growth  
 **Last Updated:** Oct 13, 2025 (v1.9.0 plan)
 ```
-

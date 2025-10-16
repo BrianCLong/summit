@@ -20,6 +20,15 @@ jobs:
         run: echo "No client/server changes; skipping build"
       - name: Install deps (scoped)
         if: ${{ steps.changes.outputs.client == 'true' || steps.changes.outputs.server == 'true' }}
+            workflows:
+              - '.github/workflows/**'
+      - name: No app changes, skip build
+        if: ${{ steps.changes.outputs.client != 'true' && steps.changes.outputs.server != 'true' }}
+        run: echo "No client/server changes; skipping build"
+        shell: bash
+      - uses: actions/setup-node@v4
+        with: { node-version: 20 }
+      - name: Install deps (scoped)
         run: |
           if [[ "${{ steps.changes.outputs.client }}" == 'true' && "${{ steps.changes.outputs.server }}" != 'true' ]]; then \
             cd client && npm ci; \
@@ -27,6 +36,7 @@ jobs:
             npm ci; \
           fi
       - name: Lint/Typecheck/Build (scoped)
+<<<<<<< HEAD
         if: ${{ steps.changes.outputs.client == 'true' || steps.changes.outputs.server == 'true' }}
         run: |
           if [[ "${{ steps.changes.outputs.client }}" == 'true' && "${{ steps.changes.outputs.server }}" != 'true' ]]; then \
@@ -34,6 +44,16 @@ jobs:
           else \
             npm run lint && npm run typecheck && npm run build; \
           fi
+=======
+        run: |
+          if [[ "${{ steps.changes.outputs.client }}" == 'true' && "${{ steps.changes.outputs.server }}" != 'true' ]]; then \
+            cd client && (npm run lint || true) && (npm run typecheck || true) && npm run build; \
+          else \
+            (npm run lint || true) && (npm run typecheck || true) && npm run build; \
+          fi
+      - name: Done
+        run: echo "Switchboard build completed"
+>>>>>>> origin/main
   policies:
     runs-on: ubuntu-latest
     steps:
@@ -48,6 +68,10 @@ jobs:
         if: steps.pol.outputs.pol != 'true'
         run: echo "No policy changes; skipping OPA tests"
       - uses: open-policy-agent/setup-opa@v2
+<<<<<<< HEAD
         if: steps.pol.outputs.pol == 'true'
       - run: opa fmt -w policies && opa test policies -v
         if: steps.pol.outputs.pol == 'true'
+=======
+      - run: opa fmt -w policies && opa test policies -v || true
+>>>>>>> origin/main

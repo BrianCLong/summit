@@ -9,7 +9,13 @@ interface PremiumModel {
   id: string;
   name: string;
   provider: 'openai' | 'anthropic' | 'google' | 'azure' | 'cohere' | 'groq';
-  modelType: 'chat' | 'completion' | 'embedding' | 'reasoning' | 'code' | 'vision';
+  modelType:
+    | 'chat'
+    | 'completion'
+    | 'embedding'
+    | 'reasoning'
+    | 'code'
+    | 'vision';
   tier: 'premium' | 'enterprise' | 'flagship';
   capabilities: string[];
   costPerToken: number;
@@ -110,14 +116,22 @@ export class PremiumModelRouter {
       const scoredModels = await this.scoreModels(candidateModels, request);
 
       // Step 3: Apply Thompson Sampling for exploitation/exploration balance
-      const selectedModel = await this.selectModelWithThompsonSampling(scoredModels, request);
+      const selectedModel = await this.selectModelWithThompsonSampling(
+        scoredModels,
+        request,
+      );
 
       // Step 4: Validate availability and rate limits
-      const availabilityCheck = await this.validateModelAvailability(selectedModel, request);
+      const availabilityCheck = await this.validateModelAvailability(
+        selectedModel,
+        request,
+      );
 
       if (!availabilityCheck.available) {
         // Fallback to next best model
-        const fallbackModel = scoredModels.find((m) => m.model.id !== selectedModel.id);
+        const fallbackModel = scoredModels.find(
+          (m) => m.model.id !== selectedModel.id,
+        );
         if (!fallbackModel) {
           throw new Error('No available models after rate limit check');
         }
@@ -142,18 +156,26 @@ export class PremiumModelRouter {
 
       // Update routing metrics
       const routingTime = Date.now() - startTime;
-      prometheusConductorMetrics.recordOperationalMetric('premium_routing_latency', routingTime, {
-        selected_model: selectedModel.name,
-        tenant_id: request.context.tenantId,
-        task_type: request.context.taskType,
-      });
+      prometheusConductorMetrics.recordOperationalMetric(
+        'premium_routing_latency',
+        routingTime,
+        {
+          selected_model: selectedModel.name,
+          tenant_id: request.context.tenantId,
+          task_type: request.context.taskType,
+        },
+      );
 
-      prometheusConductorMetrics.recordOperationalEvent('premium_model_routed', true, {
-        model_name: selectedModel.name,
-        provider: selectedModel.provider,
-        tier: selectedModel.tier,
-        tenant_id: request.context.tenantId,
-      });
+      prometheusConductorMetrics.recordOperationalEvent(
+        'premium_model_routed',
+        true,
+        {
+          model_name: selectedModel.name,
+          provider: selectedModel.provider,
+          tier: selectedModel.tier,
+          tenant_id: request.context.tenantId,
+        },
+      );
 
       logger.info('Premium model routing completed', {
         selectedModel: selectedModel.name,
@@ -167,10 +189,14 @@ export class PremiumModelRouter {
     } catch (error) {
       const routingTime = Date.now() - startTime;
 
-      prometheusConductorMetrics.recordOperationalEvent('premium_routing_error', false, {
-        error_type: error.name,
-        tenant_id: request.context.tenantId,
-      });
+      prometheusConductorMetrics.recordOperationalEvent(
+        'premium_routing_error',
+        false,
+        {
+          error_type: error.name,
+          tenant_id: request.context.tenantId,
+        },
+      );
 
       logger.error('Premium model routing failed', {
         error: error.message,
@@ -186,15 +212,18 @@ export class PremiumModelRouter {
   /**
    * Filter models based on capabilities and constraints
    */
-  private async filterCandidateModels(request: RoutingRequest): Promise<PremiumModel[]> {
+  private async filterCandidateModels(
+    request: RoutingRequest,
+  ): Promise<PremiumModel[]> {
     const models = Array.from(this.availableModels.values());
 
     return models.filter((model) => {
       // Check required capabilities
       if (request.constraints.requiredCapabilities) {
-        const hasAllCapabilities = request.constraints.requiredCapabilities.every((cap) =>
-          model.capabilities.includes(cap),
-        );
+        const hasAllCapabilities =
+          request.constraints.requiredCapabilities.every((cap) =>
+            model.capabilities.includes(cap),
+          );
         if (!hasAllCapabilities) return false;
       }
 
@@ -216,7 +245,10 @@ export class PremiumModelRouter {
 
       // Check budget constraints
       const estimatedCost = this.estimateModelCost(model, request);
-      if (request.constraints.maxCost && estimatedCost > request.constraints.maxCost) {
+      if (
+        request.constraints.maxCost &&
+        estimatedCost > request.constraints.maxCost
+      ) {
         return false;
       }
 
@@ -230,7 +262,10 @@ export class PremiumModelRouter {
       }
 
       // Check task type compatibility
-      const taskCompatible = this.isTaskCompatible(model, request.context.taskType);
+      const taskCompatible = this.isTaskCompatible(
+        model,
+        request.context.taskType,
+      );
       if (!taskCompatible) return false;
 
       return true;
@@ -247,16 +282,28 @@ export class PremiumModelRouter {
     const scoredModels = [];
 
     for (const model of models) {
-      const performance = this.performanceData.get(`${model.id}:${request.context.taskType}`);
+      const performance = this.performanceData.get(
+        `${model.id}:${request.context.taskType}`,
+      );
 
       // Multi-criteria scoring with weights based on request context
       const weights = this.calculateScoringWeights(request);
 
-      const qualityScore = this.calculateQualityScore(model, performance, request);
+      const qualityScore = this.calculateQualityScore(
+        model,
+        performance,
+        request,
+      );
       const costScore = this.calculateCostScore(model, request);
       const speedScore = this.calculateSpeedScore(model, performance, request);
-      const reliabilityScore = this.calculateReliabilityScore(model, performance);
-      const specializationScore = this.calculateSpecializationScore(model, request);
+      const reliabilityScore = this.calculateReliabilityScore(
+        model,
+        performance,
+      );
+      const specializationScore = this.calculateSpecializationScore(
+        model,
+        request,
+      );
 
       const overallScore =
         qualityScore * weights.quality +
@@ -294,7 +341,9 @@ export class PremiumModelRouter {
     const sampledScores = [];
 
     for (const { model, score } of scoredModels) {
-      const performance = this.performanceData.get(`${model.id}:${request.context.taskType}`);
+      const performance = this.performanceData.get(
+        `${model.id}:${request.context.taskType}`,
+      );
 
       if (performance && performance.sampleSize > 10) {
         // Use Beta distribution based on historical success/failure
@@ -443,14 +492,17 @@ export class PremiumModelRouter {
         // Update existing performance data
         const newSampleSize = currentPerformance.sampleSize + 1;
         const successCount =
-          currentPerformance.successRate * currentPerformance.sampleSize + (result.success ? 1 : 0);
+          currentPerformance.successRate * currentPerformance.sampleSize +
+          (result.success ? 1 : 0);
         const newSuccessRate = successCount / newSampleSize;
 
         // Exponential moving average for latency and cost
         const alpha = 0.1; // Learning rate
         const newAvgLatency =
-          currentPerformance.avgLatency * (1 - alpha) + result.actualLatency * alpha;
-        const newAvgCost = currentPerformance.avgCost * (1 - alpha) + result.actualCost * alpha;
+          currentPerformance.avgLatency * (1 - alpha) +
+          result.actualLatency * alpha;
+        const newAvgCost =
+          currentPerformance.avgCost * (1 - alpha) + result.actualCost * alpha;
 
         const updatedPerformance: ModelPerformance = {
           modelId,
@@ -503,10 +555,14 @@ export class PremiumModelRouter {
         { model_id: modelId, task_type: taskType },
       );
 
-      prometheusConductorMetrics.recordOperationalEvent('model_execution_result', result.success, {
-        model_id: modelId,
-        task_type: taskType,
-      });
+      prometheusConductorMetrics.recordOperationalEvent(
+        'model_execution_result',
+        result.success,
+        {
+          model_id: modelId,
+          task_type: taskType,
+        },
+      );
 
       logger.info('Model execution result recorded', {
         modelId,
@@ -514,7 +570,8 @@ export class PremiumModelRouter {
         success: result.success,
         actualCost: result.actualCost,
         actualLatency: result.actualLatency,
-        updatedSuccessRate: this.performanceData.get(performanceKey)?.successRate,
+        updatedSuccessRate:
+          this.performanceData.get(performanceKey)?.successRate,
       });
     } catch (error) {
       logger.error('Failed to record execution result', {
@@ -528,10 +585,34 @@ export class PremiumModelRouter {
   // Utility methods for scoring
   private calculateScoringWeights(request: RoutingRequest): any {
     const urgencyWeights = {
-      critical: { quality: 0.4, cost: 0.1, speed: 0.4, reliability: 0.05, specialization: 0.05 },
-      high: { quality: 0.35, cost: 0.15, speed: 0.35, reliability: 0.1, specialization: 0.05 },
-      medium: { quality: 0.3, cost: 0.3, speed: 0.2, reliability: 0.15, specialization: 0.05 },
-      low: { quality: 0.25, cost: 0.4, speed: 0.15, reliability: 0.15, specialization: 0.05 },
+      critical: {
+        quality: 0.4,
+        cost: 0.1,
+        speed: 0.4,
+        reliability: 0.05,
+        specialization: 0.05,
+      },
+      high: {
+        quality: 0.35,
+        cost: 0.15,
+        speed: 0.35,
+        reliability: 0.1,
+        specialization: 0.05,
+      },
+      medium: {
+        quality: 0.3,
+        cost: 0.3,
+        speed: 0.2,
+        reliability: 0.15,
+        specialization: 0.05,
+      },
+      low: {
+        quality: 0.25,
+        cost: 0.4,
+        speed: 0.15,
+        reliability: 0.15,
+        specialization: 0.05,
+      },
     };
 
     return urgencyWeights[request.context.urgency] || urgencyWeights.medium;
@@ -551,7 +632,10 @@ export class PremiumModelRouter {
     return Math.min(1, baseScore);
   }
 
-  private calculateCostScore(model: PremiumModel, request: RoutingRequest): number {
+  private calculateCostScore(
+    model: PremiumModel,
+    request: RoutingRequest,
+  ): number {
     const estimatedCost = this.estimateModelCost(model, request);
     const budgetRatio = estimatedCost / request.context.budget;
 
@@ -567,7 +651,8 @@ export class PremiumModelRouter {
     let baseScore = model.speedScore / 100;
 
     if (performance && request.constraints.maxLatency) {
-      const latencyRatio = performance.avgLatency / request.constraints.maxLatency;
+      const latencyRatio =
+        performance.avgLatency / request.constraints.maxLatency;
       baseScore = Math.max(0, 1 - latencyRatio);
     }
 
@@ -584,7 +669,10 @@ export class PremiumModelRouter {
     return model.reliabilityScore / 100;
   }
 
-  private calculateSpecializationScore(model: PremiumModel, request: RoutingRequest): number {
+  private calculateSpecializationScore(
+    model: PremiumModel,
+    request: RoutingRequest,
+  ): number {
     const hasSpecialization = model.specializations.some((spec) =>
       request.context.taskType.toLowerCase().includes(spec.toLowerCase()),
     );
@@ -592,7 +680,10 @@ export class PremiumModelRouter {
     return hasSpecialization ? 1.0 : 0.5;
   }
 
-  private estimateModelCost(model: PremiumModel, request: RoutingRequest): number {
+  private estimateModelCost(
+    model: PremiumModel,
+    request: RoutingRequest,
+  ): number {
     const estimatedTokens = this.estimateTokenUsage(
       request.query,
       request.context.expectedOutputLength,
@@ -600,12 +691,20 @@ export class PremiumModelRouter {
     return estimatedTokens * model.costPerToken;
   }
 
-  private estimateLatency(model: PremiumModel, request: RoutingRequest): number {
-    const performance = this.performanceData.get(`${model.id}:${request.context.taskType}`);
+  private estimateLatency(
+    model: PremiumModel,
+    request: RoutingRequest,
+  ): number {
+    const performance = this.performanceData.get(
+      `${model.id}:${request.context.taskType}`,
+    );
     return performance?.avgLatency || 2000; // Default 2s
   }
 
-  private estimateTokenUsage(query: string, expectedOutputLength: number): number {
+  private estimateTokenUsage(
+    query: string,
+    expectedOutputLength: number,
+  ): number {
     // Simple estimation - in production would use proper tokenizer
     const inputTokens = Math.ceil(query.length / 4);
     const outputTokens = Math.ceil(expectedOutputLength / 4);
@@ -644,7 +743,10 @@ export class PremiumModelRouter {
     );
   }
 
-  private async reserveModelCapacity(model: PremiumModel, request: RoutingRequest): Promise<void> {
+  private async reserveModelCapacity(
+    model: PremiumModel,
+    request: RoutingRequest,
+  ): Promise<void> {
     // Update rate limit counters
     const rateLimitKey = `rate_limit:${model.id}:${request.context.tenantId}`;
     const estimatedTokens = this.estimateTokenUsage(
@@ -679,7 +781,11 @@ export class PremiumModelRouter {
         speedScore: 85,
         reliabilityScore: 95,
         specializations: ['code', 'reasoning', 'analysis'],
-        rateLimits: { requestsPerMinute: 500, tokensPerMinute: 150000, concurrent: 20 },
+        rateLimits: {
+          requestsPerMinute: 500,
+          tokensPerMinute: 150000,
+          concurrent: 20,
+        },
       },
       {
         id: 'claude-3-sonnet',
@@ -696,7 +802,11 @@ export class PremiumModelRouter {
         speedScore: 88,
         reliabilityScore: 96,
         specializations: ['analysis', 'reasoning', 'research'],
-        rateLimits: { requestsPerMinute: 1000, tokensPerMinute: 200000, concurrent: 25 },
+        rateLimits: {
+          requestsPerMinute: 1000,
+          tokensPerMinute: 200000,
+          concurrent: 25,
+        },
       },
       // Add more premium models...
     ];
@@ -732,7 +842,9 @@ export class PremiumModelRouter {
         });
       }
 
-      logger.info(`Loaded performance data for ${result.rows.length} model-task combinations`);
+      logger.info(
+        `Loaded performance data for ${result.rows.length} model-task combinations`,
+      );
     } finally {
       client.release();
     }
@@ -740,11 +852,16 @@ export class PremiumModelRouter {
 
   private async initializeLoadBalancers(): Promise<void> {
     for (const [modelId, model] of this.availableModels) {
-      this.loadBalancers.set(modelId, new ModelLoadBalancer(model.rateLimits.concurrent));
+      this.loadBalancers.set(
+        modelId,
+        new ModelLoadBalancer(model.rateLimits.concurrent),
+      );
     }
   }
 
-  private async savePerformanceData(performance: ModelPerformance): Promise<void> {
+  private async savePerformanceData(
+    performance: ModelPerformance,
+  ): Promise<void> {
     const client = await this.pool.connect();
     try {
       await client.query(

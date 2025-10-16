@@ -18,23 +18,23 @@ spec:
     - name: check-signed-images
       match:
         any:
-        - resources:
-            kinds:
-            - Pod
-            namespaces:
-            - intelgraph-prod
-            - intelgraph-stage
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - intelgraph-prod
+                - intelgraph-stage
       verifyImages:
-      - imageReferences:
-        - "ghcr.io/brianclong/intelgraph/*"
-        attestors:
-        - entries:
-          - keyless:
-              subject: "https://github.com/BrianCLong/summit/.github/workflows/*"
-              issuer: "https://token.actions.githubusercontent.com"
-              additionalExtensions:
-                github_workflow_trigger: "push"
-                github_workflow_repository: "BrianCLong/summit"
+        - imageReferences:
+            - 'ghcr.io/brianclong/intelgraph/*'
+          attestors:
+            - entries:
+                - keyless:
+                    subject: 'https://github.com/BrianCLong/summit/.github/workflows/*'
+                    issuer: 'https://token.actions.githubusercontent.com'
+                    additionalExtensions:
+                      github_workflow_trigger: 'push'
+                      github_workflow_repository: 'BrianCLong/summit'
 
 ---
 apiVersion: kyverno.io/v1
@@ -56,22 +56,22 @@ spec:
     - name: check-sbom-attestations
       match:
         any:
-        - resources:
-            kinds:
-            - Pod
-            namespaces:
-            - intelgraph-prod
-            - intelgraph-stage
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - intelgraph-prod
+                - intelgraph-stage
       verifyImages:
-      - imageReferences:
-        - "ghcr.io/brianclong/intelgraph/*"
-        attestations:
-        - predicateType: https://spdx.dev/Document
-          attestors:
-          - entries:
-            - keyless:
-                subject: "https://github.com/BrianCLong/summit/.github/workflows/*"
-                issuer: "https://token.actions.githubusercontent.com"
+        - imageReferences:
+            - 'ghcr.io/brianclong/intelgraph/*'
+          attestations:
+            - predicateType: https://spdx.dev/Document
+              attestors:
+                - entries:
+                    - keyless:
+                        subject: 'https://github.com/BrianCLong/summit/.github/workflows/*'
+                        issuer: 'https://token.actions.githubusercontent.com'
 
 ---
 apiVersion: kyverno.io/v1
@@ -93,33 +93,33 @@ spec:
     - name: block-unsigned-containers
       match:
         any:
-        - resources:
-            kinds:
-            - Pod
-            namespaces:
-            - intelgraph-prod
-            - intelgraph-stage
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - intelgraph-prod
+                - intelgraph-stage
       validate:
-        message: "Container images must be signed and from approved registries"
+        message: 'Container images must be signed and from approved registries'
         pattern:
           spec:
             containers:
-            - image: "ghcr.io/brianclong/intelgraph/*"
+              - image: 'ghcr.io/brianclong/intelgraph/*'
     - name: deny-privileged-containers
       match:
         any:
-        - resources:
-            kinds:
-            - Pod
-            namespaces:
-            - intelgraph-prod
-            - intelgraph-stage
+          - resources:
+              kinds:
+                - Pod
+              namespaces:
+                - intelgraph-prod
+                - intelgraph-stage
       validate:
-        message: "Privileged containers are not allowed in production"
+        message: 'Privileged containers are not allowed in production'
         pattern:
           spec:
             =(securityContext):
-              =(privileged): "false"
+              =(privileged): 'false'
             containers:
-            - =(securityContext):
-                =(privileged): "false"
+              - =(securityContext):
+                  =(privileged): 'false'

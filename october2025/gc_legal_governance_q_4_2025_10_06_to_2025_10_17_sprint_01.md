@@ -8,10 +8,12 @@
 ---
 
 ## 0) Source Alignment (Read‑In)
+
 **Observed sprints & artifacts in repo:**
-- Co‑CEO Governance Sprint (Oct 20–Oct 31) — hardened release path, audit/provenance, disclosure‑first demos.  
-- Intelgraph & Maestro cadence — Q4 multi‑lane sprints including SecDevOps hardening, provenance monitoring, residency, step‑up auth, DR, quotas, SLOs, anomaly, autoremediation.  
-- “Drift Harness & Replay” + Explainability/Fingerprint concepts (registry, prompt canon sets).  
+
+- Co‑CEO Governance Sprint (Oct 20–Oct 31) — hardened release path, audit/provenance, disclosure‑first demos.
+- Intelgraph & Maestro cadence — Q4 multi‑lane sprints including SecDevOps hardening, provenance monitoring, residency, step‑up auth, DR, quotas, SLOs, anomaly, autoremediation.
+- “Drift Harness & Replay” + Explainability/Fingerprint concepts (registry, prompt canon sets).
 - Platform docs for release orchestration and summit cadence.
 
 **Implication for Legal lane:** our gate must prove: (a) rights to ship, (b) privacy/AI safety posture, (c) regional residency controls, (d) export/classification, (e) public claims substantiation, (f) incident readiness, (g) auditability.
@@ -19,6 +21,7 @@
 ---
 
 ## 1) Gap Assessment (Legal/Policy/Compliance)
+
 1. **Evidence‑Backed Release Gate not uniformly codified.** Needs a single, repo‑portable checklist + machine‑verifiable artifacts.
 2. **Data Protection & Residency:** Residency toggles exist in engineering plan; legal mapping (DPA/SCC/UK IDTA/Swiss addendum, data transfer TIAs) not packaged per‑tenant.
 3. **AI Governance:** Model provenance, evals, prompt canon, fingerprint registry not yet tied to policy & public claims controls; red‑teaming/disclosure lanes missing.
@@ -31,9 +34,11 @@
 ---
 
 ## 2) Sprint Goal (Two‑Week Outcome)
+
 **“Every shipping repo passes the same legal release gate with machine‑verifiable artifacts: privacy, AI, IP/OSS, export, claims, and incident readiness.”**
 
 **Definition of Done**
+
 - Gate runs in CI, outputs a versioned **Disclosure Pack** (ZIP/JSON + markdown) attached to the release.
 - Each pack has green checks for: **DPA mapping**, **AI model sheet**, **eval summary**, **SBOM & license clearance**, **export check**, **claims substantiation**, **incident readiness**, **audit log pointers**.
 - At least **2 product repos** pass the gate in this sprint (pilot), with issues logged & fixed.
@@ -41,58 +46,68 @@
 ---
 
 ## 3) Deliverables (Ship This Sprint)
-1. **Policy‑as‑Code Gate** (OPA/Rego + scripts) — minimal ruleset (see §7).  
-2. **Disclosure Pack Template** (see §6) — markdown + JSON schema.  
-3. **Data Protection Bundle** — DPA/DTS/TIA scaffold per tenant/region.  
-4. **AI Governance Kit** — Model Sheet, Eval Log, Prompt Canon registry link, Fingerprint stub.  
-5. **OSS/IP Clearance** — SBOM ingestion + license policy, patent scan checklist.  
-6. **Export & Sanctions Check** — ECCN matrix, geo controls, denied‑party checklist.  
-7. **Security/Privacy by Design SOP** — short form DPIA + Design Review Memo template.  
-8. **Incident & Disclosure Playbook** — notifiable events matrix, regulator timelines, legal hold SOP.  
+
+1. **Policy‑as‑Code Gate** (OPA/Rego + scripts) — minimal ruleset (see §7).
+2. **Disclosure Pack Template** (see §6) — markdown + JSON schema.
+3. **Data Protection Bundle** — DPA/DTS/TIA scaffold per tenant/region.
+4. **AI Governance Kit** — Model Sheet, Eval Log, Prompt Canon registry link, Fingerprint stub.
+5. **OSS/IP Clearance** — SBOM ingestion + license policy, patent scan checklist.
+6. **Export & Sanctions Check** — ECCN matrix, geo controls, denied‑party checklist.
+7. **Security/Privacy by Design SOP** — short form DPIA + Design Review Memo template.
+8. **Incident & Disclosure Playbook** — notifiable events matrix, regulator timelines, legal hold SOP.
 9. **Control Narrative Map** — SOC2/ISO control IDs ↔ gate checks crosswalk.
 
 ---
 
 ## 4) Work Plan (Swimlanes & Tasks)
-**Lane A — Gate & CI Integration**  
-- A1. Add `/.legal/gate.rego` + `/.legal/run_gate.sh` to pilot repos.  
-- A2. Wire to CI (GitHub Actions or Maestro Job).  
+
+**Lane A — Gate & CI Integration**
+
+- A1. Add `/.legal/gate.rego` + `/.legal/run_gate.sh` to pilot repos.
+- A2. Wire to CI (GitHub Actions or Maestro Job).
 - A3. Fail build on red; publish `disclosure-pack.tgz` as artifact.
 
-**Lane B — Evidence & Templates**  
-- B1. Draft Disclosure Pack v0.9 (see §6).  
-- B2. Generate **SBOM** (Syft or native) and run license policy.  
+**Lane B — Evidence & Templates**
+
+- B1. Draft Disclosure Pack v0.9 (see §6).
+- B2. Generate **SBOM** (Syft or native) and run license policy.
 - B3. Populate **Model Sheet** & **Eval Summary** from existing drift/replay data.
 
-**Lane C — Data Transfer & Residency**  
-- C1. Tenant residency map → TIA stub + SCC selection.  
-- C2. DPA addendum boilerplate per region (EU/UK/CH).  
+**Lane C — Data Transfer & Residency**
+
+- C1. Tenant residency map → TIA stub + SCC selection.
+- C2. DPA addendum boilerplate per region (EU/UK/CH).
 - C3. Map DR/Failover plan to data transfer safety measures.
 
-**Lane D — Export & Sanctions**  
-- D1. Classification memo (ECCN/ETR) for core features.  
-- D2. Denied‑party checklist before enabling paid features.  
+**Lane D — Export & Sanctions**
+
+- D1. Classification memo (ECCN/ETR) for core features.
+- D2. Denied‑party checklist before enabling paid features.
 - D3. Region sharding enforcement note (config proof).
 
-**Lane E — Incident Readiness**  
-- E1. Incident taxonomy & thresholds.  
-- E2. 72‑hour privacy‑breach clock SOP (EU/CO/US states).  
+**Lane E — Incident Readiness**
+
+- E1. Incident taxonomy & thresholds.
+- E2. 72‑hour privacy‑breach clock SOP (EU/CO/US states).
 - E3. Legal hold trigger + preservation kit.
 
 ---
 
 ## 5) Dependencies & RACI
+
 **Dependencies:** SBOM tooling; provenance/audit logs; residency switches; prompt canon/fingerprint registry; DR documentation; CI access.
 
-**RACI:**  
-- **Responsible:** GC (this lane) for gate rules, packs, legal artifacts.  
-- **Accountable:** Co‑CEO Governance for release readiness; Chief Architect for CI gate adoption.  
-- **Consulted:** SecDevOps, Data Protection Officer, ML Lead (evals/fingerprints), Export Counsel.  
+**RACI:**
+
+- **Responsible:** GC (this lane) for gate rules, packs, legal artifacts.
+- **Accountable:** Co‑CEO Governance for release readiness; Chief Architect for CI gate adoption.
+- **Consulted:** SecDevOps, Data Protection Officer, ML Lead (evals/fingerprints), Export Counsel.
 - **Informed:** Sales/BD (claims), Support/IR lead, External Auditors.
 
 ---
 
 ## 6) Disclosure Pack — Structure (v0.9)
+
 ```
 /disclosure/
   release.json                 # metadata: repo, commit, region, features, models
@@ -124,6 +139,7 @@
 ---
 
 ## 7) Policy‑as‑Code — Minimal Ruleset (Rego Sketch)
+
 ```rego
 package legal.gate
 
@@ -154,6 +170,7 @@ allow { sbom_present; license_ok; dpia_ok; evals_ok; export_ok }
 ```
 
 **CI shim (`run_gate.sh`)**
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -169,6 +186,7 @@ opa eval --format pretty --data .legal/gate.rego --input .legal/gate_input.json 
 ## 8) Templates (Drop‑in)
 
 ### 8.1 Short‑Form DPIA (1–2 pages)
+
 ```
 # DPIA — <Product/Feature> (<Release/Commit>)
 - Purpose & lawful basis:
@@ -181,6 +199,7 @@ opa eval --format pretty --data .legal/gate.rego --input .legal/gate_input.json 
 ```
 
 ### 8.2 Model Sheet (Public‑Shareable)
+
 ```
 # Model Sheet — <Model/Version>
 - Intended use & limitations:
@@ -191,6 +210,7 @@ opa eval --format pretty --data .legal/gate.rego --input .legal/gate_input.json 
 ```
 
 ### 8.3 Eval Summary (Attach Metrics)
+
 ```
 # Evals — <Release>
 - Tests run & thresholds:
@@ -199,6 +219,7 @@ opa eval --format pretty --data .legal/gate.rego --input .legal/gate_input.json 
 ```
 
 ### 8.4 License Policy (SBOM Gate)
+
 ```
 # License Policy
 - Allowed: MIT/BSD/Apache‑2.0/…
@@ -209,6 +230,7 @@ opa eval --format pretty --data .legal/gate.rego --input .legal/gate_input.json 
 ```
 
 ### 8.5 Export & Sanctions Checklist
+
 ```
 # Export Check — <Release>
 - ECCN/ETR classification:
@@ -219,6 +241,7 @@ opa eval --format pretty --data .legal/gate.rego --input .legal/gate_input.json 
 ```
 
 ### 8.6 Claims Substantiation
+
 ```
 # Public Claims — <Release>
 - Marketing claims list:
@@ -228,6 +251,7 @@ opa eval --format pretty --data .legal/gate.rego --input .legal/gate_input.json 
 ```
 
 ### 8.7 Incident & Disclosure Matrix
+
 ```
 # Notifiability Matrix
 - Severity levels & criteria
@@ -240,18 +264,20 @@ opa eval --format pretty --data .legal/gate.rego --input .legal/gate_input.json 
 ---
 
 ## 9) Control Narrative Crosswalk (seed)
-| Gate Check | SOC 2 | ISO 27001 | AI Policy | Notes |
-|---|---|---|---|---|
-| SBOM & License | CC8.1/8.2 | A.8.1 | IP‑01 | OSS inventory & risk |
-| DPIA & PbD | CC7.x | A.6/A.8 | PR‑01 | Feature‑level privacy |
-| AI Evals | N/A | N/A | AI‑03 | Risk‑based evals |
-| Export/Sanctions | CC1.2 | A.5 | REG‑02 | ECCN & geo gates |
-| Incident & Hold | CC7.3 | A.5/A.16 | IR‑02 | Timelines & legal hold |
-| Claims Pack | CC2.3 | A.5 | GOV‑01 | Truth‑in‑advertising |
+
+| Gate Check       | SOC 2     | ISO 27001 | AI Policy | Notes                  |
+| ---------------- | --------- | --------- | --------- | ---------------------- |
+| SBOM & License   | CC8.1/8.2 | A.8.1     | IP‑01     | OSS inventory & risk   |
+| DPIA & PbD       | CC7.x     | A.6/A.8   | PR‑01     | Feature‑level privacy  |
+| AI Evals         | N/A       | N/A       | AI‑03     | Risk‑based evals       |
+| Export/Sanctions | CC1.2     | A.5       | REG‑02    | ECCN & geo gates       |
+| Incident & Hold  | CC7.3     | A.5/A.16  | IR‑02     | Timelines & legal hold |
+| Claims Pack      | CC2.3     | A.5       | GOV‑01    | Truth‑in‑advertising   |
 
 ---
 
 ## 10) Acceptance Criteria & Demos
+
 - **CI shows green gate** for two pilot repos with artifact links.
 - **Disclosure Packs** reviewable in PR; zero P0 issues.
 - **One public‑safe Model Sheet** published.
@@ -262,29 +288,33 @@ opa eval --format pretty --data .legal/gate.rego --input .legal/gate_input.json 
 ---
 
 ## 11) Risks & Mitigations
-- **Time squeeze** → scope minimal ruleset; expand next sprint.  
-- **Tooling variance** → ship a repo‑portable `.legal/` folder.  
-- **Red tape vs speed** → waivers w/ expiry and audit log.  
+
+- **Time squeeze** → scope minimal ruleset; expand next sprint.
+- **Tooling variance** → ship a repo‑portable `.legal/` folder.
+- **Red tape vs speed** → waivers w/ expiry and audit log.
 - **Claims drift** → lock claims list in pack; marketing cannot publish without link.
 
 ---
 
 ## 12) Next Sprint (Preview: Oct 20 – Oct 31, 2025)
-- Expand AI eval policies (fairness/abuse tests); automate claims diff.  
-- Add **TPIA** (third‑party impact) for upstream model vendors.  
-- Wire **Explainability API** and Fingerprint registry into packs.  
+
+- Expand AI eval policies (fairness/abuse tests); automate claims diff.
+- Add **TPIA** (third‑party impact) for upstream model vendors.
+- Wire **Explainability API** and Fingerprint registry into packs.
 - Pilot external auditor review on control narratives.
 
 ---
 
 ## 13) Operating Cadence
-- **Daily:** PR gate triage & waivers review.  
-- **Tue/Thu:** Joint stand‑up with SecDevOps + ML evals.  
+
+- **Daily:** PR gate triage & waivers review.
+- **Tue/Thu:** Joint stand‑up with SecDevOps + ML evals.
 - **Fri:** Disclosure review + claims freeze for Monday release.
 
 ---
 
 ## 14) Scaffolding — Repo Drop‑Ins
+
 ```
 /.legal/
   gate.rego
@@ -302,4 +332,3 @@ opa eval --format pretty --data .legal/gate.rego --input .legal/gate_input.json 
 ```
 
 > **Ship clean, green, and provable. The gate is our sword and our shield.**
-

@@ -9,7 +9,10 @@
       "title": "NLQ Parse p95 (s)",
       "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
       "targets": [
-        { "expr": "histogram_quantile(0.95, sum(rate(nlq_parse_duration_seconds_bucket[5m])) by (le))", "legendFormat": "parse p95" }
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(nlq_parse_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "parse p95"
+        }
       ]
     },
     {
@@ -17,7 +20,10 @@
       "title": "NLQ Execute p95 (s)",
       "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
       "targets": [
-        { "expr": "histogram_quantile(0.95, sum(rate(nlq_execute_duration_seconds_bucket[5m])) by (le))", "legendFormat": "exec p95" }
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(nlq_execute_duration_seconds_bucket[5m])) by (le))",
+          "legendFormat": "exec p95"
+        }
       ]
     },
     {
@@ -25,7 +31,10 @@
       "title": "Ingest E2E (s)",
       "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
       "targets": [
-        { "expr": "histogram_quantile(0.95, sum(rate(ingest_e2e_seconds_bucket[5m])) by (le))", "legendFormat": "ingest p95" }
+        {
+          "expr": "histogram_quantile(0.95, sum(rate(ingest_e2e_seconds_bucket[5m])) by (le))",
+          "legendFormat": "ingest p95"
+        }
       ]
     },
     {
@@ -33,9 +42,18 @@
       "title": "Export Decisions (5m)",
       "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
       "targets": [
-        { "expr": "sum(rate(export_decisions_total{result=\"allow\"}[5m]))", "legendFormat": "allow" },
-        { "expr": "sum(rate(export_decisions_total{result=\"deny\"}[5m]))", "legendFormat": "deny" },
-        { "expr": "sum(rate(export_decisions_total{result=\"redacted\"}[5m]))", "legendFormat": "redacted" }
+        {
+          "expr": "sum(rate(export_decisions_total{result=\"allow\"}[5m]))",
+          "legendFormat": "allow"
+        },
+        {
+          "expr": "sum(rate(export_decisions_total{result=\"deny\"}[5m]))",
+          "legendFormat": "deny"
+        },
+        {
+          "expr": "sum(rate(export_decisions_total{result=\"redacted\"}[5m]))",
+          "legendFormat": "redacted"
+        }
       ]
     },
     {
@@ -57,7 +75,11 @@
       ],
       "thresholds": {
         "mode": "absolute",
-        "steps": [ { "color": "green" }, { "color": "orange", "value": 6 }, { "color": "red", "value": 14 } ]
+        "steps": [
+          { "color": "green" },
+          { "color": "orange", "value": 6 },
+          { "color": "red", "value": 14 }
+        ]
       }
     }
   ],
@@ -65,4 +87,3 @@
     "list": []
   }
 }
-

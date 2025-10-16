@@ -17,7 +17,7 @@ async function main() {
       case 'migrate':
         await migrationManager.migrate();
         break;
-        
+
       case 'status':
         const status = await migrationManager.status();
         console.log('\n📊 Migration Status:');
@@ -25,12 +25,12 @@ async function main() {
         if (status.length === 0) {
           console.log('No migrations found.');
         } else {
-          status.forEach(migration => {
+          status.forEach((migration) => {
             console.log(`${migration.status} ${migration.version}`);
           });
         }
         break;
-        
+
       case 'create':
         const migrationName = args[1];
         if (!migrationName) {
@@ -41,7 +41,7 @@ async function main() {
         const version = await migrationManager.createMigration(migrationName);
         console.log(`✅ Created migration: ${version}`);
         break;
-        
+
       case 'help':
       default:
         console.log(`
@@ -73,7 +73,7 @@ Environment Variables:
   }
 }
 
-main().catch(error => {
+main().catch((error) => {
   console.error('❌ Unexpected error:', error);
   process.exit(1);
 });

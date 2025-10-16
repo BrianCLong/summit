@@ -19,7 +19,6 @@ IntelGraph is a deployable-first intelligence analysis platform combining graph 
 - End-to-end investigation management including versioning
 - Data ingestion from CSV, STIX/TAXII standards, and external federated sources
 
-
 ### Advanced Capabilities (MVP-1 Completed)
 
 - Multimodal AI/ML data extraction engines, including OCR (Tesseract, PaddleOCR), YOLO v8 object detection, face recognition (MTCNN + FaceNet), Whisper speech-to-text, and spaCy NLP (entity recognition, sentiment analysis)
@@ -30,25 +29,23 @@ IntelGraph is a deployable-first intelligence analysis platform combining graph 
 - Security hardening (tenant isolation, audit logging)
 - DevOps-ready with Docker, CI/CD, smoke testing, and deployment automation
 
-
 ### User Interface
 
 - Interactive graph visualization powered by Cytoscape.js
 - Real-time multi-user collaboration with presence tracking
 - Mobile-responsive and WCAG 2.1 AA accessibility compliant
 
-
 ## Technology Stack
 
-| Component | Technology |
-| :-- | :-- |
-| Frontend | React 18, Redux Toolkit, Material-UI, Cytoscape.js, Vite |
-| Backend | Node.js 20+, TypeScript, Apollo GraphQL Server, Express.js |
-| Databases | Neo4j (graph), PostgreSQL 16 (relational, pgvector), TimescaleDB (time-series), Redis (cache/session) |
-| AI/ML Models | Tesseract OCR, PaddleOCR, YOLO v8, MTCNN, FaceNet, Whisper ASR, spaCy NER, sentence transformers |
-| Containerization | Docker, Docker Compose, Helm charts (for Kubernetes) |
-| Monitoring | OpenTelemetry, Prometheus, Grafana, AlertManager |
-| Security | JWT, OPA policies, RBAC, rate limiting, CSRF/XSS protection, encrypted backups |
+| Component        | Technology                                                                                            |
+| :--------------- | :---------------------------------------------------------------------------------------------------- |
+| Frontend         | React 18, Redux Toolkit, Material-UI, Cytoscape.js, Vite                                              |
+| Backend          | Node.js 20+, TypeScript, Apollo GraphQL Server, Express.js                                            |
+| Databases        | Neo4j (graph), PostgreSQL 16 (relational, pgvector), TimescaleDB (time-series), Redis (cache/session) |
+| AI/ML Models     | Tesseract OCR, PaddleOCR, YOLO v8, MTCNN, FaceNet, Whisper ASR, spaCy NER, sentence transformers      |
+| Containerization | Docker, Docker Compose, Helm charts (for Kubernetes)                                                  |
+| Monitoring       | OpenTelemetry, Prometheus, Grafana, AlertManager                                                      |
+| Security         | JWT, OPA policies, RBAC, rate limiting, CSRF/XSS protection, encrypted backups                        |
 
 ## Developer Onboarding and Quickstart
 
@@ -62,10 +59,10 @@ make smoke       # Smoke tests to validate deployment
 ```
 
 - URLs after startup:
-    - Frontend: http://localhost:3000
-    - GraphQL API: http://localhost:4000/graphql
-    - Neo4j Browser: http://localhost:7474
-    - Adminer (DB admin): http://localhost:8080
+  - Frontend: http://localhost:3000
+  - GraphQL API: http://localhost:4000/graphql
+  - Neo4j Browser: http://localhost:7474
+  - Adminer (DB admin): http://localhost:8080
 
 For full AI capabilities:
 
@@ -75,14 +72,12 @@ make up-kafka    # Streaming Kafka services
 make up-full     # All services (AI + Kafka)
 ```
 
-
 ## System Architecture Highlights
 
 - Functional flow: Client (React) → GraphQL API (Node.js) → Databases (Neo4j for graph, PostgreSQL for metadata, TimescaleDB for metrics)
 - Real-time updates via Socket.io
 - Redis used for session storage and caching, also rate limiting
 - Role-based and policy-driven secure access throughout
-
 
 ## Security and Compliance
 
@@ -92,20 +87,17 @@ make up-full     # All services (AI + Kafka)
 - Audit logging, encryption-at-rest, TLS 1.3 encryption in transit
 - GDPR-ready, SOC 2 Type II compliance, NIST cybersecurity framework alignment
 
-
 ## Development Tools and Testing
 
 - Strict TypeScript and ESLint standards
 - Testing suite: Jest for unit, Playwright for E2E, Artillery for performance, OWASP ZAP for security scanning
 - CI/CD pipelines supported with smoke tests and automated quality checks
 
-
 ## Documentation and Support
 
 - Detailed API documentation, architecture decision records, troubleshooting guides included
 - Community support via GitHub Discussions and Issues
 - Feature request and bug reporting guidelines
-
 
 ## Summary
 
@@ -118,7 +110,6 @@ If needed, further dive into specific architectural areas, AI capabilities, or d
 <div align="center">⁂</div>
 
 [^1_1]: https://github.com/BrianCLong/summit
-
 
 ---
 
@@ -171,7 +162,6 @@ Let me know if a precise summary or walkthrough of any particular subsystem, fea
 
 [^2_15]: https://www.cablelabs.com/event/cablelabs-winter-conference-2025
 
-
 ---
 
 # Precise summary of everything, providing topic areas to drill into
@@ -180,7 +170,7 @@ IntelGraph Platform (aka summit) — Precise Full Summary with Drilldown Topics
 
 IntelGraph is a sophisticated, deployable-first AI-augmented intelligence analysis platform optimized for graph analytics, real-time collaboration, and enterprise-grade security. Designed primarily for intelligence community use, it integrates advanced multimodal AI extraction with a secure, scalable, and observable data architecture.
 
-***
+---
 
 ## Platform Overview
 
@@ -188,37 +178,37 @@ IntelGraph is a sophisticated, deployable-first AI-augmented intelligence analys
 - **Design:** Deployable-first; comprehensive codebase supports seamless development to production transition
 - **Core Workflow:** Investigation creation → entity/relationship graph construction → AI-powered analysis → actionable insights
 
-***
+---
 
 ## Core Platform Features (MVP-0 Complete)
 
 - **Authentication/Security:** JWT auth, RBAC, Open Policy Agent policies, rate limiting
 - **Databases:**
-    - Neo4j for graph data/analytics
-    - PostgreSQL for user data, metadata, audit logs (with pgvector support)
-    - TimescaleDB for time-series metrics/events
-    - Redis for caching, sessions, rate limiting
+  - Neo4j for graph data/analytics
+  - PostgreSQL for user data, metadata, audit logs (with pgvector support)
+  - TimescaleDB for time-series metrics/events
+  - Redis for caching, sessions, rate limiting
 - **Frontend:** React 18 app with Material-UI, Redux Toolkit, real-time UI updates, and Cytoscape.js graph visualization
 - **Backend:** Node.js 20+ with Apollo GraphQL server and Express middleware
 - **Investigation Management:** End-to-end investigation lifecycle with versioning and real-time collaboration
 - **Data Ingestion:** Supports CSV uploads, STIX/TAXII standards, and external federated sources ingestion
 
-***
+---
 
 ## Advanced AI/ML Capabilities (MVP-1 Complete)
 
 - **Multimodal AI Extraction:**
-    - OCR: Tesseract, PaddleOCR
-    - Object Detection: YOLO v8
-    - Face Recognition: MTCNN + FaceNet
-    - Speech-to-Text: OpenAI Whisper
-    - NLP: spaCy NER, sentiment analysis, topic modeling
-    - Vector Embeddings \& Semantic Search: Sentence transformers (all-MiniLM-L6-v2)
-    - Cross-modal content matching across text, images, audio
+  - OCR: Tesseract, PaddleOCR
+  - Object Detection: YOLO v8
+  - Face Recognition: MTCNN + FaceNet
+  - Speech-to-Text: OpenAI Whisper
+  - NLP: spaCy NER, sentiment analysis, topic modeling
+  - Vector Embeddings \& Semantic Search: Sentence transformers (all-MiniLM-L6-v2)
+  - Cross-modal content matching across text, images, audio
 - **Smart Clustering \& Graph Analytics:** Community detection, centrality, path finding with graph clustering and LOD rendering
 - **Temporal \& GEOINT Analysis:** Time-series pattern recognition, geographic intelligence via Leaflet
 
-***
+---
 
 ## Infrastructure \& Architecture
 
@@ -227,7 +217,7 @@ IntelGraph is a sophisticated, deployable-first AI-augmented intelligence analys
 - **Security Controls:** Input validation, CSRF and XSS protections, encrypted backups, audit logs, GDPR, SOC2 Type II compliance, NIST aligned
 - **Monitoring \& Observability:** OpenTelemetry instrumentation; Prometheus and Grafana dashboards with alerting
 
-***
+---
 
 ## Development \& Deployment
 
@@ -236,7 +226,7 @@ IntelGraph is a sophisticated, deployable-first AI-augmented intelligence analys
 - **APIs:** Rich GraphQL schema for investigations, entities, relationships; REST endpoints for file upload and stats; WebSocket events for realtime updates
 - **Configuration:** Feature flags, rate limiting, logging with JSON structured logs, secret management via environment variables
 
-***
+---
 
 ## User Interface
 
@@ -245,7 +235,7 @@ IntelGraph is a sophisticated, deployable-first AI-augmented intelligence analys
 - Mobile device optimized
 - AI Copilot natural language query interface with live progress streaming
 
-***
+---
 
 ## Security \& Compliance
 
@@ -255,36 +245,36 @@ IntelGraph is a sophisticated, deployable-first AI-augmented intelligence analys
 - Encryption in transit with TLS 1.3 and encryption at rest
 - GDPR-ready data portability and deletion workflows
 
-***
+---
 
 # Suggested Drilldown Topics
 
 1. **Architecture Deep Dive**
-    - Detailed system components and data flow
-    - Multi-database coordination and caching strategy
+   - Detailed system components and data flow
+   - Multi-database coordination and caching strategy
 2. **AI/ML Extraction Engines**
-    - Setup and configuration of OCR, object detection, NLP pipelines
-    - Cross-modal vector search and semantic matching
+   - Setup and configuration of OCR, object detection, NLP pipelines
+   - Cross-modal vector search and semantic matching
 3. **Graph Analytics \& Visualization**
-    - Graph algorithms implemented
-    - Real-time collaborative graph visualization UI details
+   - Graph algorithms implemented
+   - Real-time collaborative graph visualization UI details
 4. **Security Implementation**
-    - OPA policy examples, JWT tokens, rate limiting strategies
-    - Audit logging and compliance support
+   - OPA policy examples, JWT tokens, rate limiting strategies
+   - Audit logging and compliance support
 5. **Developer Workflow**
-    - CI/CD pipelines, smoke testing, test coverage standards
-    - Docker and Kubernetes deployment setups
+   - CI/CD pipelines, smoke testing, test coverage standards
+   - Docker and Kubernetes deployment setups
 6. **Investigation and Data Ingestion**
-    - Supported formats, federation, and data enrichment workflows
-    - Investigation lifecycle management via GraphQL API
+   - Supported formats, federation, and data enrichment workflows
+   - Investigation lifecycle management via GraphQL API
 7. **Observability \& Monitoring**
-    - Prometheus metrics captured
-    - Grafana dashboard setups and alerting rules
+   - Prometheus metrics captured
+   - Grafana dashboard setups and alerting rules
 8. **User Interface \& AI Copilot**
-    - AI-driven natural language query orchestration
-    - Multi-user presence and collaboration UX design
+   - AI-driven natural language query orchestration
+   - Multi-user presence and collaboration UX design
 
-***
+---
 
 This summary and the listed drilldown topics provide a strong framework to quickly locate and study any specific domain within the IntelGraph platform, supporting development, deployment, or strategic documentation needs. Let me know which topic(s) to explore in detail next.
 
@@ -294,7 +284,7 @@ This summary and the listed drilldown topics provide a strong framework to quick
 
 IntelGraph Platform — Architecture Deep Dive
 
-***
+---
 
 ## Core Components \& System Architecture
 
@@ -321,8 +311,7 @@ IntelGraph employs a modular, microservices-oriented architecture designed for s
 └───────────┘   └──────────────┘   └─────────────┘   └─────────┘
 ```
 
-
-***
+---
 
 ## Frontend Layer
 
@@ -331,7 +320,7 @@ IntelGraph employs a modular, microservices-oriented architecture designed for s
 - **Graph Visualization:** Cytoscape.js for interactive node-link diagrams with support for multiple layouts and optimized viewport rendering
 - **Real-Time Updates:** WebSocket connections via Socket.io for multi-user presence, collaboration, and live investigation updates
 
-***
+---
 
 ## Backend Layer
 
@@ -341,7 +330,7 @@ IntelGraph employs a modular, microservices-oriented architecture designed for s
 - **Security Middleware:** Helmet.js for secure headers, rate limiting via Redis throttling, input validation and sanitization to avoid injection and XSS attacks
 - **Real-Time Communication:** Socket.io server for WebSocket event broadcasting and client synchronization
 
-***
+---
 
 ## Data Persistence and Databases
 
@@ -351,18 +340,15 @@ IntelGraph employs a modular, microservices-oriented architecture designed for s
 - Supports complex graph traversal and analytics (community detection, centrality)
 - Native constraints and indexes for data consistency and query performance
 
-
 ### PostgreSQL (Relational DB)
 
 - Stores user accounts, authentication metadata, audit logs, and other relational data
 - Includes pgvector extension for storing and querying vector embeddings (semantic search)
 
-
 ### TimescaleDB (Time-Series DB)
 
 - Houses time-stamped metrics, event logs, and temporal data for analytics and observability
 - Enables temporal pattern recognition and anomaly detection within investigation workflows
-
 
 ### Redis (In-Memory Data Store)
 
@@ -370,22 +356,22 @@ IntelGraph employs a modular, microservices-oriented architecture designed for s
 - Manages rate limiting tokens per user/IP for request throttling
 - Facilitates pub/sub for WebSocket state synchronization
 
-***
+---
 
 ## AI/ML Services Architecture
 
 - Deployed optionally alongside core services as a dedicated container stack
 - Engines include:
-    - OCR (Tesseract, PaddleOCR)
-    - Object detection (YOLO v8)
-    - Face recognition (MTCNN + FaceNet)
-    - Speech-to-text (OpenAI Whisper)
-    - NLP (spaCy entity recognition, sentiment analysis)
-    - Vector embeddings (sentence transformers for semantic search)
+  - OCR (Tesseract, PaddleOCR)
+  - Object detection (YOLO v8)
+  - Face recognition (MTCNN + FaceNet)
+  - Speech-to-text (OpenAI Whisper)
+  - NLP (spaCy entity recognition, sentiment analysis)
+  - Vector embeddings (sentence transformers for semantic search)
 - AI tasks orchestrated by backend job queue with GPU support, configurable concurrency, and model pathing
 - Cross-modal semantic search merges AI-extracted metadata with graph structures
 
-***
+---
 
 ## Security Architecture
 
@@ -396,7 +382,7 @@ IntelGraph employs a modular, microservices-oriented architecture designed for s
 - Audit logging with immutable storage and correlation IDs for traceability
 - Sensitive data encrypted at rest and in transit
 
-***
+---
 
 ## Monitoring, Observability \& DevOps
 
@@ -406,7 +392,7 @@ IntelGraph employs a modular, microservices-oriented architecture designed for s
 - Alertmanager issues warnings on critical failures, resource exhaustion, or security anomalies
 - CI/CD pipelines automate build, test (unit, integration, e2e, smoke), and deploy leveraging GitHub Actions with quality gates
 
-***
+---
 
 ## Data Flow Summary
 
@@ -418,7 +404,7 @@ IntelGraph employs a modular, microservices-oriented architecture designed for s
 6. AI services asynchronously process media/text for entity extraction and enrichment as needed.
 7. Metrics and logs feed into monitoring dashboards for ongoing health insight.
 
-***
+---
 
 This architecture balances scalable, real-time graph data analysis and advanced AI enrichment, emphasizing security, observability, and developer productivity.
 
@@ -436,13 +422,11 @@ As of the latest public release labeled "v2025.09.30-golden," the IntelGraph pla
 - **MVP-1:** Advanced AI/ML extraction, multimodal analytics, strong security (completed)
 - **MVP-2:** Not yet released or publicly detailed in the current repository or documentation
 
-
 ### Status of MVP-2 or General Availability (GA)
 
 - MVP-2 and GA stages are not explicitly published or tagged in the repository as of September 30, 2025.
 - No release notes, changelogs, or roadmap information available in the repo or public channels reference MVP-2 features or GA readiness.
 - Presumably, MVP-2 will focus on feature finalization, scale/performance optimization, possibly enterprise integrations, and formal GA validation and compliance, but these details are not yet in the public domain.
-
 
 ### Summary
 
@@ -458,7 +442,7 @@ Just flipped public. Dig into where we are and where we need to be. Provide full
 
 IntelGraph Platform — Current State, Roadmap \& Product Requirements Document (PRD) for MVP-2 and GA
 
-***
+---
 
 ## 1. Current State (as of public release v2025.09.30-golden)
 
@@ -472,99 +456,97 @@ IntelGraph is a production-ready AI-augmented intelligence analysis platform foc
 - Responsive and accessible React UI with Cytoscape.js visualization and AI-driven natural language query assistant
 - Four coordinated databases: Neo4j (graph), PostgreSQL (metadata), TimescaleDB (metrics), Redis (cache/session)
 
-***
+---
 
 ## 2. Where We Need to Be: MVP-2 \& GA Vision
 
 The transition from MVP-1 to MVP-2 and ultimately to General Availability (GA) entails solidifying enterprise readiness, expanding features, improving performance and scalability, and polishing UX. The objectives span from technical robustness to operational excellence.
 
-***
+---
 
 ## 3. MVP-2 Product Requirements
 
 ### Core Deliverables
 
 1. **Enterprise-Grade Scale \& Performance**
-    - Horizontal scaling architecture for backend and AI services (Kubernetes optimization)
-    - Database tuning and auto-scaling strategies (Neo4j clustering, TimescaleDB distributed deployments)
-    - Enhanced caching and query performance with persisted queries \& aggressive cache invalidation policies
+   - Horizontal scaling architecture for backend and AI services (Kubernetes optimization)
+   - Database tuning and auto-scaling strategies (Neo4j clustering, TimescaleDB distributed deployments)
+   - Enhanced caching and query performance with persisted queries \& aggressive cache invalidation policies
 2. **Advanced Security \& Compliance**
-    - Full SSO/SAML/OAuth integration
-    - Enhanced audit logging with anomaly detection for suspicious activity
-    - Data loss prevention (DLP) features \& enhanced encryption key management
-    - Formal SOC 2 Type II and GDPR audit preparation workflows
+   - Full SSO/SAML/OAuth integration
+   - Enhanced audit logging with anomaly detection for suspicious activity
+   - Data loss prevention (DLP) features \& enhanced encryption key management
+   - Formal SOC 2 Type II and GDPR audit preparation workflows
 3. **Expanded Data Federation \& Integration**
-    - Support for more external standards (e.g., additional OSINT feeds, extended STIX/TAXII versions)
-    - Real-time federated query with additional API connectors (REST, gRPC, Kafka streams)
-    - Data provenance and lineage tracking
+   - Support for more external standards (e.g., additional OSINT feeds, extended STIX/TAXII versions)
+   - Real-time federated query with additional API connectors (REST, gRPC, Kafka streams)
+   - Data provenance and lineage tracking
 4. **Improved User Experience**
-    - Enhanced graph visualization UI features (advanced filtering, dynamic graph summaries)
-    - Multi-lingual NLP support \& customizable AI Copilot capabilities
-    - Workflow automation and investigation templating features
-    - Collaboration tools: integrated messaging, commenting, and annotation system
+   - Enhanced graph visualization UI features (advanced filtering, dynamic graph summaries)
+   - Multi-lingual NLP support \& customizable AI Copilot capabilities
+   - Workflow automation and investigation templating features
+   - Collaboration tools: integrated messaging, commenting, and annotation system
 5. **Operational \& DevOps Enhancements**
-    - Enterprise-grade deployment options (Helm charts for multi-tenant Kubernetes clusters)
-    - Comprehensive disaster recovery automation with DR drills integration
-    - Fine-grained role customization UI for administrators
-    - Improved observability: distributed tracing dashboards and automated root cause analytics
+   - Enterprise-grade deployment options (Helm charts for multi-tenant Kubernetes clusters)
+   - Comprehensive disaster recovery automation with DR drills integration
+   - Fine-grained role customization UI for administrators
+   - Improved observability: distributed tracing dashboards and automated root cause analytics
 6. **Quality Assurance \& Documentation**
-    - End-to-end encrypted communication compliance testing
-    - Performance benchmarking suite and load testing automation
-    - Complete updated technical and user documentation, API versioning strategy
+   - End-to-end encrypted communication compliance testing
+   - Performance benchmarking suite and load testing automation
+   - Complete updated technical and user documentation, API versioning strategy
 
-***
+---
 
 ## 4. General Availability (GA) Product Requirements
 
 1. **Production-Ready Stability \& Support**
-    - Formal SLAs and uptime guarantees with built-in self-healing
-    - Full multi-region/cloud deployment support and disaster recovery failover
-    - Comprehensive logging and audit trails with integration to SIEM platforms
+   - Formal SLAs and uptime guarantees with built-in self-healing
+   - Full multi-region/cloud deployment support and disaster recovery failover
+   - Comprehensive logging and audit trails with integration to SIEM platforms
 2. **Enterprise Governance \& Regulatory Compliance**
-    - Data residency configurations and certification (FedRAMP, HIPAA where applicable)
-    - Built-in data anonymization and PII scrubbing workflows
-    - Policy management console with audit-ready compliance reporting
+   - Data residency configurations and certification (FedRAMP, HIPAA where applicable)
+   - Built-in data anonymization and PII scrubbing workflows
+   - Policy management console with audit-ready compliance reporting
 3. **Extensibility \& Ecosystem**
-    - Plugin and extension framework for third-party AI/analytics components
-    - SDKs and API extensions for custom integrations and automation
-    - Marketplace or registry for reusable investigation templates and AI models
+   - Plugin and extension framework for third-party AI/analytics components
+   - SDKs and API extensions for custom integrations and automation
+   - Marketplace or registry for reusable investigation templates and AI models
 4. **User Experience Excellence**
-    - Fully polished UI/UX with onboarding wizards and in-app tooling guidance
-    - Advanced AI Copilot features: proactive insights, predictive analytics, and decision support
-    - Mobile client improvements and offline investigation support
+   - Fully polished UI/UX with onboarding wizards and in-app tooling guidance
+   - Advanced AI Copilot features: proactive insights, predictive analytics, and decision support
+   - Mobile client improvements and offline investigation support
 5. **Enterprise Support \& Training**
-    - Formal customer support channels, training modules, and professional services engagement
-    - Release management process with backward compatibility guarantees and legacy data migration tools
+   - Formal customer support channels, training modules, and professional services engagement
+   - Release management process with backward compatibility guarantees and legacy data migration tools
 
-***
+---
 
 ## 5. Gap Analysis: Where We Are vs MVP-2/GA
 
-| Area | Current State (MVP-1) | Gap for MVP-2/GA |
-| :-- | :-- | :-- |
-| Scalability | Single-node optimized, Docker-compose | Clustering, Kubernetes multi-tenant, auto-scaling |
-| Security | JWT/RBAC/OPA, encryption, audit logs | SSO/OAuth, DLP, enhanced audit anomaly detection |
-| Data Federation \& Integration | CSV, STIX/TAXII, Kafka support optional | Extended OSINT support, federated real-time queries |
-| UI/UX | Interactive graph, AI Copilot basic NLP | Multi-lingual, workflow automation, collaboration tools |
-| Observability \& DevOps | OpenTelemetry, Prometheus, Grafana | Distributed tracing, root cause analysis, DR automation |
-| Documentation \& QA | Basic docs and testing | Complete API versioning, certification, benchmarking |
-| GA Readiness | Production ready at MVP-1 | Multi-region cloud, SLAs, regulatory certifications |
+| Area                           | Current State (MVP-1)                   | Gap for MVP-2/GA                                        |
+| :----------------------------- | :-------------------------------------- | :------------------------------------------------------ |
+| Scalability                    | Single-node optimized, Docker-compose   | Clustering, Kubernetes multi-tenant, auto-scaling       |
+| Security                       | JWT/RBAC/OPA, encryption, audit logs    | SSO/OAuth, DLP, enhanced audit anomaly detection        |
+| Data Federation \& Integration | CSV, STIX/TAXII, Kafka support optional | Extended OSINT support, federated real-time queries     |
+| UI/UX                          | Interactive graph, AI Copilot basic NLP | Multi-lingual, workflow automation, collaboration tools |
+| Observability \& DevOps        | OpenTelemetry, Prometheus, Grafana      | Distributed tracing, root cause analysis, DR automation |
+| Documentation \& QA            | Basic docs and testing                  | Complete API versioning, certification, benchmarking    |
+| GA Readiness                   | Production ready at MVP-1               | Multi-region cloud, SLAs, regulatory certifications     |
 
-
-***
+---
 
 ## 6. Proposed Roadmap (High Level)
 
-| Quarter | Goals | Deliverables |
-| :-- | :-- | :-- |
-| Q4 2025 | MVP-1 Stabilization \& Feedback | Bug fixes, performance tuning, community feedback |
-| Q1 2026 | MVP-2 Development Start | Scalability features, security enhancements, integrations |
-| Q2 2026 | MVP-2 Completion \& Testing | Comprehensive QA, documentation, rollout to pilot customers |
-| Q3 2026 | GA Readiness | Compliance certifications, enterprise support, final UX polish |
-| Q4 2026 | GA Launch | Production multi-region deployments, full enterprise SLAs and support |
+| Quarter | Goals                           | Deliverables                                                          |
+| :------ | :------------------------------ | :-------------------------------------------------------------------- |
+| Q4 2025 | MVP-1 Stabilization \& Feedback | Bug fixes, performance tuning, community feedback                     |
+| Q1 2026 | MVP-2 Development Start         | Scalability features, security enhancements, integrations             |
+| Q2 2026 | MVP-2 Completion \& Testing     | Comprehensive QA, documentation, rollout to pilot customers           |
+| Q3 2026 | GA Readiness                    | Compliance certifications, enterprise support, final UX polish        |
+| Q4 2026 | GA Launch                       | Production multi-region deployments, full enterprise SLAs and support |
 
-
-***
+---
 
 ## 7. Next Steps \& Action Items
 
@@ -575,7 +557,7 @@ The transition from MVP-1 to MVP-2 and ultimately to General Availability (GA) e
 - Invest in documentation, onboarding, and developer tools improvements
 - Set up formal product management and release governance processes
 
-***
+---
 
 This comprehensive 360° PRD aims to move IntelGraph from a technical MVP-1 baseline to a polished, enterprise-ready GA product that meets scalability, security, interoperability, and user experience demands of advanced intelligence communities and enterprises.
 
@@ -586,14 +568,13 @@ Further tailored decomposition by subsystems, feature sets, or compliance domain
 
 [^6_1]: https://github.com/BrianCLong/summit
 
-
 ---
 
 # Please create appropriate categorization for each further tailored decomposition by subsystems, feature sets, or compliance domains, provide the list we'll work through generating detailed PRDs for each.
 
 Here is an appropriate categorization scheme for the further tailored decomposition of IntelGraph’s roadmap and PRDs by key subsystems, feature sets, and compliance domains. This will provide a structured framework to generate detailed PRDs for each area:
 
-***
+---
 
 ## Categories for Detailed PRD Decomposition
 
@@ -608,7 +589,6 @@ Here is an appropriate categorization scheme for the further tailored decomposit
 - **1.7 Observability \& Monitoring**
 - **1.8 DevOps, CI/CD, and Deployment**
 
-
 ### 2. Feature Sets \& Functional Capabilities
 
 - **2.1 Investigation Workflow \& Management**
@@ -620,7 +600,6 @@ Here is an appropriate categorization scheme for the further tailored decomposit
 - **2.7 Performance Optimization \& Scalability**
 - **2.8 Role-Based Access Control \& Policy Enforcement**
 
-
 ### 3. Compliance, Security \& Governance Domains
 
 - **3.1 Authentication \& Identity Management**
@@ -631,7 +610,6 @@ Here is an appropriate categorization scheme for the further tailored decomposit
 - **3.6 Secure Software Development Lifecycle (SSDLC)**
 - **3.7 Incident Response \& Disaster Recovery**
 
-
 ### 4. Enterprise Readiness \& Support
 
 - **4.1 Multi-Tenant Cloud Deployment \& Orchestration**
@@ -641,7 +619,7 @@ Here is an appropriate categorization scheme for the further tailored decomposit
 - **4.5 Customer Support \& Professional Services**
 - **4.6 Release Management \& Versioning**
 
-***
+---
 
 Let me know which category or categories to prioritize first for generating detailed product requirements documents (PRDs). This structured approach will allow focused, comprehensive planning and design for IntelGraph’s MVP-2 and GA evolution.
 
@@ -651,13 +629,13 @@ Let me know which category or categories to prioritize first for generating deta
 
 IntelGraph Platform — Detailed PRD for Backend Services \& APIs (Category 1.1)
 
-***
+---
 
 ## Overview
 
 The Backend Services \& APIs form the core computational and orchestration layer of IntelGraph. This subsystem is responsible for implementing business logic, handling secure client-server interactions via GraphQL and REST, managing integration with data stores, real-time communications, and coordinating AI/ML processing. It must ensure high performance, security, scalability, and extensibility to support evolving enterprise intelligence workflows.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -670,50 +648,46 @@ The Backend Services \& APIs form the core computational and orchestration layer
 - Enable operational observability and health monitoring natively.
 - Maintain high availability and scalability via microservice architecture and container orchestration.
 
-***
+---
 
 ## Functional Requirements
 
 ### API Design \& Management
 
 - Unified GraphQL endpoint implementing schema for:
-    - Investigations, Entities, Relationships CRUD and querying
-    - Semantic search and AI Copilot interactions
-    - User management and authentication flows
+  - Investigations, Entities, Relationships CRUD and querying
+  - Semantic search and AI Copilot interactions
+  - User management and authentication flows
 - Exposure of RESTful endpoints for:
-    - File uploads/downloads
-    - Health checks and metrics reporting
-    - Administrative operations (e.g., migrations, stats)
+  - File uploads/downloads
+  - Health checks and metrics reporting
+  - Administrative operations (e.g., migrations, stats)
 - Support persisted queries to optimize performance and security.
 - Enable API versioning strategy to ensure backward compatibility.
-
 
 ### Business Logic \& Service Layer
 
 - Implement resolver and service logic for:
-    - Investigation lifecycle management with versioning and concurrency control
-    - Entity-relationship graph operations with validation and constraint enforcement
-    - AI task orchestration for asynchronous processing and results integration
+  - Investigation lifecycle management with versioning and concurrency control
+  - Entity-relationship graph operations with validation and constraint enforcement
+  - AI task orchestration for asynchronous processing and results integration
 - Input validation and sanitization consistent with secure coding practices.
-
 
 ### Data Access \& Integration
 
 - Efficient access and transaction management for:
-    - Neo4j for graph-centric data storage and analytics
-    - PostgreSQL for relational and vector data storage
-    - TimescaleDB for time-series event and metric data
-    - Redis for caching, session management, and pub/sub
+  - Neo4j for graph-centric data storage and analytics
+  - PostgreSQL for relational and vector data storage
+  - TimescaleDB for time-series event and metric data
+  - Redis for caching, session management, and pub/sub
 - Reliable error handling and retry logic for data operations.
-
 
 ### Real-Time Communication
 
 - WebSocket event handlers for:
-    - Broadcasting entity and investigation updates
-    - Multi-user presence and collaboration signals
+  - Broadcasting entity and investigation updates
+  - Multi-user presence and collaboration signals
 - Mechanisms for user session management and reconnection handling.
-
 
 ### Security \& Compliance Controls
 
@@ -722,14 +696,13 @@ The Backend Services \& APIs form the core computational and orchestration layer
 - Implement rate limiting with Redis backend to mitigate abuse.
 - Secure external APIs with CORS policy and HTTPS enforcement.
 
-
 ### Observability \& Health Monitoring
 
 - Integrate OpenTelemetry tracing and metrics instrumentation.
 - Expose Prometheus metrics endpoint for system and API performance.
 - Provide detailed health check endpoints for automated CI/CD gatekeepers.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -740,7 +713,7 @@ The Backend Services \& APIs form the core computational and orchestration layer
 - Security: Comply with OWASP API security guidelines and internal security policies.
 - Documentation: Auto-generated API docs with GraphQL Playground accessible to authorized users.
 
-***
+---
 
 ## Dependencies
 
@@ -752,22 +725,21 @@ The Backend Services \& APIs form the core computational and orchestration layer
 - Open Policy Agent (OPA) for authorization policies
 - Apollo Server v4 for GraphQL compliance
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| API Schema Finalization | Complete comprehensive GraphQL schema | 2025-10-15 |
-| Core Resolver Implementation | CRUD and query resolvers for investigations | 2025-11-15 |
-| AI Task Orchestration | Backend orchestration for AI/ML integration | 2025-12-01 |
-| Real-time Features | WebSocket integration for collaboration | 2026-01-10 |
-| Security Enhancements | OPA integration, rate limiting, token rotation | 2026-01-25 |
-| Observability Instrumentation | OpenTelemetry + Prometheus integration | 2026-02-05 |
-| Load Testing \& Optimization | Performance benchmarking and scalability tuning | 2026-02-28 |
+| Milestone                     | Description                                     | Target Date |
+| :---------------------------- | :---------------------------------------------- | :---------- |
+| API Schema Finalization       | Complete comprehensive GraphQL schema           | 2025-10-15  |
+| Core Resolver Implementation  | CRUD and query resolvers for investigations     | 2025-11-15  |
+| AI Task Orchestration         | Backend orchestration for AI/ML integration     | 2025-12-01  |
+| Real-time Features            | WebSocket integration for collaboration         | 2026-01-10  |
+| Security Enhancements         | OPA integration, rate limiting, token rotation  | 2026-01-25  |
+| Observability Instrumentation | OpenTelemetry + Prometheus integration          | 2026-02-05  |
+| Load Testing \& Optimization  | Performance benchmarking and scalability tuning | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -777,7 +749,7 @@ The Backend Services \& APIs form the core computational and orchestration layer
 - **AI Pipeline Latency Impact:** Decouple AI processing asynchronously with publishing API results upon completion.
 - **API Compatibility Breaks:** Strict semantic versioning and comprehensive automated contract testing.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -788,7 +760,7 @@ The Backend Services \& APIs form the core computational and orchestration layer
 - Automated API schema documentation with no discrepancies
 - Positive feedback from pilot users on API reliability and performance
 
-***
+---
 
 This detailed PRD for Backend Services \& APIs will serve as a blueprint to build, secure, and operate the IntelGraph backend at MVP-2 and beyond to GA.
 
@@ -800,13 +772,13 @@ Next, please specify if you want to proceed with detailed PRDs for another categ
 
 IntelGraph Platform — Detailed PRD for Frontend \& User Interface (Category 1.2)
 
-***
+---
 
 ## Overview
 
 The Frontend \& User Interface (UI) subsystem provides the primary user-facing component of IntelGraph. It delivers intuitive, performant, and accessible interfaces for intelligence analysts to create, explore, and collaborate on investigations enriched by AI-powered insights. The UI facilitates complex graph visualizations, real-time collaboration, natural language interactions, and multi-device support.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -819,7 +791,7 @@ The Frontend \& User Interface (UI) subsystem provides the primary user-facing c
 - Provide efficient state management and performant rendering under complex data loads.
 - Support multi-lingual interfaces and customizable user preferences.
 
-***
+---
 
 ## Functional Requirements
 
@@ -827,27 +799,25 @@ The Frontend \& User Interface (UI) subsystem provides the primary user-facing c
 
 - Dashboard for managing and launching investigations.
 - Investigation workspace featuring:
-    - Drag-and-drop entity and relationship creation.
-    - Entity detail panes with editable properties.
-    - Real-time update indicators and collaboration presence.
+  - Drag-and-drop entity and relationship creation.
+  - Entity detail panes with editable properties.
+  - Real-time update indicators and collaboration presence.
 - AI Copilot chat interface with:
-    - Natural language query submission.
-    - Real-time progress/status streaming.
-    - Contextual recommendations and interactive result exploration.
+  - Natural language query submission.
+  - Real-time progress/status streaming.
+  - Contextual recommendations and interactive result exploration.
 - Search functionality including semantic vector search.
 - User account and settings management interface.
-
 
 ### Graph Visualization
 
 - Cytoscape.js based graph rendering supporting:
-    - Multiple layout algorithms (e.g., force-directed, concentric).
-    - Dynamic filtering by entity and relationship attributes.
-    - Node grouping and smart clustering with collapse/expand.
-    - Zoom, pan, and focus context controls optimized for performance.
+  - Multiple layout algorithms (e.g., force-directed, concentric).
+  - Dynamic filtering by entity and relationship attributes.
+  - Node grouping and smart clustering with collapse/expand.
+  - Zoom, pan, and focus context controls optimized for performance.
 - Visual highlights for AI confidence scores and metadata.
 - Responsive adjustments for varying screen sizes and touch inputs.
-
 
 ### Collaboration Features
 
@@ -856,13 +826,11 @@ The Frontend \& User Interface (UI) subsystem provides the primary user-facing c
 - Presence indicators and user activity logs.
 - WebSocket error recovery and session persistence.
 
-
 ### Accessibility \& Internationalization
 
 - WCAG 2.1 AA compliance including keyboard navigation, screen reader support, and color contrast.
 - Support for English default plus extensible localization framework.
 - User preference settings for display modes, font sizes, and language.
-
 
 ### Performance \& State Management
 
@@ -871,14 +839,13 @@ The Frontend \& User Interface (UI) subsystem provides the primary user-facing c
 - UI virtualization to handle large graphs without lag.
 - Hot module reloading and developer debugging tools for rapid iteration.
 
-
 ### Developer Experience
 
 - Auto-generated Storybook components library.
 - TypeScript with strict typing and linting via ESLint (Airbnb config).
 - Comprehensive unit and end-to-end tests using Jest, React Testing Library, and Playwright.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -889,7 +856,7 @@ The Frontend \& User Interface (UI) subsystem provides the primary user-facing c
 - Secured against XSS and injection attacks in input fields.
 - Compatibility with modern browsers (Chrome, Firefox, Edge, Safari).
 
-***
+---
 
 ## Dependencies
 
@@ -902,22 +869,21 @@ The Frontend \& User Interface (UI) subsystem provides the primary user-facing c
 - i18next (or similar) for localization
 - Jest, React Testing Library, Playwright testing frameworks
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| UI Component Library | Basic UI components and layouts | 2025-10-20 |
-| Core Investigation Workspace | Entity/relationship CRUD UI and graph viz | 2025-11-25 |
-| AI Copilot Interface | Natural language chat with real-time feedback | 2025-12-15 |
-| Real-Time Collaboration | Multi-user presence and editing awareness | 2026-01-20 |
-| Accessibility \& Intl Support | WCAG compliance and multi-language support | 2026-02-10 |
-| Performance Tuning | UI virtualization and optimization | 2026-02-28 |
-| Automated Testing Coverage | 80%+ coverage for UI components | 2026-03-05 |
+| Milestone                     | Description                                   | Target Date |
+| :---------------------------- | :-------------------------------------------- | :---------- |
+| UI Component Library          | Basic UI components and layouts               | 2025-10-20  |
+| Core Investigation Workspace  | Entity/relationship CRUD UI and graph viz     | 2025-11-25  |
+| AI Copilot Interface          | Natural language chat with real-time feedback | 2025-12-15  |
+| Real-Time Collaboration       | Multi-user presence and editing awareness     | 2026-01-20  |
+| Accessibility \& Intl Support | WCAG compliance and multi-language support    | 2026-02-10  |
+| Performance Tuning            | UI virtualization and optimization            | 2026-02-28  |
+| Automated Testing Coverage    | 80%+ coverage for UI components               | 2026-03-05  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -926,7 +892,7 @@ The Frontend \& User Interface (UI) subsystem provides the primary user-facing c
 - **Real-time collaboration can introduce race conditions:** Implement well-defined locking and conflict resolution strategies.
 - **Localization delays could extend schedules:** Build extensible frameworks early, utilizing community translation support tools.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -937,7 +903,7 @@ The Frontend \& User Interface (UI) subsystem provides the primary user-facing c
 - 90%+ automated test coverage with <2% flaky tests.
 - Zero critical UI security vulnerabilities in audits.
 
-***
+---
 
 This Detailed PRD for the Frontend \& User Interface subsystem aims to deliver a performant, secure, and highly usable interface for IntelGraph’s intelligence analysis workflows, enabling seamless AI integration and collaboration.
 
@@ -949,28 +915,28 @@ Please indicate if the next focus should be on another subsystem PRD or further 
 
 IntelGraph Platform — Detailed PRD for Databases \& Data Management (Category 1.3)
 
-***
+---
 
 ## Overview
 
 The Databases \& Data Management subsystem underpins IntelGraph’s storage, retrieval, and processing of heterogeneous data types critical for intelligence analysis. It integrates multiple specialized database engines—graph, relational, time-series, and cache stores—to support the platform’s complex entity-relationship modeling, metadata management, metrics tracking, and real-time responsiveness.
 
-***
+---
 
 ## Goals \& Objectives
 
 - Provide highly performant, consistent, and scalable storage for diverse data types:
-    - Graph data: entities, relationships, and investigative analytics
-    - Relational data: user accounts, audit logs, metadata, vector embeddings
-    - Time-series data: metrics, events, temporal pattern tracking
-    - Cache/session data: real-time query caching, rate limiting, pub/sub messages
+  - Graph data: entities, relationships, and investigative analytics
+  - Relational data: user accounts, audit logs, metadata, vector embeddings
+  - Time-series data: metrics, events, temporal pattern tracking
+  - Cache/session data: real-time query caching, rate limiting, pub/sub messages
 - Ensure ACID compliance and transactional integrity where required.
 - Optimize spatial, temporal, and semantic query capabilities.
 - Enable seamless interaction across databases while maintaining isolation and security.
 - Support backups, replication, and disaster recovery workflows.
 - Provide operational metrics and health monitoring applicable to data stores.
 
-***
+---
 
 ## Functional Requirements
 
@@ -982,7 +948,6 @@ The Databases \& Data Management subsystem underpins IntelGraph’s storage, ret
 - Ensure consistent snapshots and replication for HA deployment.
 - Provide administrative APIs and monitoring hooks.
 
-
 ### PostgreSQL (Relational Database)
 
 - Store user and authentication data, audit logs, and metadata tables.
@@ -990,7 +955,6 @@ The Databases \& Data Management subsystem underpins IntelGraph’s storage, ret
 - Enforce data constraints, foreign keys, and detailed indexing strategies.
 - Support JSONB columns for flexible metadata storage.
 - Provide reliable backup and restore capabilities.
-
 
 ### TimescaleDB (Time-Series Database)
 
@@ -1000,7 +964,6 @@ The Databases \& Data Management subsystem underpins IntelGraph’s storage, ret
 - Support continuous aggregation for rolled-up metrics.
 - Integration with Prometheus metrics scraping and alerting.
 
-
 ### Redis (In-Memory Cache \& Session Store)
 
 - Cache frequent read queries to reduce database load.
@@ -1009,7 +972,7 @@ The Databases \& Data Management subsystem underpins IntelGraph’s storage, ret
 - Enable persistence and data durability via AOF or RDB snapshots.
 - Support Redis cluster modes for scaling.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -1021,7 +984,7 @@ The Databases \& Data Management subsystem underpins IntelGraph’s storage, ret
 - Compatibility with containerized deployment environments.
 - Monitoring and alerting integrated with overall observability stack.
 
-***
+---
 
 ## Dependencies \& Integrations
 
@@ -1032,23 +995,22 @@ The Databases \& Data Management subsystem underpins IntelGraph’s storage, ret
 - Integration with backend business logic service layer
 - Backup and restore tooling (cron jobs or operator-based)
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| Database Schema Design Finalized | Complete ER models and index design | 2025-10-10 |
-| Neo4j Analytics Optimization | Performance tuning and constraint setup | 2025-11-05 |
-| Pgvector \& Metadata Storage | Vector embedding indexing and querying | 2025-11-20 |
-| TimescaleDB Hypertables Setup | Time-series schema and continuous aggregates | 2025-12-05 |
-| Redis Cache \& Session Scaling | Configure persistence and clustering | 2025-12-15 |
-| Backup \& Recovery Automation | Scripts and operators for data backups | 2026-01-10 |
-| Monitoring \& Alerting Setup | Integrate database metrics in Grafana | 2026-01-30 |
-| Load Testing \& Benchmarking | Measure DB performance and scalability | 2026-02-20 |
+| Milestone                        | Description                                  | Target Date |
+| :------------------------------- | :------------------------------------------- | :---------- |
+| Database Schema Design Finalized | Complete ER models and index design          | 2025-10-10  |
+| Neo4j Analytics Optimization     | Performance tuning and constraint setup      | 2025-11-05  |
+| Pgvector \& Metadata Storage     | Vector embedding indexing and querying       | 2025-11-20  |
+| TimescaleDB Hypertables Setup    | Time-series schema and continuous aggregates | 2025-12-05  |
+| Redis Cache \& Session Scaling   | Configure persistence and clustering         | 2025-12-15  |
+| Backup \& Recovery Automation    | Scripts and operators for data backups       | 2026-01-10  |
+| Monitoring \& Alerting Setup     | Integrate database metrics in Grafana        | 2026-01-30  |
+| Load Testing \& Benchmarking     | Measure DB performance and scalability       | 2026-02-20  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -1058,7 +1020,7 @@ The Databases \& Data Management subsystem underpins IntelGraph’s storage, ret
 - **Scaling Issues Under Load:** Employ horizontal scaling, sharding, or clustering supported by database engines.
 - **Security Exposure:** Enforce strict database access policies and encrypt sensitive stored data.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -1070,13 +1032,13 @@ The Databases \& Data Management subsystem underpins IntelGraph’s storage, ret
 - Successful execution of automated backups and integrity checks.
 - Monitoring alerts trigger within 5 minutes of any anomaly.
 
-***
+---
 
 This detailed PRD for Databases \& Data Management prepares IntelGraph’s data infrastructure for enterprise-scale performance, security, and operational excellence, leading into MVP-2 and GA phases.
 
 Please advise on which category or subsystem PRD to develop next.Here is an appropriate categorization scheme for the further tailored decomposition of IntelGraph’s roadmap and PRDs by key subsystems, feature sets, and compliance domains. This will provide a structured framework to generate detailed PRDs for each area:
 
-***
+---
 
 ## Categories for Detailed PRD Decomposition
 
@@ -1091,7 +1053,6 @@ Please advise on which category or subsystem PRD to develop next.Here is an appr
 - **1.7 Observability \& Monitoring**
 - **1.8 DevOps, CI/CD, and Deployment**
 
-
 ### 2. Feature Sets \& Functional Capabilities
 
 - **2.1 Investigation Workflow \& Management**
@@ -1103,7 +1064,6 @@ Please advise on which category or subsystem PRD to develop next.Here is an appr
 - **2.7 Performance Optimization \& Scalability**
 - **2.8 Role-Based Access Control \& Policy Enforcement**
 
-
 ### 3. Compliance, Security \& Governance Domains
 
 - **3.1 Authentication \& Identity Management**
@@ -1114,7 +1074,6 @@ Please advise on which category or subsystem PRD to develop next.Here is an appr
 - **3.6 Secure Software Development Lifecycle (SSDLC)**
 - **3.7 Incident Response \& Disaster Recovery**
 
-
 ### 4. Enterprise Readiness \& Support
 
 - **4.1 Multi-Tenant Cloud Deployment \& Orchestration**
@@ -1124,7 +1083,7 @@ Please advise on which category or subsystem PRD to develop next.Here is an appr
 - **4.5 Customer Support \& Professional Services**
 - **4.6 Release Management \& Versioning**
 
-***
+---
 
 Let me know which category or categories to prioritize first for generating detailed product requirements documents (PRDs). This structured approach will allow focused, comprehensive planning and design for IntelGraph’s MVP-2 and GA evolution.
 
@@ -1134,13 +1093,13 @@ Let me know which category or categories to prioritize first for generating deta
 
 IntelGraph Platform — Detailed PRD for Real-Time Collaboration \& WebSockets (Category 1.4)
 
-***
+---
 
 ## Overview
 
 The Real-Time Collaboration \& WebSockets subsystem enables multi-user synchronous interactions within the IntelGraph platform. It supports live updates of investigations, entity and relationship edits, presence awareness, and collaborative workflows essential for intelligence teams working concurrently. This subsystem underpins the platform’s interactive and collaborative user experience for seamless joint analysis.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -1152,7 +1111,7 @@ The Real-Time Collaboration \& WebSockets subsystem enables multi-user synchrono
 - Scale to support concurrent users with minimal performance degradation.
 - Secure real-time channel with authentication and encryption.
 
-***
+---
 
 ## Functional Requirements
 
@@ -1161,13 +1120,12 @@ The Real-Time Collaboration \& WebSockets subsystem enables multi-user synchrono
 - Establish persistent socket connections with clients triggered upon login/session establishment.
 - Broadcast entity create, update, and delete events to subscribed clients in investigation rooms.
 - Support fine-grained subscription mechanisms:
-    - Per-investigation room joining/leaving
-    - Event filtering by entity types or activity
+  - Per-investigation room joining/leaving
+  - Event filtering by entity types or activity
 - Propagate multi-user presence events including:
-    - Online/offline status
-    - Cursor positions (for multi-cursor UX)
-    - Editing locks and conflict indicators
-
+  - Online/offline status
+  - Cursor positions (for multi-cursor UX)
+  - Editing locks and conflict indicators
 
 ### Collaboration Features
 
@@ -1177,13 +1135,11 @@ The Real-Time Collaboration \& WebSockets subsystem enables multi-user synchrono
 - Activity feeds streaming user actions per investigation.
 - Integration with AI Copilot status updates during query processing.
 
-
 ### Connection Management
 
 - Automatic reconnection logic with progressive backoff.
 - Session state resumption on reconnect.
 - Heartbeat ping/pong messages to maintain connection health.
-
 
 ### Security Controls
 
@@ -1192,14 +1148,13 @@ The Real-Time Collaboration \& WebSockets subsystem enables multi-user synchrono
 - Encrypt WebSocket traffic using TLS.
 - Rate-limit message bursts to prevent denial of service.
 
-
 ### Backend Integration
 
 - Interface with backend event bus for real-time event sourcing and persistence.
 - Ensure all WebSocket events are audit logged with correlation IDs.
 - Support scalability via Redis or Kafka pub/sub clustering for event distribution.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -1209,7 +1164,7 @@ The Real-Time Collaboration \& WebSockets subsystem enables multi-user synchrono
 - Minimal CPU and memory overhead on backend to support real-time messaging.
 - Backwards compatibility with future UI components enhancing collaboration.
 
-***
+---
 
 ## Dependencies
 
@@ -1218,23 +1173,22 @@ The Real-Time Collaboration \& WebSockets subsystem enables multi-user synchrono
 - Integration with authentication (JWT) and authorization (OPA) subsystems
 - Infrastructure TLS certificates for encrypted communications
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| Socket Connection Setup | Client/server connection and handshake | 2025-10-15 |
-| Event Broadcasting \& Subscriptions | Basic real-time entity updates with room join/leave | 2025-11-05 |
-| Presence \& Multi-Cursor | Implement online status and cursor sharing | 2025-11-25 |
-| Locking \& Conflict Resolution | Entity-level edit locks and UI integration | 2025-12-20 |
-| Collaboration Features | Real-time commenting and activity feeds | 2026-01-10 |
-| Connection Resilience | Auto reconnection and heartbeat pings | 2026-01-25 |
-| Security Enhancements | Auth, authorization, encryption | 2026-02-10 |
-| Scalability Testing | Load tests for concurrent connections | 2026-02-28 |
+| Milestone                           | Description                                         | Target Date |
+| :---------------------------------- | :-------------------------------------------------- | :---------- |
+| Socket Connection Setup             | Client/server connection and handshake              | 2025-10-15  |
+| Event Broadcasting \& Subscriptions | Basic real-time entity updates with room join/leave | 2025-11-05  |
+| Presence \& Multi-Cursor            | Implement online status and cursor sharing          | 2025-11-25  |
+| Locking \& Conflict Resolution      | Entity-level edit locks and UI integration          | 2025-12-20  |
+| Collaboration Features              | Real-time commenting and activity feeds             | 2026-01-10  |
+| Connection Resilience               | Auto reconnection and heartbeat pings               | 2026-01-25  |
+| Security Enhancements               | Auth, authorization, encryption                     | 2026-02-10  |
+| Scalability Testing                 | Load tests for concurrent connections               | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -1244,7 +1198,7 @@ The Real-Time Collaboration \& WebSockets subsystem enables multi-user synchrono
 - **Security Exposure in Real-Time Channels:** Enforce strict token validation and minimum permission policies.
 - **Resource Exhaustion:** Monitor and rate-limit abuse or malfunctioning clients.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -1255,13 +1209,13 @@ The Real-Time Collaboration \& WebSockets subsystem enables multi-user synchrono
 - Zero critical security vulnerabilities in WebSocket interactions.
 - Positive user feedback on collaboration UX in pilot deployments.
 
-***
+---
 
 This detailed PRD for Real-Time Collaboration \& WebSockets subsystem ensures IntelGraph meets the demands of secure, scalable, and responsive intelligence team collaboration, readying the platform for MVP-2 and GA.
 
 Please indicate the next category or subsystem for detailed PRD generation.Here is an appropriate categorization scheme for the further tailored decomposition of IntelGraph’s roadmap and PRDs by key subsystems, feature sets, and compliance domains. This will provide a structured framework to generate detailed PRDs for each area:
 
-***
+---
 
 ## Categories for Detailed PRD Decomposition
 
@@ -1276,7 +1230,6 @@ Please indicate the next category or subsystem for detailed PRD generation.Here 
 - **1.7 Observability \& Monitoring**
 - **1.8 DevOps, CI/CD, and Deployment**
 
-
 ### 2. Feature Sets \& Functional Capabilities
 
 - **2.1 Investigation Workflow \& Management**
@@ -1288,7 +1241,6 @@ Please indicate the next category or subsystem for detailed PRD generation.Here 
 - **2.7 Performance Optimization \& Scalability**
 - **2.8 Role-Based Access Control \& Policy Enforcement**
 
-
 ### 3. Compliance, Security \& Governance Domains
 
 - **3.1 Authentication \& Identity Management**
@@ -1299,7 +1251,6 @@ Please indicate the next category or subsystem for detailed PRD generation.Here 
 - **3.6 Secure Software Development Lifecycle (SSDLC)**
 - **3.7 Incident Response \& Disaster Recovery**
 
-
 ### 4. Enterprise Readiness \& Support
 
 - **4.1 Multi-Tenant Cloud Deployment \& Orchestration**
@@ -1309,17 +1260,17 @@ Please indicate the next category or subsystem for detailed PRD generation.Here 
 - **4.5 Customer Support \& Professional Services**
 - **4.6 Release Management \& Versioning**
 
-***
+---
 
 Let me know which category or categories to prioritize first for generating detailed product requirements documents (PRDs). This structured approach will allow focused, comprehensive planning and design for IntelGraph’s MVP-2 and GA evolution.IntelGraph Platform — Detailed PRD for Real-Time Collaboration \& WebSockets (Category 1.4)
 
-***
+---
 
 ## Overview
 
 The Real-Time Collaboration \& WebSockets subsystem enables multi-user synchronous interactions within the IntelGraph platform. It supports live updates of investigations, entity and relationship edits, presence awareness, and collaborative workflows essential for intelligence teams working concurrently. This subsystem underpins the platform’s interactive and collaborative user experience for seamless joint analysis.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -1331,7 +1282,7 @@ The Real-Time Collaboration \& WebSockets subsystem enables multi-user synchrono
 - Scale to support concurrent users with minimal performance degradation.
 - Secure real-time channel with authentication and encryption.
 
-***
+---
 
 ## Functional Requirements
 
@@ -1340,13 +1291,12 @@ The Real-Time Collaboration \& WebSockets subsystem enables multi-user synchrono
 - Establish persistent socket connections with clients triggered upon login/session establishment.
 - Broadcast entity create, update, and delete events to subscribed clients in investigation rooms.
 - Support fine-grained subscription mechanisms:
-    - Per-investigation room joining/leaving
-    - Event filtering by entity types or activity
+  - Per-investigation room joining/leaving
+  - Event filtering by entity types or activity
 - Propagate multi-user presence events including:
-    - Online/offline status
-    - Cursor positions (for multi-cursor UX)
-    - Editing locks and conflict indicators
-
+  - Online/offline status
+  - Cursor positions (for multi-cursor UX)
+  - Editing locks and conflict indicators
 
 ### Collaboration Features
 
@@ -1356,13 +1306,11 @@ The Real-Time Collaboration \& WebSockets subsystem enables multi-user synchrono
 - Activity feeds streaming user actions per investigation.
 - Integration with AI Copilot status updates during query processing.
 
-
 ### Connection Management
 
 - Automatic reconnection logic with progressive backoff.
 - Session state resumption on reconnect.
 - Heartbeat ping/pong messages to maintain connection health.
-
 
 ### Security Controls
 
@@ -1371,14 +1319,13 @@ The Real-Time Collaboration \& WebSockets subsystem enables multi-user synchrono
 - Encrypt WebSocket traffic using TLS.
 - Rate-limit message bursts to prevent denial of service.
 
-
 ### Backend Integration
 
 - Interface with backend event bus for real-time event sourcing and persistence.
 - Ensure all WebSocket events are audit logged with correlation IDs.
 - Support scalability via Redis or Kafka pub/sub clustering for event distribution.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -1388,7 +1335,7 @@ The Real-Time Collaboration \& WebSockets subsystem enables multi-user synchrono
 - Minimal CPU and memory overhead on backend to support real-time messaging.
 - Backwards compatibility with future UI components enhancing collaboration.
 
-***
+---
 
 ## Dependencies
 
@@ -1397,23 +1344,22 @@ The Real-Time Collaboration \& WebSockets subsystem enables multi-user synchrono
 - Integration with authentication (JWT) and authorization (OPA) subsystems
 - Infrastructure TLS certificates for encrypted communications
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| Socket Connection Setup | Client/server connection and handshake | 2025-10-15 |
-| Event Broadcasting \& Subscriptions | Basic real-time entity updates with room join/leave | 2025-11-05 |
-| Presence \& Multi-Cursor | Implement online status and cursor sharing | 2025-11-25 |
-| Locking \& Conflict Resolution | Entity-level edit locks and UI integration | 2025-12-20 |
-| Collaboration Features | Real-time commenting and activity feeds | 2026-01-10 |
-| Connection Resilience | Auto reconnection and heartbeat pings | 2026-01-25 |
-| Security Enhancements | Auth, authorization, encryption | 2026-02-10 |
-| Scalability Testing | Load tests for concurrent connections | 2026-02-28 |
+| Milestone                           | Description                                         | Target Date |
+| :---------------------------------- | :-------------------------------------------------- | :---------- |
+| Socket Connection Setup             | Client/server connection and handshake              | 2025-10-15  |
+| Event Broadcasting \& Subscriptions | Basic real-time entity updates with room join/leave | 2025-11-05  |
+| Presence \& Multi-Cursor            | Implement online status and cursor sharing          | 2025-11-25  |
+| Locking \& Conflict Resolution      | Entity-level edit locks and UI integration          | 2025-12-20  |
+| Collaboration Features              | Real-time commenting and activity feeds             | 2026-01-10  |
+| Connection Resilience               | Auto reconnection and heartbeat pings               | 2026-01-25  |
+| Security Enhancements               | Auth, authorization, encryption                     | 2026-02-10  |
+| Scalability Testing                 | Load tests for concurrent connections               | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -1423,7 +1369,7 @@ The Real-Time Collaboration \& WebSockets subsystem enables multi-user synchrono
 - **Security Exposure in Real-Time Channels:** Enforce strict token validation and minimum permission policies.
 - **Resource Exhaustion:** Monitor and rate-limit abuse or malfunctioning clients.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -1434,7 +1380,7 @@ The Real-Time Collaboration \& WebSockets subsystem enables multi-user synchrono
 - Zero critical security vulnerabilities in WebSocket interactions.
 - Positive user feedback on collaboration UX in pilot deployments.
 
-***
+---
 
 This detailed PRD for Real-Time Collaboration \& WebSockets subsystem ensures IntelGraph meets the demands of secure, scalable, and responsive intelligence team collaboration, readying the platform for MVP-2 and GA.
 
@@ -1446,13 +1392,13 @@ Please indicate the next category or subsystem for detailed PRD generation.
 
 IntelGraph Platform — Detailed PRD for AI/ML Extraction \& Analytics Engine (Category 1.5)
 
-***
+---
 
 ## Overview
 
 The AI/ML Extraction \& Analytics Engine subsystem provides multimodal artificial intelligence capabilities essential for enhancing IntelGraph’s intelligence analysis workflows. It powers automated extraction, classification, enrichment, and semantic understanding of heterogeneous data types including text, images, audio, and video. This engine integrates tightly with the investigation workflow to deliver deep content insights and cross-modal correlations.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -1464,7 +1410,7 @@ The AI/ML Extraction \& Analytics Engine subsystem provides multimodal artificia
 - Provide confidence metrics and validation workflows for AI-generated content.
 - Seamlessly integrate AI outputs into the core graph data model and investigative UI.
 
-***
+---
 
 ## Functional Requirements
 
@@ -1477,13 +1423,11 @@ The AI/ML Extraction \& Analytics Engine subsystem provides multimodal artificia
 - NLP pipelines using spaCy for named entity recognition (NER), sentiment analysis, topic modeling, and language detection.
 - Vector embedding generation via sentence-transformers (all-MiniLM-L6-v2).
 
-
 ### Cross-Modal Matching
 
 - Semantic similarity matching across extracted content from different media (text, image, audio).
 - Clustering and automatic entity grouping based on AI confidence scores.
 - Temporal and spatial correlation analysis for pattern detection.
-
 
 ### AI Task Management \& Orchestration
 
@@ -1491,13 +1435,11 @@ The AI/ML Extraction \& Analytics Engine subsystem provides multimodal artificia
 - GPU resource allocation and concurrency control configurable via environment variables.
 - Model management framework supporting on-the-fly model updates and rollbacks.
 
-
 ### Quality \& Validation
 
 - AI confidence scoring to assess extraction reliability.
 - Interactive validation workflows for human-in-the-loop corrections.
 - Audit trail of AI-generated content changes for compliance.
-
 
 ### Integration \& APIs
 
@@ -1505,7 +1447,7 @@ The AI/ML Extraction \& Analytics Engine subsystem provides multimodal artificia
 - Event-driven updates to notify investigation UI on AI task completions.
 - Support for bulk batch processing in high-throughput scenarios.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -1516,7 +1458,7 @@ The AI/ML Extraction \& Analytics Engine subsystem provides multimodal artificia
 - Compliance with data privacy regulations regarding AI data usage.
 - Efficient resource utilization balancing CPU and GPU workloads.
 
-***
+---
 
 ## Dependencies
 
@@ -1527,22 +1469,21 @@ The AI/ML Extraction \& Analytics Engine subsystem provides multimodal artificia
 - Messaging queues (Kafka, RabbitMQ or equivalent) for task coordination
 - Secure storage for AI model artifacts and results
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| AI Model Setup \& Testing | Install and integrate baseline AI models | 2025-10-20 |
-| Multimodal Extraction Pipelines | Implement OCR, object detection, NLP | 2025-11-30 |
-| Cross-Modal Semantic Matching | Develop embedding and matching workflows | 2025-12-15 |
-| AI Job Orchestration | Backend queue and concurrency management | 2026-01-10 |
-| Validation \& Confidence Scoring | Human-in-the-loop editing workflows | 2026-01-30 |
-| Integration with Core Graph | Automate AI result persistence in graph | 2026-02-20 |
-| Scalability \& Performance | Benchmark and optimize GPU/CPU usage | 2026-02-28 |
+| Milestone                        | Description                              | Target Date |
+| :------------------------------- | :--------------------------------------- | :---------- |
+| AI Model Setup \& Testing        | Install and integrate baseline AI models | 2025-10-20  |
+| Multimodal Extraction Pipelines  | Implement OCR, object detection, NLP     | 2025-11-30  |
+| Cross-Modal Semantic Matching    | Develop embedding and matching workflows | 2025-12-15  |
+| AI Job Orchestration             | Backend queue and concurrency management | 2026-01-10  |
+| Validation \& Confidence Scoring | Human-in-the-loop editing workflows      | 2026-01-30  |
+| Integration with Core Graph      | Automate AI result persistence in graph  | 2026-02-20  |
+| Scalability \& Performance       | Benchmark and optimize GPU/CPU usage     | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -1552,7 +1493,7 @@ The AI/ML Extraction \& Analytics Engine subsystem provides multimodal artificia
 - **Latency Impacting User Experience:** Decouple AI processing from synchronous user workflows.
 - **Integration Complexity:** Design clear APIs and robust retry/reconciliation mechanisms.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -1563,7 +1504,7 @@ The AI/ML Extraction \& Analytics Engine subsystem provides multimodal artificia
 - Zero data privacy incidents during AI processing tests
 - Positive accuracy feedback from pilot analyst users
 
-***
+---
 
 This detailed PRD for the AI/ML Extraction \& Analytics Engine targets the transformation of raw multimodal data into actionable intelligence insights, advancing IntelGraph’s capabilities toward MVP-2 and enterprise-grade GA readiness.
 
@@ -1575,13 +1516,13 @@ Please specify which next category or subsystem to detail next.
 
 IntelGraph Platform — Detailed PRD for Security and Access Control (Category 1.6)
 
-***
+---
 
 ## Overview
 
 The Security and Access Control subsystem is fundamental to protecting IntelGraph’s sensitive intelligence data and ensuring compliance with enterprise and regulatory standards. This subsystem encompasses authentication, authorization, policy enforcement, data protection, and threat mitigation across all platform components, enabling secure and governed usage by authorized analysts and operators.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -1594,7 +1535,7 @@ The Security and Access Control subsystem is fundamental to protecting IntelGrap
 - Enable secure multi-tenant role-based access with least privilege principles.
 - Integrate seamlessly with DevSecOps pipelines for continuous security validation.
 
-***
+---
 
 ## Functional Requirements
 
@@ -1605,14 +1546,12 @@ The Security and Access Control subsystem is fundamental to protecting IntelGrap
 - Enforce multifactor authentication (MFA) as configurable policy.
 - Provide user management APIs for account lifecycle (creation, password reset, deactivation).
 
-
 ### Authorization
 
 - Implement Role-Based Access Control (RBAC) with hierarchical roles.
 - Enforce dynamic policy decisions via Open Policy Agent (OPA) for GraphQL and REST APIs.
 - Support attribute-based access control (ABAC) for fine-grained permissions.
 - Enable contextual access constraints (time, IP, device).
-
 
 ### Data Protection
 
@@ -1621,14 +1560,12 @@ The Security and Access Control subsystem is fundamental to protecting IntelGrap
 - Implement data anonymization and PII scrubbing options.
 - Secure backups and encryption key management integrated with environment secrets.
 
-
 ### Audit Logging \& Monitoring
 
 - Generate immutable logs capturing all authentication, authorization, and admin actions.
 - Capture request context with correlation IDs for traceability.
 - Integrate anomaly detection alerts for unusual access patterns.
 - Provide audit log querying and export mechanisms for compliance reporting.
-
 
 ### Web/Application Security
 
@@ -1637,7 +1574,6 @@ The Security and Access Control subsystem is fundamental to protecting IntelGrap
 - Rate limiting and IP throttling to mitigate brute force and DoS attacks.
 - Secure headers implemented by middleware (Helmet.js or equivalent).
 
-
 ### Incident Response \& Recovery
 
 - Security alerting integration for rapid incident response escalation.
@@ -1645,7 +1581,7 @@ The Security and Access Control subsystem is fundamental to protecting IntelGrap
 - Secure procedure for revoking compromised credentials and tokens.
 - Disaster recovery plans including data breach containment and forensic analysis support.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -1656,7 +1592,7 @@ The Security and Access Control subsystem is fundamental to protecting IntelGrap
 - Least privilege enforced by default; no excessive permissions.
 - Robust secret management supporting environment-specific configurations.
 
-***
+---
 
 ## Dependencies
 
@@ -1667,22 +1603,21 @@ The Security and Access Control subsystem is fundamental to protecting IntelGrap
 - Secure logging infrastructure (ELK stack, Splunk, or equivalent).
 - Integration with monitoring \& alerting (Prometheus, Alertmanager).
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| Auth Framework Implementation | JWT with refresh tokens, user lifecycle | 2025-10-20 |
-| SSO \& MFA Integration | SAML/OAuth2 SSO and optional MFA | 2025-11-15 |
-| RBAC and OPA Policy Enforcement | Define and enforce dynamic access policies | 2025-12-10 |
-| Data Encryption \& Key Management | At-rest and in-transit encryption | 2025-12-30 |
-| Audit Logging \& Anomaly Alerts | Immutable log stores and anomaly detection | 2026-01-20 |
-| Security Middleware Hardenings | CSP, CSRF, rate limiting, secure headers | 2026-02-10 |
-| Incident Response Automation | Account lockout, alerting, token revocation | 2026-02-28 |
+| Milestone                         | Description                                 | Target Date |
+| :-------------------------------- | :------------------------------------------ | :---------- |
+| Auth Framework Implementation     | JWT with refresh tokens, user lifecycle     | 2025-10-20  |
+| SSO \& MFA Integration            | SAML/OAuth2 SSO and optional MFA            | 2025-11-15  |
+| RBAC and OPA Policy Enforcement   | Define and enforce dynamic access policies  | 2025-12-10  |
+| Data Encryption \& Key Management | At-rest and in-transit encryption           | 2025-12-30  |
+| Audit Logging \& Anomaly Alerts   | Immutable log stores and anomaly detection  | 2026-01-20  |
+| Security Middleware Hardenings    | CSP, CSRF, rate limiting, secure headers    | 2026-02-10  |
+| Incident Response Automation      | Account lockout, alerting, token revocation | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -1692,7 +1627,7 @@ The Security and Access Control subsystem is fundamental to protecting IntelGrap
 - **Phishing or Social Engineering:** Enforce MFA and user education programs.
 - **Denial of Service on Auth Systems:** Employ rate limiting, WAF, and scalable auth servers.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -1703,7 +1638,7 @@ The Security and Access Control subsystem is fundamental to protecting IntelGrap
 - Complete audit log coverage of all sensitive actions.
 - All policies tested and validated as part of CI/CD with 100% pass rate.
 
-***
+---
 
 This detailed PRD for the Security and Access Control subsystem ensures IntelGraph secures data, users, and operations comprehensively, supporting the platform’s MVP-2 and GA enterprise readiness.
 
@@ -1715,13 +1650,13 @@ Please advise on which next category or subsystem to develop in detail.
 
 IntelGraph Platform — Detailed PRD for Observability \& Monitoring (Category 1.7)
 
-***
+---
 
 ## Overview
 
 The Observability \& Monitoring subsystem provides comprehensive visibility into the health, performance, and security of the IntelGraph platform. It enables proactive detection of issues, performance bottlenecks, and anomalous behavior throughout the distributed microservices, databases, AI pipelines, and frontend components. This subsystem is critical for delivering reliable uptime, rapid troubleshooting, and operational excellence.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -1734,7 +1669,7 @@ The Observability \& Monitoring subsystem provides comprehensive visibility into
 - Ensure data retention policies and privacy for monitoring data.
 - Enable audit logging integration for security and compliance needs.
 
-***
+---
 
 ## Functional Requirements
 
@@ -1744,7 +1679,6 @@ The Observability \& Monitoring subsystem provides comprehensive visibility into
 - Collect key metrics including request rates, latency, error rates, database query performance, cache hit ratios, and user activity.
 - Support business metrics such as investigation creation rates, user engagement, and AI model inference success.
 
-
 ### Logging
 
 - Centralized structured logging with correlation IDs for request tracing.
@@ -1752,24 +1686,21 @@ The Observability \& Monitoring subsystem provides comprehensive visibility into
 - Integration with Elasticsearch or similar for log search and analysis.
 - Capture security event logs in compliance with audit requirements.
 
-
 ### Distributed Tracing
 
 - Trace requests and events across microservices and databases.
 - Visualize trace spans with timing details for root cause analysis.
 - Integrate tracing with error and anomaly detection workflows.
 
-
 ### Dashboards \& Visualization
 
 - Custom Grafana dashboards including:
-    - System health overview
-    - API performance and error trends
-    - Database query statistics and connection pools
-    - User engagement and AI module KPIs
-    - Security audit and anomaly detection insights
+  - System health overview
+  - API performance and error trends
+  - Database query statistics and connection pools
+  - User engagement and AI module KPIs
+  - Security audit and anomaly detection insights
 - Role-based dashboard access for developers, operators, and security teams.
-
 
 ### Alerting \& Incident Management
 
@@ -1777,13 +1708,12 @@ The Observability \& Monitoring subsystem provides comprehensive visibility into
 - Integration with Alertmanager and ITSM tools (PagerDuty, Slack, etc.).
 - Auto-escalation workflows and on-call schedules support.
 
-
 ### Monitoring API
 
 - Expose health check endpoints compatible with Kubernetes and load balancers.
 - Provide detailed health status and readiness probes for service orchestration.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -1794,7 +1724,7 @@ The Observability \& Monitoring subsystem provides comprehensive visibility into
 - Efficient instrumentation minimizing overhead on production systems.
 - Compliance with data privacy and retention policies for monitoring data.
 
-***
+---
 
 ## Dependencies
 
@@ -1805,22 +1735,21 @@ The Observability \& Monitoring subsystem provides comprehensive visibility into
 - Kubernetes or container orchestration platform
 - Integration with cloud monitoring services (optional)
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| Metrics Instrumentation | API, DB, AI, infrastructure metrics | 2025-10-30 |
-| Distributed Tracing Setup | End-to-end request tracing with visualization | 2025-11-20 |
-| Centralized Logging | Structured log aggregation and indexing | 2025-12-10 |
-| Grafana Dashboard Creation | Role-based dashboards for operations and dev | 2025-12-31 |
-| Alerting Rules Definition | Critical and warning alert configuration | 2026-01-25 |
-| Incident Escalation Workflow | Integrate alerts with PagerDuty/Slack | 2026-02-15 |
-| Monitoring API Health Checks | Standardized readiness and liveness probes | 2026-02-28 |
+| Milestone                    | Description                                   | Target Date |
+| :--------------------------- | :-------------------------------------------- | :---------- |
+| Metrics Instrumentation      | API, DB, AI, infrastructure metrics           | 2025-10-30  |
+| Distributed Tracing Setup    | End-to-end request tracing with visualization | 2025-11-20  |
+| Centralized Logging          | Structured log aggregation and indexing       | 2025-12-10  |
+| Grafana Dashboard Creation   | Role-based dashboards for operations and dev  | 2025-12-31  |
+| Alerting Rules Definition    | Critical and warning alert configuration      | 2026-01-25  |
+| Incident Escalation Workflow | Integrate alerts with PagerDuty/Slack         | 2026-02-15  |
+| Monitoring API Health Checks | Standardized readiness and liveness probes    | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -1830,7 +1759,7 @@ The Observability \& Monitoring subsystem provides comprehensive visibility into
 - **Monitoring System Failures:** Implement redundancy and failover for monitoring infrastructure.
 - **Complexity in Trace Correlation:** Enforce consistent correlation ID propagation patterns.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -1841,7 +1770,7 @@ The Observability \& Monitoring subsystem provides comprehensive visibility into
 - Role-based dashboards actively used by all operations teams.
 - Full integration with CI/CD for automated health gating.
 
-***
+---
 
 This detailed PRD for Observability \& Monitoring ensures IntelGraph can proactively manage operational health, performance, and security errors, positioning the platform for scalable MVP-2 and enterprise GA deployment.
 
@@ -1853,13 +1782,13 @@ Please specify the next subsystem or feature category for detailed PRD developme
 
 IntelGraph Platform — Detailed PRD for DevOps, CI/CD, and Deployment (Category 1.8)
 
-***
+---
 
 ## Overview
 
 The DevOps, CI/CD, and Deployment subsystem establishes the framework for automated, reliable, and secure build, test, and deployment workflows for IntelGraph. It ensures rapid delivery of high-quality software changes, consistent production environment setups, scalable deployments, and robust operational controls. This subsystem supports developer productivity, platform stability, and enterprise-grade release management.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -1872,7 +1801,7 @@ The DevOps, CI/CD, and Deployment subsystem establishes the framework for automa
 - Automate versioning, changelog generation, and release tagging.
 - Secure pipeline execution with secrets management and access controls.
 
-***
+---
 
 ## Functional Requirements
 
@@ -1884,7 +1813,6 @@ The DevOps, CI/CD, and Deployment subsystem establishes the framework for automa
 - Quality gates blocking merges on failing tests or low coverage.
 - Pull request validations integrated with source control management (GitHub).
 
-
 ### Continuous Delivery \& Deployment
 
 - Automated builds of Docker images with multi-stage builds for production optimization.
@@ -1894,20 +1822,17 @@ The DevOps, CI/CD, and Deployment subsystem establishes the framework for automa
 - Automated rollback on deployment failures.
 - Deployment approval workflows for controlled releases.
 
-
 ### Development \& Local Environment Support
 
 - One-command startup scripts using Docker Compose for core and optional AI/Kafka services.
 - Hot module replacement and developer-friendly debugging.
 - Isolated development environments matching production configurations.
 
-
 ### Health and Quality Validation
 
 - Integration of smoke tests post-deployment to validate service availability.
 - API health endpoints verification.
 - Metrics and logs verification integration pre/post deployment.
-
 
 ### Security \& Compliance
 
@@ -1916,7 +1841,7 @@ The DevOps, CI/CD, and Deployment subsystem establishes the framework for automa
 - Compliance audits integrated into the pipeline.
 - Role-based access control for pipeline executions.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -1926,7 +1851,7 @@ The DevOps, CI/CD, and Deployment subsystem establishes the framework for automa
 - Horizontal scalability for pipelines supporting parallel testing and deployment.
 - Detailed logs and notifications integrated with communication platforms.
 
-***
+---
 
 ## Dependencies
 
@@ -1937,23 +1862,22 @@ The DevOps, CI/CD, and Deployment subsystem establishes the framework for automa
 - Security scanning tools (Snyk, OWASP ZAP).
 - Secrets management solutions (HashiCorp Vault, GitHub Secrets).
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| CI Pipeline Basic Setup | Code linting, formatting, unit tests | 2025-10-10 |
-| Full Test Suite Integration | Integration, e2e, security tests | 2025-10-30 |
-| Docker Image Build \& Push | Multi-stage Docker build and registry push | 2025-11-15 |
-| Helm Chart Deployment | Kubernetes deployments with Helm | 2025-12-05 |
-| Deployment Strategies | Blue/green and canary rollout implementations | 2026-01-05 |
-| Health Checks \& Smoke Tests | Post-deployment validations | 2026-01-20 |
-| Security \& Compliance Gates | Image scanning and secret management | 2026-02-10 |
-| Release Automation | Versioning, changelogs, and release tagging | 2026-02-28 |
+| Milestone                    | Description                                   | Target Date |
+| :--------------------------- | :-------------------------------------------- | :---------- |
+| CI Pipeline Basic Setup      | Code linting, formatting, unit tests          | 2025-10-10  |
+| Full Test Suite Integration  | Integration, e2e, security tests              | 2025-10-30  |
+| Docker Image Build \& Push   | Multi-stage Docker build and registry push    | 2025-11-15  |
+| Helm Chart Deployment        | Kubernetes deployments with Helm              | 2025-12-05  |
+| Deployment Strategies        | Blue/green and canary rollout implementations | 2026-01-05  |
+| Health Checks \& Smoke Tests | Post-deployment validations                   | 2026-01-20  |
+| Security \& Compliance Gates | Image scanning and secret management          | 2026-02-10  |
+| Release Automation           | Versioning, changelogs, and release tagging   | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -1963,7 +1887,7 @@ The DevOps, CI/CD, and Deployment subsystem establishes the framework for automa
 - **Slow Pipeline Performance:** Optimize jobs for parallel execution and caching.
 - **Rollback Complexity:** Automate safe rollback processes with state rollback verification.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -1974,7 +1898,7 @@ The DevOps, CI/CD, and Deployment subsystem establishes the framework for automa
 - Automated rollback effective in 100% of failed deployment tests.
 - Security scan issues identified and remediated before production release.
 
-***
+---
 
 This detailed PRD for DevOps, CI/CD, and Deployment subsystems provides the foundation for rapid, secure, and repeatable delivery processes essential for IntelGraph’s agile development toward MVP-2 and GA.
 
@@ -1986,13 +1910,13 @@ Please specify the next category or subsystem for detailed PRD development.
 
 IntelGraph Platform — Detailed PRD for Investigation Workflow \& Management (Category 2.1)
 
-***
+---
 
 ## Overview
 
 The Investigation Workflow \& Management subsystem is the core functional area enabling users to create, organize, analyze, and manage intelligence investigations within IntelGraph. This subsystem guides the end-to-end lifecycle of investigations, linking data ingest, entity-relationship graph construction, AI-driven analysis, collaboration, and results tracking to deliver actionable intelligence.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -2004,7 +1928,7 @@ The Investigation Workflow \& Management subsystem is the core functional area e
 - Support task assignment, investigation status tracking, and progress visualization.
 - Maintain full traceability and change history for investigations meeting compliance needs.
 
-***
+---
 
 ## Functional Requirements
 
@@ -2015,7 +1939,6 @@ The Investigation Workflow \& Management subsystem is the core functional area e
 - Enable cloning and templating of investigation structures for rapid start.
 - Define metadata attributes (name, description, tags, owner, timestamps).
 
-
 ### Entity \& Relationship Management
 
 - CRUD operations on entities and relationships within investigations.
@@ -2023,13 +1946,11 @@ The Investigation Workflow \& Management subsystem is the core functional area e
 - Bulk imports and metadata enrichment with audit logging.
 - Visual graph explorer for interactive entity relationship mapping.
 
-
 ### AI-Powered Analysis Integration
 
 - Trigger AI Copilot orchestrated queries within investigations.
 - Present AI-generated insights, confidence scores, and recommendations.
 - Enrich entity and relationship data with AI-extracted attributes.
-
 
 ### Collaboration and Access
 
@@ -2037,13 +1958,11 @@ The Investigation Workflow \& Management subsystem is the core functional area e
 - Support multi-user simultaneous editing with conflict resolution.
 - Commenting, annotation, and activity feeds tied to investigations.
 
-
 ### Investigation Progress \& Tracking
 
 - Status modes (draft, active, archived, completed).
 - Task assignment and checklist integration.
 - Dashboard views summarizing investigation metrics and insights.
-
 
 ### Auditability \& Compliance
 
@@ -2051,7 +1970,7 @@ The Investigation Workflow \& Management subsystem is the core functional area e
 - Export and reporting capabilities in JSON, CSV, and GraphML formats.
 - Support for investigation data anonymization on request.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -2061,7 +1980,7 @@ The Investigation Workflow \& Management subsystem is the core functional area e
 - Strong data consistency guarantees within investigation boundaries.
 - Secure access ensuring data isolation between tenants or projects.
 
-***
+---
 
 ## Dependencies
 
@@ -2071,22 +1990,21 @@ The Investigation Workflow \& Management subsystem is the core functional area e
 - Redis for session and real-time collaboration state management.
 - Frontend React components for investigation management and visualization.
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| Investigation CRUD APIs | GraphQL schema and resolvers | 2025-10-15 |
-| Versioning \& Branching | Version control and cloning features | 2025-11-05 |
-| Entity-Relationship Management | Visual graph explorer and validation | 2025-11-25 |
-| AI Integration | Triggering and displaying AI insights | 2025-12-20 |
-| Collaboration Support | Role permissions, commenting, multi-user | 2026-01-15 |
-| Progress Tracking \& Tasks | Statuses, checklists, dashboard summary | 2026-02-05 |
-| Audit \& Export Functionality | Immutable history and data export | 2026-02-28 |
+| Milestone                      | Description                              | Target Date |
+| :----------------------------- | :--------------------------------------- | :---------- |
+| Investigation CRUD APIs        | GraphQL schema and resolvers             | 2025-10-15  |
+| Versioning \& Branching        | Version control and cloning features     | 2025-11-05  |
+| Entity-Relationship Management | Visual graph explorer and validation     | 2025-11-25  |
+| AI Integration                 | Triggering and displaying AI insights    | 2025-12-20  |
+| Collaboration Support          | Role permissions, commenting, multi-user | 2026-01-15  |
+| Progress Tracking \& Tasks     | Statuses, checklists, dashboard summary  | 2026-02-05  |
+| Audit \& Export Functionality  | Immutable history and data export        | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -2096,7 +2014,7 @@ The Investigation Workflow \& Management subsystem is the core functional area e
 - **Data Privacy in Export:** Implement export filters and access gates.
 - **Performance at Scale:** Use pagination, caching, and batch operations for CRUD.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -2107,13 +2025,13 @@ The Investigation Workflow \& Management subsystem is the core functional area e
 - Comprehensive audit trails without data loss.
 - Export formats validated for interoperability with downstream tools.
 
-***
+---
 
 This PRD for Investigation Workflow \& Management defines the blueprint for user-centric, secure, and AI-augmented investigative processes critical to IntelGraph’s MVP-2 and GA readiness.
 
 Please indicate the next category, subsystem, or feature set for detailed PRD generation.Here is an appropriate categorization scheme for the further tailored decomposition of IntelGraph’s roadmap and PRDs by key subsystems, feature sets, and compliance domains. This will provide a structured framework to generate detailed PRDs for each area:
 
-***
+---
 
 ## Categories for Detailed PRD Decomposition
 
@@ -2128,7 +2046,6 @@ Please indicate the next category, subsystem, or feature set for detailed PRD ge
 - **1.7 Observability \& Monitoring**
 - **1.8 DevOps, CI/CD, and Deployment**
 
-
 ### 2. Feature Sets \& Functional Capabilities
 
 - **2.1 Investigation Workflow \& Management**
@@ -2140,7 +2057,6 @@ Please indicate the next category, subsystem, or feature set for detailed PRD ge
 - **2.7 Performance Optimization \& Scalability**
 - **2.8 Role-Based Access Control \& Policy Enforcement**
 
-
 ### 3. Compliance, Security \& Governance Domains
 
 - **3.1 Authentication \& Identity Management**
@@ -2151,7 +2067,6 @@ Please indicate the next category, subsystem, or feature set for detailed PRD ge
 - **3.6 Secure Software Development Lifecycle (SSDLC)**
 - **3.7 Incident Response \& Disaster Recovery**
 
-
 ### 4. Enterprise Readiness \& Support
 
 - **4.1 Multi-Tenant Cloud Deployment \& Orchestration**
@@ -2161,7 +2076,7 @@ Please indicate the next category, subsystem, or feature set for detailed PRD ge
 - **4.5 Customer Support \& Professional Services**
 - **4.6 Release Management \& Versioning**
 
-***
+---
 
 Let me know which category or categories to prioritize next for generating detailed product requirements documents (PRDs). This structured approach will allow focused, comprehensive planning and design for IntelGraph’s MVP-2 and GA evolution.
 
@@ -2171,13 +2086,13 @@ Let me know which category or categories to prioritize next for generating detai
 
 IntelGraph Platform — Detailed PRD for Graph Analytics \& Visualization (Category 2.2)
 
-***
+---
 
 ## Overview
 
 The Graph Analytics \& Visualization subsystem powers IntelGraph’s core capability to represent, analyze, and explore complex entity relationships graphically. This subsystem provides advanced algorithms for graph analytics, robust tools for interactive visualization, and insights delivery through visually rich user interfaces vital for intelligence analysis.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -2189,7 +2104,7 @@ The Graph Analytics \& Visualization subsystem powers IntelGraph’s core capabi
 - Facilitate temporal and spatial graph analysis with timeline and geo-visual overlays.
 - Enable export of graph visualizations and underlying data in standard formats.
 
-***
+---
 
 ## Functional Requirements
 
@@ -2201,13 +2116,12 @@ The Graph Analytics \& Visualization subsystem powers IntelGraph’s core capabi
 - Temporal graph analysis including changes over time.
 - GEOINT spatial clustering and radius-based searches integrated with map views.
 
-
 ### Visualization Features
 
 - Interactive graph rendering using Cytoscape.js with support for multiple layouts:
-    - Force-directed
-    - Concentric
-    - Grid and hierarchical
+  - Force-directed
+  - Concentric
+  - Grid and hierarchical
 - Real-time updates and incremental graph rendering during data changes.
 - Node and edge styling based on AI confidence, metadata attributes, and relation types.
 - Dynamic filtering and search overlays to highlight subsets of interest.
@@ -2216,7 +2130,6 @@ The Graph Analytics \& Visualization subsystem powers IntelGraph’s core capabi
 - Timeline visualization overlays for temporal investigations.
 - Leaflet integration for geographic visualization layering.
 
-
 ### Scalability \& Performance
 
 - Level-of-Detail (LOD) rendering to optimize visualization for large graphs.
@@ -2224,14 +2137,13 @@ The Graph Analytics \& Visualization subsystem powers IntelGraph’s core capabi
 - Efficient memory and resource management to support graphs with thousands of nodes/edges.
 - Support for asynchronous loading of large datasets.
 
-
 ### Export \& Interoperability
 
 - Export graphs or subgraphs in formats such as GraphML, JSON, and CSV.
 - Integration with AI Copilot to allow visual query generation and refinement.
 - Copy/paste and drag-and-drop support from other investigative tools.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -2241,7 +2153,7 @@ The Graph Analytics \& Visualization subsystem powers IntelGraph’s core capabi
 - Avoid UI blocking and ensure smooth animations.
 - Secure visualization layer that sanitizes all input data against injection risks.
 
-***
+---
 
 ## Dependencies
 
@@ -2251,22 +2163,21 @@ The Graph Analytics \& Visualization subsystem powers IntelGraph’s core capabi
 - Frontend React components and Redux for state management.
 - Leaflet.js for geographic information system (GIS) integration.
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| Core Graph Analytics | Implement community detection, centrality | 2025-10-20 |
-| Basic Graph Visualization | Cytoscape.js integration with layouts | 2025-11-15 |
-| AI-Driven Styling | Visual indicators from AI metadata | 2025-12-05 |
-| Scalability Enhancements | LOD rendering, async graph loading | 2026-01-05 |
-| Temporal \& GEOINT Overlays | Timeline view and Leaflet mapping | 2026-01-25 |
-| Export \& Interoperability | GraphML/JSON/CSV export and visual query integration | 2026-02-15 |
-| Performance \& Accessibility Testing | Cross-browser and accessibility compliance | 2026-02-28 |
+| Milestone                            | Description                                          | Target Date |
+| :----------------------------------- | :--------------------------------------------------- | :---------- |
+| Core Graph Analytics                 | Implement community detection, centrality            | 2025-10-20  |
+| Basic Graph Visualization            | Cytoscape.js integration with layouts                | 2025-11-15  |
+| AI-Driven Styling                    | Visual indicators from AI metadata                   | 2025-12-05  |
+| Scalability Enhancements             | LOD rendering, async graph loading                   | 2026-01-05  |
+| Temporal \& GEOINT Overlays          | Timeline view and Leaflet mapping                    | 2026-01-25  |
+| Export \& Interoperability           | GraphML/JSON/CSV export and visual query integration | 2026-02-15  |
+| Performance \& Accessibility Testing | Cross-browser and accessibility compliance           | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -2276,7 +2187,7 @@ The Graph Analytics \& Visualization subsystem powers IntelGraph’s core capabi
 - **Browser Compatibility Issues:** Adopt standard web APIs and continuous multi-browser testing.
 - **Security Risks via Visual Inputs:** Sanitize and validate all graph data before rendering.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -2287,19 +2198,19 @@ The Graph Analytics \& Visualization subsystem powers IntelGraph’s core capabi
 - Export formats validated with external intelligence tools.
 - Zero critical UI security issues in auditable tests.
 
-***
+---
 
 This PRD for Graph Analytics \& Visualization focuses on delivering performant, insightful, and interactive graph explorations that empower analysts to uncover deep intelligence patterns, foundational for IntelGraph’s MVP-2 and GA.
 
 Please specify the next area or feature set to detail further.IntelGraph Platform — Detailed PRD for Graph Analytics \& Visualization (Category 2.2)
 
-***
+---
 
 ## Overview
 
 The Graph Analytics \& Visualization subsystem powers IntelGraph’s core capability to represent, analyze, and explore complex entity relationships graphically. This subsystem provides advanced algorithms for graph analytics, robust tools for interactive visualization, and insights delivery through visually rich user interfaces vital for intelligence analysis.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -2311,7 +2222,7 @@ The Graph Analytics \& Visualization subsystem powers IntelGraph’s core capabi
 - Facilitate temporal and spatial graph analysis with timeline and geo-visual overlays.
 - Enable export of graph visualizations and underlying data in standard formats.
 
-***
+---
 
 ## Functional Requirements
 
@@ -2323,13 +2234,12 @@ The Graph Analytics \& Visualization subsystem powers IntelGraph’s core capabi
 - Temporal graph analysis including changes over time.
 - GEOINT spatial clustering and radius-based searches integrated with map views.
 
-
 ### Visualization Features
 
 - Interactive graph rendering using Cytoscape.js with support for multiple layouts:
-    - Force-directed
-    - Concentric
-    - Grid and hierarchical
+  - Force-directed
+  - Concentric
+  - Grid and hierarchical
 - Real-time updates and incremental graph rendering during data changes.
 - Node and edge styling based on AI confidence, metadata attributes, and relation types.
 - Dynamic filtering and search overlays to highlight subsets of interest.
@@ -2338,7 +2248,6 @@ The Graph Analytics \& Visualization subsystem powers IntelGraph’s core capabi
 - Timeline visualization overlays for temporal investigations.
 - Leaflet integration for geographic visualization layering.
 
-
 ### Scalability \& Performance
 
 - Level-of-Detail (LOD) rendering to optimize visualization for large graphs.
@@ -2346,14 +2255,13 @@ The Graph Analytics \& Visualization subsystem powers IntelGraph’s core capabi
 - Efficient memory and resource management to support graphs with thousands of nodes/edges.
 - Support for asynchronous loading of large datasets.
 
-
 ### Export \& Interoperability
 
 - Export graphs or subgraphs in formats such as GraphML, JSON, and CSV.
 - Integration with AI Copilot to allow visual query generation and refinement.
 - Copy/paste and drag-and-drop support from other investigative tools.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -2363,7 +2271,7 @@ The Graph Analytics \& Visualization subsystem powers IntelGraph’s core capabi
 - Avoid UI blocking and ensure smooth animations.
 - Secure visualization layer that sanitizes all input data against injection risks.
 
-***
+---
 
 ## Dependencies
 
@@ -2373,22 +2281,21 @@ The Graph Analytics \& Visualization subsystem powers IntelGraph’s core capabi
 - Frontend React components and Redux for state management.
 - Leaflet.js for geographic information system (GIS) integration.
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| Core Graph Analytics | Implement community detection, centrality | 2025-10-20 |
-| Basic Graph Visualization | Cytoscape.js integration with layouts | 2025-11-15 |
-| AI-Driven Styling | Visual indicators from AI metadata | 2025-12-05 |
-| Scalability Enhancements | LOD rendering, async graph loading | 2026-01-05 |
-| Temporal \& GEOINT Overlays | Timeline view and Leaflet mapping | 2026-01-25 |
-| Export \& Interoperability | GraphML/JSON/CSV export and visual query integration | 2026-02-15 |
-| Performance \& Accessibility Testing | Cross-browser and accessibility compliance | 2026-02-28 |
+| Milestone                            | Description                                          | Target Date |
+| :----------------------------------- | :--------------------------------------------------- | :---------- |
+| Core Graph Analytics                 | Implement community detection, centrality            | 2025-10-20  |
+| Basic Graph Visualization            | Cytoscape.js integration with layouts                | 2025-11-15  |
+| AI-Driven Styling                    | Visual indicators from AI metadata                   | 2025-12-05  |
+| Scalability Enhancements             | LOD rendering, async graph loading                   | 2026-01-05  |
+| Temporal \& GEOINT Overlays          | Timeline view and Leaflet mapping                    | 2026-01-25  |
+| Export \& Interoperability           | GraphML/JSON/CSV export and visual query integration | 2026-02-15  |
+| Performance \& Accessibility Testing | Cross-browser and accessibility compliance           | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -2398,7 +2305,7 @@ The Graph Analytics \& Visualization subsystem powers IntelGraph’s core capabi
 - **Browser Compatibility Issues:** Adopt standard web APIs and continuous multi-browser testing.
 - **Security Risks via Visual Inputs:** Sanitize and validate all graph data before rendering.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -2409,7 +2316,7 @@ The Graph Analytics \& Visualization subsystem powers IntelGraph’s core capabi
 - Export formats validated with external intelligence tools.
 - Zero critical UI security issues in auditable tests.
 
-***
+---
 
 This PRD for Graph Analytics \& Visualization focuses on delivering performant, insightful, and interactive graph explorations that empower analysts to uncover deep intelligence patterns, foundational for IntelGraph’s MVP-2 and GA.
 
@@ -2421,13 +2328,13 @@ Please specify the next area or feature set to detail further.
 
 IntelGraph Platform — Detailed PRD for Multimodal Data Ingestion \& Federation (Category 2.3)
 
-***
+---
 
 ## Overview
 
 The Multimodal Data Ingestion \& Federation subsystem enables IntelGraph to process and integrate diverse data sources including structured files, streaming data, external intelligence feeds, and multimedia content. It supports high-throughput, scalable ingestion pipelines feeding the platform’s graph and AI engines to provide a unified and enriched intelligence dataset for analysis.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -2439,7 +2346,7 @@ The Multimodal Data Ingestion \& Federation subsystem enables IntelGraph to proc
 - Enable configurable ingestion pipelines supporting different source formats and protocols.
 - Maintain ingestion performance and data quality for scale and reliability.
 
-***
+---
 
 ## Functional Requirements
 
@@ -2449,13 +2356,11 @@ The Multimodal Data Ingestion \& Federation subsystem enables IntelGraph to proc
 - Parse and ingest STIX 2.x and TAXII feeds for standardized threat intelligence sharing.
 - Extract metadata and content from multimedia files for AI processing.
 
-
 ### Stream-Based Ingestion
 
 - Consume Kafka topics for real-time social media, OSINT, or system telemetry feeds.
 - Support backpressure handling and offset management.
 - Validate incoming data against schemas and discard or quarantine invalid messages.
-
 
 ### External Federation
 
@@ -2464,12 +2369,10 @@ The Multimodal Data Ingestion \& Federation subsystem enables IntelGraph to proc
 - Implement federation caching to reduce redundant queries.
 - Support federated query federation with source prioritization and conflict resolution.
 
-
 ### AI/ML Enrichment Integration
 
 - Trigger AI extraction (OCR, NLP, object detection) on incoming multimedia and text data.
 - Append AI-generated metadata and confidence attributes to entities before graph insertion.
-
 
 ### Provenance \& Data Lineage
 
@@ -2477,14 +2380,13 @@ The Multimodal Data Ingestion \& Federation subsystem enables IntelGraph to proc
 - Track transformations and AI enrichments performed on data.
 - Provide audit-ready lineage reports per investigation or dataset.
 
-
 ### Error Handling \& Notifications
 
 - Detect and log ingestion failures with detailed diagnostics.
 - Provide retry mechanisms and dead-letter queue management.
 - Alert administrators on ingestion pipeline issues via monitoring tools.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -2495,7 +2397,7 @@ The Multimodal Data Ingestion \& Federation subsystem enables IntelGraph to proc
 - Secure data handling conforming to encryption and compliance policies.
 - Extensible pipeline architecture for future data sources and formats.
 
-***
+---
 
 ## Dependencies
 
@@ -2506,22 +2408,21 @@ The Multimodal Data Ingestion \& Federation subsystem enables IntelGraph to proc
 - Backend orchestration and database APIs.
 - Monitoring systems for pipeline health.
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| CSV \& STIX/TAXII Pipeline | Batch ingest with mapping and validation | 2025-10-25 |
-| Kafka Stream Consumption | Real-time streaming ingestion and offset management | 2025-11-15 |
-| Multimedia Handling | Metadata extraction and AI pipeline trigger | 2025-12-05 |
-| Federation Connectors | Dynamic external source integration | 2025-12-30 |
-| AI Enrichment Integration | Linking ingestion with AI extraction | 2026-01-20 |
-| Provenance \& Lineage | Metadata tagging and audit trail enhancements | 2026-02-10 |
-| Error Handling \& Monitoring | Retry, queue management, alerting | 2026-02-28 |
+| Milestone                    | Description                                         | Target Date |
+| :--------------------------- | :-------------------------------------------------- | :---------- |
+| CSV \& STIX/TAXII Pipeline   | Batch ingest with mapping and validation            | 2025-10-25  |
+| Kafka Stream Consumption     | Real-time streaming ingestion and offset management | 2025-11-15  |
+| Multimedia Handling          | Metadata extraction and AI pipeline trigger         | 2025-12-05  |
+| Federation Connectors        | Dynamic external source integration                 | 2025-12-30  |
+| AI Enrichment Integration    | Linking ingestion with AI extraction                | 2026-01-20  |
+| Provenance \& Lineage        | Metadata tagging and audit trail enhancements       | 2026-02-10  |
+| Error Handling \& Monitoring | Retry, queue management, alerting                   | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -2531,7 +2432,7 @@ The Multimodal Data Ingestion \& Federation subsystem enables IntelGraph to proc
 - **Data Source Schema Changes:** Abstracted schema mapping and dynamic reconfiguration.
 - **Security Breaches in Data Sources:** Enforce strict access controls and encrypt sensitive payloads.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -2542,7 +2443,7 @@ The Multimodal Data Ingestion \& Federation subsystem enables IntelGraph to proc
 - Positive feedback from analysts on data freshness and quality.
 - Secure handling of external data verified by audits.
 
-***
+---
 
 This detailed PRD for Multimodal Data Ingestion \& Federation subsystem establishes a scalable, resilient foundation for IntelGraph’s data intake mechanisms essential for MVP-2 and enterprise GA maturity.
 
@@ -2554,13 +2455,13 @@ Please specify the next category or subsystem for detailed PRD generation.
 
 IntelGraph Platform — Detailed PRD for AI Copilot \& Natural Language Processing (Category 2.4)
 
-***
+---
 
 ## Overview
 
 The AI Copilot \& Natural Language Processing (NLP) subsystem provides advanced, interactive AI-driven capabilities that enhance analyst productivity and insight generation within IntelGraph. It allows natural language querying, conversational exploration of graphs, and automated semantic understanding of investigative data, bridging human intuition with machine intelligence.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -2573,7 +2474,7 @@ The AI Copilot \& Natural Language Processing (NLP) subsystem provides advanced,
 - Deliver confidence metrics and transparency in AI-generated responses.
 - Support proactive recommendations based on user workflow and data trends.
 
-***
+---
 
 ## Functional Requirements
 
@@ -2584,7 +2485,6 @@ The AI Copilot \& Natural Language Processing (NLP) subsystem provides advanced,
 - Support contextual follow-up questions and query expansions.
 - Handle diverse question types: entity search, relationship paths, attribute filters, timelines.
 
-
 ### Conversational AI Interface
 
 - Provide UI chat-like interface for user to interact with AI Copilot.
@@ -2592,13 +2492,11 @@ The AI Copilot \& Natural Language Processing (NLP) subsystem provides advanced,
 - Enable multi-turn conversations with memory of context.
 - Assist with common investigative tasks via automated workflows.
 
-
 ### Semantic Understanding \& Content Generation
 
 - Extract topics, sentiments, and key entities from user and data content.
 - Generate narrative summaries and explanations of graph insights.
 - Align AI-generated insights with user’s investigative goals.
-
 
 ### Multilingual \& Customization Support
 
@@ -2606,20 +2504,18 @@ The AI Copilot \& Natural Language Processing (NLP) subsystem provides advanced,
 - Allow user-specific customization of AI Copilot styles, domain language, and response verbosity.
 - Train and update language models with domain-specific corpora.
 
-
 ### Integration \& APIs
 
 - Backend API endpoints for NLP pipeline querying and AI Copilot orchestration.
 - Integration with AI/ML extraction engines for semantic enrichment.
 - Event-driven model for updating UI and user notifications.
 
-
 ### Transparency \& Validation
 
 - Expose AI confidence scores and reasoning paths.
 - Provide user controls for feedback and correction on AI outputs.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -2629,7 +2525,7 @@ The AI Copilot \& Natural Language Processing (NLP) subsystem provides advanced,
 - Secure processing that ensures user query and data confidentiality.
 - Compliance with relevant data privacy regulations.
 
-***
+---
 
 ## Dependencies
 
@@ -2639,21 +2535,20 @@ The AI Copilot \& Natural Language Processing (NLP) subsystem provides advanced,
 - Frontend chat UI components and state management
 - GPU resources for AI model inference acceleration
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| NLP Intent Parsing \& Query Translation | Develop core NL to graph query translation | 2025-10-30 |
-| Conversational Interface UI | Interactive chat with streaming results | 2025-11-25 |
-| Semantic Content Generation | Narrative and insight generation | 2025-12-20 |
-| Multilingual Support | Expand NLP pipelines to additional languages | 2026-01-30 |
-| Customization \& Feedback | User-specific tuning and correction mechanisms | 2026-02-20 |
-| Scalability \& Security | Load testing and secure processing enhancements | 2026-02-28 |
+| Milestone                               | Description                                     | Target Date |
+| :-------------------------------------- | :---------------------------------------------- | :---------- |
+| NLP Intent Parsing \& Query Translation | Develop core NL to graph query translation      | 2025-10-30  |
+| Conversational Interface UI             | Interactive chat with streaming results         | 2025-11-25  |
+| Semantic Content Generation             | Narrative and insight generation                | 2025-12-20  |
+| Multilingual Support                    | Expand NLP pipelines to additional languages    | 2026-01-30  |
+| Customization \& Feedback               | User-specific tuning and correction mechanisms  | 2026-02-20  |
+| Scalability \& Security                 | Load testing and secure processing enhancements | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -2663,7 +2558,7 @@ The AI Copilot \& Natural Language Processing (NLP) subsystem provides advanced,
 - **Multilingual Complexity:** Phased rollout prioritizing core languages and models.
 - **Sensitive Data Exposure:** Encrypt queries and implement strict access controls.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -2674,7 +2569,7 @@ The AI Copilot \& Natural Language Processing (NLP) subsystem provides advanced,
 - Continuous AI feedback incorporation reducing error rate by 30%.
 - Zero critical security incidents related to AI data handling.
 
-***
+---
 
 This PRD for AI Copilot \& Natural Language Processing drives IntelGraph’s intelligent user interaction forward, enabling natural, efficient, and context-aware investigative workflows critical for MVP-2 and GA deployment readiness.
 
@@ -2686,13 +2581,13 @@ Please specify the next category or subsystem to detail further.
 
 IntelGraph Platform — Detailed PRD for Semantic Vector Search \& Cross-Modal Matching (Category 2.5)
 
-***
+---
 
 ## Overview
 
 The Semantic Vector Search \& Cross-Modal Matching subsystem enables IntelGraph to perform high-accuracy, content-based searches and analytical matching across diverse data modalities (text, images, audio). It leverages vector embeddings and AI-driven similarity algorithms to enhance investigation by finding semantically related entities and evidence, transcending exact keyword matches.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -2704,18 +2599,17 @@ The Semantic Vector Search \& Cross-Modal Matching subsystem enables IntelGraph 
 - Support incremental index updates in near real-time with low latency.
 - Allow visual and programmatic access to semantic similarity results.
 
-***
+---
 
 ## Functional Requirements
 
 ### Vector Embeddings Generation
 
 - Extract embeddings from:
-    - Text using sentence-transformers (all-MiniLM-L6-v2 or better)
-    - Images using convolutional neural network (CNN) models trained for semantic features
-    - Audio using speech embeddings via models such as OpenAI Whisper or custom embeddings
+  - Text using sentence-transformers (all-MiniLM-L6-v2 or better)
+  - Images using convolutional neural network (CNN) models trained for semantic features
+  - Audio using speech embeddings via models such as OpenAI Whisper or custom embeddings
 - Provide normalization and dimension reduction pipelines.
-
 
 ### Indexing \& Search Engine
 
@@ -2724,13 +2618,11 @@ The Semantic Vector Search \& Cross-Modal Matching subsystem enables IntelGraph 
 - Enable similarity search APIs with parameterizable thresholds and result limits.
 - Provide filters for semantic search by metadata (time, location, entity types).
 
-
 ### Cross-Modal Matching
 
 - Perform content correlation by linking semantically related entities across modalities.
 - Annotate matched records with confidence scores and explainability metadata.
 - Allow user feedback for match validation and retraining.
-
 
 ### Integration \& APIs
 
@@ -2738,14 +2630,13 @@ The Semantic Vector Search \& Cross-Modal Matching subsystem enables IntelGraph 
 - Integrate with AI Copilot for query expansion and recommendations.
 - Support batch vector updates and incremental reindexing processes.
 
-
 ### Visualization \& UI
 
 - Visual cues for semantic similarity intensity in graph views.
 - Ranked and highlighted search results with explanations.
 - Support for semantic filtering and faceted search.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -2755,7 +2646,7 @@ The Semantic Vector Search \& Cross-Modal Matching subsystem enables IntelGraph 
 - Secure APIs with access control and rate limiting.
 - Continuous synchronization with data ingestion and AI enrichment pipelines.
 
-***
+---
 
 ## Dependencies
 
@@ -2766,22 +2657,21 @@ The Semantic Vector Search \& Cross-Modal Matching subsystem enables IntelGraph 
 - Integration with backend AI orchestration for model inference.
 - Frontend components to leverage semantic search results.
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| Text Embeddings Implementation | Sentence-transformers based text embeddings | 2025-10-30 |
-| Vector Index Setup \& Search | ANN index building and search API | 2025-11-20 |
-| Image \& Audio Embeddings | Implement multimodal embedding extractions | 2025-12-15 |
-| Cross-Modal Matching | Correlation and confidence scoring | 2026-01-10 |
-| API \& UI Integration | Search endpoints and semantic UI components | 2026-01-30 |
-| Incremental Indexing | Near real-time vector index updates | 2026-02-15 |
-| Scalability \& Performance | Benchmark and optimize search throughput | 2026-02-28 |
+| Milestone                      | Description                                 | Target Date |
+| :----------------------------- | :------------------------------------------ | :---------- |
+| Text Embeddings Implementation | Sentence-transformers based text embeddings | 2025-10-30  |
+| Vector Index Setup \& Search   | ANN index building and search API           | 2025-11-20  |
+| Image \& Audio Embeddings      | Implement multimodal embedding extractions  | 2025-12-15  |
+| Cross-Modal Matching           | Correlation and confidence scoring          | 2026-01-10  |
+| API \& UI Integration          | Search endpoints and semantic UI components | 2026-01-30  |
+| Incremental Indexing           | Near real-time vector index updates         | 2026-02-15  |
+| Scalability \& Performance     | Benchmark and optimize search throughput    | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -2791,7 +2681,7 @@ The Semantic Vector Search \& Cross-Modal Matching subsystem enables IntelGraph 
 - **Cross-Modal Embedding Alignment Challenges:** Use joint embedding training and similarity calibration.
 - **Security Concerns on API Exposure:** Enforce strict authentication and throttling on search APIs.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -2802,13 +2692,13 @@ The Semantic Vector Search \& Cross-Modal Matching subsystem enables IntelGraph 
 - Positive user feedback on search relevance and UI integration.
 - Zero major security incidents from vector search APIs.
 
-***
+---
 
 This PRD for Semantic Vector Search \& Cross-Modal Matching expands IntelGraph’s AI-powered discovery capabilities, crucial for advanced investigative analysis and MVP-2/GA readiness.
 
 Please specify the next category or subsystem for detailed PRD development.Here is an appropriate categorization scheme for the further tailored decomposition of IntelGraph’s roadmap and PRDs by key subsystems, feature sets, and compliance domains. This will provide a structured framework to generate detailed PRDs for each area:
 
-***
+---
 
 ## Categories for Detailed PRD Decomposition
 
@@ -2823,7 +2713,6 @@ Please specify the next category or subsystem for detailed PRD development.Here 
 - **1.7 Observability \& Monitoring**
 - **1.8 DevOps, CI/CD, and Deployment**
 
-
 ### 2. Feature Sets \& Functional Capabilities
 
 - **2.1 Investigation Workflow \& Management**
@@ -2835,7 +2724,6 @@ Please specify the next category or subsystem for detailed PRD development.Here 
 - **2.7 Performance Optimization \& Scalability**
 - **2.8 Role-Based Access Control \& Policy Enforcement**
 
-
 ### 3. Compliance, Security \& Governance Domains
 
 - **3.1 Authentication \& Identity Management**
@@ -2846,7 +2734,6 @@ Please specify the next category or subsystem for detailed PRD development.Here 
 - **3.6 Secure Software Development Lifecycle (SSDLC)**
 - **3.7 Incident Response \& Disaster Recovery**
 
-
 ### 4. Enterprise Readiness \& Support
 
 - **4.1 Multi-Tenant Cloud Deployment \& Orchestration**
@@ -2856,7 +2743,7 @@ Please specify the next category or subsystem for detailed PRD development.Here 
 - **4.5 Customer Support \& Professional Services**
 - **4.6 Release Management \& Versioning**
 
-***
+---
 
 Let me know which category or categories to prioritize first for generating detailed product requirements documents (PRDs). This structured approach will allow focused, comprehensive planning and design for IntelGraph’s MVP-2 and GA evolution.
 
@@ -2866,13 +2753,13 @@ Let me know which category or categories to prioritize first for generating deta
 
 IntelGraph Platform — Detailed PRD for User Collaboration \& Communication Tools (Category 2.6)
 
-***
+---
 
 ## Overview
 
 The User Collaboration \& Communication Tools subsystem enables seamless, secure, and efficient teamwork within IntelGraph. It provides shared workspaces, real-time messaging, annotations, and activity tracking, fostering a collaborative environment essential for joint intelligence analysis. This subsystem integrates tightly with investigation workflows to maintain context and user awareness.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -2885,7 +2772,7 @@ The User Collaboration \& Communication Tools subsystem enables seamless, secure
 - Support access control respecting RBAC and OPA policies.
 - Integrate collaboration events with overall platform audit logging and observability.
 
-***
+---
 
 ## Functional Requirements
 
@@ -2895,13 +2782,11 @@ The User Collaboration \& Communication Tools subsystem enables seamless, secure
 - Support typing indicators, read receipts, and message threading.
 - Notifications on relevant messages via UI and optionally email.
 
-
 ### Commenting \& Annotation
 
 - Inline comments attached to specific entities, relationships, or graph regions.
 - Annotation tools for textual notes, highlighting, and tagging.
 - Moderation and editing capabilities with version history.
-
 
 ### Presence \& Activity Indicators
 
@@ -2909,12 +2794,10 @@ The User Collaboration \& Communication Tools subsystem enables seamless, secure
 - Show cursors or focus regions for multi-user awareness.
 - Activity feed summarizing recent user actions and collaboration events.
 
-
 ### Asynchronous Communication
 
 - Persistent message history with search capabilities.
 - Integration with external communication channels (Slack, email) for alerts and summaries.
-
 
 ### Security \& Compliance
 
@@ -2922,14 +2805,13 @@ The User Collaboration \& Communication Tools subsystem enables seamless, secure
 - Encrypt all communications in transit and at rest.
 - Audit trail of collaboration interactions including edits and message deletions.
 
-
 ### User Interface
 
 - Responsive UI components for chat, comments, and annotation supporting desktop and mobile.
 - Seamless integration with investigation and graph visualization interfaces.
 - Accessibility compliance following WCAG 2.1 AA guidelines.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -2939,7 +2821,7 @@ The User Collaboration \& Communication Tools subsystem enables seamless, secure
 - Scalable storage and retrieval of collaboration history.
 - Secure storage with backup and retention policies aligned with compliance requirements.
 
-***
+---
 
 ## Dependencies
 
@@ -2949,21 +2831,20 @@ The User Collaboration \& Communication Tools subsystem enables seamless, secure
 - Frontend chat and annotation UI components.
 - Logging and observability systems for collaboration event tracking.
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| Real-Time Chat \& Messaging | Basic messaging with typing indicators, threading | 2025-10-25 |
-| Commenting \& Annotation | Inline comments and annotation tools | 2025-11-20 |
-| User Presence \& Activity Feed | Multi-user awareness and session activity feed | 2025-12-15 |
-| Integration with Notifications | Alerts via UI and optional email/Slack | 2026-01-10 |
-| Security \& Access Controls | Enforce collaboration permissions and encryption | 2026-02-05 |
-| Offline Support \& Caching | Message queueing and offline resilience | 2026-02-28 |
+| Milestone                      | Description                                       | Target Date |
+| :----------------------------- | :------------------------------------------------ | :---------- |
+| Real-Time Chat \& Messaging    | Basic messaging with typing indicators, threading | 2025-10-25  |
+| Commenting \& Annotation       | Inline comments and annotation tools              | 2025-11-20  |
+| User Presence \& Activity Feed | Multi-user awareness and session activity feed    | 2025-12-15  |
+| Integration with Notifications | Alerts via UI and optional email/Slack            | 2026-01-10  |
+| Security \& Access Controls    | Enforce collaboration permissions and encryption  | 2026-02-05  |
+| Offline Support \& Caching     | Message queueing and offline resilience           | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -2973,7 +2854,7 @@ The User Collaboration \& Communication Tools subsystem enables seamless, secure
 - **Performance Degradation with Many Participants:** Optimize message batching and server scaling.
 - **User Acceptance:** Conduct user testing to ensure intuitive workflows.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -2984,13 +2865,13 @@ The User Collaboration \& Communication Tools subsystem enables seamless, secure
 - Auditable collaboration logs covering 100% of interactions.
 - Effective offline message handling with automatic resync upon reconnect.
 
-***
+---
 
 This PRD for User Collaboration \& Communication Tools targets the creation of a rich and secure collaborative experience essential for distributed intelligence teams, aligning with IntelGraph’s advancement toward MVP-2 and GA.
 
 Please specify the next subsystem or feature set for detailed PRD generation.Here is an appropriate categorization scheme for the further tailored decomposition of IntelGraph’s roadmap and PRDs by key subsystems, feature sets, and compliance domains. This will provide a structured framework to generate detailed PRDs for each area:
 
-***
+---
 
 ## Categories for Detailed PRD Decomposition
 
@@ -3005,7 +2886,6 @@ Please specify the next subsystem or feature set for detailed PRD generation.Her
 - **1.7 Observability \& Monitoring**
 - **1.8 DevOps, CI/CD, and Deployment**
 
-
 ### 2. Feature Sets \& Functional Capabilities
 
 - **2.1 Investigation Workflow \& Management**
@@ -3017,7 +2897,6 @@ Please specify the next subsystem or feature set for detailed PRD generation.Her
 - **2.7 Performance Optimization \& Scalability**
 - **2.8 Role-Based Access Control \& Policy Enforcement**
 
-
 ### 3. Compliance, Security \& Governance Domains
 
 - **3.1 Authentication \& Identity Management**
@@ -3028,7 +2907,6 @@ Please specify the next subsystem or feature set for detailed PRD generation.Her
 - **3.6 Secure Software Development Lifecycle (SSDLC)**
 - **3.7 Incident Response \& Disaster Recovery**
 
-
 ### 4. Enterprise Readiness \& Support
 
 - **4.1 Multi-Tenant Cloud Deployment \& Orchestration**
@@ -3038,7 +2916,7 @@ Please specify the next subsystem or feature set for detailed PRD generation.Her
 - **4.5 Customer Support \& Professional Services**
 - **4.6 Release Management \& Versioning**
 
-***
+---
 
 Let me know which category or categories to prioritize next for generating detailed product requirements documents (PRDs). This structured approach will allow focused, comprehensive planning and design for IntelGraph’s MVP-2 and GA evolution.
 
@@ -3048,13 +2926,13 @@ Let me know which category or categories to prioritize next for generating detai
 
 IntelGraph Platform — Detailed PRD for Performance Optimization \& Scalability (Category 2.7)
 
-***
+---
 
 ## Overview
 
 The Performance Optimization \& Scalability subsystem focuses on ensuring IntelGraph delivers responsive, reliable, and scalable performance to support large-scale intelligence investigations and enterprise workloads. It encompasses backend, database, AI, and frontend performance tuning, load balancing, resource management, and horizontal scaling to handle growing user and data volume demands.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -3067,7 +2945,7 @@ The Performance Optimization \& Scalability subsystem focuses on ensuring IntelG
 - Employ caching, batching, and asynchronous processing effectively.
 - Ensure predictable performance with clear SLOs and capacity planning.
 
-***
+---
 
 ## Functional Requirements
 
@@ -3077,7 +2955,6 @@ The Performance Optimization \& Scalability subsystem focuses on ensuring IntelG
 - Batch and throttle high-frequency requests.
 - Use CDN and edge caching for static assets.
 
-
 ### Database Scalability
 
 - Optimize Neo4j cluster for graph data partitioning, replication, and failover.
@@ -3085,13 +2962,11 @@ The Performance Optimization \& Scalability subsystem focuses on ensuring IntelG
 - TimescaleDB scaling for time-series ingestion and querying.
 - Redis clustering for session storage and distributed caching.
 
-
 ### AI/ML Service Scaling
 
 - Load-balanced AI inference services with GPU resource pooling.
 - Asynchronous AI task execution with prioritized job queues.
 - Model inference caching to reduce redundant compute.
-
 
 ### Frontend Performance
 
@@ -3099,14 +2974,13 @@ The Performance Optimization \& Scalability subsystem focuses on ensuring IntelG
 - Minimize bundle sizes with code splitting and tree shaking.
 - Efficient state management and memoization techniques.
 
-
 ### Infrastructure \& Orchestration
 
 - Kubernetes deployment with auto-scaling, rolling updates, and failover.
 - Resource requests and limits per service container.
 - Load balancing and API gateway rate limiting.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -3117,7 +2991,7 @@ The Performance Optimization \& Scalability subsystem focuses on ensuring IntelG
 - Auto-scale up/down within 2-minute reaction time.
 - Zero downtime deployments with canary releases.
 
-***
+---
 
 ## Dependencies
 
@@ -3127,22 +3001,21 @@ The Performance Optimization \& Scalability subsystem focuses on ensuring IntelG
 - Redis, Neo4j, PostgreSQL, TimescaleDB clusters.
 - AI model serving infrastructure with GPU accelerators.
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| Performance Baseline \& Profiling | Establish baseline performance metrics | 2025-10-15 |
-| Query \& API Optimization | Indexes, batching, cache strategies | 2025-11-05 |
-| Database Scaling Implementation | Clustering, failover, and tuning | 2025-12-01 |
-| AI Service Load Balancing | GPU pooling and async task prioritization | 2025-12-20 |
-| Frontend Optimization | Virtualization, bundle size improvements | 2026-01-15 |
-| Kubernetes Auto-scaling \& Deployment | Rolling updates and auto-scale policies | 2026-02-10 |
-| Load Testing \& Tuning | Stress tests and iterative improvements | 2026-02-28 |
+| Milestone                             | Description                               | Target Date |
+| :------------------------------------ | :---------------------------------------- | :---------- |
+| Performance Baseline \& Profiling     | Establish baseline performance metrics    | 2025-10-15  |
+| Query \& API Optimization             | Indexes, batching, cache strategies       | 2025-11-05  |
+| Database Scaling Implementation       | Clustering, failover, and tuning          | 2025-12-01  |
+| AI Service Load Balancing             | GPU pooling and async task prioritization | 2025-12-20  |
+| Frontend Optimization                 | Virtualization, bundle size improvements  | 2026-01-15  |
+| Kubernetes Auto-scaling \& Deployment | Rolling updates and auto-scale policies   | 2026-02-10  |
+| Load Testing \& Tuning                | Stress tests and iterative improvements   | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -3152,7 +3025,7 @@ The Performance Optimization \& Scalability subsystem focuses on ensuring IntelG
 - **UI Slowdowns with Large Graphs:** Early use of virtualization and asynchronous rendering.
 - **Deployment Failures Impacting Performance:** Use blue/green or canary deployment strategies.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -3163,7 +3036,7 @@ The Performance Optimization \& Scalability subsystem focuses on ensuring IntelG
 - Horizontal scaling reaction time < 2 minutes to workload spikes.
 - Positive user feedback on UI responsiveness.
 
-***
+---
 
 This PRD for Performance Optimization \& Scalability ensures IntelGraph can grow seamlessly as an enterprise intelligence platform, maintaining responsiveness and reliability for MVP-2 and GA milestones.
 
@@ -3175,13 +3048,13 @@ Please specify the next category or subsystem for detailed PRD development.
 
 IntelGraph Platform — Detailed PRD for Role-Based Access Control \& Policy Enforcement (Category 2.8)
 
-***
+---
 
 ## Overview
 
 The Role-Based Access Control (RBAC) \& Policy Enforcement subsystem provides precise, flexible, and secure authorization mechanisms within IntelGraph. It enables granular control over user permissions, data access, and operational capabilities, ensuring compliance with organizational policies and regulatory requirements. Policy decisions are dynamically enforced using a policy-as-code framework for consistency and transparency.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -3194,7 +3067,7 @@ The Role-Based Access Control (RBAC) \& Policy Enforcement subsystem provides pr
 - Allow policy versioning and safe rollbacks.
 - Ensure real-time enforcement across all user interactions and APIs.
 
-***
+---
 
 ## Functional Requirements
 
@@ -3205,14 +3078,12 @@ The Role-Based Access Control (RBAC) \& Policy Enforcement subsystem provides pr
 - Define permissions for system-level, investigation-level, and entity-level access.
 - Support least privilege defaults with escalation workflows.
 
-
 ### Policy Enforcement
 
 - Use OPA to enforce access policies evaluated on every API request and UI action.
 - Implement policies as declarative, testable Rego rules.
 - Support dynamic policy decision caching with TTL to optimize performance.
 - Enable context-aware attribute-based controls (e.g., time, location, device).
-
 
 ### Administration \& Auditing
 
@@ -3221,14 +3092,13 @@ The Role-Based Access Control (RBAC) \& Policy Enforcement subsystem provides pr
 - Immutable audit logs of policy evaluations, user role assignments, and changes.
 - Alerts for policy violations or suspicious access patterns.
 
-
 ### Integration
 
 - Enforce policies consistently across backend GraphQL, REST APIs, WebSocket events, and frontend UI.
 - Integrate with authentication subsystem for user identity attributes.
 - Policy simulation and testing tools for validation before deployment.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -3239,7 +3109,7 @@ The Role-Based Access Control (RBAC) \& Policy Enforcement subsystem provides pr
 - Role and policy management actions secured with multi-factor authentication.
 - Continuous policy compliance validation via automated testing.
 
-***
+---
 
 ## Dependencies
 
@@ -3249,22 +3119,21 @@ The Role-Based Access Control (RBAC) \& Policy Enforcement subsystem provides pr
 - Secure audit logging infrastructure.
 - RBAC and ABAC rule definition schemas.
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| Role Management UI \& APIs | Create/manage roles and permissions | 2025-10-20 |
-| Core Policy Enforcement | OPA integration for baseline access control | 2025-11-15 |
-| ABAC Attribute Support | Contextual access capabilities | 2025-12-05 |
-| Admin Auditing \& Alerts | Policy change logging and suspicious activity detection | 2026-01-10 |
-| Policy Testing \& Simulation | Tools for validating policy correctness pre-deploy | 2026-01-30 |
-| Scalability \& Performance | Optimize low-latency policy decision enforcement | 2026-02-20 |
-| Security Hardening | MFA enforcement for admin operations | 2026-02-28 |
+| Milestone                    | Description                                             | Target Date |
+| :--------------------------- | :------------------------------------------------------ | :---------- |
+| Role Management UI \& APIs   | Create/manage roles and permissions                     | 2025-10-20  |
+| Core Policy Enforcement      | OPA integration for baseline access control             | 2025-11-15  |
+| ABAC Attribute Support       | Contextual access capabilities                          | 2025-12-05  |
+| Admin Auditing \& Alerts     | Policy change logging and suspicious activity detection | 2026-01-10  |
+| Policy Testing \& Simulation | Tools for validating policy correctness pre-deploy      | 2026-01-30  |
+| Scalability \& Performance   | Optimize low-latency policy decision enforcement        | 2026-02-20  |
+| Security Hardening           | MFA enforcement for admin operations                    | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -3274,7 +3143,7 @@ The Role-Based Access Control (RBAC) \& Policy Enforcement subsystem provides pr
 - **Unauthorized Policy Changes:** Enforce strict admin role controls with MFA.
 - **User Role Conflicts:** Detect and alert on conflicting role assignments.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -3285,7 +3154,7 @@ The Role-Based Access Control (RBAC) \& Policy Enforcement subsystem provides pr
 - Successful simulation of 100% policies before production deployment.
 - High positive feedback on admin usability for role/policy management.
 
-***
+---
 
 This PRD for Role-Based Access Control \& Policy Enforcement secures IntelGraph with adaptive, policy-driven authorization mechanisms vital for enterprise confidentiality and governance as the platform advances to MVP-2 and GA.
 
@@ -3297,13 +3166,13 @@ Please specify the next category or subsystem for detailed PRD development.
 
 IntelGraph Platform — Detailed PRD for Authentication \& Identity Management (Category 3.1)
 
-***
+---
 
 ## Overview
 
 The Authentication \& Identity Management subsystem is essential for verifying user identities securely and managing their access credentials within IntelGraph. This subsystem establishes trust boundaries, enforces robust user authentication mechanisms, and integrates with external identity providers to support enterprise identity standards.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -3315,7 +3184,7 @@ The Authentication \& Identity Management subsystem is essential for verifying u
 - Ensure user identities are securely stored, protected, and auditable.
 - Enable seamless integration with authorization subsystem (RBAC/OPA).
 
-***
+---
 
 ## Functional Requirements
 
@@ -3327,7 +3196,6 @@ The Authentication \& Identity Management subsystem is essential for verifying u
 - Integrate with common SSO providers using SAML 2.0, OAuth2, and OpenID Connect.
 - Support social identity providers if applicable (e.g., Google, Microsoft Azure AD).
 
-
 ### User Management
 
 - APIs and UI for user registration, profile management, password reset, and account recovery.
@@ -3335,13 +3203,11 @@ The Authentication \& Identity Management subsystem is essential for verifying u
 - Account state management (active, disabled, locked).
 - Session management including active sessions listing and revocation.
 
-
 ### Token Management \& Security
 
 - Issue short-lived access tokens and long-lived refresh tokens securely.
 - Support token revocation lists and blacklisting.
 - Secure token storage on client side with HttpOnly, Secure cookies or local storage best practices.
-
 
 ### Identity Federation
 
@@ -3349,7 +3215,7 @@ The Authentication \& Identity Management subsystem is essential for verifying u
 - Mapping external identity attributes to internal user schema.
 - Audit trail for federated login events.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -3360,7 +3226,7 @@ The Authentication \& Identity Management subsystem is essential for verifying u
 - Scalability for thousands of concurrent authentication requests.
 - Secure storage of secrets using environment variables or dedicated secret stores.
 
-***
+---
 
 ## Dependencies
 
@@ -3371,22 +3237,21 @@ The Authentication \& Identity Management subsystem is essential for verifying u
 - Identity provider connectivity tooling.
 - Backend user management APIs and database.
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| JWT Authentication | Stateless token-based auth implementation | 2025-10-15 |
-| MFA Support | Integrate TOTP and SMS MFA options | 2025-11-05 |
-| SSO Integration | SAML/OAuth2/OpenID Connect support | 2025-11-30 |
-| User Lifecycle Management | API/UI for registration, password reset | 2025-12-20 |
-| Token Revocation \& Blacklist | Secure refresh token lifecycle management | 2026-01-15 |
-| Identity Federation | External IdP integration and provisioning | 2026-02-05 |
-| Security \& Compliance Testing | Penetration tests and audits | 2026-02-28 |
+| Milestone                      | Description                               | Target Date |
+| :----------------------------- | :---------------------------------------- | :---------- |
+| JWT Authentication             | Stateless token-based auth implementation | 2025-10-15  |
+| MFA Support                    | Integrate TOTP and SMS MFA options        | 2025-11-05  |
+| SSO Integration                | SAML/OAuth2/OpenID Connect support        | 2025-11-30  |
+| User Lifecycle Management      | API/UI for registration, password reset   | 2025-12-20  |
+| Token Revocation \& Blacklist  | Secure refresh token lifecycle management | 2026-01-15  |
+| Identity Federation            | External IdP integration and provisioning | 2026-02-05  |
+| Security \& Compliance Testing | Penetration tests and audits              | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -3396,7 +3261,7 @@ The Authentication \& Identity Management subsystem is essential for verifying u
 - **Password Reset Abuse:** Rate-limit reset requests and validate user identity robustly.
 - **Scalability Limits:** Use load balancing and stateless token verification.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -3407,13 +3272,13 @@ The Authentication \& Identity Management subsystem is essential for verifying u
 - Complete audit logging of authentication events.
 - Seamless SSO integration with zero downtime in pilot.
 
-***
+---
 
 This PRD for Authentication \& Identity Management forms the backbone of secure user access control foundational to IntelGraph’s enterprise readiness and compliance for MVP-2 and GA stages.
 
 Please specify the next category or subsystem for detailed PRD development.Here is a detailed and structured product requirements document (PRD) for your IntelGraph platform broken down by subsystems, feature sets, and compliance/govenance domains. This will serve as a clear roadmap for MVP-2 and GA readiness.
 
-***
+---
 
 ## Categories for Detailed PRD Decomposition
 
@@ -3428,7 +3293,6 @@ Please specify the next category or subsystem for detailed PRD development.Here 
 - **1.7 Observability \& Monitoring**: Metrics collection, distributed tracing, alerting, dashboards, logging infrastructure.
 - **1.8 DevOps, CI/CD, and Deployment**: Automated build/test/deploy pipelines, container orchestration, Helm/K8s deployment, secrets management.
 
-
 ### 2. Feature Sets \& Functional Capabilities
 
 - **2.1 Investigation Workflow \& Management**: Versioned investigation lifecycle, entity/relationship CRUD, AI insight integration, templating, audit trails.
@@ -3440,7 +3304,6 @@ Please specify the next category or subsystem for detailed PRD development.Here 
 - **2.7 Performance Optimization \& Scalability**: Query and UI latency, horizontal scaling, resource management, load balancing, autoscaling.
 - **2.8 Role-Based Access Control \& Policy Enforcement**: Fine-grained RBAC/ABAC, OPA policy-as-code enforcement, admin controls, audit logging.
 
-
 ### 3. Compliance, Security \& Governance Domains
 
 - **3.1 Authentication \& Identity Management**: JWT auth, SSO/OAuth/SAML integration, MFA, token lifecycle, user management.
@@ -3451,7 +3314,6 @@ Please specify the next category or subsystem for detailed PRD development.Here 
 - **3.6 Secure Software Development Lifecycle (SSDLC)**: Code quality/guidelines, security testing, penetration tests.
 - **3.7 Incident Response \& Disaster Recovery**: Preparedness plans, real-time incident alerts, automated recovery drills.
 
-
 ### 4. Enterprise Readiness \& Support
 
 - **4.1 Multi-Tenant Cloud Deployment \& Orchestration**: Namespaces, tenant isolation, Kubernetes scaling.
@@ -3461,7 +3323,7 @@ Please specify the next category or subsystem for detailed PRD development.Here 
 - **4.5 Customer Support \& Professional Services**: Issue tracking, escalation procedures, enterprise onboarding.
 - **4.6 Release Management \& Versioning**: Semantic versioning, changelog automation, backward compatibility.
 
-***
+---
 
 This categorization provides a comprehensive blueprint to prioritize and create detailed PRDs for each area systematically. Please indicate which category or subsystem you want to start with for the detailed PRD creation next.
 
@@ -3471,13 +3333,13 @@ This categorization provides a comprehensive blueprint to prioritize and create 
 
 IntelGraph Platform — Detailed PRD for Authorization \& Policy Management (OPA, RBAC) (Category 3.2)
 
-***
+---
 
 ## Overview
 
 The Authorization \& Policy Management subsystem provides flexible, dynamic enforcement of access control and operational policies within IntelGraph. Leveraging Role-Based Access Control (RBAC) augmented with Open Policy Agent (OPA) policy-as-code, this subsystem ensures consistent and context-aware authorization decisions across all platform interactions to meet enterprise security and compliance requirements.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -3489,7 +3351,7 @@ The Authorization \& Policy Management subsystem provides flexible, dynamic enfo
 - Maintain audit trails of policy evaluations and changes for compliance.
 - Enable policy simulation and rollout testing to prevent misconfigurations.
 
-***
+---
 
 ## Functional Requirements
 
@@ -3499,13 +3361,11 @@ The Authorization \& Policy Management subsystem provides flexible, dynamic enfo
 - Support attribute-based policies incorporating user, resource, and environmental attributes (time, location).
 - Allow policy exceptions and overrides subject to admin review.
 
-
 ### OPA Policy Framework
 
 - Integrate Rego policy language interpreters into all enforcement points.
 - Enable modular and reusable policy modules.
 - Support caching and optimization of policy decision evaluations.
-
 
 ### Policy Management
 
@@ -3514,7 +3374,6 @@ The Authorization \& Policy Management subsystem provides flexible, dynamic enfo
 - Role and policy assignment APIs.
 - Policy testing environment for offline validation and simulation.
 
-
 ### Enforcement and Logging
 
 - Real-time policy enforcement for all API and UI resource accesses.
@@ -3522,7 +3381,7 @@ The Authorization \& Policy Management subsystem provides flexible, dynamic enfo
 - Capture policy evaluation logs with decision context and correlation IDs.
 - Alerting on policy violation attempts or anomalies.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -3532,7 +3391,7 @@ The Authorization \& Policy Management subsystem provides flexible, dynamic enfo
 - Secure storage and transmission of policy data.
 - Compliance with regulatory requirements for access governance.
 
-***
+---
 
 ## Dependencies
 
@@ -3542,22 +3401,21 @@ The Authorization \& Policy Management subsystem provides flexible, dynamic enfo
 - Frontend and admin UI components.
 - User and resource metadata services.
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| Base RBAC Roles \& Permissions | Define core roles and permission sets | 2025-10-20 |
-| OPA Runtime Integration | Embed OPA for policy decision enforcement | 2025-11-15 |
-| Policy Management UI \& APIs | Tools for authoring and versioning policies | 2025-12-10 |
-| ABAC Contextual Policies | Implement attribute-based access conditions | 2026-01-05 |
-| Policy Logging \& Alerting | Audit logs and violation alerts | 2026-01-30 |
-| Policy Simulation \& Testing | Offline validation and policy rollout tools | 2026-02-15 |
-| Scalability \& Performance | Decision latency optimization | 2026-02-28 |
+| Milestone                      | Description                                 | Target Date |
+| :----------------------------- | :------------------------------------------ | :---------- |
+| Base RBAC Roles \& Permissions | Define core roles and permission sets       | 2025-10-20  |
+| OPA Runtime Integration        | Embed OPA for policy decision enforcement   | 2025-11-15  |
+| Policy Management UI \& APIs   | Tools for authoring and versioning policies | 2025-12-10  |
+| ABAC Contextual Policies       | Implement attribute-based access conditions | 2026-01-05  |
+| Policy Logging \& Alerting     | Audit logs and violation alerts             | 2026-01-30  |
+| Policy Simulation \& Testing   | Offline validation and policy rollout tools | 2026-02-15  |
+| Scalability \& Performance     | Decision latency optimization               | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -3567,7 +3425,7 @@ The Authorization \& Policy Management subsystem provides flexible, dynamic enfo
 - **Incomplete Enforcement Coverage:** Comprehensive instrumentation and integration testing.
 - **Complexity in Attribute Management:** Centralize and normalize user/resource metadata.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -3578,7 +3436,7 @@ The Authorization \& Policy Management subsystem provides flexible, dynamic enfo
 - Positive admin user feedback on policy management usability.
 - Continuous policy validation integrated in CI/CD pipelines.
 
-***
+---
 
 This PRD for Authorization \& Policy Management ensures IntelGraph meets enterprise-grade access governance, enforceable policy compliance, and dynamic authorization needs essential for MVP-2 and GA readiness.
 
@@ -3590,13 +3448,13 @@ Please specify the next category or subsystem for detailed PRD development.
 
 IntelGraph Platform — Detailed PRD for Data Protection \& Encryption (Category 3.3)
 
-***
+---
 
 ## Overview
 
 The Data Protection \& Encryption subsystem safeguards sensitive intelligence data within IntelGraph by enforcing robust encryption methodologies and data handling policies. This subsystem ensures confidentiality, integrity, and availability of data at rest and in transit, supporting regulatory compliance and defending against data breaches or unauthorized access.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -3609,7 +3467,7 @@ The Data Protection \& Encryption subsystem safeguards sensitive intelligence da
 - Support compliance with GDPR, SOC 2, NIST, and other security frameworks.
 - Integrate seamlessly with authentication, authorization, and storage subsystems.
 
-***
+---
 
 ## Functional Requirements
 
@@ -3620,13 +3478,11 @@ The Data Protection \& Encryption subsystem safeguards sensitive intelligence da
 - Encrypt Redis cache data with data persistence enabled.
 - Ensure encrypted backups with secure storage and controlled access.
 
-
 ### Encryption in Transit
 
 - Enforce TLS 1.3 encryption for all internal and external network traffic (APIs, database connections, WebSocket).
 - Use mutual TLS where applicable for service-to-service authentication.
 - Regularly update and patch TLS libraries and configurations to mitigate vulnerabilities.
-
 
 ### Key Management
 
@@ -3634,13 +3490,11 @@ The Data Protection \& Encryption subsystem safeguards sensitive intelligence da
 - Role-based access controls for key usage.
 - Audit logging of all key management operations.
 
-
 ### Data Anonymization \& Pseudonymization
 
 - Implement configurable pipelines for anonymizing PII in logs and reports.
 - Support reversible pseudonymization for regulatory reporting and investigations.
 - Enable selective data masking in UI and API responses.
-
 
 ### Access Control \& Auditing
 
@@ -3648,7 +3502,7 @@ The Data Protection \& Encryption subsystem safeguards sensitive intelligence da
 - Log all access to encrypted data with user identity and context.
 - Audit ability to demonstrate compliance with data protection policies.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -3659,7 +3513,7 @@ The Data Protection \& Encryption subsystem safeguards sensitive intelligence da
 - Scalability to support growth in data volume without performance degradation.
 - Continuous vulnerability scanning and penetration testing for encryption mechanisms.
 
-***
+---
 
 ## Dependencies
 
@@ -3670,22 +3524,21 @@ The Data Protection \& Encryption subsystem safeguards sensitive intelligence da
 - Pseudonymization and anonymization libraries/tools.
 - Integration with Secrets Management (e.g., Vault, AWS KMS).
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| At-Rest Encryption Setup | Enable encryption on databases and caches | 2025-10-25 |
-| TLS Enforcement | Full TLS 1.3 implementation across all channels | 2025-11-15 |
-| Key Management Integration | Centralized KMS setup and access controls | 2025-12-10 |
-| Data Masking \& Anonymization | Implement PII protection pipelines | 2026-01-05 |
-| Access Logging \& Auditing | Detailed logs of encrypted data usage | 2026-01-30 |
-| Compliance Testing | Validate encryption implementations | 2026-02-20 |
-| Performance Tuning | Optimize encryption impact on system throughput | 2026-02-28 |
+| Milestone                     | Description                                     | Target Date |
+| :---------------------------- | :---------------------------------------------- | :---------- |
+| At-Rest Encryption Setup      | Enable encryption on databases and caches       | 2025-10-25  |
+| TLS Enforcement               | Full TLS 1.3 implementation across all channels | 2025-11-15  |
+| Key Management Integration    | Centralized KMS setup and access controls       | 2025-12-10  |
+| Data Masking \& Anonymization | Implement PII protection pipelines              | 2026-01-05  |
+| Access Logging \& Auditing    | Detailed logs of encrypted data usage           | 2026-01-30  |
+| Compliance Testing            | Validate encryption implementations             | 2026-02-20  |
+| Performance Tuning            | Optimize encryption impact on system throughput | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -3695,7 +3548,7 @@ The Data Protection \& Encryption subsystem safeguards sensitive intelligence da
 - **Misconfiguration:** Automated configuration testing and policy enforcement.
 - **Regulatory Non-Compliance:** Regular audits and update to evolving standards.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -3706,7 +3559,7 @@ The Data Protection \& Encryption subsystem safeguards sensitive intelligence da
 - Compliance certification achieved and maintained (e.g., SOC 2).
 - Positive results in external penetration and cryptographic audits.
 
-***
+---
 
 This PRD for Data Protection \& Encryption secures IntelGraph’s data assets foundational for enterprise trust and compliance, guiding MVP-2 and GA readiness.
 
@@ -3718,13 +3571,13 @@ Please specify the next category or subsystem for detailed PRD development.
 
 IntelGraph Platform — Detailed PRD for Audit Logging \& Anomaly Detection (Category 3.4)
 
-***
+---
 
 ## Overview
 
 The Audit Logging \& Anomaly Detection subsystem provides comprehensive, immutable record-keeping of all critical platform activities combined with intelligent monitoring to identify unusual or potentially malicious behaviors. This subsystem ensures accountability, security oversight, and early detection of incidents crucial for compliance and operational integrity within IntelGraph.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -3736,7 +3589,7 @@ The Audit Logging \& Anomaly Detection subsystem provides comprehensive, immutab
 - Maintain compliance with regulatory frameworks including GDPR, SOC 2, and NIST.
 - Seamlessly integrate with platform observability and security subsystems.
 
-***
+---
 
 ## Functional Requirements
 
@@ -3749,7 +3602,6 @@ The Audit Logging \& Anomaly Detection subsystem provides comprehensive, immutab
 - Support long-term storage and retention policies based on compliance needs.
 - Enable export in standard formats for external audits.
 
-
 ### Anomaly Detection
 
 - Implement baselining and threshold-based detection for unusual logins, access spikes, and data exfiltration attempts.
@@ -3757,14 +3609,13 @@ The Audit Logging \& Anomaly Detection subsystem provides comprehensive, immutab
 - Integrate with alerting mechanisms to notify security teams in near real-time.
 - Provide dashboards visualizing anomaly trends and severity.
 
-
 ### Incident Response Integration
 
 - Allow automated or manual triggering of incident workflows based on detected anomalies.
 - Link audit events to investigation cases for contextual traceability.
 - Support forensic data extraction and timeline reconstruction for incidents.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -3774,7 +3625,7 @@ The Audit Logging \& Anomaly Detection subsystem provides comprehensive, immutab
 - High availability and tamper-resilience of log storage systems.
 - Compliance with data privacy laws on audit data retention.
 
-***
+---
 
 ## Dependencies
 
@@ -3784,22 +3635,21 @@ The Audit Logging \& Anomaly Detection subsystem provides comprehensive, immutab
 - Integration with Prometheus, Grafana, Alertmanager.
 - Incident response and ticketing system interfaces.
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| Audit Log Collection | Instrument authentication, API, data access | 2025-10-20 |
-| Immutable Storage Setup | Secure, tamper-evident log storage | 2025-11-10 |
-| Search \& Export Functionality | Log querying and compliance exports | 2025-11-30 |
-| Anomaly Detection Basics | Threshold-based behavior monitoring | 2025-12-20 |
-| ML Anomaly Detection | Deploy machine learning models for anomaly detection | 2026-01-30 |
-| Alerting \& Incident Integration | Connect anomalies to alerting and IR workflows | 2026-02-15 |
-| Compliance Validation | Audit readiness and penetration testing | 2026-02-28 |
+| Milestone                        | Description                                          | Target Date |
+| :------------------------------- | :--------------------------------------------------- | :---------- |
+| Audit Log Collection             | Instrument authentication, API, data access          | 2025-10-20  |
+| Immutable Storage Setup          | Secure, tamper-evident log storage                   | 2025-11-10  |
+| Search \& Export Functionality   | Log querying and compliance exports                  | 2025-11-30  |
+| Anomaly Detection Basics         | Threshold-based behavior monitoring                  | 2025-12-20  |
+| ML Anomaly Detection             | Deploy machine learning models for anomaly detection | 2026-01-30  |
+| Alerting \& Incident Integration | Connect anomalies to alerting and IR workflows       | 2026-02-15  |
+| Compliance Validation            | Audit readiness and penetration testing              | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -3809,7 +3659,7 @@ The Audit Logging \& Anomaly Detection subsystem provides comprehensive, immutab
 - **Delayed Incident Response:** Establish clear escalation policies and automate notifications.
 - **Privacy Concerns:** Apply data minimization and anonymization where appropriate.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -3820,7 +3670,7 @@ The Audit Logging \& Anomaly Detection subsystem provides comprehensive, immutab
 - Compliance audit passed with no significant findings.
 - Positive feedback from security operations teams on log utility.
 
-***
+---
 
 This PRD for Audit Logging \& Anomaly Detection establishes a secure, transparent, and proactive security monitoring capability integral to IntelGraph’s enterprise-grade maturity for MVP-2 and GA.
 
@@ -3832,13 +3682,13 @@ Please specify the next category or subsystem for detailed PRD development.
 
 IntelGraph Platform — Detailed PRD for Regulatory Compliance (GDPR, SOC 2, NIST, FedRAMP) (Category 3.5)
 
-***
+---
 
 ## Overview
 
 The Regulatory Compliance subsystem ensures that IntelGraph adheres to relevant data privacy, security, and operational standards, including GDPR, SOC 2 Type II, NIST Cybersecurity Framework, and FedRAMP requirements. This subsystem provides governance capabilities, compliance workflows, and technical controls necessary for certification and legal adherence, vital to securing trust and operational licenses for deployment in sensitive environments.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -3851,7 +3701,7 @@ The Regulatory Compliance subsystem ensures that IntelGraph adheres to relevant 
 - Ensure compliance-related features integrate seamlessly across all platform subsystems.
 - Maintain up-to-date knowledge and adaptation to evolving regulations.
 
-***
+---
 
 ## Functional Requirements
 
@@ -3862,7 +3712,6 @@ The Regulatory Compliance subsystem ensures that IntelGraph adheres to relevant 
 - Data minimization and purpose limitation enforcement.
 - Data breach notification workflows compliant with GDPR timelines.
 
-
 ### Security Controls (SOC 2, NIST, FedRAMP)
 
 - Implement system and organizational controls (SOC 2) including security, availability, processing integrity, confidentiality, and privacy.
@@ -3870,13 +3719,11 @@ The Regulatory Compliance subsystem ensures that IntelGraph adheres to relevant 
 - Meet FedRAMP baseline security requirements for cloud deployment.
 - Maintain configuration management, vulnerability scanning, and patch management processes.
 
-
 ### Policy \& Documentation
 
 - Maintain updated policies for privacy, data handling, security, and incident response.
 - Provide documentation artifacts required for audits (e.g., SOC 2 Type II reports).
 - Implement training and awareness programs for compliance policies.
-
 
 ### Compliance Monitoring \& Reporting
 
@@ -3884,14 +3731,13 @@ The Regulatory Compliance subsystem ensures that IntelGraph adheres to relevant 
 - Monitor adherence to data retention limits and access policies.
 - Periodic internal and external compliance audits tracking.
 
-
 ### Incident Management
 
 - Incident response playbooks mapped to regulatory requirements.
 - Timely detection, reporting, and remediation tracking.
 - Forensic readiness and evidence preservation.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -3901,7 +3747,7 @@ The Regulatory Compliance subsystem ensures that IntelGraph adheres to relevant 
 - Automated reminders and workflow triggers for compliance milestones.
 - Scalability to adapt to added regulations or standards.
 
-***
+---
 
 ## Dependencies
 
@@ -3911,21 +3757,20 @@ The Regulatory Compliance subsystem ensures that IntelGraph adheres to relevant 
 - Security incident and event management (SIEM) integration.
 - Legal and compliance expertise advisory.
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| Data Privacy Features | GDPR rights management and consent workflows | 2025-10-30 |
-| Security Controls Implementation | SOC 2 and NIST aligned technical controls | 2025-11-30 |
-| Compliance Documentation Setup | Policies, training, and audit-ready docs | 2025-12-20 |
-| Automated Compliance Reporting | Dashboard and report generation | 2026-01-30 |
-| FedRAMP Security Baseline | Cloud security controls and configurations | 2026-02-20 |
-| Incident Response Enhancements | Compliance-aligned IR playbooks and workflows | 2026-02-28 |
+| Milestone                        | Description                                   | Target Date |
+| :------------------------------- | :-------------------------------------------- | :---------- |
+| Data Privacy Features            | GDPR rights management and consent workflows  | 2025-10-30  |
+| Security Controls Implementation | SOC 2 and NIST aligned technical controls     | 2025-11-30  |
+| Compliance Documentation Setup   | Policies, training, and audit-ready docs      | 2025-12-20  |
+| Automated Compliance Reporting   | Dashboard and report generation               | 2026-01-30  |
+| FedRAMP Security Baseline        | Cloud security controls and configurations    | 2026-02-20  |
+| Incident Response Enhancements   | Compliance-aligned IR playbooks and workflows | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -3935,7 +3780,7 @@ The Regulatory Compliance subsystem ensures that IntelGraph adheres to relevant 
 - **Documentation Deficiencies:** Maintain centralized, version-controlled document repositories.
 - **Security Non-Compliance:** Integrate security testing and continuous monitoring.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -3946,7 +3791,7 @@ The Regulatory Compliance subsystem ensures that IntelGraph adheres to relevant 
 - Positive results in external regulatory reviews.
 - User confidence ratings in privacy and security features.
 
-***
+---
 
 This PRD for Regulatory Compliance encapsulates IntelGraph’s commitment to lawful, secure, and auditable intelligence platform operations, underpinning MVP-2 and GA trustworthiness.
 
@@ -3958,13 +3803,13 @@ Please specify the next category or subsystem for detailed PRD development.
 
 IntelGraph Platform — Detailed PRD for Secure Software Development Lifecycle (SSDLC) (Category 3.6)
 
-***
+---
 
 ## Overview
 
 The Secure Software Development Lifecycle (SSDLC) subsystem integrates security practices into every phase of IntelGraph’s software development process. It ensures that security considerations—from design through deployment and maintenance—are systematically addressed to reduce vulnerabilities, improve code quality, and maintain compliance with industry standards.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -3976,7 +3821,7 @@ The Secure Software Development Lifecycle (SSDLC) subsystem integrates security 
 - Coordinate response workflows for discovered security issues.
 - Maintain up-to-date threat intelligence integration to adapt security measures.
 
-***
+---
 
 ## Functional Requirements
 
@@ -3986,7 +3831,6 @@ The Secure Software Development Lifecycle (SSDLC) subsystem integrates security 
 - Define security requirements and acceptance criteria for features.
 - Review architecture for compliance with secure design principles.
 
-
 ### Secure Coding Practices
 
 - Enforce coding standards addressing common security flaws (OWASP Top 10).
@@ -3994,13 +3838,11 @@ The Secure Software Development Lifecycle (SSDLC) subsystem integrates security 
 - Utilize secret scanning tools to prevent credential exposure.
 - Conduct peer code reviews with a security focus.
 
-
 ### Testing \& Validation
 
 - Integrate dynamic application security testing (DAST) and penetration testing.
 - Perform dependency and software composition analysis to identify vulnerable libraries.
 - Run fuzz testing on critical components.
-
 
 ### CI/CD Security Integration
 
@@ -4008,13 +3850,11 @@ The Secure Software Development Lifecycle (SSDLC) subsystem integrates security 
 - Fail builds on detection of critical security issues.
 - Implement security gates with manual approvals for high-risk changes.
 
-
 ### Incident Handling \& Remediation
 
 - Define workflows for triaging, prioritizing, and fixing security vulnerabilities.
 - Enforce timelines for patching based on severity.
 - Maintain communication channels for security advisories and updates.
-
 
 ### Documentation \& Training
 
@@ -4022,7 +3862,7 @@ The Secure Software Development Lifecycle (SSDLC) subsystem integrates security 
 - Provide regular developer training and awareness programs.
 - Track training completion and effectiveness metrics.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -4032,7 +3872,7 @@ The Secure Software Development Lifecycle (SSDLC) subsystem integrates security 
 - Scalable across multiple teams and projects within IntelGraph.
 - Compliance with industry standards (e.g., ISO 27001, NIST, SOC 2).
 
-***
+---
 
 ## Dependencies
 
@@ -4042,22 +3882,21 @@ The Secure Software Development Lifecycle (SSDLC) subsystem integrates security 
 - Security training platforms and materials.
 - Vulnerability tracking and issue management systems.
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| Threat Modeling Workshops | Conduct workshops for core system components | 2025-10-20 |
-| Secure Coding Guidelines | Publish and enforce coding standards | 2025-11-10 |
-| Security Tool Integrations | Embed static and dynamic scanners into pipelines | 2025-11-30 |
-| Developer Training Launch | Deliver security awareness and best practice sessions | 2025-12-20 |
-| Security Gates Implementation | Integrate mandatory security checks in CI/CD | 2026-01-15 |
-| Vulnerability Management Workflow | Establish lifecycle for issue handling | 2026-02-10 |
-| SSDLC Performance Review | Analyze SSDLC effectiveness and iterate | 2026-02-28 |
+| Milestone                         | Description                                           | Target Date |
+| :-------------------------------- | :---------------------------------------------------- | :---------- |
+| Threat Modeling Workshops         | Conduct workshops for core system components          | 2025-10-20  |
+| Secure Coding Guidelines          | Publish and enforce coding standards                  | 2025-11-10  |
+| Security Tool Integrations        | Embed static and dynamic scanners into pipelines      | 2025-11-30  |
+| Developer Training Launch         | Deliver security awareness and best practice sessions | 2025-12-20  |
+| Security Gates Implementation     | Integrate mandatory security checks in CI/CD          | 2026-01-15  |
+| Vulnerability Management Workflow | Establish lifecycle for issue handling                | 2026-02-10  |
+| SSDLC Performance Review          | Analyze SSDLC effectiveness and iterate               | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -4067,7 +3906,7 @@ The Secure Software Development Lifecycle (SSDLC) subsystem integrates security 
 - **Patching Delays:** Establish clear severity-based SLAs for remediation.
 - **Incomplete Documentation:** Automate documentation capture within development workflows.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -4078,13 +3917,13 @@ The Secure Software Development Lifecycle (SSDLC) subsystem integrates security 
 - Positive developer feedback regarding integrated security processes.
 - Timely remediation of vulnerabilities following detection.
 
-***
+---
 
 This PRD for Secure Software Development Lifecycle ensures that IntelGraph’s software is built and maintained with security as a first-class concern, critical for enterprise trust and regulatory compliance at MVP-2 and GA stages.
 
 Please specify the next category or subsystem for detailed PRD development.IntelGraph Platform — Detailed PRD for Secure Software Development Lifecycle (SSDLC) (Category 3.6)
 
-***
+---
 
 ## Overview
 
@@ -4098,7 +3937,6 @@ The Secure Software Development Lifecycle (SSDLC) subsystem integrates security 
 - Ensure timely remediation of detected vulnerabilities.
 - Maintain complete traceability of security-related decisions and findings.
 
-
 ## Functional Requirements
 
 - Threat modeling and risk assessments during requirements and design phases.
@@ -4109,14 +3947,12 @@ The Secure Software Development Lifecycle (SSDLC) subsystem integrates security 
 - Incident tracking and security issue lifecycle management.
 - Documentation of all security policies, procedures, and training activities.
 
-
 ## Non-Functional Requirements
 
 - Minimal disruption to developer productivity.
 - High accuracy and low false positive rates in automated security tools.
 - Scalable to support multiple teams and projects.
 - Compliance with frameworks such as ISO 27001, NIST, SOC 2.
-
 
 ## Dependencies
 
@@ -4125,18 +3961,17 @@ The Secure Software Development Lifecycle (SSDLC) subsystem integrates security 
 - Training and awareness programs.
 - Vulnerability and incident management systems.
 
-
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| Threat Modeling Workshops | Security risk assessments completed | 2025-10-20 |
-| Security Guidelines Published | Developer guidelines available | 2025-11-10 |
-| Security Tool Integration | Automated scanning integrated in pipelines | 2025-11-30 |
-| Developer Security Training | Awareness programs implemented | 2025-12-20 |
-| Security Gates Implemented | CI/CD enforcement of policy | 2026-01-15 |
-| Vulnerability Management Setup | Incident lifecycle and remediation processes | 2026-02-10 |
-| SSDLC Effectiveness Review | Metrics and feedback analyzed | 2026-02-28 |
+| Milestone                      | Description                                  | Target Date |
+| :----------------------------- | :------------------------------------------- | :---------- |
+| Threat Modeling Workshops      | Security risk assessments completed          | 2025-10-20  |
+| Security Guidelines Published  | Developer guidelines available               | 2025-11-10  |
+| Security Tool Integration      | Automated scanning integrated in pipelines   | 2025-11-30  |
+| Developer Security Training    | Awareness programs implemented               | 2025-12-20  |
+| Security Gates Implemented     | CI/CD enforcement of policy                  | 2026-01-15  |
+| Vulnerability Management Setup | Incident lifecycle and remediation processes | 2026-02-10  |
+| SSDLC Effectiveness Review     | Metrics and feedback analyzed                | 2026-02-28  |
 
 ## Risks \& Mitigations
 
@@ -4145,7 +3980,6 @@ The Secure Software Development Lifecycle (SSDLC) subsystem integrates security 
 - Late vulnerability detection (shift left with early testing).
 - Delayed patching (establish SLAs).
 - Documentation gaps (automate and enforce documentation).
-
 
 ## Metrics \& Success Criteria
 
@@ -4156,7 +3990,7 @@ The Secure Software Development Lifecycle (SSDLC) subsystem integrates security 
 - Positive developer feedback.
 - Timely vulnerability remediation.
 
-***
+---
 
 This PRD ensures that IntelGraph’s development process rigorously integrates security principles, vital for enterprise-grade compliance and product trustworthiness at MVP-2 and GA.
 
@@ -4168,13 +4002,13 @@ Please specify the next category or subsystem for detailed PRD creation.
 
 IntelGraph Platform — Detailed PRD for Incident Response \& Disaster Recovery (Category 3.7)
 
-***
+---
 
 ## Overview
 
 The Incident Response \& Disaster Recovery subsystem equips IntelGraph with systematic processes and technical capabilities to detect, respond to, and recover from cybersecurity incidents and operational disruptions. This subsystem ensures platform resilience, minimizes downtime and data loss, and supports regulatory compliance through robust incident handling and recovery procedures.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -4187,7 +4021,7 @@ The Incident Response \& Disaster Recovery subsystem equips IntelGraph with syst
 - Maintain forensic readiness to support investigations and legal requirements.
 - Integrate IR and DR capabilities with overall security and monitoring subsystems.
 
-***
+---
 
 ## Functional Requirements
 
@@ -4200,7 +4034,6 @@ The Incident Response \& Disaster Recovery subsystem equips IntelGraph with syst
 - Collaboration tools for IR teams embedded in platform workflow.
 - Post-incident analysis and reporting for root cause and remediation actions.
 
-
 ### Disaster Recovery (DR)
 
 - Defined Recovery Time Objectives (RTO) and Recovery Point Objectives (RPO) for critical system components.
@@ -4210,14 +4043,13 @@ The Incident Response \& Disaster Recovery subsystem equips IntelGraph with syst
 - Regular disaster recovery exercise scheduling and documentation.
 - Clear documentation and checklists for DR execution.
 
-
 ### Communication \& Coordination
 
 - Incident communication templates and stakeholder notification processes.
 - Roles and responsibilities matrix during incidents.
 - Support for external regulatory and legal reporting requirements.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -4228,7 +4060,7 @@ The Incident Response \& Disaster Recovery subsystem equips IntelGraph with syst
 - Scalability to handle simultaneous or complex incidents.
 - Access controls ensuring IR and DR processes are securely restricted.
 
-***
+---
 
 ## Dependencies
 
@@ -4239,22 +4071,21 @@ The Incident Response \& Disaster Recovery subsystem equips IntelGraph with syst
 - Communication and alerting services.
 - Forensic evidence collection and analysis tools.
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| Incident Detection Setup | Integrate automated anomaly-based detection | 2025-10-20 |
-| Alerting \& Escalation Wiring | Multi-channel notification and escalation | 2025-11-10 |
-| Incident Management System | Ticketing and tracking integration | 2025-11-30 |
-| Disaster Recovery Strategy | Define RTO, RPO, and backup/failover plans | 2025-12-20 |
-| DR Automation \& Failover | Implement automated failover capabilities | 2026-01-30 |
-| IR \& DR Procedures Testing | Conduct simulation drills and update plans | 2026-02-20 |
-| Compliance \& Reporting | Document regulatory incident reporting processes | 2026-02-28 |
+| Milestone                     | Description                                      | Target Date |
+| :---------------------------- | :----------------------------------------------- | :---------- |
+| Incident Detection Setup      | Integrate automated anomaly-based detection      | 2025-10-20  |
+| Alerting \& Escalation Wiring | Multi-channel notification and escalation        | 2025-11-10  |
+| Incident Management System    | Ticketing and tracking integration               | 2025-11-30  |
+| Disaster Recovery Strategy    | Define RTO, RPO, and backup/failover plans       | 2025-12-20  |
+| DR Automation \& Failover     | Implement automated failover capabilities        | 2026-01-30  |
+| IR \& DR Procedures Testing   | Conduct simulation drills and update plans       | 2026-02-20  |
+| Compliance \& Reporting       | Document regulatory incident reporting processes | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -4264,7 +4095,7 @@ The Incident Response \& Disaster Recovery subsystem equips IntelGraph with syst
 - **Incomplete IR Procedures:** Regular training and exercises with post-mortem improvements.
 - **Unauthorized Access During Incidents:** Enforce strict access controls and audit logging.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -4275,7 +4106,7 @@ The Incident Response \& Disaster Recovery subsystem equips IntelGraph with syst
 - Positive audit evaluations on incident handling and DR readiness.
 - Clear and timely communication in documented incident timelines.
 
-***
+---
 
 This PRD for Incident Response \& Disaster Recovery assures IntelGraph’s operational resilience and compliance readiness, underpinning smooth MVP-2 advancement and trusted GA deployments.
 
@@ -4287,13 +4118,13 @@ Please specify the next category or subsystem for detailed PRD development.
 
 IntelGraph Platform — Detailed PRD for Multi-Tenant Cloud Deployment \& Orchestration (Category 4.1)
 
-***
+---
 
 ## Overview
 
 The Multi-Tenant Cloud Deployment \& Orchestration subsystem enables IntelGraph to securely support multiple independent tenant environments within shared cloud infrastructure. It provides tenant isolation, scalable resource management, and centralized control to deliver cost-effective, compliant, and operationally efficient deployments suitable for enterprise adoption.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -4306,7 +4137,7 @@ The Multi-Tenant Cloud Deployment \& Orchestration subsystem enables IntelGraph 
 - Facilitate seamless upgrades, scaling, and disaster recovery across tenants.
 - Enable usage tracking and cost attribution per tenant.
 
-***
+---
 
 ## Functional Requirements
 
@@ -4317,13 +4148,11 @@ The Multi-Tenant Cloud Deployment \& Orchestration subsystem enables IntelGraph 
 - Network segmentation and secure ingress/egress controls.
 - Tenant-specific secrets and credential management.
 
-
 ### Tenant Lifecycle Management
 
 - APIs and UI for creating, updating, suspending, and deleting tenants.
 - Automated provisioning of tenant infrastructure and configuration.
 - Support for tenant-specific customizations and feature flags.
-
 
 ### Deployment Orchestration
 
@@ -4332,13 +4161,11 @@ The Multi-Tenant Cloud Deployment \& Orchestration subsystem enables IntelGraph 
 - Auto-scaling based on tenant workloads.
 - Rollback and failure isolation per tenant.
 
-
 ### Monitoring \& Policy Enforcement
 
 - Per-tenant metrics, logging, and alerting dashboards.
 - Tenant-aware policy enforcement for security and resource usage.
 - Audit trails scoped to tenant operations.
-
 
 ### Security \& Compliance
 
@@ -4346,13 +4173,12 @@ The Multi-Tenant Cloud Deployment \& Orchestration subsystem enables IntelGraph 
 - Integrate tenant authentication with SSO and identity federation.
 - Role-based tenant-specific access controls.
 
-
 ### Billing \& Reporting
 
 - Collect and report resource consumption and usage metrics by tenant.
 - Generate tenant-level cost and SLA reports.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -4363,7 +4189,7 @@ The Multi-Tenant Cloud Deployment \& Orchestration subsystem enables IntelGraph 
 - Highly available and fault tolerant architecture.
 - Scalable control plane handling tenant onboarding and management.
 
-***
+---
 
 ## Dependencies
 
@@ -4374,22 +4200,21 @@ The Multi-Tenant Cloud Deployment \& Orchestration subsystem enables IntelGraph 
 - Network policy and segmentation tools.
 - Billing and chargeback integration systems.
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| Tenant Namespace Design | Define Kubernetes and data isolation strategy | 2025-10-20 |
-| Tenant Provisioning APIs | Implement tenant lifecycle management interfaces | 2025-11-15 |
-| Multi-Tenant Helm Charts | Develop Helm templates for tenant customization | 2025-12-10 |
-| Monitoring \& Policy Scoping | Implement tenant-aware metrics and policy enforcement | 2026-01-10 |
-| Security \& Compliance | Multi-tenant data protection and access control | 2026-01-30 |
-| Billing \& Reporting Setup | Implement usage accounting per tenant | 2026-02-20 |
-| Tenant Scaling \& Upgrade Testing | Validate scale-out and upgrade isolation | 2026-02-28 |
+| Milestone                         | Description                                           | Target Date |
+| :-------------------------------- | :---------------------------------------------------- | :---------- |
+| Tenant Namespace Design           | Define Kubernetes and data isolation strategy         | 2025-10-20  |
+| Tenant Provisioning APIs          | Implement tenant lifecycle management interfaces      | 2025-11-15  |
+| Multi-Tenant Helm Charts          | Develop Helm templates for tenant customization       | 2025-12-10  |
+| Monitoring \& Policy Scoping      | Implement tenant-aware metrics and policy enforcement | 2026-01-10  |
+| Security \& Compliance            | Multi-tenant data protection and access control       | 2026-01-30  |
+| Billing \& Reporting Setup        | Implement usage accounting per tenant                 | 2026-02-20  |
+| Tenant Scaling \& Upgrade Testing | Validate scale-out and upgrade isolation              | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -4399,7 +4224,7 @@ The Multi-Tenant Cloud Deployment \& Orchestration subsystem enables IntelGraph 
 - **Identity Federation Failures:** Provide fallback authentication mechanisms.
 - **Billing Accuracy Issues:** Cross-verify usage reports with monitoring data.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -4410,7 +4235,7 @@ The Multi-Tenant Cloud Deployment \& Orchestration subsystem enables IntelGraph 
 - Positive tenant feedback on performance and reliability.
 - Compliance with multi-tenant security standards verified via audit.
 
-***
+---
 
 This PRD for Multi-Tenant Cloud Deployment \& Orchestration prepares IntelGraph for scalable, secure enterprise deployments, foundational to MVP-2 and GA operational excellence.
 
@@ -4422,13 +4247,13 @@ Please specify the next category or subsystem for detailed PRD development.
 
 IntelGraph Platform — Detailed PRD for High Availability \& Disaster Recovery (Category 4.2)
 
-***
+---
 
 ## Overview
 
 The High Availability (HA) \& Disaster Recovery (DR) subsystem ensures IntelGraph’s continuous operation and rapid service restoration in the face of failures or disasters. It incorporates redundant architectures, failover strategies, data backups, and recovery workflows essential for maintaining enterprise-grade reliability, regulatory compliance, and user trust.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -4441,7 +4266,7 @@ The High Availability (HA) \& Disaster Recovery (DR) subsystem ensures IntelGrap
 - Integrate DR strategies into CI/CD and operational monitoring frameworks.
 - Facilitate transparent incident communication and post-mortem analysis.
 
-***
+---
 
 ## Functional Requirements
 
@@ -4453,7 +4278,6 @@ The High Availability (HA) \& Disaster Recovery (DR) subsystem ensures IntelGrap
 - Kubernetes orchestration supporting pod autoscaling and self-healing.
 - Implement rolling updates with zero downtime deployment strategies.
 
-
 ### Disaster Recovery
 
 - Configure scheduled, encrypted backups for databases, file stores, and configurations.
@@ -4462,7 +4286,6 @@ The High Availability (HA) \& Disaster Recovery (DR) subsystem ensures IntelGrap
 - Enable automated DR failover procedures including DNS updates and traffic routing.
 - Document DR runbooks with step-by-step recovery processes.
 
-
 ### Testing \& Validation
 
 - Conduct periodic DR exercises simulating various failure scenarios.
@@ -4470,20 +4293,18 @@ The High Availability (HA) \& Disaster Recovery (DR) subsystem ensures IntelGrap
 - Integrate tests into quarterly operational readiness reviews.
 - Continuously update procedures based on test outcomes and environment changes.
 
-
 ### Monitoring \& Alerts
 
 - Monitor cluster health, replication status, and backup success.
 - Trigger alerts for HA/DR-related failures or anomalies.
 - Provide dashboards summarizing HA and DR status and readiness.
 
-
 ### Communication
 
 - Define communication workflows for incident escalation and stakeholder notifications.
 - Provide status updates during DR activations.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -4493,7 +4314,7 @@ The High Availability (HA) \& Disaster Recovery (DR) subsystem ensures IntelGrap
 - Scalable architecture supporting growth in data and users.
 - Compliance with industry HA/DR standards and enterprise SLAs.
 
-***
+---
 
 ## Dependencies
 
@@ -4504,21 +4325,20 @@ The High Availability (HA) \& Disaster Recovery (DR) subsystem ensures IntelGrap
 - DNS and load balancer configuration automation.
 - Incident management platforms.
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| HA Cluster Deployments | Multi-node service and database clusters | 2025-10-30 |
-| Backup \& Snapshot Automation | Scheduled encrypted backups configuration | 2025-11-30 |
-| Automated Failover | Implement service and DB failover mechanisms | 2025-12-20 |
-| DR Runbook Development | Documented recovery procedures | 2026-01-15 |
-| DR Testing \& Validation | Simulated disaster recovery exercises | 2026-02-10 |
-| Monitoring \& Alert Setup | HA/DR health dashboards and alerting | 2026-02-28 |
+| Milestone                     | Description                                  | Target Date |
+| :---------------------------- | :------------------------------------------- | :---------- |
+| HA Cluster Deployments        | Multi-node service and database clusters     | 2025-10-30  |
+| Backup \& Snapshot Automation | Scheduled encrypted backups configuration    | 2025-11-30  |
+| Automated Failover            | Implement service and DB failover mechanisms | 2025-12-20  |
+| DR Runbook Development        | Documented recovery procedures               | 2026-01-15  |
+| DR Testing \& Validation      | Simulated disaster recovery exercises        | 2026-02-10  |
+| Monitoring \& Alert Setup     | HA/DR health dashboards and alerting         | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -4528,7 +4348,7 @@ The High Availability (HA) \& Disaster Recovery (DR) subsystem ensures IntelGrap
 - **Communication Gaps During Incidents:** Establish redundant, multi-channel communication plans.
 - **Complexity in Multi-Region DR:** Use automation tools to reduce human error.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -4539,7 +4359,7 @@ The High Availability (HA) \& Disaster Recovery (DR) subsystem ensures IntelGrap
 - Real-time monitoring coverage of all HA/DR components.
 - Positive audit reports on HA/DR compliance and readiness.
 
-***
+---
 
 This PRD for High Availability \& Disaster Recovery ensures IntelGraph’s resilience and operational continuity aligned with enterprise and regulatory expectations, critical for MVP-2 and GA deployment readiness.
 
@@ -4551,13 +4371,13 @@ Please specify the next category or subsystem for detailed PRD development.
 
 IntelGraph Platform — Detailed PRD for SLA Definition \& Monitoring (Category 4.3)
 
-***
+---
 
 ## Overview
 
 The SLA (Service Level Agreement) Definition \& Monitoring subsystem formalizes performance, availability, and support commitments IntelGraph provides to its enterprise users. This subsystem defines clear, measurable SLAs, monitors adherence in real-time, and generates reports to maintain transparency, accountability, and customer trust critical for commercial and regulatory success.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -4569,19 +4389,18 @@ The SLA (Service Level Agreement) Definition \& Monitoring subsystem formalizes 
 - Enable SLA-based billing or penalty enforcement where applicable.
 - Integrate SLA monitoring with operational and security observability subsystems.
 
-***
+---
 
 ## Functional Requirements
 
 ### SLA Metrics Definition
 
 - Define key metrics including:
-    - System uptime and availability (target ≥ 99.9%)
-    - API and UI response time (median and percentile thresholds)
-    - Incident response and resolution SLAs by severity
-    - Data throughput and processing latency
+  - System uptime and availability (target ≥ 99.9%)
+  - API and UI response time (median and percentile thresholds)
+  - Incident response and resolution SLAs by severity
+  - Data throughput and processing latency
 - Support customizable SLA tiers per customer or service level.
-
 
 ### Real-Time Monitoring
 
@@ -4589,13 +4408,11 @@ The SLA (Service Level Agreement) Definition \& Monitoring subsystem formalizes 
 - Implement alerting rules for SLA threshold breaches.
 - Correlate anomalies across subsystems impacting SLA metrics.
 
-
 ### Reporting \& Dashboards
 
 - Generate periodic SLA compliance reports (daily, monthly, quarterly).
 - Provide web-accessible dashboards for customer and internal views.
 - Include historical trend visualizations and forecast projections.
-
 
 ### Remediation \& Escalation
 
@@ -4603,13 +4420,12 @@ The SLA (Service Level Agreement) Definition \& Monitoring subsystem formalizes 
 - Support automated corrective actions where feasible.
 - Facilitate communication and reporting to customers during SLA incidents.
 
-
 ### Billing \& Contract Integration
 
 - Interface SLA breach events with billing systems for penalty application or credits.
 - Maintain SLA contract versioning and update tracking.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -4619,7 +4435,7 @@ The SLA (Service Level Agreement) Definition \& Monitoring subsystem formalizes 
 - Secure access controls for customer and internal SLA data.
 - Compliance with contractual and regulatory transparency obligations.
 
-***
+---
 
 ## Dependencies
 
@@ -4628,22 +4444,21 @@ The SLA (Service Level Agreement) Definition \& Monitoring subsystem formalizes 
 - Alerting and incident management platforms.
 - Billing and financial systems integration.
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| SLA Metrics Finalization | Define measurable SLA parameters | 2025-10-20 |
-| Monitoring Instrumentation | Capture key metrics via Prometheus/Grafana | 2025-11-10 |
-| Alerting \& Threshold Setup | Configure alerts for SLA breaches | 2025-11-30 |
-| Reporting \& Dashboard Dev | SLA compliance reports and user dashboards | 2025-12-20 |
-| Remediation Workflow Setup | Define and implement SLA breach response | 2026-01-15 |
-| Billing Integration | Link SLA events with billing systems | 2026-02-10 |
-| Validation \& Customer Rollout | Test and onboard initial customers | 2026-02-28 |
+| Milestone                      | Description                                | Target Date |
+| :----------------------------- | :----------------------------------------- | :---------- |
+| SLA Metrics Finalization       | Define measurable SLA parameters           | 2025-10-20  |
+| Monitoring Instrumentation     | Capture key metrics via Prometheus/Grafana | 2025-11-10  |
+| Alerting \& Threshold Setup    | Configure alerts for SLA breaches          | 2025-11-30  |
+| Reporting \& Dashboard Dev     | SLA compliance reports and user dashboards | 2025-12-20  |
+| Remediation Workflow Setup     | Define and implement SLA breach response   | 2026-01-15  |
+| Billing Integration            | Link SLA events with billing systems       | 2026-02-10  |
+| Validation \& Customer Rollout | Test and onboard initial customers         | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -4653,7 +4468,7 @@ The SLA (Service Level Agreement) Definition \& Monitoring subsystem formalizes 
 - **Billing Disputes:** Ensure transparent, auditable SLA reporting.
 - **Scaling Challenges:** Architect monitoring for multi-tenant and high-volume environments.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -4664,7 +4479,7 @@ The SLA (Service Level Agreement) Definition \& Monitoring subsystem formalizes 
 - Positive customer feedback on SLA transparency and responsiveness.
 - Automated billing adjustments applied correctly in 100% of breach cases.
 
-***
+---
 
 This PRD for SLA Definition \& Monitoring ensures IntelGraph delivers transparent and accountable service performance key to enterprise trust and contractual compliance, advancing toward MVP-2 and GA objectives.
 
@@ -4676,13 +4491,13 @@ Please specify the next category or subsystem for detailed PRD development.
 
 IntelGraph Platform — Detailed PRD for Documentation, Training \& Onboarding (Category 4.4)
 
-***
+---
 
 ## Overview
 
 The Documentation, Training \& Onboarding subsystem ensures IntelGraph users and administrators have comprehensive resources and guided experiences to effectively adopt, operate, and support the platform. This subsystem delivers clear, current, and accessible materials, coupled with structured training programs that accelerate proficiency and reduce support overhead.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -4694,22 +4509,21 @@ The Documentation, Training \& Onboarding subsystem ensures IntelGraph users and
 - Collect user feedback to continuously improve documentation and training.
 - Facilitate enterprise onboarding with customized training and professional services integration.
 
-***
+---
 
 ## Functional Requirements
 
 ### Documentation Management
 
 - Comprehensive documentation covering:
-    - Installation and deployment guides
-    - API references and schema definitions
-    - User guides for investigation workflows and analytics
-    - Security and compliance policies
-    - Troubleshooting and FAQ
+  - Installation and deployment guides
+  - API references and schema definitions
+  - User guides for investigation workflows and analytics
+  - Security and compliance policies
+  - Troubleshooting and FAQ
 - Version-controlled documentation aligned with release cycles.
 - Searchable and navigable interface via docs portal.
 - Inline contextual help and tooltips within the UI.
-
 
 ### Training Programs
 
@@ -4718,7 +4532,6 @@ The Documentation, Training \& Onboarding subsystem ensures IntelGraph users and
 - Interactive labs and sandbox environments for hands-on learning.
 - Certification paths and assessments validating user competencies.
 
-
 ### Onboarding Workflows
 
 - Guided user onboarding walkthroughs integrated into the platform UI.
@@ -4726,14 +4539,13 @@ The Documentation, Training \& Onboarding subsystem ensures IntelGraph users and
 - Welcome emails and resource recommendations tailored by user persona.
 - Support ticket triage prioritizing new user queries.
 
-
 ### Knowledge Base \& Community Support
 
 - Maintain a searchable knowledge base with articles and best practices.
 - Enable community forums or discussion boards for peer support.
 - Integration with issue tracking and feature request workflows.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -4743,7 +4555,7 @@ The Documentation, Training \& Onboarding subsystem ensures IntelGraph users and
 - Secure access to training materials respecting tenant and role boundaries.
 - Analytics on content usage and training effectiveness.
 
-***
+---
 
 ## Dependencies
 
@@ -4753,22 +4565,21 @@ The Documentation, Training \& Onboarding subsystem ensures IntelGraph users and
 - User feedback collection tools.
 - Integration with authentication and role management.
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| Documentation Content Draft | Complete core technical and user guides | 2025-10-25 |
-| Search \& Navigation Setup | Implement doc portal with search capability | 2025-11-15 |
-| Training Curriculum Design | Develop role-specific training paths | 2025-12-05 |
-| Onboarding Workflow Build | Interactive UI onboarding and starter checklists | 2025-12-30 |
-| Launch Training Sessions | Rollout live and recorded training programs | 2026-01-20 |
-| Knowledge Base \& Community | Create KB articles and discussion forums | 2026-02-10 |
-| Analytics \& Feedback System | Implement usage and satisfaction tracking | 2026-02-28 |
+| Milestone                    | Description                                      | Target Date |
+| :--------------------------- | :----------------------------------------------- | :---------- |
+| Documentation Content Draft  | Complete core technical and user guides          | 2025-10-25  |
+| Search \& Navigation Setup   | Implement doc portal with search capability      | 2025-11-15  |
+| Training Curriculum Design   | Develop role-specific training paths             | 2025-12-05  |
+| Onboarding Workflow Build    | Interactive UI onboarding and starter checklists | 2025-12-30  |
+| Launch Training Sessions     | Rollout live and recorded training programs      | 2026-01-20  |
+| Knowledge Base \& Community  | Create KB articles and discussion forums         | 2026-02-10  |
+| Analytics \& Feedback System | Implement usage and satisfaction tracking        | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -4778,7 +4589,7 @@ The Documentation, Training \& Onboarding subsystem ensures IntelGraph users and
 - **Language and Accessibility Barriers:** Prioritize translations and WCAG compliance.
 - **Knowledge Silos:** Foster community support and encourage knowledge sharing.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -4789,7 +4600,7 @@ The Documentation, Training \& Onboarding subsystem ensures IntelGraph users and
 - Reduction in support requests related to basic usage.
 - Positive feedback from enterprise onboarding programs.
 
-***
+---
 
 This PRD for Documentation, Training \& Onboarding ensures IntelGraph users gain rapid proficiency and confidence, supporting scalable adoption and sustained platform success critical for MVP-2 and GA phases.
 
@@ -4801,13 +4612,13 @@ Please specify the next category or subsystem for detailed PRD development.
 
 IntelGraph Platform — Detailed PRD for Customer Support \& Professional Services (Category 4.5)
 
-***
+---
 
 ## Overview
 
 The Customer Support \& Professional Services subsystem provides technical assistance, consulting, and value-added services to IntelGraph customers. It ensures customer success through timely issue resolution, tailored onboarding, customization, and expert guidance, thereby increasing customer satisfaction, retention, and product adoption.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -4819,7 +4630,7 @@ The Customer Support \& Professional Services subsystem provides technical assis
 - Enable service-level agreement (SLA) enforcement for support responsiveness.
 - Foster long-term customer partnerships with consultative engagement.
 
-***
+---
 
 ## Functional Requirements
 
@@ -4831,7 +4642,6 @@ The Customer Support \& Professional Services subsystem provides technical assis
 - Knowledge base access linked to support tickets.
 - Support analytics including case volume, resolution times, and customer satisfaction scores.
 
-
 ### Professional Services
 
 - Onboarding assistance with environment setup and configuration.
@@ -4840,7 +4650,6 @@ The Customer Support \& Professional Services subsystem provides technical assis
 - Health checks and optimization reviews.
 - Dedicated technical account management for enterprise clients.
 
-
 ### Support Tools \& Integration
 
 - CRM and ticketing platform integration for unified customer view.
@@ -4848,7 +4657,7 @@ The Customer Support \& Professional Services subsystem provides technical assis
 - Integration with monitoring systems to enable proactive support.
 - Feedback collection and escalation mechanisms.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -4858,7 +4667,7 @@ The Customer Support \& Professional Services subsystem provides technical assis
 - Scalable support infrastructure to meet user growth.
 - Multilingual support capabilities.
 
-***
+---
 
 ## Dependencies
 
@@ -4868,22 +4677,21 @@ The Customer Support \& Professional Services subsystem provides technical assis
 - Training and documentation resources.
 - Communication channels (email, chat, phone).
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| Support Platform Setup | Ticketing and CRM integration | 2025-10-20 |
-| Tiered Support Model | Define support levels and escalation paths | 2025-11-10 |
-| Knowledge Base Expansion | Extend self-service resources | 2025-11-30 |
-| Professional Services Launch | Begin onboarding and customization offerings | 2025-12-20 |
-| Support Analytics \& Reporting | Implement dashboard and metrics tracking | 2026-01-15 |
-| Proactive Support Integration | Integrate with monitoring for early alerts | 2026-02-10 |
-| Customer Satisfaction Surveys | Establish regular feedback collection | 2026-02-28 |
+| Milestone                      | Description                                  | Target Date |
+| :----------------------------- | :------------------------------------------- | :---------- |
+| Support Platform Setup         | Ticketing and CRM integration                | 2025-10-20  |
+| Tiered Support Model           | Define support levels and escalation paths   | 2025-11-10  |
+| Knowledge Base Expansion       | Extend self-service resources                | 2025-11-30  |
+| Professional Services Launch   | Begin onboarding and customization offerings | 2025-12-20  |
+| Support Analytics \& Reporting | Implement dashboard and metrics tracking     | 2026-01-15  |
+| Proactive Support Integration  | Integrate with monitoring for early alerts   | 2026-02-10  |
+| Customer Satisfaction Surveys  | Establish regular feedback collection        | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -4893,7 +4701,7 @@ The Customer Support \& Professional Services subsystem provides technical assis
 - **Data Privacy Breaches:** Enforce strict data handling policies and staff training.
 - **Customer Dissatisfaction:** Regularly survey and adjust support processes accordingly.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -4904,7 +4712,7 @@ The Customer Support \& Professional Services subsystem provides technical assis
 - Knowledge base reduces ticket volume by 20% within six months.
 - Proactive alerts prevent 10% of incidents before customer reporting.
 
-***
+---
 
 This PRD for Customer Support \& Professional Services ensures IntelGraph delivers comprehensive assistance and value-driven services, vital for customer success and enterprise market growth as the platform moves toward MVP-2 and GA.
 
@@ -4913,38 +4721,38 @@ Please specify the next category or subsystem for detailed PRD development.Intel
 Here is the summary list of all the detailed PRDs generated:
 
 1. Core System Subsystems
- 1.1 Backend Services \& APIs
- 1.2 Frontend \& User Interface
- 1.3 Databases \& Data Management
- 1.4 Real-Time Collaboration \& WebSockets
- 1.5 AI/ML Extraction \& Analytics Engine
- 1.6 Security and Access Control
- 1.7 Observability \& Monitoring
- 1.8 DevOps, CI/CD, and Deployment
+    1.1 Backend Services \& APIs
+    1.2 Frontend \& User Interface
+    1.3 Databases \& Data Management
+    1.4 Real-Time Collaboration \& WebSockets
+    1.5 AI/ML Extraction \& Analytics Engine
+    1.6 Security and Access Control
+    1.7 Observability \& Monitoring
+    1.8 DevOps, CI/CD, and Deployment
 2. Feature Sets \& Functional Capabilities
- 2.1 Investigation Workflow \& Management
- 2.2 Graph Analytics \& Visualization
- 2.3 Multimodal Data Ingestion \& Federation
- 2.4 AI Copilot \& Natural Language Processing
- 2.5 Semantic Vector Search \& Cross-Modal Matching
- 2.6 User Collaboration \& Communication Tools
- 2.7 Performance Optimization \& Scalability
- 2.8 Role-Based Access Control \& Policy Enforcement
+    2.1 Investigation Workflow \& Management
+    2.2 Graph Analytics \& Visualization
+    2.3 Multimodal Data Ingestion \& Federation
+    2.4 AI Copilot \& Natural Language Processing
+    2.5 Semantic Vector Search \& Cross-Modal Matching
+    2.6 User Collaboration \& Communication Tools
+    2.7 Performance Optimization \& Scalability
+    2.8 Role-Based Access Control \& Policy Enforcement
 3. Compliance, Security \& Governance Domains
- 3.1 Authentication \& Identity Management
- 3.2 Authorization \& Policy Management (OPA, RBAC)
- 3.3 Data Protection \& Encryption
- 3.4 Audit Logging \& Anomaly Detection
- 3.5 Regulatory Compliance (GDPR, SOC 2, NIST, FedRAMP)
- 3.6 Secure Software Development Lifecycle (SSDLC)
- 3.7 Incident Response \& Disaster Recovery
+    3.1 Authentication \& Identity Management
+    3.2 Authorization \& Policy Management (OPA, RBAC)
+    3.3 Data Protection \& Encryption
+    3.4 Audit Logging \& Anomaly Detection
+    3.5 Regulatory Compliance (GDPR, SOC 2, NIST, FedRAMP)
+    3.6 Secure Software Development Lifecycle (SSDLC)
+    3.7 Incident Response \& Disaster Recovery
 4. Enterprise Readiness \& Support
- 4.1 Multi-Tenant Cloud Deployment \& Orchestration
- 4.2 High Availability \& Disaster Recovery
- 4.3 SLA Definition \& Monitoring
- 4.4 Documentation, Training \& Onboarding
- 4.5 Customer Support \& Professional Services
- 4.6 Release Management \& Versioning (pending)
+    4.1 Multi-Tenant Cloud Deployment \& Orchestration
+    4.2 High Availability \& Disaster Recovery
+    4.3 SLA Definition \& Monitoring
+    4.4 Documentation, Training \& Onboarding
+    4.5 Customer Support \& Professional Services
+    4.6 Release Management \& Versioning (pending)
 
 If desired, proceed next with detailed PRD for Release Management \& Versioning (4.6) or revisit any area to expand or prioritize.
 
@@ -4956,13 +4764,13 @@ This structure supports systematic, decision-ready development planning for the 
 
 IntelGraph Platform — Detailed PRD for Release Management \& Versioning (Category 4.6)
 
-***
+---
 
 ## Overview
 
 The Release Management \& Versioning subsystem ensures controlled, reliable, and traceable software releases for IntelGraph. It establishes processes, automation, and governance frameworks for packaging, deploying, and maintaining versions across development, staging, and production environments. This subsystem provides version consistency, rollback capability, and supports continuous delivery practices vital for product stability and customer confidence.
 
-***
+---
 
 ## Goals \& Objectives
 
@@ -4975,7 +4783,7 @@ The Release Management \& Versioning subsystem ensures controlled, reliable, and
 - Provide clear version visibility and compatibility matrices for customers and internal teams.
 - Integrate with support and incident management for rapid issue resolution post-release.
 
-***
+---
 
 ## Functional Requirements
 
@@ -4986,14 +4794,12 @@ The Release Management \& Versioning subsystem ensures controlled, reliable, and
 - Maintain backward compatibility policy guidelines.
 - Support platform component versioning independently and as a cohesive suite.
 
-
 ### Release Workflow Automation
 
 - Automate build, test, and packaging stages via CI/CD.
 - Perform automated regression and security testing as release gates.
 - Generate and publish release artifacts, changelogs, and documentation.
 - Manage staged rollouts with feature flags and canary deployments.
-
 
 ### Release Approval \& Governance
 
@@ -5002,13 +4808,11 @@ The Release Management \& Versioning subsystem ensures controlled, reliable, and
 - Enforce branching and merging strategies that align with release cadence.
 - Document release plans and schedules.
 
-
 ### Rollback \& Hotfixes
 
 - Enable rapid rollback mechanisms to previous stable versions.
 - Support emergency patch deployment with minimal user disruption.
 - Maintain version compatibility information to prevent configuration mismatches.
-
 
 ### Communication \& Visibility
 
@@ -5017,7 +4821,7 @@ The Release Management \& Versioning subsystem ensures controlled, reliable, and
 - Notify stakeholders and customers pre-release and post-release.
 - Archive and maintain historical release data.
 
-***
+---
 
 ## Non-Functional Requirements
 
@@ -5028,7 +4832,7 @@ The Release Management \& Versioning subsystem ensures controlled, reliable, and
 - Compliance with regulatory traceability and audit requirements.
 - High transparency and accurate documentation available at all times.
 
-***
+---
 
 ## Dependencies
 
@@ -5039,22 +4843,21 @@ The Release Management \& Versioning subsystem ensures controlled, reliable, and
 - Communication and notification channels.
 - Testing automation frameworks.
 
-***
+---
 
 ## Milestones \& Timeline
 
-| Milestone | Description | Target Date |
-| :-- | :-- | :-- |
-| Versioning Policy Definition | Establish semantic versioning standards | 2025-10-15 |
-| Release Automation Setup | Build/test/package automation in CI/CD | 2025-11-05 |
-| Approval Workflow Implementation | Define and enforce release governance | 2025-11-30 |
-| Release Notes \& Documentation | Automate changelog generation and publication | 2025-12-20 |
-| Rollback Mechanisms | Implement safe rollback and hotfix procedures | 2026-01-15 |
-| Communication Plan | Standardize stakeholder and customer notifications | 2026-02-05 |
-| Multi-Track Release Support | Support beta, stable, and experimental releases | 2026-02-28 |
+| Milestone                        | Description                                        | Target Date |
+| :------------------------------- | :------------------------------------------------- | :---------- |
+| Versioning Policy Definition     | Establish semantic versioning standards            | 2025-10-15  |
+| Release Automation Setup         | Build/test/package automation in CI/CD             | 2025-11-05  |
+| Approval Workflow Implementation | Define and enforce release governance              | 2025-11-30  |
+| Release Notes \& Documentation   | Automate changelog generation and publication      | 2025-12-20  |
+| Rollback Mechanisms              | Implement safe rollback and hotfix procedures      | 2026-01-15  |
+| Communication Plan               | Standardize stakeholder and customer notifications | 2026-02-05  |
+| Multi-Track Release Support      | Support beta, stable, and experimental releases    | 2026-02-28  |
 
-
-***
+---
 
 ## Risks \& Mitigations
 
@@ -5064,7 +4867,7 @@ The Release Management \& Versioning subsystem ensures controlled, reliable, and
 - **Rollback Complexity:** Test rollback procedures regularly and build automation.
 - **Poor Communication:** Use standardized templates and automated notifications.
 
-***
+---
 
 ## Metrics \& Success Criteria
 
@@ -5075,7 +4878,7 @@ The Release Management \& Versioning subsystem ensures controlled, reliable, and
 - Zero critical post-release incidents due to versioning errors.
 - Positive feedback on release transparency and reliability.
 
-***
+---
 
 This PRD for Release Management \& Versioning finalizes the enterprise-grade operational lifecycle for IntelGraph software delivery, ensuring robust, traceable, and efficient release processes critical for MVP-2 and GA stages.
 
@@ -5087,7 +4890,7 @@ Please advise if any other areas require further detailed PRD development or pri
 
 The comprehensive PRDs generated for IntelGraph cover all major areas critical to building, deploying, securing, and operating a sophisticated enterprise intelligence platform for MVP-2 and GA readiness. However, a few additional aspects may be worth considering explicitly if they are not already embedded or prioritized in current categories:
 
-***
+---
 
 ## Additional Considerations
 
@@ -5097,13 +4900,11 @@ The comprehensive PRDs generated for IntelGraph cover all major areas critical t
 - Metadata standards and stewardship for lifecycle management.
 - Data validation rules and cleansing workflows integrated with ingestion and AI pipelines.
 
-
 ### 2. Ethical AI \& Bias Mitigation
 
 - Frameworks and processes to assess and reduce bias in AI/ML models and outputs.
 - Explainability and fairness auditing of AI-generated insights.
 - User controls to flag and review questionable AI behavior.
-
 
 ### 3. API Ecosystem \& Developer Experience
 
@@ -5111,30 +4912,27 @@ The comprehensive PRDs generated for IntelGraph cover all major areas critical t
 - Rate limiting, quota management, and developer key provisioning.
 - Sandbox environments for safe API exploration and integration.
 
-
 ### 4. Analytics \& Business Intelligence
 
 - Dashboards and reports on platform usage, adoption, and business KPIs.
 - Advanced analytics for user behavior, feature impact, and ROI measurement.
 - Integration with third-party BI tools.
 
-
 ### 5. Legal \& Contract Management
 
 - Support for managing customer contracts, NDAs, and compliance certifications.
 - Data processing agreements and user consent tracking.
-
 
 ### 6. Environmental \& Operational Sustainability
 
 - Efficiency metrics for cloud resource usage and carbon footprint monitoring.
 - Green IT policies embedded in platform operation.
 
-***
+---
 
 If there is interest in any of these extended domains or further granular focus within existing PRDs, detailed PRD creation can be initiated accordingly.
 
-***
+---
 
 The existing PRD structure already provides a robust foundation for iterative development and product evolution. Prioritizing emergent needs or regulatory changes over time based on customer feedback and market demand is recommended.
 
@@ -5146,11 +4944,11 @@ Please specify any area from the above or other topics for further detailed plan
 
 IntelGraph Platform — Executive Summary of Core System Subsystems (Category 1)
 
-***
+---
 
 The Core System Subsystems form the backbone of IntelGraph, providing the essential infrastructure, business logic, user interface, data storage, real-time collaboration, AI capabilities, and security frameworks necessary to deliver a powerful intelligence analysis platform. These foundational components enable robust investigative workflows, seamless user experience, scalable data processing, and enterprise-grade reliability.
 
-***
+---
 
 ## Subsystems Included
 
@@ -5160,13 +4958,11 @@ The Core System Subsystems form the backbone of IntelGraph, providing the essent
 - GraphQL and REST API endpoints for core functionalities.
 - Secure integration points with AI engine and real-time services.
 
-
 ### 1.2 Frontend \& User Interface
 
 - Responsive React-based user dashboards and workspaces.
 - Interactive graph visualizations and AI Copilot chat interface.
 - Accessibility and multilingual support.
-
 
 ### 1.3 Databases \& Data Management
 
@@ -5174,13 +4970,11 @@ The Core System Subsystems form the backbone of IntelGraph, providing the essent
 - Data consistency, backup, and replication strategies.
 - Support for metadata, vector embeddings, and audit data.
 
-
 ### 1.4 Real-Time Collaboration \& WebSockets
 
 - Multi-user synchronous editing and presence awareness.
 - WebSocket event broadcasting with conflict resolution.
 - Robust connection handling and security.
-
 
 ### 1.5 AI/ML Extraction \& Analytics Engine
 
@@ -5188,13 +4982,11 @@ The Core System Subsystems form the backbone of IntelGraph, providing the essent
 - Entity and relationship enrichment with AI confidence scoring.
 - Scalable orchestration of AI inference tasks.
 
-
 ### 1.6 Security and Access Control
 
 - Authentication frameworks including JWT, SSO, MFA.
 - Role-Based Access Control (RBAC) and policy enforcement using OPA.
 - Data encryption, audit logging, and compliance supports.
-
 
 ### 1.7 Observability \& Monitoring
 
@@ -5202,14 +4994,13 @@ The Core System Subsystems form the backbone of IntelGraph, providing the essent
 - Alerting, dashboards, and health endpoints.
 - Performance and security monitoring integration.
 
-
 ### 1.8 DevOps, CI/CD, and Deployment
 
 - Automated build, test, and deployment pipelines.
 - Container orchestration with Helm and Kubernetes.
 - Secrets management and release automation.
 
-***
+---
 
 ## Overall Architecture \& Integration
 
@@ -5218,17 +5009,17 @@ The Core System Subsystems form the backbone of IntelGraph, providing the essent
 - Consistent security and policy enforcement across all layers.
 - Scalable and resilient cloud-native infrastructure.
 
-***
+---
 
 This core subsystem suite establishes a solid, extensible foundation for IntelGraph’s MVP-2 and scalable enterprise GA deployment, enabling complex investigations powered by AI and secure collaboration.
 
 Please advise if a deeper dive or synthesis is needed on any specific subsystem or cross-cutting concerns.IntelGraph Platform — Executive Summary of Core System Subsystems (Category 1)
 
-***
+---
 
 The Core System Subsystems form the technical foundation for IntelGraph’s intelligence analysis platform, driving critical capabilities from backend logic and APIs through data management, user experience, real-time collaboration, AI integration, and security.
 
-***
+---
 
 ## Included Subsystems
 
@@ -5241,7 +5032,7 @@ The Core System Subsystems form the technical foundation for IntelGraph’s inte
 - **1.7 Observability \& Monitoring:** Metrics, logging, distributed tracing, alerting, and operational dashboards.
 - **1.8 DevOps, CI/CD, and Deployment:** Automated build/test/deploy pipelines, Helm/Kubernetes orchestration, secrets management.
 
-***
+---
 
 ## Architecture \& Integration Highlights
 
@@ -5250,9 +5041,8 @@ The Core System Subsystems form the technical foundation for IntelGraph’s inte
 - Scalable state management with event sourcing and real-time event propagation.
 - Cloud-native resilient infrastructure for high availability and fault tolerance.
 
-***
+---
 
 This comprehensive subsystem suite enables IntelGraph to deliver scalable, secure, and AI-enhanced intelligence workflows for advanced investigative operations, ready for MVP-2 and enterprise GA deployment.
 
 Please indicate if specific system details or architectures require further elaboration.
-

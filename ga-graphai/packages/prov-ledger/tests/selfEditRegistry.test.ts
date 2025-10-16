@@ -8,7 +8,8 @@ describe('SelfEditRegistry', () => {
 
   const proposal: SelfEditProposal = {
     instruction: 'Refine classification heuristic for threat actor clustering.',
-    expectedOutput: 'Updated clustering pipeline with lower false positive rate.',
+    expectedOutput:
+      'Updated clustering pipeline with lower false positive rate.',
     rationale: 'Sandbox replay shows drift on finance tenants.',
     modelId: 'graphai-respond-001',
     baseCheckpoint: 'ckpt-main-2025-09-30',
@@ -37,7 +38,11 @@ describe('SelfEditRegistry', () => {
   it('promotes self-edits to approved when verifiers succeed', () => {
     const record = registry.register(proposal);
 
-    registry.recordVerifierScore(record.id, { verifier: 'baseline-regression', score: 0.93, passed: true });
+    registry.recordVerifierScore(record.id, {
+      verifier: 'baseline-regression',
+      score: 0.93,
+      passed: true,
+    });
     now = new Date('2025-10-14T00:00:10.000Z');
     const updated = registry.recordVerifierScore(record.id, {
       verifier: 'safety-sweeps',
@@ -55,7 +60,11 @@ describe('SelfEditRegistry', () => {
   it('rejects self-edits when any verifier fails', () => {
     const record = registry.register(proposal);
 
-    registry.recordVerifierScore(record.id, { verifier: 'sandbox-metrics', score: 0.78, passed: false });
+    registry.recordVerifierScore(record.id, {
+      verifier: 'sandbox-metrics',
+      score: 0.78,
+      passed: false,
+    });
     const card = registry.getScorecard(record.id);
 
     expect(card.failedChecks).toBe(1);

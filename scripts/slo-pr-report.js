@@ -17,9 +17,9 @@ const config = {
   prometheusUrl: process.env.PROMETHEUS_URL || 'http://localhost:9090',
   baselineHours: 24, // Compare against last 24 hours
   thresholds: {
-    availability: 0.999,   // 99.9%
-    latency_p95: 200,      // 200ms
-    latency_p99: 500,      // 500ms
+    availability: 0.999, // 99.9%
+    latency_p95: 200, // 200ms
+    latency_p99: 500, // 500ms
     error_budget_burn: 2.0, // 2x normal burn rate
   },
 };
@@ -44,7 +44,7 @@ class SLOPRReporter {
 
       const req = https.get(url, (res) => {
         let data = '';
-        res.on('data', chunk => data += chunk);
+        res.on('data', (chunk) => (data += chunk));
         res.on('end', () => {
           try {
             const result = JSON.parse(data);
@@ -67,17 +67,23 @@ class SLOPRReporter {
    * Get baseline metrics (24h ago)
    */
   async getBaselineMetrics() {
-    const baselineTime = Math.floor((Date.now() - config.baselineHours * 60 * 60 * 1000) / 1000);
+    const baselineTime = Math.floor(
+      (Date.now() - config.baselineHours * 60 * 60 * 1000) / 1000,
+    );
 
     console.log('📊 Fetching baseline metrics...');
 
     const queries = {
       availability: 'sli:availability:rate1h{service="intelgraph-server"}',
-      latency_p95: 'histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="intelgraph-server"}[1h])) by (le))',
-      latency_p99: 'histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job="intelgraph-server"}[1h])) by (le))',
+      latency_p95:
+        'histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="intelgraph-server"}[1h])) by (le))',
+      latency_p99:
+        'histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job="intelgraph-server"}[1h])) by (le))',
       error_rate: '1 - sli:availability:rate1h{service="intelgraph-server"}',
-      request_rate: 'sum(rate(http_requests_total{job="intelgraph-server"}[1h]))',
-      error_budget_burn: 'error_budget:burn_rate:1h{service="intelgraph-server"}',
+      request_rate:
+        'sum(rate(http_requests_total{job="intelgraph-server"}[1h]))',
+      error_budget_burn:
+        'error_budget:burn_rate:1h{service="intelgraph-server"}',
     };
 
     const baseline = {};
@@ -103,11 +109,15 @@ class SLOPRReporter {
 
     const queries = {
       availability: 'sli:availability:rate5m{service="intelgraph-server"}',
-      latency_p95: 'histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="intelgraph-server"}[5m])) by (le))',
-      latency_p99: 'histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job="intelgraph-server"}[5m])) by (le))',
+      latency_p95:
+        'histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket{job="intelgraph-server"}[5m])) by (le))',
+      latency_p99:
+        'histogram_quantile(0.99, sum(rate(http_request_duration_seconds_bucket{job="intelgraph-server"}[5m])) by (le))',
       error_rate: '1 - sli:availability:rate5m{service="intelgraph-server"}',
-      request_rate: 'sum(rate(http_requests_total{job="intelgraph-server"}[5m]))',
-      error_budget_burn: 'error_budget:burn_rate:5m{service="intelgraph-server"}',
+      request_rate:
+        'sum(rate(http_requests_total{job="intelgraph-server"}[5m]))',
+      error_budget_burn:
+        'error_budget:burn_rate:5m{service="intelgraph-server"}',
     };
 
     const current = {};
@@ -180,13 +190,22 @@ class SLOPRReporter {
     if (metric === 'availability' && current < config.thresholds.availability) {
       return 'slo_breach';
     }
-    if (metric === 'latency_p95' && current > config.thresholds.latency_p95 / 1000) {
+    if (
+      metric === 'latency_p95' &&
+      current > config.thresholds.latency_p95 / 1000
+    ) {
       return 'slo_breach';
     }
-    if (metric === 'latency_p99' && current > config.thresholds.latency_p99 / 1000) {
+    if (
+      metric === 'latency_p99' &&
+      current > config.thresholds.latency_p99 / 1000
+    ) {
       return 'slo_breach';
     }
-    if (metric === 'error_budget_burn' && current > config.thresholds.error_budget_burn) {
+    if (
+      metric === 'error_budget_burn' &&
+      current > config.thresholds.error_budget_burn
+    ) {
       return 'budget_burn';
     }
 
@@ -217,12 +236,17 @@ class SLOPRReporter {
    */
   generateReport(changes) {
     const timestamp = new Date().toISOString();
-    const hasRegressions = Object.values(changes).some(c =>
-      c.status === 'slo_breach' || c.status === 'regression' || c.status === 'budget_burn'
+    const hasRegressions = Object.values(changes).some(
+      (c) =>
+        c.status === 'slo_breach' ||
+        c.status === 'regression' ||
+        c.status === 'budget_burn',
     );
 
     const statusEmoji = hasRegressions ? '🚨' : '✅';
-    const overallStatus = hasRegressions ? 'REGRESSIONS DETECTED' : 'SLO COMPLIANT';
+    const overallStatus = hasRegressions
+      ? 'REGRESSIONS DETECTED'
+      : 'SLO COMPLIANT';
 
     let report = `## ${statusEmoji} SLO Performance Report
 
@@ -240,8 +264,13 @@ class SLOPRReporter {
     const avail = changes.availability;
     if (avail.current !== null) {
       const availPercent = (avail.current * 100).toFixed(3);
-      const baselinePercent = avail.baseline ? (avail.baseline * 100).toFixed(3) : 'N/A';
-      const changeStr = avail.change !== null ? `${avail.change > 0 ? '+' : ''}${avail.change.toFixed(2)}%` : 'N/A';
+      const baselinePercent = avail.baseline
+        ? (avail.baseline * 100).toFixed(3)
+        : 'N/A';
+      const changeStr =
+        avail.change !== null
+          ? `${avail.change > 0 ? '+' : ''}${avail.change.toFixed(2)}%`
+          : 'N/A';
       const statusIcon = this.getStatusIcon(avail.status);
 
       report += `\n| Availability | ${availPercent}% | ${baselinePercent}% | ${changeStr} | ${statusIcon} ${avail.status} |`;
@@ -251,8 +280,13 @@ class SLOPRReporter {
     const p95 = changes.latency_p95;
     if (p95.current !== null) {
       const p95Ms = (p95.current * 1000).toFixed(0);
-      const baselineMs = p95.baseline ? (p95.baseline * 1000).toFixed(0) : 'N/A';
-      const changeStr = p95.change !== null ? `${p95.change > 0 ? '+' : ''}${p95.change.toFixed(1)}%` : 'N/A';
+      const baselineMs = p95.baseline
+        ? (p95.baseline * 1000).toFixed(0)
+        : 'N/A';
+      const changeStr =
+        p95.change !== null
+          ? `${p95.change > 0 ? '+' : ''}${p95.change.toFixed(1)}%`
+          : 'N/A';
       const statusIcon = this.getStatusIcon(p95.status);
 
       report += `\n| p95 Latency | ${p95Ms}ms | ${baselineMs}ms | ${changeStr} | ${statusIcon} ${p95.status} |`;
@@ -262,8 +296,13 @@ class SLOPRReporter {
     const p99 = changes.latency_p99;
     if (p99.current !== null) {
       const p99Ms = (p99.current * 1000).toFixed(0);
-      const baselineMs = p99.baseline ? (p99.baseline * 1000).toFixed(0) : 'N/A';
-      const changeStr = p99.change !== null ? `${p99.change > 0 ? '+' : ''}${p99.change.toFixed(1)}%` : 'N/A';
+      const baselineMs = p99.baseline
+        ? (p99.baseline * 1000).toFixed(0)
+        : 'N/A';
+      const changeStr =
+        p99.change !== null
+          ? `${p99.change > 0 ? '+' : ''}${p99.change.toFixed(1)}%`
+          : 'N/A';
       const statusIcon = this.getStatusIcon(p99.status);
 
       report += `\n| p99 Latency | ${p99Ms}ms | ${baselineMs}ms | ${changeStr} | ${statusIcon} ${p99.status} |`;
@@ -273,8 +312,13 @@ class SLOPRReporter {
     const errorRate = changes.error_rate;
     if (errorRate.current !== null) {
       const errorPercent = (errorRate.current * 100).toFixed(3);
-      const baselinePercent = errorRate.baseline ? (errorRate.baseline * 100).toFixed(3) : 'N/A';
-      const changeStr = errorRate.change !== null ? `${errorRate.change > 0 ? '+' : ''}${errorRate.change.toFixed(1)}%` : 'N/A';
+      const baselinePercent = errorRate.baseline
+        ? (errorRate.baseline * 100).toFixed(3)
+        : 'N/A';
+      const changeStr =
+        errorRate.change !== null
+          ? `${errorRate.change > 0 ? '+' : ''}${errorRate.change.toFixed(1)}%`
+          : 'N/A';
       const statusIcon = this.getStatusIcon(errorRate.status);
 
       report += `\n| Error Rate | ${errorPercent}% | ${baselinePercent}% | ${changeStr} | ${statusIcon} ${errorRate.status} |`;
@@ -284,8 +328,13 @@ class SLOPRReporter {
     const budgetBurn = changes.error_budget_burn;
     if (budgetBurn.current !== null) {
       const burnRate = budgetBurn.current.toFixed(2);
-      const baselineBurn = budgetBurn.baseline ? budgetBurn.baseline.toFixed(2) : 'N/A';
-      const changeStr = budgetBurn.change !== null ? `${budgetBurn.change > 0 ? '+' : ''}${budgetBurn.change.toFixed(1)}%` : 'N/A';
+      const baselineBurn = budgetBurn.baseline
+        ? budgetBurn.baseline.toFixed(2)
+        : 'N/A';
+      const changeStr =
+        budgetBurn.change !== null
+          ? `${budgetBurn.change > 0 ? '+' : ''}${budgetBurn.change.toFixed(1)}%`
+          : 'N/A';
       const statusIcon = this.getStatusIcon(budgetBurn.status);
 
       report += `\n| Error Budget Burn | ${burnRate}x | ${baselineBurn}x | ${changeStr} | ${statusIcon} ${budgetBurn.status} |`;
@@ -308,7 +357,12 @@ class SLOPRReporter {
 `;
 
       const regressionList = Object.entries(changes)
-        .filter(([_, data]) => data.status === 'slo_breach' || data.status === 'regression' || data.status === 'budget_burn')
+        .filter(
+          ([_, data]) =>
+            data.status === 'slo_breach' ||
+            data.status === 'regression' ||
+            data.status === 'budget_burn',
+        )
         .map(([metric, data]) => {
           switch (data.status) {
             case 'slo_breach':
@@ -345,12 +399,12 @@ class SLOPRReporter {
    */
   getStatusIcon(status) {
     const icons = {
-      'slo_breach': '🚨',
-      'budget_burn': '⚠️',
-      'regression': '📉',
-      'improvement': '📈',
-      'stable': '✅',
-      'unknown': '❓',
+      slo_breach: '🚨',
+      budget_burn: '⚠️',
+      regression: '📉',
+      improvement: '📈',
+      stable: '✅',
+      unknown: '❓',
     };
     return icons[status] || '❓';
   }
@@ -374,9 +428,10 @@ class SLOPRReporter {
     const comments = commentsReq.data;
 
     // Find existing SLO report comment
-    const existingComment = comments.find(comment =>
-      comment.body.includes('SLO Performance Report') &&
-      comment.user.login === 'github-actions[bot]'
+    const existingComment = comments.find(
+      (comment) =>
+        comment.body.includes('SLO Performance Report') &&
+        comment.user.login === 'github-actions[bot]',
     );
 
     const commentBody = `<!-- SLO-REPORT -->
@@ -402,8 +457,8 @@ ${report}`;
       const options = {
         method,
         headers: {
-          'Authorization': `token ${config.githubToken}`,
-          'Accept': 'application/vnd.github.v3+json',
+          Authorization: `token ${config.githubToken}`,
+          Accept: 'application/vnd.github.v3+json',
           'User-Agent': 'slo-pr-reporter/1.0',
           'Content-Type': 'application/json',
         },
@@ -411,7 +466,7 @@ ${report}`;
 
       const req = https.request(url, options, (res) => {
         let data = '';
-        res.on('data', chunk => data += chunk);
+        res.on('data', (chunk) => (data += chunk));
         res.on('end', () => {
           try {
             const jsonData = data ? JSON.parse(data) : {};
@@ -442,10 +497,7 @@ ${report}`;
 
     try {
       // Fetch metrics
-      await Promise.all([
-        this.getBaselineMetrics(),
-        this.getCurrentMetrics()
-      ]);
+      await Promise.all([this.getBaselineMetrics(), this.getCurrentMetrics()]);
 
       // Calculate changes
       const changes = this.calculateChanges();
@@ -457,8 +509,8 @@ ${report}`;
       await this.updatePRComment(report);
 
       // Check for blocking issues
-      const hasBlockingIssues = Object.values(changes).some(c =>
-        c.status === 'slo_breach'
+      const hasBlockingIssues = Object.values(changes).some(
+        (c) => c.status === 'slo_breach',
       );
 
       if (hasBlockingIssues) {
@@ -468,7 +520,6 @@ ${report}`;
         console.log('✅ SLO report generated successfully');
         process.exit(0);
       }
-
     } catch (error) {
       console.error('❌ Failed to generate SLO report:', error.message);
       process.exit(1);

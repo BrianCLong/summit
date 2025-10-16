@@ -8,7 +8,11 @@ test('client posts claim', async () => {
     json: async () => ({ url, opts }),
   });
   const client = createClient('http://example');
-  const res = await client.createClaim({ id: '1', license: 'MIT', source: 'src' });
+  const res = await client.createClaim({
+    id: '1',
+    license: 'MIT',
+    source: 'src',
+  });
   assert.equal(res.url, 'http://example/claims');
   assert.equal(res.opts.method, 'POST');
 });
@@ -22,7 +26,10 @@ test('client posts evidence and transform', async () => {
   const client = createClient('http://example');
   await client.createEvidence({ id: '2', license: 'MIT', source: 'src' });
   await client.createTransform({ id: '3', license: 'MIT', source: 'src' });
-  assert.deepEqual(calls, ['http://example/evidence', 'http://example/transform']);
+  assert.deepEqual(calls, [
+    'http://example/evidence',
+    'http://example/transform',
+  ]);
 });
 
 test('client exports manifest', async () => {

@@ -3,7 +3,7 @@ import type {
   DemandForecastDatum,
   EnergyMarketDatum,
   FinancialMarketDatum,
-  RegulatoryDatum
+  RegulatoryDatum,
 } from './types.js';
 
 export interface DataFeed {
@@ -18,10 +18,10 @@ export class CompositeDataFeed {
 
   async fetchSnapshot(): Promise<CompositeMarketSnapshot> {
     const [financial, energy, demand, regulation] = await Promise.all([
-      this.collect(source => source.fetchFinancial()),
-      this.collect(source => source.fetchEnergy()),
-      this.collect(source => source.fetchDemand()),
-      this.collect(source => source.fetchRegulation())
+      this.collect((source) => source.fetchFinancial()),
+      this.collect((source) => source.fetchEnergy()),
+      this.collect((source) => source.fetchDemand()),
+      this.collect((source) => source.fetchRegulation()),
     ]);
 
     return {
@@ -29,12 +29,16 @@ export class CompositeDataFeed {
       financial,
       energy,
       demand,
-      regulation
+      regulation,
     };
   }
 
-  private async collect<T>(fetcher: (source: DataFeed) => Promise<T[]>): Promise<T[]> {
-    const results = await Promise.all(this.sources.map(source => fetcher(source)));
+  private async collect<T>(
+    fetcher: (source: DataFeed) => Promise<T[]>,
+  ): Promise<T[]> {
+    const results = await Promise.all(
+      this.sources.map((source) => fetcher(source)),
+    );
     return results.flat();
   }
 }
@@ -44,7 +48,7 @@ export class InMemoryDataFeed implements DataFeed {
     private readonly financial: FinancialMarketDatum[],
     private readonly energy: EnergyMarketDatum[],
     private readonly demand: DemandForecastDatum[],
-    private readonly regulation: RegulatoryDatum[]
+    private readonly regulation: RegulatoryDatum[],
   ) {}
 
   async fetchFinancial(): Promise<FinancialMarketDatum[]> {

@@ -1,7 +1,7 @@
 groups:
-- name: anomaly
-  rules:
-    - alert: LatencyResidualHigh
-      expr: latency_residual_ms > 200
-      for: 10m
-      labels: { severity: warning }
+  - name: anomaly
+    rules:
+      - alert: LatencyResidualHigh
+        expr: latency_residual_ms > 200
+        for: 10m
+        labels: { severity: warning }

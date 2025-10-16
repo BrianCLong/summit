@@ -7,8 +7,8 @@ tasks:
     name: Ingest Threat Data
     uses: connector:esri
     with:
-      source: "threat-intel-feeds"
-      time_window: "24h"
+      source: 'threat-intel-feeds'
+      time_window: '24h'
     timeout: 300
 
   - id: er
@@ -17,7 +17,7 @@ tasks:
     needs: [ingest]
     with:
       confidence_threshold: 0.8
-      cluster_method: "hierarchical"
+      cluster_method: 'hierarchical'
     timeout: 600
 
   - id: explain
@@ -25,7 +25,7 @@ tasks:
     uses: xai:explanations
     needs: [er]
     with:
-      model: "gnn-v2"
+      model: 'gnn-v2'
       include_counterfactuals: true
     timeout: 450
 
@@ -34,7 +34,7 @@ tasks:
     uses: analyze:risk
     needs: [er]
     with:
-      risk_model: "threat-actor-v1"
+      risk_model: 'threat-actor-v1'
     timeout: 300
 
   - id: export
@@ -42,7 +42,7 @@ tasks:
     uses: export:bundle
     needs: [explain, risk_analysis]
     with:
-      format: "investigation-pack"
+      format: 'investigation-pack'
       include_lineage: true
     timeout: 120
 

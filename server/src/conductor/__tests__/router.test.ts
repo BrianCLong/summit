@@ -155,8 +155,14 @@ describe('MoERouter', () => {
       const complexTask =
         'Analyze comprehensive forensic investigation legal policy regulatory framework advanced multi-step detailed complex deep';
 
-      const simpleDecision = router.route({ task: simpleTask, sensitivity: 'low' });
-      const complexDecision = router.route({ task: complexTask, sensitivity: 'low' });
+      const simpleDecision = router.route({
+        task: simpleTask,
+        sensitivity: 'low',
+      });
+      const complexDecision = router.route({
+        task: complexTask,
+        sensitivity: 'low',
+      });
 
       expect(simpleDecision.features.complexityScore).toBeLessThan(
         complexDecision.features.complexityScore,
@@ -265,7 +271,9 @@ describe('MoERouter', () => {
 
       const decision = router.route(input);
       // Should pick the first matching expert (in priority order)
-      expect(['GRAPH_TOOL', 'FILES_TOOL', 'EXPORT_TOOL']).toContain(decision.expert);
+      expect(['GRAPH_TOOL', 'FILES_TOOL', 'EXPORT_TOOL']).toContain(
+        decision.expert,
+      );
       expect(decision.alternatives.length).toBeGreaterThan(0);
     });
   });

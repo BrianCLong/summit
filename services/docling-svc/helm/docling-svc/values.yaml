@@ -23,10 +23,10 @@ resources:
     memory: 1Gi
 env:
   GRANITE_DOCLING_MODEL_ID: granite-docling-258m
-  GRANITE_DOCLING_MAX_TOKENS: "2048"
-  GRANITE_DOCLING_PRICE_PER_1K_CHARS: "0.04"
-  CACHE_TTL_SECONDS: "900"
-  MAX_CACHE_ENTRIES: "1000"
+  GRANITE_DOCLING_MAX_TOKENS: '2048'
+  GRANITE_DOCLING_PRICE_PER_1K_CHARS: '0.04'
+  CACHE_TTL_SECONDS: '900'
+  MAX_CACHE_ENTRIES: '1000'
   PURPOSE_POLICY: docling/purpose_enforcement
   RETENTION_POLICY: docling/retention_enforcement
   LICENSE_POLICY: docling/license_enforcement
@@ -51,13 +51,13 @@ ingress:
   tls: []
 serviceAccount:
   create: true
-  name: ""
+  name: ''
   annotations:
     eks.amazonaws.com/role-arn: arn:aws:iam::123456789012:role/docling-svc
 podAnnotations:
-  prometheus.io/scrape: "true"
-  prometheus.io/port: "9109"
-  sidecar.istio.io/inject: "true"
+  prometheus.io/scrape: 'true'
+  prometheus.io/port: '9109'
+  sidecar.istio.io/inject: 'true'
 nodeSelector: {}
 tolerations: []
 affinity: {}

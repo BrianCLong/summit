@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from '@playwright/test';
 
 const gql = async (baseURL: string, body: any) => {
   const rsp = await fetch(new URL('/api/graphql', baseURL).toString(), {
@@ -19,7 +19,11 @@ test.describe('Policy gates', () => {
         parameters: { TAG: 'e2e' },
         canaryPercent: 5,
         maxParallel: 1,
-        meta: { idempotencyKey: `pol-${Date.now()}`, dryRun: true, reason: 'policy test' },
+        meta: {
+          idempotencyKey: `pol-${Date.now()}`,
+          dryRun: true,
+          reason: 'policy test',
+        },
       },
     };
     const { ok, json } = await gql(baseURL!, { query, variables });
@@ -27,7 +31,9 @@ test.describe('Policy gates', () => {
     expect(json.data.startRun.status).toBe('PLANNED');
   });
 
-  test('startRun dryRun=false -> BLOCKED_BY_POLICY or QUEUED', async ({ baseURL }) => {
+  test('startRun dryRun=false -> BLOCKED_BY_POLICY or QUEUED', async ({
+    baseURL,
+  }) => {
     const query = `mutation($i: StartRunInput!) { startRun(input:$i){ status } }`;
     const variables = {
       i: {
@@ -35,13 +41,19 @@ test.describe('Policy gates', () => {
         parameters: { TAG: 'e2e' },
         canaryPercent: 5,
         maxParallel: 1,
-        meta: { idempotencyKey: `pol-${Date.now()}`, dryRun: false, reason: 'policy test' },
+        meta: {
+          idempotencyKey: `pol-${Date.now()}`,
+          dryRun: false,
+          reason: 'policy test',
+        },
       },
     };
     const { ok, json } = await gql(baseURL!, { query, variables });
     expect(ok).toBeTruthy();
     const status = json.data.startRun.status as string;
-    test.info().annotations.push({ type: 'policy-status', description: status });
+    test
+      .info()
+      .annotations.push({ type: 'policy-status', description: status });
     expect(['BLOCKED_BY_POLICY', 'QUEUED']).toContain(status);
   });
 });

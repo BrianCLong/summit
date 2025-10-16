@@ -23,7 +23,7 @@ exporters:
 service:
   telemetry:
     logs:
-      level: "debug"
+      level: 'debug'
   pipelines:
     traces:
       receivers: [otlp]
@@ -33,4 +33,3 @@ service:
       receivers: [otlp]
       processors: [memory_limiter, batch]
       exporters: [logging, prometheus]
-

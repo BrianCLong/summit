@@ -10,6 +10,7 @@
 ## Overview
 
 This runbook covers:
+
 - k6 synthetics test suite for golden flow validation
 - Grafana SLO dashboards with panel UIDs
 - Alert configuration and response procedures
@@ -26,6 +27,7 @@ This runbook covers:
 **Workflow**: `.github/workflows/k6-golden-flow.yml`
 
 **User Journeys Tested**:
+
 1. **Login** - User authentication (SLO: <2s)
 2. **Query** - NL→Cypher graph query (SLO: <1.5s)
 3. **Render** - Graph visualization (SLO: <3s)
@@ -36,40 +38,42 @@ This runbook covers:
 ```javascript
 export const options = {
   stages: [
-    { duration: '30s', target: 10 },  // Ramp-up
-    { duration: '1m', target: 10 },   // Steady state
-    { duration: '30s', target: 0 },   // Ramp-down
+    { duration: '30s', target: 10 }, // Ramp-up
+    { duration: '1m', target: 10 }, // Steady state
+    { duration: '30s', target: 0 }, // Ramp-down
   ],
   thresholds: {
     'http_req_duration{type:api}': ['p(95)<1500'],
-    'login_duration': ['p(95)<2000'],
-    'query_duration': ['p(95)<1500'],
-    'graph_render_duration': ['p(95)<3000'],
-    'export_duration': ['p(95)<5000'],
-    'golden_flow_success': ['rate>0.99'],
-    'http_req_failed': ['rate<0.01'],
+    login_duration: ['p(95)<2000'],
+    query_duration: ['p(95)<1500'],
+    graph_render_duration: ['p(95)<3000'],
+    export_duration: ['p(95)<5000'],
+    golden_flow_success: ['rate>0.99'],
+    http_req_failed: ['rate<0.01'],
   },
 };
 ```
 
 ### Custom Metrics
 
-| Metric | Type | Description | SLO |
-|--------|------|-------------|-----|
-| `login_duration` | Trend | Login latency | p95 <2s |
-| `query_duration` | Trend | Query execution latency | p95 <1.5s |
-| `graph_render_duration` | Trend | Visualization rendering | p95 <3s |
-| `export_duration` | Trend | Export with provenance | p95 <5s |
-| `golden_flow_success` | Rate | End-to-end success rate | >99% |
+| Metric                  | Type  | Description             | SLO       |
+| ----------------------- | ----- | ----------------------- | --------- |
+| `login_duration`        | Trend | Login latency           | p95 <2s   |
+| `query_duration`        | Trend | Query execution latency | p95 <1.5s |
+| `graph_render_duration` | Trend | Visualization rendering | p95 <3s   |
+| `export_duration`       | Trend | Export with provenance  | p95 <5s   |
+| `golden_flow_success`   | Rate  | End-to-end success rate | >99%      |
 
 ### Execution Schedule
 
 **PR Trigger**: On every pull request (blocking)
+
 - Runs synthetics test
 - Comments results on PR
 - Fails PR if thresholds breached
 
 **Nightly Run**: 2 AM UTC
+
 - Full test suite with extended duration
 - Baseline metrics storage (90 days)
 - Slack alerts on threshold breach
@@ -102,6 +106,7 @@ k6 report results.json --output report.html
 ### Interpreting Results
 
 **Successful Run**:
+
 ```
      ✓ login successful
      ✓ login latency acceptable
@@ -123,6 +128,7 @@ k6 report results.json --output report.html
 ```
 
 **Failed Run (Threshold Breach)**:
+
 ```
      ✗ query latency acceptable
       ↳  95% — ✓ 85 / ✗ 15
@@ -148,22 +154,24 @@ k6 report results.json --output report.html
 
 ### Panel Reference
 
-| Panel UID | Title | Metric | SLO | Threshold |
-|-----------|-------|--------|-----|-----------|
-| `api-p95-latency-001` | API p95 Latency | `http_request_duration_seconds` | <1.5s | Yellow: 1.2s, Red: 1.5s |
-| `opa-p95-latency-002` | OPA Decision p95 Latency | `opa_decision_duration_seconds` | <500ms | Yellow: 400ms, Red: 500ms |
-| `queue-lag-003` | Queue Lag | `kafka_consumer_lag_total` | <10k | Yellow: 8k, Red: 10k |
-| `ingest-failure-rate-004` | Ingest Failure Rate | `ingest_failures_total / ingest_attempts_total` | <1% | Yellow: 0.8%, Red: 1% |
-| `golden-flow-pass-005` | Golden Flow Pass % | `golden_flow_success_total / golden_flow_total` | >99% | Red: <99%, Green: ≥99% |
+| Panel UID                 | Title                    | Metric                                          | SLO    | Threshold                 |
+| ------------------------- | ------------------------ | ----------------------------------------------- | ------ | ------------------------- |
+| `api-p95-latency-001`     | API p95 Latency          | `http_request_duration_seconds`                 | <1.5s  | Yellow: 1.2s, Red: 1.5s   |
+| `opa-p95-latency-002`     | OPA Decision p95 Latency | `opa_decision_duration_seconds`                 | <500ms | Yellow: 400ms, Red: 500ms |
+| `queue-lag-003`           | Queue Lag                | `kafka_consumer_lag_total`                      | <10k   | Yellow: 8k, Red: 10k      |
+| `ingest-failure-rate-004` | Ingest Failure Rate      | `ingest_failures_total / ingest_attempts_total` | <1%    | Yellow: 0.8%, Red: 1%     |
+| `golden-flow-pass-005`    | Golden Flow Pass %       | `golden_flow_success_total / golden_flow_total` | >99%   | Red: <99%, Green: ≥99%    |
 
 ### Accessing Panels
 
 **Direct Panel Link**:
+
 ```
 https://grafana.example.com/d/slo-core/slo-core-dashboards?viewPanel=<panel-uid>
 ```
 
 **Example**:
+
 ```bash
 # Open OPA latency panel
 open "https://grafana.example.com/d/slo-core/slo-core-dashboards?viewPanel=opa-p95-latency-002"
@@ -172,12 +180,14 @@ open "https://grafana.example.com/d/slo-core/slo-core-dashboards?viewPanel=opa-p
 ### Dashboard Import
 
 **Via UI**:
+
 1. Navigate to Grafana → Dashboards → Import
 2. Upload `observability/grafana/slo-core-dashboards.json`
 3. Select Prometheus data source
 4. Click Import
 
 **Via API**:
+
 ```bash
 export GRAFANA_API_KEY="your-api-key"
 export GRAFANA_URL="https://grafana.example.com"
@@ -189,6 +199,7 @@ curl -X POST "$GRAFANA_URL/api/dashboards/db" \
 ```
 
 **Via Provisioning**:
+
 ```yaml
 # /etc/grafana/provisioning/dashboards/slo-dashboards.yml
 apiVersion: 1
@@ -207,6 +218,7 @@ providers:
 ### What are Trace Exemplars?
 
 Trace exemplars link metrics to individual traces, enabling:
+
 - Click on any data point in a graph
 - View the exact trace that contributed to that metric
 - Debug slow requests with full distributed trace context
@@ -214,6 +226,7 @@ Trace exemplars link metrics to individual traces, enabling:
 ### Enabled Panels
 
 **OPA Decision p95 Latency** (`opa-p95-latency-002`)
+
 - Exemplars: ✅ Enabled
 - Trace backend: Tempo
 - Query: `histogram_quantile(0.95, rate(opa_decision_duration_seconds_bucket[5m]))`
@@ -227,6 +240,7 @@ Trace exemplars link metrics to individual traces, enabling:
 5. **Analyze**: Review span durations, tags, logs for root cause
 
 **Example Trace Analysis**:
+
 ```
 Trace ID: a1b2c3d4e5f6g7h8
 Total Duration: 750ms (above 500ms SLO)
@@ -246,6 +260,7 @@ Action: Optimize policy loops, add caching
 ### Configuring Exemplars
 
 **Prometheus Data Source**:
+
 ```yaml
 datasources:
   - name: Prometheus
@@ -258,6 +273,7 @@ datasources:
 ```
 
 **Tempo Data Source**:
+
 ```yaml
 datasources:
   - name: Tempo
@@ -267,6 +283,7 @@ datasources:
 ```
 
 **Metric with Exemplar**:
+
 ```promql
 # Metric must have trace_id label
 opa_decision_duration_seconds_bucket{trace_id="a1b2c3d4e5f6g7h8"}
@@ -369,6 +386,7 @@ receivers:
 **Received**: PagerDuty page + Slack #critical-alerts
 
 **Triage** (within 5 minutes):
+
 ```bash
 # 1. Check current lag
 curl "http://prometheus:9090/api/v1/query?query=kafka_consumer_lag_total" | jq '.data.result[0].value[1]'
@@ -381,6 +399,7 @@ curl "http://prometheus:9090/api/v1/query?query=rate(kafka_producer_messages_tot
 ```
 
 **Common Causes & Fixes**:
+
 - **Consumer crash**: Restart consumer pods
 - **High producer rate**: Scale consumers horizontally
 - **Slow processing**: Identify slow handlers, optimize or scale
@@ -393,6 +412,7 @@ curl "http://prometheus:9090/api/v1/query?query=rate(kafka_producer_messages_tot
 **Received**: Slack #opa-performance
 
 **Triage** (within 15 minutes):
+
 ```bash
 # 1. Open dashboard with exemplars
 open "https://grafana.example.com/d/slo-core/slo-core-dashboards?viewPanel=opa-p95-latency-002"
@@ -407,6 +427,7 @@ git log policies/ --oneline -5
 ```
 
 **Common Causes & Fixes**:
+
 - **New policy**: Review recent policy commits, optimize loops
 - **High load**: Scale OPA horizontally (increase replicas)
 - **Large input**: Reduce input size, add pagination
@@ -423,6 +444,7 @@ git log policies/ --oneline -5
 **Symptom**: PR check fails with "k6 thresholds breached"
 
 **Diagnosis**:
+
 ```bash
 # View k6 run logs
 gh run list --workflow=k6-golden-flow.yml --limit 1
@@ -434,6 +456,7 @@ open k6-report/report.html
 ```
 
 **Resolution**:
+
 1. Identify which threshold failed (login, query, render, export)
 2. Review PR changes for performance impact
 3. Run test locally to reproduce:
@@ -448,6 +471,7 @@ open k6-report/report.html
 **Symptom**: Slack #alerts shows "Golden flow success rate <99%"
 
 **Diagnosis**:
+
 ```bash
 # Check recent nightly runs
 gh run list --workflow=k6-golden-flow.yml --event=schedule --limit 5
@@ -461,6 +485,7 @@ cat baseline-metrics/baseline.json | jq '.metrics.golden_flow_success'
 ```
 
 **Resolution**:
+
 1. Identify failure pattern (specific step, time window, intermittent)
 2. Check for infrastructure issues (DB slow, network partition)
 3. Review recent deployments (correlate with failure start time)
@@ -472,6 +497,7 @@ cat baseline-metrics/baseline.json | jq '.metrics.golden_flow_success'
 **Symptom**: Grafana panel displays "No data"
 
 **Diagnosis**:
+
 ```bash
 # Check Prometheus scrape targets
 curl "http://prometheus:9090/api/v1/targets" | jq '.data.activeTargets[] | select(.labels.job == "intelgraph-api")'
@@ -485,6 +511,7 @@ curl -H "Authorization: Bearer $GRAFANA_API_KEY" \
 ```
 
 **Resolution**:
+
 1. **No scrape target**: Check Prometheus config, ensure service discovery
 2. **Metric not found**: Verify app is exporting metrics, check `/metrics` endpoint
 3. **Data source down**: Verify Prometheus is reachable from Grafana
@@ -495,6 +522,7 @@ curl -H "Authorization: Bearer $GRAFANA_API_KEY" \
 **Symptom**: No dots on OPA latency panel
 
 **Diagnosis**:
+
 ```bash
 # Check if metric has trace_id label
 curl "http://prometheus:9090/api/v1/query?query=opa_decision_duration_seconds_bucket" | \
@@ -510,6 +538,7 @@ curl -H "Authorization: Bearer $GRAFANA_API_KEY" \
 ```
 
 **Resolution**:
+
 1. **No trace_id**: Add tracing instrumentation to OPA service
 2. **Tempo unreachable**: Check Tempo service status, network connectivity
 3. **Data source not linked**: Configure exemplar trace ID destinations in Grafana
@@ -524,6 +553,7 @@ curl -H "Authorization: Bearer $GRAFANA_API_KEY" \
 **Script**: `scripts/test-alert-fire.sh`
 
 **Usage**:
+
 ```bash
 # Set environment variables
 export PROMETHEUS_URL="http://localhost:9090"
@@ -535,6 +565,7 @@ export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
 ```
 
 **What it does**:
+
 1. Checks Prometheus and Alertmanager health
 2. Loads alert rules
 3. Injects test metric (OPA p95 ~750ms, above 500ms SLO)
@@ -544,6 +575,7 @@ export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
 7. Cleans up test metric
 
 **Expected Output**:
+
 ```
 ✅ Prometheus is healthy
 ✅ Alertmanager is healthy
@@ -566,18 +598,21 @@ Acceptance criteria met:
 ### Updating SLO Thresholds
 
 **Grafana Dashboard**:
+
 1. Edit panel → Field → Thresholds
 2. Update values (e.g., change red from 1.5s to 2s)
 3. Export dashboard JSON
 4. Commit to `observability/grafana/slo-core-dashboards.json`
 
 **k6 Tests**:
+
 1. Edit `tests/k6/golden-flow.k6.js`
 2. Update `options.thresholds`
 3. Test locally: `k6 run tests/k6/golden-flow.k6.js`
 4. Commit changes
 
 **Prometheus Alerts**:
+
 1. Edit `observability/prometheus/alerts/slo-alerts.yml`
 2. Update `expr` threshold (e.g., `> 0.5` to `> 1.0`)
 3. Reload Prometheus: `curl -X POST http://localhost:9090/-/reload`
@@ -586,6 +621,7 @@ Acceptance criteria met:
 ### Adding New Panels
 
 **1. Design Panel**:
+
 ```json
 {
   "id": 6,
@@ -618,12 +654,14 @@ Acceptance criteria met:
 
 **2. Document Panel UID**:
 Update `observability/grafana/SLO_DASHBOARDS_README.md`:
+
 ```markdown
 | db-p95-latency-006 | Database Query p95 Latency | p95 query execution time | <1s | Critical |
 ```
 
 **3. Create Alert**:
 Add to `observability/prometheus/alerts/slo-alerts.yml`:
+
 ```yaml
 - alert: DatabaseQueryLatencySLOViolation
   expr: histogram_quantile(0.95, rate(db_query_duration_seconds_bucket[5m])) > 1.0
@@ -633,17 +671,18 @@ Add to `observability/prometheus/alerts/slo-alerts.yml`:
     slo: db_latency
     panel_uid: db-p95-latency-006
   annotations:
-    summary: "Database p95 query latency exceeds SLO (>1s)"
-    dashboard_url: "https://grafana.example.com/d/slo-core/slo-core-dashboards?viewPanel=db-p95-latency-006"
+    summary: 'Database p95 query latency exceeds SLO (>1s)'
+    dashboard_url: 'https://grafana.example.com/d/slo-core/slo-core-dashboards?viewPanel=db-p95-latency-006'
 ```
 
 **4. Add to k6 Test**:
+
 ```javascript
 const dbQueryDuration = new Trend('db_query_duration', true);
 
 export const options = {
   thresholds: {
-    'db_query_duration': ['p(95)<1000'],
+    db_query_duration: ['p(95)<1000'],
   },
 };
 ```
@@ -660,6 +699,7 @@ export const options = {
 - **Trace exemplar hit rate**: >80%
 
 **Queries**:
+
 ```promql
 # k6 test success rate
 rate(k6_test_success_total[1h]) / rate(k6_test_total[1h])

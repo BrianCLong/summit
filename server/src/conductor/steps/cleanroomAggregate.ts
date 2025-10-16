@@ -4,4 +4,3 @@ export async function cleanroomAggregate(ctx: any, step: any) {
   // TODO: apply per-metric DP noise if requested
   ctx.emitArtifact('aggregate.json', Buffer.from(JSON.stringify(agg)));
 }
-

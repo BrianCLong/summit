@@ -8,6 +8,7 @@
 ---
 
 ## 1) Executive Summary (≤250 words)
+
 We reviewed the repo and active sprints (IntelGraph, Maestro Conductor, Switchboard). The stack is strong on product orchestration, OPA‑guarded governance, and UI flow, but has **gaps in AI/ML evaluation, provenance, and patent‑grade enablement**. Specifically: no unified **eval harness** with deterministic seeds; missing **benchmark datasets & ablations**; incomplete **cost/latency telemetry** for NL→Cypher and GDS analytics; partial **provenance/SBOM/SLSA** integration across all components; and no consolidated **IP/prior‑art ledger**.
 
 This sprint ships an **Auditable Intelligence Core** upgrade: a reproducible eval harness, policy‑aware NL→Cypher pipeline with cost guards, graph‑ops explainability, provenance decorators, SLSA/SBOM plumbing, and an IP scaffold with claims + prior‑art table. We target measurable deltas: **p95 NL→Cypher < 1.2s; p95 graph ops < 1.0s** on demo corpus; **cost/query reduced ≥15%** via query shaping; **coverage metrics** for test graphs; and **attested build artifacts**. Outputs land as a clean, green, runnable **Repro Pack** with CI.
@@ -19,11 +20,13 @@ This sprint ships an **Auditable Intelligence Core** upgrade: a reproducible eva
 ## 2) In‑Depth Review & Gap Analysis
 
 ### What’s strong
+
 - **Governance & cadence:** Clear sprint scaffolds; OPA policies curated; canary/rollback guardrails defined.
 - **Switchboard skeleton:** Tauri + Next.js app with CI, policy formatting/tests.
 - **MC attestation intent:** A GitHub workflow for verifying attestations exists.
 
 ### Gaps in our ambit (AI/ML R&D)
+
 - **Eval & Benchmarks**: No unified `/experiments` or `/benchmark` harness; sparse ablation planning; missing dataset/eval cards.
 - **Determinism & Telemetry**: Seeds, metrics, and run provenance not consistently captured (lack of JSONL traces).
 - **NL→Cypher Pipeline**: Cost/latency shaping and explanation are described but not implemented end‑to‑end; no query plan previews.
@@ -33,6 +36,7 @@ This sprint ships an **Auditable Intelligence Core** upgrade: a reproducible eva
 - **Coverage**: No coverage metrics for graph query classes, policy paths, or NL intents.
 
 ### Quick wins
+
 - Ship a **minimal, deterministic eval harness** (Python) with JSONL run logs + seed control.
 - Add **provenance decorators** to NL→Cypher and GDS outputs; emit receipts (source, license, authority, policy decisions).
 - Wire **SBOM + SLSA provenance** to CI across repos; cosign/verify on PR and release.
@@ -43,6 +47,7 @@ This sprint ships an **Auditable Intelligence Core** upgrade: a reproducible eva
 ## 3) Next Sprint (2025‑10‑13 → 2025‑10‑24)
 
 ### Objectives & DoD
+
 - **O1 — Reproducible Eval Harness**: Deterministic seeds; metrics (latency, cost, accuracy against golden Cypher); JSONL traces; CLI & CI.  
   **DoD:** `make test` green; eval run artifacts in `/artifacts/runs/` with schema‑validated JSONL; coverage report.
 - **O2 — NL→Cypher with Receipts**: Cost estimator + query shaping; explanation previews; OPA policy check with appeal hooks.  
@@ -55,6 +60,7 @@ This sprint ships an **Auditable Intelligence Core** upgrade: a reproducible eva
   **DoD:** `/ip` complete; CI check for inventory present.
 
 ### Sprint Backlog (Stories)
+
 - **S1 (XL)** Eval harness core (`/experiments`, `/benchmark`) with dataset/eval cards, ablations plan, unit‑economics metrics.
 - **S2 (L)** NL→Cypher **cost model** + **plan preview** + **policy gate**.
 - **S3 (M)** GDS receipts: emit `provenance.json` with params, inputs, and hashes; attach to exports.
@@ -64,15 +70,17 @@ This sprint ships an **Auditable Intelligence Core** upgrade: a reproducible eva
 - **S7 (S)** Docs: dataset card, eval card, operator playbook additions.
 
 ### Milestones
-- **M1:** Eval harness MVP (D3)  
-- **M2:** NL→Cypher cost‑shaping + receipts (D5)  
-- **M3:** GDS receipts + coverage (D7)  
-- **M4:** Provenance CI + IP pack (D9)  
+
+- **M1:** Eval harness MVP (D3)
+- **M2:** NL→Cypher cost‑shaping + receipts (D5)
+- **M3:** GDS receipts + coverage (D7)
+- **M4:** Provenance CI + IP pack (D9)
 - **M5:** Demo + canary criteria (D10)
 
 ---
 
 ## 4) Repro Pack Tree (ready‑to‑run)
+
 ```
 /design/
   problem.md
@@ -127,14 +135,16 @@ This sprint ships an **Auditable Intelligence Core** upgrade: a reproducible eva
 ## 5) Method Spec (excerpt)
 
 ### 5.1 NL→Cypher Cost Model & Plan Preview
+
 **Idea:** Before executing a generated Cypher, estimate cost by **pattern‑shaping** (node/edge selectivity, index usage, neighborhood radius). Reject or rewrite if cost exceeds budget; surface a preview with **OPA policy** explanation.
 
-- Input: natural language `q`, graph schema stats, intent class, user policy context.  
+- Input: natural language `q`, graph schema stats, intent class, user policy context.
 - Output: `{cypher, cost_estimate_ms, plan_features, policy_check: pass|block, explanation}`.
 
 **Complexity:** O(|nodes| + |edges|) feature extraction per query; constant‑time policy check (OPA eval) given compiled bundle.
 
 ### 5.2 GDS Receipts
+
 Attach a JSON receipt to each analytics result with: algorithm name & version, params, input subgraph hash, runtime, policy labels, and licensing tags. Export receipts with data products.
 
 ---
@@ -144,6 +154,7 @@ Attach a JSON receipt to each analytics result with: algorithm name & version, p
 > Python 3.11; deterministic seeds; no GPL/AGPL deps. Below are core modules (abridged).
 
 ### 6.1 `aurelius_core/receipts.py`
+
 ```python
 from __future__ import annotations
 import hashlib, json, time, uuid
@@ -186,6 +197,7 @@ class ReceiptBuilder:
 ```
 
 ### 6.2 `aurelius_core/cost_model.py`
+
 ```python
 from __future__ import annotations
 from dataclasses import dataclass
@@ -211,6 +223,7 @@ class NL2CypherCostModel:
 ```
 
 ### 6.3 `aurelius_core/nl2cypher.py` (preview + policy gate)
+
 ```python
 from __future__ import annotations
 from dataclasses import dataclass
@@ -243,6 +256,7 @@ class NL2Cypher:
 ```
 
 ### 6.4 `aurelius_core/telemetry.py` (JSONL runs)
+
 ```python
 import json, time, pathlib, random
 
@@ -263,12 +277,13 @@ class RunLogger:
 ## 7) CI & Compliance (GitHub Actions snippets)
 
 ### 7.1 Unified CI (`/integration/gh_actions/ci.yml`)
+
 ```yaml
 name: ci
 on:
   pull_request:
   push:
-    branches: [ main ]
+    branches: [main]
 jobs:
   test-and-sbom:
     runs-on: ubuntu-latest
@@ -296,6 +311,7 @@ jobs:
 ```
 
 ### 7.2 Attestation Verification (`/integration/gh_actions/release.verify.yml`)
+
 ```yaml
 name: release.verify
 on: { workflow_dispatch: {} }
@@ -316,17 +332,21 @@ jobs:
 ## 8) Benchmarks & Experiments
 
 ### KPIs
+
 - **Latency:** p50/p95 NL→Cypher, graph ops; **Cost/query**; **Throughput/Watt** (if measured); **Coverage** (intent & policy paths).
 - **Quality:** Exact‑match/functional success of Cypher against goldens; error taxonomies; policy denial accuracy.
 - **Reliability:** Flake rate; determinism (seed‑repeatable within ±1%).
 
 ### Datasets
+
 - **`demo_graph` (synthetic)** with license tags and controlled schema stats.
 
 ### Ablations
+
 - Cost model variants (with/without index; varying radius), query templates vs learned generation, policy gating strategies.
 
 ### Eval Harness CLI
+
 ```bash
 python -m impl.cli.ig_eval \
   --dataset experiments/datasets/demo_graph \
@@ -338,39 +358,45 @@ python -m impl.cli.ig_eval \
 ## 9) IP Pack
 
 ### /ip/draft_spec.md (scaffold)
-- **Title:** Policy‑Aware NL→Graph Query Preview with Provenance Receipts  
-- **Field:** AI‑assisted data analytics; graph databases; governance.  
-- **Background:** NL→SQL/Cypher; OPA policy gates; SLSA provenance — limitations: lack of cost‑aware previews with integrated policy receipts.  
-- **Summary:** A pipeline that **estimates cost & policy risk before execution**, emits **provenance receipts** attached to results, and **optimizes** query plans under budget + policy.  
-- **Drawings:** Flowchart (NL → preview → policy check → execute/appeal), receipt schema, CI provenance chain.  
-- **Detailed Description:** Embodiments for graph DBs (Neo4j, Memgraph), SQL variants, batch & streaming.  
-- **Claims:** see `claims.md`.  
-- **Industrial Applicability:** enterprise analytics with compliance.  
-- **Enablement/Best Mode:** reference impl + configs.  
+
+- **Title:** Policy‑Aware NL→Graph Query Preview with Provenance Receipts
+- **Field:** AI‑assisted data analytics; graph databases; governance.
+- **Background:** NL→SQL/Cypher; OPA policy gates; SLSA provenance — limitations: lack of cost‑aware previews with integrated policy receipts.
+- **Summary:** A pipeline that **estimates cost & policy risk before execution**, emits **provenance receipts** attached to results, and **optimizes** query plans under budget + policy.
+- **Drawings:** Flowchart (NL → preview → policy check → execute/appeal), receipt schema, CI provenance chain.
+- **Detailed Description:** Embodiments for graph DBs (Neo4j, Memgraph), SQL variants, batch & streaming.
+- **Claims:** see `claims.md`.
+- **Industrial Applicability:** enterprise analytics with compliance.
+- **Enablement/Best Mode:** reference impl + configs.
 - **FTO:** prior‑art table + design‑arounds.
 
 ### /ip/claims.md (seed)
+
 1. **Method**: receiving NL query; generating candidate graph query; extracting plan features; **estimating cost**; **policy‑evaluating** pre‑execution; rendering preview with rationale; executing only if within budget/policy; emitting **provenance receipt** linking inputs, params, and outputs.
 2. **System/CRM**: non‑transitory medium storing instructions to perform claim 1 across clients/servers with attested build pipeline.
-3–10. **Dependent**: features for selectivity stats; index awareness; variable radius; OPA bundle integration; appeal workflow; receipt schema with hashes; SBOM/SLSA attestation linkage; coverage metrics; learned cost estimator; mobile/edge runtime mapping.
+   3–10. **Dependent**: features for selectivity stats; index awareness; variable radius; OPA bundle integration; appeal workflow; receipt schema with hashes; SBOM/SLSA attestation linkage; coverage metrics; learned cost estimator; mobile/edge runtime mapping.
 
 ### /ip/prior_art.csv (seed columns)
+
 `citation, artifact_link, license, claim_summary, technical_deltas, attack_surface`
 
 ### /ip/fto.md
+
 - Potential overlaps: NL→SQL previews; DB cost estimates; OPA policy gates — mitigate via **integrated policy‑receipt coupling** and **graph‑specific cost shaping**.
 
 ---
 
 ## 10) Commercial Brief (/go/brief.md)
-- **Licensable Units:** Eval harness SDK; receipts runtime; NL→Graph preview engine; provenance CI toolkit.  
-- **Targets:** Regulated analytics (finserv, healthcare, gov), data platforms (Neo4j/Memgraph), SI partners.  
-- **Pricing:** Per‑seat (analyst), per‑query (SaaS), OEM royalty (SDK).  
+
+- **Licensable Units:** Eval harness SDK; receipts runtime; NL→Graph preview engine; provenance CI toolkit.
+- **Targets:** Regulated analytics (finserv, healthcare, gov), data platforms (Neo4j/Memgraph), SI partners.
+- **Pricing:** Per‑seat (analyst), per‑query (SaaS), OEM royalty (SDK).
 - **GTM Hooks:** Compliance wins (SBOM/SLSA; export receipts), ROI (cost/query ↓, analyst throughput ↑), security (policy gates).
 
 ---
 
 ## 11) Next‑Steps Kanban (time‑boxed)
+
 - [ ] **D1–D3:** Implement `/impl` core + tests; bootstrap `/experiments` with synthetic dataset & seeds.
 - [ ] **D3–D5:** NL→Cypher cost model + preview; OPA eval stub; JSONL runs in CI artifacts.
 - [ ] **D5–D7:** GDS receipts; coverage metrics; operator docs.
@@ -380,12 +406,14 @@ python -m impl.cli.ig_eval \
 ---
 
 ## 12) Integration Notes
+
 - **Summit/IntelGraph/MC:** ingest Decision nodes and run receipts; tie Maestro run IDs to receipts; expose tri‑pane UI previews + policy reasons.
 - **Switchboard:** surface verification status (SBOM/SLSA) and receipt presence in meeting co‑pilot summaries.
 
 ---
 
 ## 13) Risks & Mitigations
+
 - **Perf regressions:** guard with budget enforcement + canary SLOs; add synthetic load tests (k6) for NL→Graph path.
 - **Policy false blocks:** appeal workflow + human‑in‑the‑loop override with logging.
 - **IP overlap risk:** maintain prior‑art table; focus claims on **policy‑receipt coupling** and **graph‑specific cost shaping**.
@@ -394,9 +422,9 @@ python -m impl.cli.ig_eval \
 ---
 
 ## 14) Release Notes Template
+
 **Added:** Eval harness; receipts runtime; preview cost model; SBOM/SLSA CI.  
 **Changed:** NL→Cypher path now policy‑gated pre‑execution.  
 **Fixed:** Missing coverage for intent classes.  
 **Security:** Receipts include policy and license bindings; attested builds.  
 **Ops:** p95 NL→Cypher <1.2s; p95 graph ops <1.0s on demo corpus.
-

@@ -33,7 +33,7 @@ _Squash alt:_ **feat: coverage metrics + automated ramp controller with CI**
 
 ### `PR-feat-coverage-metrics-and-ramp-controller.patch`
 
-```diff
+````diff
 diff --git a/services/api/src/lib/metrics.ts b/services/api/src/lib/metrics.ts
 index 11aa22b..33bb44c 100644
 --- a/services/api/src/lib/metrics.ts
@@ -237,7 +237,7 @@ index 0000000..a1b2c3d
 curl -X POST localhost:4000/admin/coverage -H 'content-type: application/json' -d '{"tenant":"default","pct":97}'
 # Run controller against mock flags.json
 python3 infra/ramp/ramp_controller.py
-```
+````
 
 ---
 
@@ -246,19 +246,23 @@ python3 infra/ramp/ramp_controller.py
 **Theme**: Enrich receipts with **op lineage spans**, add **PII detectors** to selective disclosure, and ship **compliance hooks** (data retention, DSAR export).
 
 ## Objectives & KPIs
+
 - **Lineage**: emit `op_chain_id` and parent links across API/Worker; visible in audit & exporter.
-  - *KPI*: chain reconstruction accuracy 100% on test corpus.
+  - _KPI_: chain reconstruction accuracy 100% on test corpus.
 - **PII Guard**: automatic redact suggestions (email/IP/phone) feeding denylist; false positive rate < 2%.
 - **Compliance**: DSAR export (`/audit/dsar`) and retention purge hooks.
 
 ## Work Breakdown
+
 - [ ] Add lineage fields to ReceiptV02 (`op_id`, `op_parent_id`, `op_chain_id`) and surface in audit/export.
 - [ ] PII scanners integrated into rehydration pipeline → suggest policy denylist updates.
 - [ ] DSAR exporter for a subject id with signed manifest; retention CLI to purge beyond TTL.
 - [ ] Dashboards: lineage completeness % and PII block rate.
 
 ## CI
+
 - Lineage chain tests; PII unit tests; DSAR export smoke with signature verify.
 
 ## DoD
+
 - Lineage in receipts/export; DSAR route live; PII denylist suggestions recorded and optionally auto‑applied.

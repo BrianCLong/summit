@@ -15,13 +15,23 @@ describe('chain of custody', () => {
     let prevHash = 'GENESIS';
     prevHash = await writeCoC(
       db,
-      { caseId: 'c1', actorId: 'u1', action: 'CREATE', payload: { device: 'a' } },
+      {
+        caseId: 'c1',
+        actorId: 'u1',
+        action: 'CREATE',
+        payload: { device: 'a' },
+      },
       prevHash,
       privateKey,
     );
     prevHash = await writeCoC(
       db,
-      { caseId: 'c1', actorId: 'u2', action: 'TRANSFER', payload: { reason: 'review' } },
+      {
+        caseId: 'c1',
+        actorId: 'u2',
+        action: 'TRANSFER',
+        payload: { reason: 'review' },
+      },
       prevHash,
       privateKey,
     );

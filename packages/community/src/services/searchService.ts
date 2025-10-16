@@ -11,7 +11,10 @@ export interface SearchFilters {
 export class SearchService {
   public constructor(private readonly store: CommunityStore) {}
 
-  public search(query: string, filters?: SearchFilters): Array<SearchResult<'thread' | 'profile' | 'post'>> {
+  public search(
+    query: string,
+    filters?: SearchFilters,
+  ): Array<SearchResult<'thread' | 'profile' | 'post'>> {
     const normalizedQuery = normalizeText(query);
     if (!normalizedQuery) {
       return [];
@@ -21,13 +24,18 @@ export class SearchService {
     const includeProfiles = filters?.includeProfiles ?? true;
     const includePosts = true;
 
-    const tagSet = new Set(filters?.tags?.map((tag) => normalizeText(tag)) ?? []);
+    const tagSet = new Set(
+      filters?.tags?.map((tag) => normalizeText(tag)) ?? [],
+    );
 
     const results: Array<SearchResult<'thread' | 'profile' | 'post'>> = [];
 
     if (includeThreads) {
       for (const thread of this.store.listThreads()) {
-        if (tagSet.size > 0 && !thread.tags.some((tag) => tagSet.has(normalizeText(tag)))) {
+        if (
+          tagSet.size > 0 &&
+          !thread.tags.some((tag) => tagSet.has(normalizeText(tag)))
+        ) {
           continue;
         }
         const score =
@@ -39,7 +47,7 @@ export class SearchService {
             type: 'thread',
             score,
             snippet: thread.title,
-            tags: [...thread.tags]
+            tags: [...thread.tags],
           });
         }
       }
@@ -47,7 +55,12 @@ export class SearchService {
 
     if (includeProfiles) {
       for (const profile of this.store.listUsers()) {
-        if (tagSet.size > 0 && !profile.interests.some((interest) => tagSet.has(normalizeText(interest)))) {
+        if (
+          tagSet.size > 0 &&
+          !profile.interests.some((interest) =>
+            tagSet.has(normalizeText(interest)),
+          )
+        ) {
           continue;
         }
         const score =
@@ -59,8 +72,10 @@ export class SearchService {
             id: profile.id,
             type: 'profile',
             score,
-            snippet: profile.bio ? profile.bio.slice(0, 180) : profile.displayName,
-            tags: [...profile.interests]
+            snippet: profile.bio
+              ? profile.bio.slice(0, 180)
+              : profile.displayName,
+            tags: [...profile.interests],
           });
         }
       }
@@ -84,7 +99,7 @@ export class SearchService {
             type: 'post',
             score,
             snippet: post.content.slice(0, 180),
-            tags: this.store.getThread(post.threadId)?.tags ?? []
+            tags: this.store.getThread(post.threadId)?.tags ?? [],
           });
         }
       }

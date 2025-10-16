@@ -10,15 +10,20 @@ export const logger = winston.createLogger({
     isDev
       ? winston.format.combine(
           winston.format.colorize(),
-          winston.format.simple()
+          winston.format.simple(),
         )
-      : winston.format.json()
+      : winston.format.json(),
   ),
   transports: [
     new winston.transports.Console(),
-    ...(isDev ? [] : [
-      new winston.transports.File({ filename: 'error.log', level: 'error' }),
-      new winston.transports.File({ filename: 'combined.log' })
-    ])
-  ]
+    ...(isDev
+      ? []
+      : [
+          new winston.transports.File({
+            filename: 'error.log',
+            level: 'error',
+          }),
+          new winston.transports.File({ filename: 'combined.log' }),
+        ]),
+  ],
 });

@@ -57,7 +57,14 @@
           }
         }
       },
-      "required": ["id", "type", "sourceId", "targetId", "observedAt", "tenantId"],
+      "required": [
+        "id",
+        "type",
+        "sourceId",
+        "targetId",
+        "observedAt",
+        "tenantId"
+      ],
       "additionalProperties": false
     }
   },

@@ -53,7 +53,9 @@ export class RetentionScheduler extends EventEmitter {
         try {
           await task.handler();
           task.schedule.lastRun = referenceTime;
-          task.schedule.nextRun = new Date(referenceTime.getTime() + task.schedule.intervalMs);
+          task.schedule.nextRun = new Date(
+            referenceTime.getTime() + task.schedule.intervalMs,
+          );
           this.emit('taskCompleted', { datasetId, schedule: task.schedule });
         } catch (error) {
           this.emit('taskFailed', { datasetId, error });

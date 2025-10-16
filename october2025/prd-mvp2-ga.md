@@ -10,13 +10,13 @@ From inspecting the repo and README, here’s my evaluation of what functions, a
 
 According to the README:
 
-Core platform (MVP‑0) is “complete” — authentication, graph analytics, investigation workflow, ingestion, basic UI. 
+Core platform (MVP‑0) is “complete” — authentication, graph analytics, investigation workflow, ingestion, basic UI.
 GitHub
 
-MVP‑1 (advanced capabilities) is “complete” — AI/ML extraction, computer vision, speech, vector search, cross-modal, observability, performance, security hardening. 
+MVP‑1 (advanced capabilities) is “complete” — AI/ML extraction, computer vision, speech, vector search, cross-modal, observability, performance, security hardening.
 GitHub
 
-The stack is modern: React frontend (with Material-UI, Cytoscape.js), backend Node.js + GraphQL, databases (Neo4j, PostgreSQL with pgvector, TimescaleDB), Redis, Docker, observability, etc. 
+The stack is modern: React frontend (with Material-UI, Cytoscape.js), backend Node.js + GraphQL, databases (Neo4j, PostgreSQL with pgvector, TimescaleDB), Redis, Docker, observability, etc.
 GitHub
 
 Thus, the codebase already has many advanced features. But “complete” in open source / early stage often means “proof-of-concept / feature skeleton,” not hardened production-grade across all use cases. There are always gaps in scaling, security, usability, UX, integration, performance.
@@ -134,14 +134,14 @@ From your vantage, “winning” means getting into real programs (government / 
 
 Below is a suggested phased roadmap, with scope, specs, and priorities.
 
-Phase	Objective / Target Users	Scope (What we will build)	Non-goals / Out-of-scope	Key Risks / Mitigations
-MVP‑2	From proof-of-concept to early pilot readiness	Build the bridging features required to support pilot adoption in real users, integrate with at least one live external data source, mid-scale load, basic explainability	Not full enterprise scale, not highly optimized AI, not rich plugin marketplace	Over-scoping, integration complexity, data quality
-GA	Production-ready, scalable, extensible platform	Hardened architecture, multi-tenant support, full connectors, performance at scale, governance / compliance, full AI explain, plugin support	Exotic domain-specific modules, extremely custom one-off features	Resource/time, unknown scale behavior, security audits
+Phase Objective / Target Users Scope (What we will build) Non-goals / Out-of-scope Key Risks / Mitigations
+MVP‑2 From proof-of-concept to early pilot readiness Build the bridging features required to support pilot adoption in real users, integrate with at least one live external data source, mid-scale load, basic explainability Not full enterprise scale, not highly optimized AI, not rich plugin marketplace Over-scoping, integration complexity, data quality
+GA Production-ready, scalable, extensible platform Hardened architecture, multi-tenant support, full connectors, performance at scale, governance / compliance, full AI explain, plugin support Exotic domain-specific modules, extremely custom one-off features Resource/time, unknown scale behavior, security audits
 
 I’ll now break down the PRD for MVP‑2, then vision-level spec for GA.
 
 4. PRD: MVP‑2
-4.1 Goals (OKRs)
+   4.1 Goals (OKRs)
 
 O1: Deploy the system end-to-end into a pilot (customer / user) environment, ingesting a non-trivial real-world dataset, enabling real users to create investigations, view AI-suggested relations, and collaborate.
 
@@ -533,146 +533,157 @@ Below is a skeleton of your product spec / roadmap in Markdown you can drop into
 # Summit / IntelGraph — Strategic Spec & Roadmap
 
 ## 1. Current State (Baseline)
-- Core features: authentication, investigation workflows, entity/relationship CRUD, ingestion, graph viz  
-- AI modules: extraction, vision, speech, embeddings (prototype-level)  
-- Stack: React, GraphQL, Neo4j, PostgreSQL, TimescaleDB, Redis  
-- Observability and security scaffolding  
+
+- Core features: authentication, investigation workflows, entity/relationship CRUD, ingestion, graph viz
+- AI modules: extraction, vision, speech, embeddings (prototype-level)
+- Stack: React, GraphQL, Neo4j, PostgreSQL, TimescaleDB, Redis
+- Observability and security scaffolding
 
 ## 2. Vision / GA Ambition
+
 A decision intelligence platform for complex investigations and analysis, enabling ingest, inference, collaboration, and action.  
 Key pillars:
-- Scale & performance  
-- Connector ecosystem  
-- Explainable AI + trust  
-- Extensibility / plugin framework  
-- Governance / compliance  
-- UX / narrative generation  
-- Resilient operations  
+
+- Scale & performance
+- Connector ecosystem
+- Explainable AI + trust
+- Extensibility / plugin framework
+- Governance / compliance
+- UX / narrative generation
+- Resilient operations
 
 ## 3. MVP‑2: Bridge to Pilot Readiness
 
 ### 3.1 Objectives & Metrics
-| Objective | Metric |
-|---|---|
+
+| Objective                       | Metric             |
+| ------------------------------- | ------------------ |
 | Ingest non-trivial real dataset | ≥ 100K entities/hr |
-| Graph scale | 1M+ nodes |
-| Latency | 95th < 300ms |
-| AI suggestions adoption | ≥ 20% |
-| Stability / uptime | > 99.5% |
+| Graph scale                     | 1M+ nodes          |
+| Latency                         | 95th < 300ms       |
+| AI suggestions adoption         | ≥ 20%              |
+| Stability / uptime              | > 99.5%            |
 
 ### 3.2 Personas & Flows
-- Analyst / Investigator  
-- Reviewer / Supervisor  
-- Admin / Integrator  
+
+- Analyst / Investigator
+- Reviewer / Supervisor
+- Admin / Integrator
 
 Flows: connect data, ingest, graph build, suggest, accept/reject, collaborate, export, admin console.
 
 ### 3.3 Feature Scope
 
-**Must-have**  
-- Connector framework + 1 connector  
-- Ingestion pipeline with dedupe, normalization  
-- Explainable AI suggestions  
-- UI integration for suggestions  
-- Performance optimizations & caching  
-- RBAC, audit logs, collaboration  
-- Admin / instrumentation  
-- Export / reporting  
-- Onboarding / UX polish  
+**Must-have**
 
-**Should-have**  
-- Semantic / vector search  
-- Temporal / timeline views  
-- Annotations / comments  
-- Versioning / snapshot  
-- Conflict resolution UI  
+- Connector framework + 1 connector
+- Ingestion pipeline with dedupe, normalization
+- Explainable AI suggestions
+- UI integration for suggestions
+- Performance optimizations & caching
+- RBAC, audit logs, collaboration
+- Admin / instrumentation
+- Export / reporting
+- Onboarding / UX polish
 
-**Nice-to-have**  
-- Mobile / responsiveness  
-- Plugin marketplace  
-- Alerts / triggers  
-- Graph query editor  
+**Should-have**
+
+- Semantic / vector search
+- Temporal / timeline views
+- Annotations / comments
+- Versioning / snapshot
+- Conflict resolution UI
+
+**Nice-to-have**
+
+- Mobile / responsiveness
+- Plugin marketplace
+- Alerts / triggers
+- Graph query editor
 
 ### 3.4 Technical Interfaces & Data Models
 
-- Entity / Relationship / Audit tables  
-- Embedding storage & indexing  
-- GraphQL endpoints: ingest, explain, apply, search, health, connector config  
-- Frontend UI: dashboards, connector wizard, graph explorer, suggestion cards, collaboration UI, admin console  
-- Infrastructure: containerization, worker queues, rate limiting, retries  
+- Entity / Relationship / Audit tables
+- Embedding storage & indexing
+- GraphQL endpoints: ingest, explain, apply, search, health, connector config
+- Frontend UI: dashboards, connector wizard, graph explorer, suggestion cards, collaboration UI, admin console
+- Infrastructure: containerization, worker queues, rate limiting, retries
 
 ### 3.5 Release Plan & Phases
-1. Scaffold connector  
-2. Ingestion pipeline  
-3. Suggestion system  
-4. UI integration + collaboration  
-5. Perf tuning / caching  
-6. Admin features  
-7. Pilot release & feedback  
-8. Hardening & tuning  
+
+1. Scaffold connector
+2. Ingestion pipeline
+3. Suggestion system
+4. UI integration + collaboration
+5. Perf tuning / caching
+6. Admin features
+7. Pilot release & feedback
+8. Hardening & tuning
 
 Estimated duration: ~3–4 sprints + 1 for polish.
 
 ### 3.6 Risks & Mitigations
-- Connector variability → start small, build mapping tools  
-- Graph blow-up → cap suggestions, heuristics  
-- Latency under load → profiling & caching  
-- AI errors → conservative thresholds, human-in-loop  
-- UX overload → early testing  
-- Security leaks → RBAC, encryption, audit  
+
+- Connector variability → start small, build mapping tools
+- Graph blow-up → cap suggestions, heuristics
+- Latency under load → profiling & caching
+- AI errors → conservative thresholds, human-in-loop
+- UX overload → early testing
+- Security leaks → RBAC, encryption, audit
 
 ## 4. GA / Full Product Spec
 
 ### 4.1 GA Features
-- Scalable / distributed graph backend  
-- Dedicated ANN / embedding engine  
-- Full connector library (OSINT, APIs, internal systems)  
-- Plugin / extension system  
-- Governance, compliance, explainability, audit  
-- Alerting / triggers / workflow engine  
-- Narrative / natural‐language synthesis  
-- Advanced UI (maps, timelines, dashboards)  
-- Multi-tenant / SaaS / on-prem options  
-- Ops: auto-scaling, DR, backup/restore, SLOs  
+
+- Scalable / distributed graph backend
+- Dedicated ANN / embedding engine
+- Full connector library (OSINT, APIs, internal systems)
+- Plugin / extension system
+- Governance, compliance, explainability, audit
+- Alerting / triggers / workflow engine
+- Narrative / natural‐language synthesis
+- Advanced UI (maps, timelines, dashboards)
+- Multi-tenant / SaaS / on-prem options
+- Ops: auto-scaling, DR, backup/restore, SLOs
 
 ### 4.2 Non-functional Targets
-- 10M+ nodes, 100M+ edges  
-- 500+ concurrent users  
-- Query latency 95th < 200ms  
-- SLA: 99.9% uptime  
-- Auditability per user action  
-- Certified security / compliance  
+
+- 10M+ nodes, 100M+ edges
+- 500+ concurrent users
+- Query latency 95th < 200ms
+- SLA: 99.9% uptime
+- Auditability per user action
+- Certified security / compliance
 
 ### 4.3 Milestones to GA
-1. Scale DB & indexing  
-2. Expand connectors  
-3. Build plugin framework  
-4. Alerting & workflow engine  
-5. Harden ops & security  
-6. Beta with early adopters  
-7. UX polish & tuning  
-8. GA launch  
+
+1. Scale DB & indexing
+2. Expand connectors
+3. Build plugin framework
+4. Alerting & workflow engine
+5. Harden ops & security
+6. Beta with early adopters
+7. UX polish & tuning
+8. GA launch
 
 ## 5. Strategic Moats & Imperatives
 
-- Data lock-in & network effects  
-- Domain-tuned inference models  
-- Rich connector ecosystem  
-- Explainability & trust  
-- Extensible / modular substrate architecture  
-- Operational excellence, audits, compliance  
-- Developer / user community, shared modules  
+- Data lock-in & network effects
+- Domain-tuned inference models
+- Rich connector ecosystem
+- Explainability & trust
+- Extensible / modular substrate architecture
+- Operational excellence, audits, compliance
+- Developer / user community, shared modules
 
 ## 6. Risks, Unknowns & Open Questions
 
-- What is the “killer connector” that will win clients?  
-- How to scale graph + vector indexes economically?  
-- What is acceptable latency / throughput for target clients?  
-- How to certify / audit AI for trust?  
-- What pricing / commercial model will support adoption?  
-- What domains (finance, supply chain, defense) to seed first?  
-
-
+- What is the “killer connector” that will win clients?
+- How to scale graph + vector indexes economically?
+- What is acceptable latency / throughput for target clients?
+- How to certify / audit AI for trust?
+- What pricing / commercial model will support adoption?
+- What domains (finance, supply chain, defense) to seed first?
 
 You can paste and adapt that markdown into your planning docs, product board, Confluence, whatever.
 
@@ -701,57 +712,56 @@ Thought
 
 Here’s the end-to-end product canvas for Summit / IntelGraph—where you are now, what’s missing, and what MVP-2 and GA must ship. I’m grounding the “current” snapshot in your repo’s README and structure so this is actionable, not aspirational. Citations point to the relevant sections of your public repo.
 
-Summit / IntelGraph — 360° Product Canvas
-0) Executive Thrust
+Summit / IntelGraph — 360° Product Canvas 0) Executive Thrust
 
-Summit is already a deployable, AI-augmented intel/graph platform: React client, GraphQL/Apollo backend, Neo4j + Postgres(+pgvector) + Timescale, Redis, Dockerized, with observability and an AI extraction stack (OCR, YOLO, Whisper, spaCy, embeddings), plus investigation workflow and real-time collab. That’s a strong MVP-1 baseline. 
+Summit is already a deployable, AI-augmented intel/graph platform: React client, GraphQL/Apollo backend, Neo4j + Postgres(+pgvector) + Timescale, Redis, Dockerized, with observability and an AI extraction stack (OCR, YOLO, Whisper, spaCy, embeddings), plus investigation workflow and real-time collab. That’s a strong MVP-1 baseline.
 GitHub
 
 MVP-2 should convert this from “powerful demo” to “pilot-grade system” with: connector framework + 1–2 battle-tested connectors, explainable suggestions, ingestion robustness, RBAC+OPA guardrails, caching and perf targets, admin/ops tooling, and export/reporting. GA then layers scale (HA graph + dedicated ANN), multi-tenant isolation, plugin/extension model, workflow/alerting, governance/compliance, and SLO-driven ops.
 
-1) Where We Are (Evidence-based Baseline)
+1. Where We Are (Evidence-based Baseline)
 
-Golden-path & startup: quickstart via Docker/Compose; local endpoints (client 3000, GraphQL 4000, Neo4j 7474). “Deployable-first” mantra with make up, make smoke. 
+Golden-path & startup: quickstart via Docker/Compose; local endpoints (client 3000, GraphQL 4000, Neo4j 7474). “Deployable-first” mantra with make up, make smoke.
 GitHub
 
 Features shipped (per README):
 
-Core: AuthN/AuthZ (JWT, RBAC, OPA), rate-limiting; investigation workflow; CSV & STIX/TAXII ingest; Graph viz (Cytoscape), real-time collab; vector search; observability (OTel, Prometheus, Grafana); security hardening (persisted queries, tenant isolation). 
+Core: AuthN/AuthZ (JWT, RBAC, OPA), rate-limiting; investigation workflow; CSV & STIX/TAXII ingest; Graph viz (Cytoscape), real-time collab; vector search; observability (OTel, Prometheus, Grafana); security hardening (persisted queries, tenant isolation).
 GitHub
 
-AI: OCR, object detection, face recon, Whisper STT, spaCy NLP, sentence-transformers, cross-modal search. 
+AI: OCR, object detection, face recon, Whisper STT, spaCy NLP, sentence-transformers, cross-modal search.
 GitHub
 
-Stack: React 18 + MUI + Redux; Node 20 TS + Apollo Server; Neo4j 5 CE; Postgres 16 + pgvector; TimescaleDB 2; Redis 7; Socket.io. 
+Stack: React 18 + MUI + Redux; Node 20 TS + Apollo Server; Neo4j 5 CE; Postgres 16 + pgvector; TimescaleDB 2; Redis 7; Socket.io.
 GitHub
 
-API surface: GraphQL core entities/relationships/investigations; REST for health, upload/export; Socket.io events. 
+API surface: GraphQL core entities/relationships/investigations; REST for health, upload/export; Socket.io events.
 GitHub
 
-Ops: health endpoints, Prom/Grafana/Alertmanager, ZAP security testing, CI on GitHub Actions. 
+Ops: health endpoints, Prom/Grafana/Alertmanager, ZAP security testing, CI on GitHub Actions.
 GitHub
 
 Gaps (inferred from README + typical maturity curve):
 
-Production scale: Neo4j CE lacks clustering/HA; ANN via pgvector is fine to start, not ideal at 10M+ entities. (README lists CE; no HA guide in docs.) 
+Production scale: Neo4j CE lacks clustering/HA; ANN via pgvector is fine to start, not ideal at 10M+ entities. (README lists CE; no HA guide in docs.)
 GitHub
 
-Connectors: README mentions CSV + STIX/TAXII + “external federation” but lacks a modular connector SDK, versioned mappings, DLQ/retry semantics, and catalog. 
+Connectors: README mentions CSV + STIX/TAXII + “external federation” but lacks a modular connector SDK, versioned mappings, DLQ/retry semantics, and catalog.
 GitHub
 
-Explainability: Vector/AI features exist, but no explicit UX/API for “why this edge/suggestion?” with provenance. (Schema shows props/confidence isn’t explicit.) 
+Explainability: Vector/AI features exist, but no explicit UX/API for “why this edge/suggestion?” with provenance. (Schema shows props/confidence isn’t explicit.)
 GitHub
 
-Admin/tenancy: OPA + tenant isolation noted, but tenant lifecycle, scoped search, per-tenant quotas/backups aren’t spelled out. 
+Admin/tenancy: OPA + tenant isolation noted, but tenant lifecycle, scoped search, per-tenant quotas/backups aren’t spelled out.
 GitHub
 
-Workflow/alerting: Monitoring exists; user-level alerting/rules engine not yet documented. 
+Workflow/alerting: Monitoring exists; user-level alerting/rules engine not yet documented.
 GitHub
 
 Docs: Lots of README detail; deeper “operational runbooks,” incident/DR, and migration playbooks need hardening (your tree suggests some, but GA will need formalization).
 
-2) Product Strategy
-2.1 Target Users
+2. Product Strategy
+   2.1 Target Users
 
 Intel analysts, CTI analysts, case officers, due-diligence teams, fraud/risk investigators.
 
@@ -771,8 +781,8 @@ Governance (OPA policies, lineage/provenance, audit).
 
 Ops excellence (SLOs, HA, DR) for classified/regulated buyers.
 
-3) MVP-2 PRD (Pilot-grade)
-3.1 Objectives / KRs
+3. MVP-2 PRD (Pilot-grade)
+   3.1 Objectives / KRs
 
 Pilot-ready ingest: Connector SDK + 1–2 first-class connectors (e.g., TAXII source + one commercial/API) with mapping, retries, DLQ.
 
@@ -838,12 +848,12 @@ Hybrid search: keyword (Postgres/PG Trgm) + vector (pgvector or optional ANN) + 
 
 Caching: Redis query/result cache, pre-computed centralities/paths for hot subgraphs.
 
-Targets: P95 < 300 ms; warm caches; pagination + viewport LOD (front-end). (You already employ LOD/viewport perf in README; formalize SLOs.) 
+Targets: P95 < 300 ms; warm caches; pagination + viewport LOD (front-end). (You already employ LOD/viewport perf in README; formalize SLOs.)
 GitHub
 
 E. Security / Multi-User / Audit
 
-RBAC + OPA enforced at resolvers; tenant scoping across DBs; persisted GraphQL queries. (Baseline present.) 
+RBAC + OPA enforced at resolvers; tenant scoping across DBs; persisted GraphQL queries. (Baseline present.)
 GitHub
 
 Audit: Every mutation w/ actor, before/after; exportable audit report.
@@ -852,21 +862,21 @@ Secrets: Centralized env/secret mgmt; rotation playbook.
 
 F. Admin & Observability
 
-Dashboards: Ingestion throughput, queue backlog, error classes, graph growth, query latency; alerts for SLO breaches. (Monitoring stack exists; wire the product metrics.) 
+Dashboards: Ingestion throughput, queue backlog, error classes, graph growth, query latency; alerts for SLO breaches. (Monitoring stack exists; wire the product metrics.)
 GitHub
 
 Tenants: Tenant CRUD, quotas, usage metering.
 
 G. Export/Reporting
 
-Data export: CSV/JSON/GraphML (REST already lists endpoints; ensure parity + tests). 
+Data export: CSV/JSON/GraphML (REST already lists endpoints; ensure parity + tests).
 GitHub
 
 Report template: Minimal HTML/PDF via server-side template for an investigation summary.
 
 H. UX Polish
 
-Onboarding: Guided tour across Golden Path (investigation → entities → relationships → copilot → results). 
+Onboarding: Guided tour across Golden Path (investigation → entities → relationships → copilot → results).
 GitHub
 
 Errors/empty: Friendly states; retry; DLQ management UI.
@@ -875,12 +885,12 @@ Errors/empty: Friendly states; retry; DLQ management UI.
 
 Reliability: >99.5% monthly uptime (single-site), graceful restarts, zero-data-loss on ingestion (DLQ).
 
-Security: JWT rotation, OPA policies required; CSP/Helmet; CSRF; ZAP scan gate in CI (you already reference ZAP; make it a blocking check with baseline). 
+Security: JWT rotation, OPA policies required; CSP/Helmet; CSRF; ZAP scan gate in CI (you already reference ZAP; make it a blocking check with baseline).
 GitHub
 
 Performance: P95 latency <300 ms common queries; ingestion ≥100k entities/hr.
 
-Privacy: PII scrubbing in logs (README notes anonymization; verify end-to-end). 
+Privacy: PII scrubbing in logs (README notes anonymization; verify end-to-end).
 GitHub
 
 3.6 Technical Spec (delta from current)
@@ -913,13 +923,13 @@ Connector wizard, Ingestion console, Suggestions overlay in graph explorer, DLQ 
 
 3.7 Validation & Launch
 
-Perf tests (Artillery), Sec tests (ZAP), Soak tests (24–48h). (These test modes are already mentioned; make pass/fail gates explicit.) 
+Perf tests (Artillery), Sec tests (ZAP), Soak tests (24–48h). (These test modes are already mentioned; make pass/fail gates explicit.)
 GitHub
 
 Pilot with real data, success criteria: ≥20% accepted suggestions; 3+ novel insights; SLO adherence.
 
-4) GA PRD (Production-grade, extensible)
-4.1 Objectives
+4. GA PRD (Production-grade, extensible)
+   4.1 Objectives
 
 Enterprise scale, HA, and governance; plugin platform; alerting/workflows; multi-tenant SaaS and on-prem parity; formal SLOs; compliance readiness.
 
@@ -977,7 +987,7 @@ Reliability: 99.9% SLA, RPO≤5 min, RTO≤30 min; blue/green upgrades.
 
 Security: FIPS-compatible crypto paths; audit-immutable logs; secret rotation.
 
-Compliance: Controls aligned to NIST/SOC2; FedRAMP path if pursued. (README already cites SOC2/NIST alignment direction—formalize.) 
+Compliance: Controls aligned to NIST/SOC2; FedRAMP path if pursued. (README already cites SOC2/NIST alignment direction—formalize.)
 GitHub
 
 4.4 GA Milestones
@@ -996,7 +1006,7 @@ Sec/compliance audits
 
 Beta → GA with reference customers
 
-5) Architecture Deltas (MVP-2 → GA)
+5. Architecture Deltas (MVP-2 → GA)
 
 Service graph:
 
@@ -1006,7 +1016,7 @@ Introduce ANN indexer (optional in MVP-2; required in GA).
 
 Abstract GraphStore interface to swap Neo4j CE→EE or alt engines with minimal app changes.
 
-Event bus (Kafka, already hinted via make up-kafka) for ingestion/processing. 
+Event bus (Kafka, already hinted via make up-kafka) for ingestion/processing.
 GitHub
 
 Data contracts:
@@ -1023,14 +1033,14 @@ DR: scheduled backups, snapshots; restore drills.
 
 Secrets: KMS integration; rotation cadences.
 
-6) Compliance & Security Program (progressive)
+6. Compliance & Security Program (progressive)
 
-MVP-2: Threat model; CIS benchmarks; OWASP ASVS checks; ZAP CI gate; audit log coverage report. (Security scaffolding is in README; enforce it.) 
+MVP-2: Threat model; CIS benchmarks; OWASP ASVS checks; ZAP CI gate; audit log coverage report. (Security scaffolding is in README; enforce it.)
 GitHub
 
 GA: Formal policies, vendor risk, incident response runbooks, pen-test, SOC2 Type I→II, NIST 800-53 moderate mapping.
 
-7) Metrics (Product + Tech)
+7. Metrics (Product + Tech)
 
 Adoption: DAU/WAU; investigations created; session duration; connector usage.
 Insight quality: suggestion acceptance rate; time-to-insight; false-positive rate.
@@ -1039,16 +1049,16 @@ Perf: query p95/p99; cache hit-rate; GC/headroom.
 Reliability: uptime, MTTR, RPO/RTO drills.
 Security: policy violations blocked; coverage of audited actions.
 
-8) Delivery Plan (90-day MVP-2)
+8. Delivery Plan (90-day MVP-2)
 
 Sprint 1–2: Connector SDK + TAXII hardening + DLQ/metrics; ER 1.0; ingestion console.
 Sprint 3: XAI suggestions + explanation API/UX; audit wiring.
 Sprint 4: Perf/caching; export/reporting; onboarding.
 Stabilization: perf soak, ZAP, pilot deployment + fixes.
-(You already have health endpoints, tests, ZAP, observability; convert those into blocking gates.) 
+(You already have health endpoints, tests, ZAP, observability; convert those into blocking gates.)
 GitHub
 
-9) Risks & Mitigations
+9. Risks & Mitigations
 
 Graph scale/HA → abstract store; plan EE/cluster or alt engine; cap path searches; precompute hot metrics.
 
@@ -1056,14 +1066,14 @@ Connector drift → schema-versioned mappings; contract tests; DLQ & replay.
 
 XAI trust → show top features/provenance; conservative thresholds; analyst approval loop.
 
-Multi-tenant leaks → policy tests, synthetic canary data across tenants; persisted query allowlists. 
+Multi-tenant leaks → policy tests, synthetic canary data across tenants; persisted query allowlists.
 GitHub
 
 Perf regressions → perf CI; artifact size budgets; GraphQL persisted queries; Redis caches.
 
-10) Concrete Next Actions
+10. Concrete Next Actions
 
-Cut MVP-2 branch; define SLOs (latency, throughput, availability) and make smoke/perf/security tests gates. (README lists health/tests—promote to gates.) 
+Cut MVP-2 branch; define SLOs (latency, throughput, availability) and make smoke/perf/security tests gates. (README lists health/tests—promote to gates.)
 GitHub
 
 Ship Connector SDK + two connectors (STIX/TAXII hardened + one API OSINT).
@@ -1080,14 +1090,14 @@ Pilot deployment with success criteria and feedback loop.
 
 Appendix — Repo Evidence Pointers
 
-Stack & features (React/GraphQL/Neo4j/Postgres/Timescale/Redis; AI modules; observability; security items; performance notes; quickstart & golden path). 
+Stack & features (React/GraphQL/Neo4j/Postgres/Timescale/Redis; AI modules; observability; security items; performance notes; quickstart & golden path).
 GitHub
 +1
 
-API & endpoints (GraphQL types/queries/mutations; REST; WebSocket events). 
+API & endpoints (GraphQL types/queries/mutations; REST; WebSocket events).
 GitHub
 
-Monitoring & security testing (Prometheus/Grafana/Alertmanager, ZAP, test categories). 
+Monitoring & security testing (Prometheus/Grafana/Alertmanager, ZAP, test categories).
 GitHub
 
 If you want, I can break this into a tracked, sprint-level backlog mapped to your repo’s Issues/PRs and attach example GraphQL schema diffs and TypeScript interfaces for the connector SDK and XAI explanation objects.

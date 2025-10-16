@@ -26,8 +26,16 @@ interface FIPSKeyMaterial {
 }
 
 interface FIPSCrypto {
-  encrypt(plaintext: string, keyId: string): Promise<{ ciphertext: string; nonce: string; tag: string }>;
-  decrypt(ciphertext: string, nonce: string, tag: string, keyId: string): Promise<string>;
+  encrypt(
+    plaintext: string,
+    keyId: string,
+  ): Promise<{ ciphertext: string; nonce: string; tag: string }>;
+  decrypt(
+    ciphertext: string,
+    nonce: string,
+    tag: string,
+    keyId: string,
+  ): Promise<string>;
   sign(data: string, keyId: string): Promise<string>;
   verify(data: string, signature: string, keyId: string): Promise<boolean>;
   generateKey(algorithm: string, keyLength: number): Promise<FIPSKeyMaterial>;
@@ -36,26 +44,38 @@ interface FIPSCrypto {
 
 const FIPSConfigSchema = z.object({
   enabled: z.boolean().default(false),
-  mode: z.enum(['FIPS_140_2_LEVEL_3', 'FIPS_140_2_LEVEL_4']).default('FIPS_140_2_LEVEL_3'),
+  mode: z
+    .enum(['FIPS_140_2_LEVEL_3', 'FIPS_140_2_LEVEL_4'])
+    .default('FIPS_140_2_LEVEL_3'),
   hsm: z.object({
-    provider: z.enum(['AWS_CloudHSM', 'Azure_Dedicated_HSM', 'External_HSM']).default('AWS_CloudHSM'),
+    provider: z
+      .enum(['AWS_CloudHSM', 'Azure_Dedicated_HSM', 'External_HSM'])
+      .default('AWS_CloudHSM'),
     endpoint: z.string().optional(),
     partition: z.string().optional(),
-    credentials: z.object({
-      username: z.string(),
-      password: z.string(),
-    }).optional(),
+    credentials: z
+      .object({
+        username: z.string(),
+        password: z.string(),
+      })
+      .optional(),
   }),
   algorithms: z.object({
-    symmetric: z.enum(['AES-256-GCM', 'ChaCha20-Poly1305']).default('AES-256-GCM'),
-    asymmetric: z.enum(['RSA-4096', 'ECDSA-P-384', 'Ed25519']).default('ECDSA-P-384'),
+    symmetric: z
+      .enum(['AES-256-GCM', 'ChaCha20-Poly1305'])
+      .default('AES-256-GCM'),
+    asymmetric: z
+      .enum(['RSA-4096', 'ECDSA-P-384', 'Ed25519'])
+      .default('ECDSA-P-384'),
     hash: z.enum(['SHA-256', 'SHA-384', 'SHA-512']).default('SHA-384'),
   }),
   keyRotation: z.object({
     intervalDays: z.number().min(30).max(365).default(90),
     automatic: z.boolean().default(true),
   }),
-  auditLevel: z.enum(['BASIC', 'DETAILED', 'COMPREHENSIVE']).default('COMPREHENSIVE'),
+  auditLevel: z
+    .enum(['BASIC', 'DETAILED', 'COMPREHENSIVE'])
+    .default('COMPREHENSIVE'),
 });
 
 export class FIPSComplianceService implements FIPSCrypto {
@@ -67,7 +87,7 @@ export class FIPSComplianceService implements FIPSCrypto {
     this.config = FIPSConfigSchema.parse({
       ...config,
       enabled: process.env.FIPS_ENABLED === 'true',
-      mode: process.env.FIPS_MODE as any || config?.mode,
+      mode: (process.env.FIPS_MODE as any) || config?.mode,
     });
 
     if (this.config.enabled) {
@@ -77,12 +97,14 @@ export class FIPSComplianceService implements FIPSCrypto {
 
   private async initializeFIPSCrypto() {
     const span = otelService.createSpan('fips.initialize');
-    
+
     try {
       // Verify FIPS mode is enabled in OpenSSL/Node.js
       const fipsEnabled = crypto.getFips?.() || false;
       if (!fipsEnabled && this.config.enabled) {
-        console.warn('FIPS mode not enabled in Node.js crypto - switching to FIPS-validated algorithms only');
+        console.warn(
+          'FIPS mode not enabled in Node.js crypto - switching to FIPS-validated algorithms only',
+        );
       }
 
       // Initialize HSM connection
@@ -92,19 +114,18 @@ export class FIPSComplianceService implements FIPSCrypto {
       await this.loadKeysFromHSM();
 
       console.log('FIPS 140-2 compliance service initialized successfully');
-      
+
       otelService.addSpanAttributes({
         'fips.enabled': this.config.enabled,
         'fips.mode': this.config.mode,
         'fips.hsm_provider': this.config.hsm.provider,
         'fips.keys_loaded': this.keyStore.size,
       });
-
     } catch (error: any) {
       console.error('FIPS compliance initialization failed:', error);
       otelService.recordException(error);
       span.setStatus({ code: 2, message: error.message });
-      
+
       if (this.config.enabled) {
         throw new Error('FIPS compliance required but initialization failed');
       }
@@ -122,12 +143,12 @@ export class FIPSComplianceService implements FIPSCrypto {
         console.log('Connecting to AWS CloudHSM...');
         // this.hsmConnection = await cloudhsm.connect(this.config.hsm);
         break;
-        
+
       case 'Azure_Dedicated_HSM':
         console.log('Connecting to Azure Dedicated HSM...');
         // this.hsmConnection = await azureHsm.connect(this.config.hsm);
         break;
-        
+
       case 'External_HSM':
         console.log('Connecting to External HSM...');
         // this.hsmConnection = await pkcs11.connect(this.config.hsm);
@@ -141,7 +162,7 @@ export class FIPSComplianceService implements FIPSCrypto {
     // Load existing keys from HSM partition
     // In production, enumerate keys from HSM
     const keyList = []; // await this.hsmConnection.listKeys();
-    
+
     for (const keyInfo of keyList) {
       const keyMaterial: FIPSKeyMaterial = {
         keyId: keyInfo.keyId,
@@ -158,14 +179,17 @@ export class FIPSComplianceService implements FIPSCrypto {
           operations: [],
         },
       };
-      
+
       this.keyStore.set(keyInfo.keyId, keyMaterial);
     }
   }
 
-  async generateKey(algorithm: string, keyLength: number): Promise<FIPSKeyMaterial> {
+  async generateKey(
+    algorithm: string,
+    keyLength: number,
+  ): Promise<FIPSKeyMaterial> {
     const span = otelService.createSpan('fips.generate_key');
-    
+
     try {
       if (!this.config.enabled) {
         throw new Error('FIPS compliance not enabled');
@@ -177,7 +201,7 @@ export class FIPSComplianceService implements FIPSCrypto {
       }
 
       const keyId = `fips-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-      
+
       // Generate key in HSM
       let keyHandle;
       if (this.hsmConnection) {
@@ -201,19 +225,21 @@ export class FIPSComplianceService implements FIPSCrypto {
         auditTrail: {
           created: new Date(),
           lastRotated: new Date(),
-          operations: [{
-            timestamp: new Date(),
-            operation: 'generate',
-            keyId,
-            user: process.env.USER || 'system',
-          }],
+          operations: [
+            {
+              timestamp: new Date(),
+              operation: 'generate',
+              keyId,
+              user: process.env.USER || 'system',
+            },
+          ],
         },
       };
 
       this.keyStore.set(keyId, keyMaterial);
 
       console.log(`FIPS key generated: ${keyId}`);
-      
+
       otelService.addSpanAttributes({
         'fips.key_id': keyId,
         'fips.algorithm': algorithm,
@@ -221,7 +247,6 @@ export class FIPSComplianceService implements FIPSCrypto {
       });
 
       return keyMaterial;
-      
     } catch (error: any) {
       console.error('FIPS key generation failed:', error);
       otelService.recordException(error);
@@ -232,9 +257,12 @@ export class FIPSComplianceService implements FIPSCrypto {
     }
   }
 
-  async encrypt(plaintext: string, keyId: string): Promise<{ ciphertext: string; nonce: string; tag: string }> {
+  async encrypt(
+    plaintext: string,
+    keyId: string,
+  ): Promise<{ ciphertext: string; nonce: string; tag: string }> {
     const span = otelService.createSpan('fips.encrypt');
-    
+
     try {
       const keyMaterial = this.keyStore.get(keyId);
       if (!keyMaterial) {
@@ -243,7 +271,7 @@ export class FIPSComplianceService implements FIPSCrypto {
 
       // Generate random nonce
       const nonce = crypto.randomBytes(16);
-      
+
       // Perform encryption in HSM
       let result;
       if (this.hsmConnection && keyMaterial.algorithm === 'AES-256-GCM') {
@@ -253,15 +281,15 @@ export class FIPSComplianceService implements FIPSCrypto {
         //   plaintext: Buffer.from(plaintext, 'utf8'),
         //   nonce,
         // });
-        
+
         // Fallback for testing
         const cipher = crypto.createCipherGCM('aes-256-gcm');
         cipher.setAAD(Buffer.from(keyId, 'utf8'));
-        
+
         let encrypted = cipher.update(plaintext, 'utf8', 'hex');
         encrypted += cipher.final('hex');
         const tag = cipher.getAuthTag();
-        
+
         result = {
           ciphertext: encrypted,
           tag: tag.toString('hex'),
@@ -287,7 +315,6 @@ export class FIPSComplianceService implements FIPSCrypto {
         nonce: nonce.toString('hex'),
         tag: result.tag,
       };
-      
     } catch (error: any) {
       console.error('FIPS encryption failed:', error);
       otelService.recordException(error);
@@ -298,9 +325,14 @@ export class FIPSComplianceService implements FIPSCrypto {
     }
   }
 
-  async decrypt(ciphertext: string, nonce: string, tag: string, keyId: string): Promise<string> {
+  async decrypt(
+    ciphertext: string,
+    nonce: string,
+    tag: string,
+    keyId: string,
+  ): Promise<string> {
     const span = otelService.createSpan('fips.decrypt');
-    
+
     try {
       const keyMaterial = this.keyStore.get(keyId);
       if (!keyMaterial) {
@@ -317,12 +349,12 @@ export class FIPSComplianceService implements FIPSCrypto {
         //   nonce: Buffer.from(nonce, 'hex'),
         //   tag: Buffer.from(tag, 'hex'),
         // });
-        
+
         // Fallback for testing
         const decipher = crypto.createDecipherGCM('aes-256-gcm');
         decipher.setAuthTag(Buffer.from(tag, 'hex'));
         decipher.setAAD(Buffer.from(keyId, 'utf8'));
-        
+
         let decrypted = decipher.update(ciphertext, 'hex', 'utf8');
         decrypted += decipher.final('utf8');
         plaintext = decrypted;
@@ -337,7 +369,6 @@ export class FIPSComplianceService implements FIPSCrypto {
       });
 
       return plaintext;
-      
     } catch (error: any) {
       console.error('FIPS decryption failed:', error);
       otelService.recordException(error);
@@ -350,7 +381,7 @@ export class FIPSComplianceService implements FIPSCrypto {
 
   async sign(data: string, keyId: string): Promise<string> {
     const span = otelService.createSpan('fips.sign');
-    
+
     try {
       const keyMaterial = this.keyStore.get(keyId);
       if (!keyMaterial) {
@@ -358,7 +389,9 @@ export class FIPSComplianceService implements FIPSCrypto {
       }
 
       // Create hash using FIPS-approved algorithm
-      const hash = crypto.createHash(this.config.algorithms.hash.toLowerCase().replace('-', ''));
+      const hash = crypto.createHash(
+        this.config.algorithms.hash.toLowerCase().replace('-', ''),
+      );
       hash.update(data);
       const digest = hash.digest();
 
@@ -370,11 +403,14 @@ export class FIPSComplianceService implements FIPSCrypto {
         //   algorithm: keyMaterial.algorithm,
         //   digest,
         // });
-        
+
         // Fallback for testing (NOT FIPS compliant)
         const sign = crypto.createSign(this.config.algorithms.hash);
         sign.update(data);
-        signature = sign.sign('-----BEGIN EC PRIVATE KEY-----...-----END EC PRIVATE KEY-----', 'hex');
+        signature = sign.sign(
+          '-----BEGIN EC PRIVATE KEY-----...-----END EC PRIVATE KEY-----',
+          'hex',
+        );
       }
 
       // Audit the operation
@@ -386,7 +422,6 @@ export class FIPSComplianceService implements FIPSCrypto {
       });
 
       return signature;
-      
     } catch (error: any) {
       console.error('FIPS signing failed:', error);
       otelService.recordException(error);
@@ -397,9 +432,13 @@ export class FIPSComplianceService implements FIPSCrypto {
     }
   }
 
-  async verify(data: string, signature: string, keyId: string): Promise<boolean> {
+  async verify(
+    data: string,
+    signature: string,
+    keyId: string,
+  ): Promise<boolean> {
     const span = otelService.createSpan('fips.verify');
-    
+
     try {
       const keyMaterial = this.keyStore.get(keyId);
       if (!keyMaterial) {
@@ -415,11 +454,15 @@ export class FIPSComplianceService implements FIPSCrypto {
         //   data: Buffer.from(data, 'utf8'),
         //   signature: Buffer.from(signature, 'hex'),
         // });
-        
+
         // Fallback for testing (NOT FIPS compliant)
         const verify = crypto.createVerify(this.config.algorithms.hash);
         verify.update(data);
-        valid = verify.verify('-----BEGIN EC PUBLIC KEY-----...-----END EC PUBLIC KEY-----', signature, 'hex');
+        valid = verify.verify(
+          '-----BEGIN EC PUBLIC KEY-----...-----END EC PUBLIC KEY-----',
+          signature,
+          'hex',
+        );
       }
 
       // Audit the operation
@@ -431,7 +474,6 @@ export class FIPSComplianceService implements FIPSCrypto {
       });
 
       return valid;
-      
     } catch (error: any) {
       console.error('FIPS verification failed:', error);
       otelService.recordException(error);
@@ -444,7 +486,7 @@ export class FIPSComplianceService implements FIPSCrypto {
 
   async rotateKey(keyId: string): Promise<FIPSKeyMaterial> {
     const span = otelService.createSpan('fips.rotate_key');
-    
+
     try {
       const oldKey = this.keyStore.get(keyId);
       if (!oldKey) {
@@ -453,17 +495,16 @@ export class FIPSComplianceService implements FIPSCrypto {
 
       // Generate new key with same parameters
       const newKey = await this.generateKey(oldKey.algorithm, oldKey.keyLength);
-      
+
       // Update rotation timestamp
       newKey.auditTrail.lastRotated = new Date();
-      
+
       // Archive old key (in production, move to separate HSM partition)
       this.keyStore.delete(keyId);
-      
+
       console.log(`FIPS key rotated: ${keyId} -> ${newKey.keyId}`);
-      
+
       return newKey;
-      
     } catch (error: any) {
       console.error('FIPS key rotation failed:', error);
       otelService.recordException(error);
@@ -477,7 +518,7 @@ export class FIPSComplianceService implements FIPSCrypto {
   private isFIPSApprovedAlgorithm(algorithm: string): boolean {
     const approvedAlgorithms = [
       'AES-256-GCM',
-      'AES-256-CBC', 
+      'AES-256-CBC',
       'ChaCha20-Poly1305',
       'RSA-4096',
       'ECDSA-P-256',
@@ -487,7 +528,7 @@ export class FIPSComplianceService implements FIPSCrypto {
       'SHA-384',
       'SHA-512',
     ];
-    
+
     return approvedAlgorithms.includes(algorithm);
   }
 
@@ -508,7 +549,7 @@ export class FIPSComplianceService implements FIPSCrypto {
     }>;
     auditTrail: any[];
   }> {
-    const keys = Array.from(this.keyStore.values()).map(key => ({
+    const keys = Array.from(this.keyStore.values()).map((key) => ({
       keyId: key.keyId,
       algorithm: key.algorithm,
       created: key.auditTrail.created,
@@ -517,7 +558,7 @@ export class FIPSComplianceService implements FIPSCrypto {
     }));
 
     const auditTrail = Array.from(this.keyStore.values())
-      .flatMap(key => key.auditTrail.operations)
+      .flatMap((key) => key.auditTrail.operations)
       .sort((a, b) => b.timestamp.getTime() - a.timestamp.getTime())
       .slice(0, 100); // Last 100 operations
 
@@ -557,12 +598,17 @@ export class FIPSComplianceService implements FIPSCrypto {
     // Check key rotation status
     const now = new Date();
     for (const key of this.keyStore.values()) {
-      const daysSinceRotation = (now.getTime() - key.auditTrail.lastRotated.getTime()) / (1000 * 60 * 60 * 24);
-      
+      const daysSinceRotation =
+        (now.getTime() - key.auditTrail.lastRotated.getTime()) /
+        (1000 * 60 * 60 * 24);
+
       if (daysSinceRotation > this.config.keyRotation.intervalDays) {
         keyRotationStatus = 'overdue';
         break;
-      } else if (daysSinceRotation > this.config.keyRotation.intervalDays * 0.8) {
+      } else if (
+        daysSinceRotation >
+        this.config.keyRotation.intervalDays * 0.8
+      ) {
         keyRotationStatus = 'due';
       }
     }
@@ -598,7 +644,7 @@ export class FIPSComplianceService implements FIPSCrypto {
       // await this.hsmConnection.disconnect();
       this.hsmConnection = null;
     }
-    
+
     this.keyStore.clear();
   }
 }

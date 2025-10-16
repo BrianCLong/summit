@@ -44,6 +44,7 @@ scripts/
 ## 2) GitHub Labels (bootstrap)
 
 **scripts/bootstrap_labels.sh**
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -66,6 +67,7 @@ done
 ## 3) GitHub Projects v2 (creation + fields + views)
 
 **scripts/bootstrap_project.sh**
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -123,6 +125,7 @@ echo "NOTE: Some view customizations may require the GitHub UI due to CLI limita
 ## 4) Issue/Epic Templates (YAML)
 
 **.github/ISSUE_TEMPLATE/epic.yml**
+
 ```yaml
 name: "Epic"
 description: Track an initiative spanning multiple issues
@@ -163,10 +166,11 @@ body:
 ```
 
 **.github/ISSUE_TEMPLATE/feature.yml**
+
 ```yaml
 name: Feature
 labels: [feature]
-title: "feat: <feature>"
+title: 'feat: <feature>'
 body:
   - type: textarea
     id: user_story
@@ -190,10 +194,11 @@ body:
 ```
 
 **.github/ISSUE_TEMPLATE/task.yml**
+
 ```yaml
 name: Task
 labels: [task]
-title: "chore: <task>"
+title: 'chore: <task>'
 body:
   - type: textarea
     id: detail
@@ -207,10 +212,11 @@ body:
 ```
 
 **.github/ISSUE_TEMPLATE/bug.yml**
+
 ```yaml
 name: Bug
 labels: [bug]
-title: "bug: <symptom>"
+title: 'bug: <symptom>'
 body:
   - type: textarea
     id: repro
@@ -236,6 +242,7 @@ body:
 ## 5) Bootstrap Issues from PRD (script)
 
 **scripts/bootstrap_issues_from_prd.sh**
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -276,6 +283,7 @@ echo "Seeded epics and sample issues. Link child issues to epics via checklists 
 ## 6) Auto‑add issues/PRs to Project
 
 **.github/workflows/add-to-project.yml**
+
 ```yaml
 name: Add to Project
 on:
@@ -311,6 +319,7 @@ jobs:
 ## 7) CODEOWNERS
 
 **CODEOWNERS**
+
 ```
 # Paths mapped to owners (teams or users)
 /api/ @org-backend-team
@@ -325,6 +334,7 @@ jobs:
 ## 8) OPA Policies & Tests (expanded)
 
 **policy/authz/bundle.rego**
+
 ```rego
 package summit.authz
 
@@ -365,6 +375,7 @@ case_scope_ok {
 ```
 
 **policy/authz/tests/allow_intra_tenant_test.rego**
+
 ```rego
 package summit.authz_test
 import data.summit.authz
@@ -379,6 +390,7 @@ test_allow_intra_tenant_case_scoped {
 ```
 
 **policy/authz/tests/deny_cross_tenant_test.rego**
+
 ```rego
 package summit.authz_test
 import data.summit.authz
@@ -393,6 +405,7 @@ test_deny_cross_tenant {
 ```
 
 **policy/authz/tests/classification_block_test.rego**
+
 ```rego
 package summit.authz_test
 import data.summit.authz
@@ -407,6 +420,7 @@ test_block_high_classification {
 ```
 
 **policy/authz/tests/case_scope_test.rego**
+
 ```rego
 package summit.authz_test
 import data.summit.authz
@@ -421,6 +435,7 @@ test_case_scope_required {
 ```
 
 **policy/authz/tests/export_policy_test.rego**
+
 ```rego
 package summit.export
 
@@ -446,13 +461,14 @@ allow {
 ## 9) CI Policy Gates (GitHub Actions)
 
 **.github/workflows/ci-policy.yml**
+
 ```yaml
 name: CI Policy Gates
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
   push:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   policy:
@@ -481,11 +497,12 @@ jobs:
 ```
 
 **.github/workflows/sbom-cosign.yml**
+
 ```yaml
 name: SBOM + Cosign Verify
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch: {}
 
 jobs:
@@ -520,6 +537,7 @@ jobs:
 ```
 
 **.github/workflows/secret-scan.yml**
+
 ```yaml
 name: Secret Scan
 on:
@@ -537,6 +555,7 @@ jobs:
 ```
 
 **.github/workflows/release-evidence.yml**
+
 ```yaml
 name: Release Evidence Pack
 on:
@@ -566,6 +585,7 @@ jobs:
 ## 10) Makefile (targets to wire it together)
 
 **Makefile**
+
 ```make
 .PHONY: policy-test project-bootstrap labels issues
 
@@ -626,4 +646,3 @@ make policy-test
 - **Evidence:** Templates/tests reflect PRD E.7 epics and I.1 policies; CI jobs provide measurable gates for security/compliance.
 - **Caveats:** GitHub Projects v2 views/automations are partly UI‑only; script seeds fields; use UI to finalize boards.
 - **Verification:** Run `make policy-test`; open PR; confirm Actions pass; create release to see evidence pack artifacts.
-

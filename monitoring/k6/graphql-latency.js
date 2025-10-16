@@ -149,7 +149,10 @@ export default function () {
   });
 
   // Authority binding check for secured operations
-  if (randomQuery === 'checkProvenance' || randomQuery === 'getXAIExplanation') {
+  if (
+    randomQuery === 'checkProvenance' ||
+    randomQuery === 'getXAIExplanation'
+  ) {
     check(response, {
       'authority binding enforced': (r) => {
         if (r.status === 200) return true; // Valid token case

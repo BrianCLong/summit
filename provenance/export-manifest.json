@@ -16,10 +16,7 @@
       "version": 1,
       "metadata": {
         "timestamp": "2025-09-22T21:39:35.198Z",
-        "tools": [
-          "npm",
-          "pnpm"
-        ]
+        "tools": ["npm", "pnpm"]
       },
       "components": [
         {
@@ -569,46 +566,30 @@
         "retention_period": "30d",
         "classification": "sensitive",
         "encryption": "field-level",
-        "purpose_tags": [
-          "analytics",
-          "user-experience"
-        ]
+        "purpose_tags": ["analytics", "user-experience"]
       },
       "system_logs": {
         "retention_period": "90d",
         "classification": "operational",
         "encryption": "at-rest",
-        "purpose_tags": [
-          "debugging",
-          "audit"
-        ]
+        "purpose_tags": ["debugging", "audit"]
       },
       "metrics_data": {
         "retention_period": "1y",
         "classification": "operational",
         "encryption": "at-rest",
-        "purpose_tags": [
-          "monitoring",
-          "analytics"
-        ]
+        "purpose_tags": ["monitoring", "analytics"]
       },
       "audit_logs": {
         "retention_period": "7y",
         "classification": "compliance",
         "encryption": "at-rest",
-        "purpose_tags": [
-          "audit",
-          "legal"
-        ]
+        "purpose_tags": ["audit", "legal"]
       }
     },
     "security_scan": {
       "timestamp": "2025-09-22T21:39:35.203Z",
-      "scanners": [
-        "trivy",
-        "snyk",
-        "semgrep"
-      ],
+      "scanners": ["trivy", "snyk", "semgrep"],
       "vulnerabilities": {
         "critical": 0,
         "high": 2,

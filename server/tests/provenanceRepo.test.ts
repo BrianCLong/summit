@@ -1,7 +1,8 @@
 import { ProvenanceRepo } from '../src/repos/ProvenanceRepo.js';
 
 class FakeClient {
-  private responses: Array<{ match: RegExp; result: any; error?: boolean }> = [];
+  private responses: Array<{ match: RegExp; result: any; error?: boolean }> =
+    [];
   lastSql = '';
   addResponse(match: RegExp, result: any, error = false) {
     this.responses.push({ match, result, error });
@@ -44,7 +45,14 @@ describe('ProvenanceRepo', () => {
     });
     const pool = new FakePool(client) as any;
     const repo = new ProvenanceRepo(pool);
-    const rows = await repo.by('incident', 'inc1', undefined, 10, 0, 'tenant-1');
+    const rows = await repo.by(
+      'incident',
+      'inc1',
+      undefined,
+      10,
+      0,
+      'tenant-1',
+    );
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({ id: 'r1', kind: 'policy' });
     expect(new Date(rows[0].createdAt).toISOString()).toBe(now.toISOString());
@@ -71,7 +79,14 @@ describe('ProvenanceRepo', () => {
     });
     const pool = new FakePool(client) as any;
     const repo = new ProvenanceRepo(pool);
-    const rows = await repo.by('investigation', 'inv1', undefined, 10, 0, 'tenant-1');
+    const rows = await repo.by(
+      'investigation',
+      'inv1',
+      undefined,
+      10,
+      0,
+      'tenant-1',
+    );
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({ id: 'p1', kind: 'graphrag' });
     expect(new Date(rows[0].createdAt).toISOString()).toBe(now.toISOString());

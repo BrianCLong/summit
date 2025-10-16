@@ -1,6 +1,11 @@
 import { getPostgresPool } from '../db/postgres.js';
 import { otelService } from '../middleware/observability/otel-tracing.js';
-import { createHash, randomBytes, createCipheriv, createDecipheriv } from 'crypto';
+import {
+  createHash,
+  randomBytes,
+  createCipheriv,
+  createDecipheriv,
+} from 'crypto';
 import { z } from 'zod';
 
 interface ResidencyConfig {
@@ -14,7 +19,12 @@ interface ResidencyConfig {
 }
 
 interface KMSConfig {
-  provider: 'aws-kms' | 'azure-keyvault' | 'gcp-kms' | 'hashicorp-vault' | 'customer-managed';
+  provider:
+    | 'aws-kms'
+    | 'azure-keyvault'
+    | 'gcp-kms'
+    | 'hashicorp-vault'
+    | 'customer-managed';
   keyId: string;
   region: string;
   endpoint?: string;
@@ -44,20 +54,28 @@ const ResidencyConfigSchema = z.object({
 });
 
 const KMSConfigSchema = z.object({
-  provider: z.enum(['aws-kms', 'azure-keyvault', 'gcp-kms', 'hashicorp-vault', 'customer-managed']),
+  provider: z.enum([
+    'aws-kms',
+    'azure-keyvault',
+    'gcp-kms',
+    'hashicorp-vault',
+    'customer-managed',
+  ]),
   keyId: z.string(),
   region: z.string(),
   endpoint: z.string().optional(),
-  credentials: z.object({
-    accessKey: z.string().optional(),
-    secretKey: z.string().optional(),
-    token: z.string().optional(),
-  }).optional(),
+  credentials: z
+    .object({
+      accessKey: z.string().optional(),
+      secretKey: z.string().optional(),
+      token: z.string().optional(),
+    })
+    .optional(),
 });
 
 export class DataResidencyService {
   private kmsProviders: Map<string, any> = new Map();
-  
+
   constructor() {
     this.initializeKMSProviders();
   }
@@ -96,9 +114,12 @@ export class DataResidencyService {
     });
   }
 
-  async configureDataResidency(tenantId: string, config: ResidencyConfig): Promise<string> {
+  async configureDataResidency(
+    tenantId: string,
+    config: ResidencyConfig,
+  ): Promise<string> {
     const span = otelService.createSpan('data-residency.configure');
-    
+
     try {
       const validatedConfig = ResidencyConfigSchema.parse(config);
       const pool = getPostgresPool();
@@ -131,7 +152,7 @@ export class DataResidencyService {
           JSON.stringify(validatedConfig.allowedTransfers),
           validatedConfig.retentionPolicyDays,
           validatedConfig.encryptionRequired,
-        ]
+        ],
       );
 
       // Create audit log entry
@@ -148,7 +169,7 @@ export class DataResidencyService {
             country: validatedConfig.country,
             jurisdiction: validatedConfig.jurisdiction,
           }),
-        ]
+        ],
       );
 
       otelService.addSpanAttributes({
@@ -168,7 +189,7 @@ export class DataResidencyService {
 
   async configureKMS(tenantId: string, config: KMSConfig): Promise<string> {
     const span = otelService.createSpan('data-residency.configure-kms');
-    
+
     try {
       const validatedConfig = KMSConfigSchema.parse(config);
       const pool = getPostgresPool();
@@ -178,7 +199,7 @@ export class DataResidencyService {
       await this.testKMSConnectivity(validatedConfig);
 
       // Store KMS configuration (credentials encrypted at rest)
-      const encryptedCredentials = config.credentials 
+      const encryptedCredentials = config.credentials
         ? await this.encryptCredentials(JSON.stringify(config.credentials))
         : null;
 
@@ -203,7 +224,7 @@ export class DataResidencyService {
           validatedConfig.region,
           validatedConfig.endpoint,
           encryptedCredentials,
-        ]
+        ],
       );
 
       // Create audit log entry (no sensitive data)
@@ -220,7 +241,7 @@ export class DataResidencyService {
             region: validatedConfig.region,
             keyId: validatedConfig.keyId.substring(0, 8) + '***',
           }),
-        ]
+        ],
       );
 
       otelService.addSpanAttributes({
@@ -238,13 +259,17 @@ export class DataResidencyService {
     }
   }
 
-  async encryptData(tenantId: string, data: string, dataClassification: DataClassification): Promise<{
+  async encryptData(
+    tenantId: string,
+    data: string,
+    dataClassification: DataClassification,
+  ): Promise<{
     encryptedData: string;
     encryptionMetadata: any;
     residencyCompliant: boolean;
   }> {
     const span = otelService.createSpan('data-residency.encrypt');
-    
+
     try {
       const pool = getPostgresPool();
 
@@ -255,17 +280,26 @@ export class DataResidencyService {
       ]);
 
       // Check residency compliance
-      const residencyCompliant = this.checkResidencyCompliance(dataClassification, residencyConfig);
-      
+      const residencyCompliant = this.checkResidencyCompliance(
+        dataClassification,
+        residencyConfig,
+      );
+
       if (!residencyCompliant && residencyConfig?.encryptionRequired) {
-        throw new Error('Data classification not compatible with tenant residency requirements');
+        throw new Error(
+          'Data classification not compatible with tenant residency requirements',
+        );
       }
 
       // Encrypt based on KMS configuration
       let encryptionResult;
       if (kmsConfig && this.kmsProviders.has(kmsConfig.provider)) {
         const kmsProvider = this.kmsProviders.get(kmsConfig.provider);
-        encryptionResult = await kmsProvider.encrypt(data, kmsConfig, dataClassification);
+        encryptionResult = await kmsProvider.encrypt(
+          data,
+          kmsConfig,
+          dataClassification,
+        );
       } else {
         // Fallback to local encryption
         encryptionResult = await this.encryptLocally(data, dataClassification);
@@ -294,7 +328,7 @@ export class DataResidencyService {
           kmsConfig?.provider || 'local',
           residencyConfig?.region || 'unknown',
           residencyCompliant,
-        ]
+        ],
       );
 
       otelService.addSpanAttributes({
@@ -317,9 +351,13 @@ export class DataResidencyService {
     }
   }
 
-  async decryptData(tenantId: string, encryptedData: string, encryptionMetadata: any): Promise<string> {
+  async decryptData(
+    tenantId: string,
+    encryptedData: string,
+    encryptionMetadata: any,
+  ): Promise<string> {
     const span = otelService.createSpan('data-residency.decrypt');
-    
+
     try {
       const pool = getPostgresPool();
 
@@ -327,13 +365,20 @@ export class DataResidencyService {
       const kmsConfig = await this.getKMSConfig(tenantId);
 
       let decryptedData: string;
-      
+
       if (kmsConfig && this.kmsProviders.has(kmsConfig.provider)) {
         const kmsProvider = this.kmsProviders.get(kmsConfig.provider);
-        decryptedData = await kmsProvider.decrypt(encryptedData, kmsConfig, encryptionMetadata);
+        decryptedData = await kmsProvider.decrypt(
+          encryptedData,
+          kmsConfig,
+          encryptionMetadata,
+        );
       } else {
         // Fallback to local decryption
-        decryptedData = await this.decryptLocally(encryptedData, encryptionMetadata);
+        decryptedData = await this.decryptLocally(
+          encryptedData,
+          encryptionMetadata,
+        );
       }
 
       // Audit decryption event
@@ -345,7 +390,7 @@ export class DataResidencyService {
           tenantId,
           createHash('sha256').update(decryptedData).digest('hex'),
           true,
-        ]
+        ],
       );
 
       otelService.addSpanAttributes({
@@ -357,15 +402,17 @@ export class DataResidencyService {
       return decryptedData;
     } catch (error: any) {
       console.error('Data decryption failed:', error);
-      
+
       // Audit failed decryption
       const pool = getPostgresPool();
-      await pool.query(
-        `INSERT INTO decryption_audit (
+      await pool
+        .query(
+          `INSERT INTO decryption_audit (
           tenant_id, decryption_timestamp, successful, error_message, created_at
         ) VALUES ($1, now(), $2, $3, now())`,
-        [tenantId, false, error.message]
-      ).catch(() => {}); // Non-fatal audit logging
+          [tenantId, false, error.message],
+        )
+        .catch(() => {}); // Non-fatal audit logging
 
       throw error;
     } finally {
@@ -374,10 +421,10 @@ export class DataResidencyService {
   }
 
   async checkDataTransferCompliance(
-    tenantId: string, 
-    sourceRegion: string, 
-    targetRegion: string, 
-    dataClassification: DataClassification
+    tenantId: string,
+    sourceRegion: string,
+    targetRegion: string,
+    dataClassification: DataClassification,
   ): Promise<{
     compliant: boolean;
     reason?: string;
@@ -385,10 +432,10 @@ export class DataResidencyService {
     additionalControls?: string[];
   }> {
     const span = otelService.createSpan('data-residency.transfer-compliance');
-    
+
     try {
       const residencyConfig = await this.getResidencyConfig(tenantId);
-      
+
       if (!residencyConfig) {
         return {
           compliant: false,
@@ -414,7 +461,11 @@ export class DataResidencyService {
         const requiredApprovals = [];
 
         // High-classification data requires additional controls
-        if (['confidential', 'restricted', 'top-secret'].includes(dataClassification.level)) {
+        if (
+          ['confidential', 'restricted', 'top-secret'].includes(
+            dataClassification.level,
+          )
+        ) {
           additionalControls.push('encrypted-in-transit');
           additionalControls.push('encrypted-at-rest');
           requiredApprovals.push('data-protection-officer');
@@ -447,17 +498,18 @@ export class DataResidencyService {
 
   async generateResidencyReport(tenantId: string): Promise<any> {
     const span = otelService.createSpan('data-residency.generate-report');
-    
+
     try {
       const pool = getPostgresPool();
 
       // Get all residency data
-      const [residencyConfig, kmsConfig, auditData, encryptionStats] = await Promise.all([
-        this.getResidencyConfig(tenantId),
-        this.getKMSConfig(tenantId),
-        this.getAuditData(tenantId),
-        this.getEncryptionStats(tenantId),
-      ]);
+      const [residencyConfig, kmsConfig, auditData, encryptionStats] =
+        await Promise.all([
+          this.getResidencyConfig(tenantId),
+          this.getKMSConfig(tenantId),
+          this.getAuditData(tenantId),
+          this.getEncryptionStats(tenantId),
+        ]);
 
       const report = {
         metadata: {
@@ -468,14 +520,20 @@ export class DataResidencyService {
         },
         configuration: {
           residency: residencyConfig,
-          kms: kmsConfig ? {
-            provider: kmsConfig.provider,
-            region: kmsConfig.region,
-            keyId: kmsConfig.keyId.substring(0, 8) + '***',
-          } : null,
+          kms: kmsConfig
+            ? {
+                provider: kmsConfig.provider,
+                region: kmsConfig.region,
+                keyId: kmsConfig.keyId.substring(0, 8) + '***',
+              }
+            : null,
         },
         compliance: {
-          overallStatus: this.calculateComplianceStatus(residencyConfig, kmsConfig, encryptionStats),
+          overallStatus: this.calculateComplianceStatus(
+            residencyConfig,
+            kmsConfig,
+            encryptionStats,
+          ),
           encryptionCoverage: encryptionStats.encryptionRate,
           dataClassificationBreakdown: encryptionStats.classificationBreakdown,
           crossBorderTransfers: auditData.transferCount,
@@ -486,7 +544,11 @@ export class DataResidencyService {
           decryptionEvents: auditData.decryptionEvents,
           complianceViolations: auditData.violations,
         },
-        recommendations: this.generateComplianceRecommendations(residencyConfig, kmsConfig, encryptionStats),
+        recommendations: this.generateComplianceRecommendations(
+          residencyConfig,
+          kmsConfig,
+          encryptionStats,
+        ),
       };
 
       // Store report
@@ -494,7 +556,7 @@ export class DataResidencyService {
         `INSERT INTO residency_reports (
           tenant_id, report_data, created_at
         ) VALUES ($1, $2, now())`,
-        [tenantId, JSON.stringify(report)]
+        [tenantId, JSON.stringify(report)],
       );
 
       return report;
@@ -507,34 +569,50 @@ export class DataResidencyService {
   }
 
   // KMS Provider Implementations
-  private async encryptWithAWSKMS(data: string, config: KMSConfig, classification: DataClassification) {
+  private async encryptWithAWSKMS(
+    data: string,
+    config: KMSConfig,
+    classification: DataClassification,
+  ) {
     // In production, use AWS SDK
     // For demo, simulate AWS KMS envelope encryption
     const dataKey = randomBytes(32); // 256-bit key
     const cipher = createCipheriv('aes-256-gcm', dataKey, randomBytes(16));
-    
+
     let encrypted = cipher.update(data, 'utf8', 'base64');
     encrypted += cipher.final('base64');
-    
+
     return {
       encryptedData: encrypted,
       algorithm: 'aes-256-gcm-aws-kms',
       keyId: config.keyId,
-      encryptedDataKey: Buffer.from('aws-kms-encrypted-' + dataKey.toString('hex')).toString('base64'),
+      encryptedDataKey: Buffer.from(
+        'aws-kms-encrypted-' + dataKey.toString('hex'),
+      ).toString('base64'),
       authTag: cipher.getAuthTag().toString('base64'),
     };
   }
 
-  private async decryptWithAWSKMS(encryptedData: string, config: KMSConfig, metadata: any) {
+  private async decryptWithAWSKMS(
+    encryptedData: string,
+    config: KMSConfig,
+    metadata: any,
+  ) {
     // In production, decrypt data key with AWS KMS, then decrypt data
-    const dataKey = Buffer.from(metadata.encryptedDataKey, 'base64').toString().replace('aws-kms-encrypted-', '');
-    const decipher = createDecipheriv('aes-256-gcm', Buffer.from(dataKey, 'hex'), Buffer.alloc(16));
-    
+    const dataKey = Buffer.from(metadata.encryptedDataKey, 'base64')
+      .toString()
+      .replace('aws-kms-encrypted-', '');
+    const decipher = createDecipheriv(
+      'aes-256-gcm',
+      Buffer.from(dataKey, 'hex'),
+      Buffer.alloc(16),
+    );
+
     decipher.setAuthTag(Buffer.from(metadata.authTag, 'base64'));
-    
+
     let decrypted = decipher.update(encryptedData, 'base64', 'utf8');
     decrypted += decipher.final('utf8');
-    
+
     return decrypted;
   }
 
@@ -542,96 +620,142 @@ export class DataResidencyService {
     // AWS KMS GenerateDataKey equivalent
     return {
       plaintextDataKey: randomBytes(32),
-      encryptedDataKey: Buffer.from('aws-kms-encrypted-' + randomBytes(32).toString('hex')),
+      encryptedDataKey: Buffer.from(
+        'aws-kms-encrypted-' + randomBytes(32).toString('hex'),
+      ),
     };
   }
 
-  private async encryptWithAzureKV(data: string, config: KMSConfig, classification: DataClassification) {
+  private async encryptWithAzureKV(
+    data: string,
+    config: KMSConfig,
+    classification: DataClassification,
+  ) {
     // Azure Key Vault encryption simulation
     const dataKey = randomBytes(32);
     const cipher = createCipheriv('aes-256-cbc', dataKey, randomBytes(16));
-    
+
     let encrypted = cipher.update(data, 'utf8', 'base64');
     encrypted += cipher.final('base64');
-    
+
     return {
       encryptedData: encrypted,
       algorithm: 'aes-256-cbc-azure-kv',
       keyId: config.keyId,
-      encryptedDataKey: Buffer.from('azure-kv-encrypted-' + dataKey.toString('hex')).toString('base64'),
+      encryptedDataKey: Buffer.from(
+        'azure-kv-encrypted-' + dataKey.toString('hex'),
+      ).toString('base64'),
     };
   }
 
-  private async decryptWithAzureKV(encryptedData: string, config: KMSConfig, metadata: any) {
+  private async decryptWithAzureKV(
+    encryptedData: string,
+    config: KMSConfig,
+    metadata: any,
+  ) {
     // Azure Key Vault decryption simulation
-    const dataKey = Buffer.from(metadata.encryptedDataKey, 'base64').toString().replace('azure-kv-encrypted-', '');
-    const decipher = createDecipheriv('aes-256-cbc', Buffer.from(dataKey, 'hex'), Buffer.alloc(16));
-    
+    const dataKey = Buffer.from(metadata.encryptedDataKey, 'base64')
+      .toString()
+      .replace('azure-kv-encrypted-', '');
+    const decipher = createDecipheriv(
+      'aes-256-cbc',
+      Buffer.from(dataKey, 'hex'),
+      Buffer.alloc(16),
+    );
+
     let decrypted = decipher.update(encryptedData, 'base64', 'utf8');
     decrypted += decipher.final('utf8');
-    
+
     return decrypted;
   }
 
   private async generateAzureDataKey(keyId: string) {
     return {
       plaintextDataKey: randomBytes(32),
-      encryptedDataKey: Buffer.from('azure-kv-encrypted-' + randomBytes(32).toString('hex')),
+      encryptedDataKey: Buffer.from(
+        'azure-kv-encrypted-' + randomBytes(32).toString('hex'),
+      ),
     };
   }
 
-  private async encryptWithGCPKMS(data: string, config: KMSConfig, classification: DataClassification) {
+  private async encryptWithGCPKMS(
+    data: string,
+    config: KMSConfig,
+    classification: DataClassification,
+  ) {
     // GCP KMS encryption simulation
     const dataKey = randomBytes(32);
     const cipher = createCipheriv('aes-256-gcm', dataKey, randomBytes(12));
-    
+
     let encrypted = cipher.update(data, 'utf8', 'base64');
     encrypted += cipher.final('base64');
-    
+
     return {
       encryptedData: encrypted,
       algorithm: 'aes-256-gcm-gcp-kms',
       keyId: config.keyId,
-      encryptedDataKey: Buffer.from('gcp-kms-encrypted-' + dataKey.toString('hex')).toString('base64'),
+      encryptedDataKey: Buffer.from(
+        'gcp-kms-encrypted-' + dataKey.toString('hex'),
+      ).toString('base64'),
       authTag: cipher.getAuthTag().toString('base64'),
     };
   }
 
-  private async decryptWithGCPKMS(encryptedData: string, config: KMSConfig, metadata: any) {
+  private async decryptWithGCPKMS(
+    encryptedData: string,
+    config: KMSConfig,
+    metadata: any,
+  ) {
     // GCP KMS decryption simulation
-    const dataKey = Buffer.from(metadata.encryptedDataKey, 'base64').toString().replace('gcp-kms-encrypted-', '');
-    const decipher = createDecipheriv('aes-256-gcm', Buffer.from(dataKey, 'hex'), Buffer.alloc(12));
-    
+    const dataKey = Buffer.from(metadata.encryptedDataKey, 'base64')
+      .toString()
+      .replace('gcp-kms-encrypted-', '');
+    const decipher = createDecipheriv(
+      'aes-256-gcm',
+      Buffer.from(dataKey, 'hex'),
+      Buffer.alloc(12),
+    );
+
     decipher.setAuthTag(Buffer.from(metadata.authTag, 'base64'));
-    
+
     let decrypted = decipher.update(encryptedData, 'base64', 'utf8');
     decrypted += decipher.final('utf8');
-    
+
     return decrypted;
   }
 
   private async generateGCPDataKey(keyId: string) {
     return {
       plaintextDataKey: randomBytes(32),
-      encryptedDataKey: Buffer.from('gcp-kms-encrypted-' + randomBytes(32).toString('hex')),
+      encryptedDataKey: Buffer.from(
+        'gcp-kms-encrypted-' + randomBytes(32).toString('hex'),
+      ),
     };
   }
 
-  private async encryptWithCustomerKey(data: string, config: KMSConfig, classification: DataClassification) {
+  private async encryptWithCustomerKey(
+    data: string,
+    config: KMSConfig,
+    classification: DataClassification,
+  ) {
     // Customer-managed encryption with envelope encryption pattern
     const dataKey = randomBytes(32);
     const iv = randomBytes(16);
     const cipher = createCipheriv('aes-256-gcm', dataKey, iv);
-    
+
     let encrypted = cipher.update(data, 'utf8', 'base64');
     encrypted += cipher.final('base64');
-    
+
     // In production, encrypt data key with customer's root key
     const rootKey = await this.getCustomerRootKey(config.keyId);
-    const keyEncryptionKey = createCipheriv('aes-256-gcm', rootKey, randomBytes(16));
+    const keyEncryptionKey = createCipheriv(
+      'aes-256-gcm',
+      rootKey,
+      randomBytes(16),
+    );
     let encryptedDataKey = keyEncryptionKey.update(dataKey, null, 'base64');
     encryptedDataKey += keyEncryptionKey.final('base64');
-    
+
     return {
       encryptedData: encrypted,
       algorithm: 'aes-256-gcm-customer-managed',
@@ -643,35 +767,47 @@ export class DataResidencyService {
     };
   }
 
-  private async decryptWithCustomerKey(encryptedData: string, config: KMSConfig, metadata: any) {
+  private async decryptWithCustomerKey(
+    encryptedData: string,
+    config: KMSConfig,
+    metadata: any,
+  ) {
     // Decrypt with customer-managed key
     const rootKey = await this.getCustomerRootKey(config.keyId);
-    
+
     // Decrypt data key first
-    const keyDecipher = createDecipheriv('aes-256-gcm', rootKey, Buffer.alloc(16));
+    const keyDecipher = createDecipheriv(
+      'aes-256-gcm',
+      rootKey,
+      Buffer.alloc(16),
+    );
     keyDecipher.setAuthTag(Buffer.from(metadata.keyAuthTag, 'base64'));
-    
+
     let dataKey = keyDecipher.update(metadata.encryptedDataKey, 'base64');
     dataKey = Buffer.concat([dataKey, keyDecipher.final()]);
-    
+
     // Decrypt actual data
-    const decipher = createDecipheriv('aes-256-gcm', dataKey, Buffer.from(metadata.iv, 'base64'));
+    const decipher = createDecipheriv(
+      'aes-256-gcm',
+      dataKey,
+      Buffer.from(metadata.iv, 'base64'),
+    );
     decipher.setAuthTag(Buffer.from(metadata.authTag, 'base64'));
-    
+
     let decrypted = decipher.update(encryptedData, 'base64', 'utf8');
     decrypted += decipher.final('utf8');
-    
+
     return decrypted;
   }
 
   private async generateCustomerDataKey(keyId: string) {
     const rootKey = await this.getCustomerRootKey(keyId);
     const dataKey = randomBytes(32);
-    
+
     const cipher = createCipheriv('aes-256-gcm', rootKey, randomBytes(16));
     let encryptedDataKey = cipher.update(dataKey, null, 'base64');
     encryptedDataKey += cipher.final('base64');
-    
+
     return {
       plaintextDataKey: dataKey,
       encryptedDataKey: Buffer.from(encryptedDataKey, 'base64'),
@@ -681,7 +817,10 @@ export class DataResidencyService {
   // Helper methods
   private async getCustomerRootKey(keyId: string): Promise<Buffer> {
     // In production, retrieve from secure key storage
-    return Buffer.from(process.env.CUSTOMER_ROOT_KEY || 'customer-root-key-32-byte-length!!!', 'utf8');
+    return Buffer.from(
+      process.env.CUSTOMER_ROOT_KEY || 'customer-root-key-32-byte-length!!!',
+      'utf8',
+    );
   }
 
   private async testKMSConnectivity(config: KMSConfig): Promise<boolean> {
@@ -711,13 +850,16 @@ export class DataResidencyService {
 
   private async encryptCredentials(credentials: string): Promise<string> {
     // Encrypt credentials with system key
-    const systemKey = Buffer.from(process.env.SYSTEM_ENCRYPTION_KEY || 'system-key-32-byte-length!!!!!!', 'utf8');
+    const systemKey = Buffer.from(
+      process.env.SYSTEM_ENCRYPTION_KEY || 'system-key-32-byte-length!!!!!!',
+      'utf8',
+    );
     const iv = randomBytes(16);
     const cipher = createCipheriv('aes-256-gcm', systemKey, iv);
-    
+
     let encrypted = cipher.update(credentials, 'utf8', 'base64');
     encrypted += cipher.final('base64');
-    
+
     return JSON.stringify({
       encrypted,
       iv: iv.toString('base64'),
@@ -725,15 +867,17 @@ export class DataResidencyService {
     });
   }
 
-  private async getResidencyConfig(tenantId: string): Promise<ResidencyConfig | null> {
+  private async getResidencyConfig(
+    tenantId: string,
+  ): Promise<ResidencyConfig | null> {
     const pool = getPostgresPool();
     const result = await pool.query(
       'SELECT * FROM data_residency_configs WHERE tenant_id = $1',
-      [tenantId]
+      [tenantId],
     );
-    
+
     if (result.rows.length === 0) return null;
-    
+
     const row = result.rows[0];
     return {
       region: row.region,
@@ -750,11 +894,11 @@ export class DataResidencyService {
     const pool = getPostgresPool();
     const result = await pool.query(
       'SELECT * FROM kms_configs WHERE tenant_id = $1',
-      [tenantId]
+      [tenantId],
     );
-    
+
     if (result.rows.length === 0) return null;
-    
+
     const row = result.rows[0];
     return {
       provider: row.provider,
@@ -765,27 +909,35 @@ export class DataResidencyService {
     };
   }
 
-  private checkResidencyCompliance(classification: DataClassification, config: ResidencyConfig | null): boolean {
+  private checkResidencyCompliance(
+    classification: DataClassification,
+    config: ResidencyConfig | null,
+  ): boolean {
     if (!config) return false;
-    
+
     // Check if data classification is allowed in tenant's region
     if (classification.residencyRequirements.length > 0) {
-      return classification.residencyRequirements.includes(config.region) ||
-             classification.residencyRequirements.includes(config.country) ||
-             classification.residencyRequirements.includes(config.jurisdiction);
+      return (
+        classification.residencyRequirements.includes(config.region) ||
+        classification.residencyRequirements.includes(config.country) ||
+        classification.residencyRequirements.includes(config.jurisdiction)
+      );
     }
-    
+
     return true;
   }
 
-  private async encryptLocally(data: string, classification: DataClassification) {
+  private async encryptLocally(
+    data: string,
+    classification: DataClassification,
+  ) {
     const key = randomBytes(32);
     const iv = randomBytes(16);
     const cipher = createCipheriv('aes-256-gcm', key, iv);
-    
+
     let encrypted = cipher.update(data, 'utf8', 'base64');
     encrypted += cipher.final('base64');
-    
+
     return {
       encryptedData: encrypted,
       algorithm: 'aes-256-gcm-local',
@@ -798,7 +950,9 @@ export class DataResidencyService {
   private async decryptLocally(encryptedData: string, metadata: any) {
     // For demo purposes, local decryption is simulated
     // In production, you'd need proper key management
-    throw new Error('Local decryption requires proper key storage implementation');
+    throw new Error(
+      'Local decryption requires proper key storage implementation',
+    );
   }
 
   private async getJurisdictionMapping(): Promise<Record<string, string>> {
@@ -813,27 +967,45 @@ export class DataResidencyService {
     };
   }
 
-  private requiresLegalReview(sourceJurisdiction: string, targetJurisdiction: string): boolean {
+  private requiresLegalReview(
+    sourceJurisdiction: string,
+    targetJurisdiction: string,
+  ): boolean {
     // Define jurisdiction pairs that require legal review
     const legalReviewRequired = new Set([
-      'US-EU', 'EU-US',
-      'US-APAC', 'APAC-US',
-      'EU-APAC', 'APAC-EU',
+      'US-EU',
+      'EU-US',
+      'US-APAC',
+      'APAC-US',
+      'EU-APAC',
+      'APAC-EU',
     ]);
-    
-    return legalReviewRequired.has(`${sourceJurisdiction}-${targetJurisdiction}`);
+
+    return legalReviewRequired.has(
+      `${sourceJurisdiction}-${targetJurisdiction}`,
+    );
   }
 
   private async getAuditData(tenantId: string) {
     const pool = getPostgresPool();
-    
+
     const [auditEvents, encEvents, decEvents, violations] = await Promise.all([
-      pool.query('SELECT COUNT(*) FROM data_residency_audit WHERE tenant_id = $1', [tenantId]),
-      pool.query('SELECT COUNT(*) FROM encryption_audit WHERE tenant_id = $1', [tenantId]),
-      pool.query('SELECT COUNT(*) FROM decryption_audit WHERE tenant_id = $1', [tenantId]),
-      pool.query('SELECT COUNT(*) FROM encryption_audit WHERE tenant_id = $1 AND compliant = false', [tenantId]),
+      pool.query(
+        'SELECT COUNT(*) FROM data_residency_audit WHERE tenant_id = $1',
+        [tenantId],
+      ),
+      pool.query('SELECT COUNT(*) FROM encryption_audit WHERE tenant_id = $1', [
+        tenantId,
+      ]),
+      pool.query('SELECT COUNT(*) FROM decryption_audit WHERE tenant_id = $1', [
+        tenantId,
+      ]),
+      pool.query(
+        'SELECT COUNT(*) FROM encryption_audit WHERE tenant_id = $1 AND compliant = false',
+        [tenantId],
+      ),
     ]);
-    
+
     return {
       totalEvents: parseInt(auditEvents.rows[0].count),
       encryptionEvents: parseInt(encEvents.rows[0].count),
@@ -845,8 +1017,9 @@ export class DataResidencyService {
 
   private async getEncryptionStats(tenantId: string) {
     const pool = getPostgresPool();
-    
-    const stats = await pool.query(`
+
+    const stats = await pool.query(
+      `
       SELECT 
         classification_level,
         COUNT(*) as count,
@@ -854,14 +1027,22 @@ export class DataResidencyService {
       FROM encryption_audit 
       WHERE tenant_id = $1 
       GROUP BY classification_level
-    `, [tenantId]);
-    
-    const totalEvents = await pool.query('SELECT COUNT(*) FROM encryption_audit WHERE tenant_id = $1', [tenantId]);
-    const encryptedEvents = await pool.query('SELECT COUNT(*) FROM encryption_audit WHERE tenant_id = $1 AND encryption_method != \'none\'', [tenantId]);
-    
+    `,
+      [tenantId],
+    );
+
+    const totalEvents = await pool.query(
+      'SELECT COUNT(*) FROM encryption_audit WHERE tenant_id = $1',
+      [tenantId],
+    );
+    const encryptedEvents = await pool.query(
+      "SELECT COUNT(*) FROM encryption_audit WHERE tenant_id = $1 AND encryption_method != 'none'",
+      [tenantId],
+    );
+
     const total = parseInt(totalEvents.rows[0].count);
     const encrypted = parseInt(encryptedEvents.rows[0].count);
-    
+
     return {
       encryptionRate: total > 0 ? (encrypted / total) * 100 : 100,
       classificationBreakdown: stats.rows.reduce((acc, row) => {
@@ -874,37 +1055,49 @@ export class DataResidencyService {
     };
   }
 
-  private calculateComplianceStatus(residencyConfig: ResidencyConfig | null, kmsConfig: KMSConfig | null, encryptionStats: any): string {
+  private calculateComplianceStatus(
+    residencyConfig: ResidencyConfig | null,
+    kmsConfig: KMSConfig | null,
+    encryptionStats: any,
+  ): string {
     if (!residencyConfig) return 'non-compliant';
     if (residencyConfig.encryptionRequired && !kmsConfig) return 'partial';
     if (encryptionStats.encryptionRate < 95) return 'partial';
     return 'compliant';
   }
 
-  private generateComplianceRecommendations(residencyConfig: ResidencyConfig | null, kmsConfig: KMSConfig | null, encryptionStats: any): string[] {
+  private generateComplianceRecommendations(
+    residencyConfig: ResidencyConfig | null,
+    kmsConfig: KMSConfig | null,
+    encryptionStats: any,
+  ): string[] {
     const recommendations: string[] = [];
-    
+
     if (!residencyConfig) {
-      recommendations.push('Configure data residency requirements for your tenant');
+      recommendations.push(
+        'Configure data residency requirements for your tenant',
+      );
     }
-    
+
     if (!kmsConfig) {
-      recommendations.push('Configure BYOK (Bring Your Own Key) for enhanced security');
+      recommendations.push(
+        'Configure BYOK (Bring Your Own Key) for enhanced security',
+      );
     }
-    
+
     if (encryptionStats.encryptionRate < 100) {
       recommendations.push('Ensure all sensitive data is encrypted at rest');
     }
-    
+
     if (Object.keys(encryptionStats.classificationBreakdown).length === 0) {
       recommendations.push('Implement data classification scheme');
     }
-    
+
     if (recommendations.length === 0) {
       recommendations.push('Data residency configuration is compliant');
       recommendations.push('Consider regular compliance audits');
     }
-    
+
     return recommendations;
   }
 }

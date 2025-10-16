@@ -1,7 +1,7 @@
 /**
  * Comprehensive audit logging for AI operations
  */
-import { v4 as uuid } from "uuid";
+import { randomUUID } from "crypto";
 let auditRepo = null;
 export function setupAIAuditLogging(db) {
     auditRepo = db.audit;
@@ -13,7 +13,7 @@ export async function auditAIOperation(type, actorId, meta = {}) {
         return;
     try {
         await auditRepo.insert({
-            id: uuid(),
+            id: randomUUID(),
             type,
             actorId,
             createdAt: new Date().toISOString(),

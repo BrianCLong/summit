@@ -1,4 +1,10 @@
-export type JiraPriorityLevel = 'blocker' | 'critical' | 'high' | 'medium' | 'low' | 'info';
+export type JiraPriorityLevel =
+  | 'blocker'
+  | 'critical'
+  | 'high'
+  | 'medium'
+  | 'low'
+  | 'info';
 
 export interface PriorityMappingEntry {
   readonly priorityId: string;
@@ -27,7 +33,9 @@ export interface JiraIntegrationConfig {
   readonly projectKey: string;
   readonly issueTypeId: string;
   readonly customFieldMap: PerfTraceCustomFieldMap;
-  readonly priorityMapping: Readonly<Record<JiraPriorityLevel, PriorityMappingEntry>>;
+  readonly priorityMapping: Readonly<
+    Record<JiraPriorityLevel, PriorityMappingEntry>
+  >;
   readonly workflowTransitions: WorkflowTransitionMapping;
   readonly maxRetries?: number;
   readonly retryDelayMs?: number;

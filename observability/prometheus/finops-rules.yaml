@@ -1,8 +1,8 @@
 groups:
-- name: finops-alerts
-  rules:
-    - alert: DailyCostExceeded
-      expr: sum(cost_total_daily) > 1000 # Example: $1000 daily budget
-      for: 1h
-      labels: { severity: critical }
-      annotations: { summary: "Daily cost budget exceeded" }
+  - name: finops-alerts
+    rules:
+      - alert: DailyCostExceeded
+        expr: sum(cost_total_daily) > 1000 # Example: $1000 daily budget
+        for: 1h
+        labels: { severity: critical }
+        annotations: { summary: 'Daily cost budget exceeded' }

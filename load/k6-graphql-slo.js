@@ -20,8 +20,16 @@ query Neighborhood($id: ID!) {
 export default function () {
   const res = http.post(
     __ENV.GRAPHQL_URL,
-    JSON.stringify({ query, variables: { id: __ENV.SEED_NODE || 'seed-node' } }),
-    { headers: { 'Content-Type': 'application/json', 'X-Persisted-Query': 'true' } },
+    JSON.stringify({
+      query,
+      variables: { id: __ENV.SEED_NODE || 'seed-node' },
+    }),
+    {
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Persisted-Query': 'true',
+      },
+    },
   );
 
   check(res, {

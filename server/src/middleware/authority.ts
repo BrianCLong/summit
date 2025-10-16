@@ -9,7 +9,13 @@ import { Request, Response, NextFunction } from 'express';
 import logger from '../utils/logger.js';
 
 interface AuthorityBinding {
-  type: 'WARRANT' | 'SUBPOENA' | 'COURT_ORDER' | 'ADMIN_AUTH' | 'LICENSE' | 'TOS';
+  type:
+    | 'WARRANT'
+    | 'SUBPOENA'
+    | 'COURT_ORDER'
+    | 'ADMIN_AUTH'
+    | 'LICENSE'
+    | 'TOS';
   jurisdiction: string;
   reference: string;
   expiry_date: string;
@@ -79,7 +85,8 @@ export class AuthorityGuard {
 
     for (const requiredAuth of requiredAuthorities) {
       const binding = user.authority_bindings.find(
-        (auth) => auth.type === requiredAuth && this.isAuthorityValid(auth, scope),
+        (auth) =>
+          auth.type === requiredAuth && this.isAuthorityValid(auth, scope),
       );
 
       if (!binding) {
@@ -93,7 +100,9 @@ export class AuthorityGuard {
     return { valid: true };
   }
 
-  private getRequiredAuthorities(operation: string): AuthorityBinding['type'][] {
+  private getRequiredAuthorities(
+    operation: string,
+  ): AuthorityBinding['type'][] {
     const authMap: Record<string, AuthorityBinding['type'][]> = {
       classified_query: ['WARRANT', 'COURT_ORDER'],
       export_data: ['SUBPOENA', 'COURT_ORDER', 'ADMIN_AUTH'],
@@ -105,7 +114,10 @@ export class AuthorityGuard {
     return authMap[operation] || ['LICENSE'];
   }
 
-  private isAuthorityValid(authority: AuthorityBinding, scope: string[]): boolean {
+  private isAuthorityValid(
+    authority: AuthorityBinding,
+    scope: string[],
+  ): boolean {
     const expiryDate = new Date(authority.expiry_date);
     const now = new Date();
 
@@ -120,7 +132,9 @@ export class AuthorityGuard {
 
     // Check if authority scope covers requested operation scope
     const hasScope = scope.every(
-      (requestedScope) => authority.scope.includes(requestedScope) || authority.scope.includes('*'),
+      (requestedScope) =>
+        authority.scope.includes(requestedScope) ||
+        authority.scope.includes('*'),
     );
 
     if (!hasScope) {
@@ -151,22 +165,34 @@ export class AuthorityGuard {
     // Foster dissent: License enforcement
     const licenseValid = this.validateLicense(user, operation);
     if (!licenseValid) {
-      decision.reasons.push('License validation failed - Foster dissent protection active');
+      decision.reasons.push(
+        'License validation failed - Foster dissent protection active',
+      );
     }
 
     // Starkey dissent: Authority binding validation
-    const authorityCheck = this.validateAuthorityBinding(user, operation, operationScope);
+    const authorityCheck = this.validateAuthorityBinding(
+      user,
+      operation,
+      operationScope,
+    );
     if (!authorityCheck.valid) {
-      decision.reasons.push(authorityCheck.reason || 'Authority validation failed');
+      decision.reasons.push(
+        authorityCheck.reason || 'Authority validation failed',
+      );
       decision.required_authority = this.getRequiredAuthorities(operation);
     }
 
     // Starkey dissent: Export manifest validation
     if (operation === 'export_data') {
       if (!exportManifest || !exportManifest.hash) {
-        decision.reasons.push('Missing export manifest - Starkey dissent protection active');
+        decision.reasons.push(
+          'Missing export manifest - Starkey dissent protection active',
+        );
       } else if (!exportManifest.immutable_disclosure_bundle) {
-        decision.reasons.push('Missing immutable disclosure bundle - Starkey dissent protection');
+        decision.reasons.push(
+          'Missing immutable disclosure bundle - Starkey dissent protection',
+        );
       }
     }
 
@@ -216,7 +242,12 @@ export const requireAuthority = (operation: string, scope: string[] = []) => {
       });
     }
 
-    const decision = guard.evaluatePolicy(user, operation, scope, req.body.export_manifest);
+    const decision = guard.evaluatePolicy(
+      user,
+      operation,
+      scope,
+      req.body.export_manifest,
+    );
 
     if (!decision.allow) {
       logger.warn({
@@ -250,13 +281,18 @@ export const requireAuthority = (operation: string, scope: string[] = []) => {
 };
 
 // Committee requirement: Reason for access context propagation
-export const requireReasonForAccess = (req: Request, res: Response, next: NextFunction) => {
+export const requireReasonForAccess = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const reasonForAccess = req.headers['x-reason-for-access'] as string;
 
   if (!reasonForAccess || reasonForAccess.length < 10) {
     return res.status(400).json({
       error: 'Reason for access required',
-      message: 'Committee requirement: All access must include detailed justification',
+      message:
+        'Committee requirement: All access must include detailed justification',
       code: 'REASON_REQUIRED',
     });
   }

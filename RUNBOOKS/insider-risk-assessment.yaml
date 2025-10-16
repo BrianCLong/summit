@@ -7,31 +7,31 @@ tasks:
     name: Ingest Access Logs
     uses: connector:elastic
     with:
-      indices: ["access-logs-*", "vpn-logs-*", "file-access-*"]
-      time_range: "90d"
+      indices: ['access-logs-*', 'vpn-logs-*', 'file-access-*']
+      time_range: '90d'
 
   - id: behavioral_baseline
     name: Establish Behavioral Baseline
     uses: ml:forecast
     needs: [access_logs_ingest]
     with:
-      baseline_period: "60d"
-      behavioral_features: ["login_times", "data_access", "network_usage"]
+      baseline_period: '60d'
+      behavioral_features: ['login_times', 'data_access', 'network_usage']
 
   - id: anomaly_detection
     name: Detect Behavioral Anomalies
     uses: analyze:risk
     needs: [behavioral_baseline]
     with:
-      model: "insider-threat-v3"
-      sensitivity: "high"
+      model: 'insider-threat-v3'
+      sensitivity: 'high'
 
   - id: privilege_analysis
     name: Analyze Privilege Escalation
     uses: graph:entity-resolution
     needs: [anomaly_detection]
     with:
-      entity_types: ["user", "role", "system"]
+      entity_types: ['user', 'role', 'system']
       privilege_mapping: true
 
   - id: risk_contextualization
@@ -39,7 +39,7 @@ tasks:
     uses: xai:explanations
     needs: [privilege_analysis]
     with:
-      model: "insider-context-v1"
+      model: 'insider-context-v1'
       privacy_preserving: true
 
   - id: mitigation_recommendations
@@ -47,9 +47,9 @@ tasks:
     uses: export:bundle
     needs: [risk_contextualization]
     with:
-      format: "risk-report"
+      format: 'risk-report'
       include_recommendations: true
-      privacy_level: "high"
+      privacy_level: 'high'
 
 kpis:
   - early_detection_rate

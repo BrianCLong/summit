@@ -46,7 +46,12 @@ export interface Comment {
 
 export interface LiveNotification {
   id: string;
-  type: 'USER_JOINED' | 'USER_LEFT' | 'ENTITY_UPDATED' | 'COMMENT_ADDED' | 'EDIT_CONFLICT';
+  type:
+    | 'USER_JOINED'
+    | 'USER_LEFT'
+    | 'ENTITY_UPDATED'
+    | 'COMMENT_ADDED'
+    | 'EDIT_CONFLICT';
   userId: string;
   investigationId: string;
   message: string;
@@ -83,7 +88,11 @@ export class CollaborationService extends EventEmitter {
   /**
    * User joins an investigation
    */
-  async joinInvestigation(userId: string, investigationId: string, userInfo: User): Promise<void> {
+  async joinInvestigation(
+    userId: string,
+    investigationId: string,
+    userInfo: User,
+  ): Promise<void> {
     const presence: UserPresence = {
       userId,
       investigationId,
@@ -94,7 +103,11 @@ export class CollaborationService extends EventEmitter {
     this.activeUsers.set(`${userId}:${investigationId}`, presence);
 
     // Cache user presence
-    await cacheService.set(`presence:${userId}:${investigationId}`, presence, 300);
+    await cacheService.set(
+      `presence:${userId}:${investigationId}`,
+      presence,
+      300,
+    );
 
     // Notify other users
     const notification: LiveNotification = {
@@ -109,15 +122,25 @@ export class CollaborationService extends EventEmitter {
 
     this.addNotification(notification);
     this.emit('userJoined', { userId, investigationId, userInfo, presence });
-    this.pubsub.publish('userJoined', { userId, investigationId, userInfo, presence });
+    this.pubsub.publish('userJoined', {
+      userId,
+      investigationId,
+      userInfo,
+      presence,
+    });
 
-    console.log(`[COLLABORATION] User ${userInfo.name} joined investigation ${investigationId}`);
+    console.log(
+      `[COLLABORATION] User ${userInfo.name} joined investigation ${investigationId}`,
+    );
   }
 
   /**
    * User leaves an investigation
    */
-  async leaveInvestigation(userId: string, investigationId: string): Promise<void> {
+  async leaveInvestigation(
+    userId: string,
+    investigationId: string,
+  ): Promise<void> {
     const presenceKey = `${userId}:${investigationId}`;
     const presence = this.activeUsers.get(presenceKey);
 
@@ -138,7 +161,9 @@ export class CollaborationService extends EventEmitter {
       this.emit('userLeft', { userId, investigationId });
       this.pubsub.publish('userLeft', { userId, investigationId });
 
-      console.log(`[COLLABORATION] User ${userId} left investigation ${investigationId}`);
+      console.log(
+        `[COLLABORATION] User ${userId} left investigation ${investigationId}`,
+      );
     }
   }
 
@@ -161,9 +186,17 @@ export class CollaborationService extends EventEmitter {
       };
 
       this.activeUsers.set(presenceKey, updatedPresence);
-      await cacheService.set(`presence:${userId}:${investigationId}`, updatedPresence, 300);
+      await cacheService.set(
+        `presence:${userId}:${investigationId}`,
+        updatedPresence,
+        300,
+      );
 
-      this.emit('presenceUpdated', { userId, investigationId, presence: updatedPresence });
+      this.emit('presenceUpdated', {
+        userId,
+        investigationId,
+        presence: updatedPresence,
+      });
       this.pubsub.publish('presenceUpdated', {
         userId,
         investigationId,
@@ -214,7 +247,9 @@ export class CollaborationService extends EventEmitter {
     const conflicts = this.detectEditConflicts(collaborativeEdit);
 
     if (conflicts.length > 0) {
-      console.log(`[COLLABORATION] Edit conflicts detected for edit ${collaborativeEdit.id}`);
+      console.log(
+        `[COLLABORATION] Edit conflicts detected for edit ${collaborativeEdit.id}`,
+      );
 
       const notification: LiveNotification = {
         id: `notif-${Date.now()}`,
@@ -231,7 +266,9 @@ export class CollaborationService extends EventEmitter {
 
     this.emit('editSubmitted', collaborativeEdit);
     this.pubsub.publish('editSubmitted', collaborativeEdit);
-    console.log(`[COLLABORATION] Edit submitted: ${collaborativeEdit.id} by user ${edit.userId}`);
+    console.log(
+      `[COLLABORATION] Edit submitted: ${collaborativeEdit.id} by user ${edit.userId}`,
+    );
 
     return collaborativeEdit;
   }
@@ -309,7 +346,9 @@ export class CollaborationService extends EventEmitter {
     this.emit('commentAdded', newComment);
     this.pubsub.publish('commentAdded', newComment);
 
-    console.log(`[COLLABORATION] Comment added: ${newComment.id} by user ${comment.userId}`);
+    console.log(
+      `[COLLABORATION] Comment added: ${newComment.id} by user ${comment.userId}`,
+    );
     return newComment;
   }
 
@@ -328,14 +367,18 @@ export class CollaborationService extends EventEmitter {
     }
 
     return comments.sort(
-      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
     );
   }
 
   /**
    * Get recent notifications
    */
-  getRecentNotifications(investigationId: string, limit: number = 20): LiveNotification[] {
+  getRecentNotifications(
+    investigationId: string,
+    limit: number = 20,
+  ): LiveNotification[] {
     return this.notifications
       .filter((notif) => notif.investigationId === investigationId)
       .slice(0, limit);
@@ -348,12 +391,18 @@ export class CollaborationService extends EventEmitter {
     const edits: CollaborativeEdit[] = [];
 
     for (const edit of this.pendingEdits.values()) {
-      if (edit.investigationId === investigationId && edit.status === 'PENDING') {
+      if (
+        edit.investigationId === investigationId &&
+        edit.status === 'PENDING'
+      ) {
         edits.push(edit);
       }
     }
 
-    return edits.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    return edits.sort(
+      (a, b) =>
+        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime(),
+    );
   }
 
   /**
@@ -425,13 +474,17 @@ export class CollaborationService extends EventEmitter {
 
       if (timeDiff > inactiveThreshold) {
         this.activeUsers.delete(key);
-        cacheService.delete(`presence:${presence.userId}:${presence.investigationId}`);
+        cacheService.delete(
+          `presence:${presence.userId}:${presence.investigationId}`,
+        );
         cleanedUp++;
       }
     }
 
     if (cleanedUp > 0) {
-      console.log(`[COLLABORATION] Cleaned up ${cleanedUp} inactive user presences`);
+      console.log(
+        `[COLLABORATION] Cleaned up ${cleanedUp} inactive user presences`,
+      );
     }
   }
 }

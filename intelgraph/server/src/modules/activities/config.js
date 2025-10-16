@@ -9,16 +9,16 @@ const DEFAULT_CONFIG = {
   stabilizationNexus: 1.0,
   engagementIntensity: 1.0,
   coherenceScale: 10000000000000,
-}
+};
 
 function normalizeConfig(input = {}) {
   return {
     ...DEFAULT_CONFIG,
     ...input,
-  }
+  };
 }
 
 module.exports = {
   DEFAULT_CONFIG,
   normalizeConfig,
-}
+};

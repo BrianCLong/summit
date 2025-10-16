@@ -211,10 +211,10 @@ export function isQueryAllowed(query?: string, queryId?: string): boolean {
 /**
  * Extract query from persisted query ID or validate inline query
  */
-export function resolveQuery(options: {
-  query?: string;
-  queryId?: string;
-}): { query: string; isPersistedQuery: boolean } {
+export function resolveQuery(options: { query?: string; queryId?: string }): {
+  query: string;
+  isPersistedQuery: boolean;
+} {
   const { query, queryId } = options;
 
   // Try persisted query first

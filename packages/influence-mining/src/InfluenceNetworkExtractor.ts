@@ -55,7 +55,9 @@ export class InfluenceNetworkExtractor {
     }
 
     const graph = graphBuilder.build();
-    const entities = Array.from(new Map(graph.nodes.map((entity) => [entity.id, entity])).values());
+    const entities = Array.from(
+      new Map(graph.nodes.map((entity) => [entity.id, entity])).values(),
+    );
 
     return {
       graph,
@@ -67,8 +69,12 @@ export class InfluenceNetworkExtractor {
   enrich(network: InfluenceNetwork): EnrichedNetwork {
     const motifs = {
       botNetworks: this.motifAnalyzer.detectBotNetworks(network.graph),
-      amplifierClusters: this.motifAnalyzer.findAmplifierClusters(network.graph),
-      coordinatedBehaviors: this.motifAnalyzer.identifyCoordinatedBehavior(network.graph),
+      amplifierClusters: this.motifAnalyzer.findAmplifierClusters(
+        network.graph,
+      ),
+      coordinatedBehaviors: this.motifAnalyzer.identifyCoordinatedBehavior(
+        network.graph,
+      ),
     };
 
     return {
@@ -82,8 +88,14 @@ export class InfluenceNetworkExtractor {
     const outbound = new Map<string, number>();
 
     for (const relationship of network.relationships) {
-      outbound.set(relationship.from, (outbound.get(relationship.from) ?? 0) + relationship.weight);
-      inbound.set(relationship.to, (inbound.get(relationship.to) ?? 0) + relationship.weight);
+      outbound.set(
+        relationship.from,
+        (outbound.get(relationship.from) ?? 0) + relationship.weight,
+      );
+      inbound.set(
+        relationship.to,
+        (inbound.get(relationship.to) ?? 0) + relationship.weight,
+      );
     }
 
     const rankings: NodeRanking[] = network.graph.nodes.map((entity) => {
@@ -98,7 +110,9 @@ export class InfluenceNetworkExtractor {
       };
     });
 
-    rankings.sort((a, b) => b.score - a.score || a.entity.id.localeCompare(b.entity.id));
+    rankings.sort(
+      (a, b) => b.score - a.score || a.entity.id.localeCompare(b.entity.id),
+    );
 
     return {
       ...network,

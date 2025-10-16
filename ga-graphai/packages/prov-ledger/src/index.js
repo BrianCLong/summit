@@ -38,8 +38,8 @@ export class ProvenanceLedger {
       decision: normalizedDecision,
       metadata: {
         policyTags: Array.from(new Set(metadata.policyTags ?? [])),
-        savingsUSD: Number(metadata.savingsUSD ?? 0)
-      }
+        savingsUSD: Number(metadata.savingsUSD ?? 0),
+      },
     };
     entry.fingerprint = this.createFingerprint(entry);
     deepFreeze(entry);
@@ -58,7 +58,7 @@ export class ProvenanceLedger {
       namespace: entry.namespace,
       recordedAt: entry.recordedAt,
       decision: entry.decision,
-      metadata: entry.metadata
+      metadata: entry.metadata,
     };
     const hash = crypto.createHash('sha256');
     hash.update(serializeForHash(payload));
@@ -98,7 +98,7 @@ export class ProvenanceLedger {
         acc.totalSavingsUSD += entry.metadata.savingsUSD;
         return acc;
       },
-      { count: 0, totalBudgetDeltaUSD: 0, totalSavingsUSD: 0 }
+      { count: 0, totalBudgetDeltaUSD: 0, totalSavingsUSD: 0 },
     );
   }
 }

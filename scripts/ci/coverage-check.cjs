@@ -23,7 +23,7 @@ function runUnitCoverageCheck({ baseRef, threshold = DEFAULT_THRESHOLD }) {
       description,
       passed: evaluation.passed,
       details: evaluation.details,
-      remediation
+      remediation,
     });
   } catch (error) {
     const message = extractErrorMessage(error);
@@ -32,7 +32,7 @@ function runUnitCoverageCheck({ baseRef, threshold = DEFAULT_THRESHOLD }) {
       description,
       passed: false,
       details: [message],
-      remediation
+      remediation,
     });
   }
 }
@@ -41,8 +41,8 @@ function executeCoverageSuite() {
   execSync(
     'npm run test:jest -- --coverage --coverageReporters=json-summary --passWithNoTests --runInBand',
     {
-      stdio: 'inherit'
-    }
+      stdio: 'inherit',
+    },
   );
 }
 
@@ -53,13 +53,19 @@ function loadCoverageSummary(reportPath) {
   return JSON.parse(fs.readFileSync(reportPath, 'utf8'));
 }
 
-function evaluateCoverage(summary, changedFiles, threshold = DEFAULT_THRESHOLD) {
+function evaluateCoverage(
+  summary,
+  changedFiles,
+  threshold = DEFAULT_THRESHOLD,
+) {
   const details = [];
   const eligibleFiles = changedFiles.filter(isEligibleSourceFile);
   if (eligibleFiles.length === 0) {
     return {
       passed: true,
-      details: ['No eligible source files changed; coverage requirement automatically satisfied.']
+      details: [
+        'No eligible source files changed; coverage requirement automatically satisfied.',
+      ],
     };
   }
   const coverageThreshold = threshold * 100;
@@ -67,7 +73,9 @@ function evaluateCoverage(summary, changedFiles, threshold = DEFAULT_THRESHOLD) 
   for (const filePath of eligibleFiles) {
     const coverageEntry = findCoverageEntry(summary, filePath);
     if (!coverageEntry) {
-      details.push(`Missing coverage data for ${filePath}. Add targeted tests to exercise this file.`);
+      details.push(
+        `Missing coverage data for ${filePath}. Add targeted tests to exercise this file.`,
+      );
       allPassing = false;
       continue;
     }
@@ -81,7 +89,7 @@ function evaluateCoverage(summary, changedFiles, threshold = DEFAULT_THRESHOLD) 
       if (metricInfo.pct < coverageThreshold) {
         const pct = metricInfo.pct.toFixed(1);
         details.push(
-          `${filePath}: ${metric} coverage ${pct}% is below required ${(coverageThreshold).toFixed(0)}%.`
+          `${filePath}: ${metric} coverage ${pct}% is below required ${coverageThreshold.toFixed(0)}%.`,
         );
         allPassing = false;
       }
@@ -89,7 +97,7 @@ function evaluateCoverage(summary, changedFiles, threshold = DEFAULT_THRESHOLD) 
   }
   if (allPassing) {
     details.push(
-      `All changed source files meet or exceed ${(coverageThreshold).toFixed(0)}% coverage across statements, branches, functions, and lines.`
+      `All changed source files meet or exceed ${coverageThreshold.toFixed(0)}% coverage across statements, branches, functions, and lines.`,
     );
   }
   return { passed: allPassing, details };
@@ -120,7 +128,9 @@ function findCoverageEntry(summary, filePath) {
   const candidates = new Set([
     normalized,
     normalized.startsWith('./') ? normalized.slice(2) : `./${normalized}`,
-    path.relative(process.cwd(), path.resolve(process.cwd(), normalized)).replace(/\\\\/g, '/')
+    path
+      .relative(process.cwd(), path.resolve(process.cwd(), normalized))
+      .replace(/\\\\/g, '/'),
   ]);
   for (const candidate of candidates) {
     if (summary[candidate]) {
@@ -159,5 +169,5 @@ module.exports = {
   runUnitCoverageCheck,
   executeCoverageSuite,
   loadCoverageSummary,
-  evaluateCoverage
+  evaluateCoverage,
 };

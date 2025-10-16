@@ -59,7 +59,11 @@ export class CosignPlugin implements StepPlugin {
       throw new Error('Cosign step requires operation configuration');
     }
 
-    if (!['sign', 'verify', 'attest', 'verify-attestation'].includes(stepConfig.operation)) {
+    if (
+      !['sign', 'verify', 'attest', 'verify-attestation'].includes(
+        stepConfig.operation,
+      )
+    ) {
       throw new Error(`Invalid Cosign operation: ${stepConfig.operation}`);
     }
 
@@ -125,7 +129,9 @@ export class CosignPlugin implements StepPlugin {
         },
       };
     } catch (error) {
-      throw new Error(`Cosign ${stepConfig.operation} failed: ${(error as Error).message}`);
+      throw new Error(
+        `Cosign ${stepConfig.operation} failed: ${(error as Error).message}`,
+      );
     }
   }
 
@@ -141,11 +147,17 @@ export class CosignPlugin implements StepPlugin {
     // We can only clean up local artifacts
 
     try {
-      if (stepConfig.output_signature && existsSync(stepConfig.output_signature)) {
+      if (
+        stepConfig.output_signature &&
+        existsSync(stepConfig.output_signature)
+      ) {
         execSync(`rm -f "${stepConfig.output_signature}"`);
       }
 
-      if (stepConfig.output_certificate && existsSync(stepConfig.output_certificate)) {
+      if (
+        stepConfig.output_certificate &&
+        existsSync(stepConfig.output_certificate)
+      ) {
         execSync(`rm -f "${stepConfig.output_certificate}"`);
       }
 
@@ -236,7 +248,9 @@ export class CosignPlugin implements StepPlugin {
     } else if (config.key) {
       args.push('--key', config.key);
     } else {
-      throw new Error('Either keyless verification parameters or key must be specified');
+      throw new Error(
+        'Either keyless verification parameters or key must be specified',
+      );
     }
 
     // Add optional parameters
@@ -291,7 +305,9 @@ export class CosignPlugin implements StepPlugin {
     } else if (config.key) {
       args.push('--key', config.key);
     } else {
-      throw new Error('Either keyless signing or key must be specified for attestation');
+      throw new Error(
+        'Either keyless signing or key must be specified for attestation',
+      );
     }
 
     // Add predicate
@@ -329,7 +345,9 @@ export class CosignPlugin implements StepPlugin {
     }
   }
 
-  private async verifyAttestation(config: CosignStepConfig): Promise<CosignResult> {
+  private async verifyAttestation(
+    config: CosignStepConfig,
+  ): Promise<CosignResult> {
     const args = ['verify-attestation'];
 
     // Add verification method
@@ -346,7 +364,9 @@ export class CosignPlugin implements StepPlugin {
     } else if (config.key) {
       args.push('--key', config.key);
     } else {
-      throw new Error('Either keyless verification parameters or key must be specified');
+      throw new Error(
+        'Either keyless verification parameters or key must be specified',
+      );
     }
 
     // Add predicate type if specified
@@ -391,7 +411,9 @@ export class CosignPlugin implements StepPlugin {
       case 'sign':
       case 'attest':
         if (!config.keyless && !config.key) {
-          throw new Error(`${config.operation} requires either keyless=true or key parameter`);
+          throw new Error(
+            `${config.operation} requires either keyless=true or key parameter`,
+          );
         }
         if (config.operation === 'attest' && !config.predicate) {
           throw new Error('attest operation requires predicate parameter');
@@ -405,7 +427,11 @@ export class CosignPlugin implements StepPlugin {
             `${config.operation} requires either keyless verification parameters or key parameter`,
           );
         }
-        if (config.keyless && !config.certificate_identity && !config.certificate_oidc_issuer) {
+        if (
+          config.keyless &&
+          !config.certificate_identity &&
+          !config.certificate_oidc_issuer
+        ) {
           console.warn(
             'Keyless verification without certificate constraints may accept any valid certificate',
           );
@@ -417,13 +443,18 @@ export class CosignPlugin implements StepPlugin {
   private extractDigest(image: string): string {
     try {
       // Try to get the actual digest from the registry
-      const result = execSync(`docker inspect --format='{{index .RepoDigests 0}}' "${image}"`, {
-        encoding: 'utf8',
-        stdio: ['ignore', 'pipe', 'ignore'],
-      });
+      const result = execSync(
+        `docker inspect --format='{{index .RepoDigests 0}}' "${image}"`,
+        {
+          encoding: 'utf8',
+          stdio: ['ignore', 'pipe', 'ignore'],
+        },
+      );
 
       const digestMatch = result.match(/sha256:[a-f0-9]{64}/);
-      return digestMatch ? digestMatch[0] : createHash('sha256').update(image).digest('hex');
+      return digestMatch
+        ? digestMatch[0]
+        : createHash('sha256').update(image).digest('hex');
     } catch {
       // Fallback to hash of image name
       return createHash('sha256').update(image).digest('hex');
@@ -476,7 +507,9 @@ export class CosignPlugin implements StepPlugin {
 
   private async getCosignVersion(): Promise<string> {
     try {
-      const version = execSync(`"${this.cosignPath}" version`, { encoding: 'utf8' });
+      const version = execSync(`"${this.cosignPath}" version`, {
+        encoding: 'utf8',
+      });
       const versionMatch = version.match(/v\d+\.\d+\.\d+/);
       return versionMatch ? versionMatch[0] : 'unknown';
     } catch {

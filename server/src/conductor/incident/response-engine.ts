@@ -21,7 +21,14 @@ export interface IncidentContext {
 export interface ResponseAction {
   id: string;
   name: string;
-  type: 'isolate' | 'throttle' | 'failover' | 'scale' | 'notify' | 'collect' | 'remediate';
+  type:
+    | 'isolate'
+    | 'throttle'
+    | 'failover'
+    | 'scale'
+    | 'notify'
+    | 'collect'
+    | 'remediate';
   priority: number;
   timeout: number;
   condition?: (context: IncidentContext) => boolean;
@@ -124,7 +131,9 @@ export class IncidentResponseEngine extends EventEmitter {
     const playbook = this.findMatchingPlaybook(context);
     if (playbook) {
       incident.playbook = playbook.name;
-      this.addTimelineEvent(incident, 'playbook_selected', { playbook: playbook.name });
+      this.addTimelineEvent(incident, 'playbook_selected', {
+        playbook: playbook.name,
+      });
     }
 
     // Persist incident
@@ -179,8 +188,13 @@ export class IncidentResponseEngine extends EventEmitter {
       // Set up escalation timer
       this.scheduleEscalation(incident, playbook);
     } catch (error) {
-      this.addTimelineEvent(incident, 'playbook_execution_failed', { error: error.message });
-      await this.escalateIncident(incident, `Playbook execution failed: ${error.message}`);
+      this.addTimelineEvent(incident, 'playbook_execution_failed', {
+        error: error.message,
+      });
+      await this.escalateIncident(
+        incident,
+        `Playbook execution failed: ${error.message}`,
+      );
     }
   }
 
@@ -193,7 +207,9 @@ export class IncidentResponseEngine extends EventEmitter {
   ): Promise<void> {
     const { isolationScope, isolationDuration } = playbook.containment;
 
-    this.addTimelineEvent(incident, 'containment_initiated', { scope: isolationScope });
+    this.addTimelineEvent(incident, 'containment_initiated', {
+      scope: isolationScope,
+    });
 
     try {
       switch (isolationScope) {
@@ -219,7 +235,9 @@ export class IncidentResponseEngine extends EventEmitter {
       incident.status = 'contained';
       this.addTimelineEvent(incident, 'containment_successful');
     } catch (error) {
-      this.addTimelineEvent(incident, 'containment_failed', { error: error.message });
+      this.addTimelineEvent(incident, 'containment_failed', {
+        error: error.message,
+      });
     }
   }
 
@@ -252,16 +270,23 @@ export class IncidentResponseEngine extends EventEmitter {
       }
 
       incident.evidence = { ...incident.evidence, ...evidence };
-      this.addTimelineEvent(incident, 'evidence_collected', { types: Object.keys(evidence) });
+      this.addTimelineEvent(incident, 'evidence_collected', {
+        types: Object.keys(evidence),
+      });
     } catch (error) {
-      this.addTimelineEvent(incident, 'evidence_collection_failed', { error: error.message });
+      this.addTimelineEvent(incident, 'evidence_collection_failed', {
+        error: error.message,
+      });
     }
   }
 
   /**
    * Execute individual response action
    */
-  private async executeAction(incident: IncidentRecord, action: ResponseAction): Promise<void> {
+  private async executeAction(
+    incident: IncidentRecord,
+    action: ResponseAction,
+  ): Promise<void> {
     this.addTimelineEvent(incident, 'action_started', { action: action.name });
 
     try {
@@ -289,7 +314,10 @@ export class IncidentResponseEngine extends EventEmitter {
       }
 
       // Record metrics
-      prometheusConductorMetrics.recordSecurityEvent('incident_action_executed', result.success);
+      prometheusConductorMetrics.recordSecurityEvent(
+        'incident_action_executed',
+        result.success,
+      );
     } catch (error) {
       this.addTimelineEvent(incident, 'action_failed', {
         action: action.name,
@@ -300,7 +328,9 @@ export class IncidentResponseEngine extends EventEmitter {
       if (action.rollback) {
         try {
           await action.rollback(incident.context);
-          this.addTimelineEvent(incident, 'action_rolledback', { action: action.name });
+          this.addTimelineEvent(incident, 'action_rolledback', {
+            action: action.name,
+          });
         } catch (rollbackError) {
           this.addTimelineEvent(incident, 'rollback_failed', {
             action: action.name,
@@ -347,7 +377,8 @@ export class IncidentResponseEngine extends EventEmitter {
     if (!serviceName) return;
 
     // Open circuit breaker for service
-    const circuitBreaker = conductorResilienceManager['circuitBreakers'].get(serviceName);
+    const circuitBreaker =
+      conductorResilienceManager['circuitBreakers'].get(serviceName);
     if (circuitBreaker) {
       circuitBreaker.forceState('OPEN');
     }
@@ -398,7 +429,11 @@ export class IncidentResponseEngine extends EventEmitter {
       triggers: {
         incidentTypes: ['security'],
         severityLevels: ['P0', 'P1'],
-        sourcePatterns: ['threat_detection', 'auth_failure', 'data_exfiltration'],
+        sourcePatterns: [
+          'threat_detection',
+          'auth_failure',
+          'data_exfiltration',
+        ],
       },
       actions: [
         {
@@ -409,7 +444,11 @@ export class IncidentResponseEngine extends EventEmitter {
           timeout: 30000,
           execute: async (context) => {
             if (context.metadata.userId) {
-              await this.redis.setex(`compromised_user:${context.metadata.userId}`, 3600, '1');
+              await this.redis.setex(
+                `compromised_user:${context.metadata.userId}`,
+                3600,
+                '1',
+              );
               return { success: true, message: 'User isolated' };
             }
             return { success: false, message: 'No user to isolate' };
@@ -441,7 +480,8 @@ export class IncidentResponseEngine extends EventEmitter {
       escalation: {
         timeoutMinutes: 15,
         escalationTargets: ['security-team@company.com', 'ciso@company.com'],
-        escalationMessage: 'Critical security incident requires immediate attention',
+        escalationMessage:
+          'Critical security incident requires immediate attention',
       },
       containment: {
         autoIsolate: true,
@@ -514,7 +554,9 @@ export class IncidentResponseEngine extends EventEmitter {
   /**
    * Find matching playbook for incident
    */
-  private findMatchingPlaybook(context: IncidentContext): PlaybookDefinition | undefined {
+  private findMatchingPlaybook(
+    context: IncidentContext,
+  ): PlaybookDefinition | undefined {
     for (const playbook of this.playbooks.values()) {
       if (this.playbookMatches(playbook, context)) {
         return playbook;
@@ -526,7 +568,10 @@ export class IncidentResponseEngine extends EventEmitter {
   /**
    * Check if playbook matches incident context
    */
-  private playbookMatches(playbook: PlaybookDefinition, context: IncidentContext): boolean {
+  private playbookMatches(
+    playbook: PlaybookDefinition,
+    context: IncidentContext,
+  ): boolean {
     const { triggers } = playbook;
 
     // Check incident type
@@ -612,7 +657,11 @@ export class IncidentResponseEngine extends EventEmitter {
     console.log(`SECURITY ALERT: ${context.title}`);
   }
 
-  private addTimelineEvent(incident: IncidentRecord, event: string, metadata?: any): void {
+  private addTimelineEvent(
+    incident: IncidentRecord,
+    event: string,
+    metadata?: any,
+  ): void {
     incident.timeline.push({
       timestamp: Date.now(),
       event,
@@ -642,18 +691,26 @@ export class IncidentResponseEngine extends EventEmitter {
     // Implement containment removal logic
   }
 
-  private async executeDefaultResponse(incident: IncidentRecord): Promise<void> {
+  private async executeDefaultResponse(
+    incident: IncidentRecord,
+  ): Promise<void> {
     this.addTimelineEvent(incident, 'default_response_initiated');
     // Implement default response actions
   }
 
-  private async escalateIncident(incident: IncidentRecord, reason: string): Promise<void> {
+  private async escalateIncident(
+    incident: IncidentRecord,
+    reason: string,
+  ): Promise<void> {
     incident.status = 'escalated';
     this.addTimelineEvent(incident, 'incident_escalated', { reason });
     this.emit('incident:escalated', incident);
   }
 
-  private scheduleEscalation(incident: IncidentRecord, playbook: PlaybookDefinition): void {
+  private scheduleEscalation(
+    incident: IncidentRecord,
+    playbook: PlaybookDefinition,
+  ): void {
     setTimeout(async () => {
       if (incident.status === 'active') {
         await this.escalateIncident(incident, 'Escalation timeout reached');
@@ -667,7 +724,10 @@ export class IncidentResponseEngine extends EventEmitter {
       const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000; // 7 days
 
       for (const [id, incident] of this.activeIncidents.entries()) {
-        if (incident.context.timestamp < cutoff && incident.status !== 'active') {
+        if (
+          incident.context.timestamp < cutoff &&
+          incident.status !== 'active'
+        ) {
           this.activeIncidents.delete(id);
           await this.redis.del(`incident:${id}`);
         }

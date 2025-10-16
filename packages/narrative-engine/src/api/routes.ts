@@ -10,18 +10,29 @@ export function createNarrativeRouter(engine?: SimulationEngine): Router {
     const config = req.body as SimConfig;
     try {
       runtime.initialize(config);
-      res.status(200).json({ status: 'initialized', timestamp: runtime.getState().timestamp });
+      res
+        .status(200)
+        .json({
+          status: 'initialized',
+          timestamp: runtime.getState().timestamp,
+        });
     } catch (error) {
-      res.status(400).json({ status: 'error', message: (error as Error).message });
+      res
+        .status(400)
+        .json({ status: 'error', message: (error as Error).message });
     }
   });
 
   router.post('/api/narrative/step', (_req: Request, res: Response) => {
     try {
       runtime.step();
-      res.status(200).json({ status: 'advanced', timestamp: runtime.getState().timestamp });
+      res
+        .status(200)
+        .json({ status: 'advanced', timestamp: runtime.getState().timestamp });
     } catch (error) {
-      res.status(400).json({ status: 'error', message: (error as Error).message });
+      res
+        .status(400)
+        .json({ status: 'error', message: (error as Error).message });
     }
   });
 
@@ -31,7 +42,9 @@ export function createNarrativeRouter(engine?: SimulationEngine): Router {
       runtime.injectEvent(event);
       res.status(202).json({ status: 'accepted', queueSize: 1 });
     } catch (error) {
-      res.status(400).json({ status: 'error', message: (error as Error).message });
+      res
+        .status(400)
+        .json({ status: 'error', message: (error as Error).message });
     }
   });
 
@@ -40,7 +53,9 @@ export function createNarrativeRouter(engine?: SimulationEngine): Router {
       const snapshot = runtime.getState().toJSON();
       res.status(200).json(snapshot);
     } catch (error) {
-      res.status(400).json({ status: 'error', message: (error as Error).message });
+      res
+        .status(400)
+        .json({ status: 'error', message: (error as Error).message });
     }
   });
 

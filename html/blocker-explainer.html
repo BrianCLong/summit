@@ -1,15 +1,37 @@
-<!doctype html><html><head><meta charset="utf-8"><title>Blocker</title>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<style>body{font-family:system-ui;margin:18px}.box{border:1px solid #ddd;border-radius:12px;padding:10px}</style></head>
-<body>
-<div class=box>
-  <div id=reason>(loading…)</div>
-  <button id=fix>Propose Fix</button>
-</div>
-<script>
-$(function(){
-  $.getJSON('/api/blocker?id=PR-5843', function(d){ $('#reason').text(d.reason); });
-  $('#fix').on('click', function(){ $.post('/api/blocker/propose', {id:'PR-5843'}, function(p){ alert(p.next_step); }); });
-});
-</script>
-</body></html>
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Blocker</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+      body {
+        font-family: system-ui;
+        margin: 18px;
+      }
+      .box {
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box">
+      <div id="reason">(loading…)</div>
+      <button id="fix">Propose Fix</button>
+    </div>
+    <script>
+      $(function () {
+        $.getJSON('/api/blocker?id=PR-5843', function (d) {
+          $('#reason').text(d.reason);
+        });
+        $('#fix').on('click', function () {
+          $.post('/api/blocker/propose', { id: 'PR-5843' }, function (p) {
+            alert(p.next_step);
+          });
+        });
+      });
+    </script>
+  </body>
+</html>

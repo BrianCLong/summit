@@ -1,12 +1,11 @@
-
 groups:
-- name: slo_burn_alerts
-  rules:
-  - alert: HighErrorBudgetBurn
-    expr: sum(rate(gql_requests_total{code=~"5.."}[1h])) / sum(rate(gql_requests_total[1h])) > (2 * (1 - 0.999))
-    for: 5m
-    labels:
-      severity: critical
-    annotations:
-      summary: "High error budget burn rate for GraphQL API"
-      description: "The API has burned through 2% of its monthly error budget in the last hour."
+  - name: slo_burn_alerts
+    rules:
+      - alert: HighErrorBudgetBurn
+        expr: sum(rate(gql_requests_total{code=~"5.."}[1h])) / sum(rate(gql_requests_total[1h])) > (2 * (1 - 0.999))
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: 'High error budget burn rate for GraphQL API'
+          description: 'The API has burned through 2% of its monthly error budget in the last hour.'

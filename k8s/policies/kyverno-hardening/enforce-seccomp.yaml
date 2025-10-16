@@ -17,31 +17,31 @@ spec:
     - name: seccomp-pod
       match:
         any:
-        - resources:
-            kinds:
-              - Pod
+          - resources:
+              kinds:
+                - Pod
       validate:
-        message: "Seccomp profile must be set to `RuntimeDefault` or `LocalhostProfile`."
+        message: 'Seccomp profile must be set to `RuntimeDefault` or `LocalhostProfile`.'
         pattern:
           spec:
             securityContext:
               seccompProfile:
-                type: "RuntimeDefault" # Or "LocalhostProfile"
+                type: 'RuntimeDefault' # Or "LocalhostProfile"
     - name: seccomp-container
       match:
         any:
-        - resources:
-            kinds:
-              - Pod
+          - resources:
+              kinds:
+                - Pod
       validate:
-        message: "Seccomp profile must be set to `RuntimeDefault` or `LocalhostProfile` for containers."
+        message: 'Seccomp profile must be set to `RuntimeDefault` or `LocalhostProfile` for containers.'
         pattern:
           spec:
             containers:
               - securityContext:
                   seccompProfile:
-                    type: "RuntimeDefault" # Or "LocalhostProfile"
+                    type: 'RuntimeDefault' # Or "LocalhostProfile"
             initContainers:
               - securityContext:
                   seccompProfile:
-                    type: "RuntimeDefault" # Or "LocalhostProfile"
+                    type: 'RuntimeDefault' # Or "LocalhostProfile"

@@ -8,18 +8,27 @@ import {
   RecognitionRequest,
   SchemaFieldMetadata,
   SchemaMetadata,
-  SeverityLevel
+  SeverityLevel,
 } from './types.js';
 
 const SEVERITY_ORDER: SeverityLevel[] = ['low', 'medium', 'high', 'critical'];
 
-const degradeSeverity = (level: SeverityLevel, steps: number): SeverityLevel => {
+const degradeSeverity = (
+  level: SeverityLevel,
+  steps: number,
+): SeverityLevel => {
   const idx = Math.max(0, SEVERITY_ORDER.indexOf(level) - steps);
   return SEVERITY_ORDER[idx];
 };
 
-const upgradeSeverity = (level: SeverityLevel, steps: number): SeverityLevel => {
-  const idx = Math.min(SEVERITY_ORDER.length - 1, SEVERITY_ORDER.indexOf(level) + steps);
+const upgradeSeverity = (
+  level: SeverityLevel,
+  steps: number,
+): SeverityLevel => {
+  const idx = Math.min(
+    SEVERITY_ORDER.length - 1,
+    SEVERITY_ORDER.indexOf(level) + steps,
+  );
   return SEVERITY_ORDER[idx];
 };
 
@@ -38,12 +47,17 @@ const contextualKeywords: Record<string, string[]> = {
   macAddress: ['mac'],
   geoCoordinate: ['lat', 'lon', 'coordinate'],
   insurancePolicyNumber: ['policy', 'insurance'],
-  dateOfBirth: ['dob', 'birth']
+  dateOfBirth: ['dob', 'birth'],
 };
 
-const computeContextBoost = (entity: EntityMatch, schemaField?: SchemaFieldMetadata): number => {
-  const around = `${entity.context.before} ${entity.context.after}`.toLowerCase();
-  const schema = `${schemaField?.fieldName ?? ''} ${schemaField?.description ?? ''}`.toLowerCase();
+const computeContextBoost = (
+  entity: EntityMatch,
+  schemaField?: SchemaFieldMetadata,
+): number => {
+  const around =
+    `${entity.context.before} ${entity.context.after}`.toLowerCase();
+  const schema =
+    `${schemaField?.fieldName ?? ''} ${schemaField?.description ?? ''}`.toLowerCase();
   const tokens = new Set(`${around} ${schema}`.split(/[^a-z0-9]+/i));
   let boost = 0;
   for (const [type, keywords] of Object.entries(contextualKeywords)) {
@@ -56,12 +70,20 @@ const computeContextBoost = (entity: EntityMatch, schemaField?: SchemaFieldMetad
     }
   }
   if (schemaField?.riskLevel) {
-    boost += schemaField.riskLevel === 'critical' ? 0.1 : schemaField.riskLevel === 'high' ? 0.05 : 0;
+    boost +=
+      schemaField.riskLevel === 'critical'
+        ? 0.1
+        : schemaField.riskLevel === 'high'
+          ? 0.05
+          : 0;
   }
   return Math.min(boost, 0.2);
 };
 
-const adjustSeverityByConfidence = (severity: SeverityLevel, confidence: number): SeverityLevel => {
+const adjustSeverityByConfidence = (
+  severity: SeverityLevel,
+  confidence: number,
+): SeverityLevel => {
   if (confidence >= 0.85) {
     return upgradeSeverity(severity, 0);
   }
@@ -81,18 +103,32 @@ export interface ClassificationOptions extends RecognitionOptions {
 export class ClassificationEngine {
   constructor(
     private readonly recognizer = new HybridEntityRecognizer(),
-    private readonly taxonomy = new TaxonomyManager()
+    private readonly taxonomy = new TaxonomyManager(),
   ) {}
 
-  async classify(value: string, request: RecognitionRequest, options: ClassificationOptions = {}): Promise<ClassificationResult> {
+  async classify(
+    value: string,
+    request: RecognitionRequest,
+    options: ClassificationOptions = {},
+  ): Promise<ClassificationResult> {
     const taxonomyName = options.taxonomyName ?? DEFAULT_TAXONOMY_NAME;
-    const recognition = await this.recognizer.recognize({ ...request, value }, options);
-    const classified = recognition.entities.map((entity) => this.classifyEntity(entity, request.schema, request.schemaField, taxonomyName));
+    const recognition = await this.recognizer.recognize(
+      { ...request, value },
+      options,
+    );
+    const classified = recognition.entities.map((entity) =>
+      this.classifyEntity(
+        entity,
+        request.schema,
+        request.schemaField,
+        taxonomyName,
+      ),
+    );
     const summary = this.buildSummary(classified);
     return {
       entities: classified,
       summary,
-      stats: recognition.stats
+      stats: recognition.stats,
     };
   }
 
@@ -100,15 +136,25 @@ export class ClassificationEngine {
     entity: EntityMatch,
     schema: SchemaMetadata | undefined,
     schemaField: SchemaFieldMetadata | undefined,
-    taxonomyName: string
+    taxonomyName: string,
   ): ClassifiedEntity {
     const taxonomyEntry = this.taxonomy.classify(entity.type, taxonomyName);
     const baseSeverity = taxonomyEntry?.node.severity ?? 'medium';
     const contextBoost = computeContextBoost(entity, schemaField);
     const boostedConfidence = Math.min(1, entity.confidence + contextBoost);
-    const severityFromConfidence = adjustSeverityByConfidence(baseSeverity, boostedConfidence);
+    const severityFromConfidence = adjustSeverityByConfidence(
+      baseSeverity,
+      boostedConfidence,
+    );
     const severity = schemaField?.riskLevel
-      ? upgradeSeverity(severityFromConfidence, Math.max(0, SEVERITY_ORDER.indexOf(schemaField.riskLevel) - SEVERITY_ORDER.indexOf(severityFromConfidence)))
+      ? upgradeSeverity(
+          severityFromConfidence,
+          Math.max(
+            0,
+            SEVERITY_ORDER.indexOf(schemaField.riskLevel) -
+              SEVERITY_ORDER.indexOf(severityFromConfidence),
+          ),
+        )
       : severityFromConfidence;
 
     return {
@@ -116,32 +162,34 @@ export class ClassificationEngine {
       metadata: {
         ...entity.metadata,
         schemaName: schema?.name,
-        schemaVersion: schema?.version
+        schemaVersion: schema?.version,
       },
       confidence: boostedConfidence,
       severity,
       taxonomy: taxonomyEntry?.taxonomy ?? DEFAULT_TAXONOMY_NAME,
       categories: taxonomyEntry?.node.categories ?? ['uncategorized'],
-      policyTags: taxonomyEntry?.node.policyTags ?? []
+      policyTags: taxonomyEntry?.node.policyTags ?? [],
     };
   }
 
-  private buildSummary(entities: ClassifiedEntity[]): ClassificationResult['summary'] {
+  private buildSummary(
+    entities: ClassifiedEntity[],
+  ): ClassificationResult['summary'] {
     const summary = {
       totalEntities: entities.length,
       critical: 0,
       high: 0,
       medium: 0,
       low: 0,
-      taxonomyBreakdown: {} as Record<string, number>
+      taxonomyBreakdown: {} as Record<string, number>,
     };
 
     for (const entity of entities) {
       summary[entity.severity] += 1;
-      summary.taxonomyBreakdown[entity.taxonomy] = (summary.taxonomyBreakdown[entity.taxonomy] ?? 0) + 1;
+      summary.taxonomyBreakdown[entity.taxonomy] =
+        (summary.taxonomyBreakdown[entity.taxonomy] ?? 0) + 1;
     }
 
     return summary;
   }
 }
-

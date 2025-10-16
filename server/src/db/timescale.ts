@@ -56,7 +56,10 @@ timescalePool.on('connect', (client: PoolClient) => {
 });
 
 // Committee requirement: Query performance monitoring
-export async function query<T = any>(text: string, params?: any[]): Promise<QueryResult<T>> {
+export async function query<T = any>(
+  text: string,
+  params?: any[],
+): Promise<QueryResult<T>> {
   const start = Date.now();
   const client = await timescalePool.connect();
 

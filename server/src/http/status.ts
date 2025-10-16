@@ -43,7 +43,11 @@ interface SystemStatus {
 // Ping helper function
 async function ping(
   target: string,
-): Promise<{ status: 'healthy' | 'unhealthy'; response_time_ms: number; details?: any }> {
+): Promise<{
+  status: 'healthy' | 'unhealthy';
+  response_time_ms: number;
+  details?: any;
+}> {
   const startTime = Date.now();
 
   try {
@@ -76,7 +80,10 @@ async function ping(
         return {
           status: 'unhealthy',
           response_time_ms: responseTime,
-          details: { status_code: response.status, status_text: response.statusText },
+          details: {
+            status_code: response.status,
+            status_text: response.statusText,
+          },
         };
       }
     } else {
@@ -151,20 +158,42 @@ statusRouter.get('/status', async (_req, res) => {
 
     // Check all services concurrently
     const serviceChecks = await Promise.allSettled([
-      ping('http://neo4j:7474').then((result) => ({ name: 'neo4j', ...result })),
-      ping('http://postgres:5432').then((result) => ({ name: 'postgres', ...result })),
-      ping('http://redis:6379').then((result) => ({ name: 'redis', ...result })),
+      ping('http://neo4j:7474').then((result) => ({
+        name: 'neo4j',
+        ...result,
+      })),
+      ping('http://postgres:5432').then((result) => ({
+        name: 'postgres',
+        ...result,
+      })),
+      ping('http://redis:6379').then((result) => ({
+        name: 'redis',
+        ...result,
+      })),
       ping('http://mcp-graphops:8081/health').then((result) => ({
         name: 'mcp_graphops',
         ...result,
       })),
-      ping('http://mcp-files:8082/health').then((result) => ({ name: 'mcp_files', ...result })),
-      ping('http://opa:8181/health').then((result) => ({ name: 'opa', ...result })),
+      ping('http://mcp-files:8082/health').then((result) => ({
+        name: 'mcp_files',
+        ...result,
+      })),
+      ping('http://opa:8181/health').then((result) => ({
+        name: 'opa',
+        ...result,
+      })),
     ]);
 
     // Process service results
     const services: ServiceStatus[] = serviceChecks.map((result, index) => {
-      const serviceNames = ['neo4j', 'postgres', 'redis', 'mcp_graphops', 'mcp_files', 'opa'];
+      const serviceNames = [
+        'neo4j',
+        'postgres',
+        'redis',
+        'mcp_graphops',
+        'mcp_files',
+        'opa',
+      ];
       const serviceName = serviceNames[index];
 
       if (result.status === 'fulfilled') {
@@ -207,7 +236,10 @@ statusRouter.get('/status', async (_req, res) => {
     let overallStatus: 'healthy' | 'degraded' | 'unhealthy';
     if (unhealthyServices.length > 0) {
       overallStatus = 'unhealthy';
-    } else if (degradedServices.length > 0 || budgetStatus.status === 'degraded') {
+    } else if (
+      degradedServices.length > 0 ||
+      budgetStatus.status === 'degraded'
+    ) {
       overallStatus = 'degraded';
     } else {
       overallStatus = 'healthy';
@@ -219,7 +251,8 @@ statusRouter.get('/status', async (_req, res) => {
       host: os.hostname(),
       uptime_seconds: Math.round(uptime),
       versions: {
-        server: process.env.BUILD_SHA || process.env.npm_package_version || 'unknown',
+        server:
+          process.env.BUILD_SHA || process.env.npm_package_version || 'unknown',
         policy: process.env.POLICY_SHA || 'unknown',
         node: process.version,
       },
@@ -236,7 +269,12 @@ statusRouter.get('/status', async (_req, res) => {
     };
 
     // Set appropriate HTTP status code
-    const httpStatus = overallStatus === 'healthy' ? 200 : overallStatus === 'degraded' ? 200 : 503;
+    const httpStatus =
+      overallStatus === 'healthy'
+        ? 200
+        : overallStatus === 'degraded'
+          ? 200
+          : 503;
 
     // Add performance headers
     const responseTime = Date.now() - startTime;
@@ -279,7 +317,11 @@ statusRouter.get('/ready', async (_req, res) => {
   } catch (e) {
     return res
       .status(503)
-      .json({ status: 'unready', component: 'postgres', error: (e as any)?.message || String(e) });
+      .json({
+        status: 'unready',
+        component: 'postgres',
+        error: (e as any)?.message || String(e),
+      });
   }
   try {
     const { getRedisClient } = await import('../config/database.js');
@@ -290,16 +332,27 @@ statusRouter.get('/ready', async (_req, res) => {
   } catch (e) {
     return res
       .status(503)
-      .json({ status: 'unready', component: 'redis', error: (e as any)?.message || String(e) });
+      .json({
+        status: 'unready',
+        component: 'redis',
+        error: (e as any)?.message || String(e),
+      });
   }
-  return res.status(200).json({ status: 'ready', timestamp: new Date().toISOString() });
+  return res
+    .status(200)
+    .json({ status: 'ready', timestamp: new Date().toISOString() });
 });
 
 // Conductor-specific health endpoint
 statusRouter.get('/health/conductor', async (_req, res) => {
   try {
     const health = await getConductorHealth();
-    const httpStatus = health.status === 'healthy' ? 200 : health.status === 'degraded' ? 200 : 503;
+    const httpStatus =
+      health.status === 'healthy'
+        ? 200
+        : health.status === 'degraded'
+          ? 200
+          : 503;
 
     res.status(httpStatus).json({
       status: health.status,

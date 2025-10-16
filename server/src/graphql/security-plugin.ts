@@ -2,7 +2,11 @@
 // Integrates persisted queries, introspection blocking, and security monitoring
 
 import { ApolloServerPlugin } from '@apollo/server';
-import { checkPersistedQuery, checkIntrospectionAllowed, getAllowlistStats } from './persisted';
+import {
+  checkPersistedQuery,
+  checkIntrospectionAllowed,
+  getAllowlistStats,
+} from './persisted';
 import { prometheusConductorMetrics } from '../conductor/observability/prometheus';
 
 export interface SecurityPluginConfig {
@@ -67,16 +71,23 @@ export function createGraphQLSecurityPlugin(
             validateQueryComplexity(query, finalConfig);
 
             // Record successful security check
-            prometheusConductorMetrics.recordSecurityEvent('query_validation', true);
+            prometheusConductorMetrics.recordSecurityEvent(
+              'query_validation',
+              true,
+            );
           } catch (error) {
             // Record security event
-            prometheusConductorMetrics.recordSecurityEvent('query_blocked', false);
+            prometheusConductorMetrics.recordSecurityEvent(
+              'query_blocked',
+              false,
+            );
 
             if (finalConfig.logBlockedQueries) {
               console.warn('GraphQL security violation:', {
                 error: error.message,
                 query: query.substring(0, 200) + '...',
-                userAgent: requestContext.request.http?.headers.get('user-agent'),
+                userAgent:
+                  requestContext.request.http?.headers.get('user-agent'),
                 ip:
                   requestContext.request.http?.headers.get('x-forwarded-for') ||
                   requestContext.request.http?.headers.get('x-real-ip') ||
@@ -109,12 +120,17 @@ export function createGraphQLSecurityPlugin(
 /**
  * Validate query complexity to prevent DoS attacks
  */
-function validateQueryComplexity(query: string, config: SecurityPluginConfig): void {
+function validateQueryComplexity(
+  query: string,
+  config: SecurityPluginConfig,
+): void {
   const depth = calculateQueryDepth(query);
   const complexity = estimateQueryComplexity(query);
 
   if (depth > config.maxQueryDepth) {
-    throw new Error(`Query depth (${depth}) exceeds maximum allowed (${config.maxQueryDepth})`);
+    throw new Error(
+      `Query depth (${depth}) exceeds maximum allowed (${config.maxQueryDepth})`,
+    );
   }
 
   if (complexity > config.maxQueryComplexity) {
@@ -178,7 +194,10 @@ function estimateQueryComplexity(query: string): number {
  * Rate limiting based on query complexity
  */
 export class QueryComplexityLimiter {
-  private requestCounts = new Map<string, { count: number; resetTime: number }>();
+  private requestCounts = new Map<
+    string,
+    { count: number; resetTime: number }
+  >();
   private readonly windowMs = 60000; // 1 minute window
   private readonly maxRequestsPerWindow = 100;
 

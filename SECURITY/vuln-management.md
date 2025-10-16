@@ -9,6 +9,7 @@ This document outlines the vulnerability management process for the IntelGraph p
 ### 1. Discovery and Identification
 
 #### Automated Scanning
+
 - **Container Images**: Trivy scanning in CI/CD pipeline
 - **Dependencies**: Dependabot alerts, npm audit, Snyk
 - **Code**: CodeQL SAST, SonarQube, ESLint security rules
@@ -16,6 +17,7 @@ This document outlines the vulnerability management process for the IntelGraph p
 - **Web Application**: OWASP ZAP, Burp Suite Professional
 
 #### Manual Assessment
+
 - **Penetration Testing**: Quarterly external assessments
 - **Code Review**: Security-focused peer reviews
 - **Architecture Review**: Threat modeling updates
@@ -25,23 +27,25 @@ This document outlines the vulnerability management process for the IntelGraph p
 
 #### Severity Classification
 
-| Severity | CVSS Score | SLA | Description | Examples |
-|----------|------------|-----|-------------|----------|
-| Critical | 9.0-10.0 | 24 hours | Immediate threat to system | RCE, Authentication bypass |
-| High | 7.0-8.9 | 72 hours | Significant security risk | Privilege escalation, Data exposure |
-| Medium | 4.0-6.9 | 2 weeks | Moderate security impact | XSS, Information disclosure |
-| Low | 0.1-3.9 | 1 month | Minor security concern | DoS, Configuration issues |
-| Info | 0.0 | 3 months | Security awareness | Best practices, Hardening |
+| Severity | CVSS Score | SLA      | Description                | Examples                            |
+| -------- | ---------- | -------- | -------------------------- | ----------------------------------- |
+| Critical | 9.0-10.0   | 24 hours | Immediate threat to system | RCE, Authentication bypass          |
+| High     | 7.0-8.9    | 72 hours | Significant security risk  | Privilege escalation, Data exposure |
+| Medium   | 4.0-6.9    | 2 weeks  | Moderate security impact   | XSS, Information disclosure         |
+| Low      | 0.1-3.9    | 1 month  | Minor security concern     | DoS, Configuration issues           |
+| Info     | 0.0        | 3 months | Security awareness         | Best practices, Hardening           |
 
 #### Risk Factors
 
 **Exploitability Assessment**:
+
 - Public exploit availability
 - Attack complexity and prerequisites
 - Network accessibility
 - Authentication requirements
 
 **Business Impact Analysis**:
+
 - Data sensitivity and classification
 - System criticality and availability requirements
 - Regulatory compliance implications
@@ -129,6 +133,7 @@ Vulnerability → Risk Assessment → Remediation Plan → Testing → Approval 
 ### Internal Sources
 
 1. **CI/CD Pipeline**
+
    ```yaml
    Security Scanning:
      - Trivy: Container vulnerabilities
@@ -302,18 +307,21 @@ Vulnerability Database (PostgreSQL)
 ### Stakeholder Reporting
 
 #### Executive Dashboard
+
 - Security posture trends
 - Risk exposure summary
 - Compliance status
 - Budget and resource needs
 
 #### Technical Teams
+
 - Vulnerability remediation queue
 - Patch management status
 - Security testing results
 - Technical remediation guidance
 
 #### Audit and Compliance
+
 - Control effectiveness evidence
 - Regulatory compliance status
 - Remediation timeline adherence
@@ -322,18 +330,21 @@ Vulnerability Database (PostgreSQL)
 ## Training and Awareness
 
 ### Security Team Training
+
 - Vulnerability research techniques
 - Exploit analysis and development
 - Security testing methodologies
 - Industry threat landscape
 
 ### Development Team Training
+
 - Secure coding practices
 - Vulnerability remediation techniques
 - Security testing tools
 - Threat modeling basics
 
 ### Operations Team Training
+
 - Patch management procedures
 - Incident response protocols
 - Security monitoring techniques
@@ -342,12 +353,14 @@ Vulnerability Database (PostgreSQL)
 ## Continuous Improvement
 
 ### Process Enhancement
+
 - Regular process reviews and updates
 - Lessons learned from incidents
 - Industry best practice adoption
 - Tool evaluation and improvement
 
 ### Automation Opportunities
+
 - Vulnerability correlation and deduplication
 - Risk scoring automation
 - Remediation workflow automation
@@ -356,6 +369,7 @@ Vulnerability Database (PostgreSQL)
 ## Emergency Procedures
 
 ### Zero-Day Response
+
 1. **Immediate Assessment**
    - Determine if vulnerability affects IntelGraph
    - Assess potential impact and exploitability

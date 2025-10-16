@@ -30,7 +30,11 @@ export interface RewardSignal {
   armId: ExpertArm;
   contextHash: string;
   rewardValue: number; // 0 to 1, where 1 is perfect
-  rewardType: 'success_at_k' | 'human_thumbs' | 'incident_free' | 'accepted_insight';
+  rewardType:
+    | 'success_at_k'
+    | 'human_thumbs'
+    | 'incident_free'
+    | 'accepted_insight';
   timestamp: number;
   metadata?: {
     latency?: number;
@@ -73,7 +77,10 @@ export interface LinUCBModel {
 export interface RouteDecision {
   selectedArm: ExpertArm;
   confidence: number;
-  explorationReason?: 'thompson_sampling' | 'ucb_exploration' | 'random_exploration';
+  explorationReason?:
+    | 'thompson_sampling'
+    | 'ucb_exploration'
+    | 'random_exploration';
   context: BanditContext;
   contextHash: string;
   expectedReward: number;
@@ -177,7 +184,9 @@ export class ThompsonSamplingBandit {
   private sampleGamma(shape: number, scale: number): number {
     // Marsaglia and Tsang's method for Gamma sampling
     if (shape < 1) {
-      return this.sampleGamma(shape + 1, scale) * Math.pow(Math.random(), 1 / shape);
+      return (
+        this.sampleGamma(shape + 1, scale) * Math.pow(Math.random(), 1 / shape)
+      );
     }
 
     const d = shape - 1 / 3;
@@ -246,7 +255,11 @@ export class LinUCBBandit {
   private featureDimension: number;
   private alpha: number;
 
-  constructor(arms: ExpertArm[], featureDimension: number = 20, alpha: number = 1.0) {
+  constructor(
+    arms: ExpertArm[],
+    featureDimension: number = 20,
+    alpha: number = 1.0,
+  ) {
     this.featureDimension = featureDimension;
     this.alpha = alpha;
 
@@ -313,14 +326,21 @@ export class LinUCBBandit {
     // Domain features (one-hot encoded)
     const domains = ['graph', 'rag', 'files', 'osint', 'export', 'general'];
     const domainIdx =
-      domains.indexOf(context.domain) !== -1 ? domains.indexOf(context.domain) : domains.length - 1;
+      domains.indexOf(context.domain) !== -1
+        ? domains.indexOf(context.domain)
+        : domains.length - 1;
     if (idx + domains.length <= this.featureDimension) {
       features[idx + domainIdx] = 1.0;
     }
     idx += domains.length;
 
     // Sensitivity level
-    const sensitivityMap = { public: 0.25, internal: 0.5, confidential: 0.75, secret: 1.0 };
+    const sensitivityMap = {
+      public: 0.25,
+      internal: 0.5,
+      confidential: 0.75,
+      secret: 1.0,
+    };
     if (idx < this.featureDimension) {
       features[idx] = sensitivityMap[context.sensitivity] || 0.5;
     }
@@ -346,7 +366,9 @@ export class LinUCBBandit {
         evening: [0, 0, 1, 0],
         night: [0, 0, 0, 1],
       };
-      const timeFeatures = timeMap[context.timeOfDay] || [0.25, 0.25, 0.25, 0.25];
+      const timeFeatures = timeMap[context.timeOfDay] || [
+        0.25, 0.25, 0.25, 0.25,
+      ];
       timeFeatures.forEach((val) => (features[idx++] = val));
     }
 
@@ -371,7 +393,10 @@ export class LinUCBBandit {
     const theta = this.solveLinearSystem(model.A, model.b);
 
     // Calculate x^T * theta (expected reward)
-    const expectedReward = features.reduce((sum, feat, i) => sum + feat * theta[i], 0);
+    const expectedReward = features.reduce(
+      (sum, feat, i) => sum + feat * theta[i],
+      0,
+    );
 
     // Calculate confidence width: alpha * sqrt(x^T * A^(-1) * x)
     const AInv = this.invertMatrix(model.A);
@@ -486,7 +511,10 @@ export class AdaptiveRouter extends EventEmitter {
     }
 
     // Check if in shadow mode
-    if (this.config.enableShadowMode && Math.random() > this.config.canaryPercent / 100) {
+    if (
+      this.config.enableShadowMode &&
+      Math.random() > this.config.canaryPercent / 100
+    ) {
       return this.createProductionDecision(context, contextHash, decisionId);
     }
 
@@ -556,7 +584,10 @@ export class AdaptiveRouter extends EventEmitter {
     this.emit('route:decision', decision);
 
     // Record metrics
-    prometheusConductorMetrics.recordOperationalEvent(`router_selected_${selectedArm}`, true);
+    prometheusConductorMetrics.recordOperationalEvent(
+      `router_selected_${selectedArm}`,
+      true,
+    );
 
     return decision;
   }
@@ -570,7 +601,9 @@ export class AdaptiveRouter extends EventEmitter {
       (await this.getStoredDecision(rewardSignal.contextHash));
 
     if (!decision) {
-      console.warn(`No decision found for reward signal: ${rewardSignal.contextHash}`);
+      console.warn(
+        `No decision found for reward signal: ${rewardSignal.contextHash}`,
+      );
       return;
     }
 
@@ -593,9 +626,16 @@ export class AdaptiveRouter extends EventEmitter {
     // Update bandits
     this.thompsonBandit.updateArm(rewardSignal.armId, rewardSignal.rewardValue);
 
-    if (this.config.algorithm === 'linucb' || this.config.algorithm === 'hybrid') {
+    if (
+      this.config.algorithm === 'linucb' ||
+      this.config.algorithm === 'hybrid'
+    ) {
       const features = this.linucbBandit['extractFeatures'](decision.context);
-      this.linucbBandit.updateArm(rewardSignal.armId, features, rewardSignal.rewardValue);
+      this.linucbBandit.updateArm(
+        rewardSignal.armId,
+        features,
+        rewardSignal.rewardValue,
+      );
     }
 
     // Clean up pending reward
@@ -686,7 +726,11 @@ export class AdaptiveRouter extends EventEmitter {
       complexity: context.queryComplexity,
     });
 
-    return require('crypto').createHash('sha256').update(contextStr).digest('hex').substr(0, 16);
+    return require('crypto')
+      .createHash('sha256')
+      .update(contextStr)
+      .digest('hex')
+      .substr(0, 16);
   }
 
   private shouldUseSafetyMode(context: BanditContext): boolean {
@@ -757,7 +801,8 @@ export class AdaptiveRouter extends EventEmitter {
     if (!stats) return 0.5;
 
     // Return width of confidence interval as inverse confidence measure
-    const width = stats.confidenceInterval.upper - stats.confidenceInterval.lower;
+    const width =
+      stats.confidenceInterval.upper - stats.confidenceInterval.lower;
     return Math.max(0.1, 1 - width);
   }
 
@@ -768,7 +813,9 @@ export class AdaptiveRouter extends EventEmitter {
     return stats.alpha / (stats.alpha + stats.beta);
   }
 
-  private getArmProbabilities(context: BanditContext): Record<ExpertArm, number> {
+  private getArmProbabilities(
+    context: BanditContext,
+  ): Record<ExpertArm, number> {
     // Calculate selection probabilities for all arms
     const probs: Record<ExpertArm, number> = {} as any;
     const armStats = this.thompsonBandit.getArmStatistics();
@@ -793,7 +840,9 @@ export class AdaptiveRouter extends EventEmitter {
     return 0.2; // TODO: Implement based on recent decisions
   }
 
-  private async getStoredDecision(contextHash: string): Promise<RouteDecision | null> {
+  private async getStoredDecision(
+    contextHash: string,
+  ): Promise<RouteDecision | null> {
     try {
       const stored = await this.redis.get(`router_decision:${contextHash}`);
       return stored ? JSON.parse(stored) : null;
@@ -809,7 +858,11 @@ export class AdaptiveRouter extends EventEmitter {
       lastUpdated: Date.now(),
     };
 
-    await this.redis.setex('router:bandit_state', 86400 * 7, JSON.stringify(state));
+    await this.redis.setex(
+      'router:bandit_state',
+      86400 * 7,
+      JSON.stringify(state),
+    );
   }
 
   private async loadPersistedState(): Promise<void> {
@@ -821,7 +874,10 @@ export class AdaptiveRouter extends EventEmitter {
 
       // Restore Thompson sampling state
       for (const [arm, stats] of Object.entries(state.thompson)) {
-        this.thompsonBandit['arms'].set(arm as ExpertArm, stats as ArmStatistics);
+        this.thompsonBandit['arms'].set(
+          arm as ExpertArm,
+          stats as ArmStatistics,
+        );
       }
 
       // Restore failure streaks

@@ -5,6 +5,7 @@
 **Escalation:** Immediate
 
 ## 🔍 Symptoms
+
 - Multiple 502 Bad Gateway errors across API endpoints
 - Grafana alerts: `ErrorRateSpike > 10%`
 - User reports of service unavailability
@@ -13,6 +14,7 @@
 ## ⚡ Immediate Actions (0-3 minutes)
 
 ### 1. Acknowledge & Assess
+
 ```bash
 # Check current error rate
 kubectl get pods -n intelgraph-prod -l app=intelgraph --no-headers | grep -v Running
@@ -23,6 +25,7 @@ kubectl logs -n ingress-nginx deployment/ingress-nginx-controller --tail=50
 ```
 
 ### 2. Quick Mitigation
+
 ```bash
 # Restart unhealthy pods
 kubectl rollout restart deployment/intelgraph -n intelgraph-prod
@@ -32,6 +35,7 @@ kubectl scale deployment intelgraph --replicas=10 -n intelgraph-prod
 ```
 
 ### 3. Check Upstream Dependencies
+
 ```bash
 # Database connectivity
 kubectl exec -n intelgraph-prod deployment/postgres -- pg_isready
@@ -46,6 +50,7 @@ kubectl exec -n intelgraph-prod deployment/redis -- redis-cli ping
 ## 🔧 Diagnostic Steps (3-7 minutes)
 
 ### Application Logs
+
 ```bash
 # Check application errors
 kubectl logs -n intelgraph-prod deployment/intelgraph --tail=100 | grep -i error
@@ -55,6 +60,7 @@ kubectl top pods -n intelgraph-prod --containers
 ```
 
 ### Infrastructure Issues
+
 ```bash
 # Node resource pressure
 kubectl describe nodes | grep -A5 "Conditions:"
@@ -64,6 +70,7 @@ kubectl get networkpolicies -n intelgraph-prod
 ```
 
 ### Load Balancer Status
+
 ```bash
 # AWS ALB target health
 aws elbv2 describe-target-health --target-group-arn $(aws elbv2 describe-target-groups --names intelgraph-prod --query 'TargetGroups[0].TargetGroupArn' --output text)
@@ -72,6 +79,7 @@ aws elbv2 describe-target-health --target-group-arn $(aws elbv2 describe-target-
 ## 🛠️ Resolution Actions (7-10 minutes)
 
 ### Memory/CPU Issues
+
 ```bash
 # Increase resource limits
 kubectl patch deployment intelgraph -n intelgraph-prod -p='
@@ -93,12 +101,14 @@ kubectl patch deployment intelgraph -n intelgraph-prod -p='
 ```
 
 ### Database Connection Pool
+
 ```bash
 # Reset connection pools
 kubectl exec -n intelgraph-prod deployment/intelgraph -- curl -X POST http://localhost:3000/admin/reset-pools
 ```
 
 ### Circuit Breaker Reset
+
 ```bash
 # Reset circuit breakers
 kubectl exec -n intelgraph-prod deployment/intelgraph -- curl -X POST http://localhost:3000/admin/reset-circuit-breakers

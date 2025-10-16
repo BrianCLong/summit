@@ -247,11 +247,21 @@
     {
       "action": "Generate incident report",
       "template": "./templates/incident-report.md",
-      "required_sections": ["timeline", "root_cause", "impact", "lessons_learned", "action_items"]
+      "required_sections": [
+        "timeline",
+        "root_cause",
+        "impact",
+        "lessons_learned",
+        "action_items"
+      ]
     },
     {
       "action": "Schedule post-mortem meeting",
-      "participants": ["incident_commander", "engineering_team", "product_team"],
+      "participants": [
+        "incident_commander",
+        "engineering_team",
+        "product_team"
+      ],
       "timeline": "within 24h"
     },
     {

@@ -146,16 +146,12 @@ extend type Query {
   """
   Perform sentiment analysis on text content
   """
-  analyzeSentiment(
-    text: String!
-  ): SentimentAnalysis!
+  analyzeSentiment(text: String!): SentimentAnalysis!
 
   """
   Get AI-generated insights about data quality and suggestions for improvement
   """
-  getDataQualityInsights(
-    graphId: ID
-  ): DataQualityReport!
+  getDataQualityInsights(graphId: ID): DataQualityReport!
 }
 
 # AI Analysis Mutations
@@ -163,10 +159,7 @@ extend type Mutation {
   """
   Apply AI-generated suggestions to improve graph structure and data quality
   """
-  applyAISuggestions(
-    graphId: ID!
-    suggestionIds: [ID!]!
-  ): AISuggestionResult!
+  applyAISuggestions(graphId: ID!, suggestionIds: [ID!]!): AISuggestionResult!
 
   """
   Use AI to enhance entities with additional properties, relationships, and insights

@@ -5,4 +5,3 @@ function rateLimiter({ windowMs = 60000, max = 60 }) {
 }
 
 module.exports = { rateLimiter };
-

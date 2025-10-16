@@ -70,7 +70,11 @@ export class RedisQuotaStore implements QuotaStore {
     await pipeline.exec();
   }
 
-  async usedInRolling(model: string, unit: string, window: Duration): Promise<number> {
+  async usedInRolling(
+    model: string,
+    unit: string,
+    window: Duration,
+  ): Promise<number> {
     const cutoff = DateTime.now().minus(window);
     const pipeline = this.client.pipeline();
     let totalUsed = 0;
@@ -120,7 +124,10 @@ export class RedisQuotaStore implements QuotaStore {
     return { used, windowStart: start.toISO(), windowEnd: end.toISO() };
   }
 
-  async getEarliestEventTimestamp(model: string, unit: string): Promise<number | null> {
+  async getEarliestEventTimestamp(
+    model: string,
+    unit: string,
+  ): Promise<number | null> {
     const earliestEventKey = `quota:${model}:${unit}:earliest`;
     const result = await this.client.zrange(earliestEventKey, 0, 0);
     return result.length > 0 ? parseInt(result[0], 10) : null;

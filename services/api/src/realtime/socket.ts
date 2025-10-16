@@ -43,7 +43,9 @@ interface CollaborationEvent {
 
 // JWKS client for token verification
 const jwksClientInstance = jwksClient({
-  jwksUri: process.env.OIDC_JWKS_URI || 'https://auth.intelgraph.com/.well-known/jwks.json',
+  jwksUri:
+    process.env.OIDC_JWKS_URI ||
+    'https://auth.intelgraph.com/.well-known/jwks.json',
   cache: true,
   cacheMaxEntries: 5,
   cacheMaxAge: 600000, // 10 minutes
@@ -105,7 +107,11 @@ export function createSocketIOServer(io: SocketIOServer): void {
     socket.on('investigation:join', async (investigationId: string) => {
       try {
         // Verify user has access to investigation
-        const hasAccess = await verifyInvestigationAccess(userId, investigationId, tenantId);
+        const hasAccess = await verifyInvestigationAccess(
+          userId,
+          investigationId,
+          tenantId,
+        );
         if (!hasAccess) {
           socket.emit('error', { message: 'Access denied to investigation' });
           return;
@@ -202,7 +208,9 @@ export function createSocketIOServer(io: SocketIOServer): void {
           const existingLock = await redisClient.get(lockKey);
           socket.emit('entity:lock_failed', {
             entityId,
-            lockedBy: existingLock ? JSON.parse(existingLock).userId : 'unknown',
+            lockedBy: existingLock
+              ? JSON.parse(existingLock).userId
+              : 'unknown',
             message: 'Entity is already locked by another user',
           });
         }
@@ -242,7 +250,9 @@ export function createSocketIOServer(io: SocketIOServer): void {
               socketId: socket.id,
             });
           } else {
-            socket.emit('error', { message: 'Cannot unlock entity locked by another user' });
+            socket.emit('error', {
+              message: 'Cannot unlock entity locked by another user',
+            });
           }
         }
       } catch (error) {
@@ -297,13 +307,16 @@ export function createSocketIOServer(io: SocketIOServer): void {
     });
 
     // Handle cursor/selection sharing
-    socket.on('cursor:update', (data: { x: number; y: number; selection?: string[] }) => {
-      socket.broadcast.emit('cursor:moved', {
-        userId,
-        ...data,
-        timestamp: Date.now(),
-      });
-    });
+    socket.on(
+      'cursor:update',
+      (data: { x: number; y: number; selection?: string[] }) => {
+        socket.broadcast.emit('cursor:moved', {
+          userId,
+          ...data,
+          timestamp: Date.now(),
+        });
+      },
+    );
 
     // Typing indicators
     socket.on('typing:start', (data: { context: string; field?: string }) => {
@@ -367,7 +380,9 @@ async function verifyToken(token: string): Promise<any> {
       return null;
     }
 
-    const key = await jwksClientInstance.getSigningKey(decodedHeader.header.kid);
+    const key = await jwksClientInstance.getSigningKey(
+      decodedHeader.header.kid,
+    );
     const signingKey = key.getPublicKey();
 
     const payload = jwt.verify(token, signingKey, {
@@ -435,7 +450,10 @@ async function verifyInvestigationAccess(
       return true;
     }
 
-    if (investigation.assigned_to && investigation.assigned_to.includes(userId)) {
+    if (
+      investigation.assigned_to &&
+      investigation.assigned_to.includes(userId)
+    ) {
       return true;
     }
 
@@ -495,7 +513,11 @@ async function getInvestigationState(investigationId: string): Promise<any> {
   }
 }
 
-async function cacheGraphUpdate(data: any, userId: string, tenantId: string): Promise<void> {
+async function cacheGraphUpdate(
+  data: any,
+  userId: string,
+  tenantId: string,
+): Promise<void> {
   try {
     const updateKey = `graph:updates:${tenantId}`;
     const update = {

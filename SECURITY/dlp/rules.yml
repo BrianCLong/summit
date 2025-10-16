@@ -1,131 +1,131 @@
 # Data Loss Prevention Rules
 # Sprint 27D: PII protection and field-level redaction
 
-version: "1.0"
+version: '1.0'
 metadata:
-  name: "intelgraph-dlp-rules"
-  description: "DLP rules for PII and sensitive data protection"
-  last_updated: "2025-09-19T00:00:00Z"
+  name: 'intelgraph-dlp-rules'
+  description: 'DLP rules for PII and sensitive data protection'
+  last_updated: '2025-09-19T00:00:00Z'
 
 # PII Classification Taxonomy
 pii_taxonomy:
   direct_identifiers:
-    - ssn              # Social Security Number
-    - passport_number  # Passport numbers
-    - driver_license   # Driver's license numbers
-    - credit_card      # Credit card numbers
-    - bank_account     # Bank account numbers
-    - email            # Email addresses
-    - phone            # Phone numbers
-    - full_name        # Full legal names
+    - ssn # Social Security Number
+    - passport_number # Passport numbers
+    - driver_license # Driver's license numbers
+    - credit_card # Credit card numbers
+    - bank_account # Bank account numbers
+    - email # Email addresses
+    - phone # Phone numbers
+    - full_name # Full legal names
 
   quasi_identifiers:
-    - date_of_birth    # Date of birth
-    - zip_code         # ZIP/postal codes
-    - ip_address       # IP addresses
-    - device_id        # Device identifiers
-    - user_id          # User identifiers
-    - employee_id      # Employee numbers
+    - date_of_birth # Date of birth
+    - zip_code # ZIP/postal codes
+    - ip_address # IP addresses
+    - device_id # Device identifiers
+    - user_id # User identifiers
+    - employee_id # Employee numbers
 
   sensitive_data:
-    - medical_record   # Medical information
-    - financial_data   # Financial records
-    - biometric        # Biometric data
-    - credentials      # Passwords, API keys
-    - location         # Precise location data
+    - medical_record # Medical information
+    - financial_data # Financial records
+    - biometric # Biometric data
+    - credentials # Passwords, API keys
+    - location # Precise location data
 
 # Field Detection Patterns
 detection_patterns:
   ssn:
     regex: '^\d{3}-?\d{2}-?\d{4}$'
     confidence: 0.95
-    examples: ["123-45-6789", "123456789"]
+    examples: ['123-45-6789', '123456789']
 
   email:
     regex: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
     confidence: 0.99
-    examples: ["user@example.com"]
+    examples: ['user@example.com']
 
   phone:
     regex: '^(\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})$'
     confidence: 0.90
-    examples: ["+1-555-123-4567", "(555) 123-4567"]
+    examples: ['+1-555-123-4567', '(555) 123-4567']
 
   credit_card:
     regex: '^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|3[47][0-9]{13}|3[0-9]{13}|6(?:011|5[0-9]{2})[0-9]{12})$'
     confidence: 0.95
-    examples: ["4111111111111111"]
+    examples: ['4111111111111111']
 
   ip_address:
     regex: '^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$'
     confidence: 0.90
-    examples: ["192.168.1.1"]
+    examples: ['192.168.1.1']
 
   date_of_birth:
     regex: '^(0[1-9]|1[0-2])/(0[1-9]|[12][0-9]|3[01])/(19|20)\d{2}$'
     confidence: 0.80
-    examples: ["12/31/1990"]
+    examples: ['12/31/1990']
 
 # Redaction Rules
 redaction_rules:
   default:
-    action: "mask"
-    mask_character: "*"
+    action: 'mask'
+    mask_character: '*'
     preserve_format: true
     preserve_length: true
 
   email:
-    action: "partial_mask"
-    mask_strategy: "preserve_domain"
+    action: 'partial_mask'
+    mask_strategy: 'preserve_domain'
     # user@example.com -> u***@example.com
 
   phone:
-    action: "partial_mask"
-    mask_strategy: "preserve_area_code"
+    action: 'partial_mask'
+    mask_strategy: 'preserve_area_code'
     # (555) 123-4567 -> (555) ***-****
 
   ssn:
-    action: "full_mask"
-    mask_character: "X"
+    action: 'full_mask'
+    mask_character: 'X'
     # 123-45-6789 -> XXX-XX-XXXX
 
   credit_card:
-    action: "partial_mask"
-    mask_strategy: "preserve_last_four"
+    action: 'partial_mask'
+    mask_strategy: 'preserve_last_four'
     # 4111111111111111 -> ************1111
 
   ip_address:
-    action: "partial_mask"
-    mask_strategy: "preserve_network"
+    action: 'partial_mask'
+    mask_strategy: 'preserve_network'
     # 192.168.1.100 -> 192.168.*.***
 
 # Context-Based Rules
 context_rules:
-  - name: "legal_export"
+  - name: 'legal_export'
     condition:
-      purpose: "legal"
+      purpose: 'legal'
       step_up_verified: true
-    action: "allow"
+    action: 'allow'
     audit: true
 
-  - name: "compliance_audit"
+  - name: 'compliance_audit'
     condition:
-      purpose: "compliance"
+      purpose: 'compliance'
       step_up_verified: true
-    action: "allow"
+    action: 'allow'
     audit: true
 
-  - name: "investigation_read"
+  - name: 'investigation_read'
     condition:
-      purpose: "investigation"
-      action: "read"
-    action: "redact"
-    redaction_level: "partial"
+      purpose: 'investigation'
+      action: 'read'
+    action: 'redact'
+    redaction_level: 'partial'
 
-  - name: "default_deny"
+  - name: 'default_deny'
     condition: {}
-    action: "redact"
-    redaction_level: "full"
+    action: 'redact'
+    redaction_level: 'full'
 
 # Export Restrictions
 export_restrictions:
@@ -153,7 +153,7 @@ export_restrictions:
 
 # Audit Configuration
 audit_config:
-  log_level: "info"
+  log_level: 'info'
   include_fields:
     - actor
     - purpose
@@ -163,7 +163,7 @@ audit_config:
     - export_justification
     - step_up_token
 
-  retention_days: 2555  # 7 years for compliance
+  retention_days: 2555 # 7 years for compliance
 
 # Monitoring & Alerting
 monitoring:
@@ -174,39 +174,39 @@ monitoring:
     - policy_violations_total
 
   alerts:
-    - name: "high_pii_exposure"
-      condition: "rate(pii_fields_redacted_total[5m]) > 100"
-      severity: "warning"
+    - name: 'high_pii_exposure'
+      condition: 'rate(pii_fields_redacted_total[5m]) > 100'
+      severity: 'warning'
 
-    - name: "bulk_export_spike"
-      condition: "rate(export_requests_total[1h]) > 50"
-      severity: "critical"
+    - name: 'bulk_export_spike'
+      condition: 'rate(export_requests_total[1h]) > 50'
+      severity: 'critical'
 
 # Testing & Validation
 test_data:
   positive_cases:
-    ssn: ["123-45-6789", "987654321"]
-    email: ["test@example.com", "user+tag@domain.co.uk"]
-    phone: ["+1-555-123-4567", "(555) 123-4567", "5551234567"]
-    credit_card: ["4111111111111111", "5555555555554444"]
+    ssn: ['123-45-6789', '987654321']
+    email: ['test@example.com', 'user+tag@domain.co.uk']
+    phone: ['+1-555-123-4567', '(555) 123-4567', '5551234567']
+    credit_card: ['4111111111111111', '5555555555554444']
 
   negative_cases:
-    ssn: ["123-45-678", "abc-de-fghi"]
-    email: ["invalid-email", "@domain.com"]
-    phone: ["123", "555-12-34567"]
-    credit_card: ["1234", "invalid-card-number"]
+    ssn: ['123-45-678', 'abc-de-fghi']
+    email: ['invalid-email', '@domain.com']
+    phone: ['123', '555-12-34567']
+    credit_card: ['1234', 'invalid-card-number']
 
 # Compliance Mappings
 compliance:
   gdpr:
-    article_6: "lawful_basis_required"
-    article_17: "right_to_erasure"
-    article_25: "data_protection_by_design"
+    article_6: 'lawful_basis_required'
+    article_17: 'right_to_erasure'
+    article_25: 'data_protection_by_design'
 
   ccpa:
-    section_1798_100: "right_to_know"
-    section_1798_105: "right_to_delete"
+    section_1798_100: 'right_to_know'
+    section_1798_105: 'right_to_delete'
 
   hipaa:
-    section_164_502: "minimum_necessary"
-    section_164_514: "de_identification"
+    section_164_502: 'minimum_necessary'
+    section_164_514: 'de_identification'

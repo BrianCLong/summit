@@ -25,4 +25,3 @@ r.get('/sites/stream', async (req, res) => {
 });
 
 export default r;
-

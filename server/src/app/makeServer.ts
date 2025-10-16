@@ -17,7 +17,7 @@ export interface MakeServerOptions {
 }
 
 export async function makeGraphServer(opts: MakeServerOptions = {}) {
-  let schema = makeExecutableSchema({ typeDefs, resolvers });
+  let schema = makeExecutableSchema({ typeDefs, resolvers: resolvers as any });
   const { authDirectiveTransformer } = authDirective();
   schema = authDirectiveTransformer(schema);
 
@@ -46,12 +46,19 @@ export async function makeGraphServer(opts: MakeServerOptions = {}) {
           : null);
 
       const withUser = injectedUser
-        ? { ...base, user: injectedUser, isAuthenticated: true, tenantId: injectedUser.tenant }
+        ? {
+            ...base,
+            user: injectedUser,
+            isAuthenticated: true,
+            tenantId: injectedUser.tenant,
+          }
         : base;
       // Merge/override additional context
       if (opts.context) {
         const extra =
-          typeof opts.context === 'function' ? await opts.context(withUser) : opts.context;
+          typeof opts.context === 'function'
+            ? await opts.context(withUser)
+            : opts.context;
         return { ...withUser, ...extra };
       }
       return withUser;

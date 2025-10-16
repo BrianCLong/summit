@@ -9,5 +9,5 @@ export const Storage = {
   },
   get(id: string) {
     return mem.get(id);
-  }
+  },
 };

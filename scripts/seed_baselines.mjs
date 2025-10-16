@@ -11,7 +11,9 @@ const targets = [
 ];
 
 if (!fs.existsSync(src)) {
-  console.error('[seed-baselines] Missing server/src/generated/introspection.json. Run: cd server && npm run codegen');
+  console.error(
+    '[seed-baselines] Missing server/src/generated/introspection.json. Run: cd server && npm run codegen',
+  );
   process.exit(1);
 }
 fs.mkdirSync(outDir, { recursive: true });
@@ -19,5 +21,6 @@ const buf = fs.readFileSync(src);
 for (const t of targets) {
   fs.writeFileSync(t, buf);
 }
-console.log('[seed-baselines] Seeded baselines N-1 and N-2 from current introspection.');
-
+console.log(
+  '[seed-baselines] Seeded baselines N-1 and N-2 from current introspection.',
+);

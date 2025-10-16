@@ -26,7 +26,7 @@ async function verifyBundle(bundlePath: string): Promise<VerificationResult> {
     errors: [],
     warnings: [],
     claimsVerified: 0,
-    claimsTotal: 0
+    claimsTotal: 0,
   };
 
   try {
@@ -36,7 +36,7 @@ async function verifyBundle(bundlePath: string): Promise<VerificationResult> {
     extract.on('entry', (header, stream, next) => {
       if (header.name === 'manifest.json') {
         const chunks: Buffer[] = [];
-        stream.on('data', chunk => chunks.push(chunk));
+        stream.on('data', (chunk) => chunks.push(chunk));
         stream.on('end', () => {
           manifestContent = Buffer.concat(chunks).toString('utf8');
           next();
@@ -48,11 +48,7 @@ async function verifyBundle(bundlePath: string): Promise<VerificationResult> {
       }
     });
 
-    await pipeline(
-      createReadStream(bundlePath),
-      createGunzip(),
-      extract
-    );
+    await pipeline(createReadStream(bundlePath), createGunzip(), extract);
 
     if (!manifestContent) {
       result.errors.push('No manifest.json found in bundle');
@@ -64,21 +60,29 @@ async function verifyBundle(bundlePath: string): Promise<VerificationResult> {
       manifest = JSON.parse(manifestContent);
       result.manifest = manifest;
     } catch (error) {
-      result.errors.push(`Invalid JSON in manifest: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      result.errors.push(
+        `Invalid JSON in manifest: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
       return result;
     }
 
     // Validate manifest structure
-    if (!manifest.merkleRoot || !manifest.claims || !Array.isArray(manifest.claims)) {
+    if (
+      !manifest.merkleRoot ||
+      !manifest.claims ||
+      !Array.isArray(manifest.claims)
+    ) {
       result.errors.push('Invalid manifest structure');
       return result;
     }
 
     // Verify Merkle root
-    const claimHashes = manifest.claims.map(c => c.hash);
+    const claimHashes = manifest.claims.map((c) => c.hash);
     const computedRoot = computeMerkleRoot(claimHashes);
     if (computedRoot !== manifest.merkleRoot) {
-      result.errors.push(`Merkle root mismatch: expected ${manifest.merkleRoot}, got ${computedRoot}`);
+      result.errors.push(
+        `Merkle root mismatch: expected ${manifest.merkleRoot}, got ${computedRoot}`,
+      );
     }
 
     // Verify each claim signature
@@ -87,7 +91,9 @@ async function verifyBundle(bundlePath: string): Promise<VerificationResult> {
       if (verifyClaim(claim)) {
         result.claimsVerified++;
       } else {
-        result.errors.push(`Claim signature verification failed for claim ${claim.id}`);
+        result.errors.push(
+          `Claim signature verification failed for claim ${claim.id}`,
+        );
       }
     }
 
@@ -96,20 +102,25 @@ async function verifyBundle(bundlePath: string): Promise<VerificationResult> {
       result.warnings.push('No licenses specified in manifest');
     }
 
-    if (result.errors.length === 0 && result.claimsVerified === result.claimsTotal) {
+    if (
+      result.errors.length === 0 &&
+      result.claimsVerified === result.claimsTotal
+    ) {
       result.success = true;
     }
 
     return result;
   } catch (error) {
-    result.errors.push(`Verification failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    result.errors.push(
+      `Verification failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+    );
     return result;
   }
 }
 
 function computeMerkleRoot(hashes: string[]): string {
   if (hashes.length === 0) return '';
-  let nodes: Buffer[] = hashes.map(h => Buffer.from(h, 'hex'));
+  let nodes: Buffer[] = hashes.map((h) => Buffer.from(h, 'hex'));
 
   while (nodes.length > 1) {
     const next: Buffer[] = [];
@@ -128,7 +139,10 @@ function computeMerkleRoot(hashes: string[]): string {
   return nodes[0].toString('hex');
 }
 
-function formatOutput(result: VerificationResult, format: 'json' | 'human' = 'human'): string {
+function formatOutput(
+  result: VerificationResult,
+  format: 'json' | 'human' = 'human',
+): string {
   if (format === 'json') {
     return JSON.stringify(result, null, 2);
   }
@@ -151,12 +165,12 @@ function formatOutput(result: VerificationResult, format: 'json' | 'human' = 'hu
 
   if (result.errors.length > 0) {
     lines.push('\n🚨 ERRORS:');
-    result.errors.forEach(error => lines.push(`  • ${error}`));
+    result.errors.forEach((error) => lines.push(`  • ${error}`));
   }
 
   if (result.warnings.length > 0) {
     lines.push('\n⚠️  WARNINGS:');
-    result.warnings.forEach(warning => lines.push(`  • ${warning}`));
+    result.warnings.forEach((warning) => lines.push(`  • ${warning}`));
   }
 
   return lines.join('\n');
@@ -182,13 +196,16 @@ program
 
     const result = await verifyBundle(bundlePath);
 
-    logger.info({
-      success: result.success,
-      claimsVerified: result.claimsVerified,
-      claimsTotal: result.claimsTotal,
-      errorsCount: result.errors.length,
-      warningsCount: result.warnings.length
-    }, 'Verification completed');
+    logger.info(
+      {
+        success: result.success,
+        claimsVerified: result.claimsVerified,
+        claimsTotal: result.claimsTotal,
+        errorsCount: result.errors.length,
+        warningsCount: result.warnings.length,
+      },
+      'Verification completed',
+    );
 
     console.log(formatOutput(result, options.format as 'json' | 'human'));
 
@@ -197,7 +214,9 @@ program
 
 program
   .command('info')
-  .description('Show information about a provenance bundle without verification')
+  .description(
+    'Show information about a provenance bundle without verification',
+  )
   .argument('<bundle>', 'Path to the provenance bundle (.tgz)')
   .option('-f, --format <format>', 'Output format (human|json)', 'human')
   .action(async (bundlePath: string, options) => {
@@ -208,7 +227,7 @@ program
       extract.on('entry', (header, stream, next) => {
         if (header.name === 'manifest.json') {
           const chunks: Buffer[] = [];
-          stream.on('data', chunk => chunks.push(chunk));
+          stream.on('data', (chunk) => chunks.push(chunk));
           stream.on('end', () => {
             manifestContent = Buffer.concat(chunks).toString('utf8');
             next();
@@ -220,11 +239,7 @@ program
         }
       });
 
-      await pipeline(
-        createReadStream(bundlePath),
-        createGunzip(),
-        extract
-      );
+      await pipeline(createReadStream(bundlePath), createGunzip(), extract);
 
       if (!manifestContent) {
         console.error('No manifest.json found in bundle');
@@ -241,14 +256,18 @@ program
         console.log(`Claims Count: ${manifest.claims.length}`);
         console.log(`Licenses: ${manifest.licenses.join(', ') || 'None'}`);
         console.log('\nClaims:');
-        manifest.claims.forEach(claim => {
+        manifest.claims.forEach((claim) => {
           console.log(`  • ID: ${claim.id}`);
-          console.log(`    Text: ${claim.text.substring(0, 100)}${claim.text.length > 100 ? '...' : ''}`);
+          console.log(
+            `    Text: ${claim.text.substring(0, 100)}${claim.text.length > 100 ? '...' : ''}`,
+          );
           console.log(`    Hash: ${claim.hash}`);
         });
       }
     } catch (error) {
-      console.error(`Failed to read bundle: ${error instanceof Error ? error.message : 'Unknown error'}`);
+      console.error(
+        `Failed to read bundle: ${error instanceof Error ? error.message : 'Unknown error'}`,
+      );
       process.exit(1);
     }
   });

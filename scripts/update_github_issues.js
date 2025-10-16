@@ -26,13 +26,23 @@ function parseCSV(csv) {
     for (let i = 0; i < line.length; i++) {
       const ch = line[i];
       if (inQ) {
-        if (ch === '"' && line[i + 1] === '"') { cur += '"'; i++; }
-        else if (ch === '"') { inQ = false; }
-        else { cur += ch; }
+        if (ch === '"' && line[i + 1] === '"') {
+          cur += '"';
+          i++;
+        } else if (ch === '"') {
+          inQ = false;
+        } else {
+          cur += ch;
+        }
       } else {
-        if (ch === '"') { inQ = true; }
-        else if (ch === ',') { fields.push(cur); cur = ''; }
-        else { cur += ch; }
+        if (ch === '"') {
+          inQ = true;
+        } else if (ch === ',') {
+          fields.push(cur);
+          cur = '';
+        } else {
+          cur += ch;
+        }
       }
     }
     fields.push(cur);
@@ -49,34 +59,50 @@ const rows = parseCSV(text);
 for (const [TITLE, BODY, LABELS, ASSIGNEES, STATE, MILESTONE] of rows) {
   const title = TITLE.trim().replace(/^"|"$/g, '');
   const body = BODY.trim().replace(/^"|"$/g, '');
-  const labels = LABELS ? LABELS.split(',').map(s => s.trim()).filter(Boolean) : [];
-  const assignees = ASSIGNEES ? ASSIGNEES.split(',').map(s => s.trim()).filter(Boolean) : [];
+  const labels = LABELS
+    ? LABELS.split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
+  const assignees = ASSIGNEES
+    ? ASSIGNEES.split(',')
+        .map((s) => s.trim())
+        .filter(Boolean)
+    : [];
   const state = (STATE || 'open').trim();
   const milestone = (MILESTONE || '').trim();
 
   console.log(`Syncing: ${title}`);
   let number = '';
   try {
-    const out = sh(`gh issue list --search ${JSON.stringify(title + ' in:title')} --state all --json number,title --repo ${OWNER}/${REPO}`);
+    const out = sh(
+      `gh issue list --search ${JSON.stringify(title + ' in:title')} --state all --json number,title --repo ${OWNER}/${REPO}`,
+    );
     const arr = JSON.parse(out);
-    const found = arr.find(i => i.title === title);
+    const found = arr.find((i) => i.title === title);
     number = found ? String(found.number) : '';
   } catch {}
 
   if (number) {
     let cmd = `gh issue edit ${number} --repo ${OWNER}/${REPO}`;
-    if (labels.length) cmd += labels.map(l => ` --add-label ${JSON.stringify(l)}`).join('');
+    if (labels.length)
+      cmd += labels.map((l) => ` --add-label ${JSON.stringify(l)}`).join('');
     // Normalize assignee to OWNER to avoid username mismatches
     cmd += ` --add-assignee ${JSON.stringify(OWNER)}`;
     if (milestone) cmd += ` --milestone ${JSON.stringify(milestone)}`;
     sh(cmd);
-    if (state === 'closed') sh(`gh issue close ${number} --repo ${OWNER}/${REPO}`);
+    if (state === 'closed')
+      sh(`gh issue close ${number} --repo ${OWNER}/${REPO}`);
   } else {
     let cmd = `gh issue create --repo ${OWNER}/${REPO} --title ${JSON.stringify(title)} --body ${JSON.stringify(body)}`;
     if (labels.length) cmd += ` --label ${JSON.stringify(labels.join(','))}`;
     const desired = assignees.length ? assignees : [OWNER];
-    const finalAssignees = desired.filter(a => a && a.toLowerCase() === OWNER.toLowerCase());
-    const assigneesFinal = (finalAssignees.length ? finalAssignees : [OWNER]).join(',');
+    const finalAssignees = desired.filter(
+      (a) => a && a.toLowerCase() === OWNER.toLowerCase(),
+    );
+    const assigneesFinal = (
+      finalAssignees.length ? finalAssignees : [OWNER]
+    ).join(',');
     cmd += ` --assignee ${JSON.stringify(assigneesFinal)}`;
     if (milestone) cmd += ` --milestone ${JSON.stringify(milestone)}`;
     const created = sh(cmd);

@@ -11,7 +11,7 @@ groups:
           service: agent-workbench
           slo: zk-coverage
         annotations:
-          summary: "zk-Provenance coverage below 99.5%"
+          summary: 'zk-Provenance coverage below 99.5%'
           description: |
             Zero-knowledge proof coverage is {{ $value | printf "%.2f" }}% (<99.5%).
             Some responses lack cryptographic verification of policy compliance.
@@ -27,7 +27,7 @@ groups:
           service: agent-workbench
           slo: zk-performance
         annotations:
-          summary: "zk-Proof verification P95 above 250ms"
+          summary: 'zk-Proof verification P95 above 250ms'
           description: |
             Zero-knowledge proof verification P95 latency is {{ $value | printf "%.1f" }}ms (>250ms SLA).
             Proof verification is degraded. Check circuit parameters and prover capacity.
@@ -43,7 +43,7 @@ groups:
           service: agent-workbench
           slo: bft-quorum
         annotations:
-          summary: "BFT quorum success rate below 95%"
+          summary: 'BFT quorum success rate below 95%'
           description: |
             Byzantine fault tolerant quorum success rate is {{ $value | printf "%.2%%" }} (<95%).
             CRITICAL: Multi-region write consensus is failing. Check regional connectivity
@@ -59,7 +59,7 @@ groups:
           service: agent-workbench
           slo: bft-performance
         annotations:
-          summary: "BFT write overhead exceeds 8%"
+          summary: 'BFT write overhead exceeds 8%'
           description: |
             Byzantine fault tolerant write overhead is {{ $value | printf "%.1f" }}% (>8% SLA).
             BFT consensus is impacting write performance. Check network latency between
@@ -76,7 +76,7 @@ groups:
           service: agent-workbench
           slo: cse-safety
         annotations:
-          summary: "CSE score below promote threshold (0.99)"
+          summary: 'CSE score below promote threshold (0.99)'
           description: |
             Continuous Safety Equivalence score is {{ $value | printf "%.3f" }} (<0.99).
             CRITICAL: Safety invariant violations detected. Deployment will be HELD.
@@ -92,7 +92,7 @@ groups:
           service: agent-workbench
           slo: cse-safety
         annotations:
-          summary: "CSE safety invariant violations detected"
+          summary: 'CSE safety invariant violations detected'
           description: |
             {{ $value | printf "%.2f" }} safety invariant violations per second detected.
             CRITICAL: Behavioral equivalence broken between baseline and candidate.
@@ -109,7 +109,7 @@ groups:
           service: agent-workbench
           slo: sovereign-compliance
         annotations:
-          summary: "Sovereign compliance policy drift detected"
+          summary: 'Sovereign compliance policy drift detected'
           description: |
             {{ $value | printf "%.2f" }} policy drift events per second.
             CRITICAL: Runtime policy hash differs from declared tenant stance.
@@ -125,7 +125,7 @@ groups:
           service: agent-workbench
           slo: sovereign-compliance
         annotations:
-          summary: "Sovereign compliance coverage below 100%"
+          summary: 'Sovereign compliance coverage below 100%'
           description: |
             Compliance policy tagging coverage is {{ $value | printf "%.2%%" }} (<100%).
             Some requests are not tagged with tenant policy hash. Compliance
@@ -141,7 +141,7 @@ groups:
           service: agent-workbench
           slo: sovereign-audit
         annotations:
-          summary: "Audit pack generation exceeds 60s SLA"
+          summary: 'Audit pack generation exceeds 60s SLA'
           description: |
             Sovereign audit pack generation P95 time is {{ $value | printf "%.1f" }}s (>60s SLA).
             On-demand compliance audits are taking too long. Check evidence collection
@@ -161,7 +161,7 @@ groups:
           service: agent-workbench
           slo: greenops-optimization
         annotations:
-          summary: "GreenOps optimization targets not met"
+          summary: 'GreenOps optimization targets not met'
           description: |
             GreenOps tri-objective optimization failing to meet targets:
             Cost reduction: {{ printf "%.1f%%" .Labels.cost_reduction }}
@@ -179,7 +179,7 @@ groups:
           service: agent-workbench
           slo: greenops-slo
         annotations:
-          summary: "GreenOps causing SLO violations"
+          summary: 'GreenOps causing SLO violations'
           description: |
             GreenOps optimization causing {{ $value | printf "%.3f" }} SLO violations/sec.
             Cost/carbon optimization may be compromising latency SLAs.
@@ -196,7 +196,7 @@ groups:
           service: agent-workbench
           slo: sovereign-resilience
         annotations:
-          summary: "Sovereign resilience health degraded"
+          summary: 'Sovereign resilience health degraded'
           description: |
             Overall sovereign resilience health score is {{ $value | printf "%.2f" }} (<0.8).
             Multiple mythic systems may be degraded. Check zk-provenance, BFT consensus,
@@ -213,7 +213,7 @@ groups:
           service: agent-workbench
           slo: regional-health
         annotations:
-          summary: "Regional health degraded in {{ $labels.region }}"
+          summary: 'Regional health degraded in {{ $labels.region }}'
           description: |
             Regional health score for {{ $labels.region }} is {{ $value | printf "%.2f" }} (<0.7).
             Check BFT participation, network connectivity, and resource availability.
@@ -232,7 +232,7 @@ groups:
           service: agent-workbench
           slo: byzantine-detection
         annotations:
-          summary: "Potential Byzantine behavior detected"
+          summary: 'Potential Byzantine behavior detected'
           description: |
             SECURITY ALERT: Potential Byzantine fault behavior detected in BFT committee.
             Vote inconsistency or split voting patterns observed. This may indicate

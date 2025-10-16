@@ -18,12 +18,12 @@ class TokenBucket {
 
   tryConsume(tokens: number = 1): boolean {
     this.refill();
-    
+
     if (this.tokens >= tokens) {
       this.tokens -= tokens;
       return true;
     }
-    
+
     return false;
   }
 
@@ -31,7 +31,7 @@ class TokenBucket {
     const now = Date.now();
     const timePassed = (now - this.lastRefill) / 1000; // seconds
     const tokensToAdd = timePassed * this.refillRate;
-    
+
     this.tokens = Math.min(this.capacity, this.tokens + tokensToAdd);
     this.lastRefill = now;
   }
@@ -41,7 +41,9 @@ class TokenBucket {
     return {
       tokens: Math.floor(this.tokens),
       capacity: this.capacity,
-      utilizationPct: Math.round(((this.capacity - this.tokens) / this.capacity) * 100)
+      utilizationPct: Math.round(
+        ((this.capacity - this.tokens) / this.capacity) * 100,
+      ),
     };
   }
 }
@@ -50,32 +52,34 @@ class TokenBucket {
 const rateLimitHits = new Counter({
   name: 'rate_limit_hits_total',
   help: 'Total rate limit hits by tenant',
-  labelNames: ['tenant_id', 'endpoint']
+  labelNames: ['tenant_id', 'endpoint'],
 });
 
 const activeConnections = new Gauge({
   name: 'active_connections_current',
   help: 'Current active connections per tenant',
-  labelNames: ['tenant_id']
+  labelNames: ['tenant_id'],
 });
 
 const tokenBuckets = new Map<string, TokenBucket>();
 
-export function backpressureMiddleware(options: {
-  tokensPerSecond?: number;
-  burstCapacity?: number;
-  globalLimit?: number;
-} = {}) {
+export function backpressureMiddleware(
+  options: {
+    tokensPerSecond?: number;
+    burstCapacity?: number;
+    globalLimit?: number;
+  } = {},
+) {
   const {
     tokensPerSecond = 100, // per tenant per second
-    burstCapacity = 1000,  // burst capacity per tenant
-    globalLimit = 10000    // global concurrent connections
+    burstCapacity = 1000, // burst capacity per tenant
+    globalLimit = 10000, // global concurrent connections
   } = options;
 
   let globalConnections = 0;
 
   return (req: Request, res: Response, next: NextFunction) => {
-    const tenantId = req.headers['x-tenant-id'] as string || 'default';
+    const tenantId = (req.headers['x-tenant-id'] as string) || 'default';
     const endpoint = req.route?.path || req.path;
 
     // Global connection limit
@@ -83,25 +87,28 @@ export function backpressureMiddleware(options: {
       return res.status(503).json({
         error: 'Service temporarily unavailable',
         code: 'GLOBAL_CAPACITY_EXCEEDED',
-        retryAfter: 60
+        retryAfter: 60,
       });
     }
 
     // Get or create token bucket for tenant
     const bucketKey = `${tenantId}:${endpoint}`;
     if (!tokenBuckets.has(bucketKey)) {
-      tokenBuckets.set(bucketKey, new TokenBucket(burstCapacity, tokensPerSecond));
+      tokenBuckets.set(
+        bucketKey,
+        new TokenBucket(burstCapacity, tokensPerSecond),
+      );
     }
-    
+
     const bucket = tokenBuckets.get(bucketKey)!;
 
     // Check if request can be processed
     if (!bucket.tryConsume()) {
       rateLimitHits.inc({ tenant_id: tenantId, endpoint });
-      
+
       const status = bucket.getStatus();
       const retryAfter = Math.ceil((1 - status.tokens) / tokensPerSecond);
-      
+
       return res.status(429).json({
         error: 'Too many requests',
         code: 'RATE_LIMIT_EXCEEDED',
@@ -109,8 +116,8 @@ export function backpressureMiddleware(options: {
         limit: {
           capacity: status.capacity,
           remaining: status.tokens,
-          utilizationPct: status.utilizationPct
-        }
+          utilizationPct: status.utilizationPct,
+        },
       });
     }
 
@@ -135,37 +142,37 @@ export function backpressureMiddleware(options: {
 
 export function getTenantRateStatus(tenantId: string): Record<string, any> {
   const status: Record<string, any> = {};
-  
+
   for (const [key, bucket] of tokenBuckets.entries()) {
     if (key.startsWith(`${tenantId}:`)) {
       const endpoint = key.substring(tenantId.length + 1);
       status[endpoint] = bucket.getStatus();
     }
   }
-  
+
   return {
     tenantId,
     endpoints: status,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
   };
 }
 
 export async function setupRedisRateLimit(
-  tenantId: string, 
-  key: string, 
-  limit: number, 
-  windowSeconds: number
+  tenantId: string,
+  key: string,
+  limit: number,
+  windowSeconds: number,
 ): Promise<boolean> {
   const redisKey = `rate:${tenantId}:${key}`;
-  
+
   try {
     const current = await redis.get(redisKey);
     const count = current ? parseInt(current) : 0;
-    
+
     if (count >= limit) {
       return false; // Rate limit exceeded
     }
-    
+
     if (count === 0) {
       // First request in window, set with TTL
       await redis.setWithTTL(redisKey, '1', windowSeconds);
@@ -184,11 +191,11 @@ export async function setupRedisRateLimit(
           return 0
         end
       `;
-      
+
       const result = await redis.get('eval'); // Placeholder - needs proper Redis eval
       return result === '1';
     }
-    
+
     return true;
   } catch (error) {
     console.error('Redis rate limit error:', error);
@@ -200,7 +207,7 @@ export async function setupRedisRateLimit(
 setInterval(() => {
   const now = Date.now();
   const cutoff = 5 * 60 * 1000; // 5 minutes
-  
+
   for (const [key, bucket] of tokenBuckets.entries()) {
     if (now - bucket['lastRefill'] > cutoff) {
       tokenBuckets.delete(key);

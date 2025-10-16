@@ -19,19 +19,32 @@ export class DataRetentionService {
     this.neo4j = neo4jDriver;
     // Define default retention policies
     this.policies = [
-      { label: 'Entity', ttlDays: Number(process.env.ENTITY_TTL_DAYS || 365), auditAction: 'ENTITY_DELETED_TTL' },
-      { label: 'Relationship', ttlDays: Number(process.env.RELATIONSHIP_TTL_DAYS || 365), auditAction: 'RELATIONSHIP_DELETED_TTL' },
+      {
+        label: 'Entity',
+        ttlDays: Number(process.env.ENTITY_TTL_DAYS || 365),
+        auditAction: 'ENTITY_DELETED_TTL',
+      },
+      {
+        label: 'Relationship',
+        ttlDays: Number(process.env.RELATIONSHIP_TTL_DAYS || 365),
+        auditAction: 'RELATIONSHIP_DELETED_TTL',
+      },
       // Add more policies as needed for other labels
     ];
   }
 
-  public startCleanupJob(intervalMs: number = 24 * 60 * 60 * 1000) { // Default to every 24 hours
+  public startCleanupJob(intervalMs: number = 24 * 60 * 60 * 1000) {
+    // Default to every 24 hours
     if (this.cleanupInterval) {
-      logger.warn('Data retention cleanup job already running. Stopping existing job.');
+      logger.warn(
+        'Data retention cleanup job already running. Stopping existing job.',
+      );
       this.stopCleanupJob();
     }
 
-    logger.info(`Starting data retention cleanup job every ${intervalMs / (1000 * 60 * 60)} hours.`);
+    logger.info(
+      `Starting data retention cleanup job every ${intervalMs / (1000 * 60 * 60)} hours.`,
+    );
     this.cleanupInterval = setInterval(() => this.runCleanup(), intervalMs);
   }
 
@@ -48,7 +61,9 @@ export class DataRetentionService {
     const session = this.neo4j.session();
     try {
       for (const policy of this.policies) {
-        const cutoffDate = new Date(Date.now() - policy.ttlDays * 24 * 60 * 60 * 1000);
+        const cutoffDate = new Date(
+          Date.now() - policy.ttlDays * 24 * 60 * 60 * 1000,
+        );
         const cutoffTimestamp = cutoffDate.toISOString();
 
         const query = `
@@ -62,14 +77,20 @@ export class DataRetentionService {
         const deletedCount = result.records[0].get('deletedCount');
 
         if (deletedCount > 0) {
-          logger.info(`Deleted ${deletedCount} ${policy.label} nodes/relationships older than ${policy.ttlDays} days.`);
+          logger.info(
+            `Deleted ${deletedCount} ${policy.label} nodes/relationships older than ${policy.ttlDays} days.`,
+          );
           // Audit log the deletion
           await writeAudit({
             userId: 'system', // System user for automated actions
             action: policy.auditAction,
             resourceType: policy.label,
             resourceId: 'N/A', // Cannot log individual IDs for batch delete
-            details: { count: deletedCount, ttlDays: policy.ttlDays, cutoffDate: cutoffTimestamp },
+            details: {
+              count: deletedCount,
+              ttlDays: policy.ttlDays,
+              cutoffDate: cutoffTimestamp,
+            },
             ip: 'N/A',
             userAgent: 'DataRetentionService',
             actorRole: 'system',

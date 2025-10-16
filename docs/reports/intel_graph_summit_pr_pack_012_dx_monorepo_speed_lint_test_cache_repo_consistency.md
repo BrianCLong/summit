@@ -5,11 +5,13 @@ Twelve PRs that make day‑to‑day development faster, safer, and more consiste
 ---
 
 ## PR 132 — pnpm workspaces + Turborepo (remote cache)
+
 **Purpose:** Speed builds/tests; cache across CI and dev.
 
 **Files**
 
 **`pnpm-workspace.yaml`**
+
 ```yaml
 packages:
   - apps/*
@@ -17,6 +19,7 @@ packages:
 ```
 
 **`package.json`** (root excerpt)
+
 ```json
 {
   "packageManager": "pnpm@9",
@@ -33,12 +36,13 @@ packages:
 ```
 
 **`turbo.json`**
+
 ```json
 {
   "pipeline": {
-    "build": { "dependsOn": ["^build"], "outputs": ["dist/**", "build/**" ] },
-    "test":  { "dependsOn": ["build"], "outputs": [] },
-    "lint":  { "outputs": [] },
+    "build": { "dependsOn": ["^build"], "outputs": ["dist/**", "build/**"] },
+    "test": { "dependsOn": ["build"], "outputs": [] },
+    "lint": { "outputs": [] },
     "typecheck": { "outputs": ["tsbuildinfo/**"] }
   }
 }
@@ -51,6 +55,7 @@ packages:
 ---
 
 ## PR 133 — TypeScript project references & incremental build
+
 **Purpose:** Faster builds, reliable cross‑pkg typings.
 
 **Files**
@@ -66,6 +71,7 @@ packages:
 ---
 
 ## PR 134 — ESLint (flat config) + Prettier unified + lint‑staged
+
 **Purpose:** One linter to rule them all; auto‑fix before commit.
 
 **Files**
@@ -75,11 +81,12 @@ packages:
 **`.prettierrc`**, **`.prettierignore`**.
 
 **`lint-staged.config.js`**
+
 ```js
 export default {
   '**/*.{ts,tsx,js,jsx}': ['eslint --fix'],
-  '**/*.{md,css,scss,json,yaml,yml}': ['prettier --write']
-}
+  '**/*.{md,css,scss,json,yaml,yml}': ['prettier --write'],
+};
 ```
 
 **Rollback:** Keep prior lint rules; remove lint‑staged.
@@ -87,11 +94,13 @@ export default {
 ---
 
 ## PR 135 — Ultra‑fast hooks (lefthook) + actionlint/hadolint/gitleaks
+
 **Purpose:** Fail fast locally; stop bad commits/pushes.
 
 **Files**
 
 **`lefthook.yml`**
+
 ```yaml
 pre-commit:
   parallel: true
@@ -102,8 +111,8 @@ pre-push:
   parallel: true
   commands:
     actionlint: { run: npx actionlint }
-    hadolint:   { run: npx hadolint Dockerfile || true }
-    gitleaks:   { run: npx gitleaks detect --redact --no-banner }
+    hadolint: { run: npx hadolint Dockerfile || true }
+    gitleaks: { run: npx gitleaks detect --redact --no-banner }
 ```
 
 **Rollback:** Disable lefthook by removing `pre-commit`/`pre-push` scripts.
@@ -111,6 +120,7 @@ pre-push:
 ---
 
 ## PR 136 — Faster tests: swc‑jest + deterministic env + Testcontainers
+
 **Purpose:** Cut unit test time and stabilize integration tests.
 
 **Files**
@@ -126,6 +136,7 @@ pre-push:
 ---
 
 ## PR 137 — CI: build only what changed (affected graph)
+
 **Purpose:** Huge CI savings on monorepo.
 
 **Files**
@@ -139,16 +150,20 @@ pre-push:
 ---
 
 ## PR 138 — PR hygiene automation (DangerJS)
+
 **Purpose:** Enforce description, linked issue, size warnings, docs + tests.
 
 **Files**
 
 **`dangerfile.ts`**
+
 ```ts
 import { warn, fail, markdown } from 'danger';
-if (!danger.github.pr.body || danger.github.pr.body.length < 20) fail('PR description too short');
+if (!danger.github.pr.body || danger.github.pr.body.length < 20)
+  fail('PR description too short');
 if (!/#[0-9]+/.test(danger.github.pr.body)) warn('Link an issue (e.g., #123)');
-if (danger.github.pr.additions + danger.github.pr.deletions > 1500) warn('Consider splitting: PR is large');
+if (danger.github.pr.additions + danger.github.pr.deletions > 1500)
+  warn('Consider splitting: PR is large');
 // Require tests/docs for src changes
 ```
 
@@ -159,6 +174,7 @@ if (danger.github.pr.additions + danger.github.pr.deletions > 1500) warn('Consid
 ---
 
 ## PR 139 — Devcontainer (Codespaces/containers) + VS Code defaults
+
 **Purpose:** 1‑click consistent dev env.
 
 **Files**
@@ -174,6 +190,7 @@ if (danger.github.pr.additions + danger.github.pr.deletions > 1500) warn('Consid
 ---
 
 ## PR 140 — Docs site + ADRs + preview per PR
+
 **Purpose:** Living docs; decision history; instant previews.
 
 **Files**
@@ -189,6 +206,7 @@ if (danger.github.pr.additions + danger.github.pr.deletions > 1500) warn('Consid
 ---
 
 ## PR 141 — Repo consistency: EditorConfig, .gitattributes, license headers
+
 **Purpose:** Normalize line endings, encodings, and headers across files.
 
 **Files**
@@ -200,11 +218,13 @@ if (danger.github.pr.additions + danger.github.pr.deletions > 1500) warn('Consid
 ---
 
 ## PR 142 — Onboarding: `make doctor` + Taskfile + bootstrap
+
 **Purpose:** New devs productive in minutes.
 
 **Files**
 
 **`Makefile`**
+
 ```make
 .PHONY: doctor bootstrap dev test
 bootstrap: ; pnpm i
@@ -220,6 +240,7 @@ doctor: ; node scripts/doctor.js
 ---
 
 ## PR 143 — Triage/labels/auto‑assign + issue/PR templates
+
 **Purpose:** Sane triage and ownership; less ops toil.
 
 **Files**
@@ -235,23 +256,25 @@ doctor: ; node scripts/doctor.js
 ---
 
 # Cutover (half day)
-1) Land **pnpm + Turborepo** (PR 132) behind a feature branch; enable remote cache (GitHub Actions cache or S3) and confirm speedup.
-2) Add **TS project refs** (PR 133) to top packages first; convert rest incrementally.
-3) Introduce **lint/format hooks** (PR 134–135) in warn‑only for 48h; then enforce.
-4) Switch **tests to swc-jest** and stabilize integration with **Testcontainers** (PR 136).
-5) Flip CI to **affected graph** (PR 137); monitor run time & cache hit rate.
-6) Turn on **DangerJS** (PR 138) and **labeler/auto‑assign** (PR 143).
-7) Roll out **devcontainer** (PR 139) and **docs/ADR** (PR 140) with preview.
-8) Apply **repo consistency** (PR 141) and **onboarding scripts** (PR 142).
+
+1. Land **pnpm + Turborepo** (PR 132) behind a feature branch; enable remote cache (GitHub Actions cache or S3) and confirm speedup.
+2. Add **TS project refs** (PR 133) to top packages first; convert rest incrementally.
+3. Introduce **lint/format hooks** (PR 134–135) in warn‑only for 48h; then enforce.
+4. Switch **tests to swc-jest** and stabilize integration with **Testcontainers** (PR 136).
+5. Flip CI to **affected graph** (PR 137); monitor run time & cache hit rate.
+6. Turn on **DangerJS** (PR 138) and **labeler/auto‑assign** (PR 143).
+7. Roll out **devcontainer** (PR 139) and **docs/ADR** (PR 140) with preview.
+8. Apply **repo consistency** (PR 141) and **onboarding scripts** (PR 142).
 
 # Rollback
+
 - Keep npm/yarn and full CI builds; disable turbo cache.
 - Revert swc‑jest to ts‑jest; skip integration tests in CI.
 - Disable hooks and DangerJS temporarily.
 - Docs/ADR preview can be turned off without code impact.
 
 # Ownership
+
 - **DevEx/Platform:** PR 132–137, 139, 141–142
 - **Docs/Arborist:** PR 140, 143
 - **QA:** PR 136, 137, 138
-

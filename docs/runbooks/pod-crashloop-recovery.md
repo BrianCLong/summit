@@ -5,6 +5,7 @@
 **Escalation:** After 10 minutes
 
 ## 🔍 Symptoms
+
 - Pods stuck in `CrashLoopBackOff` state
 - Grafana alert: `SaturationHigh` or `ThroughputDrop`
 - Application metrics dropping to zero
@@ -13,6 +14,7 @@
 ## ⚡ Immediate Triage (0-5 minutes)
 
 ### 1. Identify Affected Pods
+
 ```bash
 # List crashlooping pods
 kubectl get pods -n intelgraph-prod | grep -E "(CrashLoopBackOff|Error|Pending)"
@@ -22,6 +24,7 @@ kubectl describe pod -n intelgraph-prod $(kubectl get pods -n intelgraph-prod -o
 ```
 
 ### 2. Check Recent Changes
+
 ```bash
 # Recent deployments
 kubectl rollout history deployment/intelgraph -n intelgraph-prod
@@ -31,6 +34,7 @@ kubectl get events -n intelgraph-prod --sort-by='.lastTimestamp' | head -20
 ```
 
 ### 3. Extract Container Logs
+
 ```bash
 # Current container logs
 kubectl logs -n intelgraph-prod deployment/intelgraph --tail=50
@@ -44,6 +48,7 @@ kubectl logs -n intelgraph-prod deployment/intelgraph --previous --tail=50
 ### Application Startup Issues
 
 **Common Patterns:**
+
 - Database connection failures
 - Missing environment variables
 - Configuration parsing errors
@@ -61,6 +66,7 @@ kubectl get secret -n intelgraph-prod intelgraph-secrets -o yaml
 ### Resource Constraints
 
 **OOMKilled Pattern:**
+
 ```bash
 # Check resource limits
 kubectl describe pod -n intelgraph-prod $(kubectl get pods -n intelgraph-prod -o name | grep intelgraph | head -1) | grep -A10 "Containers:"
@@ -72,6 +78,7 @@ kubectl describe nodes | grep -A5 "MemoryPressure"
 ### Dependency Failures
 
 **Database Issues:**
+
 ```bash
 # PostgreSQL connectivity
 kubectl exec -n intelgraph-prod deployment/postgres -- pg_isready
@@ -88,6 +95,7 @@ kubectl exec -n intelgraph-prod deployment/redis -- redis-cli ping || echo "Redi
 ### Quick Fixes (5-10 minutes)
 
 #### 1. Rollback to Previous Version
+
 ```bash
 # Rollback to last stable deployment
 kubectl rollout undo deployment/intelgraph -n intelgraph-prod
@@ -97,6 +105,7 @@ kubectl rollout status deployment/intelgraph -n intelgraph-prod --timeout=300s
 ```
 
 #### 2. Resource Scaling
+
 ```bash
 # Increase memory limits for OOMKilled pods
 kubectl patch deployment intelgraph -n intelgraph-prod --patch='
@@ -118,6 +127,7 @@ kubectl patch deployment intelgraph -n intelgraph-prod --patch='
 ```
 
 #### 3. Configuration Fixes
+
 ```bash
 # Reset to known-good configuration
 kubectl apply -f k8s/overlays/production/configmap.yml
@@ -130,6 +140,7 @@ kubectl rollout restart deployment/intelgraph -n intelgraph-prod
 ### Advanced Recovery (10-15 minutes)
 
 #### 1. Dependency Service Recovery
+
 ```bash
 # Restart database services
 kubectl rollout restart deployment/postgres -n intelgraph-prod
@@ -141,6 +152,7 @@ kubectl wait --for=condition=available --timeout=300s deployment/postgres -n int
 ```
 
 #### 2. Network Policy Reset
+
 ```bash
 # Temporarily disable network policies for debugging
 kubectl delete networkpolicy --all -n intelgraph-prod
@@ -150,6 +162,7 @@ kubectl exec -n intelgraph-prod deployment/intelgraph -- nslookup postgres.intel
 ```
 
 #### 3. Image Pull Issues
+
 ```bash
 # Check image pull status
 kubectl describe pod -n intelgraph-prod $(kubectl get pods -n intelgraph-prod -o name | grep intelgraph | head -1) | grep -A5 "Events:"
@@ -189,14 +202,17 @@ watch -n 5 'kubectl get pods -n intelgraph-prod -l app=intelgraph'
 ## 🚨 Escalation Path
 
 ### 5 minutes: No pods running
+
 - Scale down to 1 replica for faster troubleshooting
 - Page on-call engineer
 
 ### 10 minutes: Still failing
+
 - Escalate to senior SRE
 - Consider activating backup environment
 
 ### 15 minutes: Critical outage
+
 - Engage incident commander
 - Activate disaster recovery procedures
 

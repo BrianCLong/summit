@@ -14,7 +14,7 @@ import type {
   PlannerRewardWeights,
   PricingSignal,
   SelfHealingPolicy,
-  StageFallbackStrategy
+  StageFallbackStrategy,
 } from '@ga-graphai/common-types';
 
 export interface PricingFeed {
@@ -78,13 +78,13 @@ const DEFAULT_WEIGHTS: PlannerRewardWeights = {
   throughput: 0.25,
   reliability: 0.25,
   compliance: 0.2,
-  sustainability: 0.05
+  sustainability: 0.05,
 };
 
 const DEFAULT_SELF_HEALING: SelfHealingPolicy = {
   maxRetries: 2,
   backoffSeconds: 5,
-  triggers: ['execution-failure', 'latency-breach', 'cost-spike']
+  triggers: ['execution-failure', 'latency-breach', 'cost-spike'],
 };
 
 function nowIso(): string {
@@ -103,44 +103,49 @@ function normalize(values: number[]): number[] {
   if (max === 0) {
     return values.map(() => 0);
   }
-  return values.map(value => value / max);
+  return values.map((value) => value / max);
 }
 
 function matchPricing(
   pricing: PricingSignal[],
   provider: string,
   region: string,
-  capability: string
+  capability: string,
 ): PricingSignal | undefined {
   return pricing.find(
-    signal =>
+    (signal) =>
       signal.provider === provider &&
       signal.region === region &&
-      signal.service === capability
+      signal.service === capability,
   );
 }
 
 function complianceScore(
   provider: CloudProviderDescriptor,
-  stage: PipelineStageDefinition
+  stage: PipelineStageDefinition,
 ): number {
   if (!stage.complianceTags.length) {
     return 1;
   }
   const providerTags = new Set(provider.policyTags ?? []);
-  const satisfied = stage.complianceTags.filter(tag => providerTags.has(tag));
+  const satisfied = stage.complianceTags.filter((tag) => providerTags.has(tag));
   return satisfied.length / stage.complianceTags.length;
 }
 
 export class TemplateReasoningModel implements ReasoningModel {
   generateNarrative(input: ReasoningInput): string {
-    const fallbackNames = input.fallbacks.map(fallback => `${fallback.provider}/${fallback.region}`);
-    const fallbackText = fallbackNames.length > 0 ? fallbackNames.join(', ') : 'none required';
-    const dominantFactor = Object.entries(input.breakdown).sort((a, b) => b[1] - a[1])[0]?.[0] ?? 'balanced';
+    const fallbackNames = input.fallbacks.map(
+      (fallback) => `${fallback.provider}/${fallback.region}`,
+    );
+    const fallbackText =
+      fallbackNames.length > 0 ? fallbackNames.join(', ') : 'none required';
+    const dominantFactor =
+      Object.entries(input.breakdown).sort((a, b) => b[1] - a[1])[0]?.[0] ??
+      'balanced';
     return [
       `Selected ${input.primary.provider}/${input.primary.region} for stage ${input.stage.name}.`,
       `Dominant factor: ${dominantFactor}.`,
-      `Fallback path: ${fallbackText}.`
+      `Fallback path: ${fallbackText}.`,
     ].join(' ');
   }
 }
@@ -156,30 +161,46 @@ class ActiveRewardShaper {
     return { ...this.weights };
   }
 
-  update(signals: PlannerRewardSignal[], stages: PipelineStageDefinition[]): PlannerRewardWeights {
+  update(
+    signals: PlannerRewardSignal[],
+    stages: PipelineStageDefinition[],
+  ): PlannerRewardWeights {
     if (signals.length === 0) {
       return this.getWeights();
     }
-    const stageById = new Map(stages.map(stage => [stage.id, stage]));
+    const stageById = new Map(stages.map((stage) => [stage.id, stage]));
     for (const signal of signals) {
       const stage = stageById.get(signal.stageId);
       if (!stage) {
         continue;
       }
       if (signal.observedErrorRate > (stage.guardrail?.maxErrorRate ?? 0.05)) {
-        this.weights.reliability = clamp(this.weights.reliability + 0.05, 0.1, 0.6);
+        this.weights.reliability = clamp(
+          this.weights.reliability + 0.05,
+          0.1,
+          0.6,
+        );
       }
       if (signal.observedThroughput < stage.minThroughputPerMinute) {
-        this.weights.throughput = clamp(this.weights.throughput + 0.05, 0.1, 0.6);
+        this.weights.throughput = clamp(
+          this.weights.throughput + 0.05,
+          0.1,
+          0.6,
+        );
       }
       if (signal.observedCost > 0) {
-        const unitCost = signal.observedCost / Math.max(signal.observedThroughput, 1);
+        const unitCost =
+          signal.observedCost / Math.max(signal.observedThroughput, 1);
         if (unitCost > 1) {
           this.weights.cost = clamp(this.weights.cost + 0.05, 0.1, 0.6);
         }
       }
       if (signal.recovered) {
-        this.weights.reliability = clamp(this.weights.reliability + 0.02, 0.1, 0.6);
+        this.weights.reliability = clamp(
+          this.weights.reliability + 0.02,
+          0.1,
+          0.6,
+        );
       }
     }
     return this.getWeights();
@@ -199,7 +220,10 @@ export class HybridSymbolicLLMPlanner {
   private readonly providers: CloudProviderDescriptor[];
   private readonly reasoningModel: ReasoningModel;
 
-  constructor(providers: CloudProviderDescriptor[], reasoningModel?: ReasoningModel) {
+  constructor(
+    providers: CloudProviderDescriptor[],
+    reasoningModel?: ReasoningModel,
+  ) {
     this.providers = providers;
     this.reasoningModel = reasoningModel ?? new TemplateReasoningModel();
   }
@@ -208,50 +232,74 @@ export class HybridSymbolicLLMPlanner {
     pipelineId: string,
     stages: PipelineStageDefinition[],
     observation: PlannerObservation,
-    weights: PlannerRewardWeights
+    weights: PlannerRewardWeights,
   ): Promise<ExplainablePlan> {
     const steps: ExplainablePlanStep[] = [];
     for (const stage of stages) {
-      const candidates = this.scoreCandidates(stage, observation.pricing, weights);
+      const candidates = this.scoreCandidates(
+        stage,
+        observation.pricing,
+        weights,
+      );
       if (candidates.length === 0) {
         throw new Error(`no feasible providers for stage ${stage.id}`);
       }
-      const [primary, ...fallbacks] = candidates.sort((a, b) => b.score - a.score);
-      const explanation = await this.buildExplanation(stage, primary, fallbacks);
+      const [primary, ...fallbacks] = candidates.sort(
+        (a, b) => b.score - a.score,
+      );
+      const explanation = await this.buildExplanation(
+        stage,
+        primary,
+        fallbacks,
+      );
       steps.push({
         stageId: stage.id,
         primary: primary.decision,
-        fallbacks: fallbacks.slice(0, 2).map(fallback => fallback.decision),
-        explanation
+        fallbacks: fallbacks.slice(0, 2).map((fallback) => fallback.decision),
+        explanation,
       });
     }
-    const aggregateScore = steps.reduce((acc, step) => acc + (step.explanation.scoreBreakdown.aggregate ?? 0), 0);
+    const aggregateScore = steps.reduce(
+      (acc, step) => acc + (step.explanation.scoreBreakdown.aggregate ?? 0),
+      0,
+    );
     return {
       pipelineId,
       generatedAt: nowIso(),
       steps,
       aggregateScore,
-      metadata: { weights }
+      metadata: { weights },
     };
   }
 
   private scoreCandidates(
     stage: PipelineStageDefinition,
     pricing: PricingSignal[],
-    weights: PlannerRewardWeights
+    weights: PlannerRewardWeights,
   ): CandidateScore[] {
     const capabilities = stage.requiredCapabilities;
     const normalizedThroughput = normalize(
-      this.providers.map(provider => provider.maxThroughputPerMinute)
+      this.providers.map((provider) => provider.maxThroughputPerMinute),
     );
-    const normalizedReliability = normalize(this.providers.map(provider => provider.reliabilityScore));
+    const normalizedReliability = normalize(
+      this.providers.map((provider) => provider.reliabilityScore),
+    );
     return this.providers.flatMap((provider, index) => {
-      if (!capabilities.every(capability => provider.services.includes(capability))) {
+      if (
+        !capabilities.every((capability) =>
+          provider.services.includes(capability),
+        )
+      ) {
         return [] as CandidateScore[];
       }
       const region = provider.regions[0];
       const capability = capabilities[0];
-      const priceSignal = matchPricing(pricing, provider.name, region, capability);
+      const priceSignal = matchPricing(
+        pricing,
+        provider.name,
+        region,
+        capability,
+      );
       const price = priceSignal?.pricePerUnit ?? 1.5;
       const compliance = complianceScore(provider, stage);
       if (compliance === 0) {
@@ -271,37 +319,42 @@ export class HybridSymbolicLLMPlanner {
         provider: provider.name,
         region,
         expectedCost: price * stage.minThroughputPerMinute,
-        expectedThroughput: Math.min(provider.maxThroughputPerMinute, stage.minThroughputPerMinute),
-        expectedLatency: provider.baseLatencyMs
+        expectedThroughput: Math.min(
+          provider.maxThroughputPerMinute,
+          stage.minThroughputPerMinute,
+        ),
+        expectedLatency: provider.baseLatencyMs,
       };
-      return [{
-        provider,
-        region,
-        capability,
-        score: aggregate,
-        breakdown: {
-          throughput: throughputScore,
-          reliability: reliabilityScore,
-          cost: costScore,
-          compliance,
-          sustainability: sustainabilityScore,
-          aggregate
+      return [
+        {
+          provider,
+          region,
+          capability,
+          score: aggregate,
+          breakdown: {
+            throughput: throughputScore,
+            reliability: reliabilityScore,
+            cost: costScore,
+            compliance,
+            sustainability: sustainabilityScore,
+            aggregate,
+          },
+          decision,
         },
-        decision
-      }];
+      ];
     });
   }
 
   private async buildExplanation(
     stage: PipelineStageDefinition,
     primary: CandidateScore,
-    fallbacks: CandidateScore[]
+    fallbacks: CandidateScore[],
   ): Promise<PlannerExplanation> {
     const narrative = await this.reasoningModel.generateNarrative({
       stage,
       primary: primary.decision,
-      fallbacks: fallbacks.map(fallback => fallback.decision),
-      breakdown: primary.breakdown
+      fallbacks: fallbacks.map((fallback) => fallback.decision),
+      breakdown: primary.breakdown,
     });
     const constraints = [`requires ${stage.requiredCapabilities.join(', ')}`];
     if (stage.complianceTags.length > 0) {
@@ -309,7 +362,7 @@ export class HybridSymbolicLLMPlanner {
     }
     if (stage.guardrail) {
       constraints.push(
-        `error rate <= ${stage.guardrail.maxErrorRate} with recovery ${stage.guardrail.recoveryTimeoutSeconds}s`
+        `error rate <= ${stage.guardrail.maxErrorRate} with recovery ${stage.guardrail.recoveryTimeoutSeconds}s`,
       );
     }
     return {
@@ -317,7 +370,7 @@ export class HybridSymbolicLLMPlanner {
       provider: primary.decision.provider,
       narrative,
       scoreBreakdown: primary.breakdown,
-      constraints
+      constraints,
     };
   }
 }
@@ -336,41 +389,50 @@ export class MetaOrchestrator {
     this.pricingFeed = options.pricingFeed;
     this.execution = options.execution;
     this.auditSink = options.auditSink;
-    this.planner = new HybridSymbolicLLMPlanner(options.providers, options.reasoningModel);
-    this.rewardShaper = new ActiveRewardShaper(options.rewardWeights ?? DEFAULT_WEIGHTS);
+    this.planner = new HybridSymbolicLLMPlanner(
+      options.providers,
+      options.reasoningModel,
+    );
+    this.rewardShaper = new ActiveRewardShaper(
+      options.rewardWeights ?? DEFAULT_WEIGHTS,
+    );
     this.selfHealing = options.selfHealing ?? DEFAULT_SELF_HEALING;
   }
 
-  async createPlan(stages: PipelineStageDefinition[], observation?: PlannerObservation): Promise<ExplainablePlan> {
-    const pricing = observation?.pricing ?? (await this.pricingFeed.getPricingSignals());
+  async createPlan(
+    stages: PipelineStageDefinition[],
+    observation?: PlannerObservation,
+  ): Promise<ExplainablePlan> {
+    const pricing =
+      observation?.pricing ?? (await this.pricingFeed.getPricingSignals());
     const rewardSignals = observation?.rewards ?? [];
     const weights = this.rewardShaper.update(rewardSignals, stages);
     const plan = await this.planner.plan(
       this.pipelineId,
       stages,
       { pricing, rewards: rewardSignals },
-      weights
+      weights,
     );
     await this.auditSink.record({
       id: `${this.pipelineId}:${Date.now()}:plan`,
       timestamp: nowIso(),
       category: 'plan',
       summary: 'Hybrid planner generated explainable plan',
-      data: plan
+      data: plan,
     });
     return plan;
   }
 
   async executePlan(
     stages: PipelineStageDefinition[],
-    planMetadata: Record<string, unknown> = {}
+    planMetadata: Record<string, unknown> = {},
   ): Promise<ExecutionOutcome> {
     const plan = await this.createPlan(stages);
     const trace: ExecutionTraceEntry[] = [];
     const rewards: PlannerRewardSignal[] = [];
 
     for (const step of plan.steps) {
-      const stage = stages.find(candidate => candidate.id === step.stageId);
+      const stage = stages.find((candidate) => candidate.id === step.stageId);
       if (!stage) {
         throw new Error(`unknown stage ${step.stageId}`);
       }
@@ -385,7 +447,7 @@ export class MetaOrchestrator {
       timestamp: nowIso(),
       category: 'reward-update',
       summary: 'Updated reward weights after execution',
-      data: { rewards, weights: updatedWeights }
+      data: { rewards, weights: updatedWeights },
     });
 
     return { plan, trace, rewards };
@@ -394,7 +456,7 @@ export class MetaOrchestrator {
   private async runStage(
     stage: PipelineStageDefinition,
     step: ExplainablePlanStep,
-    metadata: Record<string, unknown>
+    metadata: Record<string, unknown>,
   ): Promise<{
     traceEntry: ExecutionTraceEntry;
     rewardSignal: PlannerRewardSignal;
@@ -403,7 +465,7 @@ export class MetaOrchestrator {
     const primaryResult = await this.execution.execute({
       stage,
       decision: step.primary,
-      planMetadata: metadata
+      planMetadata: metadata,
     });
     if (primaryResult.status === 'success') {
       const finishedAt = nowIso();
@@ -413,21 +475,21 @@ export class MetaOrchestrator {
         status: 'success',
         startedAt,
         finishedAt,
-        logs: primaryResult.logs
+        logs: primaryResult.logs,
       };
       const rewardSignal: PlannerRewardSignal = {
         stageId: stage.id,
         observedThroughput: primaryResult.throughputPerMinute,
         observedCost: primaryResult.cost,
         observedErrorRate: primaryResult.errorRate,
-        recovered: false
+        recovered: false,
       };
       await this.auditSink.record({
         id: `${stage.id}:${Date.now()}:execution`,
         timestamp: finishedAt,
         category: 'execution',
         summary: `Stage ${stage.name} completed on ${step.primary.provider}`,
-        data: { result: primaryResult, decision: step.primary }
+        data: { result: primaryResult, decision: step.primary },
       });
       return { traceEntry, rewardSignal };
     }
@@ -441,14 +503,14 @@ export class MetaOrchestrator {
         startedAt,
         finishedAt,
         logs: primaryResult.logs,
-        fallbackTriggered: 'execution-failure'
+        fallbackTriggered: 'execution-failure',
       };
       const rewardSignal: PlannerRewardSignal = {
         stageId: stage.id,
         observedThroughput: primaryResult.throughputPerMinute,
         observedCost: primaryResult.cost,
         observedErrorRate: primaryResult.errorRate,
-        recovered: false
+        recovered: false,
       };
       return { traceEntry, rewardSignal };
     }
@@ -458,7 +520,7 @@ export class MetaOrchestrator {
       step,
       metadata,
       primaryResult.logs,
-      startedAt
+      startedAt,
     );
     return fallbackResult;
   }
@@ -468,7 +530,7 @@ export class MetaOrchestrator {
     step: ExplainablePlanStep,
     metadata: Record<string, unknown>,
     accumulatedLogs: string[],
-    initialStartedAt: string
+    initialStartedAt: string,
   ): Promise<{
     traceEntry: ExecutionTraceEntry;
     rewardSignal: PlannerRewardSignal;
@@ -482,7 +544,9 @@ export class MetaOrchestrator {
       if (attempt > this.selfHealing.maxRetries) {
         break;
       }
-      const fallbackPolicy = fallbacks.find(strategy => strategy.provider === fallbackDecision.provider);
+      const fallbackPolicy = fallbacks.find(
+        (strategy) => strategy.provider === fallbackDecision.provider,
+      );
       if (!fallbackPolicy) {
         continue;
       }
@@ -500,13 +564,13 @@ export class MetaOrchestrator {
         timestamp: nowIso(),
         category: 'fallback',
         summary: `Triggering fallback ${fallbackDecision.provider} for stage ${stage.name}`,
-        data: { fallbackDecision, stage }
+        data: { fallbackDecision, stage },
       });
       const fallbackStartedAt = nowIso();
       const result = await this.execution.execute({
         stage,
         decision: fallbackDecision,
-        planMetadata: metadata
+        planMetadata: metadata,
       });
       lastStartedAt = fallbackStartedAt;
       if (result.status === 'success') {
@@ -518,14 +582,17 @@ export class MetaOrchestrator {
           startedAt: fallbackStartedAt,
           finishedAt,
           logs: [...accumulatedLogs, ...result.logs],
-          fallbackTriggered: 'execution-failure'
+          fallbackTriggered: 'execution-failure',
         };
         const rewardSignal: PlannerRewardSignal = {
           stageId: stage.id,
           observedThroughput: result.throughputPerMinute,
           observedCost: result.cost,
-          observedErrorRate: Math.min(result.errorRate, guardrail?.maxErrorRate ?? result.errorRate),
-          recovered: true
+          observedErrorRate: Math.min(
+            result.errorRate,
+            guardrail?.maxErrorRate ?? result.errorRate,
+          ),
+          recovered: true,
         };
         return { traceEntry, rewardSignal };
       }
@@ -539,30 +606,42 @@ export class MetaOrchestrator {
       startedAt: lastStartedAt,
       finishedAt,
       logs: accumulatedLogs,
-      fallbackTriggered: 'execution-failure'
+      fallbackTriggered: 'execution-failure',
     };
     const rewardSignal: PlannerRewardSignal = {
       stageId: stage.id,
       observedThroughput: 0,
       observedCost: 0,
       observedErrorRate: guardrail?.maxErrorRate ?? 1,
-      recovered: false
+      recovered: false,
     };
     return { traceEntry, rewardSignal };
   }
 
   deriveTelemetry(outcome: ExecutionOutcome): MetaOrchestratorTelemetry {
-    const throughput = outcome.rewards.reduce((acc, reward) => acc + reward.observedThroughput, 0);
-    const cost = outcome.rewards.reduce((acc, reward) => acc + reward.observedCost, 0);
-    const successes = outcome.trace.filter(entry => entry.status === 'success' || entry.status === 'recovered').length;
-    const auditCompleteness = outcome.trace.length > 0 ? successes / outcome.trace.length : 0;
-    const selfHealing = outcome.trace.filter(entry => entry.status === 'recovered').length;
-    const selfHealingRate = outcome.trace.length > 0 ? selfHealing / outcome.trace.length : 0;
+    const throughput = outcome.rewards.reduce(
+      (acc, reward) => acc + reward.observedThroughput,
+      0,
+    );
+    const cost = outcome.rewards.reduce(
+      (acc, reward) => acc + reward.observedCost,
+      0,
+    );
+    const successes = outcome.trace.filter(
+      (entry) => entry.status === 'success' || entry.status === 'recovered',
+    ).length;
+    const auditCompleteness =
+      outcome.trace.length > 0 ? successes / outcome.trace.length : 0;
+    const selfHealing = outcome.trace.filter(
+      (entry) => entry.status === 'recovered',
+    ).length;
+    const selfHealingRate =
+      outcome.trace.length > 0 ? selfHealing / outcome.trace.length : 0;
     return {
       throughputPerMinute: throughput,
       costPerThroughputUnit: throughput === 0 ? cost : cost / throughput,
       auditCompleteness,
-      selfHealingRate
+      selfHealingRate,
     };
   }
 }
@@ -589,5 +668,5 @@ export type {
   ReasoningInput,
   ReasoningModel,
   StageExecutionRequest,
-  StageExecutionResult
+  StageExecutionResult,
 };

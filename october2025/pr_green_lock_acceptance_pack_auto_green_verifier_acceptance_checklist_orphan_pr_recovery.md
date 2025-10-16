@@ -9,6 +9,7 @@
 ## Files in this PR
 
 ### 1) `.github/workflows/auto-green.yml`
+
 ```yaml
 name: Auto-Green PR
 on:
@@ -53,6 +54,7 @@ jobs:
 ---
 
 ### 2) `scripts/verify_greenlock.sh`
+
 ```bash
 #!/usr/bin/env bash
 # GREEN‑LOCK SEPTUPLE VERIFIER
@@ -118,12 +120,14 @@ echo "Report: $OUT" | tee -a "$OUT"
 ---
 
 ### 3) `docs/greenlock/ACCEPTANCE_CHECKLIST.md`
+
 ```md
 # ✅ GREEN‑LOCK ACCEPTANCE CHECKLIST
 
 **Objective:** Prove zero data loss, bright‑green `main`, and full recoverability — then keep it green.
 
 ## Septuple Confirmation
+
 1. **Bundle Integrity** — checksum + `git fsck` on rehydrated clone
 2. **Reflog Parity** — expected line count present (≈ recorded)
 3. **Dangling Census** — expected count (≈ recorded), sample readable
@@ -135,11 +139,13 @@ echo "Report: $OUT" | tee -a "$OUT"
 > Generate report: `scripts/verify_greenlock.sh` (stores at `green-lock-ledger/verification_report.txt`).
 
 ## Go / No‑Go
+
 - **GO** if all seven confirmations pass and `main` is green.
 - **NO‑GO** if any parity step fails → recover via orphan/PR scripts below, re‑run verifier.
 
 ## Operational Steps (post‑acceptance)
-- **Enable merge queue** on `main`; required check = *Stabilization: Build & Unit Tests*.
+
+- **Enable merge queue** on `main`; required check = _Stabilization: Build & Unit Tests_.
 - **Auto‑green** is active; PRs auto‑fix formatting + smoke‑pact.
 - Gradually **re‑enable real checks** and add them back to required list one by one.
 - Freeze dependency drift (security‑updates only) until pipelines are green.
@@ -150,6 +156,7 @@ echo "Report: $OUT" | tee -a "$OUT"
 ## 4) Orphan / PR / Untracked Recovery Utilities
 
 ### `scripts/recover_orphans_from_bundle.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -166,6 +173,7 @@ done
 ```
 
 ### `scripts/import_untracked_from_snapshot.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -186,6 +194,7 @@ git push origin HEAD || true
 ```
 
 ### `scripts/auto_merge_all_open_prs.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -208,6 +217,7 @@ done
 ## 5) One‑shot PR creator
 
 ### `scripts/prepare-green-lock-acceptance-pr.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -246,6 +256,7 @@ echo "PR opened: $TITLE"
 ---
 
 ## Usage (from clean room, `~/Developer/ig-salvage/wt-rescue`)
+
 ```bash
 # 1) Create files as above (copy from this PR doc into your repo paths)
 chmod +x scripts/*.sh
@@ -267,6 +278,7 @@ bash scripts/verify_greenlock.sh
 ---
 
 ## Notes
+
 - Nothing here weakens quality gates long‑term; the Stabilization gate is a **temporary minimal gate**. Add real checks back as they become green.
 - The recovery scripts are **idempotent and safe**; they never rewrite history on `main`.
 - Keep working **outside iCloud**. Ensure merge queue is ON for `main`.

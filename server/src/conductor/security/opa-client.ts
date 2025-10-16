@@ -53,7 +53,9 @@ export class OPAClient {
    */
   async evaluatePolicy(input: OPAInput): Promise<OPAResult> {
     try {
-      const response = await this.queryOPA('/v1/data/conductor/security', { input });
+      const response = await this.queryOPA('/v1/data/conductor/security', {
+        input,
+      });
 
       return {
         allow: response.result?.allow ?? false,
@@ -107,7 +109,10 @@ export class OPAClient {
   /**
    * Check if user can preview routing
    */
-  async canPreviewRouting(context: SecurityContext, task: string): Promise<OPAResult> {
+  async canPreviewRouting(
+    context: SecurityContext,
+    task: string,
+  ): Promise<OPAResult> {
     const input: OPAInput = {
       user: {
         id: context.userId,
@@ -129,10 +134,18 @@ export class OPAClient {
   /**
    * Detect PII in text using client-side patterns
    */
-  public detectPII(text: string): { hasPII: boolean; patterns: string[]; redacted: string } {
+  public detectPII(text: string): {
+    hasPII: boolean;
+    patterns: string[];
+    redacted: string;
+  } {
     const patterns = [
       // SSN patterns
-      { name: 'SSN', regex: /\b\d{3}-\d{2}-\d{4}\b/g, replacement: 'XXX-XX-XXXX' },
+      {
+        name: 'SSN',
+        regex: /\b\d{3}-\d{2}-\d{4}\b/g,
+        replacement: 'XXX-XX-XXXX',
+      },
       { name: 'SSN_NoHyphen', regex: /\b\d{9}\b/g, replacement: 'XXXXXXXXX' },
 
       // Email patterns
@@ -180,7 +193,10 @@ export class OPAClient {
   /**
    * Create security context from user session
    */
-  public static createSecurityContext(user: any, requestMetadata: any = {}): SecurityContext {
+  public static createSecurityContext(
+    user: any,
+    requestMetadata: any = {},
+  ): SecurityContext {
     return {
       userId: user.id || 'anonymous',
       roles: user.roles || ['viewer'],
@@ -196,11 +212,18 @@ export class OPAClient {
   /**
    * Generate audit hash for policy decisions
    */
-  public generateAuditHash(input: OPAInput, result: OPAResult, timestamp: number): string {
+  public generateAuditHash(
+    input: OPAInput,
+    result: OPAResult,
+    timestamp: number,
+  ): string {
     const auditData = {
       userId: input.user.id,
       action: input.action,
-      taskHash: createHash('sha256').update(input.task).digest('hex').substring(0, 16),
+      taskHash: createHash('sha256')
+        .update(input.task)
+        .digest('hex')
+        .substring(0, 16),
       expert: input.expert,
       allow: result.allow,
       timestamp,
@@ -230,7 +253,9 @@ export class OPAClient {
       clearTimeout(timeoutId);
 
       if (!response.ok) {
-        throw new Error(`OPA request failed: ${response.status} ${response.statusText}`);
+        throw new Error(
+          `OPA request failed: ${response.status} ${response.statusText}`,
+        );
       }
 
       return await response.json();

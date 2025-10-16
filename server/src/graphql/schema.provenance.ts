@@ -15,7 +15,11 @@ export const provenanceTypeDefs = gql`
   }
 
   extend type Mutation {
-    linkTrustScoreEvidence(tenantId: String!, subjectId: ID!, evidenceId: ID!): TrustScore!
+    linkTrustScoreEvidence(
+      tenantId: String!
+      subjectId: ID!
+      evidenceId: ID!
+    ): TrustScore!
   }
 `;
 

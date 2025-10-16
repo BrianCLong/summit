@@ -3,6 +3,7 @@ This package adds a **DB migration gate** and a **stage→prod release train** w
 ---
 
 ## File Map (add to repo)
+
 ```
 .github/workflows/
   release-train.yml
@@ -32,11 +33,12 @@ ops/runbooks/
 ## Configs
 
 ### `.ci/config/release.yml`
+
 ```yaml
 versioning:
   mode: auto # auto | manual
   tag_prefix: v
-  bump: patch  # default bump if auto and no conventional commit scope
+  bump: patch # default bump if auto and no conventional commit scope
   allow_pre: true
   prerelease_prefix: rc
 promote:
@@ -44,15 +46,16 @@ promote:
     - stage
     - prod
 canary:
-  steps: [5, 25, 50, 100]   # percentage
-  window_secs: 300          # observation window per step
+  steps: [5, 25, 50, 100] # percentage
+  window_secs: 300 # observation window per step
 rollback:
-  strategy: helm_rollback   # or: new_deploy_prev_tag
+  strategy: helm_rollback # or: new_deploy_prev_tag
 notes:
   sections: [Features, Fixes, Chores, Security]
 ```
 
 ### `.ci/config/db.yml`
+
 ```yaml
 engine: postgres
 schema_dir: db/migrations
@@ -66,6 +69,7 @@ required_docs:
 ## Migration Gate Workflow
 
 ### `.github/workflows/migration-gate.yml`
+
 ```yaml
 name: migration-gate
 on:
@@ -106,6 +110,7 @@ jobs:
 ## Release Train (Stage → Prod with Canary)
 
 ### `.github/workflows/release-train.yml`
+
 ```yaml
 name: release-train
 on:
@@ -190,6 +195,7 @@ jobs:
 ```
 
 ### `.github/workflows/promote.yml`
+
 ```yaml
 name: promote
 on:
@@ -209,6 +215,7 @@ jobs:
 ## DB Scripts (Postgres example)
 
 ### `.ci/scripts/db_dryrun_pg.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -225,6 +232,7 @@ done
 ```
 
 ### `.ci/scripts/db_apply_pg.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -236,6 +244,7 @@ done
 ```
 
 ### `.ci/scripts/db_rollback_pg.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -248,6 +257,7 @@ psql "$PG_CONN" -v ON_ERROR_STOP=1 -f "$ROLLBACK_SQL"
 ## Canary Health & SLO Gates
 
 ### `.ci/scripts/verify_canary_health.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -262,6 +272,7 @@ done
 ```
 
 ### `.ci/scripts/require_green_slo.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -272,6 +283,7 @@ exit 0
 ```
 
 ### `.ci/scripts/collect_release_notes.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -290,11 +302,13 @@ echo "$COMMITS" | awk '
 ---
 
 ## Maestro Conductor Hooks
+
 - **Trace & Audit**: call `.ci/scripts/annotate_pr_with_trace.sh` during PR builds to append trace IDs; Maestro collects them and correlates with deployments.
 - **Policy stop**: Maestro should query SLO endpoint and block `promote.yml` dispatch if `.ci/scripts/require_green_slo.sh` would fail.
 - **Rollback**: If `verify_canary_health.sh` exits non‑zero, deploy job fails; Maestro triggers `helm rollback` to previous revision and records immutable audit with reason.
 
 ### `.ci/scripts/annotate_pr_with_trace.sh`
+
 ```bash
 #!/usr/bin/env bash
 set -euo pipefail
@@ -308,32 +322,40 @@ echo "Trace: $TRACE_ID" > trace.txt
 ## Runbooks
 
 ### `ops/runbooks/release-train.md`
+
 ```md
 **Objective**: Safe, reversible stage→prod promotion with canary + rollback.
-1) Run workflow **release-train** on `main`.
-2) Verify stage dashboards; ensure `require_green_slo.sh` passes.
-3) Promote to prod (canary). Observe golden signals each step.
-4) If breach: rollback via Helm (`helm rollback summit <REV>`), verify, and document audit ID.
+
+1. Run workflow **release-train** on `main`.
+2. Verify stage dashboards; ensure `require_green_slo.sh` passes.
+3. Promote to prod (canary). Observe golden signals each step.
+4. If breach: rollback via Helm (`helm rollback summit <REV>`), verify, and document audit ID.
 ```
 
 ### `ops/runbooks/migrations.md`
+
 ```md
 **Objective**: Prevent unsafe schema changes.
+
 - PRs touching `db/migrations/**` must include plan + rollback docs and pass `migration-gate`.
 - Dry-run against non-prod clone; attach `DRYRUN_RESULT.txt`.
 - Rollback script `docs/migrations/rollback.sql` must reverse all destructive changes.
 ```
 
 ### `ops/runbooks/rollback-db.md`
+
 ```md
 **DB Rollback**
+
 - Use `db_rollback_pg.sh` with the connection string to stage/prod after approval.
 - Verify application compatibility; monitor error rate.
 ```
 
 ### `ops/runbooks/rollback-app.md`
+
 ```md
 **App Rollback**
+
 - `helm rollback summit <REVISION>`
 - Confirm p95 latency, error rate, saturation are back to normal for 10 minutes.
 ```
@@ -341,7 +363,7 @@ echo "Trace: $TRACE_ID" > trace.txt
 ---
 
 ## Required Secrets & Protections
+
 - `PG_DRYRUN_CONN` — non‑prod Postgres clone for DRYRUN.
 - Protect **prod** environment: required reviewers, manual approval, and `prevent self‑approval`.
 - Enable branch protection on `main`: required checks (tests, scan, migration‑gate when applicable), linear history, and signed commits.
-

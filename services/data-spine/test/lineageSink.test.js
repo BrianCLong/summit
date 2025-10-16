@@ -17,7 +17,7 @@ test('persists lineage events and tracks drop rate', () => {
     when: new Date().toISOString(),
     where: 's3://prod-bucket',
     why: 'daily-upsert',
-    checksum: 'abc123'
+    checksum: 'abc123',
   };
   sink.record(event);
   const stored = JSON.parse(fs.readFileSync(outputPath, 'utf8'));

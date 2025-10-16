@@ -75,4 +75,3 @@ spec:
         - name: config
           configMap:
             name: fluent-bit-config
-

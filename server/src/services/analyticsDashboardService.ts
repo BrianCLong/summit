@@ -30,7 +30,12 @@ interface AnalyticsReport {
   id: string;
   name: string;
   description: string;
-  category: 'threat' | 'investigation' | 'performance' | 'collaboration' | 'security';
+  category:
+    | 'threat'
+    | 'investigation'
+    | 'performance'
+    | 'collaboration'
+    | 'security';
   widgets: string[];
   schedule: 'realtime' | 'hourly' | 'daily' | 'weekly' | 'monthly';
   recipients: string[];
@@ -55,8 +60,14 @@ interface InvestigationMetrics {
   completedInvestigations: number;
   avgCompletionTime: number;
   investigationsByStatus: Record<string, number>;
-  evidenceMetrics: { totalEvidence: number; evidenceByType: Record<string, number> };
-  findingsMetrics: { totalFindings: number; findingsBySeverity: Record<string, number> };
+  evidenceMetrics: {
+    totalEvidence: number;
+    evidenceByType: Record<string, number>;
+  };
+  findingsMetrics: {
+    totalFindings: number;
+    findingsBySeverity: Record<string, number>;
+  };
 }
 
 export class AnalyticsDashboardService extends EventEmitter {
@@ -156,7 +167,11 @@ export class AnalyticsDashboardService extends EventEmitter {
       this.widgets.set(widget.id, widget);
     });
 
-    console.log('[ANALYTICS] Initialized dashboard with', defaultWidgets.length, 'widgets');
+    console.log(
+      '[ANALYTICS] Initialized dashboard with',
+      defaultWidgets.length,
+      'widgets',
+    );
   }
 
   private startDataRefresh(): void {
@@ -203,9 +218,18 @@ export class AnalyticsDashboardService extends EventEmitter {
       topThreatTypes: [
         { type: 'Malware', count: Math.floor(Math.random() * 300) + 100 },
         { type: 'Phishing', count: Math.floor(Math.random() * 250) + 80 },
-        { type: 'Command & Control', count: Math.floor(Math.random() * 200) + 60 },
-        { type: 'Data Exfiltration', count: Math.floor(Math.random() * 150) + 40 },
-        { type: 'Lateral Movement', count: Math.floor(Math.random() * 100) + 30 },
+        {
+          type: 'Command & Control',
+          count: Math.floor(Math.random() * 200) + 60,
+        },
+        {
+          type: 'Data Exfiltration',
+          count: Math.floor(Math.random() * 150) + 40,
+        },
+        {
+          type: 'Lateral Movement',
+          count: Math.floor(Math.random() * 100) + 30,
+        },
       ],
       geographicDistribution: [
         { country: 'US', threatCount: Math.floor(Math.random() * 500) + 200 },
@@ -221,11 +245,13 @@ export class AnalyticsDashboardService extends EventEmitter {
       id: 'threat-metrics-chart',
       type: 'bar',
       title: 'Threat Severity Distribution',
-      data: Object.entries(metrics.threatSeverityDistribution).map(([severity, count]) => ({
-        label: severity.charAt(0).toUpperCase() + severity.slice(1),
-        value: count,
-        color: this.getSeverityColor(severity),
-      })),
+      data: Object.entries(metrics.threatSeverityDistribution).map(
+        ([severity, count]) => ({
+          label: severity.charAt(0).toUpperCase() + severity.slice(1),
+          value: count,
+          color: this.getSeverityColor(severity),
+        }),
+      ),
       options: {
         responsive: true,
         plugins: {
@@ -241,7 +267,11 @@ export class AnalyticsDashboardService extends EventEmitter {
     };
 
     this.charts.set('threat-metrics', chartData);
-    await this.cache.set('analytics:threat-metrics', JSON.stringify(metrics), 300);
+    await this.cache.set(
+      'analytics:threat-metrics',
+      JSON.stringify(metrics),
+      300,
+    );
   }
 
   private async refreshInvestigationMetrics(): Promise<void> {
@@ -302,7 +332,11 @@ export class AnalyticsDashboardService extends EventEmitter {
     };
 
     this.charts.set('investigation-timeline', timelineChart);
-    await this.cache.set('analytics:investigation-metrics', JSON.stringify(metrics), 300);
+    await this.cache.set(
+      'analytics:investigation-metrics',
+      JSON.stringify(metrics),
+      300,
+    );
   }
 
   private async refreshNetworkData(): Promise<void> {
@@ -317,7 +351,11 @@ export class AnalyticsDashboardService extends EventEmitter {
       },
     };
 
-    await this.cache.set('analytics:network-data', JSON.stringify(networkData), 300);
+    await this.cache.set(
+      'analytics:network-data',
+      JSON.stringify(networkData),
+      300,
+    );
   }
 
   private async refreshPerformanceMetrics(): Promise<void> {
@@ -371,7 +409,11 @@ export class AnalyticsDashboardService extends EventEmitter {
     };
 
     this.charts.set('performance-metrics', performanceChart);
-    await this.cache.set('analytics:performance-data', JSON.stringify(performanceData), 300);
+    await this.cache.set(
+      'analytics:performance-data',
+      JSON.stringify(performanceData),
+      300,
+    );
   }
 
   private async refreshGeoThreatData(): Promise<void> {
@@ -385,9 +427,21 @@ export class AnalyticsDashboardService extends EventEmitter {
         { lat: 37.7749, lng: -122.4194, weight: Math.random() * 100 }, // San Francisco
       ],
       clusters: [
-        { lat: 40.7128, lng: -74.006, count: Math.floor(Math.random() * 50) + 10 },
-        { lat: 51.5074, lng: -0.1278, count: Math.floor(Math.random() * 40) + 8 },
-        { lat: 35.6762, lng: 139.6503, count: Math.floor(Math.random() * 35) + 7 },
+        {
+          lat: 40.7128,
+          lng: -74.006,
+          count: Math.floor(Math.random() * 50) + 10,
+        },
+        {
+          lat: 51.5074,
+          lng: -0.1278,
+          count: Math.floor(Math.random() * 40) + 8,
+        },
+        {
+          lat: 35.6762,
+          lng: 139.6503,
+          count: Math.floor(Math.random() * 35) + 7,
+        },
       ],
     };
 
@@ -434,7 +488,13 @@ export class AnalyticsDashboardService extends EventEmitter {
   }
 
   private generateNetworkNodes(count: number): any[] {
-    const nodeTypes = ['Person', 'Organization', 'Location', 'Event', 'Document'];
+    const nodeTypes = [
+      'Person',
+      'Organization',
+      'Location',
+      'Event',
+      'Document',
+    ];
     const nodes = [];
 
     for (let i = 0; i < count; i++) {
@@ -445,7 +505,9 @@ export class AnalyticsDashboardService extends EventEmitter {
         size: Math.random() * 20 + 5,
         x: Math.random() * 800,
         y: Math.random() * 600,
-        color: this.getNodeColor(nodeTypes[Math.floor(Math.random() * nodeTypes.length)]),
+        color: this.getNodeColor(
+          nodeTypes[Math.floor(Math.random() * nodeTypes.length)],
+        ),
       });
     }
 
@@ -454,7 +516,13 @@ export class AnalyticsDashboardService extends EventEmitter {
 
   private generateNetworkEdges(count: number): any[] {
     const edges = [];
-    const relationTypes = ['CONNECTED_TO', 'RELATED_TO', 'INVOLVED_IN', 'LOCATED_AT', 'OWNS'];
+    const relationTypes = [
+      'CONNECTED_TO',
+      'RELATED_TO',
+      'INVOLVED_IN',
+      'LOCATED_AT',
+      'OWNS',
+    ];
 
     for (let i = 0; i < count; i++) {
       edges.push({
@@ -516,7 +584,11 @@ export class AnalyticsDashboardService extends EventEmitter {
     };
 
     this.reports.set(newReport.id, newReport);
-    await this.cache.set(`analytics:report:${newReport.id}`, JSON.stringify(newReport), 86400);
+    await this.cache.set(
+      `analytics:report:${newReport.id}`,
+      JSON.stringify(newReport),
+      86400,
+    );
 
     this.emit('report-created', newReport);
     return newReport;

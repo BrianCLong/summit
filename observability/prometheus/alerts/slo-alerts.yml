@@ -11,10 +11,10 @@ groups:
           slo: api_latency
           panel_uid: api-p95-latency-001
         annotations:
-          summary: "API p95 latency exceeds SLO (>1.5s)"
-          description: "API p95 latency is {{ $value | humanizeDuration }} (SLO: <1.5s). Panel: api-p95-latency-001"
-          dashboard_url: "https://grafana.example.com/d/slo-core/slo-core-dashboards?viewPanel=api-p95-latency-001"
-          runbook_url: "https://runbooks.example.com/slo-alerts/api-latency"
+          summary: 'API p95 latency exceeds SLO (>1.5s)'
+          description: 'API p95 latency is {{ $value | humanizeDuration }} (SLO: <1.5s). Panel: api-p95-latency-001'
+          dashboard_url: 'https://grafana.example.com/d/slo-core/slo-core-dashboards?viewPanel=api-p95-latency-001'
+          runbook_url: 'https://runbooks.example.com/slo-alerts/api-latency'
 
       # OPA Decision p95 Latency SLO Alert
       - alert: OPADecisionLatencySLOViolation
@@ -25,10 +25,10 @@ groups:
           slo: opa_latency
           panel_uid: opa-p95-latency-002
         annotations:
-          summary: "OPA p95 decision latency exceeds SLO (>500ms)"
-          description: "OPA p95 decision latency is {{ $value | humanizeDuration }} (SLO: <500ms). Panel: opa-p95-latency-002"
-          dashboard_url: "https://grafana.example.com/d/slo-core/slo-core-dashboards?viewPanel=opa-p95-latency-002"
-          runbook_url: "https://runbooks.example.com/slo-alerts/opa-latency"
+          summary: 'OPA p95 decision latency exceeds SLO (>500ms)'
+          description: 'OPA p95 decision latency is {{ $value | humanizeDuration }} (SLO: <500ms). Panel: opa-p95-latency-002'
+          dashboard_url: 'https://grafana.example.com/d/slo-core/slo-core-dashboards?viewPanel=opa-p95-latency-002'
+          runbook_url: 'https://runbooks.example.com/slo-alerts/opa-latency'
           exemplar_query: 'opa_decision_duration_seconds{quantile="0.95"}'
 
       # Queue Lag SLO Alert
@@ -40,10 +40,10 @@ groups:
           slo: queue_lag
           panel_uid: queue-lag-003
         annotations:
-          summary: "Queue lag exceeds SLO (>10k messages)"
-          description: "Queue lag is {{ $value }} messages (SLO: <10k). Panel: queue-lag-003"
-          dashboard_url: "https://grafana.example.com/d/slo-core/slo-core-dashboards?viewPanel=queue-lag-003"
-          runbook_url: "https://runbooks.example.com/slo-alerts/queue-lag"
+          summary: 'Queue lag exceeds SLO (>10k messages)'
+          description: 'Queue lag is {{ $value }} messages (SLO: <10k). Panel: queue-lag-003'
+          dashboard_url: 'https://grafana.example.com/d/slo-core/slo-core-dashboards?viewPanel=queue-lag-003'
+          runbook_url: 'https://runbooks.example.com/slo-alerts/queue-lag'
 
       # Ingest Failure Rate SLO Alert
       - alert: IngestFailureRateSLOViolation
@@ -54,10 +54,10 @@ groups:
           slo: ingest_failure_rate
           panel_uid: ingest-failure-rate-004
         annotations:
-          summary: "Ingest failure rate exceeds SLO (>1%)"
-          description: "Ingest failure rate is {{ $value | humanizePercentage }} (SLO: <1%). Panel: ingest-failure-rate-004"
-          dashboard_url: "https://grafana.example.com/d/slo-core/slo-core-dashboards?viewPanel=ingest-failure-rate-004"
-          runbook_url: "https://runbooks.example.com/slo-alerts/ingest-failure-rate"
+          summary: 'Ingest failure rate exceeds SLO (>1%)'
+          description: 'Ingest failure rate is {{ $value | humanizePercentage }} (SLO: <1%). Panel: ingest-failure-rate-004'
+          dashboard_url: 'https://grafana.example.com/d/slo-core/slo-core-dashboards?viewPanel=ingest-failure-rate-004'
+          runbook_url: 'https://runbooks.example.com/slo-alerts/ingest-failure-rate'
 
       # Golden Flow Pass Rate SLO Alert
       - alert: GoldenFlowPassRateSLOViolation
@@ -68,10 +68,10 @@ groups:
           slo: golden_flow_pass_rate
           panel_uid: golden-flow-pass-005
         annotations:
-          summary: "Golden flow pass rate below SLO (<99%)"
-          description: "Golden flow pass rate is {{ $value | humanizePercentage }} (SLO: >99%). Panel: golden-flow-pass-005"
-          dashboard_url: "https://grafana.example.com/d/slo-core/slo-core-dashboards?viewPanel=golden-flow-pass-005"
-          runbook_url: "https://runbooks.example.com/slo-alerts/golden-flow"
+          summary: 'Golden flow pass rate below SLO (<99%)'
+          description: 'Golden flow pass rate is {{ $value | humanizePercentage }} (SLO: >99%). Panel: golden-flow-pass-005'
+          dashboard_url: 'https://grafana.example.com/d/slo-core/slo-core-dashboards?viewPanel=golden-flow-pass-005'
+          runbook_url: 'https://runbooks.example.com/slo-alerts/golden-flow'
 
       # Critical: Multiple SLO Violations
       - alert: MultipleSLOViolations
@@ -81,7 +81,7 @@ groups:
           severity: critical
           slo: multiple
         annotations:
-          summary: "Multiple SLO violations detected"
-          description: "{{ $value }} SLO alerts are currently firing. Investigate system-wide issues."
-          dashboard_url: "https://grafana.example.com/d/slo-core/slo-core-dashboards"
-          runbook_url: "https://runbooks.example.com/slo-alerts/multiple-violations"
+          summary: 'Multiple SLO violations detected'
+          description: '{{ $value }} SLO alerts are currently firing. Investigate system-wide issues.'
+          dashboard_url: 'https://grafana.example.com/d/slo-core/slo-core-dashboards'
+          runbook_url: 'https://runbooks.example.com/slo-alerts/multiple-violations'

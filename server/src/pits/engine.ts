@@ -52,7 +52,10 @@ export class PrivacyIncidentDrillEngine {
     const startDate = cloneDate(this.scenario.startDate);
     const timeline: TimelineEntry[] = [];
     const breaches: SlaBreach[] = [];
-    const integrationArtifacts: Record<IntegrationName, { adapter: IntegrationAdapter; items: IntegrationArtifact[] }> = {
+    const integrationArtifacts: Record<
+      IntegrationName,
+      { adapter: IntegrationAdapter; items: IntegrationArtifact[] }
+    > = {
       IAB: { adapter: this.integrations.IAB, items: [] },
       IDTL: { adapter: this.integrations.IDTL, items: [] },
     };
@@ -61,10 +64,14 @@ export class PrivacyIncidentDrillEngine {
     const evidenceDurations: number[] = [];
     let artifactSequence = 0;
 
-    const sortedEvents = [...this.scenario.events].sort((a, b) => a.dayOffset - b.dayOffset);
+    const sortedEvents = [...this.scenario.events].sort(
+      (a, b) => a.dayOffset - b.dayOffset,
+    );
 
     for (const event of sortedEvents) {
-      const scheduledAt = new Date(startDate.getTime() + event.dayOffset * HOURS_IN_DAY * MILLIS_PER_HOUR);
+      const scheduledAt = new Date(
+        startDate.getTime() + event.dayOffset * HOURS_IN_DAY * MILLIS_PER_HOUR,
+      );
       const startedAt = cloneDate(scheduledAt);
       let completedAt = cloneDate(startedAt);
       let status: TimelineEntry['status'] = 'informational';
@@ -85,7 +92,9 @@ export class PrivacyIncidentDrillEngine {
           const actual = this.resolveActualHours(responseEvent, rng);
           actualHours = roundHours(actual);
           const slaLimit = this.resolveSlaLimit(responseEvent);
-          completedAt = new Date(startedAt.getTime() + actualHours * MILLIS_PER_HOUR);
+          completedAt = new Date(
+            startedAt.getTime() + actualHours * MILLIS_PER_HOUR,
+          );
           status = actualHours > slaLimit ? 'breached' : 'on_track';
 
           metadata.plannedHours = plannedHours;
@@ -99,7 +108,10 @@ export class PrivacyIncidentDrillEngine {
               eventTitle: responseEvent.title,
               eventType: responseEvent.type,
               gapHours,
-              recommendedAction: this.buildRecommendation(responseEvent, gapHours),
+              recommendedAction: this.buildRecommendation(
+                responseEvent,
+                gapHours,
+              ),
             };
             metadata.gapHours = gapHours;
             breaches.push(breach);
@@ -119,7 +131,9 @@ export class PrivacyIncidentDrillEngine {
             const artifactEvent = responseEvent as ArtifactRequestEvent;
             const integration = integrationArtifacts[artifactEvent.integration];
             if (!integration) {
-              throw new Error(`No integration configured for ${artifactEvent.integration}`);
+              throw new Error(
+                `No integration configured for ${artifactEvent.integration}`,
+              );
             }
             artifactSequence += 1;
             const artifact = integration.adapter.produceArtifact({
@@ -163,9 +177,14 @@ export class PrivacyIncidentDrillEngine {
 
     const evidenceRequests = evidenceDurations.length;
     const averageTimeToEvidenceHours = evidenceRequests
-      ? roundHours(evidenceDurations.reduce((sum, value) => sum + value, 0) / evidenceRequests)
+      ? roundHours(
+          evidenceDurations.reduce((sum, value) => sum + value, 0) /
+            evidenceRequests,
+        )
       : 0;
-    const maxTimeToEvidenceHours = evidenceRequests ? roundHours(Math.max(...evidenceDurations)) : 0;
+    const maxTimeToEvidenceHours = evidenceRequests
+      ? roundHours(Math.max(...evidenceDurations))
+      : 0;
 
     const score = this.calculateScore({
       breaches,
@@ -173,11 +192,18 @@ export class PrivacyIncidentDrillEngine {
       maxTimeToEvidenceHours,
     });
 
-    const integrationsReport = (Object.keys(integrationArtifacts) as IntegrationName[]).reduce(
+    const integrationsReport = (
+      Object.keys(integrationArtifacts) as IntegrationName[]
+    ).reduce(
       (acc, name) => {
         const { items } = integrationArtifacts[name];
         const averageDeliveryLagHours = items.length
-          ? roundHours(items.reduce((sum, artifact) => sum + artifact.deliveryLagHours, 0) / items.length)
+          ? roundHours(
+              items.reduce(
+                (sum, artifact) => sum + artifact.deliveryLagHours,
+                0,
+              ) / items.length,
+            )
           : 0;
         acc[name] = {
           name,
@@ -211,8 +237,14 @@ export class PrivacyIncidentDrillEngine {
     return report;
   }
 
-  private resolveActualHours(event: ResponseDrivenEvent, rng: SeededRandom): number {
-    const jitter = rng.nextInRange(-event.variabilityHours, event.variabilityHours);
+  private resolveActualHours(
+    event: ResponseDrivenEvent,
+    rng: SeededRandom,
+  ): number {
+    const jitter = rng.nextInRange(
+      -event.variabilityHours,
+      event.variabilityHours,
+    );
     const raw = event.targetResponseHours + jitter;
     return raw < 0 ? 0 : raw;
   }
@@ -220,17 +252,29 @@ export class PrivacyIncidentDrillEngine {
   private resolveSlaLimit(event: ResponseDrivenEvent): number {
     switch (event.type) {
       case 'regulator_query':
-        return Math.min(event.dueInHours, this.scenario.slaTargets.regulatorResponseHours);
+        return Math.min(
+          event.dueInHours,
+          this.scenario.slaTargets.regulatorResponseHours,
+        );
       case 'customer_comm':
-        return Math.min(event.dueInHours, this.scenario.slaTargets.customerNotificationHours);
+        return Math.min(
+          event.dueInHours,
+          this.scenario.slaTargets.customerNotificationHours,
+        );
       case 'artifact_request':
-        return Math.min(event.dueInHours, this.scenario.slaTargets.artifactFulfillmentHours);
+        return Math.min(
+          event.dueInHours,
+          this.scenario.slaTargets.artifactFulfillmentHours,
+        );
       default:
         return event.dueInHours;
     }
   }
 
-  private buildRecommendation(event: ResponseDrivenEvent, gapHours: number): string {
+  private buildRecommendation(
+    event: ResponseDrivenEvent,
+    gapHours: number,
+  ): string {
     const roundedGap = roundHours(gapHours);
     switch (event.type) {
       case 'regulator_query':
@@ -254,9 +298,18 @@ export class PrivacyIncidentDrillEngine {
     maxTimeToEvidenceHours: number;
   }): number {
     const breachPenalty = breaches.length * 8;
-    const averagePenalty = Math.max(0, averageTimeToEvidenceHours - this.scenario.slaTargets.artifactFulfillmentHours);
-    const maxPenalty = Math.max(0, maxTimeToEvidenceHours - this.scenario.slaTargets.artifactFulfillmentHours);
-    const rawScore = 100 - breachPenalty - averagePenalty * 1.5 - maxPenalty * 0.5;
+    const averagePenalty = Math.max(
+      0,
+      averageTimeToEvidenceHours -
+        this.scenario.slaTargets.artifactFulfillmentHours,
+    );
+    const maxPenalty = Math.max(
+      0,
+      maxTimeToEvidenceHours -
+        this.scenario.slaTargets.artifactFulfillmentHours,
+    );
+    const rawScore =
+      100 - breachPenalty - averagePenalty * 1.5 - maxPenalty * 0.5;
     return Math.max(0, roundHours(rawScore));
   }
 }

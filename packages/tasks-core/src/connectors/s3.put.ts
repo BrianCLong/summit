@@ -10,7 +10,9 @@ interface In {
 }
 export default defineTask<In, { etag: string }>({
   async execute(_ctx, { payload }) {
-    const s3 = new S3Client({ region: payload.region ?? process.env.AWS_REGION });
+    const s3 = new S3Client({
+      region: payload.region ?? process.env.AWS_REGION,
+    });
     const res = await s3.send(
       new PutObjectCommand({
         Bucket: payload.bucket,

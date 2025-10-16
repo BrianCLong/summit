@@ -1,44 +1,44 @@
 # UTC is the system time. User timezone: America/Denver.
 station_profiles:
   buzzer:
-    name: "The Buzzer"
+    name: 'The Buzzer'
     tags: [uvb76, buzzer, 4625khz, usb]
     freq_khz: 4625.0
     day_night: none
   pip_day:
-    name: "The Pip (day)"
+    name: 'The Pip (day)'
     tags: [pip, 5448khz, usb]
     freq_khz: 5448.0
   pip_night:
-    name: "The Pip (night)"
+    name: 'The Pip (night)'
     tags: [pip, 3756khz, usb]
     freq_khz: 3756.0
   squeak_day:
-    name: "The Squeaky Wheel (day)"
+    name: 'The Squeaky Wheel (day)'
     tags: [squeaky, 5367khz, usb]
     freq_khz: 5367.0
   squeak_night:
-    name: "The Squeaky Wheel (night)"
+    name: 'The Squeaky Wheel (night)'
     tags: [squeaky, 3363_5khz, usb]
     freq_khz: 3363.5
   d_marker:
-    name: "D Marker"
+    name: 'D Marker'
     tags: [marker, d, 5292khz]
     freq_khz: 5292.0
   t_marker:
-    name: "T Marker"
+    name: 'T Marker'
     tags: [marker, t, 4325khz]
     freq_khz: 4325.0
   air_horn:
-    name: "The Air Horn"
+    name: 'The Air Horn'
     tags: [airhorn, 4930khz]
     freq_khz: 4930.0
   goose:
-    name: "The Goose"
+    name: 'The Goose'
     tags: [goose, 4310khz]
     freq_khz: 4310.0
   alarm:
-    name: "The Alarm"
+    name: 'The Alarm'
     tags: [alarm, 4770khz]
     freq_khz: 4770.0
 

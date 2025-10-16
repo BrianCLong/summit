@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata: { name: prune-signals-365d }
 spec:
-  schedule: "37 3 * * *"
+  schedule: '37 3 * * *'
   jobTemplate:
     spec:
       template:
@@ -11,8 +11,11 @@ spec:
             - name: prune
               image: node:20-alpine
               env:
-                - { name: NEO4J_URI, valueFrom: { secretKeyRef: { name: neo4j, key: uri } } }
-                - { name: RETENTION_DAYS, value: "365" } # S4.2: Parameterize TTL
-                - { name: DRY_RUN, value: "false" } # S4.2: Add dry-run mode
-              command: ["node", "scripts/prune-signals.js"] # Assuming a JS script to execute Cypher
+                - {
+                    name: NEO4J_URI,
+                    valueFrom: { secretKeyRef: { name: neo4j, key: uri } },
+                  }
+                - { name: RETENTION_DAYS, value: '365' } # S4.2: Parameterize TTL
+                - { name: DRY_RUN, value: 'false' } # S4.2: Add dry-run mode
+              command: ['node', 'scripts/prune-signals.js'] # Assuming a JS script to execute Cypher
           restartPolicy: OnFailure

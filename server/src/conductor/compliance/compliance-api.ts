@@ -53,7 +53,10 @@ complianceRouter.post('/assessments/run', async (req, res) => {
     };
 
     // Record metrics
-    prometheusConductorMetrics.recordOperationalEvent('compliance_assessment_run', true);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'compliance_assessment_run',
+      true,
+    );
     prometheusConductorMetrics.recordOperationalMetric(
       'compliance_assessment_time',
       response.processingTime,
@@ -63,7 +66,10 @@ complianceRouter.post('/assessments/run', async (req, res) => {
   } catch (error) {
     console.error('Assessment execution error:', error);
 
-    prometheusConductorMetrics.recordOperationalEvent('compliance_assessment_error', false);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'compliance_assessment_error',
+      false,
+    );
 
     res.status(500).json({
       success: false,
@@ -128,7 +134,10 @@ complianceRouter.get('/assessments', async (req, res) => {
       });
     }
 
-    let assessments = await complianceEngine.listAssessments(tenantId, parseInt(limit as string));
+    let assessments = await complianceEngine.listAssessments(
+      tenantId,
+      parseInt(limit as string),
+    );
 
     // Filter by framework if specified
     if (frameworkId) {
@@ -191,7 +200,8 @@ complianceRouter.get('/frameworks', async (req, res) => {
         id: 'soc2-2017',
         name: 'SOC 2 Type II',
         version: '2017',
-        description: 'System and Organization Controls 2 - Trust Services Criteria',
+        description:
+          'System and Organization Controls 2 - Trust Services Criteria',
         categories: [
           'Common Criteria',
           'Availability',
@@ -206,7 +216,8 @@ complianceRouter.get('/frameworks', async (req, res) => {
         id: 'gdpr-2018',
         name: 'General Data Protection Regulation',
         version: '2018',
-        description: 'EU General Data Protection Regulation compliance requirements',
+        description:
+          'EU General Data Protection Regulation compliance requirements',
         categories: [
           'Lawfulness of Processing',
           'Data Subject Rights',
@@ -238,7 +249,8 @@ complianceRouter.get('/frameworks', async (req, res) => {
         id: 'nist-csf-1.1',
         name: 'NIST Cybersecurity Framework',
         version: '1.1',
-        description: 'Framework for improving critical infrastructure cybersecurity',
+        description:
+          'Framework for improving critical infrastructure cybersecurity',
         categories: ['Identify', 'Protect', 'Detect', 'Respond', 'Recover'],
         auditFrequency: 'quarterly',
         certificationRequired: false,
@@ -271,7 +283,13 @@ complianceRouter.patch('/findings/:findingId/status', async (req, res) => {
     const { status, comments, assignee } = req.body;
     const updatedBy = req.user?.sub || 'system';
 
-    const validStatuses = ['open', 'in_progress', 'resolved', 'accepted_risk', 'false_positive'];
+    const validStatuses = [
+      'open',
+      'in_progress',
+      'resolved',
+      'accepted_risk',
+      'false_positive',
+    ];
     if (!validStatuses.includes(status)) {
       return res.status(400).json({
         success: false,
@@ -295,13 +313,19 @@ complianceRouter.patch('/findings/:findingId/status', async (req, res) => {
     };
 
     // Record metrics
-    prometheusConductorMetrics.recordOperationalEvent('compliance_finding_updated', true);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'compliance_finding_updated',
+      true,
+    );
 
     res.json(response);
   } catch (error) {
     console.error('Finding update error:', error);
 
-    prometheusConductorMetrics.recordOperationalEvent('compliance_finding_update_error', false);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'compliance_finding_update_error',
+      false,
+    );
 
     res.status(500).json({
       success: false,
@@ -378,7 +402,10 @@ complianceRouter.post('/reports/generate', async (req, res) => {
       },
       frameworkStatus: dashboard.frameworkStatus,
       trendAnalysis: {
-        scoreHistory: assessments.map((a) => ({ date: a.completionDate, score: a.overallScore })),
+        scoreHistory: assessments.map((a) => ({
+          date: a.completionDate,
+          score: a.overallScore,
+        })),
         findingsTrend: 'improving', // Simplified
       },
     };
@@ -392,7 +419,10 @@ complianceRouter.post('/reports/generate', async (req, res) => {
     };
 
     // Record metrics
-    prometheusConductorMetrics.recordOperationalEvent('compliance_report_generated', true);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'compliance_report_generated',
+      true,
+    );
     prometheusConductorMetrics.recordOperationalMetric(
       'compliance_report_time',
       response.processingTime,
@@ -402,7 +432,10 @@ complianceRouter.post('/reports/generate', async (req, res) => {
   } catch (error) {
     console.error('Report generation error:', error);
 
-    prometheusConductorMetrics.recordOperationalEvent('compliance_report_error', false);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'compliance_report_error',
+      false,
+    );
 
     res.status(500).json({
       success: false,
@@ -431,7 +464,13 @@ complianceRouter.post('/schedule/assessment', async (req, res) => {
       });
     }
 
-    const validFrequencies = ['daily', 'weekly', 'monthly', 'quarterly', 'annually'];
+    const validFrequencies = [
+      'daily',
+      'weekly',
+      'monthly',
+      'quarterly',
+      'annually',
+    ];
     if (!validFrequencies.includes(frequency)) {
       return res.status(400).json({
         success: false,
@@ -462,13 +501,19 @@ complianceRouter.post('/schedule/assessment', async (req, res) => {
     };
 
     // Record metrics
-    prometheusConductorMetrics.recordOperationalEvent('compliance_schedule_created', true);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'compliance_schedule_created',
+      true,
+    );
 
     res.json(response);
   } catch (error) {
     console.error('Schedule creation error:', error);
 
-    prometheusConductorMetrics.recordOperationalEvent('compliance_schedule_error', false);
+    prometheusConductorMetrics.recordOperationalEvent(
+      'compliance_schedule_error',
+      false,
+    );
 
     res.status(500).json({
       success: false,
@@ -524,7 +569,11 @@ complianceRouter.get('/metrics', async (req, res) => {
           : 0,
       lastAssessment:
         dashboard.recentAssessments.length > 0
-          ? Math.max(...dashboard.recentAssessments.map((a) => a.completionDate || a.startDate))
+          ? Math.max(
+              ...dashboard.recentAssessments.map(
+                (a) => a.completionDate || a.startDate,
+              ),
+            )
           : 0,
     };
 
@@ -561,9 +610,14 @@ complianceRouter.use((req, res, next) => {
 
   res.on('finish', () => {
     const duration = Date.now() - start;
-    console.log(`Compliance API: ${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`);
+    console.log(
+      `Compliance API: ${req.method} ${req.path} - ${res.statusCode} (${duration}ms)`,
+    );
 
-    prometheusConductorMetrics.recordOperationalMetric('compliance_api_request_duration', duration);
+    prometheusConductorMetrics.recordOperationalMetric(
+      'compliance_api_request_duration',
+      duration,
+    );
     prometheusConductorMetrics.recordOperationalEvent(
       `compliance_api_${req.method.toLowerCase()}`,
       res.statusCode < 400,

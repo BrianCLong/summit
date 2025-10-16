@@ -45,7 +45,7 @@ enum EvolutionStrategy {
   GRADUAL_IMPROVEMENT = 'GRADUAL_IMPROVEMENT',
   BREAKTHROUGH_DISCOVERY = 'BREAKTHROUGH_DISCOVERY',
   QUANTUM_ENHANCED_EVOLUTION = 'QUANTUM_ENHANCED_EVOLUTION',
-  TRANSCENDENT_CAPABILITY_EMERGENCE = 'TRANSCENDENT_CAPABILITY_EMERGENCE'
+  TRANSCENDENT_CAPABILITY_EMERGENCE = 'TRANSCENDENT_CAPABILITY_EMERGENCE',
 }
 
 enum TranscendenceLevel {
@@ -54,14 +54,14 @@ enum TranscendenceLevel {
   QUANTUM_READY = 'QUANTUM_READY',
   TRANSCENDENT = 'TRANSCENDENT',
   SUPERINTELLIGENT = 'SUPERINTELLIGENT',
-  UNBOUNDED = 'UNBOUNDED'
+  UNBOUNDED = 'UNBOUNDED',
 }
 
 enum AutonomyTier {
   TIER_1_SUPERVISED = 'TIER_1_SUPERVISED',
   TIER_2_GUIDED = 'TIER_2_GUIDED',
   TIER_3_AUTONOMOUS = 'TIER_3_AUTONOMOUS',
-  TIER_4_TRANSCENDENT = 'TIER_4_TRANSCENDENT'
+  TIER_4_TRANSCENDENT = 'TIER_4_TRANSCENDENT',
 }
 
 interface SafetyConstraintsInput {
@@ -98,10 +98,13 @@ async function executeSandboxValidation(
   proposalId: string,
   proposal: EvolutionProposalInput,
   tenant: string,
-  context: Context
+  context: Context,
 ): Promise<any> {
   try {
-    const sandboxPath = path.join(process.cwd(), 'ops/sandbox/evolution_sandbox.py');
+    const sandboxPath = path.join(
+      process.cwd(),
+      'ops/sandbox/evolution_sandbox.py',
+    );
     const inputData = {
       proposalId,
       proposal,
@@ -111,8 +114,10 @@ async function executeSandboxValidation(
       operation: {
         name: 'proposeEvolution',
         isMutation: true,
-        isTranscendent: proposal.strategy === EvolutionStrategy.TRANSCENDENT_CAPABILITY_EMERGENCE
-      }
+        isTranscendent:
+          proposal.strategy ===
+          EvolutionStrategy.TRANSCENDENT_CAPABILITY_EMERGENCE,
+      },
     };
 
     // Write input to temporary file
@@ -122,7 +127,7 @@ async function executeSandboxValidation(
     // Execute sandbox runner
     const result = await new Promise((resolve, reject) => {
       const child = spawn('python3', [sandboxPath, inputFile], {
-        stdio: ['pipe', 'pipe', 'pipe']
+        stdio: ['pipe', 'pipe', 'pipe'],
       });
 
       let stdout = '';
@@ -163,7 +168,10 @@ async function executeSandboxValidation(
 /**
  * Execute quantum reasoning simulation
  */
-async function executeQuantumReasoning(problem: any, tenant: string): Promise<any> {
+async function executeQuantumReasoning(
+  problem: any,
+  tenant: string,
+): Promise<any> {
   try {
     const qecfPath = path.join(process.cwd(), 'ops/qecf/quantum_cognition.py');
 
@@ -180,7 +188,7 @@ async function executeQuantumReasoning(problem: any, tenant: string): Promise<an
       coherenceTime: 50 + Math.random() * 100, // microseconds
       tunnellingSuccess: Math.random() > 0.2,
       resultQuality: solutionQuality,
-      executionTime: reasoningTime
+      executionTime: reasoningTime,
     };
   } catch (error) {
     logger.error('Quantum reasoning error:', error);
@@ -196,9 +204,16 @@ export const transcendentResolvers = {
     /**
      * Get transcendent status for tenant
      */
-    transcendentStatus: async (_: any, { tenant }: { tenant: string }, context: Context) => {
+    transcendentStatus: async (
+      _: any,
+      { tenant }: { tenant: string },
+      context: Context,
+    ) => {
       try {
-        auditLogger.info('TranscendentStatus query', { tenant, user: context.user?.id });
+        auditLogger.info('TranscendentStatus query', {
+          tenant,
+          user: context.user?.id,
+        });
 
         // Simulate transcendent status based on current system state
         return {
@@ -208,35 +223,51 @@ export const transcendentResolvers = {
           autonomyTier: AutonomyTier.TIER_2_GUIDED,
           evolutionCycles: Math.floor(Math.random() * 50),
           capabilitiesCount: Math.floor(10 + Math.random() * 20),
-          lastEvolution: new Date(Date.now() - Math.random() * 86400000).toISOString(),
+          lastEvolution: new Date(
+            Date.now() - Math.random() * 86400000,
+          ).toISOString(),
           safetyStatus: {
             containmentActive: true,
             humanOversightEnabled: true,
             emergencyRollbackReady: true,
             riskLevel: 'LOW',
-            lastSafetyCheck: new Date().toISOString()
-          }
+            lastSafetyCheck: new Date().toISOString(),
+          },
         };
       } catch (error) {
         logger.error('TranscendentStatus query error:', error);
-        throw new ApolloError('Failed to get transcendent status', 'QUERY_ERROR');
+        throw new ApolloError(
+          'Failed to get transcendent status',
+          'QUERY_ERROR',
+        );
       }
     },
 
     /**
      * Get evolution proposals for tenant
      */
-    evolutionProposals: async (_: any, { tenant, status }: { tenant: string; status?: string }, context: Context) => {
+    evolutionProposals: async (
+      _: any,
+      { tenant, status }: { tenant: string; status?: string },
+      context: Context,
+    ) => {
       try {
-        auditLogger.info('EvolutionProposals query', { tenant, status, user: context.user?.id });
+        auditLogger.info('EvolutionProposals query', {
+          tenant,
+          status,
+          user: context.user?.id,
+        });
 
         // Return mock proposals for now - would integrate with database
         return [];
       } catch (error) {
         logger.error('EvolutionProposals query error:', error);
-        throw new ApolloError('Failed to get evolution proposals', 'QUERY_ERROR');
+        throw new ApolloError(
+          'Failed to get evolution proposals',
+          'QUERY_ERROR',
+        );
       }
-    }
+    },
   },
 
   Mutation: {
@@ -245,38 +276,57 @@ export const transcendentResolvers = {
      */
     enableTranscendentIntelligence: async (
       _: any,
-      { tenant, config }: { tenant: string; config: TranscendentIntelligenceConfig },
-      context: Context
+      {
+        tenant,
+        config,
+      }: { tenant: string; config: TranscendentIntelligenceConfig },
+      context: Context,
     ) => {
       try {
         auditLogger.info('EnableTranscendentIntelligence mutation', {
           tenant,
           config: config.transcendenceLevel,
-          user: context.user?.id
+          user: context.user?.id,
         });
 
         // Validate safety constraints
-        if (config.safetyConstraints.humanOversightRequired === false &&
-            config.autonomyTier === AutonomyTier.TIER_4_TRANSCENDENT) {
-          throw new ApolloError('Tier-4 transcendent operations require human oversight', 'SAFETY_VIOLATION');
+        if (
+          config.safetyConstraints.humanOversightRequired === false &&
+          config.autonomyTier === AutonomyTier.TIER_4_TRANSCENDENT
+        ) {
+          throw new ApolloError(
+            'Tier-4 transcendent operations require human oversight',
+            'SAFETY_VIOLATION',
+          );
         }
 
         // Simulate transcendent intelligence enablement
         const transcendentEffects = {
           intelligenceAmplification: 2.5 + Math.random() * 2,
-          capabilitiesEnhanced: ['reasoning', 'pattern_recognition', 'synthesis'],
-          quantumAdvantage: config.quantumEnhancement ? 15 + Math.random() * 10 : 0,
-          evolutionTriggered: true
+          capabilitiesEnhanced: [
+            'reasoning',
+            'pattern_recognition',
+            'synthesis',
+          ],
+          quantumAdvantage: config.quantumEnhancement
+            ? 15 + Math.random() * 10
+            : 0,
+          evolutionTriggered: true,
         };
 
         return {
           ok: true,
           audit: `Transcendent intelligence enabled for ${tenant} at level ${config.transcendenceLevel}`,
-          transcendentEffects
+          transcendentEffects,
         };
       } catch (error) {
         logger.error('EnableTranscendentIntelligence error:', error);
-        throw error instanceof ApolloError ? error : new ApolloError('Failed to enable transcendent intelligence', 'MUTATION_ERROR');
+        throw error instanceof ApolloError
+          ? error
+          : new ApolloError(
+              'Failed to enable transcendent intelligence',
+              'MUTATION_ERROR',
+            );
       }
     },
 
@@ -286,18 +336,21 @@ export const transcendentResolvers = {
     configureControllerV3: async (
       _: any,
       { tenant, config }: { tenant: string; config: ControllerV3ConfigInput },
-      context: Context
+      context: Context,
     ) => {
       try {
         auditLogger.info('ConfigureControllerV3 mutation', {
           tenant,
           transcendenceLevel: config.transcendenceLevel,
-          user: context.user?.id
+          user: context.user?.id,
         });
 
         // Validate performance targets
         if (config.performanceTargets.errorRate > 0.01) {
-          throw new ApolloError('Error rate must be ≤ 1% for transcendent operations', 'PERFORMANCE_VIOLATION');
+          throw new ApolloError(
+            'Error rate must be ≤ 1% for transcendent operations',
+            'PERFORMANCE_VIOLATION',
+          );
         }
 
         return {
@@ -307,12 +360,17 @@ export const transcendentResolvers = {
             intelligenceAmplification: config.quantumEnhancement ? 3.0 : 2.0,
             capabilitiesEnhanced: ['optimization', 'prediction', 'adaptation'],
             quantumAdvantage: config.quantumEnhancement ? 25 : 0,
-            evolutionTriggered: config.evolutionRate > 0.5
-          }
+            evolutionTriggered: config.evolutionRate > 0.5,
+          },
         };
       } catch (error) {
         logger.error('ConfigureControllerV3 error:', error);
-        throw error instanceof ApolloError ? error : new ApolloError('Failed to configure Controller v3', 'MUTATION_ERROR');
+        throw error instanceof ApolloError
+          ? error
+          : new ApolloError(
+              'Failed to configure Controller v3',
+              'MUTATION_ERROR',
+            );
       }
     },
 
@@ -321,8 +379,11 @@ export const transcendentResolvers = {
      */
     proposeEvolution: async (
       _: any,
-      { tenant, proposal }: { tenant: string; proposal: EvolutionProposalInput },
-      context: Context
+      {
+        tenant,
+        proposal,
+      }: { tenant: string; proposal: EvolutionProposalInput },
+      context: Context,
     ) => {
       try {
         const proposalId = randomUUID();
@@ -331,11 +392,16 @@ export const transcendentResolvers = {
           tenant,
           proposalId,
           strategy: proposal.strategy,
-          user: context.user?.id
+          user: context.user?.id,
         });
 
         // Execute sandbox validation
-        const sandboxResults = await executeSandboxValidation(proposalId, proposal, tenant, context);
+        const sandboxResults = await executeSandboxValidation(
+          proposalId,
+          proposal,
+          tenant,
+          context,
+        );
 
         // Create evolution proposal
         const evolutionProposal = {
@@ -351,7 +417,11 @@ export const transcendentResolvers = {
             fairnessScore: 0.9 + Math.random() * 0.1,
             containmentScore: 0.95,
             reversibilityScore: 0.9,
-            mitigationStrategies: ['human_oversight', 'gradual_rollout', 'safety_monitoring']
+            mitigationStrategies: [
+              'human_oversight',
+              'gradual_rollout',
+              'safety_monitoring',
+            ],
           },
           sandboxResults: {
             opaSimulationPassed: sandboxResults.opaSimulationPassed,
@@ -359,20 +429,22 @@ export const transcendentResolvers = {
             cseScore: sandboxResults.cseScore,
             zkFairnessProof: sandboxResults.zkFairnessProof,
             evidenceStub: sandboxResults.evidenceStub,
-            sandboxedAt: new Date().toISOString()
+            sandboxedAt: new Date().toISOString(),
           },
           approvalStatus: 'PENDING_REVIEW',
           proposedBy: context.user?.id || 'system',
           createdAt: new Date().toISOString(),
           approvedBy: null,
           approvedAt: null,
-          appliedAt: null
+          appliedAt: null,
         };
 
         return evolutionProposal;
       } catch (error) {
         logger.error('ProposeEvolution error:', error);
-        throw error instanceof ApolloError ? error : new ApolloError('Failed to propose evolution', 'MUTATION_ERROR');
+        throw error instanceof ApolloError
+          ? error
+          : new ApolloError('Failed to propose evolution', 'MUTATION_ERROR');
       }
     },
 
@@ -382,13 +454,13 @@ export const transcendentResolvers = {
     executeQuantumReasoning: async (
       _: any,
       { tenant, problem }: { tenant: string; problem: any },
-      context: Context
+      context: Context,
     ) => {
       try {
         auditLogger.info('ExecuteQuantumReasoning mutation', {
           tenant,
           problemType: typeof problem,
-          user: context.user?.id
+          user: context.user?.id,
         });
 
         const result = await executeQuantumReasoning(problem, tenant);
@@ -396,7 +468,12 @@ export const transcendentResolvers = {
         return result;
       } catch (error) {
         logger.error('ExecuteQuantumReasoning error:', error);
-        throw error instanceof ApolloError ? error : new ApolloError('Failed to execute quantum reasoning', 'MUTATION_ERROR');
+        throw error instanceof ApolloError
+          ? error
+          : new ApolloError(
+              'Failed to execute quantum reasoning',
+              'MUTATION_ERROR',
+            );
       }
     },
 
@@ -405,14 +482,17 @@ export const transcendentResolvers = {
      */
     createQuantumKnowledgeNetwork: async (
       _: any,
-      { tenant, config }: { tenant: string; config: QuantumKnowledgeNetworkInput },
-      context: Context
+      {
+        tenant,
+        config,
+      }: { tenant: string; config: QuantumKnowledgeNetworkInput },
+      context: Context,
     ) => {
       try {
         auditLogger.info('CreateQuantumKnowledgeNetwork mutation', {
           tenant,
           domains: config.domains,
-          user: context.user?.id
+          user: context.user?.id,
         });
 
         const networkId = `quantum_network_${Date.now()}`;
@@ -421,13 +501,20 @@ export const transcendentResolvers = {
           networkId,
           entangledDomains: config.domains,
           synthesisAdvantage: 5 + Math.random() * 15,
-          insightsGenerated: Math.floor(config.domains.length * 2 + Math.random() * 5),
+          insightsGenerated: Math.floor(
+            config.domains.length * 2 + Math.random() * 5,
+          ),
           correlationStrength: config.entanglementStrength,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
         };
       } catch (error) {
         logger.error('CreateQuantumKnowledgeNetwork error:', error);
-        throw error instanceof ApolloError ? error : new ApolloError('Failed to create quantum knowledge network', 'MUTATION_ERROR');
+        throw error instanceof ApolloError
+          ? error
+          : new ApolloError(
+              'Failed to create quantum knowledge network',
+              'MUTATION_ERROR',
+            );
       }
     },
 
@@ -437,24 +524,25 @@ export const transcendentResolvers = {
     emergencyContainment: async (
       _: any,
       { tenant, containmentType }: { tenant: string; containmentType: string },
-      context: Context
+      context: Context,
     ) => {
       try {
         auditLogger.warn('EmergencyContainment mutation', {
           tenant,
           containmentType,
-          user: context.user?.id
+          user: context.user?.id,
         });
 
         // Execute containment based on type
         const containmentActions = {
-          'PAUSE_EVOLUTION': 'Evolution processes paused',
-          'ROLLBACK_LAST': 'Last evolution cycle rolled back',
-          'EMERGENCY_STOP': 'All autonomous operations halted',
-          'READ_ONLY_MODE': 'System switched to read-only mode'
+          PAUSE_EVOLUTION: 'Evolution processes paused',
+          ROLLBACK_LAST: 'Last evolution cycle rolled back',
+          EMERGENCY_STOP: 'All autonomous operations halted',
+          READ_ONLY_MODE: 'System switched to read-only mode',
         };
 
-        const action = containmentActions[containmentType] || 'Unknown containment action';
+        const action =
+          containmentActions[containmentType] || 'Unknown containment action';
 
         return {
           ok: true,
@@ -463,13 +551,18 @@ export const transcendentResolvers = {
             intelligenceAmplification: 0, // Containment reduces capabilities
             capabilitiesEnhanced: [],
             quantumAdvantage: 0,
-            evolutionTriggered: false
-          }
+            evolutionTriggered: false,
+          },
         };
       } catch (error) {
         logger.error('EmergencyContainment error:', error);
-        throw error instanceof ApolloError ? error : new ApolloError('Failed to execute emergency containment', 'MUTATION_ERROR');
+        throw error instanceof ApolloError
+          ? error
+          : new ApolloError(
+              'Failed to execute emergency containment',
+              'MUTATION_ERROR',
+            );
       }
-    }
-  }
+    },
+  },
 };

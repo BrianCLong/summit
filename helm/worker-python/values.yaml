@@ -1,6 +1,6 @@
 image:
   repository: ghcr.io/BrianCLong/intelgraph/worker-python
-  tag: "dev"
+  tag: 'dev'
   pullPolicy: IfNotPresent
 
 replicas: 1
@@ -15,7 +15,7 @@ env:
   - name: VAULT_ADDR
     valueFrom: { secretKeyRef: { name: vault, key: addr } }
   - name: VAULT_K8S_ROLE
-    value: "worker"
+    value: 'worker'
   - name: REGION
     value: eu-west-1
 
@@ -24,11 +24,11 @@ keda:
   maxReplicaCount: 20
   pollingInterval: 10
   cooldownPeriod: 60
-  lagThreshold: "100"
+  lagThreshold: '100'
 
 kafka:
-  bootstrapServers: "PLAINTEXT://kafka:9092"
-  consumerGroup: "runner"
-  topic: "runbook.event"
-  offsetResetPolicy: "latest"
-  authRef: ""
+  bootstrapServers: 'PLAINTEXT://kafka:9092'
+  consumerGroup: 'runner'
+  topic: 'runbook.event'
+  offsetResetPolicy: 'latest'
+  authRef: ''

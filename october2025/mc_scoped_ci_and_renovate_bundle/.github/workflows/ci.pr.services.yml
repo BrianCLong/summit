@@ -1,9 +1,9 @@
 name: ci.pr.services
 on:
   pull_request:
-    branches: [ main, develop, release/** ]
+    branches: [main, develop, release/**]
   push:
-    branches: [ feature/**, chore/**, fix/** ]
+    branches: [feature/**, chore/**, fix/**]
 permissions:
   contents: read
 jobs:

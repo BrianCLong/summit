@@ -64,7 +64,9 @@ describe('SyntheticGenerators', () => {
       intervalMs: 1,
       random: () => 0,
     });
-    expect(events.every((event) => event.payload.isAnomaly === true)).toBe(true);
+    expect(events.every((event) => event.payload.isAnomaly === true)).toBe(
+      true,
+    );
     expect(events[0].payload.signal).toBe(10);
   });
 });

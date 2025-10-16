@@ -1,7 +1,15 @@
 import { listPools, currentPricing, pickCheapestEligible } from './pools.js';
-import { poolInfo, poolCpuUsd, poolGbUsd, poolEgressUsd } from '../../metrics/federationMetrics.js';
+import {
+  poolInfo,
+  poolCpuUsd,
+  poolGbUsd,
+  poolEgressUsd,
+} from '../../metrics/federationMetrics.js';
 
-export async function choosePool(est: { cpuSec?: number; gbSec?: number; egressGb?: number }, residency?: string) {
+export async function choosePool(
+  est: { cpuSec?: number; gbSec?: number; egressGb?: number },
+  residency?: string,
+) {
   const pools = await listPools();
   const prices = await currentPricing();
   for (const p of pools) poolInfo.labels(p.id, p.region).set(1);
@@ -13,4 +21,3 @@ export async function choosePool(est: { cpuSec?: number; gbSec?: number; egressG
   }
   return pickCheapestEligible(pools, prices, est, residency);
 }
-

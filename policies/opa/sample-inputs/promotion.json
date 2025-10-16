@@ -1,7 +1,14 @@
 {
   "mode": "shadow",
-  "artifact": {"digest": "sha256:deadbeef", "region": "eu-west-1", "kms_key_id": null},
-  "tenant": {"id": "acme", "allowed_regions": ["us-east-1","us-west-2"], "protected": true},
+  "artifact": {
+    "digest": "sha256:deadbeef",
+    "region": "eu-west-1",
+    "kms_key_id": null
+  },
+  "tenant": {
+    "id": "acme",
+    "allowed_regions": ["us-east-1", "us-west-2"],
+    "protected": true
+  },
   "dlp_hits": []
 }
-

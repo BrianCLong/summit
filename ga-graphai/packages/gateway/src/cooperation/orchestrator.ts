@@ -13,7 +13,10 @@ import { CrossEntropySwapCoordinator } from './crossEntropySwaps.js';
 import { ProofOfUsefulWorkbookCoordinator } from './proofOfUsefulWorkbook.js';
 import { SemanticBraidCoordinator } from './semanticBraid.js';
 
-function ensureResource(id: string, registry: CapabilityRegistry): ResourceAdapter {
+function ensureResource(
+  id: string,
+  registry: CapabilityRegistry,
+): ResourceAdapter {
   const resource = registry.get(id);
   if (!resource) {
     throw new Error(`Resource ${id} not registered`);
@@ -21,7 +24,10 @@ function ensureResource(id: string, registry: CapabilityRegistry): ResourceAdapt
   return resource;
 }
 
-function collectResources(ids: string[], registry: CapabilityRegistry): ResourceAdapter[] {
+function collectResources(
+  ids: string[],
+  registry: CapabilityRegistry,
+): ResourceAdapter[] {
   return ids.map((id) => ensureResource(id, registry));
 }
 
@@ -38,9 +44,15 @@ export class CooperationOrchestrator {
   private readonly workbook = new ProofOfUsefulWorkbookCoordinator();
   private readonly guard = new GuardedGenerator();
 
-  constructor(private readonly registry: CapabilityRegistry, private readonly ledger: ProvenanceLedger) {}
+  constructor(
+    private readonly registry: CapabilityRegistry,
+    private readonly ledger: ProvenanceLedger,
+  ) {}
 
-  async execute(task: TaskSpec, decision: RoutingDecision): Promise<ExecutionResult> {
+  async execute(
+    task: TaskSpec,
+    decision: RoutingDecision,
+  ): Promise<ExecutionResult> {
     const resources = collectResources(
       [...decision.primaryAssignments, ...decision.supportAssignments],
       this.registry,
@@ -70,7 +82,12 @@ export class CooperationOrchestrator {
         const primary = resources[0];
         const shadow = resources[1] ?? resources[0];
         const adjudicator = resources[2] ?? resources[0];
-        const result = await this.shadow.run(task, primary, shadow, adjudicator);
+        const result = await this.shadow.run(
+          task,
+          primary,
+          shadow,
+          adjudicator,
+        );
         artifact = result.artifact;
         break;
       }
@@ -78,7 +95,12 @@ export class CooperationOrchestrator {
         const proposer = resources[0];
         const challenger = resources[1] ?? resources[0];
         const repairer = resources[2] ?? resources[0];
-        const result = await this.challenges.run(task, proposer, challenger, repairer);
+        const result = await this.challenges.run(
+          task,
+          proposer,
+          challenger,
+          repairer,
+        );
         artifact = result.artifact;
         break;
       }
@@ -87,7 +109,13 @@ export class CooperationOrchestrator {
         const candidateB = resources[1] ?? resources[0];
         const criticA = resources[2] ?? candidateA;
         const criticB = resources[3] ?? candidateB;
-        const result = await this.swaps.adjudicate(task, candidateA, candidateB, criticA, criticB);
+        const result = await this.swaps.adjudicate(
+          task,
+          candidateA,
+          candidateB,
+          criticA,
+          criticB,
+        );
         artifact = result.artifact;
         break;
       }
@@ -114,9 +142,15 @@ export class CooperationOrchestrator {
         const aggregate = votes
           .sort((a, b) => b.weight - a.weight)
           .slice(0, 3)
-          .map((vote) => `(${vote.weight.toFixed(2)}) ${vote.resource.profile.id}: ${vote.content}`)
+          .map(
+            (vote) =>
+              `(${vote.weight.toFixed(2)}) ${vote.resource.profile.id}: ${vote.content}`,
+          )
           .join('\n');
-        artifact = this.guard.enforce('federated-deliberation', aggregate).artifact;
+        artifact = this.guard.enforce(
+          'federated-deliberation',
+          aggregate,
+        ).artifact;
         break;
       }
       case 'auction-of-experts':
@@ -131,7 +165,10 @@ export class CooperationOrchestrator {
           ),
         );
         const combined = outputs
-          .map((output, index) => `Contributor ${resources[index].profile.id}: ${output.content}`)
+          .map(
+            (output, index) =>
+              `Contributor ${resources[index].profile.id}: ${output.content}`,
+          )
           .join('\n');
         artifact = this.guard.enforce('auction-of-experts', combined).artifact;
         break;

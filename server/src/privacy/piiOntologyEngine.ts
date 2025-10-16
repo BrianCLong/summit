@@ -162,7 +162,7 @@ class PatternDetector {
       specialCharDensity: 0,
       uppercaseRatio: 0,
       length: 0,
-      contextScore: 0
+      contextScore: 0,
     },
     negative: {
       count: 0,
@@ -171,8 +171,8 @@ class PatternDetector {
       specialCharDensity: 0,
       uppercaseRatio: 0,
       length: 0,
-      contextScore: 0
-    }
+      contextScore: 0,
+    },
   };
 
   registerPattern(pattern: PatternDefinition): void {
@@ -196,20 +196,22 @@ class PatternDetector {
   analyze(record: DataRecord): PatternAnalysis {
     const features = this.extractFeatures(
       record.value,
-      `${record.context.field} ${record.context.description ?? ''}`
+      `${record.context.field} ${record.context.description ?? ''}`,
     );
 
     const matches = this.patterns
       .map((pattern) => ({
         pattern,
-        matched: new RegExp(pattern.regex.source, pattern.regex.flags).test(record.value)
+        matched: new RegExp(pattern.regex.source, pattern.regex.flags).test(
+          record.value,
+        ),
       }))
       .filter((result) => result.matched)
       .map((result) => ({
         patternId: result.pattern.id,
         categories: result.pattern.categories,
         confidence: Math.min(1, 0.6 + (result.pattern.confidenceBoost ?? 0)),
-        description: result.pattern.description
+        description: result.pattern.description,
       }));
 
     const probability = this.calculateProbability(features);
@@ -224,13 +226,16 @@ class PatternDetector {
     const weight = {
       digitDensity: positive.digitDensity - negative.digitDensity,
       alphaDensity: positive.alphaDensity - negative.alphaDensity,
-      specialCharDensity: positive.specialCharDensity - negative.specialCharDensity,
+      specialCharDensity:
+        positive.specialCharDensity - negative.specialCharDensity,
       uppercaseRatio: positive.uppercaseRatio - negative.uppercaseRatio,
       length: positive.length - negative.length,
-      contextScore: positive.contextScore - negative.contextScore
+      contextScore: positive.contextScore - negative.contextScore,
     };
 
-    const bias = Math.log((this.stats.positive.count + 1) / (this.stats.negative.count + 1));
+    const bias = Math.log(
+      (this.stats.positive.count + 1) / (this.stats.negative.count + 1),
+    );
 
     const score =
       bias +
@@ -253,7 +258,8 @@ class PatternDetector {
 
     const digitDensity = value.length === 0 ? 0 : digits / value.length;
     const alphaDensity = value.length === 0 ? 0 : letters / value.length;
-    const specialCharDensity = value.length === 0 ? 0 : specialChars / value.length;
+    const specialCharDensity =
+      value.length === 0 ? 0 : specialChars / value.length;
     const uppercaseRatio = letters === 0 ? 0 : uppercase / letters;
 
     const contextScore = this.calculateContextScore(context);
@@ -264,7 +270,7 @@ class PatternDetector {
       alphaDensity,
       specialCharDensity,
       uppercaseRatio,
-      contextScore
+      contextScore,
     };
   }
 
@@ -285,7 +291,7 @@ class PatternDetector {
       'address',
       'location',
       'auth',
-      'biometric'
+      'biometric',
     ];
 
     let score = 0;
@@ -307,7 +313,7 @@ class PatternDetector {
         alphaDensity: 0.1,
         specialCharDensity: 0.1,
         uppercaseRatio: 0.1,
-        contextScore: 0.1
+        contextScore: 0.1,
       };
     }
 
@@ -317,37 +323,63 @@ class PatternDetector {
       alphaDensity: stats.alphaDensity / stats.count,
       specialCharDensity: stats.specialCharDensity / stats.count,
       uppercaseRatio: stats.uppercaseRatio / stats.count,
-      contextScore: stats.contextScore / stats.count
+      contextScore: stats.contextScore / stats.count,
     };
   }
 }
 
 class ContextualClassifier {
   private readonly contextualCatalog: Record<PIICategory, string[]> = {
-    IDENTIFIER: ['identifier', 'ssn', 'passport', 'national id', 'nin', 'tax id'],
+    IDENTIFIER: [
+      'identifier',
+      'ssn',
+      'passport',
+      'national id',
+      'nin',
+      'tax id',
+    ],
     CONTACT: ['email', 'phone', 'contact', 'address', 'messaging'],
-    FINANCIAL: ['credit', 'card', 'bank', 'iban', 'account', 'routing', 'financial'],
-    HEALTH: ['medical', 'patient', 'diagnosis', 'treatment', 'hipaa', 'condition', 'health'],
+    FINANCIAL: [
+      'credit',
+      'card',
+      'bank',
+      'iban',
+      'account',
+      'routing',
+      'financial',
+    ],
+    HEALTH: [
+      'medical',
+      'patient',
+      'diagnosis',
+      'treatment',
+      'hipaa',
+      'condition',
+      'health',
+    ],
     LOCATION: ['address', 'geo', 'latitude', 'longitude', 'gps', 'location'],
     BIOMETRIC: ['fingerprint', 'iris', 'face', 'voiceprint', 'biometric'],
     DEMOGRAPHIC: ['age', 'gender', 'ethnicity', 'demographic', 'profile'],
-    AUTHENTICATION: ['password', 'token', 'otp', 'mfa', 'secret', 'credential']
+    AUTHENTICATION: ['password', 'token', 'otp', 'mfa', 'secret', 'credential'],
   };
 
-  classify(record: DataRecord, patternMatches: PatternMatch[]): {
+  classify(
+    record: DataRecord,
+    patternMatches: PatternMatch[],
+  ): {
     categories: Set<PIICategory>;
     contextualScore: number;
     tags: string[];
   } {
-    const context = `${record.context.field} ${record.context.description ?? ''}`.toLowerCase();
+    const context =
+      `${record.context.field} ${record.context.description ?? ''}`.toLowerCase();
     const categories = new Set<PIICategory>();
     const tags = new Set<string>();
     let score = 0;
 
-    for (const [category, keywords] of Object.entries(this.contextualCatalog) as [
-      PIICategory,
-      string[]
-    ][]) {
+    for (const [category, keywords] of Object.entries(
+      this.contextualCatalog,
+    ) as [PIICategory, string[]][]) {
       for (const keyword of keywords) {
         if (context.includes(keyword)) {
           categories.add(category);
@@ -374,7 +406,7 @@ class ContextualClassifier {
     return {
       categories,
       contextualScore: Math.min(1, score),
-      tags: Array.from(tags)
+      tags: Array.from(tags),
     };
   }
 }
@@ -386,7 +418,10 @@ interface RegulatoryCatalogEntry {
 }
 
 class RegulatoryMapper {
-  private readonly catalog: Record<RegulatoryFramework, RegulatoryCatalogEntry> = {
+  private readonly catalog: Record<
+    RegulatoryFramework,
+    RegulatoryCatalogEntry
+  > = {
     GDPR: {
       categories: [
         'IDENTIFIER',
@@ -396,14 +431,14 @@ class RegulatoryMapper {
         'LOCATION',
         'BIOMETRIC',
         'DEMOGRAPHIC',
-        'AUTHENTICATION'
+        'AUTHENTICATION',
       ],
       references: ['Article 6', 'Article 32', 'Article 33'],
       obligations: [
         'Document lawful basis for processing',
         'Apply data minimization and purpose limitation controls',
-        'Enable data subject access, rectification, and deletion rights'
-      ]
+        'Enable data subject access, rectification, and deletion rights',
+      ],
     },
     CCPA: {
       categories: [
@@ -413,14 +448,14 @@ class RegulatoryMapper {
         'HEALTH',
         'LOCATION',
         'DEMOGRAPHIC',
-        'AUTHENTICATION'
+        'AUTHENTICATION',
       ],
       references: ['1798.100', '1798.110', '1798.115'],
       obligations: [
         'Provide disclosure of collection and sharing purposes',
         'Maintain opt-out controls for data sale or sharing',
-        'Support consumer access, deletion, and correction requests'
-      ]
+        'Support consumer access, deletion, and correction requests',
+      ],
     },
     HIPAA: {
       categories: ['HEALTH', 'IDENTIFIER', 'CONTACT', 'LOCATION'],
@@ -428,9 +463,9 @@ class RegulatoryMapper {
       obligations: [
         'Apply administrative, physical, and technical safeguards',
         'Limit use and disclosure to minimum necessary',
-        'Maintain audit controls and breach notification readiness'
-      ]
-    }
+        'Maintain audit controls and breach notification readiness',
+      ],
+    },
   };
 
   mapCategories(categories: PIICategory[]): RegulatoryMapping[] {
@@ -439,10 +474,10 @@ class RegulatoryMapper {
 
     for (const [framework, entry] of Object.entries(this.catalog) as [
       RegulatoryFramework,
-      RegulatoryCatalogEntry
+      RegulatoryCatalogEntry,
     ][]) {
       const relevantCategories = entry.categories.filter((category) =>
-        uniqueCategories.has(category)
+        uniqueCategories.has(category),
       );
 
       if (relevantCategories.length > 0) {
@@ -450,7 +485,7 @@ class RegulatoryMapper {
           framework,
           references: entry.references,
           obligations: entry.obligations,
-          categories: relevantCategories
+          categories: relevantCategories,
         });
       }
     }
@@ -481,9 +516,11 @@ class DataLineageTracker {
       system: context.system,
       field: context.field,
       collection: context.collection,
-      path: context.lineage?.path ?? [context.system, context.field].filter(Boolean) as string[],
+      path:
+        context.lineage?.path ??
+        ([context.system, context.field].filter(Boolean) as string[]),
       transformations: context.lineage?.transformations ?? [],
-      accessControls: context.accessControls ?? []
+      accessControls: context.accessControls ?? [],
     };
 
     this.lineage.set(entity.id, record);
@@ -502,16 +539,19 @@ class MetadataEnricher {
     entity: PIIEntity,
     patternAnalysis: PatternAnalysis,
     contextTags: string[],
-    context: DataContext
+    context: DataContext,
   ): EnrichedMetadata {
     const baseConfidence = Math.max(
       entity.confidence,
-      Math.max(...entity.patternMatches.map((match) => match.confidence), 0)
+      Math.max(...entity.patternMatches.map((match) => match.confidence), 0),
     );
 
     const regulatoryWeight = entity.regulatoryMappings.length * 0.1;
     const contextualWeight = Math.min(0.3, entity.contextualScore);
-    const riskScore = Math.min(1, baseConfidence + regulatoryWeight + contextualWeight);
+    const riskScore = Math.min(
+      1,
+      baseConfidence + regulatoryWeight + contextualWeight,
+    );
 
     const highRiskThreshold = this.config?.highRiskThreshold ?? 0.6;
     const criticalRiskThreshold = this.config?.criticalRiskThreshold ?? 0.85;
@@ -528,12 +568,14 @@ class MetadataEnricher {
     const recommendedControls = new Set<string>([
       'Encrypt data at rest and in transit',
       'Apply role-based access controls',
-      'Monitor access logs for anomalies'
+      'Monitor access logs for anomalies',
     ]);
 
     if (entity.categories.includes('HEALTH')) {
       recommendedControls.add('Enable HIPAA-aligned audit trails');
-      recommendedControls.add('Implement restricted clinical data environments');
+      recommendedControls.add(
+        'Implement restricted clinical data environments',
+      );
     }
 
     if (entity.categories.includes('FINANCIAL')) {
@@ -552,9 +594,11 @@ class MetadataEnricher {
       system: context.system,
       field: context.field,
       collection: context.collection,
-      path: context.lineage?.path ?? [context.system, context.field].filter(Boolean) as string[],
+      path:
+        context.lineage?.path ??
+        ([context.system, context.field].filter(Boolean) as string[]),
       transformations: context.lineage?.transformations ?? [],
-      accessControls: context.accessControls ?? []
+      accessControls: context.accessControls ?? [],
     };
 
     return {
@@ -565,8 +609,8 @@ class MetadataEnricher {
       stewardship: {
         owner: context.owner,
         retentionPolicy: context.retentionPolicy,
-        tags: Array.from(new Set([...contextTags, ...(context.tags ?? [])]))
-      }
+        tags: Array.from(new Set([...contextTags, ...(context.tags ?? [])])),
+      },
     };
   }
 }
@@ -574,7 +618,10 @@ class MetadataEnricher {
 class ComplianceValidator {
   constructor(private readonly mapper: RegulatoryMapper) {}
 
-  validate(entities: PIIEntity[], frameworks?: RegulatoryFramework[]): ComplianceValidationResult[] {
+  validate(
+    entities: PIIEntity[],
+    frameworks?: RegulatoryFramework[],
+  ): ComplianceValidationResult[] {
     const frameworksToCheck = frameworks ?? this.mapper.getFrameworks();
     const results: ComplianceValidationResult[] = [];
     const presentCategories = new Set<PIICategory>();
@@ -584,13 +631,19 @@ class ComplianceValidator {
     }
 
     for (const framework of frameworksToCheck) {
-      const requiredCategories = new Set(this.mapper.getRequiredCategories(framework));
+      const requiredCategories = new Set(
+        this.mapper.getRequiredCategories(framework),
+      );
       const coveredCategories = new Set<PIICategory>();
 
       for (const entity of entities) {
-        const mapping = entity.regulatoryMappings.find((item) => item.framework === framework);
+        const mapping = entity.regulatoryMappings.find(
+          (item) => item.framework === framework,
+        );
         if (mapping) {
-          mapping.categories.forEach((category) => coveredCategories.add(category));
+          mapping.categories.forEach((category) =>
+            coveredCategories.add(category),
+          );
         }
       }
 
@@ -605,7 +658,7 @@ class ComplianceValidator {
         description:
           missingCategories.length === 0
             ? `All required categories for ${framework} are covered.`
-            : `Missing coverage for ${missingCategories.join(', ')} under ${framework}.`
+            : `Missing coverage for ${missingCategories.join(', ')} under ${framework}.`,
       });
     }
 
@@ -626,7 +679,7 @@ export class PiiOntologyEngine {
     this.config = {
       detectionThreshold: config.detectionThreshold ?? 0.55,
       contextualThreshold: config.contextualThreshold ?? 0.35,
-      enrichment: config.enrichment ?? {}
+      enrichment: config.enrichment ?? {},
     } as Required<PiiOntologyConfig>;
     this.enricher = new MetadataEnricher(this.config.enrichment);
   }
@@ -649,26 +702,30 @@ export class PiiOntologyEngine {
       LOCATION: 0,
       BIOMETRIC: 0,
       DEMOGRAPHIC: 0,
-      AUTHENTICATION: 0
+      AUTHENTICATION: 0,
     };
     const frameworkCounts: Record<RegulatoryFramework, number> = {
       GDPR: 0,
       CCPA: 0,
-      HIPAA: 0
+      HIPAA: 0,
     };
 
     records.forEach((record, index) => {
       const patternAnalysis = this.detector.analyze(record);
-      const contextual = this.classifier.classify(record, patternAnalysis.matches);
+      const contextual = this.classifier.classify(
+        record,
+        patternAnalysis.matches,
+      );
 
       const allCategories = new Set<PIICategory>([...contextual.categories]);
       patternAnalysis.matches.forEach((match) =>
-        match.categories.forEach((category) => allCategories.add(category))
+        match.categories.forEach((category) => allCategories.add(category)),
       );
 
       if (
         allCategories.size === 0 &&
-        patternAnalysis.probability < (this.config.detectionThreshold ?? 0.55) &&
+        patternAnalysis.probability <
+          (this.config.detectionThreshold ?? 0.55) &&
         contextual.contextualScore < (this.config.contextualThreshold ?? 0.35)
       ) {
         return;
@@ -685,11 +742,16 @@ export class PiiOntologyEngine {
         sensitivity: 'LOW',
         patternMatches: patternAnalysis.matches,
         regulatoryMappings: [],
-        metadata: undefined as unknown as EnrichedMetadata
+        metadata: undefined as unknown as EnrichedMetadata,
       };
 
       entity.regulatoryMappings = this.mapper.mapCategories(entity.categories);
-      const metadata = this.enricher.enrich(entity, patternAnalysis, contextual.tags, record.context);
+      const metadata = this.enricher.enrich(
+        entity,
+        patternAnalysis,
+        contextual.tags,
+        record.context,
+      );
       entity.metadata = metadata;
       entity.sensitivity = metadata.sensitivity;
 
@@ -710,21 +772,23 @@ export class PiiOntologyEngine {
       (acc, framework) => {
         acc[framework] = {
           entities: entities.filter((entity) =>
-            entity.regulatoryMappings.some((mapping) => mapping.framework === framework)
+            entity.regulatoryMappings.some(
+              (mapping) => mapping.framework === framework,
+            ),
           ).length,
           categories: Array.from(
             new Set(
               entities
                 .flatMap((entity) => entity.regulatoryMappings)
                 .filter((mapping) => mapping.framework === framework)
-                .flatMap((mapping) => mapping.categories)
-            )
+                .flatMap((mapping) => mapping.categories),
+            ),
           ),
-          obligations: this.mapper.getObligations(framework)
+          obligations: this.mapper.getObligations(framework),
         };
         return acc;
       },
-      {} as ClassificationReport['regulatorySummary']
+      {} as ClassificationReport['regulatorySummary'],
     );
 
     const validations = this.validator.validate(entities);
@@ -735,10 +799,10 @@ export class PiiOntologyEngine {
         totalRecords: records.length,
         piiRecords: entities.length,
         categories: categoryCounts,
-        frameworks: frameworkCounts
+        frameworks: frameworkCounts,
       },
       regulatorySummary,
-      validations
+      validations,
     };
   }
 
@@ -748,12 +812,16 @@ export class PiiOntologyEngine {
 
   validateAgainstFrameworks(
     entities: PIIEntity[],
-    frameworks: RegulatoryFramework[]
+    frameworks: RegulatoryFramework[],
   ): ComplianceValidationResult[] {
     return this.validator.validate(entities, frameworks);
   }
 
-  private createStableId(recordId: string, index: number, value: string): string {
+  private createStableId(
+    recordId: string,
+    index: number,
+    value: string,
+  ): string {
     return crypto
       .createHash('sha256')
       .update(`${recordId}-${index}-${value}`)

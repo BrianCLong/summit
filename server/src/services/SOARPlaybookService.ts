@@ -46,7 +46,10 @@ export class SOARPlaybookService {
   /**
    * Execute phishing containment playbook
    */
-  async executePhishingContainment(alertId: string, evidence: any): Promise<PlaybookExecution> {
+  async executePhishingContainment(
+    alertId: string,
+    evidence: any,
+  ): Promise<PlaybookExecution> {
     const playbook = await this.createPlaybookExecution(
       'phishing-containment-v1.1',
       alertId,
@@ -56,7 +59,7 @@ export class SOARPlaybookService {
         recipientEmails: evidence.recipientEmails,
         subject: evidence.subject,
         attachmentHashes: evidence.attachmentHashes || [],
-      }
+      },
     );
 
     try {
@@ -77,22 +80,30 @@ export class SOARPlaybookService {
       });
 
       // Step 3: Check for additional messages from sender
-      await this.executeStep(playbook.id, 'search-similar-messages', async () => {
-        return await this.searchSimilarMessages({
-          senderEmail: evidence.senderEmail,
-          timeWindow: '24h',
-        });
-      });
+      await this.executeStep(
+        playbook.id,
+        'search-similar-messages',
+        async () => {
+          return await this.searchSimilarMessages({
+            senderEmail: evidence.senderEmail,
+            timeWindow: '24h',
+          });
+        },
+      );
 
       // Step 4: Create incident ticket with linkback
-      await this.executeStep(playbook.id, 'create-incident-ticket', async () => {
-        return await this.createIncidentTicket({
-          title: `Phishing Campaign - ${evidence.senderEmail}`,
-          priority: 'high',
-          alertId,
-          description: `Automated containment executed for phishing email from ${evidence.senderEmail}`,
-        });
-      });
+      await this.executeStep(
+        playbook.id,
+        'create-incident-ticket',
+        async () => {
+          return await this.createIncidentTicket({
+            title: `Phishing Campaign - ${evidence.senderEmail}`,
+            priority: 'high',
+            alertId,
+            description: `Automated containment executed for phishing email from ${evidence.senderEmail}`,
+          });
+        },
+      );
 
       // Step 5: Generate containment report
       await this.executeStep(playbook.id, 'generate-report', async () => {
@@ -101,10 +112,14 @@ export class SOARPlaybookService {
 
       await this.completePlaybookExecution(playbook.id, 'completed');
       return playbook;
-
     } catch (error) {
-      this.logger.error('Phishing containment playbook failed', { error, alertId });
-      await this.completePlaybookExecution(playbook.id, 'failed', { error: error.message });
+      this.logger.error('Phishing containment playbook failed', {
+        error,
+        alertId,
+      });
+      await this.completePlaybookExecution(playbook.id, 'failed', {
+        error: error.message,
+      });
       throw error;
     }
   }
@@ -112,7 +127,11 @@ export class SOARPlaybookService {
   /**
    * Execute forced MFA reset playbook
    */
-  async executeForcedMFAReset(alertId: string, evidence: any, approverUserId: string): Promise<PlaybookExecution> {
+  async executeForcedMFAReset(
+    alertId: string,
+    evidence: any,
+    approverUserId: string,
+  ): Promise<PlaybookExecution> {
     const playbook = await this.createPlaybookExecution(
       'forced-mfa-reset-v1.1',
       alertId,
@@ -121,7 +140,7 @@ export class SOARPlaybookService {
         userEmail: evidence.userEmail,
         reason: evidence.reason || 'Security incident detected',
         approverUserId,
-      }
+      },
     );
 
     try {
@@ -135,7 +154,7 @@ export class SOARPlaybookService {
           target: evidence.userEmail,
           reason: evidence.reason,
           riskLevel: 'high',
-        }
+        },
       );
 
       if (approvalResult.status !== 'approved') {
@@ -180,10 +199,11 @@ export class SOARPlaybookService {
 
       await this.completePlaybookExecution(playbook.id, 'completed');
       return playbook;
-
     } catch (error) {
       this.logger.error('Forced MFA reset playbook failed', { error, alertId });
-      await this.completePlaybookExecution(playbook.id, 'failed', { error: error.message });
+      await this.completePlaybookExecution(playbook.id, 'failed', {
+        error: error.message,
+      });
       throw error;
     }
   }
@@ -191,7 +211,10 @@ export class SOARPlaybookService {
   /**
    * Execute URL block at proxy playbook
    */
-  async executeURLBlock(alertId: string, evidence: any): Promise<PlaybookExecution> {
+  async executeURLBlock(
+    alertId: string,
+    evidence: any,
+  ): Promise<PlaybookExecution> {
     const playbook = await this.createPlaybookExecution(
       'url-block-proxy-v1.1',
       alertId,
@@ -199,7 +222,7 @@ export class SOARPlaybookService {
         urls: evidence.urls,
         category: evidence.category || 'malicious',
         reason: evidence.reason || 'Threat detected',
-      }
+      },
     );
 
     try {
@@ -214,25 +237,29 @@ export class SOARPlaybookService {
       });
 
       // Step 2: Check current active connections
-      await this.executeStep(playbook.id, 'check-active-connections', async () => {
-        return await this.checkActiveConnections({
-          urls: evidence.urls,
-        });
-      });
+      await this.executeStep(
+        playbook.id,
+        'check-active-connections',
+        async () => {
+          return await this.checkActiveConnections({
+            urls: evidence.urls,
+          });
+        },
+      );
 
       // Step 3: Terminate active connections if found
       await this.executeStep(playbook.id, 'terminate-connections', async () => {
         const activeConnections = await this.checkActiveConnections({
           urls: evidence.urls,
         });
-        
+
         if (activeConnections.length > 0) {
           return await this.terminateConnections({
             connections: activeConnections,
             reason: 'Malicious URL blocked',
           });
         }
-        
+
         return { terminated: 0, message: 'No active connections found' };
       });
 
@@ -258,10 +285,11 @@ export class SOARPlaybookService {
 
       await this.completePlaybookExecution(playbook.id, 'completed');
       return playbook;
-
     } catch (error) {
       this.logger.error('URL block playbook failed', { error, alertId });
-      await this.completePlaybookExecution(playbook.id, 'failed', { error: error.message });
+      await this.completePlaybookExecution(playbook.id, 'failed', {
+        error: error.message,
+      });
       throw error;
     }
   }
@@ -269,7 +297,9 @@ export class SOARPlaybookService {
   /**
    * Get playbook execution status
    */
-  async getPlaybookExecution(executionId: string): Promise<PlaybookExecution | null> {
+  async getPlaybookExecution(
+    executionId: string,
+  ): Promise<PlaybookExecution | null> {
     try {
       const execution = await this.prisma.playbookExecution.findUnique({
         where: { id: executionId },
@@ -281,7 +311,10 @@ export class SOARPlaybookService {
 
       return execution as PlaybookExecution | null;
     } catch (error) {
-      this.logger.error('Failed to get playbook execution', { error, executionId });
+      this.logger.error('Failed to get playbook execution', {
+        error,
+        executionId,
+      });
       return null;
     }
   }
@@ -289,7 +322,9 @@ export class SOARPlaybookService {
   /**
    * List playbook executions for an alert
    */
-  async getPlaybookExecutionsForAlert(alertId: string): Promise<PlaybookExecution[]> {
+  async getPlaybookExecutionsForAlert(
+    alertId: string,
+  ): Promise<PlaybookExecution[]> {
     try {
       const executions = await this.prisma.playbookExecution.findMany({
         where: { alertId },
@@ -302,7 +337,10 @@ export class SOARPlaybookService {
 
       return executions as PlaybookExecution[];
     } catch (error) {
-      this.logger.error('Failed to get playbook executions for alert', { error, alertId });
+      this.logger.error('Failed to get playbook executions for alert', {
+        error,
+        alertId,
+      });
       return [];
     }
   }
@@ -312,7 +350,7 @@ export class SOARPlaybookService {
   private async createPlaybookExecution(
     playbookId: string,
     alertId: string,
-    metadata: any
+    metadata: any,
   ): Promise<PlaybookExecution> {
     const execution = await this.prisma.playbookExecution.create({
       data: {
@@ -339,7 +377,7 @@ export class SOARPlaybookService {
   private async executeStep(
     executionId: string,
     stepName: string,
-    action: () => Promise<any>
+    action: () => Promise<any>,
   ): Promise<any> {
     const step = await this.prisma.playbookStep.create({
       data: {
@@ -353,7 +391,7 @@ export class SOARPlaybookService {
 
     try {
       const result = await action();
-      
+
       await this.prisma.playbookStep.update({
         where: { id: step.id },
         data: {
@@ -395,7 +433,7 @@ export class SOARPlaybookService {
     executionId: string,
     stepName: string,
     approverUserId: string,
-    approvalData: any
+    approvalData: any,
   ): Promise<PlaybookApproval> {
     const step = await this.prisma.playbookStep.create({
       data: {
@@ -417,14 +455,20 @@ export class SOARPlaybookService {
 
     // In a real implementation, you would send a notification to the approver
     // and wait for their response. For now, we'll simulate auto-approval for demo
-    
+
     // Simulate approval process (in reality this would be async)
-    const approvalResult = await this.simulateApproval(approval.id, approverUserId);
-    
+    const approvalResult = await this.simulateApproval(
+      approval.id,
+      approverUserId,
+    );
+
     return approvalResult as PlaybookApproval;
   }
 
-  private async simulateApproval(approvalId: string, approverUserId: string): Promise<any> {
+  private async simulateApproval(
+    approvalId: string,
+    approverUserId: string,
+  ): Promise<any> {
     // This is a simulation - in reality, approval would be handled by UI/API
     const approved = await this.prisma.playbookApproval.update({
       where: { id: approvalId },
@@ -441,7 +485,7 @@ export class SOARPlaybookService {
   private async completePlaybookExecution(
     executionId: string,
     status: 'completed' | 'failed' | 'cancelled',
-    results?: any
+    results?: any,
   ): Promise<void> {
     await this.prisma.playbookExecution.update({
       where: { id: executionId },
@@ -461,12 +505,20 @@ export class SOARPlaybookService {
   // Mock implementation of external integrations
   private async quarantineEmail(params: any): Promise<any> {
     // Mock implementation - would integrate with email security system
-    return { messageId: params.messageId, quarantined: true, timestamp: new Date() };
+    return {
+      messageId: params.messageId,
+      quarantined: true,
+      timestamp: new Date(),
+    };
   }
 
   private async blockEmailSender(params: any): Promise<any> {
     // Mock implementation - would integrate with email gateway
-    return { senderEmail: params.senderEmail, blocked: true, timestamp: new Date() };
+    return {
+      senderEmail: params.senderEmail,
+      blocked: true,
+      timestamp: new Date(),
+    };
   }
 
   private async searchSimilarMessages(params: any): Promise<any> {
@@ -476,7 +528,11 @@ export class SOARPlaybookService {
 
   private async createIncidentTicket(params: any): Promise<any> {
     // Mock implementation - would integrate with ITSM system
-    return { ticketId: 'INC-' + Date.now(), title: params.title, created: true };
+    return {
+      ticketId: 'INC-' + Date.now(),
+      title: params.title,
+      created: true,
+    };
   }
 
   private async generateContainmentReport(executionId: string): Promise<any> {
@@ -491,12 +547,20 @@ export class SOARPlaybookService {
 
   private async sendUserNotification(params: any): Promise<any> {
     // Mock implementation - would send email notification
-    return { userEmail: params.userEmail, notificationSent: true, timestamp: new Date() };
+    return {
+      userEmail: params.userEmail,
+      notificationSent: true,
+      timestamp: new Date(),
+    };
   }
 
   private async createAuditLog(params: any): Promise<any> {
     // Mock implementation - would create audit log entry
-    return { auditId: 'AUD-' + Date.now(), action: params.action, timestamp: new Date() };
+    return {
+      auditId: 'AUD-' + Date.now(),
+      action: params.action,
+      timestamp: new Date(),
+    };
   }
 
   private async addToProxyBlocklist(params: any): Promise<any> {
@@ -516,11 +580,19 @@ export class SOARPlaybookService {
 
   private async setupURLMonitoring(params: any): Promise<any> {
     // Mock implementation - would setup monitoring alerts
-    return { urls: params.urls, monitoringEnabled: true, timestamp: new Date() };
+    return {
+      urls: params.urls,
+      monitoringEnabled: true,
+      timestamp: new Date(),
+    };
   }
 
   private async scheduleRollback(params: any): Promise<any> {
     // Mock implementation - would schedule automated rollback
-    return { urls: params.urls, rollbackScheduled: true, rollbackAt: new Date(Date.now() + params.rollbackAfter * 60 * 60 * 1000) };
+    return {
+      urls: params.urls,
+      rollbackScheduled: true,
+      rollbackAt: new Date(Date.now() + params.rollbackAfter * 60 * 60 * 1000),
+    };
   }
 }

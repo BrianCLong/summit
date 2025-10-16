@@ -3,15 +3,19 @@
 > Paste this body into the PR. Update sections as needed.
 
 ## Rationale
+
 - _why now_
 
 ## Scope
+
 - _files/services_
 
 ## Changes
+
 - _exact commands/diffs_
 
 ## Acceptance
+
 - _checks and evidence_
 
 ---

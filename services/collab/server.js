@@ -13,14 +13,23 @@ const processed = new Set();
 
 // Database pool
 const pool = new Pool({
-  connectionString: process.env.PG_URL || 'postgresql://maestro:maestro_dev_password@localhost:5432/maestro_dev',
+  connectionString:
+    process.env.PG_URL ||
+    'postgresql://maestro:maestro_dev_password@localhost:5432/maestro_dev',
 });
 
-async function audit(tenant_id, actor_id, action, target_resource, target_id, details) {
+async function audit(
+  tenant_id,
+  actor_id,
+  action,
+  target_resource,
+  target_id,
+  details,
+) {
   try {
     await pool.query(
       'INSERT INTO maestro.audit_events(tenant_id, actor_id, action, target_resource, target_id, details) VALUES($1, $2, $3, $4, $5, $6)',
-      [tenant_id, actor_id, action, target_resource, target_id, details]
+      [tenant_id, actor_id, action, target_resource, target_id, details],
     );
   } catch (err) {
     console.error('Error writing to audit log:', err);
@@ -33,12 +42,16 @@ function sanitize(str = '') {
 
 const server = http.createServer(async (req, res) => {
   const parsed = url.parse(req.url, true);
-  if (req.method === 'GET' && parsed.pathname && parsed.pathname.startsWith('/collab/history/')) {
+  if (
+    req.method === 'GET' &&
+    parsed.pathname &&
+    parsed.pathname.startsWith('/collab/history/')
+  ) {
     const entityId = parsed.pathname.split('/').pop();
     try {
       const result = await pool.query(
         'SELECT * FROM maestro.case_space_comments WHERE case_space_id = $1 ORDER BY created_at ASC',
-        [entityId]
+        [entityId],
       );
       res.writeHead(200, { 'Content-Type': 'application/json' });
       res.end(JSON.stringify(result.rows));
@@ -63,7 +76,14 @@ wss.on('connection', (ws) => {
       processed.add(msg.eventId);
 
       // Audit every message type
-      audit(msg.tenantId, msg.userId, msg.type, msg.entityId, msg.commentId || null, msg);
+      audit(
+        msg.tenantId,
+        msg.userId,
+        msg.type,
+        msg.entityId,
+        msg.commentId || null,
+        msg,
+      );
 
       switch (msg.type) {
         case 'presence.join': {
@@ -91,7 +111,7 @@ wss.on('connection', (ws) => {
           try {
             await pool.query(
               'INSERT INTO maestro.case_space_comments(id, case_space_id, author_id, comment) VALUES($1, $2, $3, $4)',
-              [msg.commentId, msg.entityId, msg.userId, sanitize(msg.text)]
+              [msg.commentId, msg.entityId, msg.userId, sanitize(msg.text)],
             );
             broadcast(msg);
           } catch (err) {
@@ -123,7 +143,14 @@ wss.on('connection', (ws) => {
           tenantId: sess.tenantId,
         };
         broadcast(leaveMsg);
-        audit(sess.tenantId, sess.userId, 'presence.leave', sess.entityId, null, leaveMsg);
+        audit(
+          sess.tenantId,
+          sess.userId,
+          'presence.leave',
+          sess.entityId,
+          null,
+          leaveMsg,
+        );
       }
     }
   });

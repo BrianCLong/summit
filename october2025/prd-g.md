@@ -17,7 +17,7 @@ The current state of Graphika’s platform centers on advanced social network an
 
 Graphika's product emphasizes delivering actionable intelligence and proactive threat detection through a combination of patented technology and world-class analytical expertise.
 
-***
+---
 
 For MVP-2 and General Availability (GA), to exceed Graphika’s features measurably, a PRD (Product Requirements Document) should include:
 
@@ -31,22 +31,21 @@ For MVP-2 and General Availability (GA), to exceed Graphika’s features measura
 - Scalable multi-tenant architecture with robust security and compliance for enterprise needs.
 - Collaborative investigation tools with annotation, sharing, and audit trails.
 
-
 ### GA Objectives
 
 - Complete product feature parity and enhancements across all Graphika feature tiers with measurable improvements in:
-    - Intelligence feed comprehensiveness and delivery speed
-    - Network and influencer mapping granularity
-    - User-customized analytics workflows and API extensibility
-    - Crisis response automation and playbook-driven recommendations
-    - Multi-industry vertical solutions with domain-specific intelligence models
-    - Comprehensive data export, integration, and ecosystem connectivity
+  - Intelligence feed comprehensiveness and delivery speed
+  - Network and influencer mapping granularity
+  - User-customized analytics workflows and API extensibility
+  - Crisis response automation and playbook-driven recommendations
+  - Multi-industry vertical solutions with domain-specific intelligence models
+  - Comprehensive data export, integration, and ecosystem connectivity
 - AI explainability and model transparency to empower trust in automated insights
 - Advanced user and role management, incorporating organization-wide governance
 - Global scale deployment with near-zero downtime and disaster recovery guarantees
 - Full compliance with data privacy, regional regulations, and industry certifications
 
-***
+---
 
 If agreeable, the next step is to create a structured PRD document with these elements detailed in sections such as:
 
@@ -131,4 +130,3 @@ Would you like to proceed with generating a detailed PRD draft following this ou
 [^33]: https://graphika.com/feeds
 
 [^34]: https://www.builtinnyc.com/company/graphika/office-culture
-

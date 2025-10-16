@@ -13,8 +13,13 @@ export function getDriver() {
   return driver;
 }
 
-export async function runCypher<T = any>(cypher: string, params: Record<string, any> = {}) {
-  const session = getDriver().session({ defaultAccessMode: neo4j.session.WRITE });
+export async function runCypher<T = any>(
+  cypher: string,
+  params: Record<string, any> = {},
+) {
+  const session = getDriver().session({
+    defaultAccessMode: neo4j.session.WRITE,
+  });
   try {
     const res = await session.run(cypher, params);
     return res.records.map((r) => r.toObject()) as T[];

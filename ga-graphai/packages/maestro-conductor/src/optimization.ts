@@ -1,7 +1,7 @@
 import type {
   AssetPerformanceSnapshot,
   OptimizationRecommendation,
-  OptimizationSample
+  OptimizationSample,
 } from './types';
 
 class RollingSeries {
@@ -31,7 +31,9 @@ class RollingSeries {
     if (this.values.length === 0) {
       return undefined;
     }
-    return this.values.reduce((sum, value) => sum + value, 0) / this.values.length;
+    return (
+      this.values.reduce((sum, value) => sum + value, 0) / this.values.length
+    );
   }
 
   get min(): number | undefined {
@@ -66,7 +68,7 @@ function createSeries(window: number): MetricSeries {
     throughput: new RollingSeries(window),
     errorRate: new RollingSeries(window),
     saturation: new RollingSeries(window),
-    computeUtilization: new RollingSeries(window)
+    computeUtilization: new RollingSeries(window),
   };
 }
 
@@ -81,7 +83,7 @@ const DEFAULT_OPTIONS: Required<CostLatencyOptimizerOptions> = {
   windowSize: 30,
   latencyThresholdMs: 400,
   errorRateThreshold: 0.05,
-  saturationThreshold: 0.75
+  saturationThreshold: 0.75,
 };
 
 export class CostLatencyOptimizer {
@@ -94,7 +96,8 @@ export class CostLatencyOptimizer {
   }
 
   update(sample: OptimizationSample): void {
-    const series = this.metrics.get(sample.assetId) ?? createSeries(this.options.windowSize);
+    const series =
+      this.metrics.get(sample.assetId) ?? createSeries(this.options.windowSize);
     if (sample.latencyMs !== undefined) {
       series.latency.push(sample.latencyMs);
     }
@@ -137,15 +140,17 @@ export class CostLatencyOptimizer {
         series.throughput.length,
         series.errorRate.length,
         series.saturation.length,
-        series.computeUtilization.length
-      )
+        series.computeUtilization.length,
+      ),
     };
   }
 
   listSnapshots(): AssetPerformanceSnapshot[] {
     return [...this.metrics.entries()]
       .map(([assetId]) => this.getSnapshot(assetId))
-      .filter((snapshot): snapshot is AssetPerformanceSnapshot => Boolean(snapshot))
+      .filter((snapshot): snapshot is AssetPerformanceSnapshot =>
+        Boolean(snapshot),
+      )
       .sort((a, b) => a.assetId.localeCompare(b.assetId));
   }
 
@@ -169,7 +174,7 @@ export class CostLatencyOptimizer {
         actions.push('scale-out');
         actions.push('enable-adaptive-routing');
         justification.push(
-          `latency spiked to ${latencyLatest.toFixed(1)}ms vs avg ${latencyMean.toFixed(1)}ms`
+          `latency spiked to ${latencyLatest.toFixed(1)}ms vs avg ${latencyMean.toFixed(1)}ms`,
         );
       }
 
@@ -177,7 +182,9 @@ export class CostLatencyOptimizer {
       if (errorRate > this.options.errorRateThreshold) {
         actions.push('deploy-fallback');
         actions.push('activate-runbook');
-        justification.push(`error rate ${Math.round(errorRate * 100)}% above threshold`);
+        justification.push(
+          `error rate ${Math.round(errorRate * 100)}% above threshold`,
+        );
       }
 
       const saturation = series.saturation.latest ?? 0;
@@ -185,7 +192,7 @@ export class CostLatencyOptimizer {
       if (saturation > this.options.saturationThreshold && utilization > 0.75) {
         actions.push('rebalance-workload');
         justification.push(
-          `saturation ${Math.round(saturation * 100)}% indicates capacity pressure`
+          `saturation ${Math.round(saturation * 100)}% indicates capacity pressure`,
         );
       }
 
@@ -204,12 +211,15 @@ export class CostLatencyOptimizer {
         continue;
       }
 
-      const confidence = Math.min(1, Math.max(series.latency.length, series.cost.length) / 10);
+      const confidence = Math.min(
+        1,
+        Math.max(series.latency.length, series.cost.length) / 10,
+      );
       recommendations.push({
         assetId,
         actions: [...new Set(actions)],
         justification: justification.join('; '),
-        confidence: Number(confidence.toFixed(2))
+        confidence: Number(confidence.toFixed(2)),
       });
     }
     return recommendations;

@@ -8,7 +8,7 @@ import {
   JiraTicket,
   JiraWebhookEvent,
   PerfTraceTicketInput,
-  WorkflowSyncResult
+  WorkflowSyncResult,
 } from './types.js';
 
 interface CreateIssueResponse {
@@ -28,24 +28,30 @@ export class JiraIntegrationService {
   constructor(
     private readonly config: JiraIntegrationConfig,
     private readonly client: JiraApiClient,
-    private readonly auditLogger: AuditLogger
+    private readonly auditLogger: AuditLogger,
   ) {}
 
-  private buildCustomFields(input: PerfTraceTicketInput): Record<string, unknown> {
+  private buildCustomFields(
+    input: PerfTraceTicketInput,
+  ): Record<string, unknown> {
     const fields: Record<string, unknown> = {};
-    Object.entries(this.config.customFieldMap).forEach(([logicalField, jiraField]) => {
-      const value = (input as Record<string, unknown>)[logicalField];
-      if (value === undefined) {
-        return;
-      }
+    Object.entries(this.config.customFieldMap).forEach(
+      ([logicalField, jiraField]) => {
+        const value = (input as Record<string, unknown>)[logicalField];
+        if (value === undefined) {
+          return;
+        }
 
-      if (logicalField === 'owners') {
-        fields[jiraField] = (input.owners ?? []).map((email) => ({ accountId: email }));
-        return;
-      }
+        if (logicalField === 'owners') {
+          fields[jiraField] = (input.owners ?? []).map((email) => ({
+            accountId: email,
+          }));
+          return;
+        }
 
-      fields[jiraField] = value;
-    });
+        fields[jiraField] = value;
+      },
+    );
 
     const priorityEntry = this.config.priorityMapping[input.severity];
     fields.priority = { id: priorityEntry.priorityId };
@@ -64,7 +70,9 @@ export class JiraIntegrationService {
     return fields;
   }
 
-  async createPerfTraceTicket(input: PerfTraceTicketInput): Promise<JiraTicket> {
+  async createPerfTraceTicket(
+    input: PerfTraceTicketInput,
+  ): Promise<JiraTicket> {
     const fields = this.buildCustomFields(input);
     const body = JSON.stringify({
       fields: {
@@ -72,20 +80,23 @@ export class JiraIntegrationService {
         issuetype: { id: this.config.issueTypeId },
         summary: input.summary,
         description: input.description,
-        ...fields
-      }
+        ...fields,
+      },
     });
 
-    const ticket = await this.client.request<CreateIssueResponse>('/rest/api/3/issue', {
-      method: 'POST',
-      body
-    });
+    const ticket = await this.client.request<CreateIssueResponse>(
+      '/rest/api/3/issue',
+      {
+        method: 'POST',
+        body,
+      },
+    );
 
     this.auditLogger.record(
       createAuditEntry('create_ticket', 'success', {
         entityId: ticket.key,
-        payload: { severity: input.severity, environment: input.environment }
-      })
+        payload: { severity: input.severity, environment: input.environment },
+      }),
     );
 
     if (input.attachments && input.attachments.length > 0) {
@@ -99,10 +110,15 @@ export class JiraIntegrationService {
     return ticket;
   }
 
-  async addAttachments(issueId: string, attachments: readonly AttachmentPayload[]): Promise<void> {
+  async addAttachments(
+    issueId: string,
+    attachments: readonly AttachmentPayload[],
+  ): Promise<void> {
     const formData = new FormData();
     attachments.forEach((attachment) => {
-      const blob = new Blob([attachment.data], { type: attachment.contentType });
+      const blob = new Blob([attachment.data], {
+        type: attachment.contentType,
+      });
       formData.append('file', blob, attachment.fileName);
     });
 
@@ -110,21 +126,28 @@ export class JiraIntegrationService {
       method: 'POST',
       body: formData as unknown as BodyInit,
       headers: {
-        'X-Atlassian-Token': 'no-check'
-      }
+        'X-Atlassian-Token': 'no-check',
+      },
     });
 
     this.auditLogger.record(
       createAuditEntry('add_attachments', 'success', {
         entityId: issueId,
-        payload: { count: attachments.length }
-      })
+        payload: { count: attachments.length },
+      }),
     );
   }
 
-  async transitionTicket(issueId: string, targetState: string): Promise<WorkflowSyncResult> {
-    const available = await this.client.request<TransitionResponse>(`/rest/api/3/issue/${issueId}/transitions`);
-    const transition = available.transitions.find((item) => item.name === targetState);
+  async transitionTicket(
+    issueId: string,
+    targetState: string,
+  ): Promise<WorkflowSyncResult> {
+    const available = await this.client.request<TransitionResponse>(
+      `/rest/api/3/issue/${issueId}/transitions`,
+    );
+    const transition = available.transitions.find(
+      (item) => item.name === targetState,
+    );
 
     if (!transition) {
       throw new JiraApiError(`Transition ${targetState} not available`, 404);
@@ -132,20 +155,23 @@ export class JiraIntegrationService {
 
     await this.client.request(`/rest/api/3/issue/${issueId}/transitions`, {
       method: 'POST',
-      body: JSON.stringify({ transition: { id: transition.id } })
+      body: JSON.stringify({ transition: { id: transition.id } }),
     });
 
     this.auditLogger.record(
       createAuditEntry('transition_ticket', 'success', {
         entityId: issueId,
-        payload: { targetState }
-      })
+        payload: { targetState },
+      }),
     );
 
     return { issueId, transitioned: true, targetState };
   }
 
-  async syncWorkflow(issueId: string, currentStatus: string): Promise<WorkflowSyncResult> {
+  async syncWorkflow(
+    issueId: string,
+    currentStatus: string,
+  ): Promise<WorkflowSyncResult> {
     const targetState = this.config.workflowTransitions[currentStatus];
     if (!targetState) {
       return { issueId, transitioned: false };
@@ -154,31 +180,37 @@ export class JiraIntegrationService {
     return this.transitionTicket(issueId, targetState);
   }
 
-  async linkIssues(sourceIssueKey: string, relatedIssueKeys: readonly string[], linkType = 'Relates'): Promise<void> {
+  async linkIssues(
+    sourceIssueKey: string,
+    relatedIssueKeys: readonly string[],
+    linkType = 'Relates',
+  ): Promise<void> {
     const payloads: JiraLinkRequest[] = relatedIssueKeys.map((relatedKey) => ({
       type: { name: linkType },
       inwardIssue: { key: sourceIssueKey },
-      outwardIssue: { key: relatedKey }
+      outwardIssue: { key: relatedKey },
     }));
 
     await Promise.all(
       payloads.map((payload) =>
         this.client.request('/rest/api/3/issueLink', {
           method: 'POST',
-          body: JSON.stringify(payload)
-        })
-      )
+          body: JSON.stringify(payload),
+        }),
+      ),
     );
 
     this.auditLogger.record(
       createAuditEntry('link_issues', 'success', {
         entityId: sourceIssueKey,
-        payload: { related: relatedIssueKeys }
-      })
+        payload: { related: relatedIssueKeys },
+      }),
     );
   }
 
-  async bulkCreatePerfTraceTickets(inputs: readonly PerfTraceTicketInput[]): Promise<readonly JiraTicket[]> {
+  async bulkCreatePerfTraceTickets(
+    inputs: readonly PerfTraceTicketInput[],
+  ): Promise<readonly JiraTicket[]> {
     const results: JiraTicket[] = [];
     for (const input of inputs) {
       try {
@@ -188,8 +220,8 @@ export class JiraIntegrationService {
         this.auditLogger.record(
           createAuditEntry('create_ticket', 'error', {
             message: error instanceof Error ? error.message : 'Unknown error',
-            payload: { summary: input.summary }
-          })
+            payload: { summary: input.summary },
+          }),
         );
       }
     }
@@ -202,7 +234,9 @@ export class JiraIntegrationService {
       return undefined;
     }
 
-    const statusChange = event.changelog.items.find((item) => item.field === 'status');
+    const statusChange = event.changelog.items.find(
+      (item) => item.field === 'status',
+    );
     if (!statusChange || !statusChange.toString) {
       return undefined;
     }
@@ -212,7 +246,7 @@ export class JiraIntegrationService {
     const result: WorkflowSyncResult = {
       issueId: event.issue.id,
       transitioned: Boolean(mappedTarget),
-      targetState: mappedTarget
+      targetState: mappedTarget,
     };
 
     this.auditLogger.record(
@@ -221,9 +255,9 @@ export class JiraIntegrationService {
         payload: {
           previous: statusChange.fromString,
           current: statusChange.toString,
-          mappedTarget
-        }
-      })
+          mappedTarget,
+        },
+      }),
     );
 
     return result;

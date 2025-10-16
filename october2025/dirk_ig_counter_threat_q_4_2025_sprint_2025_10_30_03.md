@@ -1,12 +1,14 @@
 [MODE: WHITE+BLUE]
 
 # DIRK IG — Counter‑Threat & Intelligence Director (Next Sprint)
-**Workstream:** Counter‑Threat, Intel, Provable Compliance, Detections  • **Cadence:** Q4‑2025 (Oct–Dec)  
-**Sprint Window:** **2025‑10‑30 → 2025‑11‑13**  • **Owner:** Directorate K++ (DIRK IG)  • **Ordinal:** **03**
+
+**Workstream:** Counter‑Threat, Intel, Provable Compliance, Detections • **Cadence:** Q4‑2025 (Oct–Dec)  
+**Sprint Window:** **2025‑10‑30 → 2025‑11‑13** • **Owner:** Directorate K++ (DIRK IG) • **Ordinal:** **03**
 
 ---
 
 ## A) Executive Summary (Decisions & Next Steps)
+
 - **Productionize & Scale:** graduate strict release‑gate and Detection Pack v2 from canary to **full production** with **blast‑radius controls** and **auto‑rollback**.
 - **Intel Ingestion → Action:** stand up a minimal **Threat Intel Ingestion & Enrichment** path (STIX/TAXII → normalized indicators → policy/detection updates) with proof‑carrying provenance.
 - **Privacy‑by‑Design controls:** add **Retention/Lawful Basis** OPA policies and audit fields to the Logging Contract; ship **Privacy Incident** playbook.
@@ -15,10 +17,11 @@
 ---
 
 ## B) Findings & Rationale (carry‑forward → scale)
-- Strict gate works in canary; need **global rollout guardrails** and override analytics.  
-- Detections expanded, but **intel‑driven updates** and **suppression expiry hygiene** are manual.  
-- Logging Contract lacks **retention, lawful basis, and PII hinting** fields required for audit and minimization.  
-- Dashboards exist; SLOs require **burn‑rate alerts** and **error‑budget** tracking.  
+
+- Strict gate works in canary; need **global rollout guardrails** and override analytics.
+- Detections expanded, but **intel‑driven updates** and **suppression expiry hygiene** are manual.
+- Logging Contract lacks **retention, lawful basis, and PII hinting** fields required for audit and minimization.
+- Dashboards exist; SLOs require **burn‑rate alerts** and **error‑budget** tracking.
 - No codified **tabletop/chaos** to verify durability.
 
 **So‑What:** We reduce residual risk by making security features reliable at scale, legally auditable, and responsive to external intel with minimal operator toil.
@@ -26,6 +29,7 @@
 ---
 
 ## C) Goals & Deliverables
+
 - **G1. Prod Rollout Guardrails**: staged expansion (25%→50%→100%), automated rollback, override analytics.
 - **G2. Intel Ingestion (v0)**: TAXII pull, indicator normalization, enrichment (whois/asn/geo), push to detections/suppressions with provenance.
 - **G3. Privacy Controls**: OPA **Retention & Lawful Basis** policies + enforcement hooks; Logging Contract v1.1.
@@ -35,7 +39,9 @@
 ---
 
 ## D) Sprint Plan (2025‑10‑30 → 2025‑11‑13)
+
 **Milestones**
+
 - **11‑01:** Rollout controller + auto‑rollback merged; gate at 25% of services.
 - **11‑04:** Intel pipeline v0 (pull → normalize → enrich → publish) in staging; provenance logged.
 - **11‑07:** Logging Contract v1.1 + Privacy policies wired; SLO burn alerts in staging.
@@ -47,7 +53,9 @@
 ---
 
 ## E) Artifacts (ready to commit)
+
 ### 1) Rollout Controller (pseudo‑config)
+
 ```yaml
 rollout:
   policy: release-gate
@@ -64,7 +72,9 @@ rollout:
 ```
 
 ### 2) Intel Ingestion v0
+
 **Pipeline sketch**
+
 ```mermaid
 flowchart LR
   TAXII[TAXII Feed] --> PULL[Puller]
@@ -75,6 +85,7 @@ flowchart LR
 ```
 
 **Normalizer (YAML mapping) — STIX → IOC**
+
 ```yaml
 map:
   ipv4-addr: ip
@@ -88,19 +99,21 @@ metadata:
 ```
 
 **Enrichment output (example)**
+
 ```json
 {
-  "indicator": {"type":"ip","value":"198.51.100.42"},
+  "indicator": { "type": "ip", "value": "198.51.100.42" },
   "asn": 64512,
   "org": "ExampleNet",
-  "geo": {"country":"US"},
+  "geo": { "country": "US" },
   "risk_score": 78,
-  "source":"feed-x",
-  "evidence_uri":"s3://intel/evidence/198.51.100.42.json"
+  "source": "feed-x",
+  "evidence_uri": "s3://intel/evidence/198.51.100.42.json"
 }
 ```
 
 **Publication rules (pseudo)**
+
 ```yaml
 publish:
   to:
@@ -110,7 +123,9 @@ publish:
 ```
 
 ### 3) Privacy OPA Policies
+
 **Retention (dataset‑level)**
+
 ```rego
 package policy.privacy.retention
 
@@ -136,6 +151,7 @@ allow_access {
 ```
 
 **Lawful Basis (request‑time)**
+
 ```rego
 package policy.privacy.basis
 
@@ -155,18 +171,33 @@ allow {
 ```
 
 ### 4) Logging Contract v1.1 (delta)
+
 ```json
 {
   "properties": {
-    "retention_days": {"type":"integer","minimum":0},
-    "lawful_basis": {"type":"string","enum":["contract","consent","legitimate_interest","legal_obligation"],"nullable":true},
-    "pii_hint": {"type":"string","enum":["none","low","medium","high"],"default":"none"}
+    "retention_days": { "type": "integer", "minimum": 0 },
+    "lawful_basis": {
+      "type": "string",
+      "enum": [
+        "contract",
+        "consent",
+        "legitimate_interest",
+        "legal_obligation"
+      ],
+      "nullable": true
+    },
+    "pii_hint": {
+      "type": "string",
+      "enum": ["none", "low", "medium", "high"],
+      "default": "none"
+    }
   },
   "required_delta": ["retention_days"]
 }
 ```
 
 ### 5) SLO Burn Alerts (PromQL examples)
+
 ```promql
 # Release gate availability (error budget 99.9%)
 1 - (sum(rate(gate_errors_total[5m])) / sum(rate(gate_requests_total[5m])))
@@ -179,7 +210,9 @@ max(
 ```
 
 ### 6) Chaos & Tabletop
+
 **Chaos (scripts outline)**
+
 ```bash
 # Simulate evidence store outage
 aws s3 put-bucket-policy --bucket $EVIDENCE --policy file://deny-policy.json
@@ -188,10 +221,13 @@ for i in {1..500}; do curl -sS $ALERT_ENDPOINT -d '{"level":"high","event":"test
 ```
 
 **Tabletop Pack (checklist)**
+
 - Scenario injects; roles (IM, SecDuty, Release); decision logs; timing; comms templates; success criteria; after‑action template.
 
 ### 7) Detections (additions)
+
 **J. Intel‑Matched Traffic (IntelGraph)**
+
 ```yaml
 title: Outbound to Known Malicious IP
 id: j7b6c5d4-e3f2-4a1b-9c8d-7e6f5a4b3c2d
@@ -205,6 +241,7 @@ tags: [threat_intel, attack.command_and_control]
 ```
 
 **K. Privacy Basis Missing**
+
 ```yaml
 title: Access Without Lawful Basis
 id: k1l2m3n4-o5p6-q7r8-s9t0-u1v2w3x4y5z
@@ -218,24 +255,28 @@ tags: [privacy, governance]
 ```
 
 ### 8) Runbooks (delta)
+
 - **RB‑06: Evidence Store Outage** — switch gate to advisory; cache evidence locally; open Sev‑1; restore bucket policy; backfill bundles; post‑mortem.
 - **RB‑07: Privacy Incident** — contain (token revoke), identify data class & lawful basis, notify DPO, preserve evidence, regulatory timer start, customer comms template.
 
 ### 9) Governance & Compliance (delta)
-- **NIST 800‑53:** AU‑11 (retention), AC‑6, SI‑4, IR‑4, CP‑10.  
-- **ISO 27001:** A.5.14, A.5.34, A.8.2, A.12.1.  
+
+- **NIST 800‑53:** AU‑11 (retention), AC‑6, SI‑4, IR‑4, CP‑10.
+- **ISO 27001:** A.5.14, A.5.34, A.8.2, A.12.1.
 - **SOC 2:** CC3.2, CC6.7, CC7.2, CC7.3, CC8.1.
 
 ---
 
 ## F) SLAs, SLOs & Metrics
-- **Gate availability:** ≥ 99.9%; **Alert pipeline p95 latency:** ≤ 30s; **Intel ingestion to publish:** ≤ 15m.  
-- **FP rate (post‑suppression):** ≤ 4% by 11‑10; **Break‑glass uses:** zero normal weeks; 100% with ticket + retrospective.  
+
+- **Gate availability:** ≥ 99.9%; **Alert pipeline p95 latency:** ≤ 30s; **Intel ingestion to publish:** ≤ 15m.
+- **FP rate (post‑suppression):** ≤ 4% by 11‑10; **Break‑glass uses:** zero normal weeks; 100% with ticket + retrospective.
 - **Privacy logging coverage:** 100% events with `retention_days` and `lawful_basis` fields.
 
 ---
 
 ## G) Proof‑Carrying Analysis (PCA)
+
 **Assumptions:** TAXII feed access approved; Prometheus/Grafana available; S3 or equivalent evidence store; IAM to simulate outages.  
 **Evidence:** rollout metrics, OPA test outputs, intel provenance logs, SLO alert firings, tabletop minutes, chaos experiment results.  
 **Caveats:** Intel quality varies; use scoring + TLP handling. Chaos must respect change windows.  
@@ -244,6 +285,7 @@ tags: [privacy, governance]
 ---
 
 ## H) Definition of Done — V3
+
 - Gate fully rolled out with guardrails + automated rollback.
 - Intel ingestion v0 live; indicators feeding detections with provenance.
 - Privacy OPA + logging v1.1 enforced; privacy runbook live.
@@ -252,6 +294,7 @@ tags: [privacy, governance]
 ---
 
 ## I) Delivery Checklist
+
 - [ ] Rollout controller merged; auto‑rollback verified
 - [ ] Intel pipeline v0 running; provenance recorded
 - [ ] Logging Contract v1.1 fields emitted in services
@@ -262,5 +305,4 @@ tags: [privacy, governance]
 
 ---
 
-*Prepared by DIRK IG (Directorate K++). Auditable, production‑ready scale‑up for Q4 cadence.*
-
+_Prepared by DIRK IG (Directorate K++). Auditable, production‑ready scale‑up for Q4 cadence._

@@ -46,7 +46,9 @@ test('graphRagAnswer validates JSON schema', async () => {
         answer: 'John Doe works at Acme Corp.',
         confidence: 0.9,
         citations: { entityIds: ['ent1'] },
-        why_paths: [{ from: 'ent1', to: 'ent2', relId: 'rel1', type: 'WORKS_AT' }],
+        why_paths: [
+          { from: 'ent1', to: 'ent2', relId: 'rel1', type: 'WORKS_AT' },
+        ],
       }),
     ),
   };

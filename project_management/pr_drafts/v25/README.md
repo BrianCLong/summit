@@ -7,6 +7,7 @@ This folder is a scaffold for the next wave of PR drafts. Copy the v24 approach:
 - Publish via `scripts/pr-drafts/publish-prs.sh` or your own flow
 
 Quick start
+
 ```bash
 # Open empty drafts for editing (create your own PR-*.md files first)
 bash scripts/pr-drafts/open-drafts.sh project_management/pr_drafts/v25

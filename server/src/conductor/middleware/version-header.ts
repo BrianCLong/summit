@@ -6,7 +6,11 @@ import { randomUUID } from 'crypto';
 /**
  * Middleware to add Conductor API version headers and trace IDs
  */
-export function addConductorHeaders(req: Request, res: Response, next: NextFunction) {
+export function addConductorHeaders(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) {
   // Add version header to all Conductor API responses
   res.setHeader('X-Conductor-API-Version', 'v1');
 

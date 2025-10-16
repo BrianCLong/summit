@@ -1,6 +1,6 @@
 /**
  * SIEM Integration Middleware
- * 
+ *
  * Express middleware that automatically sends security events to SIEM systems
  * based on request patterns, authentication events, and security violations.
  */
@@ -40,13 +40,15 @@ const defaultOptions: SIEMMiddlewareOptions = {
   skipPaths: ['/health', '/metrics', '/favicon.ico'],
   skipMethods: ['OPTIONS'],
   sensitiveHeaders: ['authorization', 'cookie', 'x-api-key'],
-  maxPayloadSize: 1024 * 10 // 10KB
+  maxPayloadSize: 1024 * 10, // 10KB
 };
 
 /**
  * Create SIEM middleware with specified options
  */
-export function createSIEMMiddleware(options: SIEMMiddlewareOptions = {}): (req: Request, res: Response, next: NextFunction) => void {
+export function createSIEMMiddleware(
+  options: SIEMMiddlewareOptions = {},
+): (req: Request, res: Response, next: NextFunction) => void {
   const config = { ...defaultOptions, ...options };
 
   return (req: SIEMRequest, res: Response, next: NextFunction): void => {
@@ -57,7 +59,7 @@ export function createSIEMMiddleware(options: SIEMMiddlewareOptions = {}): (req:
       }
 
       // Skip paths and methods
-      if (config.skipPaths?.some(path => req.path.startsWith(path))) {
+      if (config.skipPaths?.some((path) => req.path.startsWith(path))) {
         return next();
       }
 
@@ -69,7 +71,7 @@ export function createSIEMMiddleware(options: SIEMMiddlewareOptions = {}): (req:
       req.siem = {
         startTime: Date.now(),
         events: [],
-        skipLogging: false
+        skipLogging: false,
       };
 
       // Log request start if enabled
@@ -85,7 +87,7 @@ export function createSIEMMiddleware(options: SIEMMiddlewareOptions = {}): (req:
 
       // Override res.end to capture response
       const originalEnd = res.end;
-      res.end = function(chunk?: any, encoding?: any) {
+      res.end = function (chunk?: any, encoding?: any) {
         try {
           // Process response
           processResponse(req, res, config);
@@ -93,7 +95,7 @@ export function createSIEMMiddleware(options: SIEMMiddlewareOptions = {}): (req:
           logger.error('SIEM middleware response processing error', {
             component: 'SIEMMiddleware',
             error: error.message,
-            path: req.path
+            path: req.path,
           });
         }
 
@@ -101,13 +103,12 @@ export function createSIEMMiddleware(options: SIEMMiddlewareOptions = {}): (req:
       };
 
       next();
-
     } catch (error) {
       logger.error('SIEM middleware error', {
         component: 'SIEMMiddleware',
         error: error.message,
         path: req.path,
-        method: req.method
+        method: req.method,
       });
       next();
     }
@@ -117,21 +118,26 @@ export function createSIEMMiddleware(options: SIEMMiddlewareOptions = {}): (req:
 /**
  * Create authentication event middleware
  */
-export function siemAuthMiddleware(options: { logSuccess?: boolean; logFailure?: boolean } = {}) {
+export function siemAuthMiddleware(
+  options: { logSuccess?: boolean; logFailure?: boolean } = {},
+) {
   const config = { logSuccess: true, logFailure: true, ...options };
 
   return (req: SIEMRequest, res: Response, next: NextFunction): void => {
     const originalJson = res.json;
-    
-    res.json = function(body: any) {
+
+    res.json = function (body: any) {
       try {
         // Detect authentication events
         if (isAuthenticationEndpoint(req.path)) {
           const isSuccess = res.statusCode >= 200 && res.statusCode < 300;
-          
-          if ((isSuccess && config.logSuccess) || (!isSuccess && config.logFailure)) {
+
+          if (
+            (isSuccess && config.logSuccess) ||
+            (!isSuccess && config.logFailure)
+          ) {
             const event = createAuthenticationEvent(req, res, isSuccess);
-            
+
             if (req.siem) {
               req.siem.events.push(event);
             } else {
@@ -143,7 +149,7 @@ export function siemAuthMiddleware(options: { logSuccess?: boolean; logFailure?:
       } catch (error) {
         logger.error('SIEM auth middleware error', {
           component: 'SIEMMiddleware',
-          error: error.message
+          error: error.message,
         });
       }
 
@@ -162,7 +168,7 @@ export function siemPrivilegedMiddleware() {
     // Check if this is a privileged operation
     if (isPrivilegedOperation(req)) {
       const event = createPrivilegedOperationEvent(req);
-      
+
       if (req.siem) {
         req.siem.events.push(event);
       } else {
@@ -181,7 +187,7 @@ export function siemDataAccessMiddleware() {
   return (req: SIEMRequest, res: Response, next: NextFunction): void => {
     if (isDataAccessOperation(req)) {
       const event = createDataAccessEvent(req);
-      
+
       if (req.siem) {
         req.siem.events.push(event);
       } else {
@@ -196,7 +202,11 @@ export function siemDataAccessMiddleware() {
 /**
  * Process response and send SIEM events
  */
-function processResponse(req: SIEMRequest, res: Response, config: SIEMMiddlewareOptions): void {
+function processResponse(
+  req: SIEMRequest,
+  res: Response,
+  config: SIEMMiddlewareOptions,
+): void {
   if (!req.siem || req.siem.skipLogging) return;
 
   const duration = Date.now() - req.siem.startTime;
@@ -205,7 +215,7 @@ function processResponse(req: SIEMRequest, res: Response, config: SIEMMiddleware
   if (config.logAllRequests) {
     const event = createRequestEvent(req, 'request_completed', 'low', {
       statusCode: res.statusCode,
-      duration
+      duration,
     });
     req.siem.events.push(event);
   }
@@ -215,7 +225,7 @@ function processResponse(req: SIEMRequest, res: Response, config: SIEMMiddleware
     const severity = res.statusCode >= 500 ? 'high' : 'medium';
     const event = createRequestEvent(req, 'request_error', severity, {
       statusCode: res.statusCode,
-      duration
+      duration,
     });
     req.siem.events.push(event);
   }
@@ -225,21 +235,20 @@ function processResponse(req: SIEMRequest, res: Response, config: SIEMMiddleware
   if (duration > slowThreshold) {
     const event = createRequestEvent(req, 'slow_request', 'medium', {
       statusCode: res.statusCode,
-      duration
+      duration,
     });
     req.siem.events.push(event);
   }
 
   // Send all events to SIEM
   if (req.siem.events.length > 0) {
-    siemService.sendEvents(req.siem.events)
-      .catch(error => {
-        logger.error('Failed to send SIEM events', {
-          component: 'SIEMMiddleware',
-          error: error.message,
-          eventCount: req.siem?.events.length
-        });
+    siemService.sendEvents(req.siem.events).catch((error) => {
+      logger.error('Failed to send SIEM events', {
+        component: 'SIEMMiddleware',
+        error: error.message,
+        eventCount: req.siem?.events.length,
       });
+    });
   }
 }
 
@@ -250,25 +259,25 @@ function checkSuspiciousActivity(req: SIEMRequest): void {
   const suspiciousPatterns = [
     // SQL injection patterns
     /'.*(\bunion\b|\bselect\b|\bdrop\b|\bdelete\b|\binsert\b)/i,
-    
+
     // XSS patterns
     /<script[\s\S]*?>[\s\S]*?<\/script>/gi,
-    
+
     // Path traversal
     /\.\.\/|\.\.\\|%2e%2e%2f|%2e%2e%5c/i,
-    
+
     // Command injection
     /[;&|`$(){}[\]]/,
-    
+
     // Unusual user agents
-    /curl|wget|python|scanner|bot/i
+    /curl|wget|python|scanner|bot/i,
   ];
 
   const checkContent = [
     req.path,
     req.query ? JSON.stringify(req.query) : '',
     req.body ? JSON.stringify(req.body).substring(0, 1000) : '', // Limit body size
-    req.get('User-Agent') || ''
+    req.get('User-Agent') || '',
   ].join(' ');
 
   for (const pattern of suspiciousPatterns) {
@@ -284,13 +293,13 @@ function checkSuspiciousActivity(req: SIEMRequest): void {
           path: req.path,
           method: req.method,
           userAgent: req.get('User-Agent'),
-          matched_content: checkContent.substring(0, 200)
+          matched_content: checkContent.substring(0, 200),
         },
         userId: req.user?.id,
         tenantId: req.user?.tenantId,
         ipAddress: getClientIP(req),
         userAgent: req.get('User-Agent'),
-        tags: ['suspicious', 'waf', 'security']
+        tags: ['suspicious', 'waf', 'security'],
       };
 
       if (req.siem) {
@@ -315,12 +324,14 @@ function checkRequestAnomalies(req: SIEMRequest): void {
 
   // Unusually large headers
   const headerSize = JSON.stringify(req.headers).length;
-  if (headerSize > 8192) { // 8KB
+  if (headerSize > 8192) {
+    // 8KB
     anomalies.push('large_headers');
   }
 
   // Too many parameters
-  const paramCount = Object.keys(req.query || {}).length + Object.keys(req.body || {}).length;
+  const paramCount =
+    Object.keys(req.query || {}).length + Object.keys(req.body || {}).length;
   if (paramCount > 100) {
     anomalies.push('excessive_parameters');
   }
@@ -348,13 +359,13 @@ function checkRequestAnomalies(req: SIEMRequest): void {
         path: req.path,
         method: req.method,
         headerSize,
-        paramCount
+        paramCount,
       },
       userId: req.user?.id,
       tenantId: req.user?.tenantId,
       ipAddress: getClientIP(req),
       userAgent: req.get('User-Agent'),
-      tags: ['anomaly', 'security']
+      tags: ['anomaly', 'security'],
     };
 
     if (req.siem) {
@@ -367,10 +378,10 @@ function checkRequestAnomalies(req: SIEMRequest): void {
  * Create generic request event
  */
 function createRequestEvent(
-  req: SIEMRequest, 
-  eventType: string, 
+  req: SIEMRequest,
+  eventType: string,
   severity: 'low' | 'medium' | 'high' | 'critical',
-  additional: Record<string, any> = {}
+  additional: Record<string, any> = {},
 ): SIEMEvent {
   return {
     timestamp: new Date(),
@@ -384,20 +395,24 @@ function createRequestEvent(
       query: sanitizeObject(req.query),
       headers: sanitizeHeaders(req.headers),
       body: sanitizeBody(req.body),
-      ...additional
+      ...additional,
     },
     userId: req.user?.id,
     tenantId: req.user?.tenantId,
     ipAddress: getClientIP(req),
     userAgent: req.get('User-Agent'),
-    tags: ['api', 'request']
+    tags: ['api', 'request'],
   };
 }
 
 /**
  * Create authentication event
  */
-function createAuthenticationEvent(req: SIEMRequest, res: Response, success: boolean): SIEMEvent {
+function createAuthenticationEvent(
+  req: SIEMRequest,
+  res: Response,
+  success: boolean,
+): SIEMEvent {
   return {
     timestamp: new Date(),
     eventType: success ? 'authentication_success' : 'authentication_failed',
@@ -409,13 +424,13 @@ function createAuthenticationEvent(req: SIEMRequest, res: Response, success: boo
       path: req.path,
       statusCode: res.statusCode,
       email: req.body?.email,
-      provider: req.body?.provider || 'local'
+      provider: req.body?.provider || 'local',
     },
     userId: success ? req.user?.id : undefined,
     tenantId: req.user?.tenantId,
     ipAddress: getClientIP(req),
     userAgent: req.get('User-Agent'),
-    tags: ['authentication', success ? 'success' : 'failure']
+    tags: ['authentication', success ? 'success' : 'failure'],
   };
 }
 
@@ -433,13 +448,13 @@ function createPrivilegedOperationEvent(req: SIEMRequest): SIEMEvent {
       method: req.method,
       path: req.path,
       userRole: req.user?.role,
-      requiredPermissions: getRequiredPermissions(req.path)
+      requiredPermissions: getRequiredPermissions(req.path),
     },
     userId: req.user?.id,
     tenantId: req.user?.tenantId,
     ipAddress: getClientIP(req),
     userAgent: req.get('User-Agent'),
-    tags: ['privilege', 'admin', 'security']
+    tags: ['privilege', 'admin', 'security'],
   };
 }
 
@@ -457,13 +472,13 @@ function createDataAccessEvent(req: SIEMRequest): SIEMEvent {
       method: req.method,
       path: req.path,
       dataType: getDataType(req.path),
-      query: sanitizeObject(req.query)
+      query: sanitizeObject(req.query),
     },
     userId: req.user?.id,
     tenantId: req.user?.tenantId,
     ipAddress: getClientIP(req),
     userAgent: req.get('User-Agent'),
-    tags: ['data', 'access']
+    tags: ['data', 'access'],
   };
 }
 
@@ -471,18 +486,22 @@ function createDataAccessEvent(req: SIEMRequest): SIEMEvent {
  * Helper functions
  */
 function getClientIP(req: Request): string {
-  return (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
-         req.headers['x-real-ip'] as string ||
-         req.connection.remoteAddress ||
-         req.socket.remoteAddress ||
-         '127.0.0.1';
+  return (
+    (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
+    (req.headers['x-real-ip'] as string) ||
+    req.connection.remoteAddress ||
+    req.socket.remoteAddress ||
+    '127.0.0.1'
+  );
 }
 
 function isAuthenticationEndpoint(path: string): boolean {
-  return path.includes('/auth/') || 
-         path.includes('/login') || 
-         path.includes('/logout') ||
-         path.includes('/token');
+  return (
+    path.includes('/auth/') ||
+    path.includes('/login') ||
+    path.includes('/logout') ||
+    path.includes('/token')
+  );
 }
 
 function isPrivilegedOperation(req: SIEMRequest): boolean {
@@ -493,12 +512,14 @@ function isPrivilegedOperation(req: SIEMRequest): boolean {
     '/api/tenants/',
     '/api/system/',
     '/api/compliance/',
-    '/api/dlp/'
+    '/api/dlp/',
   ];
 
-  return privilegedPaths.some(path => req.path.startsWith(path)) ||
-         req.user?.role === 'admin' ||
-         req.method === 'DELETE';
+  return (
+    privilegedPaths.some((path) => req.path.startsWith(path)) ||
+    req.user?.role === 'admin' ||
+    req.method === 'DELETE'
+  );
 }
 
 function isDataAccessOperation(req: SIEMRequest): boolean {
@@ -507,16 +528,21 @@ function isDataAccessOperation(req: SIEMRequest): boolean {
     '/api/entities/',
     '/api/relationships/',
     '/api/investigations/',
-    '/graphql'
+    '/graphql',
   ];
 
-  return dataEndpoints.some(endpoint => req.path.startsWith(endpoint));
+  return dataEndpoints.some((endpoint) => req.path.startsWith(endpoint));
 }
 
 function sanitizeHeaders(headers: any): Record<string, string> {
   const sanitized: Record<string, string> = {};
-  const sensitiveHeaders = ['authorization', 'cookie', 'x-api-key', 'x-auth-token'];
-  
+  const sensitiveHeaders = [
+    'authorization',
+    'cookie',
+    'x-api-key',
+    'x-auth-token',
+  ];
+
   for (const [key, value] of Object.entries(headers)) {
     if (sensitiveHeaders.includes(key.toLowerCase())) {
       sanitized[key] = '[REDACTED]';
@@ -524,18 +550,20 @@ function sanitizeHeaders(headers: any): Record<string, string> {
       sanitized[key] = String(value).substring(0, 200);
     }
   }
-  
+
   return sanitized;
 }
 
 function sanitizeObject(obj: any): any {
   if (!obj || typeof obj !== 'object') return obj;
-  
+
   const sanitized: any = {};
   const sensitiveKeys = ['password', 'token', 'secret', 'key', 'auth'];
-  
+
   for (const [key, value] of Object.entries(obj)) {
-    if (sensitiveKeys.some(sensitive => key.toLowerCase().includes(sensitive))) {
+    if (
+      sensitiveKeys.some((sensitive) => key.toLowerCase().includes(sensitive))
+    ) {
       sanitized[key] = '[REDACTED]';
     } else if (typeof value === 'string' && value.length > 200) {
       sanitized[key] = value.substring(0, 200) + '...';
@@ -543,18 +571,18 @@ function sanitizeObject(obj: any): any {
       sanitized[key] = value;
     }
   }
-  
+
   return sanitized;
 }
 
 function sanitizeBody(body: any): any {
   if (!body) return null;
-  
+
   const bodyStr = JSON.stringify(body);
   if (bodyStr.length > 1024) {
     return bodyStr.substring(0, 1024) + '... [TRUNCATED]';
   }
-  
+
   return sanitizeObject(body);
 }
 
@@ -566,7 +594,7 @@ function getRequiredPermissions(path: string): string[] {
     '/api/rbac/': ['rbac:admin'],
     '/api/system/': ['system:admin'],
     '/api/compliance/': ['compliance:admin'],
-    '/api/dlp/': ['dlp:admin']
+    '/api/dlp/': ['dlp:admin'],
   };
 
   for (const [pathPrefix, permissions] of Object.entries(permissionMap)) {
@@ -593,14 +621,14 @@ export const siemSecurityMiddleware = createSIEMMiddleware({
   logFailedAuth: true,
   logPrivilegedOperations: true,
   logSuspiciousActivity: true,
-  logDataAccess: false
+  logDataAccess: false,
 });
 export const siemFullLoggingMiddleware = createSIEMMiddleware({
   logAllRequests: true,
   logFailedAuth: true,
   logPrivilegedOperations: true,
   logDataAccess: true,
-  logSuspiciousActivity: true
+  logSuspiciousActivity: true,
 });
 
 export default createSIEMMiddleware;

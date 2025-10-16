@@ -4,9 +4,9 @@ export async function run(ctx: { endpoint: string; token?: string }) {
       method: 'POST',
       headers: {
         'content-type': 'application/json',
-        ...(ctx.token ? { authorization: `Bearer ${ctx.token}` } : {})
+        ...(ctx.token ? { authorization: `Bearer ${ctx.token}` } : {}),
       },
-      body: JSON.stringify({ toolClass: 'probe' })
+      body: JSON.stringify({ toolClass: 'probe' }),
     });
     const pass = res.status !== 401;
     return { name: 'auth', pass, status: res.status };

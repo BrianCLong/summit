@@ -16,4 +16,3 @@ router.post('/suggest-links', async (req, res) => {
 });
 
 module.exports = router;
-

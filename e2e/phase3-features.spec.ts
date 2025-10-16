@@ -10,7 +10,9 @@ test.describe('Phase 3 Production Features', () => {
     await page.goto('/dashboard');
 
     // Wait for presence pill to appear (if users are online)
-    const presencePill = page.getByTestId('presence-pill').or(page.getByText(/\d+ active/).first());
+    const presencePill = page
+      .getByTestId('presence-pill')
+      .or(page.getByText(/\d+ active/).first());
 
     // Presence should either be visible or not crash the page
     await expect(page).not.toHaveTitle(/Error/);
@@ -40,7 +42,9 @@ test.describe('Phase 3 Production Features', () => {
     await page.goto('/dashboard');
 
     // Look for activity feed component
-    const activityFeed = page.getByText('Live Activity Feed').or(page.getByText('Activity Feed'));
+    const activityFeed = page
+      .getByText('Live Activity Feed')
+      .or(page.getByText('Activity Feed'));
 
     // Activity feed should render or gracefully handle no data
     await expect(page).not.toHaveTitle(/Error/);
@@ -63,7 +67,9 @@ test.describe('Phase 3 Production Features', () => {
     await page.goto('/search');
 
     // Try to find query builder elements
-    const queryBuilder = page.getByText('Query Builder').or(page.getByPlaceholder(/Quick search/));
+    const queryBuilder = page
+      .getByText('Query Builder')
+      .or(page.getByPlaceholder(/Quick search/));
 
     if (await queryBuilder.isVisible()) {
       // Test adding a simple filter
@@ -73,12 +79,16 @@ test.describe('Phase 3 Production Features', () => {
 
       // Should create a chip
       await expect(
-        page.getByText('type equals document').or(page.getByText('type:document')),
+        page
+          .getByText('type equals document')
+          .or(page.getByText('type:document')),
       ).toBeVisible();
     }
   });
 
-  test('should display graph workbench without performance issues', async ({ page }) => {
+  test('should display graph workbench without performance issues', async ({
+    page,
+  }) => {
     await page.goto('/graph-workbench');
 
     const startTime = Date.now();
@@ -102,7 +112,9 @@ test.describe('Phase 3 Production Features', () => {
     await page.goto('/graph-workbench');
 
     // Look for path finding panel
-    const pathPanel = page.getByText('Path Finding').or(page.getByText('K-Shortest Paths'));
+    const pathPanel = page
+      .getByText('Path Finding')
+      .or(page.getByText('K-Shortest Paths'));
 
     if (await pathPanel.isVisible()) {
       // Test form inputs
@@ -135,7 +147,9 @@ test.describe('Phase 3 Production Features', () => {
 
       // Should open dialog with templates
       await expect(
-        page.getByText('Executive Summary').or(page.getByText('Generate Report')),
+        page
+          .getByText('Executive Summary')
+          .or(page.getByText('Generate Report')),
       ).toBeVisible();
 
       // Close dialog
@@ -166,7 +180,8 @@ test.describe('Phase 3 Production Features', () => {
 
     // Filter critical errors only
     const criticalErrors = errors.filter(
-      (error) => error.includes('TypeError') || error.includes('ReferenceError'),
+      (error) =>
+        error.includes('TypeError') || error.includes('ReferenceError'),
     );
 
     expect(criticalErrors.length).toBe(0);
@@ -186,7 +201,9 @@ test.describe('Phase 3 Production Features', () => {
       await localeSelector.click();
 
       // Should show locale options
-      const frenchOption = page.getByText(/Français/).or(page.getByText(/French/));
+      const frenchOption = page
+        .getByText(/Français/)
+        .or(page.getByText(/French/));
 
       if (await frenchOption.isVisible()) {
         await frenchOption.click();
@@ -198,7 +215,9 @@ test.describe('Phase 3 Production Features', () => {
     }
   });
 
-  test('accessibility - critical routes should pass axe checks', async ({ page }) => {
+  test('accessibility - critical routes should pass axe checks', async ({
+    page,
+  }) => {
     const routes = ['/dashboard', '/investigations', '/graph-workbench'];
 
     for (const route of routes) {

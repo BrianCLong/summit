@@ -23,7 +23,10 @@ export interface GraphMutatePayload {
   investigationId: string;
   ops: Array<
     | { kind: 'addNode'; node: { id: string; type: string; value: string } }
-    | { kind: 'addEdge'; edge: { id: string; source: string; target: string; type: string } }
+    | {
+        kind: 'addEdge';
+        edge: { id: string; source: string; target: string; type: string };
+      }
     | { kind: 'updateNode'; id: string; patch: Record<string, unknown> }
     | { kind: 'deleteNode'; id: string }
     | { kind: 'deleteEdge'; id: string }

@@ -8,5 +8,8 @@ spec:
       containers:
         - name: evict
           image: bitnami/kubectl
-          command: ["/bin/sh","-c"]
-          args: ["kubectl -n stage exec -it $(kubectl -n stage get pod -l app.kubernetes.io/name=redis -o jsonpath='{.items[0].metadata.name}') -- redis-cli config set maxmemory 10mb"]
+          command: ['/bin/sh', '-c']
+          args:
+            [
+              "kubectl -n stage exec -it $(kubectl -n stage get pod -l app.kubernetes.io/name=redis -o jsonpath='{.items[0].metadata.name}') -- redis-cli config set maxmemory 10mb",
+            ]

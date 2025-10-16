@@ -20,7 +20,7 @@ resources:
 persistence:
   enabled: true
   size: 50Gi
-  storageClass: ""
+  storageClass: ''
 
 env:
   - name: NEO4J_AUTH
@@ -31,27 +31,28 @@ env:
   - name: NEO4J_PLUGINS
     value: '["apoc", "graph-data-science"]'
   - name: NEO4J_apoc_export_file_enabled
-    value: "true"
+    value: 'true'
   - name: NEO4J_apoc_import_file_enabled
-    value: "true"
+    value: 'true'
   - name: NEO4J_apoc_import_file_use__neo4j__config
-    value: "true"
+    value: 'true'
 
 # Health checks
 livenessProbe:
   enabled: true
-  command: ["cypher-shell", "-u", "neo4j", "-p", "$(NEO4J_PASSWORD)", "RETURN 1"]
+  command:
+    ['cypher-shell', '-u', 'neo4j', '-p', '$(NEO4J_PASSWORD)', 'RETURN 1']
   initialDelaySeconds: 30
   timeoutSeconds: 10
   periodSeconds: 30
 
 readinessProbe:
   enabled: true
-  command: ["cypher-shell", "-u", "neo4j", "-p", "$(NEO4J_PASSWORD)", "RETURN 1"]
+  command:
+    ['cypher-shell', '-u', 'neo4j', '-p', '$(NEO4J_PASSWORD)', 'RETURN 1']
   initialDelaySeconds: 30
   timeoutSeconds: 10
   periodSeconds: 10
 
 serviceMonitor:
   enabled: false
-

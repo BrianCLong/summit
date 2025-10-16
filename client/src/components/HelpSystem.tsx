@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import DOMPurify from 'dompurify';
 
 interface HelpTopic {
   id: string;
@@ -510,7 +511,7 @@ const HelpSystem: React.FC<HelpSystemProps> = ({ isVisible, onClose, initialTopi
                     <div
                       className="prose max-w-none"
                       dangerouslySetInnerHTML={{
-                        __html: topic.content
+                        __html: DOMPurify.sanitize(topic.content
                           .split('\n')
                           .map((line) => line.trim())
                           .join('\n')
@@ -531,7 +532,7 @@ const HelpSystem: React.FC<HelpSystemProps> = ({ isVisible, onClose, initialTopi
                           )
                           .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
                           .replace(/\n\n/g, '</p><p>')
-                          .replace(/^(.*)$/gm, '<p>$1</p>'),
+                          .replace(/^(.*)$/gm, '<p>$1</p>')),
                       }}
                     />
                   </div>

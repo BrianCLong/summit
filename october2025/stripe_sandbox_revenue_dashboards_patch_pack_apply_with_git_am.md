@@ -3,6 +3,7 @@
 > Mailbox-format patches to wire **Stripe sandbox** end-to-end (Checkout, Portal, Webhooks, Metered usage), provide a **catalog bootstrap script**, and ship **Grafana dashboards** for ARR/MRR/activation → revenue/ROI. Includes demo data loaders, Make targets, and CI secrets scaffolding.
 
 ## How to apply
+
 ```bash
 mkdir -p patches && cd patches
 # Save files as 0020-*.patch ... 0027-*.patch
@@ -21,6 +22,7 @@ git am 0020-feat-billing-stripe-webhooks-and-checkout.patch \
 ---
 
 ## 0020-feat-billing-stripe-webhooks-and-checkout.patch
+
 ```
 From 2020aaaa00000000000000000000000000000020 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -159,6 +161,7 @@ index 0000000..3333333
 ---
 
 ## 0021-scripts-stripe-catalog-bootstrap.patch
+
 ```
 From 2021bbbb00000000000000000000000000000021 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -193,6 +196,7 @@ index 0000000..4444444
 ---
 
 ## 0022-feat-billing-usage-export-and-backfill.patch
+
 ```
 From 2022cccc00000000000000000000000000000022 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -227,6 +231,7 @@ index 1111111..5555555 100644
 ---
 
 ## 0023-ops-grafana-revenue-dashboards.patch
+
 ```
 From 2023dddd00000000000000000000000000000023 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -246,6 +251,7 @@ Subject: [PATCH] ops(grafana): ARR/MRR/Activation→Revenue & ROI dashboards
 ---
 
 ## 0024-ops-metrics-pipeline-revenue-activation.patch
+
 ```
 From 2024eeee00000000000000000000000000000024 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -277,6 +283,7 @@ index 0000000..aaaaaaa
 ---
 
 ## 0025-docs-billing-pricing-gtm-updates.patch
+
 ```
 From 2025ffff00000000000000000000000000000025 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -293,6 +300,7 @@ Subject: [PATCH] docs(billing): Stripe sandbox guide, buyer FAQ, ROI story
 ---
 
 ## 0026-ci-billing-webhook-and-secrets-templates.patch
+
 ```
 From 2026aaaa00000000000000000000000000000026 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -310,6 +318,7 @@ Subject: [PATCH] ci: Secrets templates & webhook exposure for billing service
 ---
 
 ## 0027-make-billing-and-revenue-targets.patch
+
 ```
 From 2027bbbb00000000000000000000000000000027 Mon Sep 17 00:00:00 2001
 From: Guy IG <guy@intelgraph.dev>
@@ -338,15 +347,17 @@ index 9999999..aaaaaaa 100644
 ---
 
 ## Secrets & Env
+
 - `STRIPE_KEY` (test) and `STRIPE_WEBHOOK_SECRET` in billing service env/Helm values
 - For local dev, use Stripe CLI to forward webhooks: `stripe listen --forward-to localhost:7080/webhook`
 
 ## Grafana Datasource (CSV) for metrics rollup (optional)
+
 Add a CSV datasource pointing to `ops/metrics/out/*.csv` (or host via tiny static server in cluster).
 
 ## Demo Flow
-1) `make billing-up` to create products/prices/webhook.
-2) Call `/checkout/session` to generate a test checkout link; complete with `4242 4242 4242 4242`.
-3) Run workloads to emit `/meter` events; `make billing-rollup` to refresh CSVs.
-4) `make revenue-dashboards` to import dashboards; view ARR/MRR/Activation/ROI panels.
 
+1. `make billing-up` to create products/prices/webhook.
+2. Call `/checkout/session` to generate a test checkout link; complete with `4242 4242 4242 4242`.
+3. Run workloads to emit `/meter` events; `make billing-rollup` to refresh CSVs.
+4. `make revenue-dashboards` to import dashboards; view ARR/MRR/Activation/ROI panels.

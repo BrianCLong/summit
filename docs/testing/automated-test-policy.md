@@ -40,10 +40,10 @@ npm run test:policy
 
 ## Coverage Enforcement
 
-* Command: `npm run test:jest -- --coverage --coverageReporters=json-summary --passWithNoTests --runInBand`
-* Scope: All changed `.ts`, `.tsx`, `.js`, `.jsx` files outside of test directories.
-* Threshold: 85% for statements, branches, functions, and lines.
-* Failure remediation: add or enhance unit tests covering the uncovered logic, break down complex functions, or refactor to more testable units.
+- Command: `npm run test:jest -- --coverage --coverageReporters=json-summary --passWithNoTests --runInBand`
+- Scope: All changed `.ts`, `.tsx`, `.js`, `.jsx` files outside of test directories.
+- Threshold: 85% for statements, branches, functions, and lines.
+- Failure remediation: add or enhance unit tests covering the uncovered logic, break down complex functions, or refactor to more testable units.
 
 The coverage module fails when:
 
@@ -54,16 +54,16 @@ The coverage module fails when:
 
 ## Integration & Contract Tests
 
-* **Integration tests:** `npm run test:integration`
-* **Contract/API tests:** `npm run test:api`
+- **Integration tests:** `npm run test:integration`
+- **Contract/API tests:** `npm run test:api`
 
 These suites validate request/response paths, data loaders, and persisted query contracts. When they fail, investigate the API logic or adjust the fixture data to match the desired behaviour before re-running the command.
 
 ## End-to-End Regression Tests
 
-* Command: `npm run test:e2e`
-* Tooling: Playwright
-* Coverage: Authentication, investigator workspace navigation, collaborative graph analysis, and export flows.
+- Command: `npm run test:e2e`
+- Tooling: Playwright
+- Coverage: Authentication, investigator workspace navigation, collaborative graph analysis, and export flows.
 
 Remediation tips:
 
@@ -73,9 +73,9 @@ Remediation tips:
 
 ## Performance Benchmarks
 
-* Command: `node scripts/ci/performance-benchmark.cjs`
-* Targets: graph traversal, risk aggregation, JSON serialisation hot paths.
-* Threshold: 500 ms per operation.
+- Command: `node scripts/ci/performance-benchmark.cjs`
+- Targets: graph traversal, risk aggregation, JSON serialisation hot paths.
+- Threshold: 500 ms per operation.
 
 If an operation exceeds 500 ms:
 
@@ -111,15 +111,15 @@ Run these commands before committing to catch issues early and avoid CI failures
 
 ## Troubleshooting
 
-| Symptom | Possible Cause | Suggested Fix |
-| --- | --- | --- |
-| Coverage gate fails with “Missing coverage data” | Jest did not execute tests for the new file | Add or update tests that import the file, or adjust test discovery patterns |
-| Integration tests cannot connect to dependencies | Local services not running | Start required services (`npm run dev` or docker compose) before running tests |
-| Playwright tests timing out | UI changed, selectors stale | Update tests with resilient selectors or increase `expect` timeouts |
-| Performance gate exceeds budget | Algorithmic regression, larger fixtures | Profile the code, optimise loops/data structures, or reduce fixture size |
+| Symptom                                          | Possible Cause                              | Suggested Fix                                                                  |
+| ------------------------------------------------ | ------------------------------------------- | ------------------------------------------------------------------------------ |
+| Coverage gate fails with “Missing coverage data” | Jest did not execute tests for the new file | Add or update tests that import the file, or adjust test discovery patterns    |
+| Integration tests cannot connect to dependencies | Local services not running                  | Start required services (`npm run dev` or docker compose) before running tests |
+| Playwright tests timing out                      | UI changed, selectors stale                 | Update tests with resilient selectors or increase `expect` timeouts            |
+| Performance gate exceeds budget                  | Algorithmic regression, larger fixtures     | Profile the code, optimise loops/data structures, or reduce fixture size       |
 
 ## Additional Resources
 
-- [Testing strategy overview](../README.md) *(if applicable)*
+- [Testing strategy overview](../README.md) _(if applicable)_
 - `scripts/ci/*.cjs` for implementation details of each policy check
 - `test-policy-report.json` artifact produced by CI for detailed diagnostics

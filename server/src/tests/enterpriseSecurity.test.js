@@ -15,11 +15,11 @@ describe('Enterprise Security Service - P1 Priority', () => {
   beforeEach(() => {
     mockClient = {
       query: jest.fn(),
-      release: jest.fn()
+      release: jest.fn(),
     };
 
     mockPostgresPool = {
-      connect: jest.fn(() => mockClient)
+      connect: jest.fn(() => mockClient),
     };
 
     mockRedisClient = {
@@ -30,19 +30,19 @@ describe('Enterprise Security Service - P1 Priority', () => {
       del: jest.fn(),
       hset: jest.fn(),
       lpush: jest.fn(),
-      ltrim: jest.fn()
+      ltrim: jest.fn(),
     };
 
     mockLogger = {
       info: jest.fn(),
       error: jest.fn(),
-      warn: jest.fn()
+      warn: jest.fn(),
     };
 
     securityService = new EnterpriseSecurityService(
       mockPostgresPool,
       mockRedisClient,
-      mockLogger
+      mockLogger,
     );
   });
 
@@ -53,39 +53,43 @@ describe('Enterprise Security Service - P1 Priority', () => {
   describe('RBAC System Initialization', () => {
     test('should initialize all system permissions', () => {
       const permissions = securityService.getAvailablePermissions();
-      
+
       expect(permissions.length).toBeGreaterThan(20);
-      expect(permissions.map(p => p.id)).toContain('INVESTIGATION_CREATE');
-      expect(permissions.map(p => p.id)).toContain('ENTITY_READ');
-      expect(permissions.map(p => p.id)).toContain('ANALYTICS_RUN');
-      expect(permissions.map(p => p.id)).toContain('USER_MANAGEMENT');
-      expect(permissions.map(p => p.id)).toContain('SENSITIVE_DATA_ACCESS');
+      expect(permissions.map((p) => p.id)).toContain('INVESTIGATION_CREATE');
+      expect(permissions.map((p) => p.id)).toContain('ENTITY_READ');
+      expect(permissions.map((p) => p.id)).toContain('ANALYTICS_RUN');
+      expect(permissions.map((p) => p.id)).toContain('USER_MANAGEMENT');
+      expect(permissions.map((p) => p.id)).toContain('SENSITIVE_DATA_ACCESS');
     });
 
     test('should initialize system roles with correct permissions', () => {
       const roles = securityService.getAvailableRoles();
-      
+
       expect(roles.length).toBeGreaterThan(5);
-      
-      const analyst = roles.find(r => r.id === 'ANALYST');
+
+      const analyst = roles.find((r) => r.id === 'ANALYST');
       expect(analyst.permissions).toContain('INVESTIGATION_CREATE');
       expect(analyst.permissions).toContain('ENTITY_READ');
       expect(analyst.dataClassifications).toContain('UNCLASSIFIED');
-      
-      const systemAdmin = roles.find(r => r.id === 'SYSTEM_ADMIN');
+
+      const systemAdmin = roles.find((r) => r.id === 'SYSTEM_ADMIN');
       expect(systemAdmin.permissions).toContain('USER_MANAGEMENT');
       expect(systemAdmin.dataClassifications).toContain('TOP_SECRET');
     });
 
     test('should configure role hierarchy correctly', () => {
       const roles = securityService.getAvailableRoles();
-      
-      const viewer = roles.find(r => r.id === 'VIEWER');
-      const analyst = roles.find(r => r.id === 'ANALYST');
-      const supervisor = roles.find(r => r.id === 'SUPERVISOR');
-      
-      expect(viewer.permissions.length).toBeLessThan(analyst.permissions.length);
-      expect(analyst.permissions.length).toBeLessThan(supervisor.permissions.length);
+
+      const viewer = roles.find((r) => r.id === 'VIEWER');
+      const analyst = roles.find((r) => r.id === 'ANALYST');
+      const supervisor = roles.find((r) => r.id === 'SUPERVISOR');
+
+      expect(viewer.permissions.length).toBeLessThan(
+        analyst.permissions.length,
+      );
+      expect(analyst.permissions.length).toBeLessThan(
+        supervisor.permissions.length,
+      );
     });
   });
 
@@ -93,15 +97,17 @@ describe('Enterprise Security Service - P1 Priority', () => {
     test('should authenticate valid user credentials', async () => {
       mockRedisClient.incr.mockResolvedValue(1);
       mockClient.query.mockResolvedValue({
-        rows: [{
-          id: 'user123',
-          username: 'testuser',
-          email: 'test@example.com',
-          password_hash: '$argon2id$v=19$m=65536,t=3,p=4$hash', // mock hash
-          role: 'ANALYST',
-          status: 'ACTIVE',
-          failed_login_attempts: 0
-        }]
+        rows: [
+          {
+            id: 'user123',
+            username: 'testuser',
+            email: 'test@example.com',
+            password_hash: '$argon2id$v=19$m=65536,t=3,p=4$hash', // mock hash
+            role: 'ANALYST',
+            status: 'ACTIVE',
+            failed_login_attempts: 0,
+          },
+        ],
       });
 
       // Mock password verification (normally done by argon2)
@@ -114,12 +120,12 @@ describe('Enterprise Security Service - P1 Priority', () => {
         clientInfo: {
           ip: '192.168.1.100',
           userAgent: 'TestAgent',
-          location: 'US'
-        }
+          location: 'US',
+        },
       };
 
       const result = await securityService.authenticate(credentials);
-      
+
       expect(result.success).toBe(true);
       expect(result.user.username).toBe('testuser');
       expect(result.user.role).toBe('ANALYST');
@@ -130,14 +136,16 @@ describe('Enterprise Security Service - P1 Priority', () => {
     test('should reject invalid credentials', async () => {
       mockRedisClient.incr.mockResolvedValue(1);
       mockClient.query.mockResolvedValue({
-        rows: [{
-          id: 'user123',
-          username: 'testuser',
-          password_hash: '$argon2id$v=19$m=65536,t=3,p=4$hash',
-          role: 'ANALYST',
-          status: 'ACTIVE',
-          failed_login_attempts: 0
-        }]
+        rows: [
+          {
+            id: 'user123',
+            username: 'testuser',
+            password_hash: '$argon2id$v=19$m=65536,t=3,p=4$hash',
+            role: 'ANALYST',
+            status: 'ACTIVE',
+            failed_login_attempts: 0,
+          },
+        ],
       });
 
       const mockVerify = jest.fn().mockResolvedValue(false);
@@ -146,11 +154,12 @@ describe('Enterprise Security Service - P1 Priority', () => {
       const credentials = {
         username: 'testuser',
         password: 'wrongpassword',
-        clientInfo: { ip: '192.168.1.100' }
+        clientInfo: { ip: '192.168.1.100' },
       };
 
-      await expect(securityService.authenticate(credentials))
-        .rejects.toThrow('Invalid credentials');
+      await expect(securityService.authenticate(credentials)).rejects.toThrow(
+        'Invalid credentials',
+      );
     });
 
     test('should enforce rate limiting', async () => {
@@ -159,31 +168,35 @@ describe('Enterprise Security Service - P1 Priority', () => {
       const credentials = {
         username: 'testuser',
         password: 'password',
-        clientInfo: { ip: '192.168.1.100' }
+        clientInfo: { ip: '192.168.1.100' },
       };
 
-      await expect(securityService.authenticate(credentials))
-        .rejects.toThrow('Too many authentication attempts');
+      await expect(securityService.authenticate(credentials)).rejects.toThrow(
+        'Too many authentication attempts',
+      );
     });
 
     test('should reject disabled accounts', async () => {
       mockRedisClient.incr.mockResolvedValue(1);
       mockClient.query.mockResolvedValue({
-        rows: [{
-          id: 'user123',
-          username: 'testuser',
-          status: 'DISABLED'
-        }]
+        rows: [
+          {
+            id: 'user123',
+            username: 'testuser',
+            status: 'DISABLED',
+          },
+        ],
       });
 
       const credentials = {
         username: 'testuser',
         password: 'password',
-        clientInfo: { ip: '192.168.1.100' }
+        clientInfo: { ip: '192.168.1.100' },
       };
 
-      await expect(securityService.authenticate(credentials))
-        .rejects.toThrow('Account disabled');
+      await expect(securityService.authenticate(credentials)).rejects.toThrow(
+        'Account disabled',
+      );
     });
   });
 
@@ -192,17 +205,17 @@ describe('Enterprise Security Service - P1 Priority', () => {
       const user = {
         id: 'user123',
         username: 'testuser',
-        role: 'ANALYST'
+        role: 'ANALYST',
       };
 
       const clientInfo = {
         ip: '192.168.1.100',
         userAgent: 'TestAgent',
-        location: 'US'
+        location: 'US',
       };
 
       const session = await securityService.createSession(user, clientInfo);
-      
+
       expect(session.id).toBeDefined();
       expect(session.userId).toBe(user.id);
       expect(session.username).toBe(user.username);
@@ -218,14 +231,17 @@ describe('Enterprise Security Service - P1 Priority', () => {
         id: 'session123',
         userId: 'user123',
         expiresAt: new Date(Date.now() + 60000),
-        lastActivity: new Date()
+        lastActivity: new Date(),
       };
 
       mockRedisClient.get.mockResolvedValue(JSON.stringify(mockSession));
 
-      const token = securityService.generateSessionToken('session123', 'user123');
+      const token = securityService.generateSessionToken(
+        'session123',
+        'user123',
+      );
       const verifiedSession = await securityService.verifySession(token);
-      
+
       expect(verifiedSession.id).toBe('session123');
       expect(verifiedSession.userId).toBe('user123');
     });
@@ -235,15 +251,19 @@ describe('Enterprise Security Service - P1 Priority', () => {
         id: 'session123',
         userId: 'user123',
         expiresAt: new Date(Date.now() - 60000), // Expired
-        lastActivity: new Date()
+        lastActivity: new Date(),
       };
 
       mockRedisClient.get.mockResolvedValue(JSON.stringify(mockSession));
 
-      const token = securityService.generateSessionToken('session123', 'user123');
-      
-      await expect(securityService.verifySession(token))
-        .rejects.toThrow('Session expired');
+      const token = securityService.generateSessionToken(
+        'session123',
+        'user123',
+      );
+
+      await expect(securityService.verifySession(token)).rejects.toThrow(
+        'Session expired',
+      );
     });
 
     test('should handle idle timeout', async () => {
@@ -251,15 +271,19 @@ describe('Enterprise Security Service - P1 Priority', () => {
         id: 'session123',
         userId: 'user123',
         expiresAt: new Date(Date.now() + 60000),
-        lastActivity: new Date(Date.now() - 40 * 60 * 1000) // 40 minutes ago
+        lastActivity: new Date(Date.now() - 40 * 60 * 1000), // 40 minutes ago
       };
 
       mockRedisClient.get.mockResolvedValue(JSON.stringify(mockSession));
 
-      const token = securityService.generateSessionToken('session123', 'user123');
-      
-      await expect(securityService.verifySession(token))
-        .rejects.toThrow('Session timed out due to inactivity');
+      const token = securityService.generateSessionToken(
+        'session123',
+        'user123',
+      );
+
+      await expect(securityService.verifySession(token)).rejects.toThrow(
+        'Session timed out due to inactivity',
+      );
     });
   });
 
@@ -272,18 +296,21 @@ describe('Enterprise Security Service - P1 Priority', () => {
         dataClassifications: ['UNCLASSIFIED', 'INTERNAL'],
         expiresAt: new Date(Date.now() + 60000),
         lastActivity: new Date(),
-        ipAddress: '192.168.1.100'
+        ipAddress: '192.168.1.100',
       };
 
       mockRedisClient.get.mockResolvedValue(JSON.stringify(mockSession));
-      const token = securityService.generateSessionToken('session123', 'user123');
+      const token = securityService.generateSessionToken(
+        'session123',
+        'user123',
+      );
 
       const result = await securityService.checkPermission(
         token,
         'ENTITY_READ',
-        { id: 'entity123', dataClassification: 'INTERNAL' }
+        { id: 'entity123', dataClassification: 'INTERNAL' },
       );
-      
+
       expect(result.allowed).toBe(true);
       expect(result.session).toBeDefined();
     });
@@ -296,17 +323,20 @@ describe('Enterprise Security Service - P1 Priority', () => {
         dataClassifications: ['UNCLASSIFIED'],
         expiresAt: new Date(Date.now() + 60000),
         lastActivity: new Date(),
-        ipAddress: '192.168.1.100'
+        ipAddress: '192.168.1.100',
       };
 
       mockRedisClient.get.mockResolvedValue(JSON.stringify(mockSession));
-      const token = securityService.generateSessionToken('session123', 'user123');
+      const token = securityService.generateSessionToken(
+        'session123',
+        'user123',
+      );
 
       const result = await securityService.checkPermission(
         token,
-        'USER_MANAGEMENT'
+        'USER_MANAGEMENT',
       );
-      
+
       expect(result.allowed).toBe(false);
       expect(result.reason).toBe('INSUFFICIENT_PERMISSIONS');
     });
@@ -319,18 +349,21 @@ describe('Enterprise Security Service - P1 Priority', () => {
         dataClassifications: ['UNCLASSIFIED', 'INTERNAL'],
         expiresAt: new Date(Date.now() + 60000),
         lastActivity: new Date(),
-        ipAddress: '192.168.1.100'
+        ipAddress: '192.168.1.100',
       };
 
       mockRedisClient.get.mockResolvedValue(JSON.stringify(mockSession));
-      const token = securityService.generateSessionToken('session123', 'user123');
+      const token = securityService.generateSessionToken(
+        'session123',
+        'user123',
+      );
 
       const result = await securityService.checkPermission(
         token,
         'ENTITY_READ',
-        { id: 'entity123', dataClassification: 'TOP_SECRET' }
+        { id: 'entity123', dataClassification: 'TOP_SECRET' },
       );
-      
+
       expect(result.allowed).toBe(false);
       expect(result.reason).toBe('DATA_CLASSIFICATION_DENIED');
     });
@@ -341,21 +374,23 @@ describe('Enterprise Security Service - P1 Priority', () => {
       const creatorSession = {
         token: 'valid-token',
         userId: 'admin123',
-        username: 'admin'
+        username: 'admin',
       };
 
       // Mock permission check
-      securityService.checkPermission = jest.fn().mockResolvedValue({ allowed: true });
-      
+      securityService.checkPermission = jest
+        .fn()
+        .mockResolvedValue({ allowed: true });
+
       const userData = {
         username: 'newuser',
         email: 'newuser@example.com',
         password: 'SecurePassword123!',
-        role: 'ANALYST'
+        role: 'ANALYST',
       };
 
       const user = await securityService.createUser(userData, creatorSession);
-      
+
       expect(user.id).toBeDefined();
       expect(user.username).toBe('newuser');
       expect(user.email).toBe('newuser@example.com');
@@ -364,17 +399,20 @@ describe('Enterprise Security Service - P1 Priority', () => {
 
     test('should validate user data before creation', async () => {
       const creatorSession = { token: 'valid-token', userId: 'admin123' };
-      securityService.checkPermission = jest.fn().mockResolvedValue({ allowed: true });
+      securityService.checkPermission = jest
+        .fn()
+        .mockResolvedValue({ allowed: true });
 
       const invalidUserData = {
         username: 'x', // Too short
         email: 'invalid-email',
         password: '123', // Weak password
-        role: 'INVALID_ROLE'
+        role: 'INVALID_ROLE',
       };
 
-      await expect(securityService.createUser(invalidUserData, creatorSession))
-        .rejects.toThrow();
+      await expect(
+        securityService.createUser(invalidUserData, creatorSession),
+      ).rejects.toThrow();
     });
 
     test('should validate password strength', () => {
@@ -383,11 +421,13 @@ describe('Enterprise Security Service - P1 Priority', () => {
         requireUppercase: true,
         requireLowercase: true,
         requireNumbers: true,
-        requireSpecialChars: true
+        requireSpecialChars: true,
       };
 
       expect(securityService.validatePassword('WeakPass', policy)).toBe(false);
-      expect(securityService.validatePassword('StrongPassword123!', policy)).toBe(true);
+      expect(
+        securityService.validatePassword('StrongPassword123!', policy),
+      ).toBe(true);
     });
   });
 
@@ -398,11 +438,11 @@ describe('Enterprise Security Service - P1 Priority', () => {
         user: 'testuser',
         session_id: 'session123',
         ip: '192.168.1.100',
-        resource: 'authentication'
+        resource: 'authentication',
       };
 
       const auditEvent = await securityService.logSecurityEvent(event);
-      
+
       expect(auditEvent.id).toBeDefined();
       expect(auditEvent.timestamp).toBeDefined();
       expect(auditEvent.type).toBe('LOGIN_SUCCESS');
@@ -414,17 +454,17 @@ describe('Enterprise Security Service - P1 Priority', () => {
     test('should determine compliance flags correctly', () => {
       const event = { type: 'LOGIN_SUCCESS', severity: 'HIGH' };
       const flags = securityService.determineComplianceFlags(event);
-      
+
       expect(flags).toContain('SOC2_ACCESS_LOGGING');
       expect(flags).toContain('FISMA_SECURITY_EVENT');
     });
 
     test('should track metrics for audit events', async () => {
       const initialMetrics = securityService.getSecurityMetrics();
-      
+
       await securityService.logSecurityEvent({
         type: 'ACCESS_GRANTED',
-        user: 'testuser'
+        user: 'testuser',
       });
 
       const updatedMetrics = securityService.getSecurityMetrics();
@@ -437,9 +477,9 @@ describe('Enterprise Security Service - P1 Priority', () => {
       const token = await securityService.generateApiToken(
         'user123',
         ['ENTITY_READ', 'ANALYTICS_RUN'],
-        '24h'
+        '24h',
       );
-      
+
       expect(token.tokenId).toBeDefined();
       expect(token.token).toContain('.');
       expect(token.permissions).toEqual(['ENTITY_READ', 'ANALYTICS_RUN']);
@@ -448,10 +488,18 @@ describe('Enterprise Security Service - P1 Priority', () => {
 
     test('should verify valid API tokens', async () => {
       require('argon2').verify = jest.fn().mockResolvedValue(true);
-      const generatedToken = await securityService.generateApiToken('user123', ['ENTITY_READ']);
-      securityService.getApiToken = jest.fn().mockResolvedValue(securityService.apiTokens.get(generatedToken.tokenId));
-      const verifiedToken = await securityService.verifyApiToken(generatedToken.token);
-      
+      const generatedToken = await securityService.generateApiToken('user123', [
+        'ENTITY_READ',
+      ]);
+      securityService.getApiToken = jest
+        .fn()
+        .mockResolvedValue(
+          securityService.apiTokens.get(generatedToken.tokenId),
+        );
+      const verifiedToken = await securityService.verifyApiToken(
+        generatedToken.token,
+      );
+
       expect(verifiedToken.userId).toBe('user123');
       expect(verifiedToken.permissions).toContain('ENTITY_READ');
       expect(verifiedToken.status).toBe('ACTIVE');
@@ -462,11 +510,12 @@ describe('Enterprise Security Service - P1 Priority', () => {
       securityService.apiTokens.set('token123', {
         userId: 'user123',
         expiresAt: new Date(Date.now() - 60000), // Expired
-        status: 'ACTIVE'
+        status: 'ACTIVE',
       });
 
-      await expect(securityService.verifyApiToken(expiredToken))
-        .rejects.toThrow('Token expired');
+      await expect(
+        securityService.verifyApiToken(expiredToken),
+      ).rejects.toThrow('Token expired');
     });
   });
 
@@ -475,16 +524,19 @@ describe('Enterprise Security Service - P1 Priority', () => {
       const framework = 'SOC2';
       const dateRange = {
         startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-        endDate: new Date()
+        endDate: new Date(),
       };
 
       securityService.getAuditEvents = jest.fn().mockResolvedValue([
         { type: 'LOGIN_SUCCESS', compliance_violations: [] },
-        { type: 'ACCESS_GRANTED', compliance_violations: [] }
+        { type: 'ACCESS_GRANTED', compliance_violations: [] },
       ]);
 
-      const report = await securityService.generateComplianceReport(framework, dateRange);
-      
+      const report = await securityService.generateComplianceReport(
+        framework,
+        dateRange,
+      );
+
       expect(report.framework).toBe('SOC2');
       expect(report.name).toBe('SOC 2 Type II');
       expect(report.summary.totalEvents).toBe(2);
@@ -495,11 +547,14 @@ describe('Enterprise Security Service - P1 Priority', () => {
       const auditEvents = [
         { type: 'LOGIN_SUCCESS', compliance_violations: [] },
         { type: 'LOGIN_FAILED', compliance_violations: [] },
-        { type: 'ACCESS_DENIED', compliance_violations: ['POLICY_VIOLATION'] }
+        { type: 'ACCESS_DENIED', compliance_violations: ['POLICY_VIOLATION'] },
       ];
 
-      const score = await securityService.calculateComplianceScore('SOC2', auditEvents);
-      
+      const score = await securityService.calculateComplianceScore(
+        'SOC2',
+        auditEvents,
+      );
+
       expect(score).toBeLessThan(100); // Should deduct for violations
       expect(score).toBeGreaterThanOrEqual(0);
     });
@@ -512,7 +567,7 @@ describe('Enterprise Security Service - P1 Priority', () => {
         { timestamp: new Date(), user: 'testuser' },
         { timestamp: new Date(), user: 'testuser' },
         { timestamp: new Date(), user: 'testuser' },
-        { timestamp: new Date(), user: 'testuser' }
+        { timestamp: new Date(), user: 'testuser' },
       ]);
 
       securityService.triggerSecurityAlert = jest.fn();
@@ -520,14 +575,14 @@ describe('Enterprise Security Service - P1 Priority', () => {
       await securityService.analyzeSecurityPatterns({
         type: 'LOGIN_FAILED',
         user: 'testuser',
-        ip_address: '192.168.1.100'
+        ip_address: '192.168.1.100',
       });
 
       expect(securityService.triggerSecurityAlert).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'BRUTE_FORCE_DETECTED',
-          user: 'testuser'
-        })
+          user: 'testuser',
+        }),
       );
     });
 
@@ -536,12 +591,12 @@ describe('Enterprise Security Service - P1 Priority', () => {
         type: 'SUSPICIOUS_LOGIN',
         severity: 'HIGH',
         user: 'testuser',
-        details: { reason: 'Unusual location' }
+        details: { reason: 'Unusual location' },
       };
 
       securityService.storeSecurityAlert = jest.fn();
       const result = await securityService.triggerSecurityAlert(alert);
-      
+
       expect(result.id).toBeDefined();
       expect(result.type).toBe('SUSPICIOUS_LOGIN');
       expect(result.severity).toBe('HIGH');
@@ -552,7 +607,7 @@ describe('Enterprise Security Service - P1 Priority', () => {
   describe('Metrics and Performance', () => {
     test('should track security metrics accurately', () => {
       const metrics = securityService.getSecurityMetrics();
-      
+
       expect(metrics.totalLogins).toBeGreaterThanOrEqual(0);
       expect(metrics.successfulLogins).toBeGreaterThanOrEqual(0);
       expect(metrics.failedLogins).toBeGreaterThanOrEqual(0);
@@ -565,7 +620,7 @@ describe('Enterprise Security Service - P1 Priority', () => {
       // Simulate some login attempts
       securityService.securityMetrics.totalLogins = 100;
       securityService.securityMetrics.successfulLogins = 95;
-      
+
       const metrics = securityService.getSecurityMetrics();
       expect(metrics.successRate).toBe('95.00');
     });
@@ -574,7 +629,9 @@ describe('Enterprise Security Service - P1 Priority', () => {
   describe('Email Validation', () => {
     test('should validate email addresses correctly', () => {
       expect(securityService.isValidEmail('valid@example.com')).toBe(true);
-      expect(securityService.isValidEmail('user.name+tag@domain.co.uk')).toBe(true);
+      expect(securityService.isValidEmail('user.name+tag@domain.co.uk')).toBe(
+        true,
+      );
       expect(securityService.isValidEmail('invalid-email')).toBe(false);
       expect(securityService.isValidEmail('no-at-symbol.com')).toBe(false);
       expect(securityService.isValidEmail('@missing-local.com')).toBe(false);
@@ -587,7 +644,9 @@ describe('Enterprise Security Service - P1 Priority', () => {
       expect(securityService.parseTimeToMs('5m')).toBe(300000);
       expect(securityService.parseTimeToMs('2h')).toBe(7200000);
       expect(securityService.parseTimeToMs('1d')).toBe(86400000);
-      expect(securityService.parseTimeToMs('invalid')).toBe(24 * 60 * 60 * 1000); // Default
+      expect(securityService.parseTimeToMs('invalid')).toBe(
+        24 * 60 * 60 * 1000,
+      ); // Default
     });
   });
 });

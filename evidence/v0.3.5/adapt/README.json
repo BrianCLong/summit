@@ -1,1 +1,5 @@
-{"evidence_type": "adaptive_controls", "version": "v0.3.5", "status": "initialized"}
+{
+  "evidence_type": "adaptive_controls",
+  "version": "v0.3.5",
+  "status": "initialized"
+}

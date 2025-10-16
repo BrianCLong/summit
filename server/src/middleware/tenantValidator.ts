@@ -26,19 +26,18 @@ export interface TenantValidationOptions {
  * Validates tenant access and creates secure tenant context
  */
 export class TenantValidator {
-  
   /**
    * Validate tenant access for a given operation
    */
   static validateTenantAccess(
     context: any,
     resourceTenantId?: string,
-    options: TenantValidationOptions = {}
+    options: TenantValidationOptions = {},
   ): TenantContext {
     const {
       requireExplicitTenant = true,
       allowSystemAccess = false,
-      validateOwnership = true
+      validateOwnership = true,
     } = options;
 
     // Extract tenant context from request
@@ -47,48 +46,61 @@ export class TenantValidator {
     const roles = context.user?.roles || [];
 
     // System-level access check
-    if (allowSystemAccess && (roles.includes('SYSTEM') || roles.includes('SUPER_ADMIN'))) {
+    if (
+      allowSystemAccess &&
+      (roles.includes('SYSTEM') || roles.includes('SUPER_ADMIN'))
+    ) {
       logger.info(`System-level access granted for user ${userId}`);
       return {
         tenantId: resourceTenantId || userTenantId || 'system',
         userId,
         roles,
-        permissions: ['*']
+        permissions: ['*'],
       };
     }
 
     // Validate user has tenant context
     if (requireExplicitTenant && !userTenantId) {
-      logger.error(`Tenant isolation violation: User ${userId} lacks tenant context`);
+      logger.error(
+        `Tenant isolation violation: User ${userId} lacks tenant context`,
+      );
       throw new GraphQLError('Tenant context required', {
-        extensions: { 
+        extensions: {
           code: 'TENANT_REQUIRED',
-          userId 
-        }
+          userId,
+        },
       });
     }
 
     // Cross-tenant access validation
-    if (validateOwnership && resourceTenantId && resourceTenantId !== userTenantId) {
-      logger.error(`Cross-tenant access denied: User ${userId} (tenant: ${userTenantId}) attempted to access resource (tenant: ${resourceTenantId})`);
+    if (
+      validateOwnership &&
+      resourceTenantId &&
+      resourceTenantId !== userTenantId
+    ) {
+      logger.error(
+        `Cross-tenant access denied: User ${userId} (tenant: ${userTenantId}) attempted to access resource (tenant: ${resourceTenantId})`,
+      );
       throw new GraphQLError('Cross-tenant access denied', {
-        extensions: { 
+        extensions: {
           code: 'CROSS_TENANT_ACCESS_DENIED',
           userTenant: userTenantId,
-          resourceTenant: resourceTenantId
-        }
+          resourceTenant: resourceTenantId,
+        },
       });
     }
 
     const effectiveTenantId = resourceTenantId || userTenantId;
-    
-    logger.debug(`Tenant access validated for user ${userId}, tenant ${effectiveTenantId}`);
-    
+
+    logger.debug(
+      `Tenant access validated for user ${userId}, tenant ${effectiveTenantId}`,
+    );
+
     return {
       tenantId: effectiveTenantId,
       userId,
       roles,
-      permissions: this.calculatePermissions(roles)
+      permissions: this.calculatePermissions(roles),
     };
   }
 
@@ -96,9 +108,9 @@ export class TenantValidator {
    * Generate tenant-scoped cache key
    */
   static getTenantCacheKey(
-    baseKey: string, 
+    baseKey: string,
     tenantContext: TenantContext,
-    scope: 'tenant' | 'global' | 'user' = 'tenant'
+    scope: 'tenant' | 'global' | 'user' = 'tenant',
   ): string {
     switch (scope) {
       case 'tenant':
@@ -115,12 +127,14 @@ export class TenantValidator {
   /**
    * Generate tenant-scoped database query constraints
    */
-  static getTenantQueryConstraints(tenantContext: TenantContext): Record<string, any> {
+  static getTenantQueryConstraints(
+    tenantContext: TenantContext,
+  ): Record<string, any> {
     return {
       tenantId: tenantContext.tenantId,
       // Additional constraints for multi-tenancy
       deletedAt: null,
-      status: { $ne: 'archived' }
+      status: { $ne: 'archived' },
     };
   }
 
@@ -130,44 +144,46 @@ export class TenantValidator {
   static addTenantToNeo4jQuery(
     cypherQuery: string,
     parameters: Record<string, any>,
-    tenantContext: TenantContext
+    tenantContext: TenantContext,
   ): { query: string; parameters: Record<string, any> } {
     // Add tenant parameter
     const enhancedParams = {
       ...parameters,
-      tenantId: tenantContext.tenantId
+      tenantId: tenantContext.tenantId,
     };
 
     // Inject tenant filtering into WHERE clauses
     let enhancedQuery = cypherQuery;
-    
+
     // Pattern to add tenant filtering to node matches
     if (!cypherQuery.includes('tenantId')) {
       // Add tenant constraint to MATCH patterns
       enhancedQuery = enhancedQuery.replace(
         /MATCH\s*\((\w+):(\w+)\)/g,
-        'MATCH ($1:$2 {tenantId: $tenantId})'
+        'MATCH ($1:$2 {tenantId: $tenantId})',
       );
-      
+
       // Add tenant constraint to WHERE clauses
       if (enhancedQuery.includes('WHERE')) {
         enhancedQuery = enhancedQuery.replace(
           /WHERE\s+/g,
-          'WHERE n.tenantId = $tenantId AND '
+          'WHERE n.tenantId = $tenantId AND ',
         );
       } else if (enhancedQuery.includes('RETURN')) {
         enhancedQuery = enhancedQuery.replace(
           /RETURN/g,
-          'WHERE n.tenantId = $tenantId RETURN'
+          'WHERE n.tenantId = $tenantId RETURN',
         );
       }
     }
 
-    logger.debug(`Enhanced Neo4j query with tenant constraints for tenant ${tenantContext.tenantId}`);
-    
+    logger.debug(
+      `Enhanced Neo4j query with tenant constraints for tenant ${tenantContext.tenantId}`,
+    );
+
     return {
       query: enhancedQuery,
-      parameters: enhancedParams
+      parameters: enhancedParams,
     };
   }
 
@@ -177,7 +193,7 @@ export class TenantValidator {
   private static calculatePermissions(roles: string[]): string[] {
     const permissions: Set<string> = new Set();
 
-    roles.forEach(role => {
+    roles.forEach((role) => {
       switch (role.toUpperCase()) {
         case 'SUPER_ADMIN':
         case 'SYSTEM':
@@ -219,32 +235,44 @@ export class TenantValidator {
       return async (parent: any, args: any, context: any, info: any) => {
         try {
           // Extract resource tenant ID from arguments if available
-          const resourceTenantId = args.tenantId || args.input?.tenantId || parent?.tenantId;
-          
+          const resourceTenantId =
+            args.tenantId || args.input?.tenantId || parent?.tenantId;
+
           // Validate tenant access
           const tenantContext = TenantValidator.validateTenantAccess(
             context,
             resourceTenantId,
-            options
+            options,
           );
 
           // Enhance context with validated tenant information
           const enhancedContext = {
             ...context,
             tenant: tenantContext,
-            getTenantCacheKey: (baseKey: string, scope?: 'tenant' | 'global' | 'user') => 
+            getTenantCacheKey: (
+              baseKey: string,
+              scope?: 'tenant' | 'global' | 'user',
+            ) =>
               TenantValidator.getTenantCacheKey(baseKey, tenantContext, scope),
-            getTenantQueryConstraints: () => 
+            getTenantQueryConstraints: () =>
               TenantValidator.getTenantQueryConstraints(tenantContext),
-            addTenantToNeo4jQuery: (query: string, params: Record<string, any>) =>
-              TenantValidator.addTenantToNeo4jQuery(query, params, tenantContext)
+            addTenantToNeo4jQuery: (
+              query: string,
+              params: Record<string, any>,
+            ) =>
+              TenantValidator.addTenantToNeo4jQuery(
+                query,
+                params,
+                tenantContext,
+              ),
           };
 
           // Call original resolver with enhanced context
           return await resolver(parent, args, enhancedContext, info);
-          
         } catch (error) {
-          logger.error(`Tenant validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          logger.error(
+            `Tenant validation failed: ${error instanceof Error ? error.message : 'Unknown error'}`,
+          );
           throw error;
         }
       };
@@ -252,5 +280,9 @@ export class TenantValidator {
   }
 }
 
-export const { validateTenantAccess, getTenantCacheKey, addTenantToNeo4jQuery } = TenantValidator;
+export const {
+  validateTenantAccess,
+  getTenantCacheKey,
+  addTenantToNeo4jQuery,
+} = TenantValidator;
 export const tenantMiddleware = TenantValidator.createTenantMiddleware;

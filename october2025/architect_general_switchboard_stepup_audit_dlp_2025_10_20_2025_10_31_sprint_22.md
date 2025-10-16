@@ -20,11 +20,13 @@
   - **Compliance Evidence Automation:** periodic SBOM drift check, attestation verification cron, audit snapshot exporter.
 
 **Definition of Done:**
+
 - All protected actions require step‑up within a freshness window; audit events are emitted, stored, and exportable; UI shows residency/label guards; perf/DAST gates passing; evidence archived.
 
 ---
 
 ## 1) Context & Dependencies
+
 - **Preceding Sprint (21):** Signed builds, SBOMs, canary + rollback, SLOs, OPA v0.2.
 - **This Sprint Focus:** Auth flows, audit fabric, data controls, performance/security tests, event contracts.
 - **External Alignment:**
@@ -35,108 +37,136 @@
 
 ## 2) Objectives & Key Results
 
-**OBJ‑1: Step‑Up Authentication (WebAuthn) for Sensitive Operations**  
-- **KR1.1** UI step‑up modal with device register+assert; backend verifies; 5‑minute freshness TTL.  
-- **KR1.2** Policy hook: actions classified ≥`confidential` require `step_up=true` or within TTL.  
+**OBJ‑1: Step‑Up Authentication (WebAuthn) for Sensitive Operations**
+
+- **KR1.1** UI step‑up modal with device register+assert; backend verifies; 5‑minute freshness TTL.
+- **KR1.2** Policy hook: actions classified ≥`confidential` require `step_up=true` or within TTL.
 - **KR1.3** Audit events for register, assert, and failures.
 
-**OBJ‑2: Audit Trail v0.1 (Provable Decisions)**  
-- **KR2.1** Append‑only store (SQLite/Postgres, `audit_events` table) + signer digest chain.  
-- **KR2.2** Export endpoints: `/audit/stream`, `/audit/export` (NDJSON + SHA256 manifest).  
-- **KR2.3** Viewer page with filters (subject, action, decision, traceId, time range).  
+**OBJ‑2: Audit Trail v0.1 (Provable Decisions)**
 
-**OBJ‑3: Residency + Classification Guardrails**  
-- **KR3.1** Residency map UI (US/EU) reads from policy context; prevents action with actionable copy.  
-- **KR3.2** API validates `resource.residency` vs `context.region`; emits structured error with remediation.  
+- **KR2.1** Append‑only store (SQLite/Postgres, `audit_events` table) + signer digest chain.
+- **KR2.2** Export endpoints: `/audit/stream`, `/audit/export` (NDJSON + SHA256 manifest).
+- **KR2.3** Viewer page with filters (subject, action, decision, traceId, time range).
+
+**OBJ‑3: Residency + Classification Guardrails**
+
+- **KR3.1** Residency map UI (US/EU) reads from policy context; prevents action with actionable copy.
+- **KR3.2** API validates `resource.residency` vs `context.region`; emits structured error with remediation.
 - **KR3.3** OPA v0.3: explicit deny codes + localization keys.
 
-**OBJ‑4: Source‑Side Redaction & PII Minimization**  
-- **KR4.1** Redaction middleware for logs/metrics/events (regex + schema‑aware).  
-- **KR4.2** Telemetry contract forbids PII fields; linter/enforcer in CI.  
+**OBJ‑4: Source‑Side Redaction & PII Minimization**
+
+- **KR4.1** Redaction middleware for logs/metrics/events (regex + schema‑aware).
+- **KR4.2** Telemetry contract forbids PII fields; linter/enforcer in CI.
 - **KR4.3** DLP unit tests and sample fixtures.
 
-**OBJ‑5: Performance & Security Gates**  
-- **KR5.1** k6 smoke and load profiles with p95≤300ms, p99≤600ms caps; CI budget check.  
-- **KR5.2** ZAP passive+active scan nightly; SARIF upload; budgeted allow‑list with expiry.  
+**OBJ‑5: Performance & Security Gates**
+
+- **KR5.1** k6 smoke and load profiles with p95≤300ms, p99≤600ms caps; CI budget check.
+- **KR5.2** ZAP passive+active scan nightly; SARIF upload; budgeted allow‑list with expiry.
 - **KR5.3** Synthetic probes extended: step‑up required path.
 
-**OBJ‑6: Evidence Automation**  
-- **KR6.1** Scheduled SBOM drift compare vs last release; open issue on regressions.  
-- **KR6.2** Attestation verification cron + Slack summary.  
+**OBJ‑6: Evidence Automation**
+
+- **KR6.1** Scheduled SBOM drift compare vs last release; open issue on regressions.
+- **KR6.2** Attestation verification cron + Slack summary.
 - **KR6.3** Weekly audit snapshot (signed manifest) stored in `evidence/`.
 
 ---
 
 ## 3) Work Breakdown & Owners
 
-| # | Epic | Issue | Owner | Acceptance | Evidence |
-|---|------|-------|-------|------------|----------|
-| A | Auth | WebAuthn register/assert + TTL | AppEng | Step‑up enforced on sensitive routes | Cypress e2e, manual runbook |
-| B | Policy | OPA v0.3 with deny codes | SecEng | 95% policy tests coverage | `opa test` summary |
-| C | Audit | Append‑only store + exporter | DataEng | Tamper‑evident digest chain | Export hash, verify script |
-| D | UI | Residency map & guardrails | FE | Correct user messaging, blocked flows | Storybook + integration tests |
-| E | DLP | Redaction middleware + CI linter | SecEng | No PII in logs/events | Linter pass + samples |
-| F | Perf | k6 profiles + CI budget | SRE | Gate fails over budget | CI artifacts + trend chart |
-| G | DAST | ZAP nightly + triage workflow | SecEng | SARIF in Security tab, budget | Issues auto‑created |
-| H | Evidence | SBOM/attest cron + snapshot | ProdOps | Weekly artifacts pushed | `evidence/` tree + checksums |
+| #   | Epic     | Issue                            | Owner   | Acceptance                            | Evidence                      |
+| --- | -------- | -------------------------------- | ------- | ------------------------------------- | ----------------------------- |
+| A   | Auth     | WebAuthn register/assert + TTL   | AppEng  | Step‑up enforced on sensitive routes  | Cypress e2e, manual runbook   |
+| B   | Policy   | OPA v0.3 with deny codes         | SecEng  | 95% policy tests coverage             | `opa test` summary            |
+| C   | Audit    | Append‑only store + exporter     | DataEng | Tamper‑evident digest chain           | Export hash, verify script    |
+| D   | UI       | Residency map & guardrails       | FE      | Correct user messaging, blocked flows | Storybook + integration tests |
+| E   | DLP      | Redaction middleware + CI linter | SecEng  | No PII in logs/events                 | Linter pass + samples         |
+| F   | Perf     | k6 profiles + CI budget          | SRE     | Gate fails over budget                | CI artifacts + trend chart    |
+| G   | DAST     | ZAP nightly + triage workflow    | SecEng  | SARIF in Security tab, budget         | Issues auto‑created           |
+| H   | Evidence | SBOM/attest cron + snapshot      | ProdOps | Weekly artifacts pushed               | `evidence/` tree + checksums  |
 
 ---
 
 ## 4) Implementation Artifacts (Drop‑in)
 
 ### 4.1 WebAuthn Step‑Up (UI + API)
+
 **UI Modal (`apps/web/src/components/StepUpModal.tsx`)**
+
 ```tsx
 'use client';
 import { useState } from 'react';
-export default function StepUpModal({ onVerified }:{ onVerified:()=>void }){
-  const [busy,setBusy]=useState(false);
-  async function doStepUp(){
+export default function StepUpModal({
+  onVerified,
+}: {
+  onVerified: () => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  async function doStepUp() {
     setBusy(true);
-    const chal = await fetch('/api/auth/webauthn/challenge').then(r=>r.json());
+    const chal = await fetch('/api/auth/webauthn/challenge').then((r) =>
+      r.json(),
+    );
     const cred = await navigator.credentials.create({ publicKey: chal });
-    const ok = await fetch('/api/auth/webauthn/verify',{
-      method:'POST', body: JSON.stringify(cred), headers:{'content-type':'application/json'}
-    }).then(r=>r.ok);
+    const ok = await fetch('/api/auth/webauthn/verify', {
+      method: 'POST',
+      body: JSON.stringify(cred),
+      headers: { 'content-type': 'application/json' },
+    }).then((r) => r.ok);
     setBusy(false);
-    if(ok) onVerified();
+    if (ok) onVerified();
   }
   return (
     <div className="p-4 rounded-2xl shadow bg-white space-y-2">
       <h3 className="text-lg font-semibold">Step‑Up Required</h3>
       <p>Confirm with your security key or platform authenticator.</p>
-      <button disabled={busy} onClick={doStepUp} className="px-3 py-2 rounded-2xl shadow">Verify</button>
+      <button
+        disabled={busy}
+        onClick={doStepUp}
+        className="px-3 py-2 rounded-2xl shadow"
+      >
+        Verify
+      </button>
     </div>
   );
 }
 ```
 
 **API Routes (pseudo, Node/Next) — freshness TTL**
+
 ```ts
 // /api/auth/webauthn/challenge
-export async function GET(){ /* return PublicKeyCredentialCreationOptions / RequestOptions */ }
+export async function GET() {
+  /* return PublicKeyCredentialCreationOptions / RequestOptions */
+}
 // /api/auth/webauthn/verify
-export async function POST(req:Request){
+export async function POST(req: Request) {
   // verify assertion, then set server session flag:
   // session.stepUp = { ts: Date.now(), method: 'webauthn' }
 }
 // helper
-export function hasFreshStepUp(session, ttlMs=5*60*1000){
-  return session?.stepUp?.ts && (Date.now() - session.stepUp.ts) < ttlMs;
+export function hasFreshStepUp(session, ttlMs = 5 * 60 * 1000) {
+  return session?.stepUp?.ts && Date.now() - session.stepUp.ts < ttlMs;
 }
 ```
 
 **Route Guard Example**
+
 ```ts
 import { hasFreshStepUp } from '@/lib/stepup';
-export async function POST(req:Request){
+export async function POST(req: Request) {
   const session = await getSession();
-  if(!hasFreshStepUp(session)) return new Response('step_up_required', { status: 428 });
+  if (!hasFreshStepUp(session))
+    return new Response('step_up_required', { status: 428 });
   // proceed
 }
 ```
 
 ### 4.2 Policy Pack v0.3 — Deny Codes & Step‑Up TTL (`policies/switchboard_v0_3.rego`)
+
 ```rego
 package switchboard
 
@@ -167,6 +197,7 @@ deny[{"code":"STEPUP_EXPIRED","msg":"step_up_stale"}] if {
 ```
 
 **Tests (`policies/tests/v0_3_test.rego`)**
+
 ```rego
 package switchboard_test
 
@@ -187,7 +218,9 @@ expired_stepup_denies {
 ```
 
 ### 4.3 Audit Trail v0.1
+
 **Schema (`db/migrations/20251020_audit.sql`)**
+
 ```sql
 create table if not exists audit_events (
   id bigint generated always as identity primary key,
@@ -206,47 +239,67 @@ create index on audit_events (ts);
 ```
 
 **Appender (Node)**
+
 ```ts
 import { createHash } from 'crypto';
 let lastDigest = Buffer.alloc(0);
-export async function appendAudit(ev:any, db:any){
-  const h = createHash('sha256').update(Buffer.concat([
-    lastDigest, Buffer.from(JSON.stringify(ev))
-  ])).digest();
-  await db.insert('audit_events',{...ev, sig_prev:lastDigest, sig_curr:h});
+export async function appendAudit(ev: any, db: any) {
+  const h = createHash('sha256')
+    .update(Buffer.concat([lastDigest, Buffer.from(JSON.stringify(ev))]))
+    .digest();
+  await db.insert('audit_events', { ...ev, sig_prev: lastDigest, sig_curr: h });
   lastDigest = h;
 }
 ```
 
 **Exporter (`/api/audit/export`)**
+
 ```ts
 // Streams NDJSON and writes manifest { count, sha256, started, ended }
 ```
 
 ### 4.4 Residency Map UI
+
 ```tsx
 // apps/web/src/components/ResidencyGuard.tsx
-export function ResidencyGuard({ residency, region, children }:{residency:'US'|'EU', region:string, children:React.ReactNode}){
-  if(residency!==region){
-    return <div className="p-3 rounded-2xl bg-yellow-50">This data is restricted to {residency}. Switch your region or request access.</div>;
+export function ResidencyGuard({
+  residency,
+  region,
+  children,
+}: {
+  residency: 'US' | 'EU';
+  region: string;
+  children: React.ReactNode;
+}) {
+  if (residency !== region) {
+    return (
+      <div className="p-3 rounded-2xl bg-yellow-50">
+        This data is restricted to {residency}. Switch your region or request
+        access.
+      </div>
+    );
   }
   return <>{children}</>;
 }
 ```
 
 ### 4.5 Redaction Middleware & Telemetry Linter
+
 **Runtime Redactor (`apps/shared/redact.ts`)**
+
 ```ts
 const patterns = [
-  { k:/email/i, v:/.+@.+/ },
-  { k:/ssn|sin/i, v:/\b\d{3}-?\d{2}-?\d{4}\b/ },
-  { k:/phone/i, v:/\+?[0-9][0-9\-\.\(\)\s]{7,}/ }
+  { k: /email/i, v: /.+@.+/ },
+  { k: /ssn|sin/i, v: /\b\d{3}-?\d{2}-?\d{4}\b/ },
+  { k: /phone/i, v: /\+?[0-9][0-9\-\.\(\)\s]{7,}/ },
 ];
-export function redact(obj:any){
+export function redact(obj: any) {
   const o = JSON.parse(JSON.stringify(obj));
-  for(const [k,v] of Object.entries(o)){
-    for(const p of patterns){
-      if(p.k.test(k) || (typeof v==='string' && p.v.test(v as string))){ o[k] = '[REDACTED]'; }
+  for (const [k, v] of Object.entries(o)) {
+    for (const p of patterns) {
+      if (p.k.test(k) || (typeof v === 'string' && p.v.test(v as string))) {
+        o[k] = '[REDACTED]';
+      }
     }
   }
   return o;
@@ -254,45 +307,60 @@ export function redact(obj:any){
 ```
 
 **Log Wrapper**
+
 ```ts
-export function logJSON(entry:any){
+export function logJSON(entry: any) {
   console.log(JSON.stringify(redact(entry)));
 }
 ```
 
 **CI Linter (`scripts/telemetry-lint.js`)**
+
 ```js
-const fs=require('fs');
-const BAD=['email','ssn','sin','phone','address'];
-const files=process.argv.slice(2);
-let bad=0;
-for(const f of files){
-  const t=fs.readFileSync(f,'utf8');
-  for(const b of BAD){ if(t.match(new RegExp(b,'i'))){ console.error(`PII token '${b}' in ${f}`); bad++; }}
+const fs = require('fs');
+const BAD = ['email', 'ssn', 'sin', 'phone', 'address'];
+const files = process.argv.slice(2);
+let bad = 0;
+for (const f of files) {
+  const t = fs.readFileSync(f, 'utf8');
+  for (const b of BAD) {
+    if (t.match(new RegExp(b, 'i'))) {
+      console.error(`PII token '${b}' in ${f}`);
+      bad++;
+    }
+  }
 }
-process.exit(bad?1:0);
+process.exit(bad ? 1 : 0);
 ```
 
 **Action Step**
+
 ```yaml
 - name: Telemetry PII Lint
   run: node scripts/telemetry-lint.js $(git ls-files "apps/**/*.ts*" "packages/**/*.ts*")
 ```
 
 ### 4.6 Performance & DAST Gates
+
 **k6 Profile (`perf/k6/smoke.js`)**
+
 ```js
 import http from 'k6/http';
 import { sleep, check } from 'k6';
-export const options = { thresholds: { http_req_duration: ['p(95)<300','p(99)<600'] }, vus: 10, duration: '3m' };
-export default function(){
+export const options = {
+  thresholds: { http_req_duration: ['p(95)<300', 'p(99)<600'] },
+  vus: 10,
+  duration: '3m',
+};
+export default function () {
   const r = http.get(`${__ENV.BASE_URL}/`);
-  check(r, { 'status 200': (res)=> res.status===200 });
+  check(r, { 'status 200': (res) => res.status === 200 });
   sleep(1);
 }
 ```
 
 **GitHub Action**
+
 ```yaml
 - name: k6 perf budget
   uses: grafana/k6-action@v0
@@ -303,6 +371,7 @@ export default function(){
 ```
 
 **ZAP Nightly (`.github/workflows/zap.yml`)**
+
 ```yaml
 name: zap-nightly
 on:
@@ -321,12 +390,15 @@ jobs:
 ```
 
 ### 4.7 Event Contracts (IntelGraph / MC)
+
 **Headers**
+
 ```
 x-trace-id, x-provenance-sha256, x-policy-decision, x-step-up-method, x-step-up-age-ms
 ```
 
 **NATS Subjects (convention)**
+
 ```
 intelgraph.signals.v1.*
 mc.actions.v1.dispatch
@@ -334,24 +406,27 @@ switchboard.audit.v1.append
 ```
 
 **Message Schema (JSON) `contracts/events.schema.json` (excerpt)**
+
 ```json
 {
   "$id": "https://companyos/contracts/events.schema.json",
   "type": "object",
   "properties": {
-    "traceId": {"type":"string"},
-    "ts": {"type":"string","format":"date-time"},
-    "subject": {"type":"object"},
-    "action": {"type":"string"},
-    "resource": {"type":"object"},
-    "decision": {"type":"string","enum":["allow","deny","stepup"]}
+    "traceId": { "type": "string" },
+    "ts": { "type": "string", "format": "date-time" },
+    "subject": { "type": "object" },
+    "action": { "type": "string" },
+    "resource": { "type": "object" },
+    "decision": { "type": "string", "enum": ["allow", "deny", "stepup"] }
   },
-  "required":["traceId","ts","action","decision"]
+  "required": ["traceId", "ts", "action", "decision"]
 }
 ```
 
 ### 4.8 Evidence Automation
+
 **Weekly SBOM Drift (`.github/workflows/sbom-drift.yml`)**
+
 ```yaml
 name: sbom-drift
 on:
@@ -362,12 +437,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: anchore/sbom-action@v0
-        with: { path: '.', format: cyclonedx-json, output-file: current.cdx.json }
+        with:
+          { path: '.', format: cyclonedx-json, output-file: current.cdx.json }
       - name: Compare
         run: node scripts/compare-sbom.js releases/latest/sbom.cdx.json current.cdx.json
 ```
 
 **Attestation Verify Cron (`.github/workflows/attest-verify.yml`)**
+
 ```yaml
 name: attest-verify
 on:
@@ -381,24 +458,31 @@ jobs:
 ```
 
 ### 4.9 Runbooks & Docs
+
 **`ops/runbooks/step-up.md`**
+
 ```md
 # Step‑Up Troubleshooting
+
 - Symptom: 428 step_up_required → Ask user to complete WebAuthn.
 - Check: `/api/auth/status` shows step_up_age_ms.
 - Remediate: Clear session, re‑register credential.
 ```
 
 **`docs/adr/021-webauthn-stepup.md`**
+
 ```md
 # ADR 021: WebAuthn Step‑Up
+
 Status: Accepted
 Decision: WebAuthn for sensitive actions with 5‑minute freshness TTL; policy enforcement in OPA v0.3; audit emission for all events.
 ```
 
 **Release Notes Template Addendum**
+
 ```md
 ## Compliance Evidence
+
 - Audit snapshot: evidence/audit_YYYYMMDD.ndjson + manifest.json
 - SBOM drift report: evidence/sbom-drift-YYYYMMDD.json
 - Attestation verify: evidence/attest-verify-YYYYMMDD.txt
@@ -407,6 +491,7 @@ Decision: WebAuthn for sensitive actions with 5‑minute freshness TTL; policy e
 ---
 
 ## 5) Testing Strategy
+
 - **Unit:** Policy tests ≥95%; redaction functions; step‑up helpers.
 - **Integration:** WebAuthn e2e (Cypress); audit append‑verify chain; residency guard UI.
 - **Security:** ZAP nightly; dependency scans continue; telemetry PII linter.
@@ -415,6 +500,7 @@ Decision: WebAuthn for sensitive actions with 5‑minute freshness TTL; policy e
 ---
 
 ## 6) Acceptance Checklist (DoR → DoD)
+
 - [ ] ADR accepted (step‑up, audit, redaction).
 - [ ] Policy v0.3 merged; tests green.
 - [ ] Step‑up enforced and freshness TTL honored.
@@ -427,6 +513,7 @@ Decision: WebAuthn for sensitive actions with 5‑minute freshness TTL; policy e
 ---
 
 ## 7) Risk Register & Mitigation
+
 - **WebAuthn device diversity** → Provide platform + cross‑platform guidance; fallback TOTP (non‑privileged paths only).
 - **Audit volume/cost** → Sampling for low‑risk allow events; full capture for deny/step‑up/admin.
 - **False‑positive DLP** → Scoped redaction to structured fields; include opt‑in allow‑list for service owners.
@@ -434,14 +521,15 @@ Decision: WebAuthn for sensitive actions with 5‑minute freshness TTL; policy e
 ---
 
 ## 8) Backlog Seed (Sprint 23)
+
 - Audit Viewer advanced filters + export UI; DLP dictionary + entropy detector; residency multi‑region routing; policy bundles signed & verified at startup; DR game‑day automation; perf budgets per page; SSO federation attestations.
 
 ---
 
 ## 9) Evidence Hooks (to fill during sprint)
+
 - **Release SHA:** …
 - **Attestation verify log:** …
 - **Audit export manifest digest:** …
 - **k6 report link:** …
 - **ZAP SARIF:** …
-

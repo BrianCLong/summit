@@ -42,7 +42,8 @@ const TEST_SCENARIOS = [
   },
   {
     name: 'Intelligence Analysis Query',
-    query: 'Analyze the implications of recent cybersecurity incidents in critical infrastructure',
+    query:
+      'Analyze the implications of recent cybersecurity incidents in critical infrastructure',
     context: {
       userId: 'test-analyst',
       tenantId: 'test-tenant',
@@ -72,7 +73,8 @@ const TEST_SCENARIOS = [
   },
   {
     name: 'Multi-Source Contradiction Test',
-    query: 'Is climate change primarily caused by human activities or natural factors?',
+    query:
+      'Is climate change primarily caused by human activities or natural factors?',
     context: {
       userId: 'test-researcher',
       tenantId: 'test-tenant',
@@ -214,7 +216,11 @@ class IntegrationTester {
         });
 
         const testDuration = Date.now() - testStart;
-        const passed = this.validateOrchestrationResult(result, scenario, testDuration);
+        const passed = this.validateOrchestrationResult(
+          result,
+          scenario,
+          testDuration,
+        );
 
         if (passed) {
           passCount++;
@@ -375,7 +381,9 @@ class IntegrationTester {
       }
     }
 
-    console.log(`\n🎯 Premium Routing Tests: ${passCount}/${routingTests.length} passed`);
+    console.log(
+      `\n🎯 Premium Routing Tests: ${passCount}/${routingTests.length} passed`,
+    );
   }
 
   async testPerformanceScalability() {
@@ -398,8 +406,10 @@ class IntegrationTester {
 
         const results = await Promise.all(promises);
         const totalTime = Date.now() - testStart;
-        const avgLatency = results.reduce((sum, r) => sum + r.avgLatency, 0) / results.length;
-        const successRate = results.reduce((sum, r) => sum + r.successRate, 0) / results.length;
+        const avgLatency =
+          results.reduce((sum, r) => sum + r.avgLatency, 0) / results.length;
+        const successRate =
+          results.reduce((sum, r) => sum + r.successRate, 0) / results.length;
 
         const passed = avgLatency < 8000 && successRate > 0.9;
 
@@ -477,13 +487,22 @@ class IntegrationTester {
       {
         name: 'Insufficient Budget Test',
         query: 'Test query',
-        context: { userId: 'test', tenantId: 'test', purpose: 'research', budgetLimit: 0.01 },
+        context: {
+          userId: 'test',
+          tenantId: 'test',
+          purpose: 'research',
+          budgetLimit: 0.01,
+        },
         expectError: true,
       },
       {
         name: 'Invalid Purpose Test',
         query: 'Test query',
-        context: { userId: 'test', tenantId: 'test', purpose: 'invalid_purpose' },
+        context: {
+          userId: 'test',
+          tenantId: 'test',
+          purpose: 'invalid_purpose',
+        },
         expectError: true,
       },
     ];
@@ -499,7 +518,9 @@ class IntegrationTester {
 
         // If we expected an error but got success, that's a failure
         if (errorTest.expectError) {
-          console.log(`  ❌ ${errorTest.name} - Expected error but got success`);
+          console.log(
+            `  ❌ ${errorTest.name} - Expected error but got success`,
+          );
         } else {
           console.log(`  ✅ ${errorTest.name} - Succeeded as expected`);
           passCount++;
@@ -507,15 +528,21 @@ class IntegrationTester {
       } catch (error) {
         // If we expected an error and got one, that's a pass
         if (errorTest.expectError) {
-          console.log(`  ✅ ${errorTest.name} - Correctly handled error: ${error.message}`);
+          console.log(
+            `  ✅ ${errorTest.name} - Correctly handled error: ${error.message}`,
+          );
           passCount++;
         } else {
-          console.log(`  ❌ ${errorTest.name} - Unexpected error: ${error.message}`);
+          console.log(
+            `  ❌ ${errorTest.name} - Unexpected error: ${error.message}`,
+          );
         }
       }
     }
 
-    console.log(`\n🎯 Error Handling Tests: ${passCount}/${errorTests.length} passed`);
+    console.log(
+      `\n🎯 Error Handling Tests: ${passCount}/${errorTests.length} passed`,
+    );
   }
 
   validateOrchestrationResult(result, scenario, duration) {
@@ -560,7 +587,8 @@ class IntegrationTester {
     }
 
     return {
-      avgLatency: latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length,
+      avgLatency:
+        latencies.reduce((sum, lat) => sum + lat, 0) / latencies.length,
       successRate: successes / iterations,
     };
   }
@@ -579,10 +607,15 @@ class IntegrationTester {
       this.results.performanceTests.filter((t) => t.passed).length /
       (this.results.performanceTests.length || 1);
     const loadTestPass =
-      this.results.loadTests.length > 0 ? this.results.loadTests[0].passed : false;
+      this.results.loadTests.length > 0
+        ? this.results.loadTests[0].passed
+        : false;
 
     const overallPassRate =
-      (orchestrationPassRate + compliancePassRate + performancePassRate + (loadTestPass ? 1 : 0)) /
+      (orchestrationPassRate +
+        compliancePassRate +
+        performancePassRate +
+        (loadTestPass ? 1 : 0)) /
       4;
 
     console.log('\n📋 MAESTRO INTEGRATION TEST SUMMARY');
@@ -610,7 +643,9 @@ class IntegrationTester {
       console.log('\n✅ OVERALL STATUS: GOOD - Minor optimizations needed');
     } else if (overallPassRate >= 0.7) {
       this.results.overallStatus = 'ACCEPTABLE';
-      console.log('\n⚠️  OVERALL STATUS: ACCEPTABLE - Some issues need attention');
+      console.log(
+        '\n⚠️  OVERALL STATUS: ACCEPTABLE - Some issues need attention',
+      );
     } else {
       this.results.overallStatus = 'NEEDS_WORK';
       console.log('\n❌ OVERALL STATUS: NEEDS WORK - Significant issues found');
@@ -621,14 +656,20 @@ class IntegrationTester {
     console.log('-'.repeat(30));
     if (this.results.orchestrationTests.length > 0) {
       const avgConfidence =
-        this.results.orchestrationTests.reduce((sum, t) => sum + (t.confidence || 0), 0) /
-        this.results.orchestrationTests.length;
+        this.results.orchestrationTests.reduce(
+          (sum, t) => sum + (t.confidence || 0),
+          0,
+        ) / this.results.orchestrationTests.length;
       const avgSources =
-        this.results.orchestrationTests.reduce((sum, t) => sum + (t.sourcesUsed || 0), 0) /
-        this.results.orchestrationTests.length;
+        this.results.orchestrationTests.reduce(
+          (sum, t) => sum + (t.sourcesUsed || 0),
+          0,
+        ) / this.results.orchestrationTests.length;
       const avgCost =
-        this.results.orchestrationTests.reduce((sum, t) => sum + (t.cost || 0), 0) /
-        this.results.orchestrationTests.length;
+        this.results.orchestrationTests.reduce(
+          (sum, t) => sum + (t.cost || 0),
+          0,
+        ) / this.results.orchestrationTests.length;
 
       console.log(`Average Confidence: ${(avgConfidence * 100).toFixed(1)}%`);
       console.log(`Average Sources Used: ${avgSources.toFixed(1)}`);

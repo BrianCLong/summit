@@ -1,4 +1,8 @@
-import type { AssignmentPlan, ManualControlPlan, WorkParcelPlan } from '../../common-types/src/index.js';
+import type {
+  AssignmentPlan,
+  ManualControlPlan,
+  WorkParcelPlan,
+} from '../../common-types/src/index.js';
 
 type ControlToggle = {
   readonly label: string;
@@ -27,7 +31,9 @@ function rowFromParcel(parcel: WorkParcelPlan): ControlMatrixRow {
   };
 }
 
-export function buildControlMatrix(plan: AssignmentPlan): readonly ControlMatrixRow[] {
+export function buildControlMatrix(
+  plan: AssignmentPlan,
+): readonly ControlMatrixRow[] {
   return plan.parcels.map(rowFromParcel);
 }
 

@@ -81,7 +81,9 @@ describe('MCPClient', () => {
         }
       });
 
-      await expect(client.connect('test-server')).rejects.toThrow('Connection failed');
+      await expect(client.connect('test-server')).rejects.toThrow(
+        'Connection failed',
+      );
     });
 
     test('throws error for unknown server', async () => {
@@ -116,16 +118,22 @@ describe('MCPClient', () => {
       const expectedResult = { success: true, data: 'test-result' };
 
       // Mock successful tool execution
-      const executionPromise = client.executeTool('test-server', 'test.tool', { input: 'test' });
+      const executionPromise = client.executeTool('test-server', 'test.tool', {
+        input: 'test',
+      });
 
       // Simulate WebSocket send
       expect(mockWs.send).toHaveBeenCalled();
-      const sentMessage = JSON.parse((mockWs.send as jest.Mock).mock.calls[0][0]);
+      const sentMessage = JSON.parse(
+        (mockWs.send as jest.Mock).mock.calls[0][0],
+      );
       expect(sentMessage.method).toBe('tools/execute');
       expect(sentMessage.params.name).toBe('test.tool');
 
       // Simulate response
-      const messageHandler = mockWs.on.mock.calls.find((call) => call[0] === 'message')[1];
+      const messageHandler = mockWs.on.mock.calls.find(
+        (call) => call[0] === 'message',
+      )[1];
       const response = {
         jsonrpc: '2.0',
         id: sentMessage.id,
@@ -138,12 +146,18 @@ describe('MCPClient', () => {
     });
 
     test('handles tool execution error', async () => {
-      const executionPromise = client.executeTool('test-server', 'test.tool', { input: 'test' });
+      const executionPromise = client.executeTool('test-server', 'test.tool', {
+        input: 'test',
+      });
 
-      const sentMessage = JSON.parse((mockWs.send as jest.Mock).mock.calls[0][0]);
+      const sentMessage = JSON.parse(
+        (mockWs.send as jest.Mock).mock.calls[0][0],
+      );
 
       // Simulate error response
-      const messageHandler = mockWs.on.mock.calls.find((call) => call[0] === 'message')[1];
+      const messageHandler = mockWs.on.mock.calls.find(
+        (call) => call[0] === 'message',
+      )[1];
       const errorResponse = {
         jsonrpc: '2.0',
         id: sentMessage.id,
@@ -154,32 +168,42 @@ describe('MCPClient', () => {
       };
       messageHandler(Buffer.from(JSON.stringify(errorResponse)));
 
-      await expect(executionPromise).rejects.toThrow('MCP Error: Tool execution failed');
+      await expect(executionPromise).rejects.toThrow(
+        'MCP Error: Tool execution failed',
+      );
     });
 
     test('validates tool scopes', async () => {
       await expect(
-        client.executeTool('test-server', 'test.tool', { input: 'test' }, ['wrong:scope']),
+        client.executeTool('test-server', 'test.tool', { input: 'test' }, [
+          'wrong:scope',
+        ]),
       ).rejects.toThrow('Insufficient scopes');
     });
 
     test('validates tool existence', async () => {
-      await expect(client.executeTool('test-server', 'nonexistent.tool', {})).rejects.toThrow(
-        "Tool 'nonexistent.tool' not found",
-      );
+      await expect(
+        client.executeTool('test-server', 'nonexistent.tool', {}),
+      ).rejects.toThrow("Tool 'nonexistent.tool' not found");
     });
 
     test('handles request timeout', async () => {
-      const clientWithTimeout = new MCPClient(registry.getAllServers(), { timeout: 100 });
+      const clientWithTimeout = new MCPClient(registry.getAllServers(), {
+        timeout: 100,
+      });
 
       mockWs.once.mockImplementation((event: string, callback: Function) => {
         if (event === 'open') setTimeout(callback, 0);
       });
       await clientWithTimeout.connect('test-server');
 
-      const executionPromise = clientWithTimeout.executeTool('test-server', 'test.tool', {
-        input: 'test',
-      });
+      const executionPromise = clientWithTimeout.executeTool(
+        'test-server',
+        'test.tool',
+        {
+          input: 'test',
+        },
+      );
 
       // Don't send response, let it timeout
       await expect(executionPromise).rejects.toThrow('Request timeout');
@@ -202,10 +226,14 @@ describe('MCPClient', () => {
 
       const infoPromise = client.getServerInfo('test-server');
 
-      const sentMessage = JSON.parse((mockWs.send as jest.Mock).mock.calls[0][0]);
+      const sentMessage = JSON.parse(
+        (mockWs.send as jest.Mock).mock.calls[0][0],
+      );
       expect(sentMessage.method).toBe('server/info');
 
-      const messageHandler = mockWs.on.mock.calls.find((call) => call[0] === 'message')[1];
+      const messageHandler = mockWs.on.mock.calls.find(
+        (call) => call[0] === 'message',
+      )[1];
       const response = {
         jsonrpc: '2.0',
         id: sentMessage.id,
@@ -276,13 +304,21 @@ describe('MCPServerRegistry', () => {
     const server1Config = {
       ...mockServerConfig,
       tools: [
-        { name: 'tool1', description: '', schema: { type: 'object' as const, properties: {} } },
+        {
+          name: 'tool1',
+          description: '',
+          schema: { type: 'object' as const, properties: {} },
+        },
       ],
     };
     const server2Config = {
       ...mockServerConfig,
       tools: [
-        { name: 'tool2', description: '', schema: { type: 'object' as const, properties: {} } },
+        {
+          name: 'tool2',
+          description: '',
+          schema: { type: 'object' as const, properties: {} },
+        },
       ],
     };
 

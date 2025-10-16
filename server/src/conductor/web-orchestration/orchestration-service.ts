@@ -79,14 +79,18 @@ export class OrchestrationService {
       this.rateLimiter.connect(),
     ]);
 
-    logger.info('🎼 Maestro Orchestration Service ready - the symphony begins!');
+    logger.info(
+      '🎼 Maestro Orchestration Service ready - the symphony begins!',
+    );
   }
 
   /**
    * 🎯 MAESTRO CORE: Universal Web Intelligence Orchestration
    * Phase 2A: Compliance-first multi-source synthesis with premium routing
    */
-  async orchestrate(request: OrchestrationRequest): Promise<OrchestrationResult> {
+  async orchestrate(
+    request: OrchestrationRequest,
+  ): Promise<OrchestrationResult> {
     const orchestrationId = `maestro-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
     const startTime = Date.now();
 
@@ -99,31 +103,43 @@ export class OrchestrationService {
 
     try {
       // Phase 1: Pre-flight validation and compliance check
-      const preflightCheck = await this.performPreflightCheck(request, orchestrationId);
+      const preflightCheck = await this.performPreflightCheck(
+        request,
+        orchestrationId,
+      );
       if (!preflightCheck.allowed) {
-        throw new Error(`Pre-flight compliance failure: ${preflightCheck.reason}`);
+        throw new Error(
+          `Pre-flight compliance failure: ${preflightCheck.reason}`,
+        );
       }
 
       // Phase 2: Web orchestration with multi-source synthesis
-      const webResult = await this.webOrchestrator.orchestrateWebQuery(request.query, {
-        userId: request.context.userId,
-        tenantId: request.context.tenantId,
-        purpose: request.context.purpose,
-        budgetLimit: request.context.budgetLimit,
-        urgency: request.context.urgency,
-        qualityThreshold: request.context.qualityThreshold,
-      });
+      const webResult = await this.webOrchestrator.orchestrateWebQuery(
+        request.query,
+        {
+          userId: request.context.userId,
+          tenantId: request.context.tenantId,
+          purpose: request.context.purpose,
+          budgetLimit: request.context.budgetLimit,
+          urgency: request.context.urgency,
+          qualityThreshold: request.context.qualityThreshold,
+        },
+      );
 
       // Phase 3: Premium model routing for synthesis enhancement (if budget allows)
       let enhancedResult = webResult;
-      const remainingBudget = (request.context.budgetLimit || 25) - webResult.cost;
+      const remainingBudget =
+        (request.context.budgetLimit || 25) - webResult.cost;
 
       if (remainingBudget > 5 && webResult.contradictions.length > 0) {
-        logger.info('🧠 Engaging premium synthesis for contradiction resolution', {
-          orchestrationId,
-          contradictions: webResult.contradictions.length,
-          remainingBudget,
-        });
+        logger.info(
+          '🧠 Engaging premium synthesis for contradiction resolution',
+          {
+            orchestrationId,
+            contradictions: webResult.contradictions.length,
+            remainingBudget,
+          },
+        );
 
         enhancedResult = await this.enhanceWithPremiumSynthesis(
           webResult,
@@ -140,7 +156,11 @@ export class OrchestrationService {
       );
 
       // Phase 5: Record provenance and update learning
-      await this.recordOrchestrationResult(finalResult, request, orchestrationId);
+      await this.recordOrchestrationResult(
+        finalResult,
+        request,
+        orchestrationId,
+      );
 
       const totalTime = Date.now() - startTime;
 
@@ -148,13 +168,20 @@ export class OrchestrationService {
       prometheusConductorMetrics.recordOperationalMetric(
         'maestro_orchestration_latency',
         totalTime,
-        { tenant_id: request.context.tenantId, sources_used: finalResult.sourcesUsed.toString() },
+        {
+          tenant_id: request.context.tenantId,
+          sources_used: finalResult.sourcesUsed.toString(),
+        },
       );
 
-      prometheusConductorMetrics.recordOperationalEvent('maestro_orchestration_success', true, {
-        tenant_id: request.context.tenantId,
-        purpose: request.context.purpose,
-      });
+      prometheusConductorMetrics.recordOperationalEvent(
+        'maestro_orchestration_success',
+        true,
+        {
+          tenant_id: request.context.tenantId,
+          purpose: request.context.purpose,
+        },
+      );
 
       logger.info('✅ Maestro orchestration completed successfully', {
         orchestrationId,
@@ -191,11 +218,15 @@ export class OrchestrationService {
       const totalTime = Date.now() - startTime;
 
       // Record failure metrics
-      prometheusConductorMetrics.recordOperationalEvent('maestro_orchestration_error', false, {
-        tenant_id: request.context.tenantId,
-        error_type: error.name,
-        purpose: request.context.purpose,
-      });
+      prometheusConductorMetrics.recordOperationalEvent(
+        'maestro_orchestration_error',
+        false,
+        {
+          tenant_id: request.context.tenantId,
+          error_type: error.name,
+          purpose: request.context.purpose,
+        },
+      );
 
       logger.error('❌ Maestro orchestration failed', {
         orchestrationId,
@@ -248,7 +279,10 @@ export class OrchestrationService {
     }
 
     // Query safety validation
-    const safetyCheck = await this.validateQuerySafety(request.query, request.context);
+    const safetyCheck = await this.validateQuerySafety(
+      request.query,
+      request.context,
+    );
     if (!safetyCheck.allowed) {
       return safetyCheck;
     }
@@ -312,7 +346,8 @@ export class OrchestrationService {
           ...webResult,
           answer: premiumResult.enhancedAnswer,
           confidence: Math.min(webResult.confidence + 0.1, 1.0),
-          contradictions: premiumResult.resolvedContradictions || webResult.contradictions,
+          contradictions:
+            premiumResult.resolvedContradictions || webResult.contradictions,
           cost: webResult.cost + premiumResult.cost,
           synthesisMethod: `${webResult.synthesisMethod}+premium_${routingDecision.selectedModel.name}`,
         };
@@ -348,12 +383,18 @@ export class OrchestrationService {
     }
 
     // Citation requirement check
-    if (request.constraints?.requireCitations && result.citations.length === 0) {
+    if (
+      request.constraints?.requireCitations &&
+      result.citations.length === 0
+    ) {
       warnings.push('No citations available despite requirement');
     }
 
     // Cost validation
-    if (request.context.budgetLimit && result.cost > request.context.budgetLimit) {
+    if (
+      request.context.budgetLimit &&
+      result.cost > request.context.budgetLimit
+    ) {
       warnings.push(
         `Cost $${result.cost.toFixed(2)} exceeded budget $${request.context.budgetLimit}`,
       );
@@ -361,13 +402,20 @@ export class OrchestrationService {
 
     // Contradiction handling
     if (result.contradictions.length > 0) {
-      warnings.push(`${result.contradictions.length} unresolved contradictions found in sources`);
+      warnings.push(
+        `${result.contradictions.length} unresolved contradictions found in sources`,
+      );
     }
 
     // Final compliance audit
-    const complianceAudit = await this.performFinalComplianceAudit(result, request);
+    const complianceAudit = await this.performFinalComplianceAudit(
+      result,
+      request,
+    );
     if (!complianceAudit.compliant) {
-      throw new Error(`Final compliance audit failed: ${complianceAudit.reason}`);
+      throw new Error(
+        `Final compliance audit failed: ${complianceAudit.reason}`,
+      );
     }
 
     return {
@@ -379,7 +427,10 @@ export class OrchestrationService {
   /**
    * Build synthesis prompt for premium model enhancement
    */
-  private buildSynthesisPrompt(webResult: any, request: OrchestrationRequest): string {
+  private buildSynthesisPrompt(
+    webResult: any,
+    request: OrchestrationRequest,
+  ): string {
     const contradictions = webResult.contradictions
       .map(
         (c: any) =>
@@ -449,7 +500,12 @@ Enhanced synthesis:`;
     _userId: string,
   ): Promise<{ allowed: boolean; reason?: string }> {
     void _userId;
-    const validPurposes = ['intelligence_analysis', 'research', 'documentation', 'development'];
+    const validPurposes = [
+      'intelligence_analysis',
+      'research',
+      'documentation',
+      'development',
+    ];
 
     if (!validPurposes.includes(purpose)) {
       return { allowed: false, reason: `Invalid purpose: ${purpose}` };
@@ -464,7 +520,13 @@ Enhanced synthesis:`;
     _context: any,
   ): Promise<{ allowed: boolean; reason?: string }> {
     // Basic safety checks - in production would use ML-based content filtering
-    const unsafePatterns = [/password/i, /api[_\s]*key/i, /secret/i, /token/i, /credential/i];
+    const unsafePatterns = [
+      /password/i,
+      /api[_\s]*key/i,
+      /secret/i,
+      /token/i,
+      /credential/i,
+    ];
 
     for (const pattern of unsafePatterns) {
       if (pattern.test(query)) {
@@ -548,6 +610,9 @@ Enhanced synthesis:`;
     });
 
     // Update rate limiter
-    await this.rateLimiter.recordSuccessfulFetch('global', request.context.tenantId);
+    await this.rateLimiter.recordSuccessfulFetch(
+      'global',
+      request.context.tenantId,
+    );
   }
 }

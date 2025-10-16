@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "license": "MIT",
   "type": "module",
-  "bin": { "komp-sim": "dist/cli.js" },
+  "bin": {
+    "komp-sim": "dist/cli.js"
+  },
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "start": "node dist/cli.js"

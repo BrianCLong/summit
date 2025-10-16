@@ -118,7 +118,7 @@ export class ContextualRewardsV2 extends EventEmitter {
     cost: 0.01, // dollars
     quality: 0.95, // 0-1 score
     reliability: 0.99, // 0-1 score
-    security: 0.98 // 0-1 score
+    security: 0.98, // 0-1 score
   };
 
   constructor(config: Partial<ContextualRewardsConfig> = {}) {
@@ -126,16 +126,16 @@ export class ContextualRewardsV2 extends EventEmitter {
     this.config = {
       objectiveWeights: {
         latency: 0.25,
-        cost: 0.20,
+        cost: 0.2,
         quality: 0.25,
         reliability: 0.15,
-        security: 0.15
+        security: 0.15,
       },
       paretoUpdateFrequency: 10, // Update Pareto front every 10 rewards
       maxHistorySize: 1000,
       adaptationRate: 0.1,
       convergenceThreshold: 0.01,
-      ...config
+      ...config,
     };
 
     // Initialize empty Pareto front
@@ -144,12 +144,12 @@ export class ContextualRewardsV2 extends EventEmitter {
       hypervolume: 0,
       spread: 0,
       convergence: 0,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     logger.info('ContextualRewardsV2 initialized', {
       objectiveWeights: this.config.objectiveWeights,
-      paretoUpdateFrequency: this.config.paretoUpdateFrequency
+      paretoUpdateFrequency: this.config.paretoUpdateFrequency,
     });
   }
 
@@ -161,7 +161,7 @@ export class ContextualRewardsV2 extends EventEmitter {
     route: RouteType,
     provider: string,
     rawMetrics: any,
-    context: ExecutionContext
+    context: ExecutionContext,
   ): Promise<MultiObjectiveReward> {
     try {
       const timestamp = new Date();
@@ -171,7 +171,10 @@ export class ContextualRewardsV2 extends EventEmitter {
 
       // Calculate composite score with context-aware weights
       const contextualWeights = this.getContextualWeights(context);
-      const compositeScore = this.calculateCompositeScore(objectives, contextualWeights);
+      const compositeScore = this.calculateCompositeScore(
+        objectives,
+        contextualWeights,
+      );
 
       // Create reward object
       const reward: MultiObjectiveReward = {
@@ -185,13 +188,15 @@ export class ContextualRewardsV2 extends EventEmitter {
         paretoRank: 0, // Will be calculated during Pareto analysis
         dominatedBy: [],
         dominates: [],
-        tradeoffs: this.analyzeTradeoffs(objectives)
+        tradeoffs: this.analyzeTradeoffs(objectives),
       };
 
       // Add to history
       this.rewardHistory.push(reward);
       if (this.rewardHistory.length > this.config.maxHistorySize) {
-        this.rewardHistory = this.rewardHistory.slice(-this.config.maxHistorySize);
+        this.rewardHistory = this.rewardHistory.slice(
+          -this.config.maxHistorySize,
+        );
       }
 
       // Update route metrics
@@ -211,7 +216,7 @@ export class ContextualRewardsV2 extends EventEmitter {
         route,
         provider,
         compositeScore,
-        paretoRank: reward.paretoRank
+        paretoRank: reward.paretoRank,
       });
 
       logger.debug('Multi-objective reward processed', {
@@ -224,8 +229,8 @@ export class ContextualRewardsV2 extends EventEmitter {
           cost: objectives.cost.normalized.toFixed(3),
           quality: objectives.quality.normalized.toFixed(3),
           reliability: objectives.reliability.normalized.toFixed(3),
-          security: objectives.security.normalized.toFixed(3)
-        }
+          security: objectives.security.normalized.toFixed(3),
+        },
       });
 
       return reward;
@@ -234,7 +239,7 @@ export class ContextualRewardsV2 extends EventEmitter {
         error,
         executionId,
         route,
-        provider
+        provider,
       });
       this.emit('reward_error', { error, executionId, route, provider });
       throw error;
@@ -246,18 +251,22 @@ export class ContextualRewardsV2 extends EventEmitter {
    */
   async calculateParetoAwareDelta(
     recentRewards: MultiObjectiveReward[],
-    timeWindowHours: number = 1
+    timeWindowHours: number = 1,
   ): Promise<any> {
     try {
-      const cutoffTime = new Date(Date.now() - timeWindowHours * 60 * 60 * 1000);
-      const windowRewards = recentRewards.filter(r => r.timestamp >= cutoffTime);
+      const cutoffTime = new Date(
+        Date.now() - timeWindowHours * 60 * 60 * 1000,
+      );
+      const windowRewards = recentRewards.filter(
+        (r) => r.timestamp >= cutoffTime,
+      );
 
       if (windowRewards.length === 0) {
         return {
           paretoImprovement: 0,
           dominanceShift: 0,
           hypervolumeIncrease: 0,
-          recommendedWeightAdjustments: {}
+          recommendedWeightAdjustments: {},
         };
       }
 
@@ -268,10 +277,12 @@ export class ContextualRewardsV2 extends EventEmitter {
       const dominanceShift = this.calculateDominanceShift(windowRewards);
 
       // Calculate hypervolume increase
-      const hypervolumeIncrease = this.calculateHypervolumeIncrease(windowRewards);
+      const hypervolumeIncrease =
+        this.calculateHypervolumeIncrease(windowRewards);
 
       // Generate weight adjustment recommendations
-      const recommendedWeightAdjustments = this.generateWeightRecommendations(windowRewards);
+      const recommendedWeightAdjustments =
+        this.generateWeightRecommendations(windowRewards);
 
       const delta = {
         paretoImprovement,
@@ -280,7 +291,7 @@ export class ContextualRewardsV2 extends EventEmitter {
         recommendedWeightAdjustments,
         analysisTimestamp: new Date(),
         timeWindowHours,
-        rewardsAnalyzed: windowRewards.length
+        rewardsAnalyzed: windowRewards.length,
       };
 
       this.emit('pareto_delta_calculated', delta);
@@ -290,12 +301,15 @@ export class ContextualRewardsV2 extends EventEmitter {
         dominanceShift: dominanceShift.toFixed(4),
         hypervolumeIncrease: hypervolumeIncrease.toFixed(4),
         timeWindowHours,
-        rewardsAnalyzed: windowRewards.length
+        rewardsAnalyzed: windowRewards.length,
       });
 
       return delta;
     } catch (error) {
-      logger.error('Failed to calculate Pareto-aware delta', { error, timeWindowHours });
+      logger.error('Failed to calculate Pareto-aware delta', {
+        error,
+        timeWindowHours,
+      });
       throw error;
     }
   }
@@ -319,7 +333,9 @@ export class ContextualRewardsV2 extends EventEmitter {
       metrics.push({ ...routeMetric });
     }
 
-    return metrics.sort((a, b) => b.averageScores.composite - a.averageScores.composite);
+    return metrics.sort(
+      (a, b) => b.averageScores.composite - a.averageScores.composite,
+    );
   }
 
   /**
@@ -331,7 +347,7 @@ export class ContextualRewardsV2 extends EventEmitter {
       underperformingRoutes: this.getUnderperformingRoutes(),
       weightAdjustments: this.getWeightAdjustmentSuggestions(),
       paretoInsights: this.getParetoInsights(),
-      convergenceStatus: this.getConvergenceStatus()
+      convergenceStatus: this.getConvergenceStatus(),
     };
 
     return recommendations;
@@ -339,7 +355,10 @@ export class ContextualRewardsV2 extends EventEmitter {
 
   // Private helper methods
 
-  private calculateObjectiveScores(rawMetrics: any, context: ExecutionContext): MultiObjectiveReward['objectives'] {
+  private calculateObjectiveScores(
+    rawMetrics: any,
+    context: ExecutionContext,
+  ): MultiObjectiveReward['objectives'] {
     // Normalize raw metrics to 0-1 scale (higher is better)
     const latencyScore = Math.max(0, 1 - (rawMetrics.latency || 1000) / 5000); // 5s max
     const costScore = Math.max(0, 1 - (rawMetrics.cost || 1) / 10); // $10 max
@@ -353,40 +372,42 @@ export class ContextualRewardsV2 extends EventEmitter {
         weight: this.config.objectiveWeights.latency,
         normalized: latencyScore,
         target: this.objectiveTargets.latency,
-        performance: this.getPerformanceLevel(latencyScore)
+        performance: this.getPerformanceLevel(latencyScore),
       },
       cost: {
         value: rawMetrics.cost || 1,
         weight: this.config.objectiveWeights.cost,
         normalized: costScore,
         target: this.objectiveTargets.cost,
-        performance: this.getPerformanceLevel(costScore)
+        performance: this.getPerformanceLevel(costScore),
       },
       quality: {
         value: rawMetrics.quality || 0.5,
         weight: this.config.objectiveWeights.quality,
         normalized: qualityScore,
         target: this.objectiveTargets.quality,
-        performance: this.getPerformanceLevel(qualityScore)
+        performance: this.getPerformanceLevel(qualityScore),
       },
       reliability: {
         value: rawMetrics.reliability || 0.8,
         weight: this.config.objectiveWeights.reliability,
         normalized: reliabilityScore,
         target: this.objectiveTargets.reliability,
-        performance: this.getPerformanceLevel(reliabilityScore)
+        performance: this.getPerformanceLevel(reliabilityScore),
       },
       security: {
         value: rawMetrics.security || 0.9,
         weight: this.config.objectiveWeights.security,
         normalized: securityScore,
         target: this.objectiveTargets.security,
-        performance: this.getPerformanceLevel(securityScore)
-      }
+        performance: this.getPerformanceLevel(securityScore),
+      },
     };
   }
 
-  private getPerformanceLevel(score: number): 'excellent' | 'good' | 'fair' | 'poor' {
+  private getPerformanceLevel(
+    score: number,
+  ): 'excellent' | 'good' | 'fair' | 'poor' {
     if (score >= 0.9) return 'excellent';
     if (score >= 0.75) return 'good';
     if (score >= 0.5) return 'fair';
@@ -420,7 +441,10 @@ export class ContextualRewardsV2 extends EventEmitter {
     return baseWeights;
   }
 
-  private calculateCompositeScore(objectives: MultiObjectiveReward['objectives'], weights: any): number {
+  private calculateCompositeScore(
+    objectives: MultiObjectiveReward['objectives'],
+    weights: any,
+  ): number {
     return (
       objectives.latency.normalized * weights.latency +
       objectives.cost.normalized * weights.cost +
@@ -430,13 +454,15 @@ export class ContextualRewardsV2 extends EventEmitter {
     );
   }
 
-  private analyzeTradeoffs(objectives: MultiObjectiveReward['objectives']): TradeoffAnalysis {
+  private analyzeTradeoffs(
+    objectives: MultiObjectiveReward['objectives'],
+  ): TradeoffAnalysis {
     const scores = {
       latency: objectives.latency.normalized,
       cost: objectives.cost.normalized,
       quality: objectives.quality.normalized,
       reliability: objectives.reliability.normalized,
-      security: objectives.security.normalized
+      security: objectives.security.normalized,
     };
 
     return {
@@ -444,11 +470,21 @@ export class ContextualRewardsV2 extends EventEmitter {
       qualityVsCost: scores.quality - scores.cost, // Positive = better quality relative to cost
       securityVsLatency: scores.security - scores.latency, // Positive = better security relative to latency
       reliabilityVsLatency: scores.reliability - scores.latency, // Positive = better reliability relative to latency
-      overallEfficiency: (scores.latency + scores.cost + scores.quality + scores.reliability + scores.security) / 5
+      overallEfficiency:
+        (scores.latency +
+          scores.cost +
+          scores.quality +
+          scores.reliability +
+          scores.security) /
+        5,
     };
   }
 
-  private async updateRouteMetrics(route: RouteType, provider: string, reward: MultiObjectiveReward): Promise<void> {
+  private async updateRouteMetrics(
+    route: RouteType,
+    provider: string,
+    reward: MultiObjectiveReward,
+  ): Promise<void> {
     const key = `${route}:${provider}`;
     let metrics = this.routeMetrics.get(key);
 
@@ -463,11 +499,11 @@ export class ContextualRewardsV2 extends EventEmitter {
           quality: 0,
           reliability: 0,
           security: 0,
-          composite: 0
+          composite: 0,
         },
         paretoRanking: 0,
         consistencyScore: 0,
-        improvementTrend: 0
+        improvementTrend: 0,
       };
     }
 
@@ -480,24 +516,43 @@ export class ContextualRewardsV2 extends EventEmitter {
     // Update average scores
     const recent = metrics.recentRewards;
     metrics.averageScores = {
-      latency: recent.reduce((sum, r) => sum + r.objectives.latency.normalized, 0) / recent.length,
-      cost: recent.reduce((sum, r) => sum + r.objectives.cost.normalized, 0) / recent.length,
-      quality: recent.reduce((sum, r) => sum + r.objectives.quality.normalized, 0) / recent.length,
-      reliability: recent.reduce((sum, r) => sum + r.objectives.reliability.normalized, 0) / recent.length,
-      security: recent.reduce((sum, r) => sum + r.objectives.security.normalized, 0) / recent.length,
-      composite: recent.reduce((sum, r) => sum + r.compositeScore, 0) / recent.length
+      latency:
+        recent.reduce((sum, r) => sum + r.objectives.latency.normalized, 0) /
+        recent.length,
+      cost:
+        recent.reduce((sum, r) => sum + r.objectives.cost.normalized, 0) /
+        recent.length,
+      quality:
+        recent.reduce((sum, r) => sum + r.objectives.quality.normalized, 0) /
+        recent.length,
+      reliability:
+        recent.reduce(
+          (sum, r) => sum + r.objectives.reliability.normalized,
+          0,
+        ) / recent.length,
+      security:
+        recent.reduce((sum, r) => sum + r.objectives.security.normalized, 0) /
+        recent.length,
+      composite:
+        recent.reduce((sum, r) => sum + r.compositeScore, 0) / recent.length,
     };
 
     // Calculate consistency score (lower variance = higher consistency)
-    const compositeScores = recent.map(r => r.compositeScore);
+    const compositeScores = recent.map((r) => r.compositeScore);
     const mean = metrics.averageScores.composite;
-    const variance = compositeScores.reduce((sum, score) => sum + Math.pow(score - mean, 2), 0) / compositeScores.length;
+    const variance =
+      compositeScores.reduce(
+        (sum, score) => sum + Math.pow(score - mean, 2),
+        0,
+      ) / compositeScores.length;
     metrics.consistencyScore = Math.max(0, 1 - Math.sqrt(variance));
 
     // Calculate improvement trend
     if (recent.length >= 10) {
-      const first5 = recent.slice(0, 5).reduce((sum, r) => sum + r.compositeScore, 0) / 5;
-      const last5 = recent.slice(-5).reduce((sum, r) => sum + r.compositeScore, 0) / 5;
+      const first5 =
+        recent.slice(0, 5).reduce((sum, r) => sum + r.compositeScore, 0) / 5;
+      const last5 =
+        recent.slice(-5).reduce((sum, r) => sum + r.compositeScore, 0) / 5;
       metrics.improvementTrend = last5 - first5;
     }
 
@@ -530,7 +585,7 @@ export class ContextualRewardsV2 extends EventEmitter {
     }
 
     // Extract Pareto front (rank 0 solutions)
-    const paretoSolutions = recentRewards.filter(r => r.paretoRank === 0);
+    const paretoSolutions = recentRewards.filter((r) => r.paretoRank === 0);
 
     // Calculate hypervolume
     const hypervolume = this.calculateHypervolume(paretoSolutions);
@@ -546,27 +601,36 @@ export class ContextualRewardsV2 extends EventEmitter {
       hypervolume,
       spread,
       convergence,
-      timestamp: new Date()
+      timestamp: new Date(),
     };
 
     this.emit('pareto_front_updated', {
       solutionCount: paretoSolutions.length,
       hypervolume,
       spread,
-      convergence
+      convergence,
     });
 
     logger.debug('Pareto front updated', {
       solutionCount: paretoSolutions.length,
       hypervolume: hypervolume.toFixed(4),
       spread: spread.toFixed(4),
-      convergence: convergence.toFixed(4)
+      convergence: convergence.toFixed(4),
     });
   }
 
-  private dominates(reward1: MultiObjectiveReward, reward2: MultiObjectiveReward): boolean {
+  private dominates(
+    reward1: MultiObjectiveReward,
+    reward2: MultiObjectiveReward,
+  ): boolean {
     // Check if reward1 dominates reward2 (better in all objectives, strictly better in at least one)
-    const objectives = ['latency', 'cost', 'quality', 'reliability', 'security'];
+    const objectives = [
+      'latency',
+      'cost',
+      'quality',
+      'reliability',
+      'security',
+    ];
     let betterInAll = true;
     let strictlyBetterInOne = false;
 
@@ -596,13 +660,12 @@ export class ContextualRewardsV2 extends EventEmitter {
 
     let hypervolume = 0;
     for (const solution of solutions) {
-      const volume = (
+      const volume =
         solution.objectives.latency.normalized *
         solution.objectives.cost.normalized *
         solution.objectives.quality.normalized *
         solution.objectives.reliability.normalized *
-        solution.objectives.security.normalized
-      );
+        solution.objectives.security.normalized;
       hypervolume += volume;
     }
 
@@ -613,11 +676,17 @@ export class ContextualRewardsV2 extends EventEmitter {
     if (solutions.length < 2) return 0;
 
     // Calculate diversity of solutions in objective space
-    const objectives = ['latency', 'cost', 'quality', 'reliability', 'security'];
+    const objectives = [
+      'latency',
+      'cost',
+      'quality',
+      'reliability',
+      'security',
+    ];
     let totalSpread = 0;
 
     for (const obj of objectives) {
-      const values = solutions.map(s => s.objectives[obj].normalized);
+      const values = solutions.map((s) => s.objectives[obj].normalized);
       const min = Math.min(...values);
       const max = Math.max(...values);
       totalSpread += max - min;
@@ -630,7 +699,9 @@ export class ContextualRewardsV2 extends EventEmitter {
     if (solutions.length === 0) return 0;
 
     // Measure how close solutions are to theoretical optimum
-    const averageComposite = solutions.reduce((sum, s) => sum + s.compositeScore, 0) / solutions.length;
+    const averageComposite =
+      solutions.reduce((sum, s) => sum + s.compositeScore, 0) /
+      solutions.length;
     const theoreticalOptimum = 1.0; // Perfect score in all objectives
 
     return Math.max(0, 1 - Math.abs(theoreticalOptimum - averageComposite));
@@ -639,7 +710,9 @@ export class ContextualRewardsV2 extends EventEmitter {
   private async adaptWeights(reward: MultiObjectiveReward): Promise<void> {
     // Simple adaptive weight learning based on performance feedback
     const contextKey = `${reward.context.priority}_${reward.context.requestType}`;
-    const currentWeights = this.contextualWeights.get(contextKey) || { ...this.config.objectiveWeights };
+    const currentWeights = this.contextualWeights.get(contextKey) || {
+      ...this.config.objectiveWeights,
+    };
 
     // Adjust weights based on performance
     const adaptationRate = this.config.adaptationRate;
@@ -655,7 +728,10 @@ export class ContextualRewardsV2 extends EventEmitter {
         currentWeights[objName] = currentWeight + adaptationRate * 0.1;
       } else if (performance < 0.4) {
         // Poor performance - slightly decrease weight
-        currentWeights[objName] = Math.max(0.05, currentWeight - adaptationRate * 0.1);
+        currentWeights[objName] = Math.max(
+          0.05,
+          currentWeight - adaptationRate * 0.1,
+        );
       }
     }
 
@@ -668,15 +744,21 @@ export class ContextualRewardsV2 extends EventEmitter {
     this.contextualWeights.set(contextKey, currentWeights);
   }
 
-  private calculateParetoImprovement(windowRewards: MultiObjectiveReward[]): number {
+  private calculateParetoImprovement(
+    windowRewards: MultiObjectiveReward[],
+  ): number {
     // Calculate improvement in Pareto front quality
-    const paretoSolutions = windowRewards.filter(r => r.paretoRank === 0);
-    const avgComposite = paretoSolutions.reduce((sum, r) => sum + r.compositeScore, 0) / Math.max(1, paretoSolutions.length);
+    const paretoSolutions = windowRewards.filter((r) => r.paretoRank === 0);
+    const avgComposite =
+      paretoSolutions.reduce((sum, r) => sum + r.compositeScore, 0) /
+      Math.max(1, paretoSolutions.length);
 
     return Math.max(0, avgComposite - 0.7); // Baseline improvement from 0.7
   }
 
-  private calculateDominanceShift(windowRewards: MultiObjectiveReward[]): number {
+  private calculateDominanceShift(
+    windowRewards: MultiObjectiveReward[],
+  ): number {
     // Calculate shifts in dominance relationships
     let dominanceShifts = 0;
 
@@ -692,24 +774,47 @@ export class ContextualRewardsV2 extends EventEmitter {
     return dominanceShifts / Math.max(1, windowRewards.length);
   }
 
-  private calculateHypervolumeIncrease(windowRewards: MultiObjectiveReward[]): number {
+  private calculateHypervolumeIncrease(
+    windowRewards: MultiObjectiveReward[],
+  ): number {
     if (windowRewards.length < 2) return 0;
 
-    const firstHalf = windowRewards.slice(0, Math.floor(windowRewards.length / 2));
-    const secondHalf = windowRewards.slice(Math.floor(windowRewards.length / 2));
+    const firstHalf = windowRewards.slice(
+      0,
+      Math.floor(windowRewards.length / 2),
+    );
+    const secondHalf = windowRewards.slice(
+      Math.floor(windowRewards.length / 2),
+    );
 
-    const hv1 = this.calculateHypervolume(firstHalf.filter(r => r.paretoRank === 0));
-    const hv2 = this.calculateHypervolume(secondHalf.filter(r => r.paretoRank === 0));
+    const hv1 = this.calculateHypervolume(
+      firstHalf.filter((r) => r.paretoRank === 0),
+    );
+    const hv2 = this.calculateHypervolume(
+      secondHalf.filter((r) => r.paretoRank === 0),
+    );
 
     return hv2 - hv1;
   }
 
-  private generateWeightRecommendations(windowRewards: MultiObjectiveReward[]): Record<string, number> {
+  private generateWeightRecommendations(
+    windowRewards: MultiObjectiveReward[],
+  ): Record<string, number> {
     const recommendations: Record<string, number> = {};
-    const objectives = ['latency', 'cost', 'quality', 'reliability', 'security'];
+    const objectives = [
+      'latency',
+      'cost',
+      'quality',
+      'reliability',
+      'security',
+    ];
 
     for (const obj of objectives) {
-      const avgPerformance = windowRewards.reduce((sum, r) => sum + r.objectives[obj].normalized, 0) / windowRewards.length;
+      const avgPerformance =
+        windowRewards.reduce(
+          (sum, r) => sum + r.objectives[obj].normalized,
+          0,
+        ) / windowRewards.length;
       const currentWeight = this.config.objectiveWeights[obj];
 
       if (avgPerformance > 0.8) {
@@ -734,22 +839,24 @@ export class ContextualRewardsV2 extends EventEmitter {
 
   private getBestRoutes(): any[] {
     const routeMetrics = this.getRouteMetrics();
-    return routeMetrics.slice(0, 3).map(r => ({
+    return routeMetrics.slice(0, 3).map((r) => ({
       route: r.route,
       provider: r.provider,
       score: r.averageScores.composite,
-      strengths: this.getRouteStrengths(r)
+      strengths: this.getRouteStrengths(r),
     }));
   }
 
   private getUnderperformingRoutes(): any[] {
     const routeMetrics = this.getRouteMetrics();
-    return routeMetrics.filter(r => r.averageScores.composite < 0.6).map(r => ({
-      route: r.route,
-      provider: r.provider,
-      score: r.averageScores.composite,
-      weaknesses: this.getRouteWeaknesses(r)
-    }));
+    return routeMetrics
+      .filter((r) => r.averageScores.composite < 0.6)
+      .map((r) => ({
+        route: r.route,
+        provider: r.provider,
+        score: r.averageScores.composite,
+        weaknesses: this.getRouteWeaknesses(r),
+      }));
   }
 
   private getRouteStrengths(metrics: RouteMetrics): string[] {
@@ -792,7 +899,7 @@ export class ContextualRewardsV2 extends EventEmitter {
       hypervolume: this.currentParetoFront.hypervolume,
       spread: this.currentParetoFront.spread,
       convergence: this.currentParetoFront.convergence,
-      dominatingRoutes: this.getDominatingRoutes()
+      dominatingRoutes: this.getDominatingRoutes(),
     };
   }
 
@@ -822,7 +929,10 @@ export class ContextualRewardsV2 extends EventEmitter {
       convergence,
       status,
       improving: convergence > 0.6,
-      recommendedAction: convergence < 0.5 ? 'increase_exploration' : 'maintain_current_strategy'
+      recommendedAction:
+        convergence < 0.5
+          ? 'increase_exploration'
+          : 'maintain_current_strategy',
     };
   }
 
@@ -845,7 +955,7 @@ export class ContextualRewardsV2 extends EventEmitter {
       currentParetoFront: this.currentParetoFront,
       routeMetrics: Object.fromEntries(this.routeMetrics),
       contextualWeights: Object.fromEntries(this.contextualWeights),
-      objectiveTargets: this.objectiveTargets
+      objectiveTargets: this.objectiveTargets,
     };
   }
 
@@ -863,7 +973,7 @@ export class ContextualRewardsV2 extends EventEmitter {
     logger.info('State imported', {
       rewardHistory: this.rewardHistory.length,
       paretoSolutions: this.currentParetoFront.solutions.length,
-      routeMetrics: this.routeMetrics.size
+      routeMetrics: this.routeMetrics.size,
     });
   }
 

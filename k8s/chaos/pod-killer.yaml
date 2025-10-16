@@ -2,7 +2,7 @@ apiVersion: batch/v1
 kind: CronJob
 metadata: { name: chaos-pod-killer, namespace: stage }
 spec:
-  schedule: "0 2 * * 3" # weekly Wed 02:00
+  schedule: '0 2 * * 3' # weekly Wed 02:00
   jobTemplate:
     spec:
       template:
@@ -12,7 +12,7 @@ spec:
           containers:
             - name: killer
               image: bitnami/kubectl:latest
-              command: ["/bin/sh","-c"]
+              command: ['/bin/sh', '-c']
               args:
                 - |
                   POD=$(kubectl -n stage get pods -l app.kubernetes.io/name=web -o jsonpath='{.items[0].metadata.name}');

@@ -14,12 +14,8 @@
       "timestamp": "2025-09-26T23:28:25.137166Z",
       "component": "query_router",
       "action": "route_query",
-      "inputs": [
-        "b6b6f5b185bade06"
-      ],
-      "outputs": [
-        "e56f1b6226736868"
-      ],
+      "inputs": ["b6b6f5b185bade06"],
+      "outputs": ["e56f1b6226736868"],
       "metadata": {
         "route_target": "llm_gateway",
         "tenant_context": "TENANT_001"
@@ -33,18 +29,10 @@
       "timestamp": "2025-09-26T23:28:25.137175Z",
       "component": "policy_engine",
       "action": "validate_request",
-      "inputs": [
-        "e56f1b6226736868"
-      ],
-      "outputs": [
-        "3d5e1d8a2e5a648c"
-      ],
+      "inputs": ["e56f1b6226736868"],
+      "outputs": ["3d5e1d8a2e5a648c"],
       "metadata": {
-        "policies_checked": [
-          "residency",
-          "privacy",
-          "budget"
-        ],
+        "policies_checked": ["residency", "privacy", "budget"],
         "all_passed": true
       },
       "duration_ms": 0.045,
@@ -56,12 +44,8 @@
       "timestamp": "2025-09-26T23:28:25.137180Z",
       "component": "llm_gateway",
       "action": "generate_response",
-      "inputs": [
-        "3d5e1d8a2e5a648c"
-      ],
-      "outputs": [
-        "aec381bb8420265f"
-      ],
+      "inputs": ["3d5e1d8a2e5a648c"],
+      "outputs": ["aec381bb8420265f"],
       "metadata": {
         "model": "claude-3.5-sonnet",
         "tokens": 1247,

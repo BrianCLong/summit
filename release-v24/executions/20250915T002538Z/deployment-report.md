@@ -15,9 +15,9 @@
 
 ## Evidence Files
 
--rw-r--r--  1 brianlong  staff    86 Sep 14 18:26 cohort-0.25-evidence.yaml
--rw-r--r--  1 brianlong  staff  3332 Sep 14 18:26 deploy.deploy_log
--rw-r--r--  1 brianlong  staff   257 Sep 14 18:26 manifest.yaml
+-rw-r--r-- 1 brianlong staff 86 Sep 14 18:26 cohort-0.25-evidence.yaml
+-rw-r--r-- 1 brianlong staff 3332 Sep 14 18:26 deploy.deploy_log
+-rw-r--r-- 1 brianlong staff 257 Sep 14 18:26 manifest.yaml
 
 ## Post-Deployment Actions
 
@@ -30,6 +30,7 @@
 ## Emergency Procedures
 
 If issues arise:
+
 ```bash
 /tmp/rollback-pr-dashboard-v24.sh --full-rollback
 ```
@@ -41,4 +42,3 @@ If issues arise:
 ✅ Core deployment completed
 ✅ SLO gates validated
 ✅ Provenance documentation created
-

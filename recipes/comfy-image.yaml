@@ -1,10 +1,9 @@
-name: "Comfy Image Gen"
-description: "Send prompt to Comfy graph"
+name: 'Comfy Image Gen'
+description: 'Send prompt to Comfy graph'
 nodes:
   - id: gen
     type: tool
-    params: { tool: "comfy", graph: "basic.json" }
+    params: { tool: 'comfy', graph: 'basic.json' }
 policies:
   - type: budget
     capUSD: 0.02
-

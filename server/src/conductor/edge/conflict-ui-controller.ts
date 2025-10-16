@@ -34,7 +34,11 @@ export class ConflictUIController {
       }
 
       // Get recent conflicts for entity
-      const history = await this.conflictResolver.getConflictHistory(entityId, tenantId, 10);
+      const history = await this.conflictResolver.getConflictHistory(
+        entityId,
+        tenantId,
+        10,
+      );
 
       if (history.conflicts.length === 0) {
         res.json({
@@ -52,7 +56,8 @@ export class ConflictUIController {
 
       for (const conflict of activeConflicts) {
         const conflictData = JSON.parse(conflict.conflicts);
-        const deltas = await this.conflictResolver.generateConflictDeltas(conflictData);
+        const deltas =
+          await this.conflictResolver.generateConflictDeltas(conflictData);
         allDeltas.push(...deltas);
       }
 
@@ -96,7 +101,11 @@ export class ConflictUIController {
       }
 
       // Get active conflicts
-      const history = await this.conflictResolver.getConflictHistory(entityId, tenantId, 10);
+      const history = await this.conflictResolver.getConflictHistory(
+        entityId,
+        tenantId,
+        10,
+      );
       const activeConflicts = history.conflicts.filter((c) => !c.resolved_at);
 
       if (activeConflicts.length === 0) {
@@ -135,7 +144,9 @@ export class ConflictUIController {
         finalValue: resolution.finalValue,
         rationale:
           resolution.rationale +
-          (resolutionRationale ? ` | User rationale: ${resolutionRationale}` : ''),
+          (resolutionRationale
+            ? ` | User rationale: ${resolutionRationale}`
+            : ''),
         timestamp: resolution.timestamp,
         approvedBy: resolution.approvedBy,
       }));
@@ -178,7 +189,11 @@ export class ConflictUIController {
         return;
       }
 
-      const history = await this.conflictResolver.getConflictHistory(entityId, tenantId, limit);
+      const history = await this.conflictResolver.getConflictHistory(
+        entityId,
+        tenantId,
+        limit,
+      );
 
       // Format for UI consumption
       const formattedHistory = history.conflicts.map((conflict) => ({
@@ -236,8 +251,14 @@ export class ConflictUIController {
 
       for (const entityId of entityIds) {
         try {
-          const history = await this.conflictResolver.getConflictHistory(entityId, tenantId, 10);
-          const activeConflicts = history.conflicts.filter((c) => !c.resolved_at);
+          const history = await this.conflictResolver.getConflictHistory(
+            entityId,
+            tenantId,
+            10,
+          );
+          const activeConflicts = history.conflicts.filter(
+            (c) => !c.resolved_at,
+          );
 
           if (activeConflicts.length > 0) {
             const allFieldConflicts = [];
@@ -287,12 +308,15 @@ export class ConflictUIController {
         results,
         summary: {
           successful: results.filter((r) => r.status === 'success').length,
-          noConflicts: results.filter((r) => r.status === 'no_conflicts').length,
+          noConflicts: results.filter((r) => r.status === 'no_conflicts')
+            .length,
           errors: results.filter((r) => r.status === 'error').length,
         },
       });
     } catch (error) {
-      logger.error('Batch conflict resolution failed', { error: error.message });
+      logger.error('Batch conflict resolution failed', {
+        error: error.message,
+      });
       res.status(500).json({
         code: 'BATCH_RESOLUTION_ERROR',
         message: 'Batch conflict resolution failed',

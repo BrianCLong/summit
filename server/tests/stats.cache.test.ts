@@ -10,7 +10,8 @@ jest.mock('../src/config/database.js', () => {
         ],
       };
     }
-    if (/SELECT COUNT\(\*\)::int AS entities/.test(sql)) return { rows: [{ entities: 42 }] };
+    if (/SELECT COUNT\(\*\)::int AS entities/.test(sql))
+      return { rows: [{ entities: 42 }] };
     if (/SELECT COUNT\(\*\)::int AS relationships/.test(sql))
       return { rows: [{ relationships: 99 }] };
     if (/SELECT COUNT\(\*\)::int AS investigations/.test(sql))

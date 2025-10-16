@@ -23,7 +23,12 @@ import { randomUUID } from 'crypto';
 
 export interface IncidentEvent {
   id: string;
-  type: 'correctness_floor_breach' | 'performance_degradation' | 'security_violation' | 'budget_breach' | 'custom';
+  type:
+    | 'correctness_floor_breach'
+    | 'performance_degradation'
+    | 'security_violation'
+    | 'budget_breach'
+    | 'custom';
   severity: 'low' | 'medium' | 'high' | 'critical';
   tenantId: string;
   appId: string;
@@ -98,7 +103,11 @@ export class IncidentAutoReweighter extends EventEmitter {
   private restorationTimers: Map<string, NodeJS.Timeout> = new Map();
   private isProcessing: boolean = false;
 
-  constructor(redis: Redis, logger: Logger, config: Partial<ReweightConfig> = {}) {
+  constructor(
+    redis: Redis,
+    logger: Logger,
+    config: Partial<ReweightConfig> = {},
+  ) {
     super();
     this.redis = redis;
     this.logger = logger;
@@ -180,8 +189,12 @@ export class IncidentAutoReweighter extends EventEmitter {
           // Restore dates from ISO strings
           reweight.startTime = new Date(reweight.startTime);
           reweight.endTime = new Date(reweight.endTime);
-          reweight.originalSettings.timestamp = new Date(reweight.originalSettings.timestamp);
-          reweight.reweightedSettings.timestamp = new Date(reweight.reweightedSettings.timestamp);
+          reweight.originalSettings.timestamp = new Date(
+            reweight.originalSettings.timestamp,
+          );
+          reweight.reweightedSettings.timestamp = new Date(
+            reweight.reweightedSettings.timestamp,
+          );
 
           if (reweight.status === 'active' && new Date() < reweight.endTime) {
             this.activeReweights.set(reweight.id, reweight);
@@ -249,7 +262,8 @@ export class IncidentAutoReweighter extends EventEmitter {
           incident: {
             type: incident.type,
             severity: incident.severity,
-            threshold: this.config.triggerThresholds[incident.type][incident.severity],
+            threshold:
+              this.config.triggerThresholds[incident.type][incident.severity],
           },
           component: 'IncidentAutoReweighter',
         });
@@ -259,7 +273,10 @@ export class IncidentAutoReweighter extends EventEmitter {
       // Check for existing active reweight for this app
       const existingKey = `${incident.tenantId}:${incident.appId}`;
       const existingReweight = Array.from(this.activeReweights.values()).find(
-        r => r.tenantId === incident.tenantId && r.appId === incident.appId && r.status === 'active'
+        (r) =>
+          r.tenantId === incident.tenantId &&
+          r.appId === incident.appId &&
+          r.status === 'active',
       );
 
       if (existingReweight) {
@@ -278,7 +295,8 @@ export class IncidentAutoReweighter extends EventEmitter {
       // Check concurrent incident limit
       if (this.activeReweights.size >= this.config.maxConcurrentIncidents) {
         this.logger.error({
-          message: 'Maximum concurrent incidents reached, cannot create new reweight',
+          message:
+            'Maximum concurrent incidents reached, cannot create new reweight',
           maxConcurrent: this.config.maxConcurrentIncidents,
           currentActive: this.activeReweights.size,
           incidentId: incident.id,
@@ -288,7 +306,10 @@ export class IncidentAutoReweighter extends EventEmitter {
       }
 
       // Get current settings from the quantum app
-      const currentSettings = await this.getCurrentAppSettings(incident.tenantId, incident.appId);
+      const currentSettings = await this.getCurrentAppSettings(
+        incident.tenantId,
+        incident.appId,
+      );
       if (!currentSettings) {
         this.logger.error({
           message: 'Could not retrieve current app settings',
@@ -334,7 +355,6 @@ export class IncidentAutoReweighter extends EventEmitter {
       });
 
       return true;
-
     } catch (error) {
       this.logger.error({
         message: 'Failed to process incident for auto-reweight',
@@ -356,7 +376,10 @@ export class IncidentAutoReweighter extends EventEmitter {
     return thresholds[incident.severity] || false;
   }
 
-  private async getCurrentAppSettings(tenantId: string, appId: string): Promise<any> {
+  private async getCurrentAppSettings(
+    tenantId: string,
+    appId: string,
+  ): Promise<any> {
     try {
       // Get settings from Redis state manager
       const key = `qam:state:${tenantId}:${appId}:current`;
@@ -383,13 +406,17 @@ export class IncidentAutoReweighter extends EventEmitter {
     }
   }
 
-  private async createReweight(incident: IncidentEvent, currentSettings: any): Promise<ActiveReweight> {
+  private async createReweight(
+    incident: IncidentEvent,
+    currentSettings: any,
+  ): Promise<ActiveReweight> {
     const reweightId = randomUUID();
     const now = new Date();
     const endTime = new Date(now.getTime() + this.config.pinDurationMs);
 
     // Calculate new explore rate (reduced by configured factor)
-    const newExploreRate = currentSettings.exploreRate * (1 - this.config.exploreReduction);
+    const newExploreRate =
+      currentSettings.exploreRate * (1 - this.config.exploreReduction);
 
     const reweight: ActiveReweight = {
       id: reweightId,
@@ -436,7 +463,11 @@ export class IncidentAutoReweighter extends EventEmitter {
 
       // Also set an incident flag
       const incidentKey = `qam:incident:${reweight.tenantId}:${reweight.appId}`;
-      await this.redis.setex(incidentKey, Math.ceil(this.config.pinDurationMs / 1000), reweight.incidentId);
+      await this.redis.setex(
+        incidentKey,
+        Math.ceil(this.config.pinDurationMs / 1000),
+        reweight.incidentId,
+      );
 
       return true;
     } catch (error) {
@@ -455,7 +486,7 @@ export class IncidentAutoReweighter extends EventEmitter {
     await this.redis.setex(
       key,
       Math.ceil(this.config.pinDurationMs / 1000) + 3600, // Add 1 hour buffer
-      JSON.stringify(reweight)
+      JSON.stringify(reweight),
     );
   }
 
@@ -486,10 +517,15 @@ export class IncidentAutoReweighter extends EventEmitter {
     });
   }
 
-  private async extendReweight(existingReweight: ActiveReweight, newIncident: IncidentEvent): Promise<void> {
+  private async extendReweight(
+    existingReweight: ActiveReweight,
+    newIncident: IncidentEvent,
+  ): Promise<void> {
     // Extend the end time
     const now = new Date();
-    existingReweight.endTime = new Date(now.getTime() + this.config.pinDurationMs);
+    existingReweight.endTime = new Date(
+      now.getTime() + this.config.pinDurationMs,
+    );
 
     // Clear existing timer and schedule new one
     const existingTimer = this.restorationTimers.get(existingReweight.id);
@@ -582,7 +618,6 @@ export class IncidentAutoReweighter extends EventEmitter {
       });
 
       return true;
-
     } catch (error) {
       this.logger.error({
         message: 'Failed to restore original settings',
@@ -601,7 +636,8 @@ export class IncidentAutoReweighter extends EventEmitter {
    */
   async manualRestore(tenantId: string, appId: string): Promise<boolean> {
     const reweight = Array.from(this.activeReweights.values()).find(
-      r => r.tenantId === tenantId && r.appId === appId && r.status === 'active'
+      (r) =>
+        r.tenantId === tenantId && r.appId === appId && r.status === 'active',
     );
 
     if (!reweight) {
@@ -663,12 +699,15 @@ export class IncidentAutoReweighter extends EventEmitter {
 
     // Update averages
     this.metrics.averageResponseTime =
-      (this.metrics.averageResponseTime * (this.metrics.totalIncidents - 1) + responseTime) /
+      (this.metrics.averageResponseTime * (this.metrics.totalIncidents - 1) +
+        responseTime) /
       this.metrics.totalIncidents;
 
     // Update counters
-    this.metrics.incidentsByType[incident.type] = (this.metrics.incidentsByType[incident.type] || 0) + 1;
-    this.metrics.incidentsBySeverity[incident.severity] = (this.metrics.incidentsBySeverity[incident.severity] || 0) + 1;
+    this.metrics.incidentsByType[incident.type] =
+      (this.metrics.incidentsByType[incident.type] || 0) + 1;
+    this.metrics.incidentsBySeverity[incident.severity] =
+      (this.metrics.incidentsBySeverity[incident.severity] || 0) + 1;
   }
 
   private async shutdown(): Promise<void> {

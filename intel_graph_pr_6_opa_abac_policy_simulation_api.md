@@ -8,6 +8,7 @@ This package wires **OPA ABAC** into the API for request/field‑level checks an
 
 **Branch:** `feature/api-opa-abac`  
 **Open PR:**
+
 ```bash
 git checkout -b feature/api-opa-abac
 # apply patches below, commit, push
@@ -271,6 +272,7 @@ gh pr create -t "API OPA ABAC + Policy Simulation" -b "OPA‑backed ABAC for que
 - Simulate policy: `make policy.sim`  
   Expect `{ allow: true/false, fields: [..], reason }`.
 - Query with ABAC enforced:
+
 ```bash
 curl -s http://localhost:4000/ \
   -H 'content-type: application/json' \
@@ -287,4 +289,3 @@ curl -s http://localhost:4000/ \
 - Replace header‑based user parsing with JWT/OIDC (JWKS) and propagate `purpose`, `legalBasis`, `license` in OPA input.
 - Add **policy simulation view** in UI (admin‑only) and snapshot policies per release (Prov‑Ledger link).
 - Expand Rego for time‑bound access, case scoping, and data‑license compatibility checks.
-

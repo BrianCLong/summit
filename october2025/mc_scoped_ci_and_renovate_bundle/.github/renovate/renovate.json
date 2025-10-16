@@ -1,5 +1,3 @@
 {
-  "extends": [
-    "github>BrianCLong/.github//renovate/default.json5"
-  ]
+  "extends": ["github>BrianCLong/.github//renovate/default.json5"]
 }

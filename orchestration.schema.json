@@ -1,6 +1,13 @@
 {
   "type": "object",
-  "required": ["env", "policies", "routing", "observability", "fastlane", "friction_alerts"],
+  "required": [
+    "env",
+    "policies",
+    "routing",
+    "observability",
+    "fastlane",
+    "friction_alerts"
+  ],
   "properties": {
     "env": {
       "type": "object",

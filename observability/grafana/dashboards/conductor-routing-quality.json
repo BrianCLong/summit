@@ -10,7 +10,9 @@
       "type": "timeseries",
       "title": "+Win‑Rate vs Baseline (Golden Sets)",
       "gridPos": { "h": 8, "w": 24, "x": 0, "y": 0 },
-      "targets": [{ "expr": "conductor_routing_winrate_delta_pp", "legendFormat": "Δpp" }]
+      "targets": [
+        { "expr": "conductor_routing_winrate_delta_pp", "legendFormat": "Δpp" }
+      ]
     },
     {
       "type": "stat",

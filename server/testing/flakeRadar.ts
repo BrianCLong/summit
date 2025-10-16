@@ -1,5 +1,5 @@
-import { logger } from "../utils/logger";
-import { recordTestMetrics } from "../observability/metrics";
+import { logger } from '../utils/logger';
+import { recordTestMetrics } from '../observability/metrics';
 
 export interface FlakeAnalysis {
   testName: string;
@@ -43,12 +43,12 @@ export class FlakeRadar {
       flakeThreshold: 0.05, // 5% failure rate
       confidenceThreshold: 0.7,
       maxHistoryDays: 30,
-    }
+    },
   ) {}
 
   recordTestRun(run: TestRun): void {
     const testKey = `${run.suite}::${run.testName}`;
-    
+
     if (!this.testHistory.has(testKey)) {
       this.testHistory.set(testKey, []);
     }
@@ -57,39 +57,48 @@ export class FlakeRadar {
     history.push(run);
 
     // Keep only recent history
-    const cutoff = new Date(Date.now() - this.options.maxHistoryDays * 24 * 60 * 60 * 1000);
-    this.testHistory.set(testKey, history.filter(r => r.timestamp >= cutoff));
+    const cutoff = new Date(
+      Date.now() - this.options.maxHistoryDays * 24 * 60 * 60 * 1000,
+    );
+    this.testHistory.set(
+      testKey,
+      history.filter((r) => r.timestamp >= cutoff),
+    );
 
     // Trigger flake analysis if we have enough runs
     if (history.length >= this.options.minRuns) {
       const analysis = this.analyzeFlake(testKey, history);
       if (analysis.flakeRate >= this.options.flakeThreshold) {
         this.flakeAnalyses.set(testKey, analysis);
-        
-        if (analysis.quarantineRecommended && analysis.confidence >= this.options.confidenceThreshold) {
+
+        if (
+          analysis.quarantineRecommended &&
+          analysis.confidence >= this.options.confidenceThreshold
+        ) {
           this.recommendQuarantine(testKey, analysis);
         }
       }
     }
 
-    logger.debug("Test run recorded", { 
-      testKey, 
+    logger.debug('Test run recorded', {
+      testKey,
       status: run.status,
-      totalRuns: history.length 
+      totalRuns: history.length,
     });
   }
 
   private analyzeFlake(testKey: string, history: TestRun[]): FlakeAnalysis {
-    const failures = history.filter(r => r.status === 'fail');
-    const passes = history.filter(r => r.status === 'pass');
+    const failures = history.filter((r) => r.status === 'fail');
+    const passes = history.filter((r) => r.status === 'pass');
     const flakeRate = failures.length / history.length;
 
     // Detect flake patterns
     const evidence: FlakeEvidence[] = [];
     const pattern = this.detectFlakePattern(history, evidence);
-    
+
     // Calculate confidence based on evidence strength
-    const confidence = evidence.reduce((sum, e) => sum + e.strength, 0) / evidence.length || 0;
+    const confidence =
+      evidence.reduce((sum, e) => sum + e.strength, 0) / evidence.length || 0;
 
     const analysis: FlakeAnalysis = {
       testName: history[0].testName,
@@ -104,7 +113,7 @@ export class FlakeRadar {
       owner: this.findTestOwner(testKey),
     };
 
-    logger.info("Flake analysis completed", {
+    logger.info('Flake analysis completed', {
       testKey,
       flakeRate: (flakeRate * 100).toFixed(1) + '%',
       pattern,
@@ -114,9 +123,12 @@ export class FlakeRadar {
     return analysis;
   }
 
-  private detectFlakePattern(history: TestRun[], evidence: FlakeEvidence[]): FlakeAnalysis['pattern'] {
-    const failures = history.filter(r => r.status === 'fail');
-    const passes = history.filter(r => r.status === 'pass');
+  private detectFlakePattern(
+    history: TestRun[],
+    evidence: FlakeEvidence[],
+  ): FlakeAnalysis['pattern'] {
+    const failures = history.filter((r) => r.status === 'fail');
+    const passes = history.filter((r) => r.status === 'pass');
 
     // Time-dependent pattern
     const timePattern = this.detectTimePattern(failures, passes);
@@ -142,16 +154,23 @@ export class FlakeRadar {
     return 'unknown';
   }
 
-  private detectTimePattern(failures: TestRun[], passes: TestRun[]): FlakeEvidence {
+  private detectTimePattern(
+    failures: TestRun[],
+    passes: TestRun[],
+  ): FlakeEvidence {
     // Check if failures cluster around specific times
-    const failureHours = failures.map(f => f.timestamp.getHours());
-    const passHours = passes.map(p => p.timestamp.getHours());
+    const failureHours = failures.map((f) => f.timestamp.getHours());
+    const passHours = passes.map((p) => p.timestamp.getHours());
 
     // Simple time clustering - in reality would use more sophisticated analysis
     const failureModeHour = this.findMode(failureHours);
-    const passesAtFailureHour = passHours.filter(h => h === failureModeHour).length;
-    const totalAtFailureHour = failureHours.filter(h => h === failureModeHour).length + passesAtFailureHour;
-    
+    const passesAtFailureHour = passHours.filter(
+      (h) => h === failureModeHour,
+    ).length;
+    const totalAtFailureHour =
+      failureHours.filter((h) => h === failureModeHour).length +
+      passesAtFailureHour;
+
     const strength = totalAtFailureHour > 3 ? 0.7 : 0.3;
 
     return {
@@ -161,11 +180,16 @@ export class FlakeRadar {
     };
   }
 
-  private detectResourcePattern(failures: TestRun[], passes: TestRun[]): FlakeEvidence {
+  private detectResourcePattern(
+    failures: TestRun[],
+    passes: TestRun[],
+  ): FlakeEvidence {
     // Analyze if failures correlate with resource usage patterns
     // Mock implementation - would integrate with system metrics
-    const avgFailureDuration = failures.reduce((sum, f) => sum + f.duration, 0) / failures.length;
-    const avgPassDuration = passes.reduce((sum, p) => sum + p.duration, 0) / passes.length;
+    const avgFailureDuration =
+      failures.reduce((sum, f) => sum + f.duration, 0) / failures.length;
+    const avgPassDuration =
+      passes.reduce((sum, p) => sum + p.duration, 0) / passes.length;
 
     const durationRatio = avgFailureDuration / avgPassDuration;
     const strength = Math.abs(durationRatio - 1) > 0.5 ? 0.8 : 0.2;
@@ -181,13 +205,14 @@ export class FlakeRadar {
     // Look for alternating pass/fail patterns
     let alternations = 0;
     for (let i = 1; i < history.length; i++) {
-      if (history[i].status !== history[i-1].status) {
+      if (history[i].status !== history[i - 1].status) {
         alternations++;
       }
     }
 
     const alternationRate = alternations / (history.length - 1);
-    const strength = alternationRate > 0.4 ? 0.9 : alternationRate > 0.2 ? 0.6 : 0.1;
+    const strength =
+      alternationRate > 0.4 ? 0.9 : alternationRate > 0.2 ? 0.6 : 0.1;
 
     return {
       type: 'concurrency',
@@ -197,19 +222,25 @@ export class FlakeRadar {
   }
 
   private findMode(numbers: number[]): number {
-    const counts = numbers.reduce((acc, n) => {
-      acc[n] = (acc[n] || 0) + 1;
-      return acc;
-    }, {} as Record<number, number>);
+    const counts = numbers.reduce(
+      (acc, n) => {
+        acc[n] = (acc[n] || 0) + 1;
+        return acc;
+      },
+      {} as Record<number, number>,
+    );
 
-    return parseInt(Object.entries(counts).sort(([,a], [,b]) => b - a)[0]?.[0] || "0");
+    return parseInt(
+      Object.entries(counts).sort(([, a], [, b]) => b - a)[0]?.[0] || '0',
+    );
   }
 
   private findTestOwner(testKey: string): string | undefined {
     // Mock implementation - would integrate with CODEOWNERS or git blame
     if (testKey.includes('auth')) return 'auth-team';
     if (testKey.includes('api')) return 'backend-team';
-    if (testKey.includes('ui') || testKey.includes('component')) return 'frontend-team';
+    if (testKey.includes('ui') || testKey.includes('component'))
+      return 'frontend-team';
     return 'platform-team';
   }
 
@@ -219,8 +250,8 @@ export class FlakeRadar {
     }
 
     this.quarantine.add(testKey);
-    
-    logger.warn("Test quarantine recommended", {
+
+    logger.warn('Test quarantine recommended', {
       testKey,
       flakeRate: (analysis.flakeRate * 100).toFixed(1) + '%',
       pattern: analysis.pattern,
@@ -237,11 +268,14 @@ export class FlakeRadar {
     this.createQuarantineIssue(testKey, analysis);
   }
 
-  private async createQuarantineIssue(testKey: string, analysis: FlakeAnalysis): Promise<void> {
+  private async createQuarantineIssue(
+    testKey: string,
+    analysis: FlakeAnalysis,
+  ): Promise<void> {
     // Mock implementation - would create actual GitHub issue
     const issueBody = this.generateQuarantineIssueBody(testKey, analysis);
-    
-    logger.info("Quarantine issue would be created", {
+
+    logger.info('Quarantine issue would be created', {
       testKey,
       owner: analysis.owner,
       title: `Flaky test detected: ${testKey}`,
@@ -249,7 +283,10 @@ export class FlakeRadar {
     });
   }
 
-  private generateQuarantineIssueBody(testKey: string, analysis: FlakeAnalysis): string {
+  private generateQuarantineIssueBody(
+    testKey: string,
+    analysis: FlakeAnalysis,
+  ): string {
     return `# 🔥 Flaky Test Quarantine Alert
 
 **Test:** \`${testKey}\`
@@ -262,7 +299,7 @@ Total runs: ${analysis.totalRuns}
 Failures: ${analysis.failures}
 
 ## Evidence
-${analysis.evidence.map(e => `- **${e.type}**: ${e.description} (strength: ${(e.strength * 100).toFixed(0)}%)`).join('\n')}
+${analysis.evidence.map((e) => `- **${e.type}**: ${e.description} (strength: ${(e.strength * 100).toFixed(0)}%)`).join('\n')}
 
 ## Recommended Actions
 ${this.generateRecommendations(analysis)}
@@ -279,31 +316,31 @@ This test has been automatically added to the quarantine list and will be skippe
 
     switch (analysis.pattern) {
       case 'time-dependent':
-        recommendations.push("- Add explicit waits or timeouts");
-        recommendations.push("- Mock time-dependent dependencies");
-        recommendations.push("- Review async operations for race conditions");
+        recommendations.push('- Add explicit waits or timeouts');
+        recommendations.push('- Mock time-dependent dependencies');
+        recommendations.push('- Review async operations for race conditions');
         break;
-        
+
       case 'resource-dependent':
-        recommendations.push("- Check for shared resources between tests");
-        recommendations.push("- Increase timeout values");
-        recommendations.push("- Review memory or CPU constraints");
+        recommendations.push('- Check for shared resources between tests');
+        recommendations.push('- Increase timeout values');
+        recommendations.push('- Review memory or CPU constraints');
         break;
-        
+
       case 'intermittent':
-        recommendations.push("- Review test isolation and cleanup");
-        recommendations.push("- Check for order-dependent tests");
-        recommendations.push("- Investigate concurrency issues");
+        recommendations.push('- Review test isolation and cleanup');
+        recommendations.push('- Check for order-dependent tests');
+        recommendations.push('- Investigate concurrency issues');
         break;
-        
+
       default:
-        recommendations.push("- Review test for non-deterministic behavior");
-        recommendations.push("- Add more detailed logging");
-        recommendations.push("- Consider test environment differences");
+        recommendations.push('- Review test for non-deterministic behavior');
+        recommendations.push('- Add more detailed logging');
+        recommendations.push('- Consider test environment differences');
     }
 
-    recommendations.push("- Run test 100+ times locally to reproduce");
-    recommendations.push("- Add retry logic as temporary mitigation");
+    recommendations.push('- Run test 100+ times locally to reproduce');
+    recommendations.push('- Add retry logic as temporary mitigation');
 
     return recommendations.join('\n');
   }
@@ -328,7 +365,7 @@ This test has been automatically added to the quarantine list and will be skippe
   removeFromQuarantine(testKey: string): boolean {
     if (this.quarantine.delete(testKey)) {
       this.flakeAnalyses.delete(testKey);
-      logger.info("Test removed from quarantine", { testKey });
+      logger.info('Test removed from quarantine', { testKey });
       return true;
     }
     return false;
@@ -343,13 +380,17 @@ This test has been automatically added to the quarantine list and will be skippe
     const allTests = this.testHistory.size;
     const flakyTests = this.flakeAnalyses.size;
     const quarantinedTests = this.quarantine.size;
-    
+
     // Calculate overall flake rate
-    const totalRuns = Array.from(this.testHistory.values())
-      .reduce((sum, history) => sum + history.length, 0);
-    
-    const totalFailures = Array.from(this.testHistory.values())
-      .reduce((sum, history) => sum + history.filter(r => r.status === 'fail').length, 0);
+    const totalRuns = Array.from(this.testHistory.values()).reduce(
+      (sum, history) => sum + history.length,
+      0,
+    );
+
+    const totalFailures = Array.from(this.testHistory.values()).reduce(
+      (sum, history) => sum + history.filter((r) => r.status === 'fail').length,
+      0,
+    );
 
     const overallFlakeRate = totalRuns > 0 ? totalFailures / totalRuns : 0;
 
@@ -376,14 +417,18 @@ This test has been automatically added to the quarantine list and will be skippe
 - **Overall Flake Rate:** ${(stats.overallFlakeRate * 100).toFixed(2)}%
 
 ## Top Flaky Tests
-${topFlakes.map((analysis, i) => 
-  `${i+1}. \`${analysis.suite}::${analysis.testName}\` - ${(analysis.flakeRate * 100).toFixed(1)}% (${analysis.pattern})`
-).join('\n')}
+${topFlakes
+  .map(
+    (analysis, i) =>
+      `${i + 1}. \`${analysis.suite}::${analysis.testName}\` - ${(analysis.flakeRate * 100).toFixed(1)}% (${analysis.pattern})`,
+  )
+  .join('\n')}
 
 ## Recommendations
-${stats.overallFlakeRate > 0.05 ? 
-  "🚨 Flake rate above 5% threshold. Focus on test stability improvements." :
-  "✅ Flake rate within acceptable range."
+${
+  stats.overallFlakeRate > 0.05
+    ? '🚨 Flake rate above 5% threshold. Focus on test stability improvements.'
+    : '✅ Flake rate within acceptable range.'
 }
 
 ---

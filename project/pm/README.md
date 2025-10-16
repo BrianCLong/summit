@@ -6,4 +6,3 @@
 4. Verify hierarchy (Epics → Stories → Sub-tasks) in preview → Import.
 
 > Source of truth is the CSV attached in Day-1 handoff. Replace the `.placeholder` file with the real CSV before merge.
-

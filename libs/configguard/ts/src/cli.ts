@@ -19,14 +19,25 @@ const program = new Command();
 
 program
   .name('configguard')
-  .description('Validate configuration files using JSON Schema with env interpolation support.')
+  .description(
+    'Validate configuration files using JSON Schema with env interpolation support.',
+  )
   .option('--schema <path>', 'Path to JSON Schema document for validation')
   .option('--dir <path>', 'Directory containing configuration files', '.')
   .option('--format <format>', 'Output format (text|json)', 'text')
   .option('--enforce <mode>', 'Severity mode: warn (default) or fail', 'warn')
-  .option('--allow-env <list>', 'Comma separated allow list of environment variables')
-  .option('--deny-env <list>', 'Comma separated deny list of environment variables')
-  .option('--defaults <list>', 'Comma separated KEY=VALUE defaults for missing environment variables')
+  .option(
+    '--allow-env <list>',
+    'Comma separated allow list of environment variables',
+  )
+  .option(
+    '--deny-env <list>',
+    'Comma separated deny list of environment variables',
+  )
+  .option(
+    '--defaults <list>',
+    'Comma separated KEY=VALUE defaults for missing environment variables',
+  )
   .action(run);
 
 program.parseAsync().catch((error) => {
@@ -45,11 +56,13 @@ async function run(options: CliOptions) {
   const entries = await fg(patterns, {
     cwd: options.dir,
     absolute: true,
-    dot: false
+    dot: false,
   });
 
   if (!entries.length) {
-    console.warn(chalk.yellow(`No configuration files found in ${options.dir}`));
+    console.warn(
+      chalk.yellow(`No configuration files found in ${options.dir}`),
+    );
     return;
   }
 
@@ -59,7 +72,7 @@ async function run(options: CliOptions) {
   for (const file of entries) {
     const result = loadConfig(file, options.schema, {
       interpolation: policy,
-      strict: false
+      strict: false,
     });
 
     const errors = result.diagnostics.filter((d) => d.severity === 'error');
@@ -69,8 +82,8 @@ async function run(options: CliOptions) {
       allDiagnostics.push(
         ...result.diagnostics.map((diag) => ({
           file,
-          ...diag
-        }))
+          ...diag,
+        })),
       );
     } else {
       if (!result.diagnostics.length) {
@@ -78,9 +91,12 @@ async function run(options: CliOptions) {
       } else {
         for (const diag of result.diagnostics) {
           const color = diag.severity === 'error' ? chalk.red : chalk.yellow;
-          const position = diag.line && diag.column ? `${diag.line}:${diag.column}` : '';
+          const position =
+            diag.line && diag.column ? `${diag.line}:${diag.column}` : '';
           console.log(
-            color(`${diag.severity.toUpperCase()} ${file}${position ? `:${position}` : ''} ${diag.message}`)
+            color(
+              `${diag.severity.toUpperCase()} ${file}${position ? `:${position}` : ''} ${diag.message}`,
+            ),
           );
           if (diag.hint) {
             console.log(color(`  hint: ${diag.hint}`));
@@ -102,7 +118,10 @@ async function run(options: CliOptions) {
 
   if (options.format === 'json') {
     console.log(JSON.stringify({ diagnostics: allDiagnostics }, null, 2));
-    if (options.enforce === 'fail' && allDiagnostics.some((d) => d.severity === 'error')) {
+    if (
+      options.enforce === 'fail' &&
+      allDiagnostics.some((d) => d.severity === 'error')
+    ) {
       process.exitCode = 1;
     }
   }
@@ -125,7 +144,7 @@ function buildPolicy(options: CliOptions): InterpolationPolicy {
       splitList(options.defaults).map((entry) => {
         const [key, ...rest] = entry.split('=');
         return [key, rest.join('=')];
-      })
+      }),
     );
   }
 

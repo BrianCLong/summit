@@ -2,7 +2,7 @@ apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata: { name: web, namespace: prod }
 spec:
-  hosts: ["web"]
+  hosts: ['web']
   http:
     - route:
         - destination: { host: web, subset: stable, weight: 100 }

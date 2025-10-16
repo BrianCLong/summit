@@ -1,11 +1,19 @@
 import { Pool } from 'pg';
 const pg = new Pool({ connectionString: process.env.DATABASE_URL });
 
-type Ev = { run_id: string; event: string; payload: any; lamport: number; region: string };
+type Ev = {
+  run_id: string;
+  event: string;
+  payload: any;
+  lamport: number;
+  region: string;
+};
 
 export async function reduce(events: Ev[]) {
   // deterministic replay (L, then region tie-breaker)
-  for (const e of events.sort((a, b) => a.lamport - b.lamport || a.region.localeCompare(b.region))) {
+  for (const e of events.sort(
+    (a, b) => a.lamport - b.lamport || a.region.localeCompare(b.region),
+  )) {
     switch (e.event) {
       case 'run.start':
         await pg.query(
@@ -16,7 +24,10 @@ export async function reduce(events: Ev[]) {
         );
         break;
       case 'step.done':
-        await pg.query(`INSERT INTO run_event(run_id,kind,payload) VALUES ($1,'step.done',$2)`, [e.run_id, e.payload || {}]);
+        await pg.query(
+          `INSERT INTO run_event(run_id,kind,payload) VALUES ($1,'step.done',$2)`,
+          [e.run_id, e.payload || {}],
+        );
         break;
       case 'attach.artifact':
         await pg.query(
@@ -26,7 +37,10 @@ export async function reduce(events: Ev[]) {
         );
         break;
       case 'run.end':
-        await pg.query(`UPDATE run SET status=$2, finished_at=now() WHERE id=$1`, [e.run_id, e.payload?.status || 'DONE']);
+        await pg.query(
+          `UPDATE run SET status=$2, finished_at=now() WHERE id=$1`,
+          [e.run_id, e.payload?.status || 'DONE'],
+        );
         break;
       default:
         // ignore unknowns
@@ -34,4 +48,3 @@ export async function reduce(events: Ev[]) {
     }
   }
 }
-

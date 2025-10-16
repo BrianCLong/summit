@@ -49,7 +49,9 @@ const server = http.createServer((req, res) => {
       };
 
       try {
-        const body = JSON.parse(Buffer.concat(chunks).toString('utf-8') || '{}');
+        const body = JSON.parse(
+          Buffer.concat(chunks).toString('utf-8') || '{}',
+        );
         if (body.query && body.query.includes('IntrospectionQuery')) {
           response = {
             data: {

@@ -152,7 +152,10 @@ LOG_LEVEL=info
 async function setupEnvironment() {
   const envFile = path.join(serverDir, '.env');
   const envExampleFile = path.join(serverDir, '.env.example');
-  const envProductionTemplateFile = path.join(serverDir, '.env.production.template');
+  const envProductionTemplateFile = path.join(
+    serverDir,
+    '.env.production.template',
+  );
 
   console.log('🔐 IntelGraph Environment Setup');
   console.log('================================');
@@ -188,7 +191,9 @@ async function setupEnvironment() {
   console.log('');
   console.log('Next steps:');
   console.log('1. Review and customize .env file as needed');
-  console.log('2. Start database services: docker-compose -f docker-compose.db.yml up -d');
+  console.log(
+    '2. Start database services: docker-compose -f docker-compose.db.yml up -d',
+  );
   console.log('3. Run migrations: npm run migrate');
   console.log('4. Start the server: npm run dev');
   console.log('');

@@ -3,7 +3,12 @@ import { writeAudit } from '../utils/audit.js';
 
 interface PolicySpec {
   action: string;
-  getResource?: (parent: any, args: any, context: any, info: any) => Promise<any> | any;
+  getResource?: (
+    parent: any,
+    args: any,
+    context: any,
+    info: any,
+  ) => Promise<any> | any;
 }
 
 export class PolicyError extends Error {
@@ -25,10 +30,15 @@ export class PolicyError extends Error {
   }
 }
 
-export function withPolicy<T extends (...args: any[]) => any>(resolver: T, spec: PolicySpec): T {
+export function withPolicy<T extends (...args: any[]) => any>(
+  resolver: T,
+  spec: PolicySpec,
+): T {
   return (async (parent: any, args: any, context: any, info: any) => {
     const user = context.user || {};
-    const resource = spec.getResource ? await spec.getResource(parent, args, context, info) : {};
+    const resource = spec.getResource
+      ? await spec.getResource(parent, args, context, info)
+      : {};
     const decision = await evaluate(spec.action, user, resource, {});
     const requestId = context?.req?.id || context.requestId;
     const traceId = context?.traceId;

@@ -5,39 +5,51 @@
     {
       "type": "stat",
       "title": "Incidents (30d)",
-      "gridPos": {"w": 6, "h": 4, "x": 0, "y": 0},
+      "gridPos": { "w": 6, "h": 4, "x": 0, "y": 0 },
       "targets": [
-        {"expr": "sum(incidents_total{severity!=\"info\"}[30d])", "legendFormat": "Total Incidents"}
+        {
+          "expr": "sum(incidents_total{severity!=\"info\"}[30d])",
+          "legendFormat": "Total Incidents"
+        }
       ]
     },
     {
       "type": "graph",
       "title": "Data Access Heatmap",
-      "gridPos": {"w": 12, "h": 8, "x": 0, "y": 4},
+      "gridPos": { "w": 12, "h": 8, "x": 0, "y": 4 },
       "targets": [
-        {"expr": "sum by (user, tenant) (rate(data_access_events_total[5m]))", "legendFormat": "{{user}} - {{tenant}}"}
+        {
+          "expr": "sum by (user, tenant) (rate(data_access_events_total[5m]))",
+          "legendFormat": "{{user}} - {{tenant}}"
+        }
       ]
     },
     {
       "type": "stat",
       "title": "Control Coverage %",
-      "gridPos": {"w": 6, "h": 4, "x": 0, "y": 12},
+      "gridPos": { "w": 6, "h": 4, "x": 0, "y": 12 },
       "targets": [
-        {"expr": "sum(compliance_controls_covered) / sum(compliance_controls_total) * 100", "legendFormat": "Control Coverage"}
+        {
+          "expr": "sum(compliance_controls_covered) / sum(compliance_controls_total) * 100",
+          "legendFormat": "Control Coverage"
+        }
       ]
     },
     {
       "type": "stat",
       "title": "Audit Pass Rate %",
-      "gridPos": {"w": 6, "h": 4, "x": 6, "y": 12},
+      "gridPos": { "w": 6, "h": 4, "x": 6, "y": 12 },
       "targets": [
-        {"expr": "sum(audit_checks_passed) / sum(audit_checks_total) * 100", "legendFormat": "Audit Pass Rate"}
+        {
+          "expr": "sum(audit_checks_passed) / sum(audit_checks_total) * 100",
+          "legendFormat": "Audit Pass Rate"
+        }
       ]
     },
     {
       "type": "table",
       "title": "Recent Unauthorized Access Attempts",
-      "gridPos": {"w": 12, "h": 8, "x": 0, "y": 20},
+      "gridPos": { "w": 12, "h": 8, "x": 0, "y": 20 },
       "targets": [
         {
           "expr": "loki_query({job=\"intelgraph-api\", level=\"warn\"} |= \"Unauthorized access attempt\")",

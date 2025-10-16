@@ -4,14 +4,18 @@ const EmbeddingService = require('../services/EmbeddingService');
 
 function arrayToVectorLiteral(arr) {
   if (!Array.isArray(arr)) return null;
-  return '[' + arr.map((x) => (typeof x === 'number' ? x : Number(x) || 0)).join(',') + ']';
+  return (
+    '[' +
+    arr.map((x) => (typeof x === 'number' ? x : Number(x) || 0)).join(',') +
+    ']'
+  );
 }
 
 async function fetchExistingIds(pg, ids) {
   if (!ids.length) return new Set();
   const { rows } = await pg.query(
     'SELECT entity_id FROM entity_embeddings WHERE entity_id = ANY($1::text[])',
-    [ids]
+    [ids],
   );
   return new Set(rows.map((r) => r.entity_id));
 }
@@ -59,7 +63,7 @@ async function runOnce(batchSize = 50) {
        WITH e ORDER BY e.updatedAt DESC
        RETURN e.id as id, e.label as label, e.description as description, e.properties as properties
        LIMIT $limit`,
-      params
+      params,
     );
     const all = result.records.map((r) => ({
       id: r.get('id'),
@@ -67,11 +71,16 @@ async function runOnce(batchSize = 50) {
     }));
 
     // Filter to those missing in Postgres
-    const existing = await fetchExistingIds(pg, all.map((x) => x.id));
+    const existing = await fetchExistingIds(
+      pg,
+      all.map((x) => x.id),
+    );
     const todo = all.filter((x) => !existing.has(x.id)).slice(0, batchSize);
     if (todo.length === 0) return { processed: 0 };
 
-    const embeddings = await embeddingService.generateEmbeddings(todo.map((t) => t.text));
+    const embeddings = await embeddingService.generateEmbeddings(
+      todo.map((t) => t.text),
+    );
     const pairs = todo.map((t, i) => ({ id: t.id, embedding: embeddings[i] }));
     const model = embeddingService.config.model;
     const written = await upsertEmbeddings(pg, pairs, model);
@@ -91,20 +100,25 @@ function startEmbeddingWorker(options = {}) {
     return { stop: () => {} };
   }
 
-  const intervalMs = Number(process.env.EMBEDDING_WORKER_INTERVAL_MS || 10 * 60 * 1000); // 10 min
+  const intervalMs = Number(
+    process.env.EMBEDDING_WORKER_INTERVAL_MS || 10 * 60 * 1000,
+  ); // 10 min
   const batchSize = Number(process.env.EMBEDDING_WORKER_BATCH || 50);
 
   let timer = null;
   const tick = async () => {
     const { processed, error } = await runOnce(batchSize);
     if (error) logger.warn('Embedding worker tick error', { error });
-    if (processed) logger.info(`Embedding worker wrote ${processed} embeddings`);
+    if (processed)
+      logger.info(`Embedding worker wrote ${processed} embeddings`);
   };
 
   // run soon after start, then on interval
   setTimeout(tick, 5000);
   timer = setInterval(tick, intervalMs);
-  logger.info(`Embedding worker started: every ${intervalMs}ms, batch ${batchSize}`);
+  logger.info(
+    `Embedding worker started: every ${intervalMs}ms, batch ${batchSize}`,
+  );
 
   return {
     stop: () => timer && clearInterval(timer),

@@ -8,23 +8,27 @@ const tracer = trace.getTracer('policy-enforcer', '24.2.0');
 const policyDecisions = new Counter({
   name: 'policy_decisions_total',
   help: 'Total OPA policy decisions',
-  labelNames: ['tenant_id', 'action', 'result']
+  labelNames: ['tenant_id', 'action', 'result'],
 });
 
 const policyLatency = new Histogram({
   name: 'policy_decision_latency_ms',
   help: 'OPA policy decision latency',
   buckets: [1, 5, 10, 25, 50, 100, 200, 500],
-  labelNames: ['cached']
+  labelNames: ['cached'],
 });
 
 const purposeViolations = new Counter({
   name: 'purpose_violations_total',
   help: 'Total purpose limitation violations',
-  labelNames: ['tenant_id', 'required_purpose', 'provided_purpose']
+  labelNames: ['tenant_id', 'required_purpose', 'provided_purpose'],
 });
 
-export type Purpose = 'investigation' | 'benchmarking' | 'monitoring' | 'analytics';
+export type Purpose =
+  | 'investigation'
+  | 'benchmarking'
+  | 'monitoring'
+  | 'analytics';
 export type Action = 'read' | 'write' | 'update' | 'delete' | 'ingest';
 
 interface PolicyContext {
@@ -68,9 +72,9 @@ export class PolicyEnforcer {
   async enforce(context: PolicyContext): Promise<PolicyDecision> {
     return tracer.startActiveSpan('policy.enforce', async (span: Span) => {
       span.setAttributes({
-        'tenant_id': context.tenantId,
-        'action': context.action,
-        'purpose': context.purpose || 'none'
+        tenant_id: context.tenantId,
+        action: context.action,
+        purpose: context.purpose || 'none',
       });
 
       const startTime = Date.now();
@@ -79,7 +83,7 @@ export class PolicyEnforcer {
         // Check cache first
         const cacheKey = this.buildCacheKey(context);
         const cached = await this.getFromCache(cacheKey);
-        
+
         if (cached) {
           policyLatency.observe({ cached: 'true' }, Date.now() - startTime);
           return cached;
@@ -87,7 +91,7 @@ export class PolicyEnforcer {
 
         // Evaluate policy
         const decision = await this.evaluatePolicy(context);
-        
+
         // Cache decision if TTL specified
         if (decision.ttlSeconds && decision.ttlSeconds > 0) {
           await this.setCache(cacheKey, decision, decision.ttlSeconds);
@@ -97,67 +101,68 @@ export class PolicyEnforcer {
         await this.recordProvenance(context, decision);
 
         policyLatency.observe({ cached: 'false' }, Date.now() - startTime);
-        policyDecisions.inc({ 
-          tenant_id: context.tenantId, 
-          action: context.action, 
-          result: decision.allow ? 'allow' : 'deny' 
+        policyDecisions.inc({
+          tenant_id: context.tenantId,
+          action: context.action,
+          result: decision.allow ? 'allow' : 'deny',
         });
 
         span.setAttributes({
-          'decision': decision.allow ? 'allow' : 'deny',
-          'reason': decision.reason || ''
+          decision: decision.allow ? 'allow' : 'deny',
+          reason: decision.reason || '',
         });
 
         return decision;
-
       } catch (error) {
         span.recordException(error as Error);
         span.setStatus({ code: 2, message: (error as Error).message });
-        
+
         // Fail secure - deny on error
         const failsafeDecision: PolicyDecision = {
           allow: false,
           reason: 'Policy evaluation failed',
-          auditRequired: true
+          auditRequired: true,
         };
 
         await this.recordProvenance(context, failsafeDecision);
         return failsafeDecision;
-
       } finally {
         span.end();
       }
     });
   }
 
-  async requirePurpose(purpose: Purpose, context: PolicyContext): Promise<PolicyDecision> {
+  async requirePurpose(
+    purpose: Purpose,
+    context: PolicyContext,
+  ): Promise<PolicyDecision> {
     if (!context.purpose) {
-      purposeViolations.inc({ 
-        tenant_id: context.tenantId, 
+      purposeViolations.inc({
+        tenant_id: context.tenantId,
         required_purpose: purpose,
-        provided_purpose: 'none'
+        provided_purpose: 'none',
       });
 
       return {
         allow: false,
         reason: `Purpose required: ${purpose}`,
         requiredPurpose: purpose,
-        auditRequired: true
+        auditRequired: true,
       };
     }
 
     if (context.purpose !== purpose) {
-      purposeViolations.inc({ 
-        tenant_id: context.tenantId, 
+      purposeViolations.inc({
+        tenant_id: context.tenantId,
         required_purpose: purpose,
-        provided_purpose: context.purpose
+        provided_purpose: context.purpose,
       });
 
       return {
         allow: false,
         reason: `Purpose mismatch: required ${purpose}, provided ${context.purpose}`,
         requiredPurpose: purpose,
-        auditRequired: true
+        auditRequired: true,
       };
     }
 
@@ -165,11 +170,13 @@ export class PolicyEnforcer {
     return this.enforce(context);
   }
 
-  private async evaluatePolicy(context: PolicyContext): Promise<PolicyDecision> {
+  private async evaluatePolicy(
+    context: PolicyContext,
+  ): Promise<PolicyDecision> {
     // Simplified policy logic - in production this would call OPA
     const decision: PolicyDecision = {
       allow: true,
-      ttlSeconds: this.defaultTTL
+      ttlSeconds: this.defaultTTL,
     };
 
     // Basic tenant isolation
@@ -210,7 +217,7 @@ export class PolicyEnforcer {
       context.userId || 'anonymous',
       context.action,
       context.resource || 'default',
-      context.purpose || 'none'
+      context.purpose || 'none',
     ];
     return `${this.cachePrefix}:${keyParts.join(':')}`;
   }
@@ -227,7 +234,11 @@ export class PolicyEnforcer {
     return null;
   }
 
-  private async setCache(key: string, decision: PolicyDecision, ttl: number): Promise<void> {
+  private async setCache(
+    key: string,
+    decision: PolicyDecision,
+    ttl: number,
+  ): Promise<void> {
     try {
       await redis.setWithTTL(key, JSON.stringify(decision), ttl);
     } catch (error) {
@@ -235,7 +246,10 @@ export class PolicyEnforcer {
     }
   }
 
-  private async recordProvenance(context: PolicyContext, decision: PolicyDecision): Promise<void> {
+  private async recordProvenance(
+    context: PolicyContext,
+    decision: PolicyDecision,
+  ): Promise<void> {
     const entry: ProvenanceEntry = {
       id: `prov_${Date.now()}_${Math.random().toString(36).substring(7)}`,
       tenantId: context.tenantId,
@@ -246,7 +260,7 @@ export class PolicyEnforcer {
       decision: decision.allow ? 'allow' : 'deny',
       reason: decision.reason,
       timestamp: new Date(),
-      clientIP: context.clientIP
+      clientIP: context.clientIP,
     };
 
     // In-memory for now - in production would write to audit database
@@ -262,9 +276,9 @@ export class PolicyEnforcer {
 
   getProvenanceLog(tenantId?: string, limit: number = 100): ProvenanceEntry[] {
     let filtered = this.provenanceLog;
-    
+
     if (tenantId) {
-      filtered = filtered.filter(entry => entry.tenantId === tenantId);
+      filtered = filtered.filter((entry) => entry.tenantId === tenantId);
     }
 
     return filtered.slice(-limit).reverse(); // Most recent first
@@ -280,7 +294,7 @@ export class PolicyEnforcer {
       cachePrefix: this.cachePrefix,
       defaultTTL: this.defaultTTL,
       provenanceEntries: this.provenanceLog.length,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
   }
 }

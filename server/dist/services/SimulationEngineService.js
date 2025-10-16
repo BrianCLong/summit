@@ -342,7 +342,26 @@ class SimulationEngineService extends EventEmitter {
         // Update behaviors dynamically from live threat feeds
         if (this.threatFeedService) {
             const feeds = await this.threatFeedService.fetchLatestFeeds();
-            this.threatFeedService.updateBehaviorModels(simulation.environment, feeds);
+            if (Array.isArray(feeds) && feeds.length > 0) {
+                if (this.threatFeedService &&
+                    typeof this.threatFeedService.updateBehaviorModels === "function") {
+                    this.threatFeedService.updateBehaviorModels(simulation.environment, feeds);
+                }
+                const feedLookup = new Map(feeds
+                    .filter((feed) => feed && feed.targetId)
+                    .map((feed) => [String(feed.targetId), feed]));
+                simulation.environment.nodes.forEach((node) => {
+                    const match = feedLookup.get(String(node.id));
+                    if (!match)
+                        return;
+                    node.simulationData = {
+                        ...node.simulationData,
+                        liveThreatScore: typeof match.score === "number" ? match.score : match.value ?? 0,
+                        source: match.source || node.simulationData.source || "threat-feed",
+                        updatedAt: new Date(),
+                    };
+                });
+            }
         }
         simulation.progress = 0.1;
         this.logger.info(`Simulation initialized with ${graphData.nodes.length} nodes, ${graphData.edges.length} edges`);

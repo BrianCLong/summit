@@ -3,6 +3,7 @@
 ## Summary
 
 This PR re-includes the plugin service tests in the Fast Lane by:
+
 1. Removing the plugin directory from testPathIgnorePatterns in the fast config
 2. Adding the required defensive mappers for uuid, argon2, archiver, and node-fetch
 3. Creating the necessary mock files that were referenced in the tests
@@ -12,6 +13,7 @@ This PR re-includes the plugin service tests in the Fast Lane by:
 ## Test Results
 
 Plugin service tests are now running correctly as part of the Fast Lane with:
+
 - 38 passing tests
 - 3 skipped (quarantined) tests
 
@@ -20,6 +22,7 @@ This keeps the lane green while expanding test coverage to include the plugin fu
 ## Quarantined Tests
 
 The following tests have been temporarily quarantined with `.skip` and marked with TODO references:
+
 1. "should respect hook priorities" - TODO(#plugin-priority-injection)
 2. "should list plugins with filtering" - TODO(#plugin-state-isolation)
 3. "should track plugin system metrics" - TODO(#plugin-metrics-isolation)
@@ -31,6 +34,7 @@ These tests will be un-quarantined once the state isolation issues are resolved 
 For when you're ready to un-quarantine the tests:
 
 ### 1) Clock/timers drift
+
 ```js
 // at top of the flaky spec
 beforeAll(() => {
@@ -44,35 +48,47 @@ await jest.advanceTimersByTimeAsync(1000);
 ```
 
 ### 2) Random IDs / nondeterminism
+
 ```js
 // ensure uuid is stable even if test imports directly
 jest.mock('uuid', () => ({ v4: () => '00000000-0000-4000-8000-000000000000' }));
 
 const realRandom = Math.random;
-beforeAll(() => { Math.random = () => 0.42; });
-afterAll(() => { Math.random = realRandom; });
+beforeAll(() => {
+  Math.random = () => 0.42;
+});
+afterAll(() => {
+  Math.random = realRandom;
+});
 ```
 
 ### 3) Hidden I/O or singleton state
+
 ```js
 // isolate between tests
 afterEach(() => {
   jest.clearAllMocks();
-  jest.resetModules();       // blow away module singletons
+  jest.resetModules(); // blow away module singletons
 });
 
 // pin env that toggles behavior
 const OLD_ENV = process.env;
-beforeAll(() => { process.env = { ...OLD_ENV, PLUGIN_REGISTRY_MODE: 'test' }; });
-afterAll(() => { process.env = OLD_ENV; });
+beforeAll(() => {
+  process.env = { ...OLD_ENV, PLUGIN_REGISTRY_MODE: 'test' };
+});
+afterAll(() => {
+  process.env = OLD_ENV;
+});
 ```
 
 ### 4) Network/fetch drift (you already mapped `node-fetch`)
+
 If a thin client leaks through, stub it:
+
 ```js
 jest.mock('@server/plugin/registryClient', () => ({
   list: jest.fn(async () => [{ id: 'p1', active: true }]),
-  fetchById: jest.fn(async id => ({ id, active: true })),
+  fetchById: jest.fn(async (id) => ({ id, active: true })),
 }));
 ```
 

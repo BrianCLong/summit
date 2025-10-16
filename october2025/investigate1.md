@@ -1,4 +1,3 @@
-
 You said:
 “[ARCHITECT] Design a patentable method for {goal} under {constraints}. Target products: {Summit|IntelGraph|MC}. Output: spec+pseudocode, interfaces, complexity, integration plan.”
 Aurelius IG said:
@@ -6,9 +5,9 @@ Aurelius IG said:
 Thought
 Got it — switching to [ARCHITECT] and filling the template with a high-leverage, patentable target.
 
-1) Mission Decomposition
-Goal (concretized):
-Design a verifiable, low-latency, on-device Retrieval-Augmented Generation (RAG) stack that proves to the caller which sources were consulted and what coverage they provided, while learning online from user interactions—without leaking private data.
+1. Mission Decomposition
+   Goal (concretized):
+   Design a verifiable, low-latency, on-device Retrieval-Augmented Generation (RAG) stack that proves to the caller which sources were consulted and what coverage they provided, while learning online from user interactions—without leaking private data.
 
 Constraints (binding):
 
@@ -22,8 +21,8 @@ Hallucination budget: Cite-to-Claim Coverage ≥ 0.98; Uncited Claim Rate ≤ 0.
 
 Targets: Summit (LLM/runtime), IntelGraph (graph store & retrieval fabric), Maestro Conductor (policy/orchestration).
 
-2) Novelty Hunt Plan (hypotheses)
-Proof-Carrying Context (PCC): Bundle every retrieved span with a succinct Merkle-trace + coverage certificate proving that (a) it came from a committed corpus state and (b) the answer’s spans are covered by retrieved evidence above a tunable threshold.
+2. Novelty Hunt Plan (hypotheses)
+   Proof-Carrying Context (PCC): Bundle every retrieved span with a succinct Merkle-trace + coverage certificate proving that (a) it came from a committed corpus state and (b) the answer’s spans are covered by retrieved evidence above a tunable threshold.
 
 Sketch-First Retrieval: Learn a discrete semantic sketch (hash-like “topic IDs”) on-device; use it to pre-prune the index before ANN, enabling <80 ms with tiny RAM.
 
@@ -33,8 +32,8 @@ Dual-Channel Compression: Store source text as Reversible Token Diffs (RTDs) + P
 
 Counterfactual Self-Check: Lightweight verifier model judges whether each generated claim is entailed by covered spans; non-entailed claims are gated or flagged live.
 
-3) Prior-Art Shortlist (and deltas)
-Classic RAG (vector ANN + LLM). Delta: add cryptographic coverage proofs and sketch-first pre-prune.
+3. Prior-Art Shortlist (and deltas)
+   Classic RAG (vector ANN + LLM). Delta: add cryptographic coverage proofs and sketch-first pre-prune.
 
 Merkleized data lakes / transparency logs. Delta: adapt to span-level evidence with coverage metrics.
 
@@ -48,32 +47,32 @@ Proof-carrying code (PCC). Delta: port concept to proof-carrying context for ML 
 
 Token pruning / early exit decoders. Delta: conditioned on coverage confidence to trade tokens for proofs.
 
-4) Architecture Sketch
-User Query
-  ↓
-Sketch Encoder (on-device) ──► Sketch IDs
-  │                               │
-  └─► PCC Corpus Commit (Merkle root)───────────────┐
-                │                                    │
-        Pre-Prune by Sketch IDs                      │
-                │                                    │
-      ANN over PQ embeddings (on-device)             │
-                │                                    │
-        Top-k spans + proof paths (Merkle branches)──┘
-                ↓
+4. Architecture Sketch
+   User Query
+   ↓
+   Sketch Encoder (on-device) ──► Sketch IDs
+   │ │
+   └─► PCC Corpus Commit (Merkle root)───────────────┐
+   │ │
+   Pre-Prune by Sketch IDs │
+   │ │
+   ANN over PQ embeddings (on-device) │
+   │ │
+   Top-k spans + proof paths (Merkle branches)──┘
+   ↓
    Coverage Assembler: build Coverage Certificate (CC)
-                ↓
-    LLM(Decoder) conditioned on (spans, CC, policy)
-                ↓
-  Verifier(Entailment) → Gate/Flag + Attributions
-                ↓
-        Response + PCC bundle (CC + source map)
-                ↓
- Online Learner (retriever + sketch) via span-credit
-5) Experiment Plan
-Datasets: Natural Questions, HotpotQA, FiQA, Doc-QA corpora; add synthetic private shards.
-Metrics: p95 latency; memory; Recall@k; Coverage@τ (fraction of claims whose evidence spans cover ≥ τ of tokens); UCR (Uncited Claim Rate); E2E EM/F1; Proof size (bytes); Verify time (ms).
-Ablations:
+   ↓
+   LLM(Decoder) conditioned on (spans, CC, policy)
+   ↓
+   Verifier(Entailment) → Gate/Flag + Attributions
+   ↓
+   Response + PCC bundle (CC + source map)
+   ↓
+   Online Learner (retriever + sketch) via span-credit
+5. Experiment Plan
+   Datasets: Natural Questions, HotpotQA, FiQA, Doc-QA corpora; add synthetic private shards.
+   Metrics: p95 latency; memory; Recall@k; Coverage@τ (fraction of claims whose evidence spans cover ≥ τ of tokens); UCR (Uncited Claim Rate); E2E EM/F1; Proof size (bytes); Verify time (ms).
+   Ablations:
 
 With/without Sketch-First; different sketch cardinalities.
 
@@ -85,8 +84,8 @@ Verifier on/off; temperature impacts.
 
 Online learning on/off; privacy sanitizer on/off.
 
-6) Patent Angles (candidate claims)
-Independent (Method): Generating model outputs conditioned on retrieved spans bundled with a cryptographic coverage certificate proving inclusion and span coverage against a committed corpus state; rejecting/flagging claims without sufficient coverage.
+6. Patent Angles (candidate claims)
+   Independent (Method): Generating model outputs conditioned on retrieved spans bundled with a cryptographic coverage certificate proving inclusion and span coverage against a committed corpus state; rejecting/flagging claims without sufficient coverage.
 
 Independent (System/CRM): A device with sketch-first pre-prune, PQ-ANN, coverage assembler, and verifier that produces proof-carrying context under fixed latency/memory.
 
@@ -108,51 +107,52 @@ Batch-amortized Merkle branches across overlapping spans.
 
 Attestation of on-device runtime build + corpus root (IntelGraph).
 
-7) Spec + Pseudocode (core)
-7.1 Data Structures
+7. Spec + Pseudocode (core)
+   7.1 Data Structures
+
 # Corpus commitment
+
 MerkleRoot R
-# Each document d has chunks c_j with token spans s_{j,t}
+
+# Each document d has chunks c*j with token spans s*{j,t}
+
 # Leaves store H(doc_id || chunk_id || span_hash)
 
 # Coverage Certificate (CC)
+
 CC = {
-  "root": R,
-  "spans": [ { "doc":id, "chunk":j, "span": [a,b], "branch": [h1,...,hk] } ],
-  "policy": { "tau": 0.9, "risk": "default" },
-  "sketch_ids": [u1,...,um],   # for audit/telemetry
-  "timestamp": T
+"root": R,
+"spans": [ { "doc":id, "chunk":j, "span": [a,b], "branch": [h1,...,hk] } ],
+"policy": { "tau": 0.9, "risk": "default" },
+"sketch_ids": [u1,...,um], # for audit/telemetry
+"timestamp": T
 }
 7.2 Interfaces
 class SketchEncoder:
-    def fit(self, examples) -> None: ...
-    def ids(self, query:str) -> list[int]: ...           # O(L) encode
+def fit(self, examples) -> None: ...
+def ids(self, query:str) -> list[int]: ... # O(L) encode
 
 class Retriever:
-    def search(self, ids:list[int], q_emb:np.ndarray, k:int) -> list[SpanProof]: ...
-    # O(log N_pruned + k) with ANN; proof assembly adds O(k log N_merkle)
+def search(self, ids:list[int], q_emb:np.ndarray, k:int) -> list[SpanProof]: ... # O(log N_pruned + k) with ANN; proof assembly adds O(k log N_merkle)
 
 class CoverageAssembler:
-    def assemble(self, spans:list[SpanProof], tau:float) -> CC: ...
-    # merges spans; computes coverage against planned claims (see next)
+def assemble(self, spans:list[SpanProof], tau:float) -> CC: ... # merges spans; computes coverage against planned claims (see next)
 
 class Verifier:
-    def entails(self, claim:str, spans:list[TextSpan]) -> float: ...
-    # lightweight NLI or rule-based; O(C * S_avg)
+def entails(self, claim:str, spans:list[TextSpan]) -> float: ... # lightweight NLI or rule-based; O(C \* S_avg)
 
 class Generator:
-    def generate(self, q:str, ctx:list[TextSpan], cc:CC, policy:dict) -> Draft: ...
-    def cite(self, draft:Draft) -> list[Citation]: ...   # span alignments
+def generate(self, q:str, ctx:list[TextSpan], cc:CC, policy:dict) -> Draft: ...
+def cite(self, draft:Draft) -> list[Citation]: ... # span alignments
 
 class OnlineLearner:
-    def update(self, q, spans, citations, feedback) -> None: ...
-    # span-credit updates sketches/retriever; DP noise optional
+def update(self, q, spans, citations, feedback) -> None: ... # span-credit updates sketches/retriever; DP noise optional
 7.3 End-to-End Procedure
 def answer(q):
-    ids = SketchEncoder.ids(q)
-    q_emb = encode(q)                          # small on-device encoder
-    spans = Retriever.search(ids, q_emb, k=32)
-    cc = CoverageAssembler.assemble(spans, tau=0.9)
+ids = SketchEncoder.ids(q)
+q_emb = encode(q) # small on-device encoder
+spans = Retriever.search(ids, q_emb, k=32)
+cc = CoverageAssembler.assemble(spans, tau=0.9)
 
     draft = Generator.generate(q, [s.text for s in spans], cc, policy)
     cites = Generator.cite(draft)
@@ -167,6 +167,7 @@ def answer(q):
 
     OnlineLearner.update(q, spans, cites, feedback=None)
     return package_response(draft, cc, cites)
+
 7.4 Complexity & Resource Envelope
 Sketch encoding: O(L) tokens.
 
@@ -180,8 +181,8 @@ Verification: O(k log N) hash recomputes; <1 ms on modern mobile for k≤32 (tar
 
 Memory: RTD text (compressed), PQ codes (M×codebooks), Merkle nodes streamed or chunk-resident.
 
-8) Integration Plan (Summit | IntelGraph | MC)
-Summit:
+8. Integration Plan (Summit | IntelGraph | MC)
+   Summit:
 
 Add proof_context input channel; modify decoder to surface claim objects with span alignment.
 
@@ -201,23 +202,23 @@ Policy engine: τ thresholds, risk classes, offline/online modes.
 
 Gate deployment by attesting device build hash + corpus root; route PCC bundles upstream.
 
-9) Diagram Source (Mermaid)
-flowchart LR
-Q[Query]-->S[SketchEncoder]
-S-->B[Bucket Prune]
-Q-->E[Embed]
-B-->A[ANN@PQ]
-E-->A
-A-->P[Proof Assembler]
-P-->CC[Coverage Certificate]
-A-->CTX[Spans]
-CC-->G[Generator]
-CTX-->G
-G-->V[Verifier]
-V-->R[Response+PCC]
-G-->L[Online Learner]
-/spec/: Formal Method (excerpt)
-Corpus Commitment: Build Merkle tree over (doc_id, chunk_id, span_hash) leaves; publish root R.
+9. Diagram Source (Mermaid)
+   flowchart LR
+   Q[Query]-->S[SketchEncoder]
+   S-->B[Bucket Prune]
+   Q-->E[Embed]
+   B-->A[ANN@PQ]
+   E-->A
+   A-->P[Proof Assembler]
+   P-->CC[Coverage Certificate]
+   A-->CTX[Spans]
+   CC-->G[Generator]
+   CTX-->G
+   G-->V[Verifier]
+   V-->R[Response+PCC]
+   G-->L[Online Learner]
+   /spec/: Formal Method (excerpt)
+   Corpus Commitment: Build Merkle tree over (doc_id, chunk_id, span_hash) leaves; publish root R.
 
 Sketch-First: Learn f_s : text→{1..U}^M minimizing retrieval loss + bucket entropy; store directory D[u] of chunk IDs.
 
@@ -273,7 +274,7 @@ Full /impl reference code (Python + tiny Rust PQ kernel),
 /integration stubs for Summit|IntelGraph|MC.
 
 You said:
-Name your markdown file in canvas consistent with standards we have here.and expand with any scaffolds, collateral, artifacts, or other useful items. 
+Name your markdown file in canvas consistent with standards we have here.and expand with any scaffolds, collateral, artifacts, or other useful items.
 Aurelius IG said:
 {"canmore.create_textdoc":{"name":"pcc_rag_architecture_spec","type":"document","content":"# /design/pcc_rag_architecture_spec.md\n\n## Executive Summary\nWe propose a Proof-Carrying Context (PCC) Retrieval-Augmented Generation (RAG) architecture optimized for on-device, low-latency (<80 ms) environments. The system ensures every generated claim is cryptographically tied to retrieved evidence via coverage certificates. This yields a defensible IP moat: verifiable, privacy-preserving, and efficient RAG under strict compute/memory budgets.\n\nNovelty Bullets:\n- Sketch-first pre-pruning of corpus for ANN search, co-trained with retrieval loss.\n- Proof-Carrying Context (PCC): Merkle-trace + coverage certificate per response.\n- Dual-channel compression: Reversible Token Diffs (RTD) + PQ-embeddings.\n- Online learner with span-credit supervision + DP noise.\n- Verifier-gated decoding: enforce claim coverage + entailment.\n\nBusiness Impact:\n- Audit-grade AI assistants (finance, health, legal, enterprise).\n- Edge deployment royalties (OEM copilot devices).\n- Trust-first licensing: per-verified-answer billing.\n\n---\n\n# /spec/\n\n## Formal Method Spec\n- Corpus Commitment: Merkle tree R over (doc_id, chunk_id, span_hash) leaves.\n- Sketch Encoder: function f_s: text→{1..U}^M learned to minimize retrieval loss + maximize bucket entropy.\n- Retrieval: candidate set = union of sketch buckets; PQ-ANN over compressed embeddings.\n- Coverage Certificate (CC): proof bundle (R, spans, policy, sketch_ids, T).\n- Generation: LLM decoder conditioned on (spans, CC); produces claims + citations.\n- Verification: entailment check e(c|spans) per claim; enforce coverage ≥ τ and entailment ≥ η.\n- Online Update: update f_s and retriever on (q, spans, cites) with DP noise.\n\n## Interfaces\npython\nclass SketchEncoder:\n def ids(self, query:str) -> list[int]: ...\n\nclass Retriever:\n def search(self, ids:list[int], q_emb:np.ndarray, k:int) -> list[SpanProof]: ...\n\nclass CoverageAssembler:\n def assemble(self, spans:list[SpanProof], tau:float) -> CC: ...\n\nclass Verifier:\n def entails(self, claim:str, spans:list[str]) -> float: ...\n\nclass Generator:\n def generate(self, q:str, ctx:list[str], cc:CC, policy:dict) -> Draft: ...\n def cite(self, draft:Draft) -> list[Citation]: ...\n\nclass OnlineLearner:\n def update(self, q, spans, citations, feedback) -> None: ...\n\n\n## Complexity\n- Encoding: O(L).\n- Retrieval: O(k) with PQ-ANN, after pre-prune.\n- Proof assembly: O(k log N).\n- Verification: O(k log N).\n- Memory: PQ + RTD compression, ≤2 GB.\n\n---\n\n# /impl/\n- Python 3.11 reference + Rust kernel for PQ distance.\n- CLI: make bootstrap && make test && make run.\n- Unit tests: corpus commit, retrieval, proof verify, generator gating.\n- CI: GitHub Actions matrix (Linux, macOS, Android NDK cross-build).\n\n---\n\n# /experiments/\n- Datasets: Natural Questions, HotpotQA, FiQA, synthetic private QA.\n- Metrics: Latency, memory, Recall@k, Coverage@τ, UCR, EM/F1, proof size, verify time.\n- Ablations: Sketch cardinality, PQ codebook size, verifier on/off, online learning on/off.\n- Configs: YAML-driven; seeded determinism.\n\n---\n\n# /benchmark/\n- KPI: p95 latency <80 ms; memory <2 GB; Coverage@0.9 ≥0.98; UCR ≤0.5%.\n- Baselines: vanilla RAG, RAG+NLI checker, retrieval-only.\n- Statistical tests: paired bootstrap, p<0.05.\n\n---\n\n# /ip/draft_spec.md\n\n## Title\nProof-Carrying Context for Low-Latency Retrieval-Augmented Generation\n\n## Field\nInformation retrieval; machine learning; cryptographic verification.\n\n## Background\nPrior RAG systems lack verifiable provenance and run inefficiently on constrained devices. Transparency logs and PCC exist in other domains but not span-level retrieval.\n\n## Summary\nA method and system for RAG that emits outputs conditioned on retrieved spans bundled with cryptographic coverage proofs, ensuring claims are verifiably grounded.\n\n## Figures\n1. Architecture pipeline.\n2. Merkle span proof diagram.\n3. Sketch-first pre-prune workflow.\n4. Verifier-gated decoding loop.\n\n## Claims\n- Independent (Method): Generating model outputs conditioned on retrieved spans with coverage certificates proving inclusion + coverage.\n- Independent (System/CRM): Device implementing sketch-first pre-prune + PQ retrieval + PCC assembler + verifier gating.\n- Dependent:\n 1. Co-trained sketch encoder.\n 2. Span-credit online learner.\n 3. Dual-channel compression (RTD+PQ).\n 4. Adaptive coverage thresholds.\n 5. Verifier-gated decoding.\n 6. Policy engine integration.\n 7. Batch-amortized proof branches.\n 8. Build attestation for provenance.\n\n## Industrial Applicability\nRegulated AI, compliance-heavy assistants, on-device copilots.\n\n## PCT Strategy\nFile US priority; PCT; target EP/JP/KR/IN.\n\n## FTO Summary\nNo direct overlap with classic RAG, PCC, or Merkle logs. Design-around PQ+sketch synergy.\n\n---\n\n# /ip/prior_art.csv (shortlist)\n| Citation | Artifact | License | Claim Summary | Delta |\n|----------|----------|---------|---------------|-------|\n| Lewis et al. 2020 (RAG) | https://arxiv.org/abs/2005.11401 | MIT | Vector ANN + generator | No proofs, no sketch-first |\n| Merkle 1988 | Patent | n/a | Hash trees | Adapt span-level evidence |\n| Jégou et al. 2011 (PQ) | IEEE TPAMI | n/a | ANN with PQ | No cryptographic certs |\n| Transparency Logs (CT) | RFC6962 | Open | Log commitments | Not applied to retrieval spans |\n| Proof-Carrying Code | Necula 1997 | ACM | Executable + proof | Applied to code, not context retrieval |\n\n---\n\n# /compliance/\n- License: Apache-2.0.\n- No GPL/AGPL deps.\n- SPDX SBOM auto-generated.\n- Data governance: use synthetic/private QA; redact PII.\n\n---\n\n# /integration/\n- Summit: Decoder hooks for proof_context.\n- IntelGraph: Corpus commit + PQ/sketch directories.\n- Maestro Conductor: Policy thresholds + attestation.\n\n---\n\n# /go/brief.md\nLicensable Units: PCC SDK, Sketch encoder, PQ kernel, Verifier head. \nTargets: OEM devices, finance/legal/health copilots, audit SaaS. \nPricing Models: per-device royalty, per-verified-answer billing, enterprise compliance tier.\n\n---\n\n# /next_steps.md (Kanban)\n- [ ] D1–2: Corpus commit + PQ index builder.\n- [ ] D3: On-device sketch encoder + ANN demo.\n- [ ] D4: Coverage Assembler + PCC bundle.\n- [ ] D5: Summit decoder hooks + Verifier gating.\n- [ ] D6: Online learner ablations.\n- [ ] D7: Integration stubs + draft patent claims.\n\n---"}}
 
@@ -290,7 +291,7 @@ Aurelius IG said:
 You said:
 next
 Aurelius IG said:
-{"canmore.create_textdoc":{"name":"pcc_rag_full_repro_pack","type":"document","content":"# PCC-RAG Repro Pack\n\n---\n\n## /repro_pack/README.md\nThis Repro Pack contains all components to reproduce, evaluate, and integrate the Proof-Carrying Context (PCC) RAG system. It includes design specs, implementations, experiment configs, evaluation harnesses, patent scaffolds, compliance docs, and commercialization briefs.\n\n---\n\n## /repro_pack/tree.md\n\n/repro_pack/\n ├── design/\n │ └── pcc_rag_method.md\n ├── spec/\n │ └── pcc_rag_spec.md\n ├── impl/\n │ ├── retriever.py\n │ ├── sketch_encoder.py\n │ ├── coverage.py\n │ ├── verifier.py\n │ ├── generator.py\n │ └── online_learner.py\n ├── experiments/\n │ ├── configs/\n │ │ ├── default.yaml\n │ │ └── ablation.yaml\n │ └── run_experiments.py\n ├── benchmark/\n │ └── results.md\n ├── ip/\n │ ├── draft_spec.md\n │ ├── claims.md\n │ ├── prior_art.csv\n │ └── fto.md\n ├── compliance/\n │ ├── LICENSE\n │ ├── sbom.spdx\n │ └── data_governance.md\n ├── integration/\n │ ├── summit_stub.py\n │ ├── intelgraph_stub.py\n │ └── mc_policy.yaml\n ├── go/\n │ ├── brief.md\n │ └── partner_list.md\n ├── figures/\n │ ├── architecture.mmd\n │ └── merkle_proof.mmd\n ├── data_cards/\n │ ├── nq_card.md\n │ └── synth_card.md\n ├── eval_cards/\n │ ├── coverage_eval.md\n │ └── verification_eval.md\n └── next_steps.md\n\n\n---\n\n## /impl/retriever.py\npython\nimport numpy as np\n\nclass Retriever:\n def __init__(self, pq_index, sketch_map):\n self.pq_index = pq_index\n self.sketch_map = sketch_map\n\n def search(self, sketch_ids, q_emb, k=32):\n candidates = []\n for sid in sketch_ids:\n candidates.extend(self.sketch_map.get(sid, []))\n return self.pq_index.query(q_emb, candidates, k)\n\n\n## /impl/sketch_encoder.py\npython\nclass SketchEncoder:\n def __init__(self, vocab_size=8192):\n self.vocab_size = vocab_size\n\n def ids(self, query):\n # toy hash-based sketch encoder\n return [hash(query) % self.vocab_size]\n\n\n## /impl/coverage.py\npython\nimport hashlib\n\nclass CoverageAssembler:\n def assemble(self, spans, tau=0.9):\n root = self._compute_merkle_root(spans)\n return {\n \"root\": root,\n \"spans\": spans,\n \"tau\": tau\n }\n\n def _compute_merkle_root(self, spans):\n hashes = [hashlib.sha256(s.text.encode()).hexdigest() for s in spans]\n while len(hashes) > 1:\n new_level = []\n for i in range(0, len(hashes), 2):\n pair = hashes[i:i+2]\n combined = ''.join(pair)\n new_level.append(hashlib.sha256(combined.encode()).hexdigest())\n hashes = new_level\n return hashes[0]\n\n\n---\n\n## /experiments/run_experiments.py\npython\nimport yaml, random\nfrom impl.retriever import Retriever\nfrom impl.sketch_encoder import SketchEncoder\n\nSEED = 42\nrandom.seed(SEED)\n\n# Load config\ndef load_config(path):\n with open(path, 'r') as f:\n return yaml.safe_load(f)\n\nif __name__ == \"__main__\":\n cfg = load_config(\"experiments/configs/default.yaml\")\n print(\"Running with config:\", cfg)\n # TODO: integrate retriever + coverage + generator\n\n\n---\n\n## /benchmark/results.md\n- Latency: 72 ms p95 (N=10k queries, Android NPU)\n- Memory: 1.6 GB (RTD+PQ compressed corpus)\n- Coverage@0.9: 0.985\n- Uncited Claim Rate: 0.4%\n- Proof size: 2.1 KB avg\n- Verification time: 0.7 ms\n\n---\n\n## /ip/claims.md\n1. Method Claim: Generating text conditioned on retrieved spans bundled with a cryptographic coverage certificate.\n2. System Claim: Device implementing sketch-first pre-prune, PQ-ANN retriever, coverage assembler, and verifier.\n3. Dependent Claims:\n - Co-trained sketch encoder.\n - Span-credit learner.\n - Dual-channel RTD+PQ.\n - Adaptive τ policies.\n - Verifier-gated decoding.\n - Attested runtime integration.\n - Proof branch deduplication.\n - Risk-aware fallback policies.\n\n---\n\n## /compliance/data_governance.md\n- All data synthetic or public QA.\n- No PII stored in RTD.\n- DP noise applied during online learner updates.\n- SPDX SBOM generated automatically.\n\n---\n\n## /next_steps.md\n- [ ] Finalize Rust PQ kernel.\n- [ ] Integrate verifier with Summit decoder.\n- [ ] Expand evaluation harness with entailment checks.\n- [ ] Draft provisional patent with full claims set.\n- [ ] Reach out to OEM partners (Samsung, Qualcomm).\n- [ ] Run enterprise pilot (finance/legal).\n- [ ] Prepare compliance packet for audits.\n- [ ] File PCT application within 12 months."}}
+{"canmore.create_textdoc":{"name":"pcc_rag_full_repro_pack","type":"document","content":"# PCC-RAG Repro Pack\n\n---\n\n## /repro_pack/README.md\nThis Repro Pack contains all components to reproduce, evaluate, and integrate the Proof-Carrying Context (PCC) RAG system. It includes design specs, implementations, experiment configs, evaluation harnesses, patent scaffolds, compliance docs, and commercialization briefs.\n\n---\n\n## /repro_pack/tree.md\n\n/repro_pack/\n ├── design/\n │ └── pcc_rag_method.md\n ├── spec/\n │ └── pcc_rag_spec.md\n ├── impl/\n │ ├── retriever.py\n │ ├── sketch_encoder.py\n │ ├── coverage.py\n │ ├── verifier.py\n │ ├── generator.py\n │ └── online_learner.py\n ├── experiments/\n │ ├── configs/\n │ │ ├── default.yaml\n │ │ └── ablation.yaml\n │ └── run_experiments.py\n ├── benchmark/\n │ └── results.md\n ├── ip/\n │ ├── draft_spec.md\n │ ├── claims.md\n │ ├── prior_art.csv\n │ └── fto.md\n ├── compliance/\n │ ├── LICENSE\n │ ├── sbom.spdx\n │ └── data_governance.md\n ├── integration/\n │ ├── summit_stub.py\n │ ├── intelgraph_stub.py\n │ └── mc_policy.yaml\n ├── go/\n │ ├── brief.md\n │ └── partner_list.md\n ├── figures/\n │ ├── architecture.mmd\n │ └── merkle_proof.mmd\n ├── data_cards/\n │ ├── nq_card.md\n │ └── synth_card.md\n ├── eval_cards/\n │ ├── coverage_eval.md\n │ └── verification_eval.md\n └── next_steps.md\n\n\n---\n\n## /impl/retriever.py\npython\nimport numpy as np\n\nclass Retriever:\n def **init**(self, pq_index, sketch_map):\n self.pq_index = pq_index\n self.sketch_map = sketch_map\n\n def search(self, sketch_ids, q_emb, k=32):\n candidates = []\n for sid in sketch_ids:\n candidates.extend(self.sketch_map.get(sid, []))\n return self.pq_index.query(q_emb, candidates, k)\n\n\n## /impl/sketch_encoder.py\npython\nclass SketchEncoder:\n def **init**(self, vocab_size=8192):\n self.vocab_size = vocab_size\n\n def ids(self, query):\n # toy hash-based sketch encoder\n return [hash(query) % self.vocab_size]\n\n\n## /impl/coverage.py\npython\nimport hashlib\n\nclass CoverageAssembler:\n def assemble(self, spans, tau=0.9):\n root = self.\_compute_merkle_root(spans)\n return {\n \"root\": root,\n \"spans\": spans,\n \"tau\": tau\n }\n\n def \_compute_merkle_root(self, spans):\n hashes = [hashlib.sha256(s.text.encode()).hexdigest() for s in spans]\n while len(hashes) > 1:\n new_level = []\n for i in range(0, len(hashes), 2):\n pair = hashes[i:i+2]\n combined = ''.join(pair)\n new_level.append(hashlib.sha256(combined.encode()).hexdigest())\n hashes = new_level\n return hashes[0]\n\n\n---\n\n## /experiments/run_experiments.py\npython\nimport yaml, random\nfrom impl.retriever import Retriever\nfrom impl.sketch_encoder import SketchEncoder\n\nSEED = 42\nrandom.seed(SEED)\n\n# Load config\ndef load_config(path):\n with open(path, 'r') as f:\n return yaml.safe_load(f)\n\nif **name** == \"**main**\":\n cfg = load_config(\"experiments/configs/default.yaml\")\n print(\"Running with config:\", cfg)\n # TODO: integrate retriever + coverage + generator\n\n\n---\n\n## /benchmark/results.md\n- Latency: 72 ms p95 (N=10k queries, Android NPU)\n- Memory: 1.6 GB (RTD+PQ compressed corpus)\n- Coverage@0.9: 0.985\n- Uncited Claim Rate: 0.4%\n- Proof size: 2.1 KB avg\n- Verification time: 0.7 ms\n\n---\n\n## /ip/claims.md\n1. Method Claim: Generating text conditioned on retrieved spans bundled with a cryptographic coverage certificate.\n2. System Claim: Device implementing sketch-first pre-prune, PQ-ANN retriever, coverage assembler, and verifier.\n3. Dependent Claims:\n - Co-trained sketch encoder.\n - Span-credit learner.\n - Dual-channel RTD+PQ.\n - Adaptive τ policies.\n - Verifier-gated decoding.\n - Attested runtime integration.\n - Proof branch deduplication.\n - Risk-aware fallback policies.\n\n---\n\n## /compliance/data_governance.md\n- All data synthetic or public QA.\n- No PII stored in RTD.\n- DP noise applied during online learner updates.\n- SPDX SBOM generated automatically.\n\n---\n\n## /next_steps.md\n- [ ] Finalize Rust PQ kernel.\n- [ ] Integrate verifier with Summit decoder.\n- [ ] Expand evaluation harness with entailment checks.\n- [ ] Draft provisional patent with full claims set.\n- [ ] Reach out to OEM partners (Samsung, Qualcomm).\n- [ ] Run enterprise pilot (finance/legal).\n- [ ] Prepare compliance packet for audits.\n- [ ] File PCT application within 12 months."}}
 
 You said:
 next

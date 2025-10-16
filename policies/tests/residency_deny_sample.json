@@ -1,7 +1,6 @@
-
 {
-  "jwt": {"tenant": "t1", "roles": ["analyst"], "purpose": ["investigation"]},
-  "resource": {"tenant": "t1", "labels": []},
+  "jwt": { "tenant": "t1", "roles": ["analyst"], "purpose": ["investigation"] },
+  "resource": { "tenant": "t1", "labels": [] },
   "action": "read",
-  "context": {"country": "DE"} 
+  "context": { "country": "DE" }
 }

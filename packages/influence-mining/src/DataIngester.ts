@@ -14,7 +14,10 @@ import { RelationshipDetector } from './RelationshipDetector.js';
 export class DataIngester {
   constructor(private readonly relationshipDetector: RelationshipDetector) {}
 
-  ingest(sources: SourceData[]): { result: IngestResult; relationships: Relationship[] } {
+  ingest(sources: SourceData[]): {
+    result: IngestResult;
+    relationships: Relationship[];
+  } {
     const posts: SocialPost[] = [];
     const documents: TextDocument[] = [];
     const entities = new Map<string, Entity>();
@@ -59,7 +62,9 @@ export class DataIngester {
           }
         }
 
-        relationships.push(...this.relationshipDetector.detectFromSocial(sourcePosts));
+        relationships.push(
+          ...this.relationshipDetector.detectFromSocial(sourcePosts),
+        );
       } else if (source.kind === 'text') {
         for (const doc of source.documents) {
           const normalizedDoc: TextDocument = {
@@ -74,7 +79,9 @@ export class DataIngester {
             type: 'actor',
             label: doc.primaryActor,
           });
-          const textRelationships = this.relationshipDetector.detectFromText(doc.text);
+          const textRelationships = this.relationshipDetector.detectFromText(
+            doc.text,
+          );
           relationships.push(...textRelationships);
           for (const rel of textRelationships) {
             if (!entities.has(rel.from)) {
@@ -106,7 +113,11 @@ export class DataIngester {
   }
 
   private normalizePost(post: SocialPost): SocialPost {
-    const mentions = post.mentions ?? [...post.text.matchAll(/@([a-zA-Z0-9_\-]+)/g)].map((match) => match[1].toLowerCase());
+    const mentions =
+      post.mentions ??
+      [...post.text.matchAll(/@([a-zA-Z0-9_\-]+)/g)].map((match) =>
+        match[1].toLowerCase(),
+      );
     return {
       ...post,
       author: post.author.toLowerCase(),

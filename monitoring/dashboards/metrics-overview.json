@@ -4,7 +4,11 @@
     {
       "type": "graph",
       "title": "CPU Usage",
-      "targets": [{ "expr": "sum(rate(container_cpu_usage_seconds_total{image!=''}[5m]))" }]
+      "targets": [
+        {
+          "expr": "sum(rate(container_cpu_usage_seconds_total{image!=''}[5m]))"
+        }
+      ]
     },
     {
       "type": "graph",

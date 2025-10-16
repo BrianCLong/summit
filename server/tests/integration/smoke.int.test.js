@@ -7,7 +7,9 @@ function makeApp() {
   app.get('/api/health', (_req, res) =>
     res.json({ name: 'intelgraph', version: 'dev', status: 'ok' }),
   );
-  app.get('/api/version', (_req, res) => res.json({ name: 'intelgraph', version: 'dev' }));
+  app.get('/api/version', (_req, res) =>
+    res.json({ name: 'intelgraph', version: 'dev' }),
+  );
   return app;
 }
 

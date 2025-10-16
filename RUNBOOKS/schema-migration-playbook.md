@@ -1,4 +1,3 @@
-
 # Runbook: Schema Migrations
 
 ## Overview
@@ -9,8 +8,8 @@ This runbook covers the process for safely applying and rolling back database sc
 
 1.  **Open a PR**: The new SQL migration script is added to the `migrations/` directory.
 2.  **CI Gate**: The `migration-gate` step in the CI pipeline automatically runs.
-    *   It applies the migration to a staging environment.
-    *   It runs smoke tests and a dry-run of any data backfills.
+    - It applies the migration to a staging environment.
+    - It runs smoke tests and a dry-run of any data backfills.
 3.  **Manual Approval**: If the gate passes, a database administrator must manually approve the PR with a `reason-for-access` comment.
 4.  **Merge & Deploy**: Upon merge, the production deployment pipeline will apply the migration.
 

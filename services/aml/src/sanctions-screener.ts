@@ -51,7 +51,13 @@ export interface SanctionsRecord {
       quality: 'strong' | 'weak';
     }>;
     identifiers: Array<{
-      type: 'passport' | 'national_id' | 'tax_id' | 'driver_license' | 'birth_cert' | 'other';
+      type:
+        | 'passport'
+        | 'national_id'
+        | 'tax_id'
+        | 'driver_license'
+        | 'birth_cert'
+        | 'other';
       value: string;
       country?: string;
       issuedDate?: Date;
@@ -64,13 +70,25 @@ export interface SanctionsRecord {
       range?: { from: Date; to: Date };
     }>;
     places: Array<{
-      type: 'birth' | 'residence' | 'business' | 'registration' | 'citizenship' | 'nationality';
+      type:
+        | 'birth'
+        | 'residence'
+        | 'business'
+        | 'registration'
+        | 'citizenship'
+        | 'nationality';
       location: string;
       country?: string;
       coordinates?: { lat: number; lng: number };
     }>;
     attributes: Array<{
-      type: 'gender' | 'occupation' | 'position' | 'nationality' | 'vessel_type' | 'tonnage';
+      type:
+        | 'gender'
+        | 'occupation'
+        | 'position'
+        | 'nationality'
+        | 'vessel_type'
+        | 'tonnage';
       value: string;
     }>;
   }>;
@@ -154,7 +172,12 @@ export interface ScreeningAlert {
   id: string;
   requestId: string;
   severity: 'low' | 'medium' | 'high' | 'critical';
-  type: 'sanctions_match' | 'pep_match' | 'adverse_media' | 'watchlist_hit' | 'high_risk_jurisdiction';
+  type:
+    | 'sanctions_match'
+    | 'pep_match'
+    | 'adverse_media'
+    | 'watchlist_hit'
+    | 'high_risk_jurisdiction';
   subject: {
     name: string;
     type: string;
@@ -223,10 +246,12 @@ export class SanctionsScreener extends EventEmitter {
   /**
    * Register sanctions list source
    */
-  async registerSource(source: Omit<SanctionsListSource, 'id'>): Promise<SanctionsListSource> {
+  async registerSource(
+    source: Omit<SanctionsListSource, 'id'>,
+  ): Promise<SanctionsListSource> {
     const fullSource: SanctionsListSource = {
       ...source,
-      id: crypto.randomUUID()
+      id: crypto.randomUUID(),
     };
 
     this.sources.set(fullSource.id, fullSource);
@@ -255,7 +280,9 @@ export class SanctionsScreener extends EventEmitter {
     }
 
     const startTime = Date.now();
-    let loaded = 0, updated = 0, errors = 0;
+    let loaded = 0,
+      updated = 0,
+      errors = 0;
 
     try {
       // Mock data loading - in practice, fetch from actual sources
@@ -263,7 +290,10 @@ export class SanctionsScreener extends EventEmitter {
 
       for (const recordData of mockData) {
         try {
-          const record = await this.parseAndValidateRecord(recordData, sourceId);
+          const record = await this.parseAndValidateRecord(
+            recordData,
+            sourceId,
+          );
           const existing = this.records.get(record.id);
 
           if (existing) {
@@ -277,7 +307,6 @@ export class SanctionsScreener extends EventEmitter {
             await this.updateMatchingIndices(record);
             loaded++;
           }
-
         } catch (error) {
           errors++;
         }
@@ -296,11 +325,10 @@ export class SanctionsScreener extends EventEmitter {
         loaded,
         updated,
         errors,
-        processingTime
+        processingTime,
       });
 
       return { loaded, updated, errors, processingTime };
-
     } catch (error) {
       this.emit('source_load_failed', { sourceId, error: error.message });
       throw error;
@@ -318,14 +346,14 @@ export class SanctionsScreener extends EventEmitter {
       places?: Array<{ type: string; location: string }>;
     },
     configuration: ScreeningRequest['configuration'],
-    requestor: string
+    requestor: string,
   ): Promise<ScreeningRequest> {
     const request: ScreeningRequest = {
       id: crypto.randomUUID(),
       requestor,
       target: {
         type: 'individual',
-        data: target
+        data: target,
       },
       configuration: {
         threshold: 0.8,
@@ -333,22 +361,25 @@ export class SanctionsScreener extends EventEmitter {
         phoneticMatching: true,
         synonymMatching: true,
         includeHistorical: false,
-        ...configuration
+        ...configuration,
       },
       status: 'pending',
       timing: {
-        requestTime: new Date()
-      }
+        requestTime: new Date(),
+      },
     };
 
     this.requests.set(request.id, request);
 
     // Execute screening asynchronously
-    this.executeScreening(request).catch(error => {
+    this.executeScreening(request).catch((error) => {
       request.status = 'failed';
       request.timing.endTime = new Date();
       this.requests.set(request.id, request);
-      this.emit('screening_failed', { requestId: request.id, error: error.message });
+      this.emit('screening_failed', {
+        requestId: request.id,
+        error: error.message,
+      });
     });
 
     return request;
@@ -364,26 +395,26 @@ export class SanctionsScreener extends EventEmitter {
       identifiers?: Array<{ type: string; value: string }>;
     }>,
     configuration: ScreeningRequest['configuration'],
-    requestor: string
+    requestor: string,
   ): Promise<ScreeningRequest> {
     const request: ScreeningRequest = {
       id: crypto.randomUUID(),
       requestor,
       target: {
         type: 'batch',
-        data: entities
+        data: entities,
       },
       configuration,
       status: 'pending',
       timing: {
-        requestTime: new Date()
-      }
+        requestTime: new Date(),
+      },
     };
 
     this.requests.set(request.id, request);
 
     // Execute batch screening
-    this.executeBatchScreening(request).catch(error => {
+    this.executeBatchScreening(request).catch((error) => {
       request.status = 'failed';
       this.requests.set(request.id, request);
     });
@@ -397,7 +428,7 @@ export class SanctionsScreener extends EventEmitter {
   async createAlert(
     requestId: string,
     matches: ScreeningResult['matches'],
-    severity: ScreeningAlert['severity']
+    severity: ScreeningAlert['severity'],
   ): Promise<ScreeningAlert> {
     const request = this.requests.get(requestId);
     if (!request) {
@@ -412,20 +443,21 @@ export class SanctionsScreener extends EventEmitter {
       subject: {
         name: request.target.data.names?.[0] || 'Unknown',
         type: request.target.type,
-        identifiers: request.target.data.identifiers?.map((id: any) => id.value) || []
+        identifiers:
+          request.target.data.identifiers?.map((id: any) => id.value) || [],
       },
-      matches: matches.map(m => m.recordId),
+      matches: matches.map((m) => m.recordId),
       recommendation: this.determineRecommendation(matches, severity),
       status: 'open',
       investigation: {
         notes: [],
-        decisions: []
+        decisions: [],
       },
       timing: {
         createdAt: new Date(),
         updatedAt: new Date(),
-        dueDate: this.calculateDueDate(severity)
-      }
+        dueDate: this.calculateDueDate(severity),
+      },
     };
 
     this.alerts.set(alert.id, alert);
@@ -452,7 +484,7 @@ export class SanctionsScreener extends EventEmitter {
         rationale: string;
         approver: string;
       };
-    }
+    },
   ): Promise<ScreeningAlert> {
     const alert = this.alerts.get(alertId);
     if (!alert) {
@@ -471,10 +503,10 @@ export class SanctionsScreener extends EventEmitter {
     }
 
     if (update.notes) {
-      update.notes.forEach(note => {
+      update.notes.forEach((note) => {
         alert.investigation.notes.push({
           timestamp: new Date(),
-          ...note
+          ...note,
         });
       });
     }
@@ -482,7 +514,7 @@ export class SanctionsScreener extends EventEmitter {
     if (update.decision) {
       alert.investigation.decisions.push({
         timestamp: new Date(),
-        ...update.decision
+        ...update.decision,
       });
     }
 
@@ -530,9 +562,10 @@ export class SanctionsScreener extends EventEmitter {
         }
 
         // Check if this update affects any recent screenings
-        const affected = await this.findAffectedScreenings(recordUpdate.recordId);
+        const affected = await this.findAffectedScreenings(
+          recordUpdate.recordId,
+        );
         impactedScreenings.push(...affected);
-
       } catch (error) {
         errors++;
       }
@@ -547,13 +580,13 @@ export class SanctionsScreener extends EventEmitter {
       sourceId: update.sourceId,
       processed,
       errors,
-      impactedScreenings: [...new Set(impactedScreenings)]
+      impactedScreenings: [...new Set(impactedScreenings)],
     });
 
     return {
       processed,
       errors,
-      impactedScreenings: [...new Set(impactedScreenings)]
+      impactedScreenings: [...new Set(impactedScreenings)],
     };
   }
 
@@ -572,25 +605,37 @@ export class SanctionsScreener extends EventEmitter {
     const now = new Date();
     const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
 
-    const recent = Array.from(this.requests.values())
-      .filter(r => r.timing.requestTime >= yesterday);
+    const recent = Array.from(this.requests.values()).filter(
+      (r) => r.timing.requestTime >= yesterday,
+    );
 
-    const completed = recent.filter(r => r.status === 'completed');
-    const avgResponseTime = completed.length > 0
-      ? completed.reduce((sum, r) => sum + (r.timing.duration || 0), 0) / completed.length
-      : 0;
+    const completed = recent.filter((r) => r.status === 'completed');
+    const avgResponseTime =
+      completed.length > 0
+        ? completed.reduce((sum, r) => sum + (r.timing.duration || 0), 0) /
+          completed.length
+        : 0;
 
-    const withMatches = completed.filter(r => r.results && r.results.matches.length > 0);
-    const matchRate = completed.length > 0 ? withMatches.length / completed.length : 0;
+    const withMatches = completed.filter(
+      (r) => r.results && r.results.matches.length > 0,
+    );
+    const matchRate =
+      completed.length > 0 ? withMatches.length / completed.length : 0;
 
-    const falsePositives = completed.reduce((sum, r) =>
-      sum + (r.results?.falsePositives.length || 0), 0);
-    const totalMatches = completed.reduce((sum, r) =>
-      sum + (r.results?.matches.length || 0), 0);
-    const falsePositiveRate = totalMatches > 0 ? falsePositives / totalMatches : 0;
+    const falsePositives = completed.reduce(
+      (sum, r) => sum + (r.results?.falsePositives.length || 0),
+      0,
+    );
+    const totalMatches = completed.reduce(
+      (sum, r) => sum + (r.results?.matches.length || 0),
+      0,
+    );
+    const falsePositiveRate =
+      totalMatches > 0 ? falsePositives / totalMatches : 0;
 
-    const openAlerts = Array.from(this.alerts.values())
-      .filter(a => a.status === 'open' || a.status === 'investigating').length;
+    const openAlerts = Array.from(this.alerts.values()).filter(
+      (a) => a.status === 'open' || a.status === 'investigating',
+    ).length;
 
     return {
       sources: this.sources.size,
@@ -599,7 +644,7 @@ export class SanctionsScreener extends EventEmitter {
       avgResponseTime,
       matchRate,
       falsePositiveRate,
-      alertsOpen: openAlerts
+      alertsOpen: openAlerts,
     };
   }
 
@@ -613,12 +658,19 @@ export class SanctionsScreener extends EventEmitter {
       let recordsScreened = 0;
 
       // Get relevant records to screen
-      const candidateRecords = await this.getCandidateRecords(target, request.configuration);
+      const candidateRecords = await this.getCandidateRecords(
+        target,
+        request.configuration,
+      );
 
       for (const record of candidateRecords) {
         recordsScreened++;
 
-        const match = await this.evaluateMatch(target, record, request.configuration);
+        const match = await this.evaluateMatch(
+          target,
+          record,
+          request.configuration,
+        );
 
         if (match && match.confidence >= request.configuration.threshold) {
           matches.push(match);
@@ -627,12 +679,14 @@ export class SanctionsScreener extends EventEmitter {
 
       // Calculate overall risk
       const overallRisk = this.calculateOverallRisk(matches);
-      const confidence = matches.length > 0
-        ? matches.reduce((sum, m) => sum + m.confidence, 0) / matches.length
-        : 0;
+      const confidence =
+        matches.length > 0
+          ? matches.reduce((sum, m) => sum + m.confidence, 0) / matches.length
+          : 0;
 
       request.timing.endTime = new Date();
-      request.timing.duration = request.timing.endTime.getTime() - request.timing.startTime!.getTime();
+      request.timing.duration =
+        request.timing.endTime.getTime() - request.timing.startTime!.getTime();
 
       request.results = {
         requestId: request.id,
@@ -644,14 +698,14 @@ export class SanctionsScreener extends EventEmitter {
           recordsScreened,
           listsChecked: request.configuration.lists,
           processedInMs: request.timing.duration,
-          cacheHitRate: 0.85 // Mock cache hit rate
+          cacheHitRate: 0.85, // Mock cache hit rate
         },
         audit: {
           screenedAt: request.timing.endTime,
           screenedBy: request.requestor,
           jurisdiction: 'US',
-          compliance: ['OFAC', 'BSA', 'PATRIOT_ACT']
-        }
+          compliance: ['OFAC', 'BSA', 'PATRIOT_ACT'],
+        },
       };
 
       request.status = 'completed';
@@ -664,7 +718,6 @@ export class SanctionsScreener extends EventEmitter {
       }
 
       this.emit('screening_completed', request);
-
     } catch (error) {
       request.status = 'failed';
       request.timing.endTime = new Date();
@@ -673,20 +726,32 @@ export class SanctionsScreener extends EventEmitter {
     }
   }
 
-  private async executeBatchScreening(request: ScreeningRequest): Promise<void> {
+  private async executeBatchScreening(
+    request: ScreeningRequest,
+  ): Promise<void> {
     request.status = 'screening';
     request.timing.startTime = new Date();
 
     try {
       const entities = request.target.data;
-      const batchResults: Array<{ entityId: string; matches: ScreeningResult['matches'] }> = [];
+      const batchResults: Array<{
+        entityId: string;
+        matches: ScreeningResult['matches'];
+      }> = [];
 
       for (const entity of entities) {
         const matches: ScreeningResult['matches'] = [];
-        const candidateRecords = await this.getCandidateRecords(entity, request.configuration);
+        const candidateRecords = await this.getCandidateRecords(
+          entity,
+          request.configuration,
+        );
 
         for (const record of candidateRecords) {
-          const match = await this.evaluateMatch(entity, record, request.configuration);
+          const match = await this.evaluateMatch(
+            entity,
+            record,
+            request.configuration,
+          );
           if (match && match.confidence >= request.configuration.threshold) {
             matches.push(match);
           }
@@ -696,13 +761,16 @@ export class SanctionsScreener extends EventEmitter {
       }
 
       request.timing.endTime = new Date();
-      request.timing.duration = request.timing.endTime.getTime() - request.timing.startTime!.getTime();
+      request.timing.duration =
+        request.timing.endTime.getTime() - request.timing.startTime!.getTime();
 
       request.status = 'completed';
       this.requests.set(request.id, request);
 
-      this.emit('batch_screening_completed', { request, results: batchResults });
-
+      this.emit('batch_screening_completed', {
+        request,
+        results: batchResults,
+      });
     } catch (error) {
       request.status = 'failed';
       throw error;
@@ -711,31 +779,32 @@ export class SanctionsScreener extends EventEmitter {
 
   private async getCandidateRecords(
     target: any,
-    config: ScreeningRequest['configuration']
+    config: ScreeningRequest['configuration'],
   ): Promise<SanctionsRecord[]> {
     const candidates = new Set<SanctionsRecord>();
 
     // Filter by configured lists
-    const relevantRecords = Array.from(this.records.values()).filter(record =>
-      config.lists.length === 0 || config.lists.includes(record.sourceId)
+    const relevantRecords = Array.from(this.records.values()).filter(
+      (record) =>
+        config.lists.length === 0 || config.lists.includes(record.sourceId),
     );
 
     // Use indices for efficient candidate selection
     for (const name of target.names || []) {
       // Exact matches
       const exactMatches = this.findExactMatches(name);
-      exactMatches.forEach(record => candidates.add(record));
+      exactMatches.forEach((record) => candidates.add(record));
 
       // Phonetic matches
       if (config.phoneticMatching) {
         const phoneticMatches = this.findPhoneticMatches(name);
-        phoneticMatches.forEach(record => candidates.add(record));
+        phoneticMatches.forEach((record) => candidates.add(record));
       }
 
       // Fuzzy matches (limited to prevent performance issues)
       if (config.fuzzyMatching) {
         const fuzzyMatches = this.findFuzzyMatches(name, 0.7);
-        fuzzyMatches.slice(0, 100).forEach(record => candidates.add(record)); // Limit fuzzy matches
+        fuzzyMatches.slice(0, 100).forEach((record) => candidates.add(record)); // Limit fuzzy matches
       }
     }
 
@@ -745,7 +814,7 @@ export class SanctionsScreener extends EventEmitter {
   private async evaluateMatch(
     target: any,
     record: SanctionsRecord,
-    config: ScreeningRequest['configuration']
+    config: ScreeningRequest['configuration'],
   ): Promise<ScreeningResult['matches'][0] | null> {
     const matchedFields: ScreeningResult['matches'][0]['matchedFields'] = [];
     let totalScore = 0;
@@ -755,13 +824,17 @@ export class SanctionsScreener extends EventEmitter {
     for (const targetName of target.names || []) {
       for (const subject of record.subjects) {
         for (const sanctionName of subject.names) {
-          const similarity = this.calculateNameSimilarity(targetName, sanctionName.fullName, config);
+          const similarity = this.calculateNameSimilarity(
+            targetName,
+            sanctionName.fullName,
+            config,
+          );
           if (similarity > 0.6) {
             matchedFields.push({
               field: 'name',
               targetValue: targetName,
               sanctionValue: sanctionName.fullName,
-              similarity
+              similarity,
             });
             totalScore += similarity;
             matchCount++;
@@ -774,12 +847,15 @@ export class SanctionsScreener extends EventEmitter {
     for (const targetId of target.identifiers || []) {
       for (const subject of record.subjects) {
         for (const sanctionId of subject.identifiers) {
-          if (targetId.type === sanctionId.type && targetId.value === sanctionId.value) {
+          if (
+            targetId.type === sanctionId.type &&
+            targetId.value === sanctionId.value
+          ) {
             matchedFields.push({
               field: 'identifier',
               targetValue: targetId.value,
               sanctionValue: sanctionId.value,
-              similarity: 1.0
+              similarity: 1.0,
             });
             totalScore += 1.0;
             matchCount++;
@@ -800,14 +876,14 @@ export class SanctionsScreener extends EventEmitter {
       matchedFields,
       record,
       riskScore,
-      recommendation: this.getMatchRecommendation(confidence, riskScore)
+      recommendation: this.getMatchRecommendation(confidence, riskScore),
     };
   }
 
   private calculateNameSimilarity(
     name1: string,
     name2: string,
-    config: ScreeningRequest['configuration']
+    config: ScreeningRequest['configuration'],
   ): number {
     // Exact match
     if (name1.toLowerCase() === name2.toLowerCase()) return 1.0;
@@ -816,7 +892,10 @@ export class SanctionsScreener extends EventEmitter {
 
     // Fuzzy matching
     if (config.fuzzyMatching) {
-      maxSimilarity = Math.max(maxSimilarity, this.fuzzyStringMatch(name1, name2));
+      maxSimilarity = Math.max(
+        maxSimilarity,
+        this.fuzzyStringMatch(name1, name2),
+      );
     }
 
     // Phonetic matching
@@ -836,8 +915,11 @@ export class SanctionsScreener extends EventEmitter {
     const maxLen = Math.max(str1.length, str2.length);
     if (maxLen === 0) return 1.0;
 
-    const distance = this.levenshteinDistance(str1.toLowerCase(), str2.toLowerCase());
-    return 1.0 - (distance / maxLen);
+    const distance = this.levenshteinDistance(
+      str1.toLowerCase(),
+      str2.toLowerCase(),
+    );
+    return 1.0 - distance / maxLen;
   }
 
   private phoneticMatch(str1: string, str2: string): number {
@@ -850,7 +932,10 @@ export class SanctionsScreener extends EventEmitter {
     const synonyms1 = this.synonymIndex.get(str1.toLowerCase()) || new Set();
     const synonyms2 = this.synonymIndex.get(str2.toLowerCase()) || new Set();
 
-    if (synonyms1.has(str2.toLowerCase()) || synonyms2.has(str1.toLowerCase())) {
+    if (
+      synonyms1.has(str2.toLowerCase()) ||
+      synonyms2.has(str1.toLowerCase())
+    ) {
       return 0.9;
     }
 
@@ -858,7 +943,9 @@ export class SanctionsScreener extends EventEmitter {
   }
 
   private levenshteinDistance(str1: string, str2: string): number {
-    const matrix = Array(str2.length + 1).fill(null).map(() => Array(str1.length + 1).fill(null));
+    const matrix = Array(str2.length + 1)
+      .fill(null)
+      .map(() => Array(str1.length + 1).fill(null));
 
     for (let i = 0; i <= str1.length; i++) matrix[0][i] = i;
     for (let j = 0; j <= str2.length; j++) matrix[j][0] = j;
@@ -869,7 +956,7 @@ export class SanctionsScreener extends EventEmitter {
         matrix[j][i] = Math.min(
           matrix[j][i - 1] + 1,
           matrix[j - 1][i] + 1,
-          matrix[j - 1][i - 1] + indicator
+          matrix[j - 1][i - 1] + indicator,
         );
       }
     }
@@ -914,7 +1001,9 @@ export class SanctionsScreener extends EventEmitter {
   private findPhoneticMatches(name: string): SanctionsRecord[] {
     const soundexCode = this.soundex(name);
     const recordIds = this.phoneticIndex.get(soundexCode) || new Set();
-    return Array.from(recordIds).map(id => this.records.get(id)!).filter(Boolean);
+    return Array.from(recordIds)
+      .map((id) => this.records.get(id)!)
+      .filter(Boolean);
   }
 
   private findFuzzyMatches(name: string, threshold: number): SanctionsRecord[] {
@@ -933,10 +1022,13 @@ export class SanctionsScreener extends EventEmitter {
 
     return matches
       .sort((a, b) => b.similarity - a.similarity)
-      .map(m => m.record);
+      .map((m) => m.record);
   }
 
-  private calculateRiskScore(record: SanctionsRecord, confidence: number): number {
+  private calculateRiskScore(
+    record: SanctionsRecord,
+    confidence: number,
+  ): number {
     let riskScore = confidence;
 
     // Adjust based on list type
@@ -962,10 +1054,12 @@ export class SanctionsScreener extends EventEmitter {
     return Math.min(riskScore, 1.0);
   }
 
-  private calculateOverallRisk(matches: ScreeningResult['matches']): ScreeningResult['overallRisk'] {
+  private calculateOverallRisk(
+    matches: ScreeningResult['matches'],
+  ): ScreeningResult['overallRisk'] {
     if (matches.length === 0) return 'clear';
 
-    const maxRisk = Math.max(...matches.map(m => m.riskScore));
+    const maxRisk = Math.max(...matches.map((m) => m.riskScore));
 
     if (maxRisk >= 0.95) return 'blocked';
     if (maxRisk >= 0.8) return 'match';
@@ -973,33 +1067,42 @@ export class SanctionsScreener extends EventEmitter {
     return 'clear';
   }
 
-  private determineMatchType(matchedFields: ScreeningResult['matches'][0]['matchedFields']): ScreeningResult['matches'][0]['matchType'] {
-    const exactFields = matchedFields.filter(f => f.similarity === 1.0);
+  private determineMatchType(
+    matchedFields: ScreeningResult['matches'][0]['matchedFields'],
+  ): ScreeningResult['matches'][0]['matchType'] {
+    const exactFields = matchedFields.filter((f) => f.similarity === 1.0);
     if (exactFields.length > 0) return 'exact';
 
-    const highFields = matchedFields.filter(f => f.similarity >= 0.9);
+    const highFields = matchedFields.filter((f) => f.similarity >= 0.9);
     if (highFields.length > 0) return 'fuzzy';
 
     return 'partial';
   }
 
-  private getMatchRecommendation(confidence: number, riskScore: number): ScreeningResult['matches'][0]['recommendation'] {
+  private getMatchRecommendation(
+    confidence: number,
+    riskScore: number,
+  ): ScreeningResult['matches'][0]['recommendation'] {
     if (riskScore >= 0.95) return 'block';
     if (riskScore >= 0.8) return 'escalate';
     if (riskScore >= 0.6) return 'review';
     return 'clear';
   }
 
-  private determineAlertType(matches: ScreeningResult['matches']): ScreeningAlert['type'] {
-    const listTypes = matches.map(m => m.record.listType);
+  private determineAlertType(
+    matches: ScreeningResult['matches'],
+  ): ScreeningAlert['type'] {
+    const listTypes = matches.map((m) => m.record.listType);
 
     if (listTypes.includes('sdn')) return 'sanctions_match';
     if (listTypes.includes('pep')) return 'pep_match';
     return 'watchlist_hit';
   }
 
-  private determineSeverity(matches: ScreeningResult['matches']): ScreeningAlert['severity'] {
-    const maxRisk = Math.max(...matches.map(m => m.riskScore));
+  private determineSeverity(
+    matches: ScreeningResult['matches'],
+  ): ScreeningAlert['severity'] {
+    const maxRisk = Math.max(...matches.map((m) => m.riskScore));
 
     if (maxRisk >= 0.95) return 'critical';
     if (maxRisk >= 0.8) return 'high';
@@ -1007,7 +1110,10 @@ export class SanctionsScreener extends EventEmitter {
     return 'low';
   }
 
-  private determineRecommendation(matches: ScreeningResult['matches'], severity: ScreeningAlert['severity']): ScreeningAlert['recommendation'] {
+  private determineRecommendation(
+    matches: ScreeningResult['matches'],
+    severity: ScreeningAlert['severity'],
+  ): ScreeningAlert['recommendation'] {
     if (severity === 'critical') return 'block';
     if (severity === 'high') return 'escalate';
     if (severity === 'medium') return 'investigate';
@@ -1027,12 +1133,15 @@ export class SanctionsScreener extends EventEmitter {
         id: `mock_record_${crypto.randomUUID()}`,
         fullName: 'John Doe',
         listType: 'sdn',
-        programs: ['TERRORISM']
-      }
+        programs: ['TERRORISM'],
+      },
     ];
   }
 
-  private async parseAndValidateRecord(data: any, sourceId: string): Promise<SanctionsRecord> {
+  private async parseAndValidateRecord(
+    data: any,
+    sourceId: string,
+  ): Promise<SanctionsRecord> {
     return {
       id: data.id,
       sourceId,
@@ -1043,34 +1152,44 @@ export class SanctionsScreener extends EventEmitter {
       designation: {
         programs: data.programs || [],
         reasons: [],
-        effectiveDate: new Date()
+        effectiveDate: new Date(),
       },
-      subjects: [{
-        type: 'primary',
-        names: [{
-          fullName: data.fullName,
-          quality: 'strong'
-        }],
-        identifiers: [],
-        dates: [],
-        places: [],
-        attributes: []
-      }],
+      subjects: [
+        {
+          type: 'primary',
+          names: [
+            {
+              fullName: data.fullName,
+              quality: 'strong',
+            },
+          ],
+          identifiers: [],
+          dates: [],
+          places: [],
+          attributes: [],
+        },
+      ],
       relationships: [],
       metadata: {
         confidence: 1.0,
         lastVerified: new Date(),
-        sources: [sourceId]
-      }
+        sources: [sourceId],
+      },
     };
   }
 
-  private isRecordNewer(record1: SanctionsRecord, record2: SanctionsRecord): boolean {
+  private isRecordNewer(
+    record1: SanctionsRecord,
+    record2: SanctionsRecord,
+  ): boolean {
     return record1.metadata.lastVerified > record2.metadata.lastVerified;
   }
 
   private calculateChecksum(data: any[]): string {
-    return crypto.createHash('sha256').update(JSON.stringify(data)).digest('hex');
+    return crypto
+      .createHash('sha256')
+      .update(JSON.stringify(data))
+      .digest('hex');
   }
 
   private async updateMatchingIndices(record: SanctionsRecord): Promise<void> {
@@ -1095,10 +1214,11 @@ export class SanctionsScreener extends EventEmitter {
 
   private async findAffectedScreenings(recordId: string): Promise<string[]> {
     // Find recent screenings that might be affected by this record update
-    const recent = Array.from(this.requests.values())
-      .filter(r => r.timing.requestTime > new Date(Date.now() - 24 * 60 * 60 * 1000));
+    const recent = Array.from(this.requests.values()).filter(
+      (r) => r.timing.requestTime > new Date(Date.now() - 24 * 60 * 60 * 1000),
+    );
 
-    return recent.map(r => r.id);
+    return recent.map((r) => r.id);
   }
 
   private initializeDefaultSources(): void {
@@ -1117,8 +1237,8 @@ export class SanctionsScreener extends EventEmitter {
         reliability: 1.0,
         coverage: ['global'],
         language: 'en',
-        format: 'xml'
-      }
+        format: 'xml',
+      },
     });
 
     // UN Consolidated List
@@ -1135,8 +1255,8 @@ export class SanctionsScreener extends EventEmitter {
         reliability: 0.95,
         coverage: ['global'],
         language: 'en',
-        format: 'xml'
-      }
+        format: 'xml',
+      },
     });
   }
 
@@ -1147,7 +1267,10 @@ export class SanctionsScreener extends EventEmitter {
     this.nameVariations.set('robert', ['bob', 'bobby', 'rob', 'robbie']);
 
     // Initialize synonym index
-    this.synonymIndex.set('corporation', new Set(['corp', 'inc', 'ltd', 'llc']));
+    this.synonymIndex.set(
+      'corporation',
+      new Set(['corp', 'inc', 'ltd', 'llc']),
+    );
     this.synonymIndex.set('company', new Set(['co', 'corp', 'inc']));
     this.synonymIndex.set('limited', new Set(['ltd', 'ltda']));
   }

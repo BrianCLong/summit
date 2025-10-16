@@ -7,7 +7,14 @@ const router = express.Router();
 interface AgentStep {
   id: string;
   role: 'planner' | 'critic' | 'executor' | 'human';
-  state: 'pending' | 'running' | 'need_approval' | 'approved' | 'blocked' | 'completed' | 'error';
+  state:
+    | 'pending'
+    | 'running'
+    | 'need_approval'
+    | 'approved'
+    | 'blocked'
+    | 'completed'
+    | 'error';
   text: string;
   ts: number;
   metadata?: {
@@ -51,11 +58,11 @@ const hitlCheckpoints = new Map<string, HITLCheckpoint[]>();
 router.get('/runs/:runId/agents/timeline', async (req, res) => {
   try {
     const { runId } = req.params;
-    
+
     // Get or create mock steps for demo
     let steps = agentSteps.get(runId);
     let checkpoints = hitlCheckpoints.get(runId);
-    
+
     if (!steps) {
       // Generate demo steps
       steps = [
@@ -70,15 +77,19 @@ router.get('/runs/:runId/agents/timeline', async (req, res) => {
             cost: 0.012,
             confidence: 0.92,
             tools_used: ['threat_analysis', 'policy_check'],
-            checkpoint_type: 'planning'
+            checkpoint_type: 'planning',
           },
           inputs: {
             task: 'Security threat assessment',
-            requirements: ['CIA triad analysis', 'Risk scoring', 'Mitigation strategies']
+            requirements: [
+              'CIA triad analysis',
+              'Risk scoring',
+              'Mitigation strategies',
+            ],
           },
           outputs: {
-            plan: 'Multi-phase security analysis with stakeholder review checkpoints'
-          }
+            plan: 'Multi-phase security analysis with stakeholder review checkpoints',
+          },
         },
         {
           id: `${runId}-step-2`,
@@ -91,15 +102,15 @@ router.get('/runs/:runId/agents/timeline', async (req, res) => {
             cost: 0.008,
             confidence: 0.88,
             tools_used: ['compliance_check', 'risk_assessment'],
-            checkpoint_type: 'review'
+            checkpoint_type: 'review',
           },
           inputs: {
-            plan_to_review: 'Security analysis plan from planner'
+            plan_to_review: 'Security analysis plan from planner',
           },
           outputs: {
             feedback: 'Add compliance checks',
-            risk_level: 'medium'
-          }
+            risk_level: 'medium',
+          },
         },
         {
           id: `${runId}-step-3`,
@@ -112,36 +123,43 @@ router.get('/runs/:runId/agents/timeline', async (req, res) => {
             cost: 0.0,
             confidence: 0.95,
             tools_used: ['vulnerability_scanner', 'penetration_testing'],
-            checkpoint_type: 'safety_check'
+            checkpoint_type: 'safety_check',
           },
           inputs: {
-            target_systems: ['web-server-prod', 'db-cluster-main', 'api-gateway'],
-            scan_intensity: 'aggressive'
-          }
-        }
+            target_systems: [
+              'web-server-prod',
+              'db-cluster-main',
+              'api-gateway',
+            ],
+            scan_intensity: 'aggressive',
+          },
+        },
       ];
-      
+
       checkpoints = [
         {
           id: `${runId}-checkpoint-1`,
           stepId: `${runId}-step-3`,
           type: 'safety_check',
-          description: 'High-impact operation requires approval before execution',
+          description:
+            'High-impact operation requires approval before execution',
           requiredRole: 'security_admin',
           autoApprove: false,
           timeout: 3600000, // 1 hour
           metadata: {
             impact_level: 'high',
-            affected_systems: ['production']
-          }
-        }
+            affected_systems: ['production'],
+          },
+        },
       ];
-      
+
       agentSteps.set(runId, steps);
       hitlCheckpoints.set(runId, checkpoints);
     }
 
-    prometheusConductorMetrics?.agentTimelineRequests?.inc({ status: 'success' });
+    prometheusConductorMetrics?.agentTimelineRequests?.inc({
+      status: 'success',
+    });
 
     res.json({
       runId,
@@ -149,13 +167,15 @@ router.get('/runs/:runId/agents/timeline', async (req, res) => {
       checkpoints,
       timeline: {
         totalSteps: steps.length,
-        pendingApprovals: steps.filter(s => s.state === 'need_approval').length,
-        completed: steps.filter(s => s.state === 'completed' || s.state === 'approved').length,
-        blocked: steps.filter(s => s.state === 'blocked').length
+        pendingApprovals: steps.filter((s) => s.state === 'need_approval')
+          .length,
+        completed: steps.filter(
+          (s) => s.state === 'completed' || s.state === 'approved',
+        ).length,
+        blocked: steps.filter((s) => s.state === 'blocked').length,
       },
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     prometheusConductorMetrics?.agentTimelineRequests?.inc({ status: 'error' });
 
@@ -163,7 +183,7 @@ router.get('/runs/:runId/agents/timeline', async (req, res) => {
     res.status(500).json({
       error: 'Failed to fetch agent timeline',
       code: 'TIMELINE_FETCH_FAILED',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -176,22 +196,26 @@ router.post('/runs/:runId/hitl/:checkpointId/approve', async (req, res) => {
   try {
     const { runId, checkpointId } = req.params;
     const { patch, reason } = req.body;
-    
+
     const steps = agentSteps.get(runId) || [];
-    const stepIndex = steps.findIndex(s => s.id === checkpointId || 
-      hitlCheckpoints.get(runId)?.find(c => c.id === checkpointId)?.stepId === s.id);
-    
+    const stepIndex = steps.findIndex(
+      (s) =>
+        s.id === checkpointId ||
+        hitlCheckpoints.get(runId)?.find((c) => c.id === checkpointId)
+          ?.stepId === s.id,
+    );
+
     if (stepIndex === -1) {
       return res.status(404).json({
         error: 'Step not found',
         code: 'STEP_NOT_FOUND',
-        checkpointId
+        checkpointId,
       });
     }
 
     const step = steps[stepIndex];
     const originalText = step.text;
-    
+
     // Update step
     steps[stepIndex] = {
       ...step,
@@ -200,23 +224,26 @@ router.post('/runs/:runId/hitl/:checkpointId/approve', async (req, res) => {
       metadata: {
         ...step.metadata,
         user_action: 'approve',
-        edit_history: patch && patch !== originalText ? [
-          ...(step.metadata?.edit_history || []),
-          {
-            timestamp: Date.now(),
-            original: originalText,
-            edited: patch,
-            reason
-          }
-        ] : step.metadata?.edit_history
-      }
+        edit_history:
+          patch && patch !== originalText
+            ? [
+                ...(step.metadata?.edit_history || []),
+                {
+                  timestamp: Date.now(),
+                  original: originalText,
+                  edited: patch,
+                  reason,
+                },
+              ]
+            : step.metadata?.edit_history,
+      },
     };
 
     agentSteps.set(runId, steps);
 
-    prometheusConductorMetrics?.hitlActionRequests?.inc({ 
-      status: 'success', 
-      action: 'approve' 
+    prometheusConductorMetrics?.hitlActionRequests?.inc({
+      status: 'success',
+      action: 'approve',
     });
 
     res.json({
@@ -224,20 +251,19 @@ router.post('/runs/:runId/hitl/:checkpointId/approve', async (req, res) => {
       stepId: step.id,
       action: 'approve',
       updatedStep: steps[stepIndex],
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
-    prometheusConductorMetrics?.hitlActionRequests?.inc({ 
-      status: 'error', 
-      action: 'approve' 
+    prometheusConductorMetrics?.hitlActionRequests?.inc({
+      status: 'error',
+      action: 'approve',
     });
 
     console.error('HITL approve error:', error);
     res.status(500).json({
       error: 'Failed to approve checkpoint',
       code: 'APPROVAL_FAILED',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -250,21 +276,25 @@ router.post('/runs/:runId/hitl/:checkpointId/block', async (req, res) => {
   try {
     const { runId, checkpointId } = req.params;
     const { reason } = req.body;
-    
+
     const steps = agentSteps.get(runId) || [];
-    const stepIndex = steps.findIndex(s => s.id === checkpointId || 
-      hitlCheckpoints.get(runId)?.find(c => c.id === checkpointId)?.stepId === s.id);
-    
+    const stepIndex = steps.findIndex(
+      (s) =>
+        s.id === checkpointId ||
+        hitlCheckpoints.get(runId)?.find((c) => c.id === checkpointId)
+          ?.stepId === s.id,
+    );
+
     if (stepIndex === -1) {
       return res.status(404).json({
         error: 'Step not found',
         code: 'STEP_NOT_FOUND',
-        checkpointId
+        checkpointId,
       });
     }
 
     const step = steps[stepIndex];
-    
+
     // Update step
     steps[stepIndex] = {
       ...step,
@@ -272,15 +302,15 @@ router.post('/runs/:runId/hitl/:checkpointId/block', async (req, res) => {
       metadata: {
         ...step.metadata,
         user_action: 'block',
-        block_reason: reason
-      }
+        block_reason: reason,
+      },
     };
 
     agentSteps.set(runId, steps);
 
-    prometheusConductorMetrics?.hitlActionRequests?.inc({ 
-      status: 'success', 
-      action: 'block' 
+    prometheusConductorMetrics?.hitlActionRequests?.inc({
+      status: 'success',
+      action: 'block',
     });
 
     res.json({
@@ -289,20 +319,19 @@ router.post('/runs/:runId/hitl/:checkpointId/block', async (req, res) => {
       action: 'block',
       reason,
       updatedStep: steps[stepIndex],
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
-    prometheusConductorMetrics?.hitlActionRequests?.inc({ 
-      status: 'error', 
-      action: 'block' 
+    prometheusConductorMetrics?.hitlActionRequests?.inc({
+      status: 'error',
+      action: 'block',
     });
 
     console.error('HITL block error:', error);
     res.status(500).json({
       error: 'Failed to block checkpoint',
       code: 'BLOCK_FAILED',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -315,29 +344,33 @@ router.post('/runs/:runId/hitl/:checkpointId/edit', async (req, res) => {
   try {
     const { runId, checkpointId } = req.params;
     const { patch, reason } = req.body;
-    
+
     if (!patch) {
       return res.status(400).json({
         error: 'patch is required for edit action',
-        code: 'MISSING_PATCH'
+        code: 'MISSING_PATCH',
       });
     }
 
     const steps = agentSteps.get(runId) || [];
-    const stepIndex = steps.findIndex(s => s.id === checkpointId || 
-      hitlCheckpoints.get(runId)?.find(c => c.id === checkpointId)?.stepId === s.id);
-    
+    const stepIndex = steps.findIndex(
+      (s) =>
+        s.id === checkpointId ||
+        hitlCheckpoints.get(runId)?.find((c) => c.id === checkpointId)
+          ?.stepId === s.id,
+    );
+
     if (stepIndex === -1) {
       return res.status(404).json({
         error: 'Step not found',
         code: 'STEP_NOT_FOUND',
-        checkpointId
+        checkpointId,
       });
     }
 
     const step = steps[stepIndex];
     const originalText = step.text;
-    
+
     // Update step with edit
     steps[stepIndex] = {
       ...step,
@@ -352,17 +385,17 @@ router.post('/runs/:runId/hitl/:checkpointId/edit', async (req, res) => {
             timestamp: Date.now(),
             original: originalText,
             edited: patch,
-            reason: reason || 'User edited and approved'
-          }
-        ]
-      }
+            reason: reason || 'User edited and approved',
+          },
+        ],
+      },
     };
 
     agentSteps.set(runId, steps);
 
-    prometheusConductorMetrics?.hitlActionRequests?.inc({ 
-      status: 'success', 
-      action: 'edit' 
+    prometheusConductorMetrics?.hitlActionRequests?.inc({
+      status: 'success',
+      action: 'edit',
     });
 
     res.json({
@@ -372,23 +405,22 @@ router.post('/runs/:runId/hitl/:checkpointId/edit', async (req, res) => {
       changes: {
         original: originalText,
         edited: patch,
-        reason
+        reason,
       },
       updatedStep: steps[stepIndex],
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
-    prometheusConductorMetrics?.hitlActionRequests?.inc({ 
-      status: 'error', 
-      action: 'edit' 
+    prometheusConductorMetrics?.hitlActionRequests?.inc({
+      status: 'error',
+      action: 'edit',
     });
 
     console.error('HITL edit error:', error);
     res.status(500).json({
       error: 'Failed to edit checkpoint',
       code: 'EDIT_FAILED',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -400,13 +432,13 @@ router.post('/runs/:runId/hitl/:checkpointId/edit', async (req, res) => {
 router.get('/runs/:runId/hitl/pending', async (req, res) => {
   try {
     const { runId } = req.params;
-    
+
     const steps = agentSteps.get(runId) || [];
     const checkpoints = hitlCheckpoints.get(runId) || [];
-    
-    const pendingSteps = steps.filter(s => s.state === 'need_approval');
-    const pendingCheckpoints = checkpoints.filter(c => 
-      pendingSteps.some(s => s.id === c.stepId)
+
+    const pendingSteps = steps.filter((s) => s.state === 'need_approval');
+    const pendingCheckpoints = checkpoints.filter((c) =>
+      pendingSteps.some((s) => s.id === c.stepId),
     );
 
     res.json({
@@ -414,15 +446,14 @@ router.get('/runs/:runId/hitl/pending', async (req, res) => {
       pendingSteps,
       pendingCheckpoints,
       count: pendingSteps.length,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
-
   } catch (error) {
     console.error('Pending HITL fetch error:', error);
     res.status(500).json({
       error: 'Failed to fetch pending checkpoints',
       code: 'PENDING_FETCH_FAILED',
-      message: error.message
+      message: error.message,
     });
   }
 });
@@ -435,7 +466,7 @@ router.post('/runs/:runId/agents/simulate', async (req, res) => {
   try {
     const { runId } = req.params;
     const { stepId, action, inputs } = req.body;
-    
+
     // Simulate step execution
     const simulationResult = {
       stepId,
@@ -447,28 +478,27 @@ router.post('/runs/:runId/agents/simulate', async (req, res) => {
         estimatedDuration: 3000,
         estimatedCost: 0.015,
         riskLevel: 'medium',
-        sideEffects: []
+        sideEffects: [],
       },
       recommendations: [
         'Review the security implications before approval',
         'Consider running in staging environment first',
-        'Monitor system performance during execution'
+        'Monitor system performance during execution',
       ],
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     };
 
     res.json({
       success: true,
       runId,
-      simulation: simulationResult
+      simulation: simulationResult,
     });
-
   } catch (error) {
     console.error('Agent simulation error:', error);
     res.status(500).json({
       error: 'Failed to simulate agent step',
       code: 'SIMULATION_FAILED',
-      message: error.message
+      message: error.message,
     });
   }
 });

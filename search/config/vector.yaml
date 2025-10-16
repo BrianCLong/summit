@@ -1,4 +1,4 @@
 active: old
 indexes:
   old: { kind: pgvector, collection: embeds_v1, efSearch: 64 }
-  new: { kind: milvus,   collection: embeds_v2, efSearch: 80 }
+  new: { kind: milvus, collection: embeds_v2, efSearch: 80 }

@@ -1,7 +1,7 @@
 import { createHash, createHmac, randomUUID } from 'node:crypto';
-import type { 
-  EvidenceBundle, 
-  LedgerEntry, 
+import type {
+  EvidenceBundle,
+  LedgerEntry,
   LedgerFactInput,
   BudgetResult,
   CursorEvent,
@@ -28,7 +28,7 @@ import type {
   AuditInvestigationTrailEntry,
   AuditRoleCapabilities,
   AuditInvestigatorRole,
-  AuditSeverity
+  AuditSeverity,
 } from 'common-types';
 import {
   buildLedgerUri,
@@ -47,7 +47,9 @@ function normaliseTimestamp(value?: string): string {
   return new Date().toISOString();
 }
 
-function computeHash(entry: Omit<LedgerEntry, 'hash'> & { previousHash?: string }): string {
+function computeHash(
+  entry: Omit<LedgerEntry, 'hash'> & { previousHash?: string },
+): string {
   const hash = createHash('sha256');
   hash.update(entry.id);
   hash.update(entry.category);
@@ -73,7 +75,7 @@ export class SimpleProvenanceLedger {
       ...fact,
       timestamp,
       previousHash,
-      hash: ''
+      hash: '',
     };
 
     entry.hash = computeHash(entry);
@@ -84,7 +86,7 @@ export class SimpleProvenanceLedger {
   list(filter?: { category?: string; limit?: number }): LedgerEntry[] {
     let data = [...this.entries];
     if (filter?.category) {
-      data = data.filter(entry => entry.category === filter.category);
+      data = data.filter((entry) => entry.category === filter.category);
     }
     if (filter?.limit && filter.limit > 0) {
       data = data.slice(-filter.limit);
@@ -94,7 +96,8 @@ export class SimpleProvenanceLedger {
 
   verify(): boolean {
     return this.entries.every((entry, index) => {
-      const expectedPrevious = index === 0 ? undefined : this.entries[index - 1].hash;
+      const expectedPrevious =
+        index === 0 ? undefined : this.entries[index - 1].hash;
       if (expectedPrevious !== entry.previousHash) {
         return false;
       }
@@ -103,12 +106,15 @@ export class SimpleProvenanceLedger {
     });
   }
 
-  exportEvidence(filter?: { category?: string; limit?: number }): EvidenceBundle {
+  exportEvidence(filter?: {
+    category?: string;
+    limit?: number;
+  }): EvidenceBundle {
     const entries = this.list(filter);
     return {
       generatedAt: new Date().toISOString(),
       headHash: entries.at(-1)?.hash,
-      entries
+      entries,
     };
   }
 }
@@ -144,7 +150,10 @@ export class ProvenanceLedger {
     this.retentionMs = options.retentionMs ?? DEFAULT_RETENTION_MS;
   }
 
-  async append(event: CursorEvent, options: AppendOptions): Promise<CursorProvenanceRecord> {
+  async append(
+    event: CursorEvent,
+    options: AppendOptions,
+  ): Promise<CursorProvenanceRecord> {
     this.prune();
 
     const receivedAt = (options.receivedAt ?? this.now()).toISOString();
@@ -182,7 +191,9 @@ export class ProvenanceLedger {
   }
 
   findByRequest(requestId: string): CursorProvenanceRecord | undefined {
-    return this.records.find((record) => record.provenance.requestId === requestId);
+    return this.records.find(
+      (record) => record.provenance.requestId === requestId,
+    );
   }
 
   stats(): {
@@ -201,7 +212,7 @@ export class ProvenanceLedger {
 
   coverageForDiffHashes(
     repo: string,
-    diffHashes: string[]
+    diffHashes: string[],
   ): { coverage: number; missing: string[] } {
     const records = this.findByRepo(repo);
     if (diffHashes.length === 0) {
@@ -253,11 +264,11 @@ export class ProvenanceLedger {
   private computeChecksum(
     event: CursorEvent,
     decision: PolicyDecision,
-    receivedAt: string
+    receivedAt: string,
   ): string {
-    const hash = createHash("sha256");
+    const hash = createHash('sha256');
     hash.update(JSON.stringify({ event, decision, receivedAt }));
-    return hash.digest("hex");
+    return hash.digest('hex');
   }
 
   private index(record: CursorProvenanceRecord): void {
@@ -320,7 +331,7 @@ export function record(
   run: WorkflowRunRecord,
   workflow: WorkflowDefinition,
   context: LedgerContext,
-  options: RecordOptions = {}
+  options: RecordOptions = {},
 ): LedgerRecord {
   const normalized = normalizeWorkflow(workflow);
   const timestamp = context.timestamp ?? new Date().toISOString();
@@ -334,26 +345,29 @@ export function record(
       id: node.id,
       type: node.type,
       params: node.params,
-      evidenceOutputs: node.evidenceOutputs
+      evidenceOutputs: node.evidenceOutputs,
     })),
-    edges: normalized.edges
+    edges: normalized.edges,
   });
 
   const outputsHash = hashObject({
     runId: run.runId,
     status: run.status,
     stats: run.stats,
-    nodes: options.includeNodeMetrics ? run.nodes : undefined
+    nodes: options.includeNodeMetrics ? run.nodes : undefined,
   });
 
-  const signature = signPayload({
-    runId: run.runId,
-    workflowId: normalized.workflowId,
-    version: normalized.version,
-    inputsHash,
-    outputsHash,
-    timestamp
-  }, context.signingKey);
+  const signature = signPayload(
+    {
+      runId: run.runId,
+      workflowId: normalized.workflowId,
+      version: normalized.version,
+      inputsHash,
+      outputsHash,
+      timestamp,
+    },
+    context.signingKey,
+  );
 
   const ledgerUri = buildLedgerUri(context, run.runId);
 
@@ -371,16 +385,18 @@ export function record(
     signature,
     ledgerUri,
     timestamp,
-    tags: options.evaluationTags
+    tags: options.evaluationTags,
   };
 }
 
 function hashObject(value: unknown): string {
-  return createHash("sha256").update(JSON.stringify(value)).digest("hex");
+  return createHash('sha256').update(JSON.stringify(value)).digest('hex');
 }
 
 function signPayload(payload: object, signingKey: string): string {
-  return createHmac("sha256", signingKey).update(JSON.stringify(payload)).digest("hex");
+  return createHmac('sha256', signingKey)
+    .update(JSON.stringify(payload))
+    .digest('hex');
 }
 
 // ============================================================================
@@ -420,7 +436,9 @@ function toIso(timestamp: Date): string {
   return timestamp.toISOString();
 }
 
-export function createProvenanceRecord(input: ProvenanceRecordInput): CoopProvenanceRecord {
+export function createProvenanceRecord(
+  input: ProvenanceRecordInput,
+): CoopProvenanceRecord {
   const start = input.startedAt ?? new Date();
   const end = input.completedAt ?? start;
   return {
@@ -442,13 +460,19 @@ export function createProvenanceRecord(input: ProvenanceRecordInput): CoopProven
   };
 }
 
-export function signRecord(record: CoopProvenanceRecord, secret: string): SignedProvenanceRecord {
+export function signRecord(
+  record: CoopProvenanceRecord,
+  secret: string,
+): SignedProvenanceRecord {
   const payload = JSON.stringify(record);
   const signature = createHmac('sha256', secret).update(payload).digest('hex');
   return { record, signature };
 }
 
-export function verifySignature(entry: SignedProvenanceRecord, secret: string): boolean {
+export function verifySignature(
+  entry: SignedProvenanceRecord,
+  secret: string,
+): boolean {
   const expected = createHmac('sha256', secret)
     .update(JSON.stringify(entry.record))
     .digest('hex');
@@ -499,7 +523,10 @@ const FALLBACK_CAPABILITIES: AuditRoleCapabilities = {
   viewAnomalies: false,
 };
 
-const DEFAULT_ROLE_MATRIX: Record<'viewer' | 'analyst' | 'admin', AuditRoleCapabilities> = {
+const DEFAULT_ROLE_MATRIX: Record<
+  'viewer' | 'analyst' | 'admin',
+  AuditRoleCapabilities
+> = {
   viewer: { query: true, export: false, viewAnomalies: false },
   analyst: { query: true, export: true, viewAnomalies: true },
   admin: { query: true, export: true, viewAnomalies: true },
@@ -535,11 +562,16 @@ function cloneEvent(event: AuditLogEvent): AuditLogEvent {
   return {
     ...event,
     metadata: event.metadata ? { ...event.metadata } : undefined,
-    correlationIds: event.correlationIds ? [...event.correlationIds] : undefined,
+    correlationIds: event.correlationIds
+      ? [...event.correlationIds]
+      : undefined,
   };
 }
 
-function cloneResult(result: AuditQueryResult, cached: boolean): AuditQueryResult {
+function cloneResult(
+  result: AuditQueryResult,
+  cached: boolean,
+): AuditQueryResult {
   return {
     ...result,
     cached,
@@ -625,7 +657,7 @@ function metadataToText(metadata?: Record<string, unknown>): string {
 function matchesCandidate(
   value: string,
   candidates: string[] | undefined,
-  mode: 'contains' | 'exact' = 'exact'
+  mode: 'contains' | 'exact' = 'exact',
 ): boolean {
   if (!candidates || candidates.length === 0) {
     return true;
@@ -650,9 +682,8 @@ function parseTimestamp(value: string | undefined): number {
 
 function timelineVisual(index: number, event: AuditLogEvent): string {
   const ts = new Date(event.timestamp).toISOString();
-  const truncatedSystem = event.system.length > 18
-    ? `${event.system.slice(0, 15)}…`
-    : event.system;
+  const truncatedSystem =
+    event.system.length > 18 ? `${event.system.slice(0, 15)}…` : event.system;
   const paddedSystem = truncatedSystem.padEnd(18, ' ');
   return `${String(index + 1).padStart(3, ' ')} | ${ts} | ${paddedSystem} | ${event.actor} -> ${event.action} (${event.resource})`;
 }
@@ -664,7 +695,9 @@ function correlationKeys(event: AuditLogEvent): string[] {
   return [event.resource];
 }
 
-function ledgerSeverityFallback(category: string | undefined): AuditSeverity | undefined {
+function ledgerSeverityFallback(
+  category: string | undefined,
+): AuditSeverity | undefined {
   if (!category) {
     return undefined;
   }
@@ -678,7 +711,10 @@ function ledgerSeverityFallback(category: string | undefined): AuditSeverity | u
   return undefined;
 }
 
-function convertSimpleLedgerEntry(entry: LedgerEntry, system: string): AuditLogEvent {
+function convertSimpleLedgerEntry(
+  entry: LedgerEntry,
+  system: string,
+): AuditLogEvent {
   const metadata = { ...entry.payload };
   const severity =
     parseSeverity(metadata.severity) ??
@@ -693,9 +729,10 @@ function convertSimpleLedgerEntry(entry: LedgerEntry, system: string): AuditLogE
   if (metadata.correlationId) {
     delete (metadata as Record<string, unknown>).correlationId;
   }
-  const resolvedSystem = typeof metadata.system === 'string' && metadata.system.length > 0
-    ? (metadata.system as string)
-    : system;
+  const resolvedSystem =
+    typeof metadata.system === 'string' && metadata.system.length > 0
+      ? (metadata.system as string)
+      : system;
   if (metadata.system) {
     delete (metadata as Record<string, unknown>).system;
   }
@@ -713,8 +750,12 @@ function convertSimpleLedgerEntry(entry: LedgerEntry, system: string): AuditLogE
   };
 }
 
-function convertCursorRecord(record: CursorProvenanceRecord, system: string): AuditLogEvent {
-  const actor = record.actor.displayName ?? record.actor.email ?? record.actor.id;
+function convertCursorRecord(
+  record: CursorProvenanceRecord,
+  system: string,
+): AuditLogEvent {
+  const actor =
+    record.actor.displayName ?? record.actor.email ?? record.actor.id;
   const metadata: Record<string, unknown> = {
     branch: record.branch,
     repo: record.repo,
@@ -732,7 +773,7 @@ function convertCursorRecord(record: CursorProvenanceRecord, system: string): Au
     record.storyRef?.id,
   ];
   const correlationIds = uniqueValues(
-    correlationSeeds.filter((value): value is string => Boolean(value))
+    correlationSeeds.filter((value): value is string => Boolean(value)),
   );
   const resolvedSystem = record.model?.name ?? system;
   const timestamp = record.receivedAt ?? record.ts;
@@ -758,11 +799,17 @@ export class AuditInvestigationPlatform {
   private readonly maxCacheEntries: number;
   private readonly anomalyMultiplier: number;
   private readonly anomalyMinEvents: number;
-  private readonly roleMatrix: Record<AuditInvestigatorRole, AuditRoleCapabilities>;
+  private readonly roleMatrix: Record<
+    AuditInvestigatorRole,
+    AuditRoleCapabilities
+  >;
   private readonly now: () => Date;
   private readonly trail: AuditInvestigationTrailEntry[] = [];
 
-  constructor(sources: AuditLogDataSource[], options: AuditPlatformOptions = {}) {
+  constructor(
+    sources: AuditLogDataSource[],
+    options: AuditPlatformOptions = {},
+  ) {
     this.dataSources = [...sources];
     this.cacheTtlMs = options.cacheTtlMs ?? 5 * MINUTE_IN_MS;
     this.maxCacheEntries = options.maxCacheEntries ?? 50;
@@ -779,7 +826,7 @@ export class AuditInvestigationPlatform {
   async runQuery(
     filter: AuditQueryFilter,
     context: AuditInvestigationContext,
-    options: AuditQueryOptions = {}
+    options: AuditQueryOptions = {},
   ): Promise<AuditQueryResult> {
     this.ensureAuthorized(context, 'query');
     const normalisedFilter = this.normaliseFilter(filter);
@@ -799,22 +846,28 @@ export class AuditInvestigationPlatform {
     if (useCache) {
       const cached = this.readCache(cacheKey);
       if (cached) {
-        this.recordInvestigation(context, normalisedFilter, finalOptions, cached);
+        this.recordInvestigation(
+          context,
+          normalisedFilter,
+          finalOptions,
+          cached,
+        );
         return cached;
       }
     }
 
     const start = this.now();
     const events = await this.loadEvents(normalisedFilter, finalOptions.limit);
-    const timeline = finalOptions.includeTimeline === false
-      ? []
-      : this.buildTimeline(events);
-    const anomalies = finalOptions.includeAnomalies === false
-      ? []
-      : this.maybeDetectAnomalies(events, context);
-    const correlations = finalOptions.includeCorrelations === false
-      ? []
-      : this.correlateEvents(events);
+    const timeline =
+      finalOptions.includeTimeline === false ? [] : this.buildTimeline(events);
+    const anomalies =
+      finalOptions.includeAnomalies === false
+        ? []
+        : this.maybeDetectAnomalies(events, context);
+    const correlations =
+      finalOptions.includeCorrelations === false
+        ? []
+        : this.correlateEvents(events);
     const optimizedPlan = finalOptions.optimize
       ? this.describeOptimization(normalisedFilter, events, finalOptions.limit)
       : undefined;
@@ -856,7 +909,7 @@ export class AuditInvestigationPlatform {
   async runNaturalLanguageQuery(
     query: string,
     context: AuditInvestigationContext,
-    options: AuditQueryOptions = {}
+    options: AuditQueryOptions = {},
   ): Promise<AuditQueryResult> {
     const parsed = this.parseNaturalLanguageQuery(query);
     const mergedOptions: AuditQueryOptions = {
@@ -868,9 +921,8 @@ export class AuditInvestigationPlatform {
   }
 
   getInvestigationTrail(limit?: number): AuditInvestigationTrailEntry[] {
-    const entries = limit && limit > 0
-      ? this.trail.slice(-limit)
-      : [...this.trail];
+    const entries =
+      limit && limit > 0 ? this.trail.slice(-limit) : [...this.trail];
     return entries.map((entry) => ({
       ...entry,
       investigator: {
@@ -976,7 +1028,9 @@ export class AuditInvestigationPlatform {
       }
     }
 
-    const lastMatch = text.match(/last\s+(\d+)\s+(minute|minutes|hour|hours|day|days)/i);
+    const lastMatch = text.match(
+      /last\s+(\d+)\s+(minute|minutes|hour|hours|day|days)/i,
+    );
     if (lastMatch) {
       const amount = Number.parseInt(lastMatch[1], 10);
       const unit = lastMatch[2].toLowerCase();
@@ -1020,13 +1074,25 @@ export class AuditInvestigationPlatform {
   private normaliseFilter(filter: AuditQueryFilter): AuditQueryFilter {
     const normalised: AuditQueryFilter = {
       ...filter,
-      actors: uniqueValues(filter.actors?.map((actor) => actor.trim()).filter(Boolean)),
-      actions: uniqueValues(filter.actions?.map((action) => action.trim()).filter(Boolean)),
-      resources: uniqueValues(filter.resources?.map((resource) => resource.trim()).filter(Boolean)),
-      systems: uniqueValues(filter.systems?.map((system) => system.trim()).filter(Boolean)),
-      categories: uniqueValues(filter.categories?.map((category) => category.trim()).filter(Boolean)),
+      actors: uniqueValues(
+        filter.actors?.map((actor) => actor.trim()).filter(Boolean),
+      ),
+      actions: uniqueValues(
+        filter.actions?.map((action) => action.trim()).filter(Boolean),
+      ),
+      resources: uniqueValues(
+        filter.resources?.map((resource) => resource.trim()).filter(Boolean),
+      ),
+      systems: uniqueValues(
+        filter.systems?.map((system) => system.trim()).filter(Boolean),
+      ),
+      categories: uniqueValues(
+        filter.categories?.map((category) => category.trim()).filter(Boolean),
+      ),
       severities: uniqueValues(filter.severities),
-      correlationIds: uniqueValues(filter.correlationIds?.map((value) => value.trim()).filter(Boolean)),
+      correlationIds: uniqueValues(
+        filter.correlationIds?.map((value) => value.trim()).filter(Boolean),
+      ),
     };
 
     if (filter.from) {
@@ -1054,7 +1120,10 @@ export class AuditInvestigationPlatform {
     return normalised;
   }
 
-  private matchesFilter(event: AuditLogEvent, filter: AuditQueryFilter): boolean {
+  private matchesFilter(
+    event: AuditLogEvent,
+    filter: AuditQueryFilter,
+  ): boolean {
     if (!matchesCandidate(event.actor, filter.actors, 'contains')) {
       return false;
     }
@@ -1074,14 +1143,17 @@ export class AuditInvestigationPlatform {
       }
     }
     if (filter.severities && filter.severities.length > 0) {
-      if (!event.severity || !matchesCandidate(event.severity, filter.severities)) {
+      if (
+        !event.severity ||
+        !matchesCandidate(event.severity, filter.severities)
+      ) {
         return false;
       }
     }
     if (filter.correlationIds && filter.correlationIds.length > 0) {
       const ids = event.correlationIds ?? [];
       const hasCorrelation = filter.correlationIds.some((candidate) =>
-        ids.some((id) => id.toLowerCase() === candidate.toLowerCase())
+        ids.some((id) => id.toLowerCase() === candidate.toLowerCase()),
       );
       if (!hasCorrelation) {
         return false;
@@ -1122,7 +1194,10 @@ export class AuditInvestigationPlatform {
     return true;
   }
 
-  private async loadEvents(filter: AuditQueryFilter, limit: number | undefined): Promise<AuditLogEvent[]> {
+  private async loadEvents(
+    filter: AuditQueryFilter,
+    limit: number | undefined,
+  ): Promise<AuditLogEvent[]> {
     const events: AuditLogEvent[] = [];
     for (const source of this.dataSources) {
       const loaded = await Promise.resolve(source.load(filter));
@@ -1133,8 +1208,12 @@ export class AuditInvestigationPlatform {
         events.push(clone);
       }
     }
-    const filtered = events.filter((event) => this.matchesFilter(event, filter));
-    filtered.sort((a, b) => parseTimestamp(a.timestamp) - parseTimestamp(b.timestamp));
+    const filtered = events.filter((event) =>
+      this.matchesFilter(event, filter),
+    );
+    filtered.sort(
+      (a, b) => parseTimestamp(a.timestamp) - parseTimestamp(b.timestamp),
+    );
     if (limit && limit > 0 && filtered.length > limit) {
       return filtered.slice(filtered.length - limit);
     }
@@ -1155,7 +1234,7 @@ export class AuditInvestigationPlatform {
 
   private maybeDetectAnomalies(
     events: AuditLogEvent[],
-    context: AuditInvestigationContext
+    context: AuditInvestigationContext,
   ): AuditAnomaly[] {
     if (!this.can(context, 'viewAnomalies')) {
       return [];
@@ -1176,12 +1255,16 @@ export class AuditInvestigationPlatform {
     }
     const averageActor = events.length / Math.max(byActor.size, 1);
     byActor.forEach((list, actor) => {
-      if (list.length >= this.anomalyMinEvents && list.length > averageActor * this.anomalyMultiplier) {
+      if (
+        list.length >= this.anomalyMinEvents &&
+        list.length > averageActor * this.anomalyMultiplier
+      ) {
         const firstTs = parseTimestamp(list[0].timestamp);
         const lastTs = parseTimestamp(list[list.length - 1].timestamp);
-        const spanMinutes = !Number.isNaN(firstTs) && !Number.isNaN(lastTs)
-          ? Math.max((lastTs - firstTs) / MINUTE_IN_MS, 1)
-          : list.length;
+        const spanMinutes =
+          !Number.isNaN(firstTs) && !Number.isNaN(lastTs)
+            ? Math.max((lastTs - firstTs) / MINUTE_IN_MS, 1)
+            : list.length;
         const score = list.length / Math.max(averageActor, 1);
         anomalies.push({
           reason: `Actor ${actor} generated ${list.length} events (${score.toFixed(1)}x avg) within ${spanMinutes.toFixed(1)} minutes`,
@@ -1200,7 +1283,10 @@ export class AuditInvestigationPlatform {
     }
     const averageSystem = events.length / Math.max(bySystem.size, 1);
     bySystem.forEach((list, system) => {
-      if (list.length >= this.anomalyMinEvents && list.length > averageSystem * this.anomalyMultiplier) {
+      if (
+        list.length >= this.anomalyMinEvents &&
+        list.length > averageSystem * this.anomalyMultiplier
+      ) {
         const score = list.length / Math.max(averageSystem, 1);
         anomalies.push({
           reason: `System ${system} produced ${list.length} events (${score.toFixed(1)}x avg)`,
@@ -1216,13 +1302,19 @@ export class AuditInvestigationPlatform {
   }
 
   private correlateEvents(events: AuditLogEvent[]): AuditCorrelation[] {
-    const correlations = new Map<string, { systems: Set<string>; events: AuditLogEvent[] }>();
+    const correlations = new Map<
+      string,
+      { systems: Set<string>; events: AuditLogEvent[] }
+    >();
     for (const event of events) {
       for (const key of correlationKeys(event)) {
         if (!key) {
           continue;
         }
-        const entry = correlations.get(key) ?? { systems: new Set<string>(), events: [] };
+        const entry = correlations.get(key) ?? {
+          systems: new Set<string>(),
+          events: [],
+        };
         entry.systems.add(event.system);
         entry.events.push(cloneEvent(event));
         correlations.set(key, entry);
@@ -1241,7 +1333,7 @@ export class AuditInvestigationPlatform {
   private describeOptimization(
     filter: AuditQueryFilter,
     events: AuditLogEvent[],
-    limit: number | undefined
+    limit: number | undefined,
   ): string {
     const indices: string[] = [];
     if (filter.actors && filter.actors.length) {
@@ -1297,7 +1389,9 @@ export class AuditInvestigationPlatform {
     ];
     const rows = [headers.join(',')];
     for (const event of events) {
-      const metadataString = event.metadata ? JSON.stringify(event.metadata) : '';
+      const metadataString = event.metadata
+        ? JSON.stringify(event.metadata)
+        : '';
       const row = [
         event.id,
         event.timestamp,
@@ -1324,7 +1418,7 @@ export class AuditInvestigationPlatform {
     context: AuditInvestigationContext,
     filter: AuditQueryFilter,
     options: AuditQueryOptions,
-    result: AuditQueryResult
+    result: AuditQueryResult,
   ): void {
     const entry: AuditInvestigationTrailEntry = {
       id: result.queryId,
@@ -1351,7 +1445,10 @@ export class AuditInvestigationPlatform {
     }
   }
 
-  private cacheKey(filter: AuditQueryFilter, options: AuditQueryOptions): string {
+  private cacheKey(
+    filter: AuditQueryFilter,
+    options: AuditQueryOptions,
+  ): string {
     return JSON.stringify({
       filter,
       limit: options.limit,
@@ -1411,7 +1508,7 @@ export class AuditInvestigationPlatform {
   }
 
   private buildRoleMatrix(
-    overrides?: Partial<Record<AuditInvestigatorRole, AuditRoleCapabilities>>
+    overrides?: Partial<Record<AuditInvestigatorRole, AuditRoleCapabilities>>,
   ): Record<AuditInvestigatorRole, AuditRoleCapabilities> {
     const matrix: Record<AuditInvestigatorRole, AuditRoleCapabilities> = {
       viewer: { ...DEFAULT_ROLE_MATRIX.viewer },
@@ -1428,14 +1525,20 @@ export class AuditInvestigationPlatform {
     return matrix;
   }
 
-  private can(context: AuditInvestigationContext, capability: AuditCapability): boolean {
+  private can(
+    context: AuditInvestigationContext,
+    capability: AuditCapability,
+  ): boolean {
     return context.roles.some((role) => {
       const capabilities = this.roleMatrix[role] ?? FALLBACK_CAPABILITIES;
       return capabilities[capability];
     });
   }
 
-  private ensureAuthorized(context: AuditInvestigationContext, capability: AuditCapability): void {
+  private ensureAuthorized(
+    context: AuditInvestigationContext,
+    capability: AuditCapability,
+  ): void {
     if (!this.can(context, capability)) {
       throw new Error(`Not authorized to ${capability} audit data`);
     }
@@ -1444,21 +1547,23 @@ export class AuditInvestigationPlatform {
 
 export function simpleLedgerDataSource(
   system: string,
-  ledger: SimpleProvenanceLedger
+  ledger: SimpleProvenanceLedger,
 ): AuditLogDataSource {
   return {
     system,
-    load: () => ledger.list().map((entry) => convertSimpleLedgerEntry(entry, system)),
+    load: () =>
+      ledger.list().map((entry) => convertSimpleLedgerEntry(entry, system)),
   };
 }
 
 export function cursorLedgerDataSource(
   system: string,
-  ledger: ProvenanceLedger
+  ledger: ProvenanceLedger,
 ): AuditLogDataSource {
   return {
     system,
-    load: () => ledger.list().map((record) => convertCursorRecord(record, system)),
+    load: () =>
+      ledger.list().map((record) => convertCursorRecord(record, system)),
   };
 }
 

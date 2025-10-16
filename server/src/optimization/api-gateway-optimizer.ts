@@ -1,7 +1,7 @@
 // server/src/optimization/api-gateway-optimizer.ts
 
 import { getRedisClient } from '../config/database.js';
-import logger from '../config/logger.js';
+import logger from '../utils/logger.js';
 import { createHash } from 'crypto';
 import { EventEmitter } from 'events';
 
@@ -83,9 +83,9 @@ export class ApiGatewayOptimizer extends EventEmitter {
     costByEndpoint: new Map(),
     costByUser: new Map(),
     dailyCost: 0,
-    monthlyCost: 0
+    monthlyCost: 0,
   };
-  
+
   private readonly CACHE_PREFIX = 'api:cache:';
   private readonly METRICS_PREFIX = 'api:metrics:';
   private readonly BATCH_WINDOW_MS = 100;
@@ -104,7 +104,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
     return async (req: any, res: any, next: any) => {
       const startTime = Date.now();
       const routeKey = this.getRouteKey(req);
-      
+
       try {
         // Skip caching for non-GET requests unless explicitly configured
         if (req.method !== 'GET' && !config.shouldCache) {
@@ -112,23 +112,29 @@ export class ApiGatewayOptimizer extends EventEmitter {
         }
 
         // Generate cache key
-        const cacheKey = config.cacheKey 
+        const cacheKey = config.cacheKey
           ? config.cacheKey(req)
           : this.generateCacheKey(req);
 
         // Try to get cached response
         const cachedResponse = await this.getCachedResponse(cacheKey);
-        
+
         if (cachedResponse) {
           // Check if cache is stale but serve it while revalidating
-          const isStale = config.staleWhileRevalidate && 
-            (Date.now() - cachedResponse.timestamp) > (config.ttl * 1000);
+          const isStale =
+            config.staleWhileRevalidate &&
+            Date.now() - cachedResponse.timestamp > config.ttl * 1000;
 
           if (isStale) {
             // Serve stale content immediately
             this.serveCachedResponse(res, cachedResponse);
-            this.updateRouteMetrics(routeKey, Date.now() - startTime, true, true);
-            
+            this.updateRouteMetrics(
+              routeKey,
+              Date.now() - startTime,
+              true,
+              true,
+            );
+
             // Revalidate in background
             this.revalidateInBackground(req, next, cacheKey, config);
             return;
@@ -147,13 +153,13 @@ export class ApiGatewayOptimizer extends EventEmitter {
         let responseData: any;
         let statusCode: number;
 
-        res.send = function(data: any) {
+        res.send = function (data: any) {
           responseData = data;
           statusCode = this.statusCode;
           return originalSend.call(this, data);
         };
 
-        res.json = function(data: any) {
+        res.json = function (data: any) {
           responseData = data;
           statusCode = this.statusCode;
           return originalJson.call(this, data);
@@ -165,22 +171,31 @@ export class ApiGatewayOptimizer extends EventEmitter {
         // Cache the response after it's sent
         res.on('finish', async () => {
           const responseTime = Date.now() - startTime;
-          const shouldCache = config.shouldCache 
+          const shouldCache = config.shouldCache
             ? config.shouldCache(req, { statusCode, data: responseData })
             : this.shouldCacheResponse(statusCode, responseData);
 
           if (shouldCache) {
-            await this.cacheResponse(cacheKey, {
-              statusCode,
-              data: responseData,
-              headers: res.getHeaders(),
-              timestamp: Date.now()
-            }, config.ttl, config.tags);
+            await this.cacheResponse(
+              cacheKey,
+              {
+                statusCode,
+                data: responseData,
+                headers: res.getHeaders(),
+                timestamp: Date.now(),
+              },
+              config.ttl,
+              config.tags,
+            );
           }
 
-          this.updateRouteMetrics(routeKey, responseTime, statusCode < 400, false);
+          this.updateRouteMetrics(
+            routeKey,
+            responseTime,
+            statusCode < 400,
+            false,
+          );
         });
-
       } catch (error) {
         logger.error('Cache middleware error:', error);
         next();
@@ -195,16 +210,21 @@ export class ApiGatewayOptimizer extends EventEmitter {
     return async (req: any, res: any, next: any) => {
       const routeKey = this.getRouteKey(req);
       const circuitBreaker = this.getCircuitBreaker(routeKey, config);
-      
+
       // Check circuit breaker state
       if (circuitBreaker.state === 'OPEN') {
         if (Date.now() < circuitBreaker.nextAttempt) {
           // Circuit is open, reject request
-          this.emit('circuitBreakerOpen', { routeKey, failures: circuitBreaker.failures });
+          this.emit('circuitBreakerOpen', {
+            routeKey,
+            failures: circuitBreaker.failures,
+          });
           return res.status(503).json({
             error: 'Service temporarily unavailable',
             code: 'CIRCUIT_BREAKER_OPEN',
-            retryAfter: Math.ceil((circuitBreaker.nextAttempt - Date.now()) / 1000)
+            retryAfter: Math.ceil(
+              (circuitBreaker.nextAttempt - Date.now()) / 1000,
+            ),
           });
         } else {
           // Move to half-open state
@@ -213,11 +233,14 @@ export class ApiGatewayOptimizer extends EventEmitter {
         }
       }
 
-      if (circuitBreaker.state === 'HALF_OPEN' && circuitBreaker.halfOpenCalls >= config.halfOpenMaxCalls) {
+      if (
+        circuitBreaker.state === 'HALF_OPEN' &&
+        circuitBreaker.halfOpenCalls >= config.halfOpenMaxCalls
+      ) {
         // Too many half-open calls, reject
         return res.status(503).json({
           error: 'Service temporarily unavailable',
-          code: 'CIRCUIT_BREAKER_HALF_OPEN_LIMIT'
+          code: 'CIRCUIT_BREAKER_HALF_OPEN_LIMIT',
         });
       }
 
@@ -227,14 +250,14 @@ export class ApiGatewayOptimizer extends EventEmitter {
       }
 
       const startTime = Date.now();
-      
+
       // Override response to track success/failure
       const originalSend = res.send;
       const originalJson = res.json;
 
       const trackResponse = (statusCode: number) => {
         const responseTime = Date.now() - startTime;
-        
+
         if (statusCode >= 500 || responseTime > config.monitoringPeriodMs) {
           // Record failure
           this.recordCircuitBreakerFailure(routeKey, circuitBreaker, config);
@@ -244,12 +267,12 @@ export class ApiGatewayOptimizer extends EventEmitter {
         }
       };
 
-      res.send = function(data: any) {
+      res.send = function (data: any) {
         trackResponse(this.statusCode);
         return originalSend.call(this, data);
       };
 
-      res.json = function(data: any) {
+      res.json = function (data: any) {
         trackResponse(this.statusCode);
         return originalJson.call(this, data);
       };
@@ -260,7 +283,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
         if (!res.headersSent) {
           res.status(408).json({
             error: 'Request timeout',
-            code: 'CIRCUIT_BREAKER_TIMEOUT'
+            code: 'CIRCUIT_BREAKER_TIMEOUT',
           });
         }
       }, config.monitoringPeriodMs);
@@ -280,11 +303,11 @@ export class ApiGatewayOptimizer extends EventEmitter {
     return async (req: any, res: any, next: any) => {
       const routeKey = this.getRouteKey(req);
       const bulkhead = this.getBulkhead(routeKey);
-      
+
       // Check if we can proceed immediately
       if (bulkhead.active < config.maxConcurrent) {
         bulkhead.active++;
-        
+
         // Track completion
         const complete = () => {
           bulkhead.active--;
@@ -299,17 +322,20 @@ export class ApiGatewayOptimizer extends EventEmitter {
 
         res.on('finish', complete);
         res.on('close', complete);
-        
+
         return next();
       }
 
       // Check queue capacity
       if (bulkhead.queue.length >= config.queueSize) {
-        this.emit('bulkheadRejection', { routeKey, queueSize: bulkhead.queue.length });
+        this.emit('bulkheadRejection', {
+          routeKey,
+          queueSize: bulkhead.queue.length,
+        });
         return res.status(429).json({
           error: 'Too many requests',
           code: 'BULKHEAD_QUEUE_FULL',
-          retryAfter: 1
+          retryAfter: 1,
         });
       }
 
@@ -317,7 +343,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
       const queuedRequest = {
         execute: () => {
           bulkhead.active++;
-          
+
           const complete = () => {
             bulkhead.active--;
             if (bulkhead.queue.length > 0) {
@@ -330,9 +356,9 @@ export class ApiGatewayOptimizer extends EventEmitter {
 
           res.on('finish', complete);
           res.on('close', complete);
-          
+
           next();
-        }
+        },
       };
 
       bulkhead.queue.push(queuedRequest);
@@ -345,7 +371,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
           if (!res.headersSent) {
             res.status(408).json({
               error: 'Request timeout in queue',
-              code: 'BULKHEAD_QUEUE_TIMEOUT'
+              code: 'BULKHEAD_QUEUE_TIMEOUT',
             });
           }
         }
@@ -359,7 +385,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
   createBatchingMiddleware() {
     return async (req: any, res: any, next: any) => {
       const routeKey = this.getRouteKey(req);
-      
+
       // Only batch GET requests to specific endpoints
       if (req.method !== 'GET' || !this.isBatchableEndpoint(routeKey)) {
         return next();
@@ -367,7 +393,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
 
       const batchKey = this.generateBatchKey(req);
       const requestId = this.generateRequestId();
-      
+
       return new Promise((resolve, reject) => {
         const requestEntry = {
           id: requestId,
@@ -380,7 +406,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
           reject: (error: any) => {
             res.status(500).json({ error: error.message });
             reject(error);
-          }
+          },
         };
 
         // Get or create batch
@@ -392,7 +418,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
             timeoutId: setTimeout(() => {
               this.executeBatch(batchKey);
             }, this.BATCH_WINDOW_MS),
-            maxWaitMs: this.BATCH_WINDOW_MS
+            maxWaitMs: this.BATCH_WINDOW_MS,
           };
           this.requestBatches.set(batchKey, batch);
         }
@@ -421,7 +447,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
       for (const tag of tags) {
         const taggedKeys = await this.redis.smembers(`cache:tags:${tag}`);
         keysToDelete.push(...taggedKeys);
-        
+
         // Clean up tag set
         await this.redis.del(`cache:tags:${tag}`);
       }
@@ -430,7 +456,9 @@ export class ApiGatewayOptimizer extends EventEmitter {
     // Invalidate by patterns
     if (patterns && patterns.length > 0) {
       for (const pattern of patterns) {
-        const matchingKeys = await this.redis.keys(`${this.CACHE_PREFIX}${pattern}`);
+        const matchingKeys = await this.redis.keys(
+          `${this.CACHE_PREFIX}${pattern}`,
+        );
         keysToDelete.push(...matchingKeys);
       }
     }
@@ -439,12 +467,15 @@ export class ApiGatewayOptimizer extends EventEmitter {
     const uniqueKeys = [...new Set(keysToDelete)];
     if (uniqueKeys.length > 0) {
       await this.redis.del(...uniqueKeys);
-      this.emit('cacheInvalidation', { 
-        tags, 
-        patterns, 
-        keysDeleted: uniqueKeys.length 
+      this.emit('cacheInvalidation', {
+        tags,
+        patterns,
+        keysDeleted: uniqueKeys.length,
       });
-      logger.info(`Invalidated ${uniqueKeys.length} cache entries`, { tags, patterns });
+      logger.info(`Invalidated ${uniqueKeys.length} cache entries`, {
+        tags,
+        patterns,
+      });
     }
   }
 
@@ -454,7 +485,8 @@ export class ApiGatewayOptimizer extends EventEmitter {
   trackRequestCost(userId: string, endpoint: string, cost: number): void {
     this.costMetrics.totalCost += cost;
     this.costMetrics.requestCount += 1;
-    this.costMetrics.avgCostPerRequest = this.costMetrics.totalCost / this.costMetrics.requestCount;
+    this.costMetrics.avgCostPerRequest =
+      this.costMetrics.totalCost / this.costMetrics.requestCount;
 
     // Track by endpoint
     const endpointCost = this.costMetrics.costByEndpoint.get(endpoint) || 0;
@@ -467,10 +499,18 @@ export class ApiGatewayOptimizer extends EventEmitter {
     // Update daily/monthly costs
     this.updatePeriodCosts();
 
-    this.emit('costTracked', { userId, endpoint, cost, totalCost: this.costMetrics.totalCost });
+    this.emit('costTracked', {
+      userId,
+      endpoint,
+      cost,
+      totalCost: this.costMetrics.totalCost,
+    });
   }
 
-  async checkBudgetLimit(userId: string, requestCost: number): Promise<{
+  async checkBudgetLimit(
+    userId: string,
+    requestCost: number,
+  ): Promise<{
     allowed: boolean;
     reason?: string;
     currentSpend: number;
@@ -478,26 +518,26 @@ export class ApiGatewayOptimizer extends EventEmitter {
   }> {
     const userBudget = await this.getUserBudget(userId);
     const currentSpend = this.costMetrics.costByUser.get(userId) || 0;
-    
+
     if (currentSpend + requestCost > userBudget.limit) {
       return {
         allowed: false,
         reason: 'Budget limit exceeded',
         currentSpend,
-        limit: userBudget.limit
+        limit: userBudget.limit,
       };
     }
 
     return {
       allowed: true,
       currentSpend,
-      limit: userBudget.limit
+      limit: userBudget.limit,
     };
   }
 
   createBudgetMiddleware() {
     return async (req: any, res: any, next: any) => {
-      const userId = req.user?.id;
+      const userId = (req as any).user?.id;
       if (!userId) return next();
 
       const estimatedCost = this.estimateRequestCost(req);
@@ -510,7 +550,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
           code: 'BUDGET_EXCEEDED',
           currentSpend: budgetCheck.currentSpend,
           limit: budgetCheck.limit,
-          estimatedCost
+          estimatedCost,
         });
       }
 
@@ -550,8 +590,8 @@ export class ApiGatewayOptimizer extends EventEmitter {
     const route = this.getRouteKey(req);
     const query = JSON.stringify(req.query, Object.keys(req.query).sort());
     const params = JSON.stringify(req.params, Object.keys(req.params).sort());
-    const userId = req.user?.id || 'anonymous';
-    
+    const userId = (req as any).user?.id || 'anonymous';
+
     return createHash('md5')
       .update(`${route}:${query}:${params}:${userId}`)
       .digest('hex');
@@ -572,10 +612,10 @@ export class ApiGatewayOptimizer extends EventEmitter {
 
   private async getCachedResponse(cacheKey: string): Promise<any> {
     if (!this.redis) return null;
-    
+
     const cached = await this.redis.get(`${this.CACHE_PREFIX}${cacheKey}`);
     if (!cached) return null;
-    
+
     try {
       return JSON.parse(cached);
     } catch (error) {
@@ -586,68 +626,74 @@ export class ApiGatewayOptimizer extends EventEmitter {
   }
 
   private async cacheResponse(
-    cacheKey: string, 
-    response: any, 
-    ttl: number, 
-    tags?: string[]
+    cacheKey: string,
+    response: any,
+    ttl: number,
+    tags?: string[],
   ): Promise<void> {
     if (!this.redis) return;
-    
+
     try {
       // Cache the response
       await this.redis.setex(
         `${this.CACHE_PREFIX}${cacheKey}`,
         ttl,
-        JSON.stringify(response)
+        JSON.stringify(response),
       );
 
       // Add to tag sets for invalidation
       if (tags && tags.length > 0) {
         for (const tag of tags) {
-          await this.redis.sadd(`cache:tags:${tag}`, `${this.CACHE_PREFIX}${cacheKey}`);
+          await this.redis.sadd(
+            `cache:tags:${tag}`,
+            `${this.CACHE_PREFIX}${cacheKey}`,
+          );
           await this.redis.expire(`cache:tags:${tag}`, ttl + 3600); // Tags expire 1 hour after cache
         }
       }
     } catch (error) {
-      logger.warn('Failed to cache response', { cacheKey, error: error.message });
+      logger.warn('Failed to cache response', {
+        cacheKey,
+        error: error.message,
+      });
     }
   }
 
   private serveCachedResponse(res: any, cachedResponse: any): void {
     res.status(cachedResponse.statusCode);
-    
+
     // Set cached headers
     if (cachedResponse.headers) {
       Object.entries(cachedResponse.headers).forEach(([key, value]) => {
         res.set(key, value);
       });
     }
-    
+
     // Add cache headers
     res.set('X-Cache-Status', 'HIT');
     res.set('X-Cache-Time', new Date(cachedResponse.timestamp).toISOString());
-    
+
     res.send(cachedResponse.data);
   }
 
   private shouldCacheResponse(statusCode: number, data: any): boolean {
     // Only cache successful responses
     if (statusCode >= 400) return false;
-    
+
     // Don't cache empty responses
     if (!data) return false;
-    
+
     // Don't cache very large responses (>1MB)
     if (JSON.stringify(data).length > 1024 * 1024) return false;
-    
+
     return true;
   }
 
   private async revalidateInBackground(
-    req: any, 
-    next: any, 
-    cacheKey: string, 
-    config: CacheConfig
+    req: any,
+    next: any,
+    cacheKey: string,
+    config: CacheConfig,
   ): Promise<void> {
     // This would trigger a background request to update the cache
     // Implementation depends on your specific framework
@@ -657,12 +703,18 @@ export class ApiGatewayOptimizer extends EventEmitter {
         // This is simplified - real implementation would depend on your routing framework
         logger.info('Background revalidation started', { cacheKey });
       } catch (error) {
-        logger.warn('Background revalidation failed', { cacheKey, error: error.message });
+        logger.warn('Background revalidation failed', {
+          cacheKey,
+          error: error.message,
+        });
       }
     });
   }
 
-  private getCircuitBreaker(routeKey: string, config: CircuitBreakerConfig): CircuitBreakerState {
+  private getCircuitBreaker(
+    routeKey: string,
+    config: CircuitBreakerConfig,
+  ): CircuitBreakerState {
     if (!this.circuitBreakers.has(routeKey)) {
       this.circuitBreakers.set(routeKey, {
         state: 'CLOSED',
@@ -670,41 +722,47 @@ export class ApiGatewayOptimizer extends EventEmitter {
         successes: 0,
         nextAttempt: 0,
         lastFailureTime: 0,
-        halfOpenCalls: 0
+        halfOpenCalls: 0,
       });
     }
     return this.circuitBreakers.get(routeKey)!;
   }
 
   private recordCircuitBreakerFailure(
-    routeKey: string, 
-    circuitBreaker: CircuitBreakerState, 
-    config: CircuitBreakerConfig
+    routeKey: string,
+    circuitBreaker: CircuitBreakerState,
+    config: CircuitBreakerConfig,
   ): void {
     circuitBreaker.failures++;
     circuitBreaker.lastFailureTime = Date.now();
-    
+
     if (circuitBreaker.state === 'HALF_OPEN') {
       // Half-open failure immediately opens the circuit
       circuitBreaker.state = 'OPEN';
       circuitBreaker.nextAttempt = Date.now() + config.resetTimeoutMs;
-      this.emit('circuitBreakerOpened', { routeKey, failures: circuitBreaker.failures });
+      this.emit('circuitBreakerOpened', {
+        routeKey,
+        failures: circuitBreaker.failures,
+      });
     } else if (circuitBreaker.failures >= config.failureThreshold) {
       // Threshold reached, open the circuit
       circuitBreaker.state = 'OPEN';
       circuitBreaker.nextAttempt = Date.now() + config.resetTimeoutMs;
       this.updateRouteMetrics(routeKey, 0, false, false, true);
-      this.emit('circuitBreakerOpened', { routeKey, failures: circuitBreaker.failures });
+      this.emit('circuitBreakerOpened', {
+        routeKey,
+        failures: circuitBreaker.failures,
+      });
     }
   }
 
   private recordCircuitBreakerSuccess(
-    routeKey: string, 
-    circuitBreaker: CircuitBreakerState, 
-    config: CircuitBreakerConfig
+    routeKey: string,
+    circuitBreaker: CircuitBreakerState,
+    config: CircuitBreakerConfig,
   ): void {
     circuitBreaker.successes++;
-    
+
     if (circuitBreaker.state === 'HALF_OPEN') {
       // Successful half-open call
       if (circuitBreaker.halfOpenCalls >= config.halfOpenMaxCalls) {
@@ -735,10 +793,10 @@ export class ApiGatewayOptimizer extends EventEmitter {
     const batchablePatterns = [
       'GET:/api/entities',
       'GET:/api/search',
-      'GET:/api/analytics'
+      'GET:/api/analytics',
     ];
-    
-    return batchablePatterns.some(pattern => routeKey.includes(pattern));
+
+    return batchablePatterns.some((pattern) => routeKey.includes(pattern));
   }
 
   private async executeBatch(batchKey: string): Promise<void> {
@@ -746,24 +804,26 @@ export class ApiGatewayOptimizer extends EventEmitter {
     if (!batch || batch.requests.length === 0) return;
 
     try {
-      this.emit('batchExecution', { 
-        batchId: batch.id, 
-        requestCount: batch.requests.length 
+      this.emit('batchExecution', {
+        batchId: batch.id,
+        requestCount: batch.requests.length,
       });
 
       // Group requests by endpoint and parameters similarity
       const groupedRequests = this.groupSimilarRequests(batch.requests);
-      
+
       // Execute each group
       for (const group of groupedRequests) {
         await this.executeBatchGroup(group);
       }
-
     } catch (error) {
-      logger.error('Batch execution failed', { batchKey, error: error.message });
-      
+      logger.error('Batch execution failed', {
+        batchKey,
+        error: error.message,
+      });
+
       // Reject all requests in the batch
-      batch.requests.forEach(req => {
+      batch.requests.forEach((req) => {
         req.reject(new Error('Batch execution failed'));
       });
     } finally {
@@ -778,41 +838,47 @@ export class ApiGatewayOptimizer extends EventEmitter {
 
     for (let i = 0; i < requests.length; i++) {
       if (processed.has(i)) continue;
-      
+
       const group = [requests[i]];
       processed.add(i);
-      
+
       // Find similar requests
       for (let j = i + 1; j < requests.length; j++) {
         if (processed.has(j)) continue;
-        
+
         if (this.areRequestsSimilar(requests[i], requests[j])) {
           group.push(requests[j]);
           processed.add(j);
         }
       }
-      
+
       groups.push(group);
     }
-    
+
     return groups;
   }
 
   private areRequestsSimilar(req1: any, req2: any): boolean {
     // Check if requests can be batched together
     if (req1.endpoint !== req2.endpoint) return false;
-    
+
     // Check parameter similarity (simplified)
-    const params1 = JSON.stringify(req1.params, Object.keys(req1.params).sort());
-    const params2 = JSON.stringify(req2.params, Object.keys(req2.params).sort());
-    
+    const params1 = JSON.stringify(
+      req1.params,
+      Object.keys(req1.params).sort(),
+    );
+    const params2 = JSON.stringify(
+      req2.params,
+      Object.keys(req2.params).sort(),
+    );
+
     return params1 === params2;
   }
 
   private async executeBatchGroup(group: any[]): Promise<void> {
     // This would execute the actual batched request
     // Implementation depends on your specific API endpoints
-    
+
     // For demonstration, we'll simulate processing each request
     for (const request of group) {
       try {
@@ -827,21 +893,21 @@ export class ApiGatewayOptimizer extends EventEmitter {
 
   private async simulateApiCall(request: any): Promise<any> {
     // Simulate different API responses based on endpoint
-    await new Promise(resolve => setTimeout(resolve, 100)); // Simulate latency
-    
+    await new Promise((resolve) => setTimeout(resolve, 100)); // Simulate latency
+
     return {
       id: request.id,
       data: `Processed ${request.endpoint}`,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
   }
 
   private updateRouteMetrics(
-    routeKey: string, 
-    responseTime: number, 
-    success: boolean, 
+    routeKey: string,
+    responseTime: number,
+    success: boolean,
     cacheHit: boolean,
-    circuitBreakerTrip: boolean = false
+    circuitBreakerTrip: boolean = false,
   ): void {
     let metrics = this.routeMetrics.get(routeKey);
     if (!metrics) {
@@ -854,7 +920,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
         p99ResponseTime: 0,
         cacheHitRate: 0,
         circuitBreakerTrips: 0,
-        lastAccessed: 0
+        lastAccessed: 0,
       };
       this.routeMetrics.set(routeKey, metrics);
     }
@@ -867,11 +933,15 @@ export class ApiGatewayOptimizer extends EventEmitter {
     }
 
     // Update response time metrics (simplified)
-    metrics.avgResponseTime = (metrics.avgResponseTime * (metrics.totalRequests - 1) + responseTime) / metrics.totalRequests;
-    
+    metrics.avgResponseTime =
+      (metrics.avgResponseTime * (metrics.totalRequests - 1) + responseTime) /
+      metrics.totalRequests;
+
     // Update cache hit rate
     const cacheHits = cacheHit ? 1 : 0;
-    metrics.cacheHitRate = (metrics.cacheHitRate * (metrics.totalRequests - 1) + cacheHits) / metrics.totalRequests;
+    metrics.cacheHitRate =
+      (metrics.cacheHitRate * (metrics.totalRequests - 1) + cacheHits) /
+      metrics.totalRequests;
 
     if (circuitBreakerTrip) {
       metrics.circuitBreakerTrips++;
@@ -882,13 +952,13 @@ export class ApiGatewayOptimizer extends EventEmitter {
 
   private estimateRequestCost(req: any): number {
     const routeKey = this.getRouteKey(req);
-    
+
     // Base costs by endpoint type
     const baseCosts = {
       'POST:/api/ai/': 0.05,
       'GET:/api/search': 0.01,
       'GET:/api/entities': 0.005,
-      'POST:/api/analysis': 0.03
+      'POST:/api/analysis': 0.03,
     };
 
     let cost = 0.001; // Default base cost
@@ -914,7 +984,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
 
   private calculateActualCost(req: any, res: any): number {
     let estimatedCost = this.estimateRequestCost(req);
-    
+
     // Adjust based on response
     if (res.statusCode >= 500) {
       estimatedCost *= 0.5; // Reduced cost for errors
@@ -928,12 +998,14 @@ export class ApiGatewayOptimizer extends EventEmitter {
     return estimatedCost;
   }
 
-  private async getUserBudget(userId: string): Promise<{ limit: number; period: string }> {
+  private async getUserBudget(
+    userId: string,
+  ): Promise<{ limit: number; period: string }> {
     // This would fetch from database or configuration
     // Simplified implementation
     return {
       limit: 10.0, // $10 per month
-      period: 'monthly'
+      period: 'monthly',
     };
   }
 
@@ -943,7 +1015,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
     const now = new Date();
     const today = now.toISOString().split('T')[0];
     const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    
+
     // This is simplified - real implementation would track historical data
     this.costMetrics.dailyCost = this.costMetrics.totalCost; // Simplified
     this.costMetrics.monthlyCost = this.costMetrics.totalCost; // Simplified
@@ -955,7 +1027,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
       circuitBreakers: Object.fromEntries(this.circuitBreakers),
       bulkheads: Object.fromEntries(this.bulkheads),
       costs: this.costMetrics,
-      activeBatches: this.requestBatches.size
+      activeBatches: this.requestBatches.size,
     };
 
     this.emit('performanceMetrics', metrics);
@@ -965,7 +1037,10 @@ export class ApiGatewayOptimizer extends EventEmitter {
     const now = Date.now();
     for (const [key, batch] of this.requestBatches) {
       // Clean up batches that are too old
-      if (now - parseInt(key.split(':').pop()!) * this.BATCH_WINDOW_MS > 60000) {
+      if (
+        now - parseInt(key.split(':').pop()!) * this.BATCH_WINDOW_MS >
+        60000
+      ) {
         clearTimeout(batch.timeoutId);
         this.requestBatches.delete(key);
       }
@@ -979,14 +1054,17 @@ export class ApiGatewayOptimizer extends EventEmitter {
       if (state.state === 'OPEN' && now >= state.nextAttempt) {
         state.state = 'HALF_OPEN';
         state.halfOpenCalls = 0;
-        this.emit('circuitBreakerTransition', { routeKey, newState: 'HALF_OPEN' });
+        this.emit('circuitBreakerTransition', {
+          routeKey,
+          newState: 'HALF_OPEN',
+        });
       }
     }
   }
 
   private cleanupExpiredMetrics(): void {
     const cutoffTime = Date.now() - 24 * 60 * 60 * 1000; // 24 hours ago
-    
+
     for (const [routeKey, metrics] of this.routeMetrics) {
       if (metrics.lastAccessed < cutoffTime) {
         this.routeMetrics.delete(routeKey);
@@ -1001,25 +1079,30 @@ export class ApiGatewayOptimizer extends EventEmitter {
       // Get cache statistics
       const keys = await this.redis.keys(`${this.CACHE_PREFIX}*`);
       const totalKeys = keys.length;
-      
-      if (totalKeys > 10000) { // Too many keys
+
+      if (totalKeys > 10000) {
+        // Too many keys
         // Remove least recently accessed items
         const sampleSize = Math.min(1000, totalKeys);
         const sampleKeys = keys.slice(0, sampleSize);
-        
+
         const keyStats = [];
         for (const key of sampleKeys) {
           const ttl = await this.redis.ttl(key);
           keyStats.push({ key, ttl });
         }
-        
+
         // Sort by TTL (ascending) and remove items with low TTL first
         keyStats.sort((a, b) => a.ttl - b.ttl);
-        const keysToRemove = keyStats.slice(0, Math.floor(sampleSize * 0.1)).map(stat => stat.key);
-        
+        const keysToRemove = keyStats
+          .slice(0, Math.floor(sampleSize * 0.1))
+          .map((stat) => stat.key);
+
         if (keysToRemove.length > 0) {
           await this.redis.del(...keysToRemove);
-          logger.info(`Cleaned up ${keysToRemove.length} cache entries for storage optimization`);
+          logger.info(
+            `Cleaned up ${keysToRemove.length} cache entries for storage optimization`,
+          );
         }
       }
     } catch (error) {
@@ -1036,20 +1119,25 @@ export class ApiGatewayOptimizer extends EventEmitter {
       circuitBreakers: Object.fromEntries(
         Array.from(this.circuitBreakers.entries()).map(([key, value]) => [
           key,
-          { ...value, nextAttemptIn: Math.max(0, value.nextAttempt - Date.now()) }
-        ])
+          {
+            ...value,
+            nextAttemptIn: Math.max(0, value.nextAttempt - Date.now()),
+          },
+        ]),
       ),
       bulkheads: Object.fromEntries(this.bulkheads),
       costs: {
         ...this.costMetrics,
-        topCostlyEndpoints: Array.from(this.costMetrics.costByEndpoint.entries())
-          .sort(([,a], [,b]) => b - a)
+        topCostlyEndpoints: Array.from(
+          this.costMetrics.costByEndpoint.entries(),
+        )
+          .sort(([, a], [, b]) => b - a)
           .slice(0, 10),
         topUsers: Array.from(this.costMetrics.costByUser.entries())
-          .sort(([,a], [,b]) => b - a)
-          .slice(0, 10)
+          .sort(([, a], [, b]) => b - a)
+          .slice(0, 10),
       },
-      cache: await this.getCacheStats()
+      cache: await this.getCacheStats(),
     };
 
     return report;
@@ -1063,7 +1151,7 @@ export class ApiGatewayOptimizer extends EventEmitter {
       return {
         available: true,
         totalEntries: keys.length,
-        memoryUsage: 'N/A' // Would need Redis MEMORY command
+        memoryUsage: 'N/A', // Would need Redis MEMORY command
       };
     } catch (error) {
       return { available: false, error: error.message };

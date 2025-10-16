@@ -193,27 +193,17 @@ export const typeDefs = gql`
     """
     Find shortest path between two entities (max 3 hops per SLO)
     """
-    pathBetween(
-      fromId: ID!
-      toId: ID!
-      maxHops: Int = 3
-    ): [PathStep!]!
+    pathBetween(fromId: ID!, toId: ID!, maxHops: Int = 3): [PathStep!]!
 
     """
     Get threat intelligence indicators
     """
-    indicators(
-      filter: EntityFilter
-      pagination: PaginationInput
-    ): [Indicator!]!
+    indicators(filter: EntityFilter, pagination: PaginationInput): [Indicator!]!
 
     """
     Get graph-based insights for entity or set of entities
     """
-    insights(
-      entityIds: [ID!]!
-      insightTypes: [String!]
-    ): [GraphInsight!]!
+    insights(entityIds: [ID!]!, insightTypes: [String!]): [GraphInsight!]!
 
     """
     Entity relationship graph for visualization

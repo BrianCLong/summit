@@ -34,7 +34,7 @@ const args = process.argv.slice(2);
 
 const child = spawn(process.execPath, [bin, ...args], {
   stdio: 'inherit',
-  env: process.env
+  env: process.env,
 });
 
 child.on('exit', (code) => process.exit(code ?? 0));

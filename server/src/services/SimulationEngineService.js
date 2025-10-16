@@ -4,11 +4,11 @@
  * Enables "what-if" scenarios and predictive modeling on intelligence graphs
  */
 
-const { v4: uuidv4 } = require("uuid");
-const EventEmitter = require("events");
+const { v4: uuidv4 } = require('uuid');
+const EventEmitter = require('events');
 
 // Service to pull live threat intelligence feeds
-const ThreatFeedService = require("./ThreatFeedService");
+const ThreatFeedService = require('./ThreatFeedService');
 
 class SimulationEngineService extends EventEmitter {
   constructor(neo4jDriver, copilotService, logger, threatFeedService) {
@@ -44,105 +44,105 @@ class SimulationEngineService extends EventEmitter {
    */
   initializeSimulationEngines() {
     // Network propagation simulation
-    this.engines.set("NETWORK_PROPAGATION", {
-      name: "Network Propagation Engine",
+    this.engines.set('NETWORK_PROPAGATION', {
+      name: 'Network Propagation Engine',
       description:
-        "Simulates information, influence, or threat propagation through networks",
+        'Simulates information, influence, or threat propagation through networks',
       parameters: {
-        propagationRate: { type: "number", default: 0.3, min: 0, max: 1 },
-        decayFactor: { type: "number", default: 0.1, min: 0, max: 1 },
-        resistanceFactor: { type: "number", default: 0.2, min: 0, max: 1 },
-        maxIterations: { type: "integer", default: 100, min: 1, max: 1000 },
-        threshold: { type: "number", default: 0.05, min: 0, max: 1 },
+        propagationRate: { type: 'number', default: 0.3, min: 0, max: 1 },
+        decayFactor: { type: 'number', default: 0.1, min: 0, max: 1 },
+        resistanceFactor: { type: 'number', default: 0.2, min: 0, max: 1 },
+        maxIterations: { type: 'integer', default: 100, min: 1, max: 1000 },
+        threshold: { type: 'number', default: 0.05, min: 0, max: 1 },
       },
       execute: this.executeNetworkPropagation.bind(this),
     });
 
     // Behavioral prediction simulation
-    this.engines.set("BEHAVIORAL_PREDICTION", {
-      name: "Behavioral Prediction Engine",
-      description: "Predicts future behaviors based on historical patterns",
+    this.engines.set('BEHAVIORAL_PREDICTION', {
+      name: 'Behavioral Prediction Engine',
+      description: 'Predicts future behaviors based on historical patterns',
       parameters: {
-        timeHorizon: { type: "integer", default: 30, min: 1, max: 365 },
-        confidenceThreshold: { type: "number", default: 0.7, min: 0, max: 1 },
-        patternWeight: { type: "number", default: 0.8, min: 0, max: 1 },
-        randomFactor: { type: "number", default: 0.1, min: 0, max: 0.5 },
-        includeSeasonality: { type: "boolean", default: true },
+        timeHorizon: { type: 'integer', default: 30, min: 1, max: 365 },
+        confidenceThreshold: { type: 'number', default: 0.7, min: 0, max: 1 },
+        patternWeight: { type: 'number', default: 0.8, min: 0, max: 1 },
+        randomFactor: { type: 'number', default: 0.1, min: 0, max: 0.5 },
+        includeSeasonality: { type: 'boolean', default: true },
       },
       execute: this.executeBehavioralPrediction.bind(this),
     });
 
     // Risk assessment simulation
-    this.engines.set("RISK_ASSESSMENT", {
-      name: "Risk Assessment Engine",
-      description: "Assesses and models risk propagation scenarios",
+    this.engines.set('RISK_ASSESSMENT', {
+      name: 'Risk Assessment Engine',
+      description: 'Assesses and models risk propagation scenarios',
       parameters: {
-        riskThreshold: { type: "number", default: 0.6, min: 0, max: 1 },
-        impactRadius: { type: "integer", default: 3, min: 1, max: 10 },
-        timeWindow: { type: "integer", default: 7, min: 1, max: 90 },
+        riskThreshold: { type: 'number', default: 0.6, min: 0, max: 1 },
+        impactRadius: { type: 'integer', default: 3, min: 1, max: 10 },
+        timeWindow: { type: 'integer', default: 7, min: 1, max: 90 },
         severityWeights: {
-          type: "object",
+          type: 'object',
           default: { low: 0.2, medium: 0.5, high: 0.8, critical: 1.0 },
         },
-        cascadeEffects: { type: "boolean", default: true },
+        cascadeEffects: { type: 'boolean', default: true },
       },
       execute: this.executeRiskAssessment.bind(this),
     });
 
     // Resource allocation simulation
-    this.engines.set("RESOURCE_ALLOCATION", {
-      name: "Resource Allocation Engine",
-      description: "Optimizes resource allocation across scenarios",
+    this.engines.set('RESOURCE_ALLOCATION', {
+      name: 'Resource Allocation Engine',
+      description: 'Optimizes resource allocation across scenarios',
       parameters: {
         resourceTypes: {
-          type: "array",
-          default: ["personnel", "equipment", "budget"],
+          type: 'array',
+          default: ['personnel', 'equipment', 'budget'],
         },
-        optimizationGoal: { type: "string", default: "maximize_coverage" },
-        constraints: { type: "object", default: {} },
-        timeframe: { type: "integer", default: 30 },
-        efficiency: { type: "number", default: 0.8, min: 0, max: 1 },
+        optimizationGoal: { type: 'string', default: 'maximize_coverage' },
+        constraints: { type: 'object', default: {} },
+        timeframe: { type: 'integer', default: 30 },
+        efficiency: { type: 'number', default: 0.8, min: 0, max: 1 },
       },
       execute: this.executeResourceAllocation.bind(this),
     });
 
     // Event cascade simulation
-    this.engines.set("EVENT_CASCADE", {
-      name: "Event Cascade Engine",
-      description: "Simulates cascading events and their impacts",
+    this.engines.set('EVENT_CASCADE', {
+      name: 'Event Cascade Engine',
+      description: 'Simulates cascading events and their impacts',
       parameters: {
-        triggerProbability: { type: "number", default: 0.4, min: 0, max: 1 },
-        cascadeDepth: { type: "integer", default: 5, min: 1, max: 20 },
-        impactDecay: { type: "number", default: 0.2, min: 0, max: 1 },
-        timeDelay: { type: "integer", default: 24, min: 1, max: 168 }, // hours
-        feedbackLoops: { type: "boolean", default: false },
+        triggerProbability: { type: 'number', default: 0.4, min: 0, max: 1 },
+        cascadeDepth: { type: 'integer', default: 5, min: 1, max: 20 },
+        impactDecay: { type: 'number', default: 0.2, min: 0, max: 1 },
+        timeDelay: { type: 'integer', default: 24, min: 1, max: 168 }, // hours
+        feedbackLoops: { type: 'boolean', default: false },
       },
       execute: this.executeEventCascade.bind(this),
     });
 
     // Monte Carlo simulation
-    this.engines.set("MONTE_CARLO", {
-      name: "Monte Carlo Engine",
-      description: "Runs multiple random scenarios for statistical analysis",
+    this.engines.set('MONTE_CARLO', {
+      name: 'Monte Carlo Engine',
+      description: 'Runs multiple random scenarios for statistical analysis',
       parameters: {
-        iterations: { type: "integer", default: 1000, min: 100, max: 10000 },
-        variability: { type: "number", default: 0.3, min: 0, max: 1 },
+        iterations: { type: 'integer', default: 1000, min: 100, max: 10000 },
+        variability: { type: 'number', default: 0.3, min: 0, max: 1 },
         confidenceInterval: {
-          type: "number",
+          type: 'number',
           default: 0.95,
           min: 0.8,
           max: 0.99,
         },
-        randomSeed: { type: "integer", default: null },
-        parallelExecution: { type: "boolean", default: true },
+        randomSeed: { type: 'integer', default: null },
+        parallelExecution: { type: 'boolean', default: true },
       },
       execute: this.executeMonteCarlo.bind(this),
     });
 
     // Adaptive behavior simulation using live threat feeds
-    this.engines.set("ADAPTIVE_BEHAVIOR", {
-      name: "Adaptive Behavior Engine",
-      description: "Updates node behaviors from live threat intelligence feeds",
+    this.engines.set('ADAPTIVE_BEHAVIOR', {
+      name: 'Adaptive Behavior Engine',
+      description: 'Updates node behaviors from live threat intelligence feeds',
       parameters: {},
       execute: this.executeAdaptiveBehavior.bind(this),
     });
@@ -155,126 +155,126 @@ class SimulationEngineService extends EventEmitter {
    */
   loadScenarioTemplates() {
     // Threat assessment scenarios
-    this.scenarioLibrary.set("THREAT_PROPAGATION", {
-      name: "Threat Propagation Analysis",
-      description: "Analyze how threats spread through a network",
-      type: "SECURITY",
-      engines: ["NETWORK_PROPAGATION", "RISK_ASSESSMENT"],
+    this.scenarioLibrary.set('THREAT_PROPAGATION', {
+      name: 'Threat Propagation Analysis',
+      description: 'Analyze how threats spread through a network',
+      type: 'SECURITY',
+      engines: ['NETWORK_PROPAGATION', 'RISK_ASSESSMENT'],
       defaultParameters: {
         propagationRate: 0.4,
         riskThreshold: 0.7,
         timeHorizon: 14,
       },
       outputMetrics: [
-        "infected_nodes",
-        "propagation_speed",
-        "containment_effectiveness",
+        'infected_nodes',
+        'propagation_speed',
+        'containment_effectiveness',
       ],
     });
 
     // Influence mapping scenarios
-    this.scenarioLibrary.set("INFLUENCE_MAPPING", {
-      name: "Influence Network Analysis",
-      description: "Map influence patterns and key influencers",
-      type: "SOCIAL",
-      engines: ["NETWORK_PROPAGATION", "BEHAVIORAL_PREDICTION"],
+    this.scenarioLibrary.set('INFLUENCE_MAPPING', {
+      name: 'Influence Network Analysis',
+      description: 'Map influence patterns and key influencers',
+      type: 'SOCIAL',
+      engines: ['NETWORK_PROPAGATION', 'BEHAVIORAL_PREDICTION'],
       defaultParameters: {
         propagationRate: 0.25,
         timeHorizon: 30,
         confidenceThreshold: 0.8,
       },
-      outputMetrics: ["influence_reach", "key_influencers", "influence_decay"],
+      outputMetrics: ['influence_reach', 'key_influencers', 'influence_decay'],
     });
 
     // Operational planning scenarios
-    this.scenarioLibrary.set("OPERATIONAL_PLANNING", {
-      name: "Operational Resource Planning",
-      description: "Optimize operational resource allocation",
-      type: "OPERATIONAL",
-      engines: ["RESOURCE_ALLOCATION", "MONTE_CARLO"],
+    this.scenarioLibrary.set('OPERATIONAL_PLANNING', {
+      name: 'Operational Resource Planning',
+      description: 'Optimize operational resource allocation',
+      type: 'OPERATIONAL',
+      engines: ['RESOURCE_ALLOCATION', 'MONTE_CARLO'],
       defaultParameters: {
-        resourceTypes: ["personnel", "equipment", "surveillance"],
-        optimizationGoal: "maximize_coverage",
+        resourceTypes: ['personnel', 'equipment', 'surveillance'],
+        optimizationGoal: 'maximize_coverage',
         iterations: 500,
       },
       outputMetrics: [
-        "coverage_percentage",
-        "resource_utilization",
-        "cost_effectiveness",
+        'coverage_percentage',
+        'resource_utilization',
+        'cost_effectiveness',
       ],
     });
 
     // Crisis response scenarios
-    this.scenarioLibrary.set("CRISIS_RESPONSE", {
-      name: "Crisis Response Simulation",
-      description: "Simulate crisis response and impact mitigation",
-      type: "CRISIS",
-      engines: ["EVENT_CASCADE", "RISK_ASSESSMENT", "RESOURCE_ALLOCATION"],
+    this.scenarioLibrary.set('CRISIS_RESPONSE', {
+      name: 'Crisis Response Simulation',
+      description: 'Simulate crisis response and impact mitigation',
+      type: 'CRISIS',
+      engines: ['EVENT_CASCADE', 'RISK_ASSESSMENT', 'RESOURCE_ALLOCATION'],
       defaultParameters: {
         triggerProbability: 0.6,
         cascadeDepth: 7,
         riskThreshold: 0.8,
       },
       outputMetrics: [
-        "response_time",
-        "impact_mitigation",
-        "resource_efficiency",
+        'response_time',
+        'impact_mitigation',
+        'resource_efficiency',
       ],
     });
 
     // Predictive intelligence scenarios
-    this.scenarioLibrary.set("PREDICTIVE_INTELLIGENCE", {
-      name: "Predictive Intelligence Analysis",
-      description: "Predict future events and behaviors",
-      type: "PREDICTIVE",
-      engines: ["BEHAVIORAL_PREDICTION", "MONTE_CARLO"],
+    this.scenarioLibrary.set('PREDICTIVE_INTELLIGENCE', {
+      name: 'Predictive Intelligence Analysis',
+      description: 'Predict future events and behaviors',
+      type: 'PREDICTIVE',
+      engines: ['BEHAVIORAL_PREDICTION', 'MONTE_CARLO'],
       defaultParameters: {
         timeHorizon: 60,
         confidenceThreshold: 0.75,
         iterations: 1000,
       },
       outputMetrics: [
-        "prediction_confidence",
-        "probability_distribution",
-        "trend_analysis",
+        'prediction_confidence',
+        'probability_distribution',
+        'trend_analysis',
       ],
     });
 
     // Cyber-physical threat scenarios
-    this.scenarioLibrary.set("CYBER_PHYSICAL", {
-      name: "Cyber-Physical Threat Scenario",
-      description: "Model attacks that bridge cyber and physical domains",
-      type: "CYBER_PHYSICAL",
-      engines: ["NETWORK_PROPAGATION", "EVENT_CASCADE", "ADAPTIVE_BEHAVIOR"],
+    this.scenarioLibrary.set('CYBER_PHYSICAL', {
+      name: 'Cyber-Physical Threat Scenario',
+      description: 'Model attacks that bridge cyber and physical domains',
+      type: 'CYBER_PHYSICAL',
+      engines: ['NETWORK_PROPAGATION', 'EVENT_CASCADE', 'ADAPTIVE_BEHAVIOR'],
       defaultParameters: {
         propagationRate: 0.3,
         cascadeDepth: 5,
       },
       outputMetrics: [
-        "systems_impacted",
-        "physical_disruption",
-        "containment_time",
+        'systems_impacted',
+        'physical_disruption',
+        'containment_time',
       ],
     });
 
     // Socio-cognitive manipulation scenarios
-    this.scenarioLibrary.set("SOCIO_COGNITIVE", {
-      name: "Socio-Cognitive Manipulation",
-      description: "Simulate influence campaigns targeting human cognition",
-      type: "SOCIO_COGNITIVE",
+    this.scenarioLibrary.set('SOCIO_COGNITIVE', {
+      name: 'Socio-Cognitive Manipulation',
+      description: 'Simulate influence campaigns targeting human cognition',
+      type: 'SOCIO_COGNITIVE',
       engines: [
-        "NETWORK_PROPAGATION",
-        "BEHAVIORAL_PREDICTION",
-        "ADAPTIVE_BEHAVIOR",
+        'NETWORK_PROPAGATION',
+        'BEHAVIORAL_PREDICTION',
+        'ADAPTIVE_BEHAVIOR',
       ],
       defaultParameters: {
         propagationRate: 0.2,
         timeHorizon: 30,
       },
       outputMetrics: [
-        "influence_reach",
-        "sentiment_shift",
-        "behavioral_change_probability",
+        'influence_reach',
+        'sentiment_shift',
+        'behavioral_change_probability',
       ],
     });
 
@@ -291,11 +291,11 @@ class SimulationEngineService extends EventEmitter {
       name: simulationConfig.name || `Simulation ${simulationId.slice(0, 8)}`,
       description: simulationConfig.description,
       scenario: simulationConfig.scenario,
-      engines: simulationConfig.engines || ["NETWORK_PROPAGATION"],
+      engines: simulationConfig.engines || ['NETWORK_PROPAGATION'],
       parameters: simulationConfig.parameters || {},
       investigationId: simulationConfig.investigationId,
       userId: simulationConfig.userId,
-      status: "INITIALIZING",
+      status: 'INITIALIZING',
       createdAt: new Date(),
       startedAt: null,
       completedAt: null,
@@ -323,7 +323,7 @@ class SimulationEngineService extends EventEmitter {
       await this.finalizeSimulation(simulation);
 
       this.metrics.completedSimulations++;
-      this.emit("simulationCompleted", { ...simulation });
+      this.emit('simulationCompleted', { ...simulation });
 
       return simulation;
     } catch (error) {
@@ -331,10 +331,10 @@ class SimulationEngineService extends EventEmitter {
         simulationId,
         error,
       });
-      simulation.status = "FAILED";
+      simulation.status = 'FAILED';
       simulation.error = error.message;
       simulation.completedAt = new Date();
-      this.emit("simulationFailed", { ...simulation });
+      this.emit('simulationFailed', { ...simulation });
       throw error;
     }
   }
@@ -343,10 +343,10 @@ class SimulationEngineService extends EventEmitter {
    * Initialize simulation with data and validation
    */
   async initializeSimulation(simulation) {
-    simulation.status = "LOADING_DATA";
+    simulation.status = 'LOADING_DATA';
     simulation.startedAt = new Date();
 
-    this.emit("simulationStarted", { ...simulation });
+    this.emit('simulationStarted', { ...simulation });
 
     // Load graph data for simulation
     const graphData = await this.loadGraphData(simulation.investigationId);
@@ -359,13 +359,13 @@ class SimulationEngineService extends EventEmitter {
     simulation.environment = {
       nodes: graphData.nodes.map((node) => ({
         ...node,
-        state: "normal",
+        state: 'normal',
         properties: { ...node.properties },
         simulationData: {},
       })),
       edges: graphData.edges.map((edge) => ({
         ...edge,
-        state: "active",
+        state: 'active',
         weight: edge.weight || 1.0,
         simulationData: {},
       })),
@@ -382,7 +382,7 @@ class SimulationEngineService extends EventEmitter {
       if (Array.isArray(feeds) && feeds.length > 0) {
         if (
           this.threatFeedService &&
-          typeof this.threatFeedService.updateBehaviorModels === "function"
+          typeof this.threatFeedService.updateBehaviorModels === 'function'
         ) {
           this.threatFeedService.updateBehaviorModels(
             simulation.environment,
@@ -403,8 +403,10 @@ class SimulationEngineService extends EventEmitter {
           node.simulationData = {
             ...node.simulationData,
             liveThreatScore:
-              typeof match.score === "number" ? match.score : match.value ?? 0,
-            source: match.source || node.simulationData.source || "threat-feed",
+              typeof match.score === 'number'
+                ? match.score
+                : (match.value ?? 0),
+            source: match.source || node.simulationData.source || 'threat-feed',
             updatedAt: new Date(),
           };
         });
@@ -421,7 +423,7 @@ class SimulationEngineService extends EventEmitter {
    * Execute simulation using specified engines
    */
   async executeSimulation(simulation) {
-    simulation.status = "RUNNING";
+    simulation.status = 'RUNNING';
     const results = {
       engineResults: {},
       aggregatedMetrics: {},
@@ -460,7 +462,7 @@ class SimulationEngineService extends EventEmitter {
       completedEngines++;
       simulation.progress = 0.1 + (0.8 * completedEngines) / engineCount;
 
-      this.emit("simulationProgress", { ...simulation });
+      this.emit('simulationProgress', { ...simulation });
     }
 
     // Aggregate results from all engines
@@ -496,10 +498,10 @@ class SimulationEngineService extends EventEmitter {
   validateSimulationRealism(results) {
     const issues = [];
     if (!results || !results.aggregatedMetrics) {
-      issues.push("missing_metrics");
+      issues.push('missing_metrics');
     } else {
       for (const [key, value] of Object.entries(results.aggregatedMetrics)) {
-        if (typeof value !== "number" || !Number.isFinite(value)) {
+        if (typeof value !== 'number' || !Number.isFinite(value)) {
           issues.push(`invalid_${key}`);
         }
         if (value < 0 || value > 1) {
@@ -514,7 +516,7 @@ class SimulationEngineService extends EventEmitter {
    * Validate utility of simulation results
    */
   validateSimulationUtility(results) {
-    if (!results) return { useful: false, issues: ["no_results"] };
+    if (!results) return { useful: false, issues: ['no_results'] };
     const hasInsights =
       Array.isArray(results.insights) && results.insights.length > 0;
     const hasVisuals =
@@ -522,8 +524,8 @@ class SimulationEngineService extends EventEmitter {
       results.visualizations.length > 0;
     const useful = hasInsights && hasVisuals;
     const issues = [];
-    if (!hasInsights) issues.push("missing_insights");
-    if (!hasVisuals) issues.push("missing_visualizations");
+    if (!hasInsights) issues.push('missing_insights');
+    if (!hasVisuals) issues.push('missing_visualizations');
     return { useful, issues };
   }
 
@@ -531,7 +533,7 @@ class SimulationEngineService extends EventEmitter {
    * Finalize simulation and generate summary
    */
   async finalizeSimulation(simulation) {
-    simulation.status = "FINALIZING";
+    simulation.status = 'FINALIZING';
 
     // Generate executive summary
     simulation.results.summary =
@@ -544,7 +546,7 @@ class SimulationEngineService extends EventEmitter {
     // Store results in database
     await this.storeSimulationResults(simulation);
 
-    simulation.status = "COMPLETED";
+    simulation.status = 'COMPLETED';
     simulation.completedAt = new Date();
     simulation.executionTime = simulation.completedAt - simulation.startedAt;
     if (simulation.executionTime === 0) simulation.executionTime = 1; // ensure > 0 for tests
@@ -651,7 +653,7 @@ class SimulationEngineService extends EventEmitter {
     }
 
     return {
-      type: "NETWORK_PROPAGATION",
+      type: 'NETWORK_PROPAGATION',
       iterations: iteration,
       converged: iteration < maxIterations,
       timeline,
@@ -748,7 +750,7 @@ class SimulationEngineService extends EventEmitter {
     }
 
     return {
-      type: "BEHAVIORAL_PREDICTION",
+      type: 'BEHAVIORAL_PREDICTION',
       timeHorizon,
       predictions,
       summary: {
@@ -828,7 +830,7 @@ class SimulationEngineService extends EventEmitter {
     );
 
     return {
-      type: "RISK_ASSESSMENT",
+      type: 'RISK_ASSESSMENT',
       assessments: riskAssessments,
       riskClusters,
       propagationPaths,
@@ -841,14 +843,14 @@ class SimulationEngineService extends EventEmitter {
           (r) => r.totalRisk >= riskThreshold,
         ).length,
         criticalRiskEntities: riskAssessments.filter(
-          (r) => r.riskLevel === "critical",
+          (r) => r.riskLevel === 'critical',
         ).length,
         riskDistribution: {
-          low: riskAssessments.filter((r) => r.riskLevel === "low").length,
-          medium: riskAssessments.filter((r) => r.riskLevel === "medium")
+          low: riskAssessments.filter((r) => r.riskLevel === 'low').length,
+          medium: riskAssessments.filter((r) => r.riskLevel === 'medium')
             .length,
-          high: riskAssessments.filter((r) => r.riskLevel === "high").length,
-          critical: riskAssessments.filter((r) => r.riskLevel === "critical")
+          high: riskAssessments.filter((r) => r.riskLevel === 'high').length,
+          critical: riskAssessments.filter((r) => r.riskLevel === 'critical')
             .length,
         },
       },
@@ -860,8 +862,8 @@ class SimulationEngineService extends EventEmitter {
    */
   async executeResourceAllocation(simulation, params) {
     const {
-      resourceTypes = ["personnel", "equipment", "budget"],
-      optimizationGoal = "maximize_coverage",
+      resourceTypes = ['personnel', 'equipment', 'budget'],
+      optimizationGoal = 'maximize_coverage',
       constraints = {},
       timeframe = 30,
       efficiency = 0.8,
@@ -920,7 +922,7 @@ class SimulationEngineService extends EventEmitter {
     }
 
     return {
-      type: "RESOURCE_ALLOCATION",
+      type: 'RESOURCE_ALLOCATION',
       initialPlan: allocationPlan,
       executionTimeline,
       finalAllocation: currentAllocation,
@@ -1050,7 +1052,7 @@ class SimulationEngineService extends EventEmitter {
     }
 
     return {
-      type: "EVENT_CASCADE",
+      type: 'EVENT_CASCADE',
       triggerEvents,
       cascades: cascadeResults,
       summary: {
@@ -1088,7 +1090,7 @@ class SimulationEngineService extends EventEmitter {
 
     if (randomSeed !== null) {
       // Set random seed for reproducible results
-      Math.seedrandom = require("seedrandom")(randomSeed);
+      Math.seedrandom = require('seedrandom')(randomSeed);
     }
 
     const results = [];
@@ -1131,7 +1133,7 @@ class SimulationEngineService extends EventEmitter {
     const analysis = this.analyzeMonteCarloResults(results, confidenceInterval);
 
     return {
-      type: "MONTE_CARLO",
+      type: 'MONTE_CARLO',
       iterations: results.length,
       results,
       analysis,
@@ -1176,7 +1178,7 @@ class SimulationEngineService extends EventEmitter {
       );
 
       const nodes = nodeResult.records.map((record) => {
-        const node = record.get("n").properties;
+        const node = record.get('n').properties;
         return {
           id: node.id || node.uuid,
           label: node.label,
@@ -1186,9 +1188,9 @@ class SimulationEngineService extends EventEmitter {
       });
 
       const edges = edgeResult.records.map((record) => {
-        const source = record.get("a").properties;
-        const target = record.get("b").properties;
-        const relationship = record.get("r").properties;
+        const source = record.get('a').properties;
+        const target = record.get('b').properties;
+        const relationship = record.get('r').properties;
 
         return {
           id: relationship.id || relationship.uuid,
@@ -1216,7 +1218,7 @@ class SimulationEngineService extends EventEmitter {
 
     // Validate graph data
     if (!simulation.graphData.nodes.length) {
-      throw new Error("No graph data available for simulation");
+      throw new Error('No graph data available for simulation');
     }
 
     // Validate parameters for each engine
@@ -1233,13 +1235,13 @@ class SimulationEngineService extends EventEmitter {
 
       if (value !== undefined) {
         // Type validation
-        if (paramConfig.type === "number" && typeof value !== "number") {
+        if (paramConfig.type === 'number' && typeof value !== 'number') {
           throw new Error(`Parameter ${paramName} must be a number`);
         }
-        if (paramConfig.type === "integer" && !Number.isInteger(value)) {
+        if (paramConfig.type === 'integer' && !Number.isInteger(value)) {
           throw new Error(`Parameter ${paramName} must be an integer`);
         }
-        if (paramConfig.type === "boolean" && typeof value !== "boolean") {
+        if (paramConfig.type === 'boolean' && typeof value !== 'boolean') {
           throw new Error(`Parameter ${paramName} must be a boolean`);
         }
 
@@ -1280,7 +1282,7 @@ class SimulationEngineService extends EventEmitter {
       .map((p) => ({
         nodeId: p.nodeId,
         label: p.label,
-        predictedEvent: "high_activity",
+        predictedEvent: 'high_activity',
         probability: p.overallConfidence,
         timeframe: p.predictions.length,
       }));
@@ -1315,10 +1317,10 @@ class SimulationEngineService extends EventEmitter {
   }
 
   classifyRiskLevel(totalRisk) {
-    if (totalRisk >= 0.8) return "critical";
-    if (totalRisk >= 0.6) return "high";
-    if (totalRisk >= 0.4) return "medium";
-    return "low";
+    if (totalRisk >= 0.8) return 'critical';
+    if (totalRisk >= 0.6) return 'high';
+    if (totalRisk >= 0.4) return 'medium';
+    return 'low';
   }
 
   // Additional utility methods would be implemented here...
@@ -1371,10 +1373,10 @@ class SimulationEngineService extends EventEmitter {
     const simulation = this.activeSimulations.get(simulationId);
     if (!simulation) return false;
 
-    simulation.status = "CANCELLED";
+    simulation.status = 'CANCELLED';
     simulation.completedAt = new Date();
 
-    this.emit("simulationCancelled", { ...simulation });
+    this.emit('simulationCancelled', { ...simulation });
     return true;
   }
 

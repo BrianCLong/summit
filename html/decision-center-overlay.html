@@ -1,16 +1,69 @@
-<!doctype html><html><head><meta charset="utf-8"><title>Decision Center</title>
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-<style>body{font-family:system-ui;margin:18px}.box{border:1px solid #ddd;border-radius:12px;padding:10px}</style></head>
-<body>
-<div id="dock"><div><b>Decision Center</b></div><div id=body></div><div>
-  <button id=b1>Retry (alt arm)</button> <button id=b2>Escalate tests</button> <button id=b3>Rollback</button>
-</div></div>
-<script>
-$(function(){
-  function render(c){ $('#body').html('<div><span class=k>arm</span> '+c.arm+' · <span class=k>eval</span> '+c.eval.toFixed(2)+' · <span class=k>$</span>'+c.cost.toFixed(2)+'</div><div class=k>speclive: '+(c.speclive?'ok':'violations')+' · exp: '+c.exp+'</div><pre>'+c.rationale+'</pre>'); }
-  var card={arm:'impl@small',eval:0.95,cost:0.17,speclive:true,exp:'continue',rationale:'Cheapest capable; SPRT not conclusive yet'}; render(card);
-  $('#b1').on('click',()=>$.post('/api/decision/alt',{arm:'impl@medium'}));
-  $('#b2').on('click',()=>$.post('/api/decision/tests',{mode:'high'}));
-  $('#b3').on('click',()=>$.post('/api/release/rollback',{rc:'current'}));
-});
-</script></body></html>
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Decision Center</title>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <style>
+      body {
+        font-family: system-ui;
+        margin: 18px;
+      }
+      .box {
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        padding: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="dock">
+      <div><b>Decision Center</b></div>
+      <div id="body"></div>
+      <div>
+        <button id="b1">Retry (alt arm)</button>
+        <button id="b2">Escalate tests</button>
+        <button id="b3">Rollback</button>
+      </div>
+    </div>
+    <script>
+      $(function () {
+        function render(c) {
+          $('#body').html(
+            '<div><span class=k>arm</span> ' +
+              c.arm +
+              ' · <span class=k>eval</span> ' +
+              c.eval.toFixed(2) +
+              ' · <span class=k>$</span>' +
+              c.cost.toFixed(2) +
+              '</div><div class=k>speclive: ' +
+              (c.speclive ? 'ok' : 'violations') +
+              ' · exp: ' +
+              c.exp +
+              '</div><pre>' +
+              c.rationale +
+              '</pre>',
+          );
+        }
+        var card = {
+          arm: 'impl@small',
+          eval: 0.95,
+          cost: 0.17,
+          speclive: true,
+          exp: 'continue',
+          rationale: 'Cheapest capable; SPRT not conclusive yet',
+        };
+        render(card);
+        $('#b1').on('click', () =>
+          $.post('/api/decision/alt', { arm: 'impl@medium' }),
+        );
+        $('#b2').on('click', () =>
+          $.post('/api/decision/tests', { mode: 'high' }),
+        );
+        $('#b3').on('click', () =>
+          $.post('/api/release/rollback', { rc: 'current' }),
+        );
+      });
+    </script>
+  </body>
+</html>

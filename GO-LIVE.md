@@ -6,27 +6,27 @@
 
 **ArgoCD + SOPS**
 
-*   `deploy/argocd/repo-server-sops-patch.yaml` installs `sops` and `helm-secrets` in repo-server.
-*   `deploy/argocd/cmp-sops.yaml` registers the `sops-helm` CMP plugin.
-*   `deploy/argocd/apps/companyos-sops.yaml` uses the plugin to decrypt at render.
+- `deploy/argocd/repo-server-sops-patch.yaml` installs `sops` and `helm-secrets` in repo-server.
+- `deploy/argocd/cmp-sops.yaml` registers the `sops-helm` CMP plugin.
+- `deploy/argocd/apps/companyos-sops.yaml` uses the plugin to decrypt at render.
 
 **ExternalDNS + IRSA (Terraform)**
 
-*   `infra/iam/externaldns/main.tf` creates IRSA provider, role & policy for Route53.
-*   Outputs `externaldns_role_arn` to annotate the ExternalDNS service account.
-*   `deploy/externaldns/values.yaml` references the IRSA role and filters `topicality.co`.
+- `infra/iam/externaldns/main.tf` creates IRSA provider, role & policy for Route53.
+- Outputs `externaldns_role_arn` to annotate the ExternalDNS service account.
+- `deploy/externaldns/values.yaml` references the IRSA role and filters `topicality.co`.
 
 **Prod values generation (immutable)**
 
-*   `scripts/gen-values-prod.sh` pins image digests + injects IRSA ARNs.
-*   `scripts/gen-values-prod-autodiscover.sh` discovers AWS Account ID, cluster OIDC, and IRSA roles; then writes `charts/companyos/values-prod.yaml`.
+- `scripts/gen-values-prod.sh` pins image digests + injects IRSA ARNs.
+- `scripts/gen-values-prod-autodiscover.sh` discovers AWS Account ID, cluster OIDC, and IRSA roles; then writes `charts/companyos/values-prod.yaml`.
 
 **(Previously landed) Supply chain / Ops**
 
-*   CI `cosign` keyless signing; Kyverno/Gatekeeper policies.
-*   HPAs + resource budgets baked into charts.
-*   SBOM (Syft) + vuln scan (Grype) workflow.
-*   ExternalDNS annotations on Ingress; SealedSecrets + SOPS options.
+- CI `cosign` keyless signing; Kyverno/Gatekeeper policies.
+- HPAs + resource budgets baked into charts.
+- SBOM (Syft) + vuln scan (Grype) workflow.
+- ExternalDNS annotations on Ingress; SealedSecrets + SOPS options.
 
 ### What to commit / share
 
@@ -100,8 +100,8 @@ kubectl -n argocd apply -f deploy/argocd/apps/companyos-sops.yaml
 
 Ensure A records exist or let ExternalDNS create them:
 
-*   `api.topicality.co` → Ingress LB
-*   `console.topicality.co` → Ingress LB
+- `api.topicality.co` → Ingress LB
+- `console.topicality.co` → Ingress LB
 
 ```bash
 kubectl -n external-dns logs deploy/external-dns | tail -n 50
@@ -146,12 +146,12 @@ cosign verify $AWS_ACCOUNT_ID.dkr.ecr.us-west-2.amazonaws.com/summit-company/cor
 
 ### “Done-done” checklist (copy/paste)
 
-*   [ ] Terraform `externaldns_role_arn` applied & annotated in `deploy/externaldns/values.yaml`
-*   [ ] `charts/companyos/values-prod.yaml` created with image digests + IRSA ARNs
-*   [ ] `helm upgrade --install companyos …` succeeds in `companyos` namespace
-*   [ ] ExternalDNS created/updated Route53 records for `api.*` and `console.*`
-*   [ ] TLS certs show Issued in `cert-manager`
-*   [ ] Kyverno policy applied; unsigned image admission is blocked
-*   [ ] SBOM artifacts uploaded by CI; Grype scan passes
-*   [ ] HPAs present and scaling under load
-*   [ ] ArgoCD SOPS path (if used) syncs cleanly
+- [ ] Terraform `externaldns_role_arn` applied & annotated in `deploy/externaldns/values.yaml`
+- [ ] `charts/companyos/values-prod.yaml` created with image digests + IRSA ARNs
+- [ ] `helm upgrade --install companyos …` succeeds in `companyos` namespace
+- [ ] ExternalDNS created/updated Route53 records for `api.*` and `console.*`
+- [ ] TLS certs show Issued in `cert-manager`
+- [ ] Kyverno policy applied; unsigned image admission is blocked
+- [ ] SBOM artifacts uploaded by CI; Grype scan passes
+- [ ] HPAs present and scaling under load
+- [ ] ArgoCD SOPS path (if used) syncs cleanly

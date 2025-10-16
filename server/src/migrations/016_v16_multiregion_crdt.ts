@@ -28,4 +28,3 @@ export default async function migrate(pool?: Pool) {
     );
   `);
 }
-

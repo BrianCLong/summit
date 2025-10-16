@@ -33,7 +33,7 @@ _Squash alt:_ **feat: region sharding & failover drill for ledger anchoring**
 
 ### `PR-feat-region-sharding-and-failover.patch`
 
-```diff
+````diff
 diff --git a/impl/ledger-svc/app/config.py b/impl/ledger-svc/app/config.py
 index 3b2a2a2..4d4d4d4 100644
 --- a/impl/ledger-svc/app/config.py
@@ -176,7 +176,7 @@ index 2222222..3333333 100644
 +docker compose --profile failover up -d ledger ledger-standby mock-notary
 +bash infra/scripts/failover_drill.sh
 +```
-```
+````
 
 ---
 
@@ -185,14 +185,17 @@ index 2222222..3333333 100644
 **Title:** feat: region sharding & failover drill for ledger anchoring
 
 **Summary**
+
 - Region-coded anchor IDs (`REGION_ID`) and exposed on `/healthz`
 - Standby ledger service + drill script and CI workflow to validate continuity under failover
 - Documentation for operational cutover; external notary acts as shared truth
 
 **RTO/RPO**
+
 - Drill demonstrates RTO < 60s; anchors remain verifiable via external proofs (RPO=0 for proofs)
 
 **How to test**
+
 ```bash
 docker compose --profile failover up -d ledger ledger-standby mock-notary
 bash infra/scripts/failover_drill.sh
@@ -205,12 +208,14 @@ bash infra/scripts/failover_drill.sh
 **Theme**: Make governance operationally visible per tenant and ship a tamper‑evident **Evidence Exporter** bundle suitable for SOC2/ISO auditors.
 
 ## Objectives & KPIs
+
 - **Dashboards**: per‑tenant panels for receipts coverage, anchor latency, queue depth, divergence rate, and flag ramps.
-  - *KPI*: Tenant dashboards load < 2s; 4 golden alerts wired.
+  - _KPI_: Tenant dashboards load < 2s; 4 golden alerts wired.
 - **Exporter**: zip bundle with policy versions, proofs, masked canon inputs, OTEL trace excerpts, and signatures.
-  - *KPI*: export < 30s for 10k ops; cryptographic signature verifiable offline.
+  - _KPI_: export < 30s for 10k ops; cryptographic signature verifiable offline.
 
 ## Work Breakdown (Stories)
+
 - [ ] **Metrics surface**: emit `attest_coverage_pct{tenant=}`, `ledger_anchor_latency_ms{region=}`, `flag_ramp_pct{tenant=}`.
 - [ ] **Dashboard JSON**: `dashboards/tenants/*.json` with templated variables (tenant, region).
 - [ ] **Alerts**: rules for coverage<100%, anchor p95>budget, divergence>0, external notary lag>60s.
@@ -222,10 +227,11 @@ bash infra/scripts/failover_drill.sh
 - [ ] **Docs**: auditor instructions + verification script to validate signature offline.
 
 ## CI
+
 - Dashboard lint (JSON schema);
 - Exporter smoke (generate 100 ops, export, verify signature);
 - Performance budget check on exporter runtime.
 
 ## DoD
-- Dashboards render per tenant; alerts firing on induced faults; exporter produces signed bundle validated by script.
 
+- Dashboards render per tenant; alerts firing on induced faults; exporter produces signed bundle validated by script.

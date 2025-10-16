@@ -4,26 +4,35 @@ const config: Config = {
   preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
   extensionsToTreatAsEsm: ['.ts'],
-  setupFilesAfterEnv: ['<rootDir>/tests/setup/jest.setup.js', 'jest-extended/all'],
+  setupFilesAfterEnv: [
+    '<rootDir>/tests/setup/jest.setup.js',
+    'jest-extended/all',
+  ],
   testMatch: [
     '<rootDir>/tests/**/*.test.ts',
     '<rootDir>/src/tests/**/*.test.ts',
-    '<rootDir>/src/**/__tests__/**/*.test.ts'
+    '<rootDir>/src/**/__tests__/**/*.test.ts',
   ],
-  testPathIgnorePatterns: ['/node_modules/', '/dist/', '/build/', '/coverage/', '/playwright-tests/'],
+  testPathIgnorePatterns: [
+    '/node_modules/',
+    '/dist/',
+    '/build/',
+    '/coverage/',
+    '/playwright-tests/',
+  ],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/src/$1',
     '^@tests/(.*)$': '<rootDir>/tests/$1',
-    '^(\\.{1,2}/.*)\\.js$': '$1'
+    '^(\\.{1,2}/.*)\\.js$': '$1',
   },
   transform: {
     '^.+\\.[tj]sx?$': [
       'ts-jest',
       {
         useESM: true,
-        tsconfig: 'tsconfig.json'
-      }
-    ]
+        tsconfig: 'tsconfig.json',
+      },
+    ],
   },
   collectCoverageFrom: [
     'src/**/*.ts',
@@ -33,15 +42,15 @@ const config: Config = {
     '!src/tests/**',
     '!src/**/index.ts',
     '!src/config/**',
-    '!src/database/**'
+    '!src/database/**',
   ],
   coverageThreshold: {
     global: {
       branches: 85,
       functions: 85,
       lines: 85,
-      statements: 85
-    }
+      statements: 85,
+    },
   },
   coverageReporters: ['text', 'lcov', 'cobertura'],
   coverageDirectory: '<rootDir>/coverage',
@@ -59,9 +68,9 @@ const config: Config = {
         classNameTemplate: '{classname}',
         titleTemplate: '{title}',
         ancestorSeparator: ' › ',
-        usePathForSuiteName: true
-      }
-    ]
+        usePathForSuiteName: true,
+      },
+    ],
   ],
   verbose: true,
   clearMocks: true,
@@ -70,8 +79,7 @@ const config: Config = {
   bail: false,
   errorOnDeprecated: true,
   transformIgnorePatterns: ['node_modules/(?!(.*\\.mjs$))'],
-  maxWorkers: process.env.CI ? 2 : '50%'
+  maxWorkers: process.env.CI ? 2 : '50%',
 };
 
 export default config;
-
