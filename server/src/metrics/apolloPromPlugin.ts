@@ -40,12 +40,12 @@ const resDur = new Histogram({
   registers: [registry],
 });
 
-function opName(ctx: GraphQLRequestContext): string {
+function opName(ctx: GraphQLRequestContext<any>): string {
   return ctx.operationName || 'anonymous';
 }
 
 function opType(
-  ctx: GraphQLRequestContext,
+  ctx: GraphQLRequestContext<any>,
 ): 'query' | 'mutation' | 'subscription' | 'unknown' {
   const t = ctx.operation?.operation;
   return t === 'query' || t === 'mutation' || t === 'subscription'
@@ -53,7 +53,7 @@ function opType(
     : 'unknown';
 }
 
-function tenantFromCtx(ctx: GraphQLRequestContext): string {
+function tenantFromCtx(ctx: GraphQLRequestContext<any>): string {
   try {
     // Prefer GraphQL context if present
     const fromCtx =
@@ -68,9 +68,9 @@ function tenantFromCtx(ctx: GraphQLRequestContext): string {
   return 'unknown';
 }
 
-export function apolloPromPlugin(): ApolloServerPlugin {
+export function apolloPromPlugin(): ApolloServerPlugin<any> {
   return {
-    async requestDidStart(ctx) {
+    async requestDidStart(ctx: GraphQLRequestContext<any>) {
       const start = process.hrtime.bigint();
       const name = opName(ctx);
       const type = opType(ctx);
