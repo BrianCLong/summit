@@ -7,6 +7,7 @@ import {
   Button,
   List,
   ListItem,
+  ListItemButton,
   Divider,
 } from '@mui/material';
 import $ from 'jquery';
@@ -103,18 +104,18 @@ export default function AIExplainPanel({ cy, investigationId }) {
           <Typography variant="caption">Citations</Typography>
           <List dense>
             {data.graphRagAnswer.citations.entityIds.map((id) => (
-              <ListItem
-                key={id}
-                button
-                onClick={() => {
-                  const node = cy.$(`node[id = "${id}"]`);
-                  if (node.nonempty()) {
-                    cy.animate({ center: { eles: node }, duration: 200 });
-                    node.flashClass && node.flashClass('highlight', 1000);
-                  }
-                }}
-              >
-                {id}
+              <ListItem key={id} disablePadding>
+                <ListItemButton
+                  onClick={() => {
+                    const node = cy.$(`node[id = "${id}"]`);
+                    if (node.nonempty()) {
+                      cy.animate({ center: { eles: node }, duration: 200 });
+                      node.flashClass && node.flashClass('highlight', 1000);
+                    }
+                  }}
+                >
+                  {id}
+                </ListItemButton>
               </ListItem>
             ))}
           </List>

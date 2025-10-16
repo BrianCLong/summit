@@ -10,6 +10,7 @@ import {
   ListItem,
   ListItemText,
   ListItemIcon,
+  ListItemButton,
   Alert,
   LinearProgress,
   Accordion,
@@ -377,52 +378,52 @@ export default function DynamicEntityClustering({
             <List dense>
               {filteredClusters.length > 0 ? (
                 filteredClusters.map((cluster, index) => (
-                  <ListItem
-                    key={cluster.id}
-                    button
-                    onClick={() => onClusterSelect && onClusterSelect(cluster)}
-                    sx={{
-                      border: 1,
-                      borderColor: 'divider',
-                      borderRadius: 1,
-                      mb: 1,
-                      '&:hover': { bgcolor: 'action.hover' },
-                    }}
-                  >
-                    <ListItemIcon>
-                      <Typography variant="h6">
-                        {getClusterIcon(cluster.type)}
-                      </Typography>
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={
-                        <Box
-                          sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
-                        >
-                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                            {cluster.name}
-                          </Typography>
-                          <Chip
-                            label={
-                              cluster.size || cluster.locations?.length || 0
-                            }
-                            size="small"
-                            color={getClusterColor(cluster.type)}
-                          />
-                        </Box>
-                      }
-                      secondary={
-                        <Box>
-                          <Typography variant="caption" color="text.secondary">
-                            Type: {cluster.type} |
-                            {cluster.density &&
-                              ` Density: ${(cluster.density * 100).toFixed(0)}%`}
-                            {cluster.confidence &&
-                              ` Confidence: ${(cluster.confidence * 100).toFixed(0)}%`}
-                          </Typography>
-                        </Box>
-                      }
-                    />
+                  <ListItem key={cluster.id} disablePadding>
+                    <ListItemButton
+                      onClick={() => onClusterSelect && onClusterSelect(cluster)}
+                      sx={{
+                        border: 1,
+                        borderColor: 'divider',
+                        borderRadius: 1,
+                        mb: 1,
+                        '&:hover': { bgcolor: 'action.hover' },
+                      }}
+                    >
+                      <ListItemIcon>
+                        <Typography variant="h6">
+                          {getClusterIcon(cluster.type)}
+                        </Typography>
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={
+                          <Box
+                            sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                          >
+                            <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                              {cluster.name}
+                            </Typography>
+                            <Chip
+                              label={
+                                cluster.size || cluster.locations?.length || 0
+                              }
+                              size="small"
+                              color={getClusterColor(cluster.type)}
+                            />
+                          </Box>
+                        }
+                        secondary={
+                          <Box>
+                            <Typography variant="caption" color="text.secondary">
+                              Type: {cluster.type} |
+                              {cluster.density &&
+                                ` Density: ${(cluster.density * 100).toFixed(0)}%`}
+                              {cluster.confidence &&
+                                ` Confidence: ${(cluster.confidence * 100).toFixed(0)}%`}
+                            </Typography>
+                          </Box>
+                        }
+                      />
+                    </ListItemButton>
                   </ListItem>
                 ))
               ) : (
