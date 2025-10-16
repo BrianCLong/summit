@@ -8,57 +8,54 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
-        id: changes
+        id: pychanges
         with:
           filters: |
             python:
               - 'python/**'
-      - name: No Python changes, skipping
-        if: steps.changes.outputs.python != 'true'
-        run: echo "No Python changes; skipping tests"
-      - name: Setup Python
-        if: steps.changes.outputs.python == 'true'
-        uses: actions/setup-python@v5
+      - name: Skip (no python changes)
+        if: steps.pychanges.outputs.python != 'true'
+        run: echo "No python/ changes"
+      - uses: actions/setup-python@v5
+        if: steps.pychanges.outputs.python == 'true'
         with:
           python-version: '3.11'
           cache: 'pip'
       - name: Install (editable with extras)
-        if: steps.changes.outputs.python == 'true'
+        if: steps.pychanges.outputs.python == 'true'
         working-directory: python
         run: |
           python -m pip install -U pip setuptools wheel
           pip install -e ".[dev,test]"
       - name: Tests
-        if: steps.changes.outputs.python == 'true'
+        if: steps.pychanges.outputs.python == 'true'
         working-directory: python
         run: pytest -q
   data-pipelines:
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: dorny/paths-filter@v3
-        id: changes
+        id: dpchanges
         with:
           filters: |
             datap:
               - 'server/data-pipelines/**'
-      - name: No data-pipelines changes, skipping
-        if: steps.changes.outputs.datap != 'true'
-        run: echo "No data-pipelines changes; skipping"
-      - name: Setup Python
-        if: steps.changes.outputs.datap == 'true'
-        uses: actions/setup-python@v5
+      - name: Skip (no data-pipelines changes)
+        if: steps.dpchanges.outputs.datap != 'true'
+        run: echo "No data-pipelines changes"
+      - uses: actions/setup-python@v5
+        if: steps.dpchanges.outputs.datap == 'true'
         with:
           python-version: '3.11'
           cache: 'pip'
       - name: Install
-        if: steps.changes.outputs.datap == 'true'
+        if: steps.dpchanges.outputs.datap == 'true'
         working-directory: server/data-pipelines
         run: |
           python -m pip install -U pip
           pip install fastavro aiokafka tenacity pytest pytest-cov
       - name: Tests
-        if: steps.changes.outputs.datap == 'true'
+        if: steps.dpchanges.outputs.datap == 'true'
         working-directory: server/data-pipelines
-        run: pytest tests/test_kafka_consumer_avro.py -q || true
+        run: pytest tests/test_kafka_consumer_avro.py -q

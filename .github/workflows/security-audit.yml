@@ -7,13 +7,26 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: pkg
+        with:
+          filters: |
+            manifests:
+              - '**/package.json'
+              - '**/package-lock.json'
+              - '**/pnpm-lock.yaml'
+      - name: Skip (no manifest changes)
+        if: steps.pkg.outputs.manifests != 'true'
+        run: echo "No manifest changes; skipping audit"
       - uses: actions/setup-node@v4
+        if: steps.pkg.outputs.manifests == 'true'
         with: { node-version: 20, cache: 'pnpm' }
       - run: corepack enable && pnpm i --frozen-lockfile
-        continue-on-error: true
-      - run: pnpm audit --audit-level=high || true
-        continue-on-error: true
-      - run: pnpm audit --json > audit.json || true
-        continue-on-error: true
+        if: steps.pkg.outputs.manifests == 'true'
+      - run: pnpm audit --audit-level=high
+        if: steps.pkg.outputs.manifests == 'true'
+      - run: pnpm audit --json > audit.json
+        if: steps.pkg.outputs.manifests == 'true'
       - uses: actions/upload-artifact@v4
+        if: steps.pkg.outputs.manifests == 'true'
         with: { name: npm-audit, path: audit.json, if-no-files-found: ignore }

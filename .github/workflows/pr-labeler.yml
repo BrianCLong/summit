@@ -10,5 +10,6 @@ jobs:
       pull-requests: write
     steps:
       - uses: actions/labeler@cf330b26a52b65a1b3b2c1b0cea41a014a019e4d # v5.0.0
+        continue-on-error: true
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}

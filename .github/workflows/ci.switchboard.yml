@@ -29,17 +29,27 @@ jobs:
             npm ci; \
           fi
       - name: Lint/Typecheck/Build (scoped)
+        if: ${{ steps.changes.outputs.client == 'true' || steps.changes.outputs.server == 'true' }}
         run: |
           if [[ "${{ steps.changes.outputs.client }}" == 'true' && "${{ steps.changes.outputs.server }}" != 'true' ]]; then \
-            cd client && (npm run lint || true) && (npm run typecheck || true) && npm run build; \
+            cd client && npm run lint && npm run typecheck && npm run build; \
           else \
-            (npm run lint || true) && (npm run typecheck || true) && npm run build; \
+            npm run lint && npm run typecheck && npm run build; \
           fi
-      - name: Done
-        run: echo "Switchboard build completed"
   policies:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: pol
+        with:
+          filters: |
+            pol:
+              - 'policies/**'
+      - name: Skip (no policy changes)
+        if: steps.pol.outputs.pol != 'true'
+        run: echo "No policy changes; skipping OPA tests"
       - uses: open-policy-agent/setup-opa@v2
-      - run: opa fmt -w policies && opa test policies -v || true
+        if: steps.pol.outputs.pol == 'true'
+      - run: opa fmt -w policies && opa test policies -v
+        if: steps.pol.outputs.pol == 'true'
