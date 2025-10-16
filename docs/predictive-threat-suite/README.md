@@ -7,7 +7,7 @@ analysing threat activity on the IntelGraph platform.
 
 1. **Predictive Timeline Generator** (`graph-service/timeline_prediction`)
    - FastAPI service that forecasts future graph activity.
-   - Demo model returns stub data for the next *N* days.
+   - Demo model returns stub data for the next _N_ days.
 2. **Causal GNN Explainer** (`ml/causal_explanations`)
    - Wraps a graph neural network explainer to highlight influential nodes and
      edges. The current implementation is a placeholder awaiting a trained

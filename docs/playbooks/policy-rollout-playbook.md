@@ -1,4 +1,3 @@
-
 # Playbook: Policy Enforcement Rollout
 
 This playbook outlines the steps to move from auditing policy to enforcing it in CI.
