@@ -7,14 +7,10 @@
     "types": ["node"],
     "skipLibCheck": true
   },
-  "include": [
-    "src/app.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "src/**/__tests__/**",
-    "src/**/tests/**",
-    "src/**/__mocks__/**"
+  "files": [
+    "src/app.ts",
+    "src/types/ambient.d.ts",
+    "src/types/core-shims.d.ts",
+    "src/types/all-shims.d.ts"
   ]
 }
