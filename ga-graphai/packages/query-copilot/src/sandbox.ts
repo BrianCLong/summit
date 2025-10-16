@@ -78,9 +78,7 @@ function extractPrimaryMatch(
   return { alias: match[1], label: match[2] };
 }
 
-function extractRelationshipMatch(
-  cypher: string,
-): {
+function extractRelationshipMatch(cypher: string): {
   alias: string;
   type: string;
   neighborAlias: string;
