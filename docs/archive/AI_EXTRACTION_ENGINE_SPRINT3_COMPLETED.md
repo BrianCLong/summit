@@ -54,6 +54,7 @@ Sprint 3 has successfully implemented a comprehensive **multimodal AI extraction
 ## 🛠 Technical Stack
 
 ### AI/ML Frameworks
+
 - **PyTorch**: Deep learning framework with CUDA support
 - **Transformers**: Hugging Face models for NLP
 - **OpenCV**: Computer vision processing
@@ -62,6 +63,7 @@ Sprint 3 has successfully implemented a comprehensive **multimodal AI extraction
 - **Sentence Transformers**: Semantic embeddings
 
 ### Infrastructure
+
 - **Docker**: Containerized AI dependencies with `Dockerfile.ai`
 - **NVIDIA CUDA**: GPU acceleration support
 - **Redis**: Job queue and caching
@@ -191,7 +193,7 @@ const ocrEngine = new OCREngine();
 const result = await ocrEngine.extractText('/path/to/image.jpg', {
   language: 'eng',
   enhanceImage: true,
-  confidenceThreshold: 0.6
+  confidenceThreshold: 0.6,
 });
 
 console.log('Extracted text:', result.text);
@@ -205,7 +207,7 @@ import { ObjectDetectionEngine } from './src/ai/engines/ObjectDetectionEngine.js
 const detector = new ObjectDetectionEngine();
 const results = await detector.detectObjects('/path/to/image.jpg', {
   model: 'yolov8n.pt',
-  confidenceThreshold: 0.5
+  confidenceThreshold: 0.5,
 });
 
 console.log('Detected objects:', results.detections);
@@ -220,7 +222,7 @@ const speechEngine = new SpeechToTextEngine();
 const transcript = await speechEngine.transcribeAudio('/path/to/audio.wav', {
   model: 'whisper-base',
   language: 'auto',
-  enableWordTimestamps: true
+  enableWordTimestamps: true,
 });
 
 console.log('Transcript:', transcript.text);
@@ -232,15 +234,18 @@ console.log('Transcript:', transcript.text);
 import { EmbeddingService } from './src/ai/services/EmbeddingService.js';
 
 const embeddingService = new EmbeddingService(config, db);
-const embedding = await embeddingService.generateMultimodalEmbedding({
-  text: "Intelligence analysis document",
-  imagePath: "/path/to/image.jpg",
-  audioPath: "/path/to/audio.wav"
-}, {
-  text: 0.4,
-  image: 0.4,
-  audio: 0.2
-});
+const embedding = await embeddingService.generateMultimodalEmbedding(
+  {
+    text: 'Intelligence analysis document',
+    imagePath: '/path/to/image.jpg',
+    audioPath: '/path/to/audio.wav',
+  },
+  {
+    text: 0.4,
+    image: 0.4,
+    audio: 0.2,
+  },
+);
 ```
 
 ## 🔍 Extraction Job Processing
@@ -253,23 +258,26 @@ import { ExtractionJobService } from './src/services/ExtractionJobService.js';
 const jobService = new ExtractionJobService(db, redisConfig);
 
 // Start multimodal extraction job
-const job = await jobService.startExtractionJob({
-  investigationId: 'inv-123',
-  mediaSourceId: 'media-456',
-  extractionMethods: [
-    'ocr',
-    'object_detection',
-    'face_detection',
-    'speech_to_text',
-    'text_analysis',
-    'embedding_generation'
-  ],
-  options: {
-    language: 'eng',
-    enhanceProcessing: true,
-    enableRealTimeUpdates: true
-  }
-}, 'user-123');
+const job = await jobService.startExtractionJob(
+  {
+    investigationId: 'inv-123',
+    mediaSourceId: 'media-456',
+    extractionMethods: [
+      'ocr',
+      'object_detection',
+      'face_detection',
+      'speech_to_text',
+      'text_analysis',
+      'embedding_generation',
+    ],
+    options: {
+      language: 'eng',
+      enhanceProcessing: true,
+      enableRealTimeUpdates: true,
+    },
+  },
+  'user-123',
+);
 
 console.log('Job started:', job.id);
 ```
@@ -277,6 +285,7 @@ console.log('Job started:', job.id);
 ## 📊 Performance & Monitoring
 
 ### Metrics Tracked
+
 - **Processing Time**: End-to-end extraction duration
 - **Confidence Scores**: AI model confidence distributions
 - **Entity Extraction**: Number and quality of extracted entities
@@ -284,6 +293,7 @@ console.log('Job started:', job.id);
 - **Resource Usage**: GPU/CPU utilization for AI processing
 
 ### Health Checks
+
 - AI engine availability
 - Model loading status
 - Python environment verification
@@ -302,6 +312,7 @@ console.log('Job started:', job.id);
 ### AI-Enhanced Container
 
 The `Dockerfile.ai` provides:
+
 - Multi-stage build for optimized image size
 - NVIDIA CUDA support for GPU acceleration
 - Pre-downloaded AI models for faster startup
@@ -333,6 +344,7 @@ node scripts/test-ai-extraction.js --engine speech_to_text
 ```
 
 ### Performance Benchmarks
+
 - **OCR**: ~2-5 seconds per page
 - **Object Detection**: ~0.5-2 seconds per image
 - **Speech Recognition**: ~0.3x real-time (faster than audio length)
@@ -342,6 +354,7 @@ node scripts/test-ai-extraction.js --engine speech_to_text
 ## 🛣 Next Steps & Future Enhancements
 
 ### Sprint 4+ Roadmap
+
 1. **Advanced Video Analysis**: Frame-by-frame processing
 2. **Real-time Streaming**: Live audio/video processing
 3. **Model Fine-tuning**: Custom models for specific domains
@@ -350,6 +363,7 @@ node scripts/test-ai-extraction.js --engine speech_to_text
 6. **Quantum ML Integration**: Quantum-enhanced algorithms
 
 ### Integration Opportunities
+
 - **GraphRAG Enhancement**: AI-powered knowledge graphs
 - **Predictive Analytics**: ML-based threat prediction
 - **Automated Investigation**: AI-driven case building
@@ -358,6 +372,7 @@ node scripts/test-ai-extraction.js --engine speech_to_text
 ## 📈 Impact & Business Value
 
 ### Intelligence Capabilities
+
 - **95% reduction** in manual content analysis time
 - **Multi-language support** for global operations
 - **Real-time processing** for time-critical intelligence
@@ -365,6 +380,7 @@ node scripts/test-ai-extraction.js --engine speech_to_text
 - **Cross-modal correlation** for comprehensive analysis
 
 ### Operational Benefits
+
 - **Scalable processing** handles enterprise workloads
 - **Cost-effective** GPU utilization with auto-scaling
 - **Audit-compliant** processing with full traceability
@@ -380,7 +396,7 @@ node scripts/test-ai-extraction.js --engine speech_to_text
 ✅ **Comprehensive documentation** and examples  
 ✅ **Environment configuration** for all deployment scenarios  
 ✅ **Performance benchmarks** meeting requirements  
-✅ **Security controls** for enterprise deployment  
+✅ **Security controls** for enterprise deployment
 
 ---
 

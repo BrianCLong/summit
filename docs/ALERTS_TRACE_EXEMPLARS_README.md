@@ -25,14 +25,14 @@ This implementation provides:
 
 ### Configured Alerts
 
-| Alert | Metric | Threshold | For | Severity | Panel UID |
-|-------|--------|-----------|-----|----------|-----------|
-| APILatencySLOViolation | API p95 latency | >1.5s | 5m | warning | api-p95-latency-001 |
-| **OPADecisionLatencySLOViolation** | OPA p95 latency | >500ms | 5m | warning | opa-p95-latency-002 |
-| QueueLagSLOViolation | Queue lag | >10k msgs | 10m | critical | queue-lag-003 |
-| IngestFailureRateSLOViolation | Ingest failure rate | >1% | 5m | critical | ingest-failure-rate-004 |
-| GoldenFlowPassRateSLOViolation | Golden flow pass rate | <99% | 5m | critical | golden-flow-pass-005 |
-| MultipleSLOViolations | Multiple alerts firing | >=2 | 10m | critical | - |
+| Alert                              | Metric                 | Threshold | For | Severity | Panel UID               |
+| ---------------------------------- | ---------------------- | --------- | --- | -------- | ----------------------- |
+| APILatencySLOViolation             | API p95 latency        | >1.5s     | 5m  | warning  | api-p95-latency-001     |
+| **OPADecisionLatencySLOViolation** | OPA p95 latency        | >500ms    | 5m  | warning  | opa-p95-latency-002     |
+| QueueLagSLOViolation               | Queue lag              | >10k msgs | 10m | critical | queue-lag-003           |
+| IngestFailureRateSLOViolation      | Ingest failure rate    | >1%       | 5m  | critical | ingest-failure-rate-004 |
+| GoldenFlowPassRateSLOViolation     | Golden flow pass rate  | <99%      | 5m  | critical | golden-flow-pass-005    |
+| MultipleSLOViolations              | Multiple alerts firing | >=2       | 10m | critical | -                       |
 
 ### Alert Annotations
 
@@ -56,21 +56,25 @@ Each alert includes:
 ### Notification Channels
 
 #### 1. Default (Slack)
+
 - **Channel**: `#alerts`
 - **For**: All alerts
 - **Format**: Slack blocks with links to dashboard and runbook
 
 #### 2. Critical Alerts (PagerDuty + Slack)
+
 - **Channels**: PagerDuty + `#critical-alerts`
 - **For**: Alerts with `severity: critical`
 - **Format**: PagerDuty incident + Slack notification with danger color
 
 #### 3. Warning Alerts (Slack)
+
 - **Channel**: `#slo-warnings`
 - **For**: Alerts with `severity: warning`
 - **Format**: Slack blocks with warning color
 
 #### 4. OPA-Specific Alerts (Slack)
+
 - **Channel**: `#opa-performance`
 - **For**: `slo: opa_latency`
 - **Format**: Includes exemplar query and trace linking instructions
@@ -118,6 +122,7 @@ Trace exemplars link high-level metrics to individual traces, allowing you to:
 **Panel**: OPA Decision p95 Latency (UID: `opa-p95-latency-002`)
 
 **Exemplar Configuration**:
+
 ```json
 {
   "targets": [
@@ -130,6 +135,7 @@ Trace exemplars link high-level metrics to individual traces, allowing you to:
 ```
 
 **Features**:
+
 - ✅ Exemplars enabled on OPA latency metric
 - ✅ Data points show as dots on the graph
 - ✅ Clicking a dot opens trace in Tempo (or configured tracing backend)
@@ -152,6 +158,7 @@ Trace exemplars link high-level metrics to individual traces, allowing you to:
 **Location**: `scripts/test-alert-fire.sh`
 
 **What it does**:
+
 1. Checks Prometheus and Alertmanager health
 2. Loads alert rules
 3. Injects test metric to violate OPA latency SLO
@@ -161,6 +168,7 @@ Trace exemplars link high-level metrics to individual traces, allowing you to:
 7. Cleans up test metric
 
 **Usage**:
+
 ```bash
 # Basic test (no Slack)
 ./scripts/test-alert-fire.sh
@@ -171,6 +179,7 @@ export SLACK_WEBHOOK_URL="https://hooks.slack.com/services/YOUR/WEBHOOK/URL"
 ```
 
 **Expected Output**:
+
 ```
 ========================================
 SLO Alert Test
@@ -319,6 +328,7 @@ curl -X POST http://localhost:3000/api/dashboards/db \
 ### Alert Not Firing
 
 **Check Prometheus**:
+
 ```bash
 # Check if metric exists
 curl "http://localhost:9090/api/v1/query?query=opa_decision_duration_seconds_bucket"
@@ -328,6 +338,7 @@ curl "http://localhost:9090/api/v1/rules" | jq '.data.groups[].rules[] | select(
 ```
 
 **Check Alertmanager**:
+
 ```bash
 # Check alerts in Alertmanager
 curl "http://localhost:9093/api/v2/alerts" | jq '.'
@@ -336,6 +347,7 @@ curl "http://localhost:9093/api/v2/alerts" | jq '.'
 ### Slack Notification Not Received
 
 **Verify webhook**:
+
 ```bash
 # Test webhook directly
 curl -X POST $SLACK_WEBHOOK_URL \
@@ -344,6 +356,7 @@ curl -X POST $SLACK_WEBHOOK_URL \
 ```
 
 **Check Alertmanager logs**:
+
 ```bash
 docker logs alertmanager
 # or
@@ -353,10 +366,12 @@ journalctl -u alertmanager -f
 ### Trace Exemplars Not Showing
 
 **Check Grafana data source**:
+
 - Prometheus data source has "Exemplars" enabled
 - Tempo data source configured and linked
 
 **Check metric labels**:
+
 ```bash
 # Verify trace_id label exists on metric
 curl "http://localhost:9090/api/v1/query?query=opa_decision_duration_seconds_bucket" | jq '.data.result[].metric'

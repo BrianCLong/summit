@@ -1,4 +1,3 @@
-
 # ADR-028: Graph Explorer Data Contracts
 
 **Status:** Proposed

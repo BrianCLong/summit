@@ -7,16 +7,16 @@ keeps policy, audit, and observability requirements front-and-center.
 
 ## Recommended Stack (TL;DR)
 
-| Layer | Technology | Rationale |
-| --- | --- | --- |
-| **API** | Node.js 18+, Express, Apollo Server (GraphQL federation) | GraphQL contracts, schema stitching, generated types, query budgets |
-| **Graph store** | Neo4j 5.x with official JS driver | Temporal/geo patterns, path/community analytics, policy labels |
-| **Relational sidecar** | PostgreSQL 15+ | Case metadata, audit rollups, feature snapshots, reporting views |
-| **Streaming & cache** | Kafka/Redpanda, Redis | High-volume ingest, runbook events, pub/sub, idempotency, rate limits |
-| **Policy & auth** | OIDC/JWKS SSO, SCIM, RBAC+ABAC via Open Policy Agent | Centralized policy bundles, reason-for-access, license/authority enforcement |
-| **Observability** | OpenTelemetry traces, Prometheus metrics, structured logs | Golden SLO dashboards, slow-query guardrails |
-| **Operations** | Docker → Kubernetes (Helm), Terraform, canaries, PITR | GitOps-friendly, resilient rollouts, cross-region replicas |
-| **Governance** | Provenance/claim ledger, export manifolds with hashes | Chain-of-custody, auditable disclosures |
+| Layer                  | Technology                                                | Rationale                                                                    |
+| ---------------------- | --------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| **API**                | Node.js 18+, Express, Apollo Server (GraphQL federation)  | GraphQL contracts, schema stitching, generated types, query budgets          |
+| **Graph store**        | Neo4j 5.x with official JS driver                         | Temporal/geo patterns, path/community analytics, policy labels               |
+| **Relational sidecar** | PostgreSQL 15+                                            | Case metadata, audit rollups, feature snapshots, reporting views             |
+| **Streaming & cache**  | Kafka/Redpanda, Redis                                     | High-volume ingest, runbook events, pub/sub, idempotency, rate limits        |
+| **Policy & auth**      | OIDC/JWKS SSO, SCIM, RBAC+ABAC via Open Policy Agent      | Centralized policy bundles, reason-for-access, license/authority enforcement |
+| **Observability**      | OpenTelemetry traces, Prometheus metrics, structured logs | Golden SLO dashboards, slow-query guardrails                                 |
+| **Operations**         | Docker → Kubernetes (Helm), Terraform, canaries, PITR     | GitOps-friendly, resilient rollouts, cross-region replicas                   |
+| **Governance**         | Provenance/claim ledger, export manifolds with hashes     | Chain-of-custody, auditable disclosures                                      |
 
 ## High-Level Topology
 
@@ -88,12 +88,17 @@ const server = new ApolloServer({
   introspection: process.env.NODE_ENV !== 'production',
 });
 
-app.use('/graphql', express.json(), authMiddleware, expressMiddleware(server, {
-  context: async ({ req }) => ({
-    user: req.user,
-    authorize: (action) => opaAuthorize(req.user, action),
+app.use(
+  '/graphql',
+  express.json(),
+  authMiddleware,
+  expressMiddleware(server, {
+    context: async ({ req }) => ({
+      user: req.user,
+      authorize: (action) => opaAuthorize(req.user, action),
+    }),
   }),
-}));
+);
 ```
 
 This gateway centralizes authentication, authorization, and query budgeting while

@@ -1,11 +1,11 @@
-
 # ADR-050: Knowledge OS Data Model
 
 **Status:** Proposed
 
 ## Context
 
-The Knowledge OS needs to answer two types of questions: 
+The Knowledge OS needs to answer two types of questions:
+
 1.  Semantic questions ("What is our strategy for handling PII?")
 2.  Structural questions ("Which services are affected by a change to this library?")
 

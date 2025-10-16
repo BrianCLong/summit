@@ -1,4 +1,3 @@
-
 # API Reference
 
 This directory contains the generated API reference documentation for Maestro.
