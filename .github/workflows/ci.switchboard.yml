@@ -5,11 +5,35 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: dorny/paths-filter@v3
+        id: changes
+        with:
+          filters: |
+            client:
+              - 'client/**'
+            server:
+              - 'server/**'
       - uses: actions/setup-node@v4
         with: { node-version: 20 }
-      - run: npm ci
-      - run: npm run lint && npm run typecheck
-      - run: npm run build
+      - name: No app changes, skip build
+        if: ${{ steps.changes.outputs.client != 'true' && steps.changes.outputs.server != 'true' }}
+        run: echo "No client/server changes; skipping build"
+      - name: Install deps (scoped)
+        if: ${{ steps.changes.outputs.client == 'true' || steps.changes.outputs.server == 'true' }}
+        run: |
+          if [[ "${{ steps.changes.outputs.client }}" == 'true' && "${{ steps.changes.outputs.server }}" != 'true' ]]; then \
+            cd client && npm ci; \
+          else \
+            npm ci; \
+          fi
+      - name: Lint/Typecheck/Build (scoped)
+        if: ${{ steps.changes.outputs.client == 'true' || steps.changes.outputs.server == 'true' }}
+        run: |
+          if [[ "${{ steps.changes.outputs.client }}" == 'true' && "${{ steps.changes.outputs.server }}" != 'true' ]]; then \
+            cd client && npm run lint && npm run typecheck && npm run build; \
+          else \
+            npm run lint && npm run typecheck && npm run build; \
+          fi
   policies:
     runs-on: ubuntu-latest
     steps:
