@@ -1,3 +1,4 @@
+# NOTE: Non-UTF8 bytes were replaced with the Unicode replacement character (U+FFFD). Original saved as .bak.bin
 #!/usr/bin/env python3
 """
 Evolution Sandbox Runner - MC Platform v0.4.0
@@ -599,17 +600,17 @@ async def demo_sandbox_execution():
     print(f"Status: {results.status.value}")
     print(f"Execution Time: {(results.execution_end - results.execution_start).total_seconds():.2f}s")
     print(f"\n[VALIDATION RESULTS]")
-    print(f" OPA Simulation: {'PASSED' if results.opa_simulation_passed else 'FAILED'}")
-    print(f" Test Coverage: {results.test_results.coverage:.2%} ({results.test_results.passed_tests}/{results.test_results.total_tests})")
-    print(f" CSE Score: {results.cse_validation.score:.4f}")
-    print(f" ZK Fairness: {results.zk_fairness_proof.fairness_score:.4f}")
-    print(f" Evidence: {len(results.evidence_stub)} bytes signed")
+    print(f"- OPA Simulation: {'PASSED' if results.opa_simulation_passed else 'FAILED'}")
+    print(f"- Test Coverage: {results.test_results.coverage:.2%} ({results.test_results.passed_tests}/{results.test_results.total_tests})")
+    print(f"- CSE Score: {results.cse_validation.score:.4f}")
+    print(f"- ZK Fairness: {results.zk_fairness_proof.fairness_score:.4f}")
+    print(f"- Evidence: {len(results.evidence_stub)} bytes signed")
 
     if results.status == SandboxStatus.COMPLETED:
-        print(f"\n<‰ SANDBOX VALIDATION SUCCESSFUL! <‰")
-        print(f"Evolution proposal is ready for human review and approval")
+        print("\n[OK] SANDBOX VALIDATION SUCCESSFUL!")
+        print("Evolution proposal is ready for human review and approval")
     else:
-        print(f"\nL SANDBOX VALIDATION FAILED!")
+        print("\n[FAIL] SANDBOX VALIDATION FAILED!")
         print(f"Error: {results.error_message}")
 
     print("\n" + "="*80)
