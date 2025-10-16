@@ -32,7 +32,7 @@ IntelGraph is a deployable‑first, AI‑augmented intelligence analysis platfor
 ---
 
 ## 2) North‑Star & Principles
-- **Provenance over prediction:** every claim has source, transform, confidence, and license.
+- **Provenance Before Prediction:** every claim has source, transform, confidence, and license.
 - **Compartmentation & consent:** multi‑tenant by default, case compartments, ABAC policy tags, reason‑for‑access prompts.
 - **Explainable automation:** AI results are cited and reproducible; generated queries previewed before execution.
 - **Operate degraded:** offline kits; CRDT sync on reconnect; reproducible exports.

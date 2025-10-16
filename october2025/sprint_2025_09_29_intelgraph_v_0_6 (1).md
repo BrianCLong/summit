@@ -7,7 +7,7 @@
 
 ---
 ## 0) North Stars & Acceptance Gate (Definition of Done)
-- **Provenance > Prediction:** All materialized artifacts (graphs, briefs, exports) carry lineage + license + authority bindings.
+- **Provenance Before Prediction:** All materialized artifacts (graphs, briefs, exports) carry lineage + license + authority bindings.
 - **Compartmentation by Default:** RBAC/ABAC enforced on GraphQL resolvers; OPA policies dry‑run + enforce.
 - **AI with Receipts:** NL→Cypher preview with cost estimates; RAG replies include citations; blocked actions show policy reasons.
 - **Ops First:** p95 graph query < 1.5s @ 50k nodes neighborhood; ingestion E2E < 5m for 10k docs.

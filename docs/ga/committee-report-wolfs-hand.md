@@ -40,7 +40,7 @@ These capabilities already appear in our backlog and should be elevated to mustâ
 
 ## Recommendations (Build & Operate)
 
-1. **Provenance > Prediction (enforce by design).**
+1. **Provenance Before Prediction (enforce by design).**
    - Implement the Provenance & Claim Ledger: register evidence, hash transforms, create explicit claim nodes, and surface contradiction graphs in every investigative view.
      Acceptance includes exportable, verifiable manifests.
    - Mandate citations in outputs; block publication without linked evidence.

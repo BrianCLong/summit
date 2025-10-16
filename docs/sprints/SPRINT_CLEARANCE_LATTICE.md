@@ -189,7 +189,7 @@ Ship a working slice that enables **privacy‑preserving cross‑case/link disco
 
 ## 13) Operating Rules
 
-- **Provenance over prediction.**
+- **Provenance Before Prediction.**
 - **Least disclosure wins.**
 - **Policy by default; reasons mandatory.**
 - **Reversible automation** with verifiable manifests.

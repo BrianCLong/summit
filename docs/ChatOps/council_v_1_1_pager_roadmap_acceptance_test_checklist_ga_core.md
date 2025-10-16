@@ -8,7 +8,7 @@ _Updated: August 20, 2025_
 
 **Goal:** Deliver an auditable, policy‑by‑default thin slice from **Intake → Entity Resolution → Link Analysis → Courses of Action (COA) → Brief** using one canned dataset.
 
-**Guardrails:** Mission‑first/ethics‑always; provenance over prediction; ABAC/RBAC + OPA policy enforcement; auditability & explainability by design.
+**Guardrails:** Mission‑first/ethics‑always; Provenance Before Prediction; ABAC/RBAC + OPA policy enforcement; auditability & explainability by design.
 
 ---
 

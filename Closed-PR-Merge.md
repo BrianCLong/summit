@@ -143,7 +143,7 @@ Map to Wishbook acceptance patterns:
 
 ## Why this aligns with our North Star
 
-This sprint explicitly protects the **Provenance > Prediction** ethos, **Compartmentation & Policy-by-Default**, and **Ops SLOs** that the Council requires, while unblocking developer velocity by landing recent closed work safely and verifiably. &#x20;
+This sprint explicitly protects the **Provenance Before Prediction** ethos, **Compartmentation & Policy-by-Default**, and **Ops SLOs** that the Council requires, while unblocking developer velocity by landing recent closed work safely and verifiably. &#x20;
 
 ---
 
