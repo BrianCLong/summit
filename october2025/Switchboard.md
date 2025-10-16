@@ -291,7 +291,7 @@ client/Switchboard/Switchboard.tsx as the user's instruction implied. I'll retry
 │ │
 │ total 0 │
 ╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-✦ ls shows client/src/components/Switchboard/ is empty, despite write_file reporting success for Switchboard.tsx. I'll re-create
+✦ ls shows client/src/components/Switchboard/ is empty, despite write*file reporting success for Switchboard.tsx. I'll re-create
 client/src/components/Switchboard/Switchboard.jsx and client/src/components/ProvisioningWizard/ProvisioningWizard.jsx using the user's provided content, ensuring JS-safe,
 MUI-compliant code. Starting with Switchboard.jsx.
 ╭───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
@@ -349,7 +349,7 @@ MUI-compliant code. Starting with Switchboard.jsx.
 │ 50 │
 │ 51 return ( │
 │ 52 <Box className="grid grid-cols-12 gap-4 p-4"> │
-│ 53 {/_ Left rail _/} │
+│ 53 {/* Left rail _/} │
 │ 54 <Box component="aside" className="col-span-3 space-y-3"> │
 │ 55 <Card className="rounded-2xl"> │
 │ 56 <CardHeader │
@@ -450,7 +450,7 @@ MUI-compliant code. Starting with Switchboard.jsx.
 │ 151 </DialogContent> │
 │ 152 </Dialog> │
 │ 153 │
-│ 154 {/_ Command palette _/} │
+│ 154 {/_ Command palette \_/} │
 │ 155 <Dialog open={cmdOpen} onClose={()=>setCmdOpen(false)} maxWidth="md" fullWidth> │
 │ 156 <DialogContent className="p-0"> │
 │ 157 <TextField │
@@ -2727,7 +2727,7 @@ NPM_CONFIG_CACHE="$HOME/.cache/npm-companyos" npm install --no-audit --no-fund
 
 # These temp dirs are what npm tries to rename to; sometimes they stick around.
 
-find node_modules -maxdepth 1 -name "._-_" -type d -print -exec rm -rf {} +
+find node*modules -maxdepth 1 -name ".*-\_" -type d -print -exec rm -rf {} +
 rm -rf node_modules/eslint node_modules/.eslint-\* 2>/dev/null || true
 
 # Try again
@@ -3252,6 +3252,7 @@ return (
 className="w-[960px] h-[540px] rounded-xl shadow-lg p-8 overflow-auto bg-white dark:bg-neutral-900"
 sx={{ border: '1px solid rgba(0,0,0,0.08)' }} >
 <MDXProvider components={components}>
+
 <div id="mdx-deck-root" data-current-slide={slide}>
 <DeckComponent />
 </div>
@@ -4697,9 +4698,9 @@ awesome — doing all three. You can paste these in now; they’re self-containe
 
 client/src/lib/decks/remote.js (new)
 
-const API = import.meta.env.VITE_COMPANYOS_API;
+const API = import.meta.env.VITE*COMPANYOS_API;
 const LS_KEY = 'companyos.decks.cache.v1';
-const TTL_MS = 5 _ 60 _ 1000; // 5 minutes
+const TTL_MS = 5 * 60 \_ 1000; // 5 minutes
 
 function now() { return Date.now(); }
 
@@ -4893,6 +4894,7 @@ return () => { el.removeEventListener('mousemove', onMove); el.removeEventListen
 }, [enabled]);
 
 return (
+
 <div ref={ref} style={{ position: 'absolute', inset: 0, cursor: enabled ? 'none' : 'default' }}>
 {pos && (
 <div
@@ -5075,17 +5077,18 @@ reason: String,
 }
 
 #[tauri::command]
-async fn policy*eval(req: PolicyReq) -> Result<PolicyRes, String> {
+async fn policy\*eval(req: PolicyReq) -> Result<PolicyRes, String> {
 // TODO: call OPA/engine; demo logic:
 let allow = match req.action.as_str() {
 "render_widget" | "perform_action" => true,
-* => false,
-};
-Ok(PolicyRes {
-allow,
-reason: if allow { "ok".into() } else { "denied".into() },
-})
-}
+
+- => false,
+  };
+  Ok(PolicyRes {
+  allow,
+  reason: if allow { "ok".into() } else { "denied".into() },
+  })
+  }
 
 #[tauri::command]
 async fn stage_event(event: String, payload: serde_json::Value) -> Result<(), String> {
@@ -5219,10 +5222,10 @@ sweet — pushing the stack further. Here’s the next slice wired end-to-end: r
 
 Add a per-deck cache and a detail fetch. (Keep the earlier list code as-is.)
 
-const API = import.meta.env.VITE_COMPANYOS_API;
+const API = import.meta.env.VITE*COMPANYOS_API;
 const LIST_LS = 'companyos.decks.cache.v1';
 const DECK_LS = (id) => `companyos.decks.${id}.v1`;
-const TTL_MS = 5 _ 60 _ 1000;
+const TTL_MS = 5 * 60 \_ 1000;
 
 const now = () => Date.now();
 
@@ -5568,8 +5571,8 @@ useEffect(() => { preload(thumbs); }, [thumbs]);
 
 client/src/lib/decks/remote.js — add a per-slide fetcher + cache.
 
-const API = import.meta.env.VITE_COMPANYOS_API;
-const TTL_MS = 5 _ 60 _ 1000;
+const API = import.meta.env.VITE*COMPANYOS_API;
+const TTL_MS = 5 * 60 \_ 1000;
 const now = () => Date.now();
 const DECK_LS = (id) => `companyos.decks.${id}.v1`;
 const SLIDE_LS = (id, n) => `companyos.decks.${id}.slide.${n}.v1`;
@@ -5935,9 +5938,9 @@ return () => { cancelled = true; };
 
 client/src/lib/decks/mediaCache.js (new)
 
-const API = import.meta.env.VITE_COMPANYOS_API;
+const API = import.meta.env.VITE*COMPANYOS_API;
 const MEM = new Map(); // url -> objectURL
-const TTL_MS = 10 _ 60 _ 1000;
+const TTL_MS = 10 * 60 \_ 1000;
 
 function lsKey(k){ return `companyos.media.${k}`; }
 function now(){ return Date.now(); }
@@ -9494,7 +9497,7 @@ score?: number; // rank score
 };
 
 /\*_ naive store + TTL cache _/
-const WINDOW_MS = 1000 _ 60 _ 60 \* 24; // 24h
+const WINDOW*MS = 1000 * 60 \_ 60 \* 24; // 24h
 let items: IntelItem[] = [];
 
 function insert(i: IntelItem){
@@ -9569,6 +9572,7 @@ return ()=>abort.abort();
 },[q]);
 
 return (
+
 <Dialog open={open} onClose={()=>setOpen(false)} maxWidth="md" fullWidth>
 <DialogTitle>Market Intelligence</DialogTitle>
 <DialogContent>
@@ -9768,7 +9772,7 @@ File: observability/grafana/dashboards/asr_push.json
 "type": "stat",
 "title": "ASR Bridge RPS",
 "gridPos": { "x":0,"y":0,"w":6,"h":4 },
-"targets":[{ "expr":"rate(asr_bridge_requests_total[5m])", "legendFormat":"rps" }]
+"targets":[{ "expr":"rate(asr*bridge_requests_total[5m])", "legendFormat":"rps" }]
 },
 {
 "type": "graph",
@@ -9780,7 +9784,7 @@ File: observability/grafana/dashboards/asr_push.json
 "type": "stat",
 "title": "Whisper Pod CPU",
 "gridPos": { "x":0,"y":4,"w":6,"h":4 },
-"targets":[{ "expr":"avg(rate(container_cpu_usage_seconds_total{pod=~\"whisper._\"}[5m]))" }]
+"targets":[{ "expr":"avg(rate(container_cpu_usage_seconds_total{pod=~\"whisper.*\"}[5m]))" }]
 },
 {
 "type":"graph",
@@ -9981,6 +9985,7 @@ return ()=>a.abort();
 },[q]);
 
 return (
+
 <Dialog open={open} onClose={()=>setOpen(false)} maxWidth="md" fullWidth>
 <DialogTitle>Search everything</DialogTitle>
 <DialogContent>
@@ -10382,6 +10387,7 @@ return ()=>a.abort();
 const types = ['email','calendar','crm','deck','timeline','intel'];
 
 return (
+
 <Dialog open={open} onClose={()=>setOpen(false)} maxWidth="md" fullWidth>
 <DialogTitle>Search everything</DialogTitle>
 <DialogContent>
@@ -10802,6 +10808,7 @@ return ()=>a.abort();
 const types = ['email','calendar','crm','deck','timeline','intel'];
 
 return (
+
 <Dialog open={open} onClose={()=>setOpen(false)} maxWidth="md" fullWidth>
 <DialogTitle>Search everything</DialogTitle>
 <DialogContent>
@@ -12288,6 +12295,7 @@ body: JSON.stringify({ intent, scope, diff: diff?.changes, proposal })
 };
 
 return (
+
 <Dialog open={open} onClose={onClose} fullWidth maxWidth="md" TransitionComponent={Transition}>
 <DialogTitle>Preview &amp; Commit — {intent}</DialogTitle>
 <DialogContent dividers>

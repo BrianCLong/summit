@@ -29,7 +29,12 @@
     "tenant-002": {
       "tenantId": "tenant-002",
       "isolationLevel": "moderate",
-      "allowedCrossTenantActions": ["read", "create", "share_intelligence", "collaborate"],
+      "allowedCrossTenantActions": [
+        "read",
+        "create",
+        "share_intelligence",
+        "collaborate"
+      ],
       "dataClassification": "internal",
       "retentionPolicy": {
         "defaultRetentionDays": 1825,
@@ -150,7 +155,11 @@
         "status": "active",
         "expiryDate": 1735689600000000000,
         "allowedOperations": ["read", "create", "collaborate"],
-        "allowedResources": ["intelligence_reports", "operational_data", "threat_indicators"],
+        "allowedResources": [
+          "intelligence_reports",
+          "operational_data",
+          "threat_indicators"
+        ],
         "securityControls": {
           "mfaRequired": false,
           "encryptionRequired": true,
@@ -188,7 +197,11 @@
         "status": "active",
         "expiryDate": 1735689600000000000,
         "allowedOperations": ["read", "create", "update", "collaborate"],
-        "allowedResources": ["intelligence_reports", "operational_data", "investigation_data"],
+        "allowedResources": [
+          "intelligence_reports",
+          "operational_data",
+          "investigation_data"
+        ],
         "securityControls": {
           "mfaRequired": false,
           "encryptionRequired": true,
