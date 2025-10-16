@@ -257,7 +257,7 @@ class MinHashDeduplicator:
             hash_key = f"record_hash:{record_id}"
             
             # Serialize MinHash
-            minhash_data = pickle.dumps(minhash)
+            minhash_data = json.dumps({'hashvalues': minhash.hashvalues.tolist()}).encode('utf-8')
             
             self.redis_client.set(minhash_key, minhash_data, ex=86400 * 30)  # 30 days TTL
             self.redis_client.set(hash_key, record_hash, ex=86400 * 30)
@@ -277,7 +277,8 @@ class MinHashDeduplicator:
                 # Load MinHash
                 minhash_data = self.redis_client.get(key)
                 if minhash_data:
-                    minhash = pickle.loads(minhash_data)
+                    minhash_json = json.loads(minhash_data)
+                    minhash = MinHash(num_perm=self.num_perm, hashvalues=minhash_json['hashvalues'])
                     self.lsh.insert(record_id, minhash)
                 
                 # Load record hash
@@ -298,7 +299,8 @@ class MinHashDeduplicator:
                 minhash_key = f"minhash:{record_id}"
                 minhash_data = self.redis_client.get(minhash_key)
                 if minhash_data:
-                    return pickle.loads(minhash_data)
+                    minhash_json = json.loads(minhash_data)
+                    return MinHash(num_perm=self.num_perm, hashvalues=minhash_json['hashvalues'])
             except Exception as e:
                 self.logger.warning(f"Failed to load MinHash for {record_id}: {e}")
         
@@ -307,11 +309,22 @@ class MinHashDeduplicator:
     def _save_to_file(self):
         """Save LSH index to file"""
         try:
+            import hashlib
+            import os
+            secret_key = os.environ.get('SUMMIT_SIGNING_KEY')
+            if not secret_key:
+                self.logger.error("SUMMIT_SIGNING_KEY environment variable not set. Cannot save to file.")
+                return
+
+            data_to_pickle = {
+                'lsh': self.lsh,
+                'record_hashes': self.record_hashes
+            }
+            pickled_data = pickle.dumps(data_to_pickle)
+            signature = hashlib.sha256(secret_key.encode('utf-8') + pickled_data).hexdigest()
+
             with open(self.storage_path, 'wb') as f:
-                pickle.dump({
-                    'lsh': self.lsh,
-                    'record_hashes': self.record_hashes
-                }, f)
+                f.write(signature.encode('utf-8') + b'\n' + pickled_data)
         except Exception as e:
             self.logger.error(f"Failed to save to file: {e}")
     
@@ -319,8 +332,26 @@ class MinHashDeduplicator:
         """Load LSH index from file"""
         try:
             if self.storage_path.exists():
+                import hashlib
+                import os
+                secret_key = os.environ.get('SUMMIT_SIGNING_KEY')
+                if not secret_key:
+                    self.logger.error("SUMMIT_SIGNING_KEY environment variable not set. Cannot load from file.")
+                    return
+
                 with open(self.storage_path, 'rb') as f:
-                    data = pickle.load(f)
+                    parts = f.read().split(b'\n', 1)
+                    if len(parts) != 2:
+                        self.logger.error("Invalid file format. Cannot load from file.")
+                        return
+                    signature, pickled_data = parts
+                    expected_signature = hashlib.sha256(secret_key.encode('utf-8') + pickled_data).hexdigest()
+
+                    if signature.decode('utf-8') != expected_signature:
+                        self.logger.error("Invalid signature. File may be tampered.")
+                        return
+
+                    data = pickle.loads(pickled_data)
                     self.lsh = data.get('lsh', MinHashLSH(threshold=self.threshold, num_perm=self.num_perm))
                     self.record_hashes = data.get('record_hashes', {})
                     

@@ -171,15 +171,13 @@ jobs:
         pnpm run typecheck 2>&1 | tee typecheck.log
 
         # Check for build warnings
-        if grep -i "warning" build.log; then
+        if grep -i "warning" build.log;
           echo "⚠️ Build warnings detected"
           gh pr comment ${{ github.event.pull_request.number }} --body "
           ⚠️ **Build Warnings Detected**
 
           The build completed but with warnings. Please review:
-          \`\`\`
-          $(grep -i "warning" build.log | head -10)
-          \`\`\`
+          `$(grep -i "warning" build.log | head -10)`
           "
         fi
 
@@ -228,15 +226,15 @@ jobs:
         # Check for secrets in code
         echo "Scanning for potential secrets..."
         SECRET_PATTERNS=(
-          "password\s*[:=]\s*['\"][^'\"]+['\"]"
-          "api[_-]?key\s*[:=]\s*['\"][^'\"]+['\"]"
-          "secret\s*[:=]\s*['\"][^'\"]+['\"]"
-          "token\s*[:=]\s*['\"][^'\"]+['\"]"
+          "password\s*[:=]\s*['\"][^'\"]+['"]"
+          "api[_-]?key\s*[:=]\s*['\"][^'\"]+['"]"
+          "secret\s*[:=]\s*['\"][^'\"]+['"]"
+          "token\s*[:=]\s*['\"][^'\"]+['"]"
         )
 
         SECRETS_FOUND=false
-        for pattern in "${SECRET_PATTERNS[@]}"; do
-          if git diff ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | grep -E "$pattern" | grep -v test; then
+        for pattern in "${{ SECRET_PATTERNS[@] }}"; do
+          if git diff ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }} | grep -E "$pattern" | grep -v test;
             echo "⚠️ Potential secret found: $pattern"
             SECRETS_FOUND=true
           fi
@@ -325,11 +323,11 @@ jobs:
 
           Found $LINT_ERRORS linting errors that must be fixed:
 
-          \`\`\`
+          ```
           $(grep "error" lint.log | head -10)
-          \`\`\`
+          ```
 
-          Run \`pnpm run lint --fix\` to auto-fix some issues.
+          Run `pnpm run lint --fix` to auto-fix some issues.
           "
           exit 1
         fi
@@ -504,7 +502,7 @@ jobs:
           - Build: $BUILD_STATUS
           - Policy: $POLICY_STATUS
 
-          Use \`/merge-pr ${{ github.event.pull_request.number }} --dry-run\` to run Release Captain analysis.
+          Use `/merge-pr ${{ github.event.pull_request.number }} --dry-run` to run Release Captain analysis.
           "
           exit 1
         fi

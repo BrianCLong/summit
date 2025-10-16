@@ -674,12 +674,12 @@ function HomeRouteInner() {
               title="📊 Graph Overview"
               height={300}
               maxNodes={15}
-              onNodeClick={(node) => console.log('Clicked node:', node)}
+              onNodeClick={(node: unknown) => console.log('Clicked node:', node)}
             />
 
             <RealTimePresence
               currentUser={currentUser}
-              onUserClick={(user) => console.log('Clicked user:', user)}
+              onUserClick={(user: unknown) => console.log('Clicked user:', user)}
               className="h-80"
             />
           </div>
@@ -734,7 +734,7 @@ function HomeRouteInner() {
           <DataExport
             investigationId={selectedInvestigation?.id}
             selectedEntities={[]}
-            onExportComplete={(result) => {
+            onExportComplete={(result: any) => {
               console.log('Export completed:', result);
               // Could show notification here
             }}
@@ -759,7 +759,7 @@ function HomeRouteInner() {
             <div style={{ height: '70vh' }}>
               <EnhancedAIAssistant
                 context={aiContext}
-                onActionRequest={(action) => {
+                onActionRequest={(action: any) => {
                   console.log('AI requested action:', action);
                   toast.info('AI Action', `Action requested: ${action.type}`);
                 }}
@@ -785,11 +785,11 @@ function HomeRouteInner() {
           <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
             <InteractiveGraphCanvas
               investigationId={selectedInvestigation?.id}
-              onNodeSelect={(nodes) => {
+              onNodeSelect={(nodes: any[]) => {
                 console.log('Selected nodes:', nodes);
                 toast.info('Graph Selection', `Selected ${nodes.length} node(s)`);
               }}
-              onEdgeSelect={(edges) => {
+              onEdgeSelect={(edges: any[]) => {
                 console.log('Selected edges:', edges);
                 toast.info('Graph Selection', `Selected ${edges.length} edge(s)`);
               }}
@@ -824,11 +824,11 @@ function HomeRouteInner() {
           >
             <TemporalAnalysis
               investigationId={selectedInvestigation?.id}
-              onEventSelect={(event) => {
+              onEventSelect={(event: any) => {
                 console.log('Selected event:', event);
                 toast.info('Timeline Event', `Selected: ${event.title}`);
               }}
-              onTimeRangeChange={(start, end) => {
+              onTimeRangeChange={(start: Date, end: Date) => {
                 console.log('Time range changed:', start, end);
                 toast.info(
                   'Timeline',
@@ -858,15 +858,15 @@ function HomeRouteInner() {
           <div style={{ height: '75vh', border: '1px solid var(--hairline)', borderRadius: '8px' }}>
             <ThreatIntelligenceHub
               investigationId={selectedInvestigation?.id}
-              onIndicatorSelect={(indicator) => {
+              onIndicatorSelect={(indicator: any) => {
                 console.log('Selected threat indicator:', indicator);
                 toast.info('Threat Intel', `Selected: ${indicator.type} ${indicator.value}`);
               }}
-              onCampaignSelect={(campaign) => {
+              onCampaignSelect={(campaign: any) => {
                 console.log('Selected campaign:', campaign);
                 toast.info('Campaign', `Selected: ${campaign.name}`);
               }}
-              onActorSelect={(actor) => {
+              onActorSelect={(actor: any) => {
                 console.log('Selected actor:', actor);
                 toast.info('Threat Actor', `Selected: ${actor.name}`);
               }}

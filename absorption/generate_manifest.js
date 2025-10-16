@@ -28,8 +28,8 @@ const manifest = {
   generatedAt: new Date().toISOString(),
   repository: 'intelgraph',
   verification_protocol: 'Zero-Loss Absorption & A+++ Excellence',
-  commit_sha: require('child_process').execSync('git rev-parse HEAD').toString().trim(),
-  branch: require('child_process').execSync('git rev-parse --abbrev-ref HEAD').toString().trim(),
+  commit_sha: require('child_process').execFileSync('git', ['rev-parse', 'HEAD']).toString().trim(),
+  branch: require('child_process').execFileSync('git', ['rev-parse', '--abbrev-ref', 'HEAD']).toString().trim(),
   files: absorptionFiles.map((file) => ({
     path: file,
     sha256: sha256(file),
