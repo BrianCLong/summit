@@ -47,7 +47,7 @@ export function requireBudgetPlugin(
   options: BudgetPluginOptions = {},
 ): ApolloServerPlugin {
   const {
-    enforcebudget = process.env.REQUIRE_BUDGET_PLUGIN === 'true',
+    enforceBudget = process.env.REQUIRE_BUDGET_PLUGIN === 'true',
     logViolations = true,
     allowlistTenants = [],
     allowlistOperations = [],
@@ -130,11 +130,11 @@ export function requireBudgetPlugin(
                 operationName,
                 tenantId,
                 violations: violationFields,
-                enforced: enforcebudget,
+                enforced: enforceBudget,
               });
             }
 
-            if (enforcebudget) {
+            if (enforceBudget) {
               throw new GraphQLError(
                 `Mutation fields missing required @budget directive: ${violationFields.join(', ')}. ` +
                   `All mutations must declare budget limits for cost control.`,
@@ -203,7 +203,7 @@ function extractMutationFields(operation: OperationDefinitionNode): string[] {
  */
 export function createRequireBudgetPlugin(): ApolloServerPlugin {
   return requireBudgetPlugin({
-    enforcebudget: process.env.REQUIRE_BUDGET_ENFORCEMENT === 'true',
+    enforceBudget: process.env.REQUIRE_BUDGET_ENFORCEMENT === 'true',
     logViolations: process.env.LOG_BUDGET_VIOLATIONS !== 'false',
     allowlistTenants: process.env.BUDGET_ALLOWLIST_TENANTS?.split(',') || [],
     allowlistOperations: process.env.BUDGET_ALLOWLIST_OPERATIONS?.split(

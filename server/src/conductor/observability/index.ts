@@ -391,9 +391,9 @@ export function conductorTracingMiddleware() {
  */
 export function createConductorGraphQLPlugin() {
   return {
-    requestDidStart() {
+    async requestDidStart() {
       return {
-        willSendResponse(requestContext: any) {
+        async willSendResponse(requestContext: any) {
           // Add trace context to GraphQL responses
           if (requestContext.response.http) {
             const traceContext = getCurrentTraceContext();
@@ -410,7 +410,7 @@ export function createConductorGraphQLPlugin() {
           }
         },
 
-        didResolveOperation(requestContext: any) {
+        async didResolveOperation(requestContext: any) {
           const { operationName } = requestContext.request;
 
           if (
@@ -431,7 +431,7 @@ export function createConductorGraphQLPlugin() {
           }
         },
 
-        didEncounterErrors(requestContext: any) {
+        async didEncounterErrors(requestContext: any) {
           const { operationName } = requestContext.request;
 
           if (
