@@ -1,7 +1,7 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "allowJs": false,
+    "allowJs": true,
     "checkJs": false,
     "noEmit": true,
     "types": ["node"],
@@ -10,7 +10,6 @@
   "files": [
     "src/app.ts",
     "src/types/ambient.d.ts",
-    "src/types/core-shims.d.ts",
-    "src/types/all-shims.d.ts"
+    "src/types/core-shims.d.ts"
   ]
 }
